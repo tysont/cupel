@@ -97,14 +97,16 @@ cupel/
 ├── crates/
 │   ├── cupel-cli/             # binary `cupel`: clap, renderers, exit codes, daemon auto-connect
 │   ├── cupel-core/            # Envelope/Finding/CheckResult types, schemas, scope, scheduler, config, Check trait
-│   ├── cupel-lang/            # tree-sitter frontends, LanguageAdapter trait, structural hashing, parse cache
+│   ├── cupel-lang/            # LanguageAdapter trait, structural hashing, parse cache
+│   │   └── src/langs/<id>/    # one dir per language: mod.rs + queries/*.scm + tables.toml (design §8.3.2)
 │   ├── cupel-store/           # SQLite fact store, migrations, queries
 │   ├── cupel-checks/          # native checks, one module per check (see ADR-001)
 │   ├── cupel-adapt/           # coverage/runner/bench adapters, one module per tool
 │   ├── cupel-plugin/          # plugin protocol types + external-process host (P5)
 │   ├── cupel-serve/           # daemon, socket protocol, watcher, MCP (P4, P7)
 │   └── cupel-fixtures/        # fixture repos + golden envelopes + harness (dev-dependency)
-│       ├── repos/<lang>/...   # known-bad source trees
+│       ├── conformance/constructs.toml   # shared construct inventory every language must cover (design §8.3.4)
+│       ├── repos/<lang>/...   # known-bad source trees, each with inventory.toml mapping construct IDs to code
 │       └── golden/<check>/<lang>.json
 └── docs/
     ├── CUPEL_TECHNICAL_DESIGN.md
@@ -128,7 +130,7 @@ Core crates (add only when a step needs them; never pre-add):
 | JSON Schema | `schemars` |
 | Hashing | `blake3` |
 | Run IDs | `ulid` |
-| Parsing | `tree-sitter`, `tree-sitter-rust`, `tree-sitter-python`, `tree-sitter-typescript` |
+| Parsing | `tree-sitter`, `tree-sitter-javascript`, `tree-sitter-typescript` (typescript + tsx), `tree-sitter-rust`, `tree-sitter-go`, `tree-sitter-python` |
 | Store | `rusqlite` (feature `bundled`) |
 | Parallelism | `rayon`, `tokio` |
 | File walk / watch | `ignore`, `notify` |
@@ -186,7 +188,7 @@ These must be written as ADRs at the step indicated. Numbers are reserved; addit
 | 002 | Git access: shell out to `git` vs `gix`/`git2` | P2.1 | Shelling out keeps the binary small and matches the user's git; a library gives speed in the daemon. Measure before choosing |
 | 003 | Golden envelope redaction and comparison strategy | P0.6 | Which fields are volatile, how goldens are updated (`UPDATE_GOLDENS=1`), how diffs are reported |
 | 004 | Equivalent-mutant handling in v1 (design open question 2) | P3.4 | Design leans toward emitting `mutant.equivalent?` with `confidence ≤ 0.3`, `severity: info` |
-| 005 | Go schemata timing: P4 vs P6 (design open question 3) | P4.1 | Decide after Rust schemata lands and a Go fixture exists |
+| 005 | Go schemata timing: P4 vs P6 (design open question 3) | P4.1 | Go adapter and fixtures exist from P1, so the generic-inference edge cases can be measured before deciding |
 | 006 | Per-test coverage for JS/TS (design open question 1) | P3.3 | V8 `NODE_V8_COVERAGE` per test vs permanent file-level fallback |
 | 007 | `spec.trace` instrumentation API (design open question 4) | P7.2 | Attribute/macro vs logging convention |
 | 008 | `meta.traceability` requirement-ID source (design open question 5) | P7.6 | Spec file vs `#REQ-12` in test names vs both |
@@ -216,6 +218,15 @@ The README is the front door and must be world class at every phase boundary. It
 - Have Install, Usage, Configuration, Agents (`describe --agent`), Development (`make` targets), and License sections.
 - Link to `docs/CUPEL_TECHNICAL_DESIGN.md` and `docs/CUPEL_IMPLEMENTATION_PLAN.md`.
 - Contain no roadmap, no "coming soon", no screenshots of unbuilt features.
+
+### 2.8 Language parity rule
+
+Cupel launches with five adapters — `javascript`, `typescript`, `rust`, `go`, `python` — and they are peers. Throughout this plan, "every language" means all five.
+
+- Every P1 step is done for all five adapters before the step is marked complete. The trait is shaped by five implementations, not one.
+- Every check golden exists for every language the check applies to. A check that does not apply to a language says so through `Capabilities` and is covered by a test asserting the precise `skipped` reason.
+- The conformance suite (design §8.3.4) runs as part of `make test`. A construct ID with no mapping in a language's `inventory.toml` is a build failure, not a warning.
+- Adding a language later (Java and Clojure in P6) follows the design §8.3.4 checklist exactly. If the checklist turns out to require a change in `cupel-core`, a check, or the CLI, stop: write an ADR, fix the extension point, then continue.
 
 ---
 
@@ -342,78 +353,103 @@ _(none yet)_
 
 ### P1 — Language layer
 
-**Goal:** `cupel-lang` with the `LanguageAdapter` trait (§8.3) fully implemented for Rust, Python, and TypeScript/TSX, structural hashing, a content-hash parse cache, and a parallel tree walk. Validated against fixture repos with known symbol inventories.
+**Goal:** `cupel-lang` with the `LanguageAdapter` trait (design §8.3) fully implemented for JavaScript, TypeScript, Rust, Go, and Python; the declarative `LanguageSpec` + `Capabilities` core; structural hashing; a content-hash parse cache; a parallel tree walk; and the conformance suite that makes the trait an enforceable contract.
 
 **Status:** not started
 
-Each step below is done for all three launch languages before moving on, so the trait is shaped by three implementations, not one. Fixture repos under `cupel-fixtures/repos/{rust,python,typescript}/` are created in P1.1 and grow with each step; every fixture file is paired with an expected-inventory JSON that tests compare against.
+Each step below is done for all five adapters before moving on (§2.8). Fixture repos under `cupel-fixtures/repos/{javascript,typescript,rust,go,python}/` are created in P1.1 and grow with each step; every fixture file is paired with an expected-inventory JSON, and every construct the step introduces is added to `conformance/constructs.toml` and mapped in each language's `inventory.toml`.
 
-#### P1.1 Trait, grammars, parse, walk, cache
+#### P1.1 Trait, spec, capabilities, grammars, walk, cache, conformance skeleton
 
 **Status:** not started
 
-- `LanguageAdapter` trait exactly as §8.3; `LangId`; registry of adapters by extension.
-- tree-sitter grammars compiled in; `parse(path) -> Tree`.
+- `LanguageAdapter` trait exactly as design §8.3.1 with query-driven default methods reading `LanguageSpec`; `LangId`, `LangFamily`, `Capabilities`; registry of adapters by extension; `grammar(path)` selecting among an adapter's grammars (`javascript`: js/jsx; `typescript`: typescript/tsx).
+- `langs/<id>/` directory per language with `mod.rs`, `queries/`, `tables.toml`; queries embedded with `include_str!`; a test compiles every `.scm` against its grammar.
+- `javascript` and `typescript` share one implementation module with two `LangId`s and the `ecma` family.
 - Parallel walk with `ignore` (gitignore-aware), rayon parse; parse cache keyed by blake3 of file content.
-- Fixture repos created with a minimal, deliberately-structured file set per language.
+- `cupel-fixtures/conformance/constructs.toml` created; each language's `inventory.toml` created; the conformance test harness iterates adapters × constructs and fails on any unmapped construct.
+- `cupel describe language <id>` and `describe languages` render identity and capabilities.
 
-*Tests first:* walk returns exactly the fixture's expected file list (gitignored files excluded); cache hit rate is 100% on second walk; parse errors produce a `lang.parse-error` finding, never a panic.
+*Tests first:* every `.scm` compiles; walk returns exactly the fixture's expected file list (gitignored files excluded); cache hit rate is 100% on second walk; parse errors produce a `lang.parse-error` finding, never a panic; `.tsx` and `.jsx` files parse with the right grammar; conformance harness fails on a deliberately unmapped construct.
 
 #### P1.2 Symbols
 
 **Status:** not started
 
-- `symbols()` → functions, methods, nested functions, closures assigned to names, with namespace (`module::Type::method`), visibility, span, body node.
+- `symbols()` → functions, methods, nested functions, closures assigned to names, with namespace (`module::Type::method`), visibility, span, body node. Language specifics: Go method receivers and package-level namespace; Rust `impl` blocks and trait impls; Python nested `def` and class methods; JS/TS arrow functions assigned to `const`, class methods, exported function expressions.
 
-*Tests first:* expected-inventory JSON per fixture file (name, ns, visibility, start/end line).
+*Tests first:* expected-inventory JSON per fixture file (name, ns, visibility, start/end line); conformance constructs `sym.*`.
 
 #### P1.3 Decision points
 
 **Status:** not started
 
-- `decision_points()` for cyclomatic and cognitive (nesting-weighted) complexity, following crapper's per-language tables (§3).
+- `decision_points()` for cyclomatic and cognitive (nesting-weighted) complexity, following crapper's per-language tables (design §3), expressed as `decisions.scm` captures plus weights in `tables.toml`.
 
-*Tests first:* functions with known CC/cognitive values; a `cc_table.json` per language listing every construct and its weight, with one fixture function per construct.
+*Tests first:* functions with known CC/cognitive values; the weights table is the single source — one fixture function per construct per language; conformance constructs `cc.*` (with `not-applicable` for e.g. Go ternary, Rust `switch`).
 
 #### P1.4 Normalization and structural hash
 
 **Status:** not started
 
-- `normalize()` → `NormTree`: locals, fields, literals, keywords → generic markers; call names, operators, tree shape preserved (dryer's rules, §3).
+- `normalize()` → `NormTree`: locals, fields, literals, keywords → generic markers; call names, operators, tree shape preserved (dryer's rules, design §3). Normalize rules live in `tables.toml`; adapters override only for constructs the rules cannot express (Python `self`, Rust macros, Go receivers).
+- `NormTree` serialization is language-independent so `ecma`-family symbols compare across JS and TS.
 - `Symbol.hash = blake3(lang ∥ serialize(NormTree))`, `sh_` prefix.
 
-*Tests first:* property tests — hash invariant under: rename of locals/params, reformatting (whitespace/newlines), function rename, file move; hash **changes** under: operator swap, added branch, changed call target. Fixture pairs for each.
+*Tests first:* property tests — hash invariant under: rename of locals/params, reformatting (whitespace/newlines), function rename, file move; hash **changes** under: operator swap, added branch, changed call target. Fixture pairs for each language. A JS function and its TS-annotated twin normalize to equal `NormTree`s.
 
 #### P1.5 Mutation sites
 
 **Status:** not started
 
-- `mutation_sites()` with operator set `default` (boolean flips, relational/equality swaps, `+/-`, `*//`, `&&/||`, `0/1`) and `extended` (statement deletion, return-value replacement, constant replacement, boundary ±1, negation), each site carrying a `site_hash` (structural position within the symbol, not line).
+- `mutation_sites()` with operator set `default` (boolean flips, relational/equality swaps, `+/-`, `*//`, `&&/||`, `0/1`) and `extended` (statement deletion, return-value replacement, constant replacement, boundary ±1, negation), each site carrying a `site_hash` (structural position within the symbol, not line). Operators and replacements are `mutations.scm` captures plus `tables.toml` entries (e.g. Python `and/or`, Go `&&/||`, Rust `&&/||`; Python `True/False`, others `true/false`).
 
-*Tests first:* expected-sites JSON per fixture function; `site_hash` unchanged when the function is moved or reformatted (property).
+*Tests first:* expected-sites JSON per fixture function; `site_hash` unchanged when the function is moved or reformatted (property); conformance constructs `mut.*`; every generated replacement re-parses without a syntax error in its language (property over the fixture corpus).
 
 #### P1.6 Test frames
 
 **Status:** not started
 
-- `test_frames()` → test cases with their assertions, mocks, skip markers, and setup blocks for each language's dominant frameworks (Rust `#[test]`, pytest/unittest, vitest/jest/mocha).
+- `test_frames()` → test cases with their assertions, mocks, skip markers, and setup blocks for each language's dominant frameworks: vitest/jest/mocha/`node:test` (JS/TS), Rust `#[test]`/`#[tokio::test]`, Go `testing.T`/testify, pytest/unittest. Weak-assertion patterns per framework in `tables.toml`.
+- `is_test_file()` and `test_files_for()` conventions: `*.test.ts`/`__tests__/`, `#[cfg(test)]`/`tests/`, `*_test.go`, `test_*.py`/`tests/`.
 
-*Tests first:* expected-frames JSON per fixture test file.
+*Tests first:* expected-frames JSON per fixture test file; conformance constructs `test.*`; `test_files_for(src)` returns the fixture's actual test file for every source file that has one.
 
-#### P1.7 Project detection
+#### P1.7 Imports, module resolution, overlay dependencies
 
 **Status:** not started
 
-- Move P0.8's detection into `project()` on each adapter; add `ProjectInfo` (build file, default test/coverage/bench commands, dirs to skip).
+- `imports()` → edges with raw specifiers via `imports.scm` (ESM/CJS `import`/`require`, Rust `use`/`mod`, Go `import`, Python `import`/`from … import`).
+- `resolve_import()` → `Resolution::{File(path), External(name), Unresolved}`: Node resolution with `package.json` `exports`/`main` and `tsconfig` `paths`; Rust `mod` tree and workspace members; Go module path → directory via `go.mod`; Python packages via `__init__.py` and project roots.
+- `overlay_deps()` → files a mutant overlay must copy alongside the mutated file (Node relative imports; empty for Rust/Go/Python).
 
-*Tests first:* P0.8's `init` goldens continue to pass unchanged (this is a pure refactor).
+*Tests first:* fixture per language with a known import graph (including one external and one unresolvable specifier); resolved graph equals the expected edge list exactly; a TS fixture with `paths` aliases resolves correctly.
+
+#### P1.8 Public API and dead-code roots
+
+**Status:** not started
+
+- `public_api()` → exported/`pub`/capitalized/`__all__` items with normalized signatures via `api.scm`.
+- `roots()` → symbols live by convention: `main`, exported items, test functions, framework hooks (`init()`, `__init__`, default exports, `#[no_mangle]`, Go `TestMain`).
+
+*Tests first:* expected API JSON per fixture; a fixture change that removes a public parameter shows in the API diff; every test function in every fixture is reported as a root.
+
+#### P1.9 Project detection and toolchain table
+
+**Status:** not started
+
+- Move P0.8's detection into `project()` on each adapter; `ProjectInfo` (build file, roots, default test/coverage/bench commands, dirs to skip). JS vs TS decided by `tsconfig.json` presence.
+- `cupel-adapt` toolchain table keyed by `LangId` per design §8.6 (runner detection rules, coverage producers/formats, bench, property/fuzz/race tools); adapter implementations themselves land in P3. `init`, `doctor`, and `describe language` read the table.
+
+*Tests first:* P0.8's `init` goldens continue to pass unchanged; a monorepo fixture with a Rust crate, a Go module, a TS package, and a Python package yields four roots with the right languages; `describe language go` snapshot.
 
 #### P1 Definition of Done
 
-- All three adapters implement the full trait (except `schemata`, which returns `None` until P4.1).
-- `cupel describe` lists supported languages and their stability.
+- All five adapters implement the full trait (except `schemata`, which returns `None` until P4.1) and the conformance suite is green with zero unmapped constructs.
+- Each adapter's `mod.rs` is thin: any analysis method override is justified by a comment naming the construct queries could not express.
+- `cupel describe languages` lists five languages with capabilities and stability.
 - Parse of a 100k-LOC synthetic tree completes in < 2 s cold on the dev machine (record the number in Notes).
-- README lists supported languages.
+- README lists supported languages with a capability matrix.
 
 #### P1 Notes
 
@@ -450,7 +486,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 - Scheduler v1: dependency-ordered sequential execution; rayon within a check; no budget yet (P4.3).
 - `static.complexity` as the first check; thresholds configurable under `[checks."static.complexity"]`.
 
-*Tests first:* scope resolution matrix (unit, with a `tempfile` git repo); `--only`/`--skip` group expansion; golden envelopes for `static.complexity` on all three fixture languages; `--changed` on a clean tree → exit 0, `scope.symbols: 0`.
+*Tests first:* scope resolution matrix (unit, with a `tempfile` git repo); `--only`/`--skip` group expansion; golden envelopes for `static.complexity` on all five fixture languages; `scope.languages` lists exactly the adapters that saw files; `--changed` on a clean tree → exit 0, `scope.symbols: 0`.
 
 #### P2.2 Fact store, `explain`, baselines, `suppress`
 
@@ -475,7 +511,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 **Status:** not started
 
-- Per-symbol subtree fingerprints from `NormTree`; MinHash signatures → LSH bands → pairwise Jaccard within buckets only. Defaults `threshold 0.82`, `min_lines 4`, `min_nodes 20`; same-language only. Kinds `clone.pair` (both spans in evidence), `clone.cluster`.
+- Per-symbol subtree fingerprints from `NormTree`; MinHash signatures → LSH bands → pairwise Jaccard within buckets only. Defaults `threshold 0.82`, `min_lines 4`, `min_nodes 20`; same-family only (JS↔TS pairs are reported; Go↔Python never). Kinds `clone.pair` (both spans in evidence), `clone.cluster`.
 
 *Additional tests:* property — MinHash/LSH never misses a pair whose true Jaccard ≥ threshold + 0.05 on generated fingerprint sets (recall bound); performance — 10k synthetic symbols in < 1 s.
 
@@ -483,7 +519,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 **Status:** not started
 
-- Import/use graph via tree-sitter queries; afferent/efferent coupling, instability, abstractness, distance from main sequence; Tarjan SCC for cycles; layering rules from `[checks."static.deps".layers]`. Kinds `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract`.
+- Module graph from `imports()` + `resolve_import()` (P1.7); external and unresolved edges excluded from coupling but counted in evidence; afferent/efferent coupling, instability, abstractness, distance from main sequence; Tarjan SCC for cycles; layering rules from `[checks."static.deps".layers]`. Kinds `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract`.
 
 #### P2.6 `tests.quality`
 
@@ -503,7 +539,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 **Status:** not started
 
-- Unreferenced symbols and exports using the symbol table and import graph; conservative (entry points, tests, `pub` in library crates, `__all__`, framework hooks are not dead). Kinds `dead.symbol`, `dead.export`. `confidence` reflects uncertainty.
+- Unreferenced symbols and exports using the symbol table, the resolved import graph, and `roots()` (P1.8) as the live set; conservative — anything reachable from a root or exported from a library root is not dead. Kinds `dead.symbol`, `dead.export`. `confidence` reflects uncertainty (dynamic dispatch, reflection, `getattr`).
 
 #### P2.9 `survey`, gates, `next_actions`
 
@@ -524,7 +560,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 #### P2 Definition of Done
 
-- All seven static checks pass goldens in all three languages.
+- All seven static checks pass goldens in all five languages (or have a tested `skipped` reason via `Capabilities`).
 - `cupel survey --depth quick` on the Cupel repo completes in < 5 s.
 - `cupel check --changed --gate` passes in CI on the Cupel repo.
 - `describe` covers every shipped check and finding kind.
@@ -542,13 +578,13 @@ _(none yet)_
 
 **Status:** not started
 
-External tools used here (`cargo-llvm-cov`, `cargo-nextest`, `pytest`, `pytest-cov`, `vitest`) are exercised for real in integration tests when present and reported as skipped when absent. Parsers are always tested against captured real output committed as fixtures.
+External tools used here (`cargo-llvm-cov`, `cargo-nextest`, `go`, `pytest`, `pytest-cov`, `vitest`, `jest`) are exercised for real in integration tests when present and reported as skipped when absent. Parsers are always tested against captured real output committed as fixtures.
 
 #### P3.1 Runner adapters and baseline test run (exit 4)
 
 **Status:** not started
 
-- `RunnerAdapter` trait (§8.6); adapters for `cargo test`, `cargo nextest`, `pytest`, `vitest`/`jest`; `list()` and `run(selection, env, timeout)` → `TestResults` (per-test outcome, duration).
+- `RunnerAdapter` trait (design §8.6); adapters for `cargo test`, `cargo nextest`, `go test -json`, `pytest`, `vitest`, `jest`, registered in the P1.9 toolchain table; `list()` and `run(selection, env, timeout)` → `TestResults` (per-test outcome, duration).
 - Baseline test run executed once in the real tree before any check that needs it; red baseline → `status: error`, exit 4, no scores produced. `test_results` table.
 - `doctor` gains tool presence/version checks for configured runners.
 
@@ -558,7 +594,7 @@ External tools used here (`cargo-llvm-cov`, `cargo-nextest`, `pytest`, `pytest-c
 
 **Status:** not started
 
-- `CoverageAdapter` trait; parsers for LCOV, Cobertura XML, Istanbul JSON, go coverprofile, JaCoCo XML → `CoverageMap` (line + branch). Producers for Rust (`cargo llvm-cov --lcov`), Python (`pytest --cov --cov-report=lcov`), TS (`vitest --coverage`). Ingest existing reports when fresher than sources (mtime + content hash).
+- `CoverageAdapter` trait; parsers for LCOV, Cobertura XML, Istanbul JSON, go coverprofile, JaCoCo XML → `CoverageMap` (line + branch). Producers for Rust (`cargo llvm-cov --lcov`), Go (`go test -coverprofile`), Python (`pytest --cov --cov-report=lcov`), JS/TS (`vitest --coverage`, `jest --coverage`, `c8`). Ingest existing reports when fresher than sources (mtime + content hash). `Capabilities.branch_coverage` is false for Go (coverprofile is statement-level) and `coverage.uncovered-branch` is skipped there with that reason.
 - `tests.coverage` check with `coverage.uncovered-symbol`, `coverage.uncovered-branch`; `coverage` table.
 - `static.crap` consumes the coverage adapter; `--no-coverage` retained.
 
@@ -568,7 +604,7 @@ External tools used here (`cargo-llvm-cov`, `cargo-nextest`, `pytest`, `pytest-c
 
 **Status:** not started
 
-- Per-test maps: nextest + llvm-cov per-test profiles (Rust), pytest-cov `--cov-context=test` (Python); JS/TS file-level import-graph fallback with `per_test_map: false` echoed. Write **ADR-006**.
+- Per-test maps: nextest + llvm-cov per-test profiles (Rust), `go test -coverprofile -run '^TestX$'` per test (Go, `PerTestCoverage::ByNarrowing`), pytest-cov `--cov-context=test` (Python); JS/TS file-level fallback over the P1.7 resolved import graph with `per_test_map: false` echoed. Write **ADR-006**.
 - Inverted index `line → tests`; `tests --impacted` returns `{id, file, reason}` plus a ready-to-run `command` per runner; says when it fell back to file-level.
 
 *Tests first:* a fixture with two tests covering disjoint functions — changing one function yields exactly one impacted test.
@@ -580,7 +616,7 @@ External tools used here (`cargo-llvm-cov`, `cargo-nextest`, `pytest`, `pytest-c
 Built in sub-steps, each with its own failing test first:
 
 1. **Sites → mutants**: from P1.5 sites, generate mutant source for each; `mutants` table.
-2. **File-copy overlay**: reflink (APFS/btrfs/XFS) else hardlink tree + private copy of mutated file; relative-import neighbors copied for Node resolution. Mutants of one file run concurrently, files sequentially.
+2. **File-copy overlay**: reflink (APFS/btrfs/XFS) else hardlink tree + private copy of mutated file plus everything `overlay_deps()` (P1.7) names. Mutants of one file run concurrently, files sequentially.
 3. **Coverage gating**: uncovered sites emit `mutant.uncovered` and are never executed.
 4. **Per-test selection**: only tests covering the mutated line run; full suite when no per-test map.
 5. **Timeouts**: `timeout_factor × baseline_duration(test)`, floor 2 s → `mutant.timeout`.
@@ -728,15 +764,16 @@ _(none yet)_
 
 - Bench adapters (criterion, benchstat, hyperfine) with statistical comparison against baseline.
 
-#### P6.4 Go, Java, Clojure adapters
+#### P6.4 Java and Clojure adapters
 
 **Status:** not started
 
-- Full `LanguageAdapter` for each with fixture repos and all P2 goldens; mutation for Java delegates to PIT via a wrapping plugin; Go schemata per ADR-005.
+- Each added by following the design §8.3.4 checklist verbatim, as the proof that the extension point works: new `langs/<id>/` directory, fixture repo with full `inventory.toml`, toolchain table entry (JUnit/Maven/Gradle + JaCoCo; `clojure.test` + Cloverage), conformance green, all goldens. Java mutation delegates to PIT via a wrapping plugin. Go schemata per ADR-005 if deferred from P4.
+- Record in Notes the exact set of files touched outside `langs/`, `cupel-fixtures/`, and the toolchain table. The target is zero; anything else is an extension-point defect to fix.
 
 #### P6 Definition of Done
 
-- Every check in §5.1, §5.3 (except `gen.symbolic`), §5.4 `conc.race`, §5.6 has goldens; six languages pass the P2 suite.
+- Every check in §5.1, §5.3 (except `gen.symbolic`), §5.4 `conc.race`, §5.6 has goldens; seven languages pass the P2 suite and the conformance suite.
 - README: full language and check matrix.
 
 #### P6 Notes
