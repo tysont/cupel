@@ -359,6 +359,90 @@
     },
     {
       "body": {
+        "col": 30,
+        "end_col": 6,
+        "end_line": 40,
+        "line": 38
+      },
+      "display": "pricing::tests::entries",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "entries",
+      "namespace": "pricing::tests",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 40,
+        "line": 38
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 6,
+        "end_line": 47,
+        "line": 43
+      },
+      "display": "pricing::tests::tally_reports_overdraft",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "tally_reports_overdraft",
+      "namespace": "pricing::tests",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 47,
+        "line": 43
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 28,
+        "end_col": 6,
+        "end_line": 52,
+        "line": 50
+      },
+      "display": "pricing::tests::discount_snapshot",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "discount_snapshot",
+      "namespace": "pricing::tests",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 52,
+        "line": 50
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 6,
+        "end_line": 59,
+        "line": 55
+      },
+      "display": "pricing::tests::the_log_is_written_once",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "the_log_is_written_once",
+      "namespace": "pricing::tests",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 59,
+        "line": 55
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 43,
         "end_col": 2,
         "end_line": 3,
@@ -548,22 +632,148 @@
     },
     {
       "body": {
-        "col": 27,
+        "col": 34,
         "end_col": 2,
-        "end_line": 6,
-        "line": 4
+        "end_line": 9,
+        "line": 5
       },
-      "display": "tests::ledger::balance_sums_entries",
+      "display": "tests::ledger::deposit_adds_to_the_balance",
       "file": "tests/ledger.rs",
       "kind": "function",
       "lang": "rust",
-      "name": "balance_sums_entries",
+      "name": "deposit_adds_to_the_balance",
       "namespace": "tests::ledger",
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 6,
-        "line": 4
+        "end_line": 9,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 12
+      },
+      "display": "tests::ledger::members_get_a_discount",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "members_get_a_discount",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 12
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 17
+      },
+      "display": "tests::ledger::statements_mention_the_balance",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "statements_mention_the_balance",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 17
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 28,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "tests::ledger::parsing_garbage_fails",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "parsing_garbage_fails",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 28
+      },
+      "display": "tests::ledger::huge_deposits_overflow",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "huge_deposits_overflow",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 28
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 36
+      },
+      "display": "tests::ledger::statement_is_mailed",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "statement_is_mailed",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 36
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 42
+      },
+      "display": "tests::ledger::opening_an_account_does_not_panic",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "opening_an_account_does_not_panic",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 42
       },
       "visibility": "private"
     }

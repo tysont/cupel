@@ -795,6 +795,237 @@
       }
     },
     {
+      "sites": [
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "cd07d167a6c8231f",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d41c76f86fd648cc",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0fd457156128629a",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 38
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(total, -3);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4f2a10b82fd2b1e6",
+          "span": {
+            "col": 9,
+            "end_col": 31,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b1cdefbc0c7e7192",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assert!(overdrawn);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e039051e9c004738",
+          "span": {
+            "col": 9,
+            "end_col": 28,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 43
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "insta::assert_snapshot!(discounted(200, 50, true).to_string());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 9,
+            "end_col": 72,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "37e82aa4a928f2c7",
+          "span": {
+            "col": 44,
+            "end_col": 47,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2d7a7313e2200b3b",
+          "span": {
+            "col": 49,
+            "end_col": 51,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "3302bb0f1f6ed447",
+          "span": {
+            "col": 53,
+            "end_col": 57,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "false"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 50
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "log.expect_write().times(1).return_const(());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 54,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "ce7cc097da5e1a56",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "log.write(\"total 1\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 9,
+            "end_col": 30,
+            "end_line": 58,
+            "line": 58
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 55
+      }
+    },
+    {
       "sites": [],
       "symbol": {
         "col": 1,
@@ -1357,60 +1588,129 @@
     {
       "sites": [
         {
-          "from": "assert_eq!(balance(&[3, -1]), 2);",
+          "from": "account.deposit(250);",
           "operator": "statement-deletion",
           "set": "extended",
-          "site_hash": "632d868e8cf5fd24",
+          "site_hash": "4f2a10b82fd2b1e6",
           "span": {
             "col": 5,
-            "end_col": 38,
-            "end_line": 5,
-            "line": 5
+            "end_col": 26,
+            "end_line": 7,
+            "line": 7
           },
           "to": [
             ""
           ]
         },
         {
-          "from": "3",
+          "from": "250",
           "operator": "constant",
           "set": "extended",
-          "site_hash": "275a367160767c17",
+          "site_hash": "08b5bd7ab4eb7e63",
           "span": {
-            "col": 26,
-            "end_col": 27,
-            "end_line": 5,
-            "line": 5
+            "col": 21,
+            "end_col": 24,
+            "end_line": 7,
+            "line": 7
           },
           "to": [
             "0"
           ]
         },
         {
-          "from": "1",
-          "operator": "zero-one",
-          "set": "default",
-          "site_hash": "aa626441d6df8c4c",
+          "from": "assert_eq!(account.to_string(), \"ada (250)\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e039051e9c004738",
+          "span": {
+            "col": 5,
+            "end_col": 50,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert!(discounted(1000, 10, true) < 1000);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 48,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "37e82aa4a928f2c7",
+          "span": {
+            "col": 24,
+            "end_col": 28,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2d7a7313e2200b3b",
           "span": {
             "col": 30,
-            "end_col": 31,
-            "end_line": 5,
-            "line": 5
+            "end_col": 32,
+            "end_line": 13,
+            "line": 13
           },
           "to": [
             "0"
           ]
         },
         {
-          "from": "2",
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "3302bb0f1f6ed447",
+          "span": {
+            "col": 34,
+            "end_col": 38,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "1000",
           "operator": "constant",
           "set": "extended",
           "site_hash": "cddbe8ee5ec7efc3",
           "span": {
-            "col": 35,
-            "end_col": 36,
-            "end_line": 5,
-            "line": 5
+            "col": 42,
+            "end_col": 46,
+            "end_line": 13,
+            "line": 13
           },
           "to": [
             "0"
@@ -1420,7 +1720,157 @@
       "symbol": {
         "col": 1,
         "file": "tests/ledger.rs",
-        "line": 4
+        "line": 12
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert!(Account::new(\"eve\").statement().find(\"balance\").is_some());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 72,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 17
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert!(ledger::decide::parse_cents(\"ten\").is_err());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 58,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account.deposit(i64::MAX);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4f2a10b82fd2b1e6",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "account.deposit(1);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e039051e9c004738",
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "65554d48c20bf478",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 28
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_ne!(account.statement(), \"\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4f2a10b82fd2b1e6",
+          "span": {
+            "col": 5,
+            "end_col": 41,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 36
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Account::new(\"dee\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 42
       }
     }
   ]

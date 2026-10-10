@@ -487,7 +487,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.6 Facts: `TestFrames` and `TestConventions`
 
-**Status:** not started
+**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-027](adr/CUPEL_DECISION_027.md)
 
 - `QueryTestFrames` over `tests.scm` → test cases with `Assertion { kind, strength }` (semantic kinds from design §8.3.2), mocks, skip markers, setup blocks, and the detected framework, for each language's dominant frameworks: vitest/jest/mocha/`node:test` (JS/TS), Rust `#[test]`/`#[tokio::test]`, Go `testing.T`/testify, pytest/unittest. The idiom→kind mapping (e.g. `assert x is not None` → `NotNull`, `expect(x).toBeTruthy()` → `Truthiness, Weak`) lives in `tables.toml`.
 - `GlobTestConventions` over test-file globs in `tables.toml` → `TestConventions` (`is_test(path)`, `test_files_for(source)`): `*.test.ts`/`__tests__/`, `#[cfg(test)]`/`tests/`, `*_test.go`, `test_*.py`/`tests/`.

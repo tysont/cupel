@@ -112,3 +112,28 @@ pub fn file_namespace(rules: &NamespaceRules, file: &str) -> Vec<String> {
     }
     parts.into_iter().map(str::to_owned).collect()
 }
+
+/// `path` split at its last source root directory: the part before it (with a trailing `/`, or
+/// empty when no source root is on the path) and the part below it without the extension.
+pub fn file_namespace_root(path: &str, source_roots: &[String]) -> (String, String) {
+    let parts: Vec<&str> = path.split('/').collect();
+    let root = parts[..parts.len().saturating_sub(1)]
+        .iter()
+        .rposition(|dir| source_roots.iter().any(|r| r == dir));
+    let without_ext = |text: &str| {
+        text.rsplit_once('.')
+            .map_or(text, |(stem, _)| stem)
+            .to_owned()
+    };
+    match root {
+        Some(index) => (
+            parts[..index].iter().fold(String::new(), |mut base, dir| {
+                base.push_str(dir);
+                base.push('/');
+                base
+            }),
+            without_ext(&parts[index + 1..].join("/")),
+        ),
+        None => (String::new(), without_ext(path)),
+    }
+}

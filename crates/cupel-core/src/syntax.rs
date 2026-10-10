@@ -355,6 +355,27 @@ pub struct TestConventions {
 }
 fact!(TestConventions, TestConventions);
 
+impl TestConventions {
+    /// Whether `path` is a test file: some glob in `test_globs` matches it. A glob that does not
+    /// parse matches nothing.
+    pub fn is_test(&self, path: &str) -> bool {
+        self.test_globs.iter().any(|glob| {
+            globset::GlobBuilder::new(glob)
+                .literal_separator(true)
+                .build()
+                .is_ok_and(|glob| glob.compile_matcher().is_match(path))
+        })
+    }
+
+    /// The test files that test `source`, empty when it has none.
+    pub fn test_files_for(&self, source: &str) -> &[String] {
+        self.pairs
+            .iter()
+            .find(|pair| pair.source == source)
+            .map_or(&[], |pair| pair.tests.as_slice())
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct TestPairing {
     pub source: String,

@@ -286,6 +286,7 @@ name = "cupel-core"
 version = "0.1.0"
 dependencies = [
  "blake3",
+ "globset",
  "insta",
  "proptest",
  "schemars",

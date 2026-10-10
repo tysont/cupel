@@ -82,3 +82,44 @@ templates = ["{} + 1", "{} - 1"]
 
 [mutations.negation]
 templates = ["!({})"]
+
+[tests]
+framework = "rust-test"
+
+[tests.assertions]
+assert_eq = { kind = "equality", strength = "strong" }
+debug_assert_eq = { kind = "equality", strength = "strong" }
+prop_assert_eq = { kind = "equality", strength = "strong" }
+# Inequality rules out one value and allows every other: weak.
+assert_ne = { kind = "equality", strength = "weak" }
+debug_assert_ne = { kind = "equality", strength = "weak" }
+prop_assert_ne = { kind = "equality", strength = "weak" }
+assert = { kind = "truthiness", strength = "weak" }
+debug_assert = { kind = "truthiness", strength = "weak" }
+prop_assert = { kind = "truthiness", strength = "weak" }
+assert_snapshot = { kind = "snapshot", strength = "strong" }
+assert_debug_snapshot = { kind = "snapshot", strength = "strong" }
+assert_display_snapshot = { kind = "snapshot", strength = "strong" }
+assert_json_snapshot = { kind = "snapshot", strength = "strong" }
+assert_yaml_snapshot = { kind = "snapshot", strength = "strong" }
+# Idioms captured as @assertion.idiom.<key>.
+is-present = { kind = "not-null", strength = "weak" }
+is-err = { kind = "throws", strength = "weak" }
+should-panic = { kind = "throws", strength = "strong" }
+
+[conventions]
+test_globs = ["**/tests/**/*.rs"]
+
+# An integration test named after the module it tests.
+[[conventions.tests_for]]
+template = "{base}tests/{stem}.rs"
+
+# The crate root is tested by every integration test.
+[[conventions.tests_for]]
+template = "{base}tests/*.rs"
+stems = ["lib"]
+
+# A module with a test module inside it tests itself.
+[[conventions.tests_for]]
+template = "{path}"
+contains = "#[cfg(test)]"

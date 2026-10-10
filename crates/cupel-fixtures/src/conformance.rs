@@ -45,7 +45,7 @@
 //! | `test-frames` | the case called `name` in `file`; without `name`, the file entry |
 //! | `module-graph` | edges from `file` whose `specifier` is `name` |
 //! | `api-surface` | items in `file` whose `path` is `name` |
-//! | `test-conventions` | the pairing whose `source` is `file` |
+//! | `test-conventions` | the pairing whose `source` is `file`, if its `tests` include `name` |
 //! | `project-info` | roots whose `path` is `file` |
 //!
 //! A construct a language cannot exhibit is mapped to `not-applicable = "<reason>"`. Facts a
@@ -406,7 +406,10 @@ fn locate(
             .collect(),
         FactKind::TestConventions => list(value, "pairs")
             .into_iter()
-            .filter(|pair| is(pair, "source", file))
+            .filter(|pair| {
+                is(pair, "source", file)
+                    && name.is_none_or(|name| list(pair, "tests").contains(&name.into()))
+            })
             .collect(),
         FactKind::ProjectInfo => list(value, "roots")
             .into_iter()

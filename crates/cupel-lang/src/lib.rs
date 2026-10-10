@@ -44,6 +44,7 @@
 //! on the producer that reads them.
 
 mod contract;
+mod conventions;
 pub mod decisions;
 mod generic;
 mod langs;
@@ -57,9 +58,11 @@ mod query;
 mod spec;
 pub mod symbols;
 mod tables;
+pub mod testframes;
 mod walk;
 
 pub use contract::{Contract, capture, contract};
+pub use conventions::GlobTestConventions;
 pub use language::{Language, LanguageRegistry, lang, owns};
 pub use parse::{CacheStats, ParseCache, ParseProblem, Parsed, Syntax};
 pub use producer::{Extract, Merge, QueryProducer, Source, parse_scope, producer_id};

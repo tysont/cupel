@@ -163,3 +163,61 @@ expect = { from = "0", to = ["0 + 1", "0 - 1"] }
 file = "src/pricing.rs"
 name = "pricing::discounted"
 expect = { from = "member && cut != 0", to = ["!(member && cut != 0)"] }
+
+[test-frames.case]
+file = "tests/ledger.rs"
+name = "deposit_adds_to_the_balance"
+
+[test-frames.assertion-equality]
+file = "tests/ledger.rs"
+name = "deposit_adds_to_the_balance"
+
+[test-frames.assertion-truthiness]
+file = "tests/ledger.rs"
+name = "members_get_a_discount"
+
+[test-frames.assertion-not-null]
+file = "tests/ledger.rs"
+name = "statements_mention_the_balance"
+
+[test-frames.assertion-throws]
+file = "tests/ledger.rs"
+name = "huge_deposits_overflow"
+
+[test-frames.assertion-snapshot]
+file = "src/pricing.rs"
+name = "discount_snapshot"
+
+[test-frames.weak-assertion]
+file = "tests/ledger.rs"
+name = "statement_is_mailed"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "tests/ledger.rs"
+name = "opening_an_account_does_not_panic"
+
+[test-frames.skip]
+file = "tests/ledger.rs"
+name = "statement_is_mailed"
+expect = { skip = { reason = "talks to the network" } }
+
+[test-frames.mock]
+file = "src/pricing.rs"
+name = "the_log_is_written_once"
+expect = { target = "MockLog" }
+
+[test-frames.setup]
+file = "src/pricing.rs"
+
+[test-frames.framework]
+file = "tests/ledger.rs"
+expect = { framework = "rust-test" }
+
+[test-conventions.separate-test-file]
+file = "src/lib.rs"
+name = "tests/ledger.rs"
+
+[test-conventions.inline-tests]
+file = "src/pricing.rs"
+name = "src/pricing.rs"

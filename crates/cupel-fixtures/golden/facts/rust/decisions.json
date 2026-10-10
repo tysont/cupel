@@ -229,6 +229,38 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 38
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 43
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 50
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 55
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 1,
         "file": "src/report/format.rs",
         "line": 1
@@ -358,7 +390,55 @@
       "symbol": {
         "col": 1,
         "file": "tests/ledger.rs",
-        "line": 4
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 36
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 42
       }
     }
   ]

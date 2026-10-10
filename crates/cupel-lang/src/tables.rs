@@ -2,7 +2,9 @@
 // ABOUTME: alongside the queries. Unknown keys are errors, so a typo fails the spec test.
 use std::collections::{BTreeMap, HashMap};
 
-use cupel_core::syntax::{DecisionKind, MutationOperator, Visibility};
+use cupel_core::syntax::{
+    AssertionKind, AssertionStrength, DecisionKind, MutationOperator, Visibility,
+};
 use serde::Deserialize;
 
 /// Everything a language's `tables.toml` may contain. Every section is optional; a section a
@@ -16,6 +18,9 @@ pub struct Tables {
     /// Present when the language has a `NormTree` producer.
     pub normalize: Option<NormalizeRules>,
     pub mutations: HashMap<MutationOperator, Replacements>,
+    pub tests: TestRules,
+    /// Present when the language has a `TestConventions` producer.
+    pub conventions: Option<ConventionRules>,
 }
 
 impl Tables {
@@ -283,4 +288,92 @@ impl Replacements {
         }
         out
     }
+}
+
+/// `[tests]`: what `QueryTestFrames` needs besides tests.scm.
+///
+/// ```toml
+/// [tests]
+/// framework = "rust-test"     # a file's framework when no `@framework.<name>` capture matched
+/// unknown_assertion = { kind = "custom", strength = "strong" }  # the default shown
+///
+/// [tests.assertions]          # assertion key → semantic kind and strength
+/// assert_eq = { kind = "equality", strength = "strong" }
+/// is-present = { kind = "not-null", strength = "weak" }   # an `@assertion.idiom.is-present`
+/// ```
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct TestRules {
+    pub framework: String,
+    pub unknown_assertion: AssertionClass,
+    pub assertions: BTreeMap<String, AssertionClass>,
+}
+
+impl Default for TestRules {
+    fn default() -> Self {
+        Self {
+            framework: String::new(),
+            unknown_assertion: AssertionClass {
+                kind: AssertionKind::Custom,
+                strength: AssertionStrength::Strong,
+            },
+            assertions: BTreeMap::new(),
+        }
+    }
+}
+
+impl TestRules {
+    /// The class of the assertion whose key is `key`.
+    pub fn classify(&self, key: &str) -> AssertionClass {
+        self.assertions
+            .get(key)
+            .copied()
+            .unwrap_or(self.unknown_assertion)
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct AssertionClass {
+    pub kind: AssertionKind,
+    pub strength: AssertionStrength,
+}
+
+/// `[conventions]`: how `GlobTestConventions` recognizes test files and pairs them with sources.
+///
+/// ```toml
+/// [conventions]
+/// test_globs = ["**/tests/**/*.rs"]   # a file is a test file exactly when one matches
+///
+/// [[conventions.tests_for]]           # candidate test files for a source file, in order
+/// template = "{base}tests/{stem}.rs"
+///
+/// [[conventions.tests_for]]
+/// template = "{base}tests/*.rs"       # globs match files in scope
+/// stems = ["lib"]                     # only for sources with one of these stems
+///
+/// [[conventions.tests_for]]
+/// template = "{path}"
+/// contains = "#[cfg(test)]"           # only when the candidate's text contains this
+/// ```
+///
+/// Placeholders: `{path}` the source path, `{dir}` its directory, `{stem}` its name before the
+/// first dot, `{ext}` its extension with the dot, `{base}` the path before its last source root
+/// directory (`[namespace].source_roots`, with a trailing `/`, or empty), and `{module}` the
+/// path below that root without the extension. A candidate must be a file in scope.
+#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct ConventionRules {
+    pub test_globs: Vec<String>,
+    pub tests_for: Vec<TestsFor>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TestsFor {
+    pub template: String,
+    #[serde(default)]
+    pub stems: Vec<String>,
+    #[serde(default)]
+    pub contains: Option<String>,
 }

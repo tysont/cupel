@@ -1,0 +1,19 @@
+{
+  "pairs": [
+    {
+      "source": "src/lib.rs",
+      "tests": [
+        "tests/ledger.rs"
+      ]
+    },
+    {
+      "source": "src/pricing.rs",
+      "tests": [
+        "src/pricing.rs"
+      ]
+    }
+  ],
+  "test_globs": [
+    "**/tests/**/*.rs"
+  ]
+}

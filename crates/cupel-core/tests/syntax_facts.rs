@@ -372,3 +372,25 @@ fn each_payload_declares_its_own_kind_at_version_1() {
     assert_eq!(kinds, FactKind::SYNTACTIC.into_iter().collect());
     assert!(declared.iter().all(|(_, version)| *version == 1));
 }
+
+#[test]
+fn test_conventions_answer_is_test_and_test_files_for() {
+    let conventions = TestConventions {
+        test_globs: vec!["**/tests/**/*.rs".to_owned(), "**/*_test.go".to_owned()],
+        pairs: vec![TestPairing {
+            source: "src/lib.rs".to_owned(),
+            tests: vec!["tests/ledger.rs".to_owned()],
+        }],
+    };
+    assert!(conventions.is_test("tests/ledger.rs"));
+    assert!(conventions.is_test("crates/a/tests/deep/x.rs"));
+    assert!(conventions.is_test("pkg/math_test.go"));
+    assert!(conventions.is_test("math_test.go"));
+    assert!(!conventions.is_test("src/lib.rs"));
+    assert!(!conventions.is_test("src/attests/x.go"));
+    assert_eq!(
+        conventions.test_files_for("src/lib.rs"),
+        ["tests/ledger.rs"]
+    );
+    assert!(conventions.test_files_for("src/other.rs").is_empty());
+}
