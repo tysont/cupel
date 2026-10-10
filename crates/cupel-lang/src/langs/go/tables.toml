@@ -4,7 +4,10 @@
 [namespace]
 separator = "."
 
-# Capitalized names are exported; everything else is visible throughout the package.
+# Capitalized names are exported; everything else is visible throughout the package, which is
+# what `internal` means (ADR-032). Go has no narrower level, so nothing is `private`. Exported
+# names in `internal/` directories stay `public`: they are visible outside their package, and
+# the import restriction is a module-boundary rule that a name rule cannot see.
 [visibility]
 default = "internal"
 

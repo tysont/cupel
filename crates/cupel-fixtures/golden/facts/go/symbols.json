@@ -2,43 +2,778 @@
   "symbols": [
     {
       "body": {
-        "col": 24,
+        "col": 13,
         "end_col": 2,
-        "end_line": 5,
-        "line": 3
+        "end_line": 14,
+        "line": 10
       },
-      "display": "math.Add",
-      "file": "math.go",
+      "display": "main.main",
+      "file": "cmd/ledger/main.go",
       "kind": "function",
       "lang": "go",
-      "name": "Add",
-      "namespace": "math",
+      "name": "main",
+      "namespace": "main",
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 5,
-        "line": 3
+        "end_line": 14,
+        "line": 10
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 12
+      },
+      "display": "ledger.classify",
+      "file": "decide.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "classify",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 12
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 22
+      },
+      "display": "ledger.firstOverdraft",
+      "file": "decide.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "firstOverdraft",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 22
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 37,
+        "line": 31
+      },
+      "display": "ledger.parseCents",
+      "file": "decide.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "parseCents",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 37,
+        "line": 31
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 39
+      },
+      "display": "ledger.describe",
+      "file": "decide.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "describe",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 39
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 58,
+        "line": 50
+      },
+      "display": "ledger.kindOf",
+      "file": "decide.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "kindOf",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 58,
+        "line": 50
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 62,
+        "end_col": 2,
+        "end_line": 70,
+        "line": 60
+      },
+      "display": "ledger.drain",
+      "file": "decide.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "drain",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 70,
+        "line": 60
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 13,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 21
+      },
+      "display": "ledger.init",
+      "file": "ledger.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "init",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 21
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 42,
+        "line": 38
+      },
+      "display": "ledger.NewAccount",
+      "file": "ledger.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "NewAccount",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 42,
+        "line": 38
       },
       "visibility": "public"
     },
     {
       "body": {
-        "col": 28,
+        "col": 40,
         "end_col": 2,
-        "end_line": 9,
-        "line": 5
+        "end_line": 47,
+        "line": 45
       },
-      "display": "math.TestAdd",
-      "file": "math_test.go",
-      "kind": "function",
+      "display": "ledger.Account.Deposit",
+      "file": "ledger.go",
+      "kind": "method",
       "lang": "go",
-      "name": "TestAdd",
-      "namespace": "math",
+      "name": "Deposit",
+      "namespace": "ledger.Account",
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 9,
+        "end_line": 47,
+        "line": 45
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 55,
+        "line": 50
+      },
+      "display": "ledger.Account.Statement",
+      "file": "ledger.go",
+      "kind": "method",
+      "lang": "go",
+      "name": "Statement",
+      "namespace": "ledger.Account",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 55,
+        "line": 50
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 3,
+        "end_line": 53,
+        "line": 51
+      },
+      "display": "ledger.Account.Statement.header",
+      "file": "ledger.go",
+      "kind": "closure",
+      "lang": "go",
+      "name": "header",
+      "namespace": "ledger.Account.Statement",
+      "span": {
+        "col": 2,
+        "end_col": 3,
+        "end_line": 53,
+        "line": 51
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 59,
+        "line": 57
+      },
+      "display": "ledger.Account.audited",
+      "file": "ledger.go",
+      "kind": "method",
+      "lang": "go",
+      "name": "audited",
+      "namespace": "ledger.Account",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 59,
+        "line": 57
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 64,
+        "line": 62
+      },
+      "display": "ledger.Balance",
+      "file": "ledger.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Balance",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 64,
+        "line": 62
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 49,
+        "end_col": 2,
+        "end_line": 72,
+        "line": 66
+      },
+      "display": "ledger.scale",
+      "file": "ledger.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "scale",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 72,
+        "line": 66
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 77,
+        "line": 75
+      },
+      "display": "ledger.FloorArea",
+      "file": "ledger.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "FloorArea",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 77,
+        "line": 75
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 8
+      },
+      "display": "ledger.TestMain",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestMain",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 13
+      },
+      "display": "ledger.TestDepositAddsToTheBalance",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestDepositAddsToTheBalance",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 22
+      },
+      "display": "ledger.TestMembersGetADiscount",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestMembersGetADiscount",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 49,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 28
+      },
+      "display": "ledger.TestNewAccountsAreRegistered",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestNewAccountsAreRegistered",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 28
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 35
+      },
+      "display": "ledger.TestParsingGarbageFails",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestParsingGarbageFails",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 35
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 51,
+        "end_col": 2,
+        "end_line": 46,
+        "line": 41
+      },
+      "display": "ledger.TestNewAccountsHaveDistinctIDs",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestNewAccountsHaveDistinctIDs",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 46,
+        "line": 41
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 64,
+        "line": 48
+      },
+      "display": "ledger.TestClassify",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestClassify",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 64,
+        "line": 48
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 42,
+        "end_col": 2,
+        "end_line": 73,
+        "line": 66
+      },
+      "display": "ledger.TestStatementIsMailed",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestStatementIsMailed",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 73,
+        "line": 66
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 83,
+        "line": 75
+      },
+      "display": "ledger.TestParseCentsTrimsSpaces",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestParseCentsTrimsSpaces",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 83,
+        "line": 75
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 53,
+        "end_col": 2,
+        "end_line": 87,
+        "line": 85
+      },
+      "display": "ledger.TestOpeningAnAccountDoesNotPanic",
+      "file": "ledger_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestOpeningAnAccountDoesNotPanic",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 87,
+        "line": 85
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 58,
+        "end_col": 2,
+        "end_line": 11,
         "line": 5
+      },
+      "display": "ledger.discounted",
+      "file": "pricing.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "discounted",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 5
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 13
+      },
+      "display": "ledger.tally",
+      "file": "pricing.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "tally",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 13
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 28,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 26
+      },
+      "display": "ledger.logTotal",
+      "file": "pricing.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "logTotal",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 26
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 54,
+        "end_col": 2,
+        "end_line": 38,
+        "line": 36
+      },
+      "display": "ledger.Mail",
+      "file": "pricing.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Mail",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 38,
+        "line": 36
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 62,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 16
+      },
+      "display": "ledger.MockNotifier.Notify",
+      "file": "pricing_test.go",
+      "kind": "method",
+      "lang": "go",
+      "name": "Notify",
+      "namespace": "ledger.MockNotifier",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 25,
+        "line": 21
+      },
+      "display": "ledger.TestTallyReportsOverdraft",
+      "file": "pricing_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestTallyReportsOverdraft",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 25,
+        "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 27
+      },
+      "display": "ledger.TestParseCentsAcceptsDigits",
+      "file": "pricing_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestParseCentsAcceptsDigits",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 27
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 33
+      },
+      "display": "ledger.TestParseCentsRejectsBlanks",
+      "file": "pricing_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestParseCentsRejectsBlanks",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 33
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 2,
+        "end_line": 40,
+        "line": 38
+      },
+      "display": "ledger.TestDiscountSnapshot",
+      "file": "pricing_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestDiscountSnapshot",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 40,
+        "line": 38
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 47,
+        "line": 42
+      },
+      "display": "ledger.TestMailNotifiesTheOwner",
+      "file": "pricing_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestMailNotifiesTheOwner",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 47,
+        "line": 42
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 6
+      },
+      "display": "report.Render",
+      "file": "report/format.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Render",
+      "namespace": "report",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 6
       },
       "visibility": "public"
     },
@@ -123,6 +858,216 @@
         "end_col": 3,
         "end_line": 20,
         "line": 18
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 35,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 24
+      },
+      "display": "shapes.Square",
+      "file": "shapes/geometry.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Square",
+      "namespace": "shapes",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 24
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 5
+      },
+      "display": "ledger.netTotal",
+      "file": "twins.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "netTotal",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 5
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 13
+      },
+      "display": "ledger.sumAfterCharge",
+      "file": "twins.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "sumAfterCharge",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 13
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 21
+      },
+      "display": "ledger.netTotalFloor",
+      "file": "twins.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "netTotalFloor",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 21
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 54,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 29
+      },
+      "display": "ledger.netTotalLaidOut",
+      "file": "twins.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "netTotalLaidOut",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 29
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 51,
+        "end_col": 2,
+        "end_line": 47,
+        "line": 41
+      },
+      "display": "ledger.netTotalPlus",
+      "file": "twins.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "netTotalPlus",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 47,
+        "line": 41
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 53,
+        "end_col": 2,
+        "end_line": 57,
+        "line": 49
+      },
+      "display": "ledger.netTotalCapped",
+      "file": "twins.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "netTotalCapped",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 57,
+        "line": 49
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 54,
+        "end_col": 2,
+        "end_line": 65,
+        "line": 59
+      },
+      "display": "ledger.netTotalProduct",
+      "file": "twins.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "netTotalProduct",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 65,
+        "line": 59
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 73,
+        "line": 67
+      },
+      "display": "ledger.sum",
+      "file": "twins.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "sum",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 73,
+        "line": 67
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 35,
+        "end_col": 2,
+        "end_line": 81,
+        "line": 75
+      },
+      "display": "ledger.product",
+      "file": "twins.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "product",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 81,
+        "line": 75
       },
       "visibility": "internal"
     }

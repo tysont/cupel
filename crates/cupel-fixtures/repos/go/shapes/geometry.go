@@ -20,3 +20,7 @@ func (c Circle) scaled(factor float64) Circle {
 	}
 	return Circle{Radius: double(c.Radius)}
 }
+
+func Square(side float64) float64 {
+	return side * side
+}

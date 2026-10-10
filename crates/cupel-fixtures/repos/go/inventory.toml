@@ -2,12 +2,12 @@
 # repository that exhibits it, or marks it not-applicable with a reason.
 
 [symbols.function]
-file = "shapes/geometry.go"
-name = "shapes.NewCircle"
+file = "ledger.go"
+name = "ledger.Balance"
 
 [symbols.method]
-file = "shapes/geometry.go"
-name = "shapes.Circle.Area"
+file = "ledger.go"
+name = "ledger.Account.Deposit"
 
 [symbols.static-method]
 not-applicable = "Go methods always have a receiver; package-level functions play the role of static methods."
@@ -16,21 +16,21 @@ not-applicable = "Go methods always have a receiver; package-level functions pla
 not-applicable = "Go has no named nested functions; a function literal bound to a name is a closure."
 
 [symbols.closure]
-file = "shapes/geometry.go"
-name = "shapes.Circle.scaled.double"
+file = "ledger.go"
+name = "ledger.Account.Statement.header"
 
 [symbols.public]
-file = "shapes/geometry.go"
-name = "shapes.NewCircle"
+file = "ledger.go"
+name = "ledger.Balance"
 
 [symbols.internal]
-file = "shapes/geometry.go"
-name = "shapes.Circle.scaled"
+file = "ledger.go"
+name = "ledger.scale"
 
 [symbols.private]
 not-applicable = "Go has no file- or type-private visibility; unexported names are visible throughout the package."
 
 [symbols.file-namespace]
-file = "shapes/geometry.go"
-name = "shapes.NewCircle"
-expect = { namespace = "shapes" }
+file = "report/format.go"
+name = "report.Render"
+expect = { namespace = "report" }
