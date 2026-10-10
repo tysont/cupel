@@ -7,7 +7,9 @@
 //!   `@api.variable`, or `@api.module` on a public item's node; the capture name is its kind.
 //!   The earliest pattern wins for an item node.
 //! - `@api.name` on the node whose text names it. Its path is the namespace (file namespace,
-//!   enclosing `@scope`s, as for symbols) joined with the name.
+//!   enclosing `@scope`s, as for symbols) joined with the name; an `@scope.name` in the item's
+//!   own match adds one innermost segment that is not lexical, such as a Go method's receiver
+//!   type, as it does in symbols.scm.
 //! - `@api.signature` (optional, repeatable) on the nodes that make up its signature: the
 //!   signature is every token from the start of the first to the end of the last, comments
 //!   skipped, so text between them (such as `->`) is kept.
@@ -16,8 +18,9 @@
 //! - `@root.entry-point` and `@root.hook` belong to `QueryRoots` (see `cupel_lang::roots`).
 //!
 //! Tokens are joined by single spaces, except none before `, ) ] > : ; ? .` and `::`, none
-//! after `( [ < & * ' .` and `::`, and none before an opening bracket that follows a name; a
-//! comma right before a closing bracket or at the end is dropped.
+//! after `( [ < & * ' .` and `::` or after a token in `[api].tight_after`, and none before an
+//! opening bracket that follows a name (the `_` standing for a local is not a name); a comma
+//! right before a closing bracket or at the end is dropped.
 use std::collections::BTreeMap;
 
 use cupel_core::syntax::{ApiItem, ApiItemKind, ApiSurface};
@@ -30,6 +33,9 @@ use crate::parse::Parsed;
 use crate::producer::Source;
 use crate::query::{Match, matches, span};
 use crate::spec::QueryFile;
+
+/// What a local name becomes in a signature.
+const LOCAL: &str = "_";
 
 /// The `ApiSurface` extractor.
 ///
@@ -62,17 +68,19 @@ pub fn extract(source: &Source<'_>) -> ApiSurface {
     let mut items: Vec<(&Match<'_, '_>, ApiItemKind, Node<'_>)> = chosen.into_values().collect();
     items.sort_by_key(|(_, _, node)| node.start_byte());
     let none: [Scope<'_>; 0] = [];
+    let tight_after = &spec.tables().api.tight_after;
     ApiSurface {
         items: items
             .into_iter()
             .filter_map(|(m, kind, node)| {
                 let name = parsed.text(m.node(capture::API_NAME)?);
-                let namespace = namespaces.of(node, &none, None);
+                let extra = m.node(capture::SCOPE_NAME).map(|n| parsed.text(n));
+                let namespace = namespaces.of(node, &none, extra);
                 let signature_nodes: Vec<Node<'_>> = m.nodes(capture::API_SIGNATURE).collect();
                 Some(ApiItem {
                     path: namespaces.display(&namespace, name),
                     kind,
-                    signature: signature(parsed, node, &signature_nodes, &locals),
+                    signature: signature(parsed, node, &signature_nodes, &locals, tight_after),
                     file: parsed.file.clone(),
                     span: span(node),
                 })
@@ -91,7 +99,13 @@ fn item_capture<'t>(m: &Match<'_, 't>) -> Option<(ApiItemKind, Node<'t>)> {
 }
 
 /// The normalized signature spanning `nodes`, read from the leaves of `item`.
-fn signature(parsed: &Parsed, item: Node<'_>, nodes: &[Node<'_>], locals: &[Node<'_>]) -> String {
+fn signature(
+    parsed: &Parsed,
+    item: Node<'_>,
+    nodes: &[Node<'_>],
+    locals: &[Node<'_>],
+    tight_after: &[String],
+) -> String {
     let (Some(start), Some(end)) = (
         nodes.iter().map(Node::start_byte).min(),
         nodes.iter().map(Node::end_byte).max(),
@@ -111,7 +125,7 @@ fn signature(parsed: &Parsed, item: Node<'_>, nodes: &[Node<'_>], locals: &[Node
             Some(local) if last_local == Some(local.id()) => {}
             Some(local) => {
                 last_local = Some(local.id());
-                tokens.push("_".to_owned());
+                tokens.push(LOCAL.to_owned());
             }
             None => {
                 last_local = None;
@@ -119,7 +133,7 @@ fn signature(parsed: &Parsed, item: Node<'_>, nodes: &[Node<'_>], locals: &[Node
             }
         }
     });
-    join(&tokens)
+    join(&tokens, tight_after)
 }
 
 /// Calls `visit` on every leaf below `node`, in document order, skipping comments.
@@ -138,7 +152,7 @@ fn leaves<'t>(node: Node<'t>, visit: &mut dyn FnMut(Node<'t>)) {
 }
 
 /// Tokens joined as the module docs describe.
-fn join(tokens: &[String]) -> String {
+fn join(tokens: &[String], tight_after: &[String]) -> String {
     let closes = |t: &str| matches!(t, ")" | "]" | ">" | "}");
     let mut out = String::new();
     let mut previous: Option<&str> = None;
@@ -151,8 +165,10 @@ fn join(tokens: &[String]) -> String {
         if let Some(prev) = previous {
             let tight_before =
                 matches!(token, "," | ")" | "]" | ">" | ":" | ";" | "?" | "." | "::");
-            let tight_after = matches!(prev, "(" | "[" | "<" | "&" | "*" | "'" | "." | "::");
+            let tight_after = matches!(prev, "(" | "[" | "<" | "&" | "*" | "'" | "." | "::")
+                || tight_after.iter().any(|t| t == prev);
             let call_like = matches!(token, "(" | "<" | "[")
+                && prev != LOCAL
                 && prev
                     .chars()
                     .last()
@@ -172,7 +188,10 @@ mod tests {
     use super::join;
 
     fn joined(tokens: &[&str]) -> String {
-        join(&tokens.iter().map(|t| (*t).to_owned()).collect::<Vec<_>>())
+        join(
+            &tokens.iter().map(|t| (*t).to_owned()).collect::<Vec<_>>(),
+            &[],
+        )
     }
 
     #[test]
@@ -194,5 +213,16 @@ mod tests {
             "fmt::Formatter<'_>"
         );
         assert_eq!(joined(&["where", "T", ":", "Copy", ","]), "where T: Copy");
+    }
+
+    #[test]
+    fn a_local_placeholder_is_not_a_name_and_tables_add_tight_tokens() {
+        assert_eq!(joined(&["(", "_", "[", "]", "T", ")"]), "(_ [] T)");
+        let tight = ["]".to_owned(), "...".to_owned()];
+        let tokens: Vec<String> = ["(", "_", "[", "]", "T", ",", "_", "...", "U", ")"]
+            .iter()
+            .map(|t| (*t).to_owned())
+            .collect();
+        assert_eq!(join(&tokens, &tight), "(_ []T, _ ...U)");
     }
 }

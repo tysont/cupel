@@ -23,6 +23,7 @@ pub struct Tables {
     pub conventions: Option<ConventionRules>,
     /// Present when the language has a `Roots` producer.
     pub roots: Option<RootRules>,
+    pub api: ApiRules,
 }
 
 impl Tables {
@@ -393,4 +394,17 @@ pub struct TestsFor {
 pub struct RootRules {
     pub entry_points: Vec<String>,
     pub hooks: Vec<String>,
+}
+
+/// `[api]`: how `QueryApi` spaces the tokens of a signature, beyond the shared rules documented
+/// in `cupel_lang::api`.
+///
+/// ```toml
+/// [api]
+/// tight_after = ["]", "..."]   # no space after these tokens: Go's `[]T`, `map[K]V`, `...T`
+/// ```
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct ApiRules {
+    pub tight_after: Vec<String>,
 }
