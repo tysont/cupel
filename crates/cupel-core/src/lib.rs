@@ -4,6 +4,7 @@
 //! structural hashes, and the extension model of facts, producers, and checks (design §8.3).
 
 mod check;
+mod describe;
 mod envelope;
 mod error;
 mod event;
@@ -21,6 +22,10 @@ pub mod syntax;
 
 pub use check::{
     Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,
+};
+pub use describe::{
+    AllDescription, ArgDescription, CliDescription, CommandDescription, CommandSummary,
+    Description, Example, ExitCodeDescription, SchemaDescription, SchemaRef, ValueType,
 };
 pub use envelope::{
     BaselineRef, CheckResult, CheckStatus, ConfigEcho, ConfigSource, CupelInfo, Delta, Envelope,
