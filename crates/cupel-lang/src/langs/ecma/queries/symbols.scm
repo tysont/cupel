@@ -60,6 +60,40 @@
   (#eq? @_exports "exports")
   (#eq? @_module "module")) @symbol.closure @visibility.public
 
+; Names exported apart from their definition: `export { a, b as c }` (not re-exports from
+; another module), `export default a`, `module.exports = { a, b: c }`, `module.exports = a`,
+; and `exports.x = a`.
+(export_statement
+  !source
+  (export_clause
+    (export_specifier
+      name: (identifier) @export.name)))
+
+(export_statement
+  value: (identifier) @export.name)
+
+(assignment_expression
+  left: (member_expression
+    object: (identifier) @_module
+    property: (property_identifier) @_exports)
+  right: [
+    (identifier) @export.name
+    (object
+      [
+        (shorthand_property_identifier) @export.name
+        (pair value: (identifier) @export.name)
+      ])
+  ]
+  (#eq? @_module "module")
+  (#eq? @_exports "exports"))
+
+(assignment_expression
+  left: (member_expression
+    object: (identifier) @_exports
+    property: (property_identifier))
+  right: (identifier) @export.name
+  (#eq? @_exports "exports"))
+
 ; Test callbacks are closures named by the test's title (`it("adds", () => …)`, `test.skip`,
 ; `xit`); suites (`describe`) namespace them. See ADR-030.
 (call_expression

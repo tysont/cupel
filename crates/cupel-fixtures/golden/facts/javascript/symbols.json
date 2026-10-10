@@ -124,7 +124,7 @@
         "end_line": 5,
         "line": 3
       },
-      "visibility": "private"
+      "visibility": "public"
     },
     {
       "body": {

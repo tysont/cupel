@@ -33,7 +33,7 @@
 //!
 //! | File | Required | Optional |
 //! |---|---|---|
-//! | `symbols.scm` | `@symbol.function` / `@symbol.method` / `@symbol.closure`; `@symbol.name` | `@symbol.body` `@symbol.visibility` `@visibility.public` `@visibility.internal` `@visibility.private` `@scope` `@scope.name` `@namespace.name` |
+//! | `symbols.scm` | `@symbol.function` / `@symbol.method` / `@symbol.closure`; `@symbol.name` | `@symbol.body` `@symbol.visibility` `@visibility.public` `@visibility.internal` `@visibility.private` `@export.name` `@scope` `@scope.name` `@namespace.name` |
 //! | `decisions.scm` | one of `@decision.branch` `.loop` `.boolean-op` `.case` `.catch` `.early-return` `.ternary` | |
 //! | `mutations.scm` | one of `@mut.relational` `.equality` `.arith-add-sub` `.arith-mul-div` `.boolean-op` `.boolean-literal` `.zero-one` `.statement-deletion` `.return-value` `.constant` `.boundary` `.negation` | |
 //! | `tests.scm` | `@test.case`; `@test.name` | `@test.assertion` `@assertion.name` `@assertion.idiom.<key>` `@test.mock` `@mock.target` `@test.skip` `@skip.reason` `@test.setup` `@framework.<name>` |

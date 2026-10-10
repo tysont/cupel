@@ -200,3 +200,64 @@ fn exported_function_expressions_and_var_bindings_are_closures() {
         ],
     );
 }
+
+#[test]
+fn names_exported_apart_from_their_definition_are_public_at_the_top_level_only() {
+    let symbols: Symbols = produce("javascript", &fixture("javascript"));
+    expect(
+        &symbols,
+        "src/report.cjs",
+        &[("report.summary", Function, Public, (3, 5))],
+    );
+    let dir = tree(&[
+        (
+            "src/esm.js",
+            "function add(a, b) { return a + b; }\nconst sub = (a, b) => a - b;\nfunction mul(a, b) {\n  function add(x) { return x; }\n  return a * b;\n}\nfunction hidden() {}\nexport { add, sub as minus };\nexport default mul;\nexport { hidden } from \"./other.js\";\n",
+        ),
+        (
+            "src/cjs.cjs",
+            "function a() {}\nfunction b() {}\nfunction c() {}\nfunction d() {}\nmodule.exports = { a, renamed: b };\nexports.alias = c;\n",
+        ),
+        (
+            "src/whole.cjs",
+            "function only() {}\nmodule.exports = only;\n",
+        ),
+        (
+            "src/legacy.ts",
+            "function round(n: number): number { return n; }\nexport = round;\n",
+        ),
+    ]);
+    let javascript: Symbols = produce("javascript", dir.path());
+    expect(
+        &javascript,
+        "src/esm.js",
+        &[
+            ("esm.add", Function, Public, (1, 1)),
+            ("esm.sub", Closure, Public, (2, 2)),
+            ("esm.mul", Function, Public, (3, 6)),
+            ("esm.mul.add", Function, Private, (4, 4)),
+            ("esm.hidden", Function, Private, (7, 7)),
+        ],
+    );
+    expect(
+        &javascript,
+        "src/cjs.cjs",
+        &[
+            ("cjs.a", Function, Public, (1, 1)),
+            ("cjs.b", Function, Public, (2, 2)),
+            ("cjs.c", Function, Public, (3, 3)),
+            ("cjs.d", Function, Private, (4, 4)),
+        ],
+    );
+    expect(
+        &javascript,
+        "src/whole.cjs",
+        &[("whole.only", Function, Public, (1, 1))],
+    );
+    let typescript: Symbols = produce("typescript", dir.path());
+    expect(
+        &typescript,
+        "src/legacy.ts",
+        &[("legacy.round", Function, Public, (1, 1))],
+    );
+}
