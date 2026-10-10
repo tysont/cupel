@@ -1,0 +1,172 @@
+{
+  "symbols": [
+    {
+      "body": {
+        "col": 51,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "math.add",
+      "file": "src/math.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "add",
+      "namespace": "math",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 42,
+        "end_line": 2,
+        "line": 2
+      },
+      "display": "shapes.geometry.Circle.constructor",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "constructor",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 42,
+        "end_line": 2,
+        "line": 2
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 18,
+        "end_col": 4,
+        "end_line": 6,
+        "line": 4
+      },
+      "display": "shapes.geometry.Circle.area",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "area",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 6,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 25,
+        "end_col": 4,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "shapes.geometry.Circle.unit",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "unit",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 10,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 14,
+        "line": 12
+      },
+      "display": "shapes.geometry.Circle.isValid",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "isValid",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 14,
+        "line": 12
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 3,
+        "end_col": 37,
+        "end_line": 18,
+        "line": 18
+      },
+      "display": "shapes.geometry.scale",
+      "file": "src/shapes/geometry.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "scale",
+      "namespace": "shapes.geometry",
+      "span": {
+        "col": 14,
+        "end_col": 37,
+        "end_line": 18,
+        "line": 17
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 25,
+        "line": 20
+      },
+      "display": "shapes.geometry.perimeter",
+      "file": "src/shapes/geometry.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "perimeter",
+      "namespace": "shapes.geometry",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 25,
+        "line": 20
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 4,
+        "end_line": 23,
+        "line": 21
+      },
+      "display": "shapes.geometry.perimeter.twice",
+      "file": "src/shapes/geometry.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "twice",
+      "namespace": "shapes.geometry.perimeter",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 23,
+        "line": 21
+      },
+      "visibility": "private"
+    }
+  ]
+}

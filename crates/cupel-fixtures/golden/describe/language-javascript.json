@@ -12,7 +12,18 @@
       ".mjs",
       ".cjs"
     ],
-    "facts": [],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      }
+    ],
     "family": "ecma",
     "id": "javascript",
     "stability": "experimental",

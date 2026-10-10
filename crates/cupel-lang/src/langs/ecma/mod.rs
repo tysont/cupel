@@ -7,15 +7,27 @@ use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::language::Language;
 use crate::parse::ParseCache;
-use crate::spec::LanguageSpec;
+use crate::spec::{LanguageSpec, QueryFile};
 
 const TABLES: &str = include_str!("tables.toml");
 
-static JAVASCRIPT: LazyLock<LanguageSpec> =
-    LazyLock::new(|| LanguageSpec::new("javascript", &[], TABLES));
+/// Queries shared by both languages.
+const SHARED: &[(QueryFile, &str)] = &[(QueryFile::Symbols, include_str!("queries/symbols.scm"))];
 
-static TYPESCRIPT: LazyLock<LanguageSpec> =
-    LazyLock::new(|| LanguageSpec::new("typescript", &[], TABLES));
+/// TypeScript-only queries. They are placed before the shared queries of the same file, so
+/// their patterns win where both match one definition.
+const TYPESCRIPT_ONLY: &[(QueryFile, &str)] = &[(
+    QueryFile::Symbols,
+    include_str!("queries/typescript/symbols.scm"),
+)];
+
+static JAVASCRIPT: LazyLock<LanguageSpec> =
+    LazyLock::new(|| LanguageSpec::new("javascript", SHARED, TABLES));
+
+static TYPESCRIPT: LazyLock<LanguageSpec> = LazyLock::new(|| {
+    let queries: Vec<(QueryFile, &str)> = TYPESCRIPT_ONLY.iter().chain(SHARED).copied().collect();
+    LanguageSpec::new("typescript", &queries, TABLES)
+});
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Dialect {

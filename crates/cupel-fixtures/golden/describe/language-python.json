@@ -9,7 +9,18 @@
     "extensions": [
       ".py"
     ],
-    "facts": [],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      }
+    ],
     "family": "python",
     "id": "python",
     "stability": "experimental",

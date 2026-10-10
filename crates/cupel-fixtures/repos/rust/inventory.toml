@@ -1,2 +1,39 @@
 # Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
 # repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+file = "src/lib.rs"
+name = "balance"
+
+[symbols.method]
+file = "src/account.rs"
+name = "account::Account::deposit"
+
+[symbols.static-method]
+file = "src/account.rs"
+name = "account::Account::new"
+
+[symbols.nested-function]
+file = "src/account.rs"
+name = "account::Account::statement::line"
+
+[symbols.closure]
+file = "src/account.rs"
+name = "account::Account::statement::header"
+
+[symbols.public]
+file = "src/lib.rs"
+name = "balance"
+
+[symbols.internal]
+file = "src/lib.rs"
+name = "audit_limit"
+
+[symbols.private]
+file = "src/lib.rs"
+name = "scale"
+
+[symbols.file-namespace]
+file = "src/report/format.rs"
+name = "report::format::render"
+expect = { namespace = "report::format" }

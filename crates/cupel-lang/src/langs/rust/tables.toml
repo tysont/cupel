@@ -1,2 +1,13 @@
 # ABOUTME: Tables the generic producers read for rust, alongside its queries.
 # ABOUTME: Keys and shapes are documented in the cupel-lang crate docs; unknown keys are errors.
+
+[namespace]
+separator = "::"
+source_roots = ["src"]
+index_files = ["lib", "main", "mod"]
+
+[visibility]
+default = "private"
+modifiers = { "pub" = "public", "pub(self)" = "private" }
+# pub(crate), pub(super), pub(in path): visible inside the crate, not exported.
+modifier_default = "internal"

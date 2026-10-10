@@ -1,2 +1,20 @@
 # ABOUTME: Tables the generic producers read for python, alongside its queries.
 # ABOUTME: Keys and shapes are documented in the cupel-lang crate docs; unknown keys are errors.
+
+[namespace]
+separator = "."
+source_roots = ["src"]
+index_files = ["__init__"]
+
+# Dunder names are protocol methods; a leading underscore marks a name private by convention.
+[visibility]
+default = "public"
+
+[[visibility.names]]
+prefix = "__"
+suffix = "__"
+visibility = "public"
+
+[[visibility.names]]
+prefix = "_"
+visibility = "private"

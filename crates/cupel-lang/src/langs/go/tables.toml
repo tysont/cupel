@@ -1,2 +1,13 @@
 # ABOUTME: Tables the generic producers read for go, alongside its queries.
 # ABOUTME: Keys and shapes are documented in the cupel-lang crate docs; unknown keys are errors.
+
+[namespace]
+separator = "."
+
+# Capitalized names are exported; everything else is visible throughout the package.
+[visibility]
+default = "internal"
+
+[[visibility.names]]
+capitalized = true
+visibility = "public"

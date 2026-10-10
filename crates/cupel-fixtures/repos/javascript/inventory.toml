@@ -1,2 +1,38 @@
 # Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
 # repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+file = "src/math.js"
+name = "math.add"
+
+[symbols.method]
+file = "src/shapes/geometry.js"
+name = "shapes.geometry.Circle.area"
+
+[symbols.static-method]
+file = "src/shapes/geometry.js"
+name = "shapes.geometry.Circle.unit"
+
+[symbols.nested-function]
+file = "src/shapes/geometry.js"
+name = "shapes.geometry.perimeter.twice"
+
+[symbols.closure]
+file = "src/shapes/geometry.js"
+name = "shapes.geometry.scale"
+
+[symbols.public]
+file = "src/math.js"
+name = "math.add"
+
+[symbols.internal]
+not-applicable = "JavaScript modules have no package-level visibility: a name is exported or private to its module."
+
+[symbols.private]
+file = "src/shapes/geometry.js"
+name = "shapes.geometry.Circle.#isValid"
+
+[symbols.file-namespace]
+file = "src/shapes/geometry.js"
+name = "shapes.geometry.perimeter"
+expect = { namespace = "shapes.geometry" }

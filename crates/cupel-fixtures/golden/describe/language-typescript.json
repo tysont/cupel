@@ -12,7 +12,18 @@
       ".cts",
       ".tsx"
     ],
-    "facts": [],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.typescript",
+            "needs": []
+          }
+        ]
+      }
+    ],
     "family": "ecma",
     "id": "typescript",
     "stability": "experimental",

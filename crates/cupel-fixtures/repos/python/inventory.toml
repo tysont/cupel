@@ -1,2 +1,38 @@
 # Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
 # repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+file = "shapes/circle.py"
+name = "shapes.circle.perimeter"
+
+[symbols.method]
+file = "shapes/circle.py"
+name = "shapes.circle.Circle.area"
+
+[symbols.static-method]
+file = "shapes/circle.py"
+name = "shapes.circle.Circle.unit"
+
+[symbols.nested-function]
+file = "shapes/circle.py"
+name = "shapes.circle.perimeter.twice"
+
+[symbols.closure]
+file = "shapes/circle.py"
+name = "shapes.circle.scale"
+
+[symbols.public]
+file = "shapes/circle.py"
+name = "shapes.circle.perimeter"
+
+[symbols.internal]
+not-applicable = "Python has no package-level visibility; a leading underscore marks a name private by convention."
+
+[symbols.private]
+file = "shapes/circle.py"
+name = "shapes.circle.Circle._is_valid"
+
+[symbols.file-namespace]
+file = "shapes/circle.py"
+name = "shapes.circle.perimeter"
+expect = { namespace = "shapes.circle" }

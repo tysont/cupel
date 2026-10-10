@@ -10,7 +10,9 @@
         "extensions": [
           ".go"
         ],
-        "facts": [],
+        "facts": [
+          "symbols"
+        ],
         "family": "go",
         "id": "go",
         "stability": "experimental"
@@ -22,7 +24,9 @@
           ".mjs",
           ".cjs"
         ],
-        "facts": [],
+        "facts": [
+          "symbols"
+        ],
         "family": "ecma",
         "id": "javascript",
         "stability": "experimental"
@@ -31,7 +35,9 @@
         "extensions": [
           ".py"
         ],
-        "facts": [],
+        "facts": [
+          "symbols"
+        ],
         "family": "python",
         "id": "python",
         "stability": "experimental"
@@ -40,7 +46,9 @@
         "extensions": [
           ".rs"
         ],
-        "facts": [],
+        "facts": [
+          "symbols"
+        ],
         "family": "rust",
         "id": "rust",
         "stability": "experimental"
@@ -52,7 +60,9 @@
           ".cts",
           ".tsx"
         ],
-        "facts": [],
+        "facts": [
+          "symbols"
+        ],
         "family": "ecma",
         "id": "typescript",
         "stability": "experimental"

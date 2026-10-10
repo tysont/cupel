@@ -7,7 +7,7 @@ cupel describe: pass (exit 0)
 language typescript · family ecma · .ts .mts .cts .tsx · experimental
 
 facts
-  none
+  symbols  lang.typescript (quick)
 
 checks
   none registered

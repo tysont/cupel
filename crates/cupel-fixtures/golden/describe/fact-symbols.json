@@ -10,23 +10,53 @@
     "producers": [
       {
         "lang": "go",
-        "producers": []
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
       },
       {
         "lang": "javascript",
-        "producers": []
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
       },
       {
         "lang": "python",
-        "producers": []
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
       },
       {
         "lang": "rust",
-        "producers": []
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
       },
       {
         "lang": "typescript",
-        "producers": []
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.typescript",
+            "needs": []
+          }
+        ]
       }
     ],
     "schema": {

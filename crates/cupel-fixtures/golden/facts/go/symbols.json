@@ -1,0 +1,130 @@
+{
+  "symbols": [
+    {
+      "body": {
+        "col": 24,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "math.Add",
+      "file": "math.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Add",
+      "namespace": "math",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 28,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "display": "math.TestAdd",
+      "file": "math_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestAdd",
+      "namespace": "math",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "shapes.NewCircle",
+      "file": "shapes/geometry.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "NewCircle",
+      "namespace": "shapes",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "display": "shapes.Circle.Area",
+      "file": "shapes/geometry.go",
+      "kind": "method",
+      "lang": "go",
+      "name": "Area",
+      "namespace": "shapes.Circle",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 22,
+        "line": 17
+      },
+      "display": "shapes.Circle.scaled",
+      "file": "shapes/geometry.go",
+      "kind": "method",
+      "lang": "go",
+      "name": "scaled",
+      "namespace": "shapes.Circle",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 22,
+        "line": 17
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 3,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "shapes.Circle.scaled.double",
+      "file": "shapes/geometry.go",
+      "kind": "closure",
+      "lang": "go",
+      "name": "double",
+      "namespace": "shapes.Circle.scaled",
+      "span": {
+        "col": 2,
+        "end_col": 3,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "internal"
+    }
+  ]
+}

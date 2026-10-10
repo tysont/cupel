@@ -1,0 +1,193 @@
+{
+  "symbols": [
+    {
+      "body": {
+        "col": 5,
+        "end_col": 23,
+        "end_line": 2,
+        "line": 2
+      },
+      "display": "shapes.area.square",
+      "file": "shapes/area.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "square",
+      "namespace": "shapes.area",
+      "span": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 2,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 29,
+        "end_line": 6,
+        "line": 6
+      },
+      "display": "shapes.circle.Circle.__init__",
+      "file": "shapes/circle.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "__init__",
+      "namespace": "shapes.circle.Circle",
+      "span": {
+        "col": 5,
+        "end_col": 29,
+        "end_line": 6,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 40,
+        "end_line": 9,
+        "line": 9
+      },
+      "display": "shapes.circle.Circle.area",
+      "file": "shapes/circle.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "area",
+      "namespace": "shapes.circle.Circle",
+      "span": {
+        "col": 5,
+        "end_col": 40,
+        "end_line": 9,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 25,
+        "end_line": 13,
+        "line": 13
+      },
+      "display": "shapes.circle.Circle.unit",
+      "file": "shapes/circle.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "unit",
+      "namespace": "shapes.circle.Circle",
+      "span": {
+        "col": 5,
+        "end_col": 25,
+        "end_line": 13,
+        "line": 12
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 31,
+        "end_line": 16,
+        "line": 16
+      },
+      "display": "shapes.circle.Circle._is_valid",
+      "file": "shapes/circle.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "_is_valid",
+      "namespace": "shapes.circle.Circle",
+      "span": {
+        "col": 5,
+        "end_col": 31,
+        "end_line": 16,
+        "line": 15
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 42,
+        "end_line": 23,
+        "line": 20
+      },
+      "display": "shapes.circle.perimeter",
+      "file": "shapes/circle.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "perimeter",
+      "namespace": "shapes.circle",
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 23,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 25,
+        "end_line": 21,
+        "line": 21
+      },
+      "display": "shapes.circle.perimeter.twice",
+      "file": "shapes/circle.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "twice",
+      "namespace": "shapes.circle.perimeter",
+      "span": {
+        "col": 5,
+        "end_col": 25,
+        "end_line": 21,
+        "line": 20
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 62,
+        "end_line": 26,
+        "line": 26
+      },
+      "display": "shapes.circle.scale",
+      "file": "shapes/circle.py",
+      "kind": "closure",
+      "lang": "python",
+      "name": "scale",
+      "namespace": "shapes.circle",
+      "span": {
+        "col": 1,
+        "end_col": 62,
+        "end_line": 26,
+        "line": 26
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 26,
+        "end_line": 5,
+        "line": 5
+      },
+      "display": "tests.test_area.test_square",
+      "file": "tests/test_area.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_square",
+      "namespace": "tests.test_area",
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 5,
+        "line": 4
+      },
+      "visibility": "public"
+    }
+  ]
+}

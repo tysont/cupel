@@ -1,2 +1,36 @@
 # Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
 # repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+file = "shapes/geometry.go"
+name = "shapes.NewCircle"
+
+[symbols.method]
+file = "shapes/geometry.go"
+name = "shapes.Circle.Area"
+
+[symbols.static-method]
+not-applicable = "Go methods always have a receiver; package-level functions play the role of static methods."
+
+[symbols.nested-function]
+not-applicable = "Go has no named nested functions; a function literal bound to a name is a closure."
+
+[symbols.closure]
+file = "shapes/geometry.go"
+name = "shapes.Circle.scaled.double"
+
+[symbols.public]
+file = "shapes/geometry.go"
+name = "shapes.NewCircle"
+
+[symbols.internal]
+file = "shapes/geometry.go"
+name = "shapes.Circle.scaled"
+
+[symbols.private]
+not-applicable = "Go has no file- or type-private visibility; unexported names are visible throughout the package."
+
+[symbols.file-namespace]
+file = "shapes/geometry.go"
+name = "shapes.NewCircle"
+expect = { namespace = "shapes" }

@@ -1,0 +1,277 @@
+{
+  "symbols": [
+    {
+      "body": {
+        "col": 37,
+        "end_col": 6,
+        "end_line": 16,
+        "line": 11
+      },
+      "display": "account::Account::new",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "new",
+      "namespace": "account::Account",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 16,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 6,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "account::Account::deposit",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "deposit",
+      "namespace": "account::Account",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 6,
+        "end_line": 28,
+        "line": 22
+      },
+      "display": "account::Account::statement",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "statement",
+      "namespace": "account::Account",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 28,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 10,
+        "end_line": 25,
+        "line": 23
+      },
+      "display": "account::Account::statement::line",
+      "file": "src/account.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "line",
+      "namespace": "account::Account::statement",
+      "span": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 25,
+        "line": 23
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 65,
+        "end_line": 26,
+        "line": 26
+      },
+      "display": "account::Account::statement::header",
+      "file": "src/account.rs",
+      "kind": "closure",
+      "lang": "rust",
+      "name": "header",
+      "namespace": "account::Account::statement",
+      "span": {
+        "col": 9,
+        "end_col": 66,
+        "end_line": 26,
+        "line": 26
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 62,
+        "end_col": 6,
+        "end_line": 34,
+        "line": 32
+      },
+      "display": "account::Account::fmt",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "fmt",
+      "namespace": "account::Account",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 34,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 6,
+        "end_line": 42,
+        "line": 40
+      },
+      "display": "account::Audited::is_clean",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "is_clean",
+      "namespace": "account::Audited",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 42,
+        "line": 40
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "balance",
+      "file": "src/lib.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "balance",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "display": "audit_limit",
+      "file": "src/lib.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "audit_limit",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 17
+      },
+      "display": "scale",
+      "file": "src/lib.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "scale",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 17
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "report::format::render",
+      "file": "src/report/format.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "render",
+      "namespace": "report::format",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "report::summary",
+      "file": "src/report/mod.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "summary",
+      "namespace": "report",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 27,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "display": "tests::ledger::balance_sums_entries",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "balance_sums_entries",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "visibility": "private"
+    }
+  ]
+}

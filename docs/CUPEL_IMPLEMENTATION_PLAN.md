@@ -439,7 +439,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.1 Language trait, spec, generic-producer scaffold, grammars, walk, cache, conformance harness
 
-**Status:** in progress (2026-10-10) · [ADR-023](adr/CUPEL_DECISION_023.md)
+**Status:** complete (2026-10-10, d78da11) · [ADR-023](adr/CUPEL_DECISION_023.md)
 
 - `Language` trait exactly as design §8.4.1; `LangId`, `LangFamily`; language registry by extension; `grammar(path)` selecting among a language's grammars (`javascript`: js/jsx; `typescript`: typescript/tsx); `register()` attaching producers to the `ProducerRegistry` from P0.2.
 - `LanguageSpec` loader: `queries/*.scm` embedded with `include_str!`, `tables.toml` parsed at startup once; a test compiles every `.scm` against its grammar and checks that every capture name a generic producer expects is present.
@@ -453,7 +453,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.2 Fact: `Symbols`
 
-**Status:** not started
+**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending)
 
 - `QuerySymbols` generic producer over `symbols.scm` → functions, methods, nested functions, closures assigned to names, with namespace (`module::Type::method`), visibility, span, body ref, `lang`. Language specifics expressed in queries/tables where possible: Go method receivers and package-level namespace; Rust `impl` blocks and trait impls; Python nested `def` and class methods; JS/TS arrow functions assigned to `const`, class methods, exported function expressions.
 

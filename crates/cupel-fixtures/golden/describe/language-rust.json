@@ -9,7 +9,18 @@
     "extensions": [
       ".rs"
     ],
-    "facts": [],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      }
+    ],
     "family": "rust",
     "id": "rust",
     "stability": "experimental",

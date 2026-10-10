@@ -9,7 +9,18 @@
     "extensions": [
       ".go"
     ],
-    "facts": [],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      }
+    ],
     "family": "go",
     "id": "go",
     "stability": "experimental",

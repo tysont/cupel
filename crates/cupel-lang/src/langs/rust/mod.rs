@@ -9,8 +9,15 @@ use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::spec::LanguageSpec;
 
-static SPEC: LazyLock<LanguageSpec> =
-    LazyLock::new(|| LanguageSpec::new("rust", &[], include_str!("tables.toml")));
+use crate::spec::QueryFile;
+
+static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
+    LanguageSpec::new(
+        "rust",
+        &[(QueryFile::Symbols, include_str!("queries/symbols.scm"))],
+        include_str!("tables.toml"),
+    )
+});
 
 #[derive(Clone)]
 pub struct Rust {

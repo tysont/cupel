@@ -1,0 +1,9 @@
+; TypeScript-only symbol patterns. They come before the shared ECMAScript patterns, so they win
+; for the definitions they match.
+
+; Methods with an accessibility modifier take their visibility from it.
+(class_body
+  (method_definition
+    (accessibility_modifier) @symbol.visibility
+    name: (_) @symbol.name
+    body: (statement_block) @symbol.body) @symbol.method)

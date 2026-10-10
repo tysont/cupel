@@ -24,6 +24,8 @@ pub struct Parsed {
     /// Relative to the repository root, `/`-separated.
     pub file: String,
     pub lang: LangId,
+    /// The grammar the file was parsed with; queries are compiled against it.
+    pub grammar: tree_sitter::Language,
     pub syntax: Arc<Syntax>,
 }
 
@@ -120,6 +122,7 @@ impl ParseCache {
             String::from_utf8(bytes).map_err(|_| problem("the file is not UTF-8".to_owned()))?;
         let grammar = language.grammar(Path::new(file));
         let key = (blake3::hash(source.as_bytes()), grammar.clone());
+        let parse_grammar = grammar.clone();
         let cell = Arc::clone(
             self.trees
                 .lock()
@@ -131,7 +134,7 @@ impl ParseCache {
         let syntax = cell.get_or_init(|| {
             parsed_here = true;
             let mut parser = Parser::new();
-            parser.set_language(&grammar).ok()?;
+            parser.set_language(&parse_grammar).ok()?;
             let tree = parser.parse(&source, None)?;
             Some(Arc::new(Syntax { source, tree }))
         });
@@ -147,6 +150,7 @@ impl ParseCache {
         Ok(Parsed {
             file: file.to_owned(),
             lang: language.id(),
+            grammar,
             syntax,
         })
     }

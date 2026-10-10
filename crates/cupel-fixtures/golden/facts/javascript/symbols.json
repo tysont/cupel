@@ -1,0 +1,172 @@
+{
+  "symbols": [
+    {
+      "body": {
+        "col": 27,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "math.add",
+      "file": "src/math.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "add",
+      "namespace": "math",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 23,
+        "end_col": 4,
+        "end_line": 4,
+        "line": 2
+      },
+      "display": "shapes.geometry.Circle.constructor",
+      "file": "src/shapes/geometry.js",
+      "kind": "method",
+      "lang": "javascript",
+      "name": "constructor",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 4,
+        "line": 2
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 10,
+        "end_col": 4,
+        "end_line": 8,
+        "line": 6
+      },
+      "display": "shapes.geometry.Circle.area",
+      "file": "src/shapes/geometry.js",
+      "kind": "method",
+      "lang": "javascript",
+      "name": "area",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 8,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 17,
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
+      },
+      "display": "shapes.geometry.Circle.unit",
+      "file": "src/shapes/geometry.js",
+      "kind": "method",
+      "lang": "javascript",
+      "name": "unit",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 14,
+        "end_col": 4,
+        "end_line": 16,
+        "line": 14
+      },
+      "display": "shapes.geometry.Circle.#isValid",
+      "file": "src/shapes/geometry.js",
+      "kind": "method",
+      "lang": "javascript",
+      "name": "#isValid",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 16,
+        "line": 14
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 42,
+        "end_col": 76,
+        "end_line": 19,
+        "line": 19
+      },
+      "display": "shapes.geometry.scale",
+      "file": "src/shapes/geometry.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "scale",
+      "namespace": "shapes.geometry",
+      "span": {
+        "col": 14,
+        "end_col": 76,
+        "end_line": 19,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 28,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 21
+      },
+      "display": "shapes.geometry.perimeter",
+      "file": "src/shapes/geometry.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "perimeter",
+      "namespace": "shapes.geometry",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 21
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 25,
+        "end_col": 4,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "shapes.geometry.perimeter.twice",
+      "file": "src/shapes/geometry.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "twice",
+      "namespace": "shapes.geometry.perimeter",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    }
+  ]
+}
