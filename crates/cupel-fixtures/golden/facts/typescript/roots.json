@@ -1,0 +1,348 @@
+{
+  "roots": [
+    {
+      "reason": "entry-point",
+      "symbol": {
+        "col": 1,
+        "file": "bin/cli.ts",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "packages/shapes/src/index.ts",
+        "line": 1
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 28,
+        "file": "src/__tests__/pricing.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 38,
+        "file": "src/__tests__/pricing.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 14
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 23
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 34
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/inline.ts",
+        "line": 1
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 17,
+        "file": "src/inline.ts",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/ledger.ts",
+        "line": 13
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 10,
+        "file": "src/legacy.ts",
+        "line": 2
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 26,
+        "file": "src/math.test.ts",
+        "line": 7
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 37,
+        "file": "src/math.test.ts",
+        "line": 17
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 33,
+        "file": "src/math.test.ts",
+        "line": 21
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 30,
+        "file": "src/math.test.ts",
+        "line": 25
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 35,
+        "file": "src/math.test.ts",
+        "line": 29
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 40,
+        "file": "src/math.test.ts",
+        "line": 33
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 30,
+        "file": "src/math.test.ts",
+        "line": 39
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 30,
+        "file": "src/math.test.ts",
+        "line": 43
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/math.ts",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/math.ts",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 16,
+        "file": "src/plugin.ts",
+        "line": 5
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 16,
+        "file": "src/plugin.ts",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.ts",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.ts",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 14
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 18
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 14,
+        "file": "src/shapes/geometry.ts",
+        "line": 29
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 16
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 28
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 33
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 41
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 23,
+        "file": "src/widget.test.tsx",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/widget.tsx",
+        "line": 1
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 39,
+        "file": "test/decide.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "test/decide.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 37,
+        "file": "test/decide.test.ts",
+        "line": 13
+      }
+    }
+  ]
+}

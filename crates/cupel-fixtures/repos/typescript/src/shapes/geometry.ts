@@ -1,5 +1,15 @@
-export class Circle {
-  constructor(readonly radius: number) {}
+export abstract class Shape {
+  abstract area(): number;
+
+  describe(): string {
+    return `area ${this.area()}`;
+  }
+}
+
+export class Circle extends Shape {
+  constructor(readonly radius: number) {
+    super();
+  }
 
   area(): number {
     return Math.PI * this.radius * this.radius;
@@ -12,6 +22,8 @@ export class Circle {
   private isValid(): boolean {
     return this.radius > 0;
   }
+
+  #cache(): void {}
 }
 
 export const scale = (circle: Circle, factor: number): Circle =>

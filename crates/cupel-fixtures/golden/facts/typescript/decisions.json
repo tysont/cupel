@@ -1,0 +1,559 @@
+{
+  "symbols": [
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "bin/cli.ts",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "packages/shapes/src/index.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 28,
+        "file": "src/__tests__/pricing.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 38,
+        "file": "src/__tests__/pricing.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "ternary",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 2
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 14
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        },
+        {
+          "cognitive": 0,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 23
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "catch",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/inline.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 17,
+        "file": "src/inline.ts",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "ternary",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/ledger.ts",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 10,
+        "file": "src/legacy.ts",
+        "line": 2
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 26,
+        "file": "src/math.test.ts",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 37,
+        "file": "src/math.test.ts",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 33,
+        "file": "src/math.test.ts",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 30,
+        "file": "src/math.test.ts",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 35,
+        "file": "src/math.test.ts",
+        "line": 29
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 40,
+        "file": "src/math.test.ts",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 30,
+        "file": "src/math.test.ts",
+        "line": 39
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 30,
+        "file": "src/math.test.ts",
+        "line": 43
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/math.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/math.ts",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 16,
+        "file": "src/plugin.ts",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.ts",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "ternary",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.ts",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 14
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 26
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 14,
+        "file": "src/shapes/geometry.ts",
+        "line": 29
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/shapes/geometry.ts",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 41
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 23,
+        "file": "src/widget.test.tsx",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "ternary",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/widget.tsx",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 39,
+        "file": "test/decide.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "test/decide.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 37,
+        "file": "test/decide.test.ts",
+        "line": 13
+      }
+    }
+  ]
+}

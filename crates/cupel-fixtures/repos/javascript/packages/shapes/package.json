@@ -1,0 +1,11 @@
+{
+  "name": "@ledger/shapes",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./lib/index.cjs"
+    },
+    "./square": "./lib/square.js"
+  }
+}

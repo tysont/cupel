@@ -1,0 +1,11 @@
+{
+  "name": "ledger",
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "imports": {
+    "#money/*": "./src/money/*.js"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}

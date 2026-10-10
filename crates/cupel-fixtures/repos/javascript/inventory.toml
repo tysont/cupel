@@ -26,7 +26,7 @@ file = "src/math.js"
 name = "math.add"
 
 [symbols.internal]
-not-applicable = "JavaScript modules have no package-level visibility: a name is exported or private to its module."
+not-applicable = "JavaScript has no package-level visibility: a top-level name is exported (public) or private to its module, and `#name` class members are private."
 
 [symbols.private]
 file = "src/shapes/geometry.js"
@@ -36,3 +36,262 @@ name = "shapes.geometry.Circle.#isValid"
 file = "src/shapes/geometry.js"
 name = "shapes.geometry.perimeter"
 expect = { namespace = "shapes.geometry" }
+
+[decisions.if]
+file = "src/decide.js"
+name = "decide.classify"
+
+[decisions.else-if]
+file = "src/decide.js"
+name = "decide.classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "src/decide.js"
+name = "decide.firstOverdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "src/decide.js"
+name = "decide.firstOverdraft"
+
+[decisions.boolean-op]
+file = "src/decide.js"
+name = "decide.classify"
+
+[decisions.early-return]
+file = "src/decide.js"
+name = "decide.parseCents"
+
+[decisions.case]
+file = "src/decide.js"
+name = "decide.label"
+
+[decisions.ternary]
+file = "src/decide.js"
+name = "decide.classify"
+
+[decisions.catch]
+file = "src/decide.js"
+name = "decide.parseCents"
+
+[norm-tree.rename]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.sumAfterCharge"
+
+[norm-tree.literal]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalFloor"
+
+[norm-tree.layout]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalLaidOut"
+
+[norm-tree.operator]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalPlus"
+
+[norm-tree.branch]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalCapped"
+
+[norm-tree.call]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalProduct"
+
+[mutation-sites.relational]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "!==", to = ["==="] }
+
+[mutation-sites.arith-add-sub]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "+=", to = ["-="] }
+
+[mutation-sites.arith-mul-div]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "&&", to = ["||"] }
+
+[mutation-sites.boolean-literal]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "false", to = ["true"] }
+
+[mutation-sites.zero-one]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "logTotal(total);", to = [""] }
+
+[mutation-sites.return-value]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "price - cut", to = ["undefined"] }
+
+[mutation-sites.constant]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "src/decide.js"
+name = "decide.classify"
+expect = { from = "0", to = ["0 + 1", "0 - 1"] }
+
+[mutation-sites.negation]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "member && cut !== 0", to = ["!(member && cut !== 0)"] }
+
+[test-frames.case]
+file = "test/math.test.js"
+name = "adds two numbers"
+
+[test-frames.assertion-equality]
+file = "test/math.test.js"
+name = "adds two numbers"
+
+[test-frames.assertion-truthiness]
+file = "test/math.test.js"
+name = "is truthy for non-zero sums"
+
+[test-frames.assertion-not-null]
+file = "test/math.test.js"
+name = "returns a defined value"
+
+[test-frames.assertion-throws]
+file = "test/math.test.js"
+name = "rejects empty amounts"
+
+[test-frames.assertion-snapshot]
+file = "test/math.test.js"
+name = "matches the range snapshot"
+
+[test-frames.weak-assertion]
+file = "test/math.test.js"
+name = "does not return zero"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "test/math.test.js"
+name = "can be called without checking"
+
+[test-frames.skip]
+file = "test/decide.test.js"
+name = "waits for the ledger server"
+expect = { skip = { reason = "needs a ledger server" } }
+
+[test-frames.mock]
+file = "test/math.test.js"
+name = "reports what it parsed"
+expect = { target = "vi.fn" }
+
+[test-frames.setup]
+file = "test/math.test.js"
+
+[test-frames.framework]
+file = "test/math.test.js"
+expect = { framework = "vitest" }
+
+[test-conventions.separate-test-file]
+file = "src/math.js"
+name = "test/math.test.js"
+
+[test-conventions.inline-tests]
+file = "src/inline.js"
+name = "src/inline.js"
+
+[module-graph.relative]
+file = "src/ledger.js"
+name = "./math.js"
+expect = { target = { path = "src/math.js" } }
+
+[module-graph.absolute]
+file = "src/ledger.js"
+name = "#money/cents"
+expect = { target = { path = "src/money/cents.js" } }
+
+[module-graph.workspace-member]
+file = "src/ledger.js"
+name = "@ledger/shapes"
+expect = { target = { path = "packages/shapes/lib/index.js" } }
+
+[module-graph.external]
+file = "src/ledger.js"
+name = "lodash/fp"
+expect = { target = { package = "lodash" } }
+
+[module-graph.standard-library]
+file = "src/ledger.js"
+name = "node:fs/promises"
+expect = { target = { package = "node:fs" } }
+
+[module-graph.unresolved]
+file = "src/ledger.js"
+name = "./generated.js"
+
+[api-surface.function]
+file = "src/math.js"
+name = "math.add"
+expect = { signature = "(_, _)" }
+
+[api-surface.method]
+file = "src/shapes/geometry.js"
+name = "shapes.geometry.Circle.area"
+
+[api-surface.type]
+file = "src/shapes/geometry.js"
+name = "shapes.geometry.Circle"
+
+[api-surface.interface]
+not-applicable = "JavaScript has no interfaces or protocols; a class is its only type declaration."
+
+[api-surface.constant]
+file = "src/index.js"
+name = "MAX_ENTRIES"
+
+[api-surface.variable]
+file = "src/index.js"
+name = "currency"
+
+[api-surface.module]
+file = "src/index.js"
+name = "geometry"
+
+[roots.entry-point]
+file = "bin/cli.js"
+name = "bin.cli.main"
+
+[roots.export]
+file = "src/math.js"
+name = "math.add"
+
+[roots.test]
+file = "test/math.test.js"
+name = "test.math.add.adds two numbers"
+
+[roots.hook]
+file = "src/plugin.js"
+name = "plugin.default"

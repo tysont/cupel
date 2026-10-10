@@ -15,8 +15,9 @@ const GRAMMAR_PATHS: [(&str, &[&str]); 5] = [
 ];
 
 /// Query directories on disk and the languages whose specs embed them.
-const QUERY_DIRS: [(&str, &[&str]); 5] = [
+const QUERY_DIRS: [(&str, &[&str]); 6] = [
     ("ecma/queries", &["javascript", "typescript"]),
+    ("ecma/queries/javascript", &["javascript"]),
     ("ecma/queries/typescript", &["typescript"]),
     ("rust/queries", &["rust"]),
     ("go/queries", &["go"]),

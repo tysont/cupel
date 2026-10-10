@@ -1,0 +1,40 @@
+{
+  "pairs": [
+    {
+      "source": "src/decide.ts",
+      "tests": [
+        "test/decide.test.ts"
+      ]
+    },
+    {
+      "source": "src/inline.ts",
+      "tests": [
+        "src/inline.ts"
+      ]
+    },
+    {
+      "source": "src/math.ts",
+      "tests": [
+        "src/math.test.ts"
+      ]
+    },
+    {
+      "source": "src/pricing.ts",
+      "tests": [
+        "src/__tests__/pricing.test.ts"
+      ]
+    },
+    {
+      "source": "src/widget.tsx",
+      "tests": [
+        "src/widget.test.tsx"
+      ]
+    }
+  ],
+  "test_globs": [
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/__tests__/**",
+    "**/test/**"
+  ]
+}

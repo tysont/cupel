@@ -1,0 +1,243 @@
+{
+  "roots": [
+    {
+      "edges": [
+        {
+          "from": "bin/cli.js",
+          "line": 2,
+          "relative": true,
+          "specifier": "../src/math.js",
+          "target": {
+            "kind": "file",
+            "path": "src/math.js"
+          }
+        },
+        {
+          "from": "src/index.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "./shapes/geometry.js",
+          "target": {
+            "kind": "file",
+            "path": "src/shapes/geometry.js"
+          }
+        },
+        {
+          "from": "src/ledger.js",
+          "line": 1,
+          "relative": false,
+          "specifier": "node:fs/promises",
+          "target": {
+            "kind": "external",
+            "package": "node:fs"
+          }
+        },
+        {
+          "from": "src/ledger.js",
+          "line": 2,
+          "relative": false,
+          "specifier": "path",
+          "target": {
+            "kind": "external",
+            "package": "node:path"
+          }
+        },
+        {
+          "from": "src/ledger.js",
+          "line": 3,
+          "relative": false,
+          "specifier": "lodash/fp",
+          "target": {
+            "kind": "external",
+            "package": "lodash"
+          }
+        },
+        {
+          "from": "src/ledger.js",
+          "line": 4,
+          "relative": true,
+          "specifier": "./math.js",
+          "target": {
+            "kind": "file",
+            "path": "src/math.js"
+          }
+        },
+        {
+          "from": "src/ledger.js",
+          "line": 5,
+          "relative": false,
+          "specifier": "#money/cents",
+          "target": {
+            "kind": "file",
+            "path": "src/money/cents.js"
+          }
+        },
+        {
+          "from": "src/ledger.js",
+          "line": 6,
+          "relative": false,
+          "specifier": "@ledger/shapes",
+          "target": {
+            "kind": "file",
+            "path": "packages/shapes/lib/index.js"
+          }
+        },
+        {
+          "from": "src/ledger.js",
+          "line": 7,
+          "relative": false,
+          "specifier": "@ledger/shapes/square",
+          "target": {
+            "kind": "file",
+            "path": "packages/shapes/lib/square.js"
+          }
+        },
+        {
+          "from": "src/ledger.js",
+          "line": 8,
+          "relative": true,
+          "specifier": "./generated.js",
+          "target": {
+            "kind": "unresolved"
+          }
+        },
+        {
+          "from": "src/ledger.js",
+          "line": 12,
+          "relative": true,
+          "specifier": "./report.cjs",
+          "target": {
+            "kind": "file",
+            "path": "src/report.cjs"
+          }
+        },
+        {
+          "from": "src/report.cjs",
+          "line": 1,
+          "relative": true,
+          "specifier": "./format.cjs",
+          "target": {
+            "kind": "file",
+            "path": "src/format.cjs"
+          }
+        },
+        {
+          "from": "test/decide.test.js",
+          "line": 1,
+          "relative": false,
+          "specifier": "node:assert/strict",
+          "target": {
+            "kind": "external",
+            "package": "node:assert"
+          }
+        },
+        {
+          "from": "test/decide.test.js",
+          "line": 2,
+          "relative": false,
+          "specifier": "node:test",
+          "target": {
+            "kind": "external",
+            "package": "node:test"
+          }
+        },
+        {
+          "from": "test/decide.test.js",
+          "line": 3,
+          "relative": true,
+          "specifier": "../src/decide.js",
+          "target": {
+            "kind": "file",
+            "path": "src/decide.js"
+          }
+        },
+        {
+          "from": "test/format.spec.js",
+          "line": 1,
+          "relative": false,
+          "specifier": "chai",
+          "target": {
+            "kind": "external",
+            "package": "chai"
+          }
+        },
+        {
+          "from": "test/format.spec.js",
+          "line": 2,
+          "relative": false,
+          "specifier": "sinon",
+          "target": {
+            "kind": "external",
+            "package": "sinon"
+          }
+        },
+        {
+          "from": "test/format.spec.js",
+          "line": 3,
+          "relative": true,
+          "specifier": "../src/format.cjs",
+          "target": {
+            "kind": "file",
+            "path": "src/format.cjs"
+          }
+        },
+        {
+          "from": "test/math.test.js",
+          "line": 1,
+          "relative": false,
+          "specifier": "vitest",
+          "target": {
+            "kind": "external",
+            "package": "vitest"
+          }
+        },
+        {
+          "from": "test/math.test.js",
+          "line": 2,
+          "relative": true,
+          "specifier": "../src/math.js",
+          "target": {
+            "kind": "file",
+            "path": "src/math.js"
+          }
+        },
+        {
+          "from": "test/math.test.js",
+          "line": 3,
+          "relative": true,
+          "specifier": "../src/decide.js",
+          "target": {
+            "kind": "file",
+            "path": "src/decide.js"
+          }
+        },
+        {
+          "from": "test/report.test.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "../src/report.cjs",
+          "target": {
+            "kind": "file",
+            "path": "src/report.cjs"
+          }
+        }
+      ],
+      "root": "."
+    },
+    {
+      "edges": [
+        {
+          "from": "packages/shapes/lib/index.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "./square.js",
+          "target": {
+            "kind": "file",
+            "path": "packages/shapes/lib/square.js"
+          }
+        }
+      ],
+      "root": "packages/shapes"
+    }
+  ]
+}

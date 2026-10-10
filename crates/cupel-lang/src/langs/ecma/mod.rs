@@ -1,10 +1,14 @@
 // ABOUTME: JavaScript and TypeScript: one implementation with two language IDs in the `ecma` family,
-// ABOUTME: sharing queries and tables; TypeScript appends its own query files and parses `.tsx` as TSX.
+// ABOUTME: sharing queries and tables; each prepends its own query files, and `.tsx` parses as TSX.
+mod resolve;
+
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
+use cupel_core::syntax::ModuleGraph;
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
+use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::spec::{LanguageSpec, QueryFile};
@@ -12,17 +16,38 @@ use crate::spec::{LanguageSpec, QueryFile};
 const TABLES: &str = include_str!("tables.toml");
 
 /// Queries shared by both languages.
-const SHARED: &[(QueryFile, &str)] = &[(QueryFile::Symbols, include_str!("queries/symbols.scm"))];
+const SHARED: &[(QueryFile, &str)] = &[
+    (QueryFile::Symbols, include_str!("queries/symbols.scm")),
+    (QueryFile::Decisions, include_str!("queries/decisions.scm")),
+    (QueryFile::Mutations, include_str!("queries/mutations.scm")),
+    (QueryFile::Tests, include_str!("queries/tests.scm")),
+    (QueryFile::Imports, include_str!("queries/imports.scm")),
+    (QueryFile::Api, include_str!("queries/api.scm")),
+];
+
+/// JavaScript-only queries: patterns the TypeScript grammars reject, such as a bare identifier
+/// as a parameter. They are placed before the shared queries of the same file.
+const JAVASCRIPT_ONLY: &[(QueryFile, &str)] =
+    &[(QueryFile::Api, include_str!("queries/javascript/api.scm"))];
 
 /// TypeScript-only queries. They are placed before the shared queries of the same file, so
 /// their patterns win where both match one definition.
-const TYPESCRIPT_ONLY: &[(QueryFile, &str)] = &[(
-    QueryFile::Symbols,
-    include_str!("queries/typescript/symbols.scm"),
-)];
+const TYPESCRIPT_ONLY: &[(QueryFile, &str)] = &[
+    (
+        QueryFile::Symbols,
+        include_str!("queries/typescript/symbols.scm"),
+    ),
+    (
+        QueryFile::Imports,
+        include_str!("queries/typescript/imports.scm"),
+    ),
+    (QueryFile::Api, include_str!("queries/typescript/api.scm")),
+];
 
-static JAVASCRIPT: LazyLock<LanguageSpec> =
-    LazyLock::new(|| LanguageSpec::new("javascript", SHARED, TABLES));
+static JAVASCRIPT: LazyLock<LanguageSpec> = LazyLock::new(|| {
+    let queries: Vec<(QueryFile, &str)> = JAVASCRIPT_ONLY.iter().chain(SHARED).copied().collect();
+    LanguageSpec::new("javascript", &queries, TABLES)
+});
 
 static TYPESCRIPT: LazyLock<LanguageSpec> = LazyLock::new(|| {
     let queries: Vec<(QueryFile, &str)> = TYPESCRIPT_ONLY.iter().chain(SHARED).copied().collect();
@@ -102,5 +127,15 @@ impl Language for Ecma {
     fn register(&self, reg: &mut ProducerRegistry) {
         let language: Arc<dyn Language> = Arc::new(self.clone());
         crate::generic::register(&language, &self.cache, reg);
+        // Module resolution needs package manifests and tsconfig, which queries cannot see.
+        let resolve = match self.dialect {
+            Dialect::JavaScript => resolve::javascript,
+            Dialect::TypeScript => resolve::typescript,
+        };
+        reg.register::<ModuleGraph, _>(ImportGraph::new(
+            language,
+            Arc::clone(&self.cache),
+            resolve,
+        ));
     }
 }

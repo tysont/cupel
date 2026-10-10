@@ -2,6 +2,216 @@
   "symbols": [
     {
       "body": {
+        "col": 21,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "display": "bin.cli.main",
+      "file": "bin/cli.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "main",
+      "namespace": "bin.cli",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 30,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "packages.shapes.lib.square.square",
+      "file": "packages/shapes/lib/square.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "square",
+      "namespace": "packages.shapes.lib.square",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 42,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 1
+      },
+      "display": "decide.classify",
+      "file": "src/decide.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "classify",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 2,
+        "end_line": 17,
+        "line": 10
+      },
+      "display": "decide.firstOverdraft",
+      "file": "src/decide.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "firstOverdraft",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 17,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 19
+      },
+      "display": "decide.label",
+      "file": "src/decide.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "label",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 30
+      },
+      "display": "decide.parseCents",
+      "file": "src/decide.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "parseCents",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 30
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "format.money",
+      "file": "src/format.cjs",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "money",
+      "namespace": "format",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 27,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "inline.double",
+      "file": "src/inline.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "double",
+      "namespace": "inline",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 23,
+        "end_col": 4,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "inline.doubles",
+      "file": "src/inline.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "doubles",
+      "namespace": "inline",
+      "span": {
+        "col": 17,
+        "end_col": 4,
+        "end_line": 10,
+        "line": 8
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 10
+      },
+      "display": "ledger.load",
+      "file": "src/ledger.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "load",
+      "namespace": "ledger",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 27,
         "end_col": 2,
         "end_line": 3,
@@ -18,6 +228,153 @@
         "end_col": 2,
         "end_line": 3,
         "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "display": "math.range",
+      "file": "src/math.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "range",
+      "namespace": "math",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "money.cents.toCents",
+      "file": "src/money/cents.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "toCents",
+      "namespace": "money.cents",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "plugin.default",
+      "file": "src/plugin.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "default",
+      "namespace": "plugin",
+      "span": {
+        "col": 16,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "display": "pricing.discounted",
+      "file": "src/pricing.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "discounted",
+      "namespace": "pricing",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "display": "pricing.tally",
+      "file": "src/pricing.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "tally",
+      "namespace": "pricing",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "pricing.logTotal",
+      "file": "src/pricing.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "logTotal",
+      "namespace": "pricing",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 27,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "report.summary",
+      "file": "src/report.cjs",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "summary",
+      "namespace": "report",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
       },
       "visibility": "public"
     },
@@ -165,6 +522,531 @@
         "end_col": 4,
         "end_line": 24,
         "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 1
+      },
+      "display": "twins.netTotal",
+      "file": "src/twins.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "netTotal",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      },
+      "display": "twins.sumAfterCharge",
+      "file": "src/twins.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "sumAfterCharge",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 11
+      },
+      "display": "twins.netTotalFloor",
+      "file": "src/twins.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "netTotalFloor",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 16
+      },
+      "display": "twins.netTotalLaidOut",
+      "file": "src/twins.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "netTotalLaidOut",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 25
+      },
+      "display": "twins.netTotalPlus",
+      "file": "src/twins.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "netTotalPlus",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 30
+      },
+      "display": "twins.netTotalCapped",
+      "file": "src/twins.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "netTotalCapped",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 30
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 41,
+        "line": 38
+      },
+      "display": "twins.netTotalProduct",
+      "file": "src/twins.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "netTotalProduct",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 41,
+        "line": 38
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "test.decide.classifies overdrawn balances",
+      "file": "test/decide.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "classifies overdrawn balances",
+      "namespace": "test.decide",
+      "span": {
+        "col": 39,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 51,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "test.decide.does not call an empty balance rich",
+      "file": "test/decide.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "does not call an empty balance rich",
+      "namespace": "test.decide",
+      "span": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "display": "test.decide.labels through a stub",
+      "file": "test/decide.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "labels through a stub",
+      "namespace": "test.decide",
+      "span": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 18
+      },
+      "display": "test.decide.waits for the ledger server",
+      "file": "test/decide.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "waits for the ledger server",
+      "namespace": "test.decide",
+      "span": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 18
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 4,
+        "end_line": 8,
+        "line": 6
+      },
+      "display": "test.format.money.shows two decimals",
+      "file": "test/format.spec.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "shows two decimals",
+      "namespace": "test.format.money",
+      "span": {
+        "col": 28,
+        "end_col": 4,
+        "end_line": 8,
+        "line": 6
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 4,
+        "end_line": 13,
+        "line": 10
+      },
+      "display": "test.format.money.is not called by accident",
+      "file": "test/format.spec.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "is not called by accident",
+      "namespace": "test.format.money",
+      "span": {
+        "col": 35,
+        "end_col": 4,
+        "end_line": 13,
+        "line": 10
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 4,
+        "end_line": 16,
+        "line": 14
+      },
+      "display": "test.math.add.adds two numbers",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "adds two numbers",
+      "namespace": "test.math.add",
+      "span": {
+        "col": 26,
+        "end_col": 4,
+        "end_line": 16,
+        "line": 14
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 4,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "test.math.add.is truthy for non-zero sums",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "is truthy for non-zero sums",
+      "namespace": "test.math.add",
+      "span": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 4,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "test.math.add.returns a defined value",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "returns a defined value",
+      "namespace": "test.math.add",
+      "span": {
+        "col": 33,
+        "end_col": 4,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 4,
+        "end_line": 28,
+        "line": 26
+      },
+      "display": "test.math.add.does not return zero",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "does not return zero",
+      "namespace": "test.math.add",
+      "span": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 28,
+        "line": 26
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 4,
+        "end_line": 32,
+        "line": 30
+      },
+      "display": "test.math.add.handles huge numbers",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "handles huge numbers",
+      "namespace": "test.math.add",
+      "span": {
+        "col": 35,
+        "end_col": 4,
+        "end_line": 32,
+        "line": 30
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 4,
+        "end_line": 36,
+        "line": 34
+      },
+      "display": "test.math.add.can be called without checking",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "can be called without checking",
+      "namespace": "test.math.add",
+      "span": {
+        "col": 40,
+        "end_col": 4,
+        "end_line": 36,
+        "line": 34
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 42,
+        "line": 40
+      },
+      "display": "test.math.parseCents.rejects empty amounts",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "rejects empty amounts",
+      "namespace": "test.math.parseCents",
+      "span": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 42,
+        "line": 40
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 4,
+        "end_line": 46,
+        "line": 44
+      },
+      "display": "test.math.parseCents.throws on nothing",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "throws on nothing",
+      "namespace": "test.math.parseCents",
+      "span": {
+        "col": 27,
+        "end_col": 4,
+        "end_line": 46,
+        "line": 44
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 42,
+        "end_col": 4,
+        "end_line": 50,
+        "line": 48
+      },
+      "display": "test.math.parseCents.matches the range snapshot",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "matches the range snapshot",
+      "namespace": "test.math.parseCents",
+      "span": {
+        "col": 36,
+        "end_col": 4,
+        "end_line": 50,
+        "line": 48
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 4,
+        "end_line": 56,
+        "line": 52
+      },
+      "display": "test.math.parseCents.reports what it parsed",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "reports what it parsed",
+      "namespace": "test.math.parseCents",
+      "span": {
+        "col": 32,
+        "end_col": 4,
+        "end_line": 56,
+        "line": 52
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "test.report.joins one line per entry",
+      "file": "test/report.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "joins one line per entry",
+      "namespace": "test.report",
+      "span": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "test.report.formats currency symbols",
+      "file": "test/report.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "formats currency symbols",
+      "namespace": "test.report",
+      "span": {
+        "col": 35,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
       },
       "visibility": "private"
     }

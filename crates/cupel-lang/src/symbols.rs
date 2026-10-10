@@ -16,6 +16,9 @@
 //!   node of the match) fixes the visibility outright, such as for trait-impl methods.
 //! - `@scope.name` (optional) inside a symbol's match adds one innermost namespace segment that
 //!   is not lexical, such as a Go method's receiver type.
+//! - `@export.name` (in a pattern of its own) on a node whose text names a symbol the file
+//!   exports apart from its definition (`export { a }`, `module.exports = { a }`). A top-level
+//!   symbol so named whose match fixes no visibility and captures no modifier is public.
 //!
 //! When several patterns match the same definition node, **the earliest pattern in the file
 //! wins**, so specific patterns (methods in trait impls) come before general ones (every
@@ -26,7 +29,7 @@
 //! scope and every other symbol that encloses it, outermost first, joined by
 //! `[namespace].separator`; nested functions and closures are therefore namespaced by the
 //! function they are defined in.
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 
 use cupel_core::syntax::{SymbolDef, SymbolKind, Symbols, Visibility};
 use tree_sitter::Node;
@@ -102,6 +105,12 @@ pub fn definitions<'t>(parsed: &'t Parsed, language: &dyn Language) -> Vec<Defin
         })
         .collect();
     let rules = &spec.tables().visibility;
+    let exported: HashSet<&str> = found
+        .iter()
+        .flat_map(|m| m.nodes(capture::EXPORT_NAME).collect::<Vec<_>>())
+        .map(|node| parsed.text(node))
+        .collect();
+    let file_namespace = namespaces.of(parsed.root(), &[], None);
     picked
         .into_iter()
         .filter_map(|(m, kind, node)| {
@@ -109,11 +118,15 @@ pub fn definitions<'t>(parsed: &'t Parsed, language: &dyn Language) -> Vec<Defin
             let name = parsed.text(name_node);
             let extra = m.node(capture::SCOPE_NAME).map(|n| parsed.text(n));
             let namespace = namespaces.of(node, &enclosing, extra);
+            let modifier = m.node(capture::SYMBOL_VISIBILITY).map(|n| parsed.text(n));
+            let exported_by_name =
+                modifier.is_none() && namespace == file_namespace && exported.contains(name);
             let visibility = fixed_visibility(m).unwrap_or_else(|| {
-                rules.resolve(
-                    name,
-                    m.node(capture::SYMBOL_VISIBILITY).map(|n| parsed.text(n)),
-                )
+                if exported_by_name {
+                    Visibility::Public
+                } else {
+                    rules.resolve(name, modifier)
+                }
             });
             let body = m.node(capture::SYMBOL_BODY);
             Some(Definition {
