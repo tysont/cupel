@@ -302,12 +302,14 @@ ADRs: [011](adr/CUPEL_DECISION_011.md) (language identity in core), [012](adr/CU
 
 #### P0.4 Configuration
 
-**Status:** in progress (2026-10-10)
+**Status:** complete (2026-10-10, 411e22d)
 
 - `cupel.toml` model per §6.7 with `serde` + `toml`; unknown keys at any level are usage errors (exit 2) listing valid keys.
 - Discovery: `--config PATH`, else nearest `cupel.toml` walking up from `--cwd` (default: current dir); `--cwd` establishes repo root — **never** rely on process cwd elsewhere.
 - Precedence: flags > `CUPEL_*` env > `--profile` > `cupel.toml` > defaults. Effective config and its sources echoed under `run.config`.
 - Gate rule key validation (`<check-id>.<metric>` or `<check-id>`; operators `>= > <= < == none no-breaking`) — parsing only; evaluation is P2.9. Unknown check IDs error at parse time once the check registry exists (P2.1); until then, validate syntax only.
+
+ADRs: [017](adr/CUPEL_DECISION_017.md) (layered settings, gate-key grammar, sources, override merge, registry validation).
 
 *Tests first:* precedence matrix as a table-driven unit test; unknown-key error message snapshot; walking-up discovery with `tempfile`; profile merge.
 
@@ -373,6 +375,13 @@ ADRs: [011](adr/CUPEL_DECISION_011.md) (language identity in core), [012](adr/CU
 - **P0.2 — what the `FindingId` "ignores line numbers" test is.** The API has no parameter a line can enter through (`compute(check, kind, &SymbolHash, Option<&SiteHash>)`); a `compile_fail` doctest on `FindingId::compute` proves passing a `u32` line does not compile, and a proptest checks IDs are deterministic and well-formed over arbitrary structural inputs. Known-answer vectors were computed with the Python `blake3` package, independently of the Rust crate.
 - **P0.2 — schemas.** Every property in every published schema is `required` (absent values are `null`, ADR-013), enforced by a schema transform and a test. Fourteen `insta` snapshots: `run`, `finding`, `events`, `plugin`, and one per syntactic fact kind. `CostClass` doubles as the depth type (`run.depth`); there is no separate `Depth` type.
 - **P0.2 — tests.** 79 in `cupel-core`: `ids` 12 + 1 doctest, `contract` 20, `syntax_facts` 16, `extension` 22, `schemas` 8.
+- **P0.4 — API for the CLI.** Fill `cupel_core::config::ConfigRequest { root, config_path, profile, flags: Settings, env }` (`root` is `--cwd`, absolute; `env` is the process environment — core reads neither cwd nor env itself) and call `Config::load(&request)`. The result has `effective: Effective { depth, format, budget, profile }`, the parsed `file: ConfigFile`, `path`, and `sources`; `Config::echo()` is the envelope's `run.config`. Every failure is `Error::Config(ConfigError::…)`, a usage error (exit 2). `Effective.format` is `None` when nothing set it: the CLI auto-detects from the terminal. `Format` (json/jsonl/text/sarif) and `TimeLimit` (`250ms`/`20s`/`5m`/`1h`) live in `cupel_core::config`; P0.3 should use them rather than CLI-local copies, and P0.7 should parse `--timeout` with `TimeLimit`.
+- **P0.4 — what is layered.** Only `depth`, `format`, and `budget` are settings that flags, env, a profile, and the file can all set; env vars are `CUPEL_DEPTH`/`CUPEL_FORMAT`/`CUPEL_BUDGET` (defined once on `Setting`), and `CUPEL_PROFILE` selects a profile when `--profile` is absent. `sources` lists every contributing layer in precedence order. See ADR-017.
+- **P0.4 — slices.** `Config::check_config(check, lang)` is what `CheckCtx.config` is filled from (per-language override deep-merged; the reserved `lang` key never reaches a check). `Config::lang_config(lang)` fills the new `ProduceCtx.config` field, so producers see `[lang.<id>]` only.
+- **P0.4 — gate rules.** `[gate.changed]`/`[gate.tree]` parse into ordered `GateRuleSpec { key: GateKey { check, metric }, condition }` (toml's `preserve_order` feature keeps written order). Comparisons need a metric; `none`/`no-breaking` need a bare check ID. A malformed rule's error quotes the rule and points at its section header, not its line. Evaluation is P2.9.
+- **P0.4 — registration point.** Parsing validates ID syntax only (check IDs are exactly `<group>.<name>`). `Config::validate_registered(&CheckRegistry, &[LangId])` rejects unknown checks, gate metrics not in the check's `Manifest.metrics`, and unknown languages; the CLI must call it once P2.1 (checks) and P1.1 (languages) populate the registries. `[checks."<id>"]` and `[lang.<id>]` values stay open tables until manifests declare parameters.
+- **P0.4 — schemas.** `schema::config()` is the `cupel.toml` schema. Input schemas are generated without the ADR-013 "every property required" transform, so keys stay optional while closed sections keep `additionalProperties: false`.
+- **P0.4 — tests.** 49 new in `cupel-core` (128 total): `config_gate` 5, `config_settings` 7, `config_file` 11 (three `insta` error-message snapshots), `config_discovery` 8 (`tempfile`), `config_resolve` 8 (16-row precedence matrix), `config_slices` 6, `config_registry` 2, `schemas` +2.
 
 ---
 
