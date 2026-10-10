@@ -13,6 +13,7 @@ TREE_STATE_FILE = target/tree-state-before-check
 build:
 	$(CARGO) build --workspace
 
+# UPDATE_GOLDENS=1 make test rewrites golden envelopes instead of comparing them (ADR-003).
 test:
 	$(CARGO) test --workspace
 

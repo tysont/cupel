@@ -2,7 +2,7 @@
 # ABOUTME: Every dependency version is declared once here; member crates use `workspace = true`.
 [workspace]
 resolver = "3"
-members = ["crates/cupel-cli", "crates/cupel-core"]
+members = ["crates/cupel-cli", "crates/cupel-core", "crates/cupel-fixtures"]
 
 [workspace.package]
 version = "0.1.0"
@@ -26,6 +26,8 @@ predicates = "3.1.4"
 insta = "1.49.0"
 proptest = "1.11.0"
 tempfile = "3.27.0"
+# 2.x, not 3.x: the version insta already resolves to, so the build carries one copy (ADR-003).
+similar = "2.7.0"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

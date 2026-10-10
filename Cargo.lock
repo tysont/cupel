@@ -268,6 +268,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "cupel-fixtures"
+version = "0.1.0"
+dependencies = [
+ "assert_cmd",
+ "cupel-core",
+ "serde_json",
+ "similar",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
 name = "difflib"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

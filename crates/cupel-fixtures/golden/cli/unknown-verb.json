@@ -1,0 +1,82 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 2,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "configure",
+        "priority": 1,
+        "summary": "Use one of: init, doctor, describe, check, survey, explain, baseline, oracle, tests, suppress, serve."
+      },
+      "check": "cli",
+      "confidence": 1.0,
+      "detail": "error: unrecognized subcommand 'frobnicate'\n\nUsage: cupel [OPTIONS] [COMMAND]\n\nFor more information, try '--help'.",
+      "evidence": {
+        "argument": null,
+        "valid": [
+          "init",
+          "doctor",
+          "describe",
+          "check",
+          "survey",
+          "explain",
+          "baseline",
+          "oracle",
+          "tests",
+          "suppress",
+          "serve"
+        ],
+        "value": "frobnicate"
+      },
+      "id": "fnd_b4d81a",
+      "kind": "cli.usage",
+      "location": null,
+      "new_since_baseline": false,
+      "repro": "cupel frobnicate --format json",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_b4d81a --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "unrecognized subcommand 'frobnicate'"
+    }
+  ],
+  "next_actions": [],
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {},
+      "sources": []
+    },
+    "depth": null,
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": null
+  },
+  "status": "error",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 1,
+  "truncated": false
+}

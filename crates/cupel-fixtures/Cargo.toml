@@ -1,0 +1,24 @@
+# ABOUTME: Manifest for cupel-fixtures: fixture repositories, golden envelopes, and the harness that runs them.
+# ABOUTME: A dev-dependency of other Cupel crates; never shipped in the `cupel` binary.
+[package]
+name = "cupel-fixtures"
+description = "Fixture repositories, golden envelopes, and the harness that compares them."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+cupel-core.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+assert_cmd.workspace = true
+similar.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true
