@@ -6,19 +6,14 @@ mod resolve;
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::{
-    ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, Roots, Symbols, TestConventions,
-    TestFrames,
-};
-use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
+use cupel_core::syntax::{ModuleGraph, NormTree};
+use cupel_core::{FactKind, LangFamily, LangId, ProducerRegistry, Stability};
 
-use crate::conventions::GlobTestConventions;
 use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::producer::QueryProducer;
 use crate::spec::LanguageSpec;
-use crate::{api, decisions, mutations, roots, symbols, testframes};
 
 use crate::spec::QueryFile;
 
@@ -73,47 +68,16 @@ impl Language for Python {
         Stability::Experimental
     }
 
-    /// The generic producers, registered one by one rather than through `generic::register`
-    /// because `NormTree` is Python's own: `self`/`cls` receivers and docstrings are positional
-    /// rules the `[normalize]` table cannot express (see `normalize`).
+    /// The generic producers, except that `NormTree` is Python's own: `self`/`cls` receivers and
+    /// docstrings are positional rules the `[normalize]` table cannot express (see `normalize`).
     fn register(&self, reg: &mut ProducerRegistry) {
         let language: Arc<dyn Language> = Arc::new(self.clone());
         let cache = &self.cache;
-        reg.register::<Symbols, _>(QueryProducer::new(
-            Arc::clone(&language),
-            Arc::clone(cache),
-            symbols::extract,
-        ));
-        reg.register::<Decisions, _>(QueryProducer::new(
-            Arc::clone(&language),
-            Arc::clone(cache),
-            decisions::extract,
-        ));
+        crate::generic::register_except(&language, cache, reg, &[FactKind::NormTree]);
         reg.register::<NormTree, _>(QueryProducer::new(
             Arc::clone(&language),
             Arc::clone(cache),
             normalize::extract,
-        ));
-        reg.register::<MutationSites, _>(QueryProducer::new(
-            Arc::clone(&language),
-            Arc::clone(cache),
-            mutations::extract,
-        ));
-        reg.register::<TestFrames, _>(QueryProducer::new(
-            Arc::clone(&language),
-            Arc::clone(cache),
-            testframes::extract,
-        ));
-        reg.register::<TestConventions, _>(GlobTestConventions::new(Arc::clone(&language)));
-        reg.register::<ApiSurface, _>(QueryProducer::new(
-            Arc::clone(&language),
-            Arc::clone(cache),
-            api::extract,
-        ));
-        reg.register::<Roots, _>(QueryProducer::new(
-            Arc::clone(&language),
-            Arc::clone(cache),
-            roots::extract,
         ));
         // Module resolution needs packages, layouts, and manifests, which queries cannot see.
         reg.register::<ModuleGraph, _>(ImportGraph::new(

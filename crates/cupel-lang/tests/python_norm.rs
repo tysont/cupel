@@ -117,9 +117,9 @@ fn a_method_hashes_like_the_free_function_with_its_body_once_self_or_cls_is_drop
     assert_ne!(hash_of(source, "m.Till.odd"), free);
 }
 
-/// Python registers its generic producers one by one so that its `NormTree` override replaces
-/// the table-driven one; every syntactic fact but `ProjectInfo` (P1.9) must still have exactly
-/// one producer, so a generic producer added later cannot silently skip Python.
+/// Python's `NormTree` override replaces the table-driven one (`generic::register_except`);
+/// every syntactic fact but `ProjectInfo` (P1.9) must still have exactly one producer, so the
+/// override neither doubles `NormTree` nor drops another generic producer.
 #[test]
 fn python_has_one_producer_for_every_syntactic_fact_but_project_info() {
     let languages = cupel_lang::LanguageRegistry::builtin();
