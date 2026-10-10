@@ -11,6 +11,7 @@ use crate::error::CupelError;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Rendering {
     Json,
+    Jsonl,
     Text,
 }
 
@@ -28,7 +29,7 @@ pub fn rendering(format: Format) -> Result<Rendering, CupelError> {
     match format {
         Format::Json => Ok(Rendering::Json),
         Format::Text => Ok(Rendering::Text),
-        Format::Jsonl => Err(CupelError::pending_format(format.as_str(), "P0.5")),
+        Format::Jsonl => Ok(Rendering::Jsonl),
         Format::Sarif => Err(CupelError::pending_format(format.as_str(), "P6.1")),
     }
 }
@@ -39,9 +40,10 @@ pub struct Recovered {
     pub format: Format,
     pub quiet: bool,
     pub describe: bool,
+    pub no_color: bool,
 }
 
-/// Scans the arguments before any `--` for `--format`, `--quiet`, and `--describe`. The format
+/// Scans the arguments before any `--` for `--format`, `--quiet`, `--describe`, and `--no-color`. The format
 /// falls back to `CUPEL_FORMAT` and then the terminal rule; a source naming an invalid format
 /// falls straight back to the terminal rule.
 pub fn recover(args: &[OsString], variable: Option<&str>, stdout_is_terminal: bool) -> Recovered {
@@ -66,6 +68,7 @@ pub fn recover(args: &[OsString], variable: Option<&str>, stdout_is_terminal: bo
         format,
         quiet: args.iter().any(|arg| arg == "--quiet"),
         describe: args.iter().any(|arg| arg == "--describe"),
+        no_color: args.iter().any(|arg| arg == "--no-color"),
     }
 }
 
@@ -84,14 +87,13 @@ mod tests {
     }
 
     #[test]
-    fn json_and_text_render_and_the_rest_name_their_step() {
+    fn json_jsonl_and_text_render_and_sarif_names_its_step() {
         assert_eq!(rendering(Format::Json), Ok(Rendering::Json));
+        assert_eq!(rendering(Format::Jsonl), Ok(Rendering::Jsonl));
         assert_eq!(rendering(Format::Text), Ok(Rendering::Text));
-        for (format, step) in [(Format::Jsonl, "P0.5"), (Format::Sarif, "P6.1")] {
-            match rendering(format) {
-                Err(CupelError::NotImplemented(pending)) => assert_eq!(pending.step, step),
-                other => panic!("{format:?}: {other:?}"),
-            }
+        match rendering(Format::Sarif) {
+            Err(CupelError::NotImplemented(pending)) => assert_eq!(pending.step, "P6.1"),
+            other => panic!("sarif: {other:?}"),
         }
     }
 
@@ -127,10 +129,18 @@ mod tests {
     }
 
     #[test]
-    fn recover_reads_quiet_and_describe_but_not_after_a_double_dash() {
-        let found = recover(&args(&["--quiet", "x", "--describe"]), None, false);
-        assert!(found.quiet && found.describe);
-        let after = recover(&args(&["x", "--", "--quiet", "--describe"]), None, false);
-        assert!(!after.quiet && !after.describe);
+    fn recover_reads_quiet_describe_and_no_color_but_not_after_a_double_dash() {
+        let found = recover(
+            &args(&["--quiet", "x", "--describe", "--no-color"]),
+            None,
+            false,
+        );
+        assert!(found.quiet && found.describe && found.no_color);
+        let after = recover(
+            &args(&["x", "--", "--quiet", "--describe", "--no-color"]),
+            None,
+            false,
+        );
+        assert!(!after.quiet && !after.describe && !after.no_color);
     }
 }

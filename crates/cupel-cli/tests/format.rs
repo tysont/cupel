@@ -40,7 +40,7 @@ fn format_text_renders_a_status_line_instead_of_json() {
         "{}",
         outcome.stdout
     );
-    insta::assert_snapshot!(outcome.stdout);
+    insta::assert_snapshot!(support::redacted_text(&outcome.stdout));
 }
 
 #[test]
@@ -48,14 +48,21 @@ fn format_text_shows_findings_with_their_fix() {
     let outcome = run(["check", "--format", "text"]);
     assert_eq!(outcome.code, 2);
     let id = cli_finding_id("cli.not-implemented", "check");
-    assert_eq!(
-        outcome.stdout,
-        format!(
-            "cupel check: error (exit 2)\n\
-             fail cli.not-implemented {id}: `cupel check` is not implemented yet\n  \
-             detail: Implemented in plan step P2.1.\n  \
-             action: review — Use a verb that is implemented; `cupel describe` marks pending ones with pending_step.\n"
-        )
+    assert!(outcome.stdout.starts_with("cupel check: error (exit 2)\n"));
+    let findings = format!(
+        "fail (1)\n  cli\n    `cupel check` is not implemented yet\n      \
+         {id} · cli.not-implemented · tier 0 · confidence 1\n      \
+         Implemented in plan step P2.1.\n      \
+         evidence: step \"P2.1\" (full: cupel explain {id})\n      \
+         action review (priority 1): Use a verb that is implemented; `cupel describe` marks \
+         pending ones with pending_step.\n      \
+         repro: cupel check --format text\n      \
+         suppress: cupel suppress {id} --reason '…'\n"
+    );
+    assert!(
+        outcome.stdout.contains(&findings),
+        "{findings}\nin:\n{}",
+        outcome.stdout
     );
 }
 
@@ -132,24 +139,16 @@ fn usage_errors_render_in_the_requested_format_when_it_is_valid() {
 }
 
 #[test]
-fn formats_from_later_steps_are_not_implemented_and_render_as_json() {
-    for (format, step) in [("jsonl", "P0.5"), ("sarif", "P6.1")] {
-        let outcome = run(["describe", "--format", format]);
-        assert_eq!(outcome.code, 2, "{format}");
-        let finding = outcome.finding();
-        assert_eq!(finding["kind"], json!("cli.not-implemented"));
-        assert_eq!(
-            finding["id"],
-            json!(cli_finding_id(
-                "cli.not-implemented",
-                &format!("--format {format}")
-            ))
-        );
-        assert!(
-            finding["detail"].as_str().unwrap().contains(step),
-            "{format}"
-        );
-    }
+fn sarif_is_not_implemented_and_renders_as_json() {
+    let outcome = run(["describe", "--format", "sarif"]);
+    assert_eq!(outcome.code, 2);
+    let finding = outcome.finding();
+    assert_eq!(finding["kind"], json!("cli.not-implemented"));
+    assert_eq!(
+        finding["id"],
+        json!(cli_finding_id("cli.not-implemented", "--format sarif"))
+    );
+    assert!(finding["detail"].as_str().unwrap().contains("P6.1"));
 }
 
 #[test]

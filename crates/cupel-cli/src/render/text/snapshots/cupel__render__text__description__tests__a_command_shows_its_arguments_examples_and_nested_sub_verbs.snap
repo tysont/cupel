@@ -1,0 +1,35 @@
+---
+source: crates/cupel-cli/src/render/text/description.rs
+expression: "plain(&Description::Command(baseline))"
+---
+cupel baseline · Set, show, diff, export, or import the baseline runs are compared with. · experimental · pending P2.2
+  arguments
+    --name NAME  Which named baseline; default `default`.
+  examples
+    $ cupel baseline show  # Print the baseline. (exit 2)
+  sub-verbs
+    cupel baseline set · Name the current run, or a given run, as the baseline.
+      arguments
+        --from run:ID  The run to use instead of the latest.
+      examples
+        $ cupel baseline set --write  # Name the current run, or a given run, as the baseline. (exit 2)
+    cupel baseline show · Print the baseline.
+      examples
+        $ cupel baseline show  # Print the baseline. (exit 2)
+    cupel baseline diff · Compare two runs as an envelope of new and resolved findings.
+      arguments
+        --against run:ID|REF  The run or git ref to compare with.
+      examples
+        $ cupel baseline diff  # Compare two runs as an envelope of new and resolved findings. (exit 2)
+    cupel baseline export · Write the baseline to a file as JSON.
+      arguments
+        <FILE>  Where to write the baseline.
+                path · required
+      examples
+        $ cupel baseline export baseline.json  # Write the baseline to a file as JSON. (exit 2)
+    cupel baseline import · Read a baseline from a JSON file.
+      arguments
+        <FILE>  The baseline to read.
+                path · required
+      examples
+        $ cupel baseline import baseline.json  # Read a baseline from a JSON file. (exit 2)

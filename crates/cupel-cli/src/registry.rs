@@ -562,16 +562,14 @@ fn global_flags() -> Vec<ArgDescription> {
             ValueType::Integer,
             "N",
             "Return at most N findings.",
-        )
-        .pending("P0.5"),
+        ),
         valued(
             "--offset",
             ValueType::Integer,
             "N",
             "Skip the first N findings.",
-        )
-        .pending("P0.5"),
-        switch("--no-color", "Render text without color.").pending("P0.5"),
+        ),
+        switch("--no-color", "Render text without color.").env("NO_COLOR"),
         switch(
             "--no-install",
             "Never install tools; the default unless stdout is a terminal.",
@@ -876,11 +874,14 @@ mod tests {
 
     use super::*;
 
-    /// The variable configuration reads for a flag: a layered setting's, or `CUPEL_PROFILE`.
-    /// Clap itself reads no variables, so configuration can report which layer set a value.
+    /// The variable read in place of a flag: a layered setting's, `CUPEL_PROFILE`, or
+    /// `NO_COLOR`. Clap itself reads no variables, so configuration can report which layer set
+    /// a value.
     fn configured_env(name: &str) -> Option<String> {
-        if name == "--profile" {
-            return Some(PROFILE_ENV_VAR.to_owned());
+        match name {
+            "--profile" => return Some(PROFILE_ENV_VAR.to_owned()),
+            "--no-color" => return Some("NO_COLOR".to_owned()),
+            _ => {}
         }
         Setting::ALL
             .into_iter()

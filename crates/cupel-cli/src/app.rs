@@ -16,6 +16,7 @@ use cupel_core::{Envelope, Verb};
 use crate::cli::{Cli, VerbArgs, verb_name};
 use crate::error::{BugReport, CupelError, Usage};
 use crate::format::{self, Rendering};
+use crate::page::Page;
 use crate::run::Run;
 use crate::{describe, registry, render};
 
@@ -30,6 +31,8 @@ pub struct Environment {
     /// The `CUPEL_*` variables. Configuration reads its settings from them, and
     /// `CUPEL_DEBUG_PANIC=1` fails deliberately after parsing to exercise exit 6 (ADR-018).
     pub variables: BTreeMap<String, String>,
+    /// `NO_COLOR` is set to a non-empty value (no-color.org).
+    pub no_color_variable: bool,
 }
 
 impl Environment {
@@ -44,6 +47,7 @@ impl Environment {
                 })
                 .filter(|(key, _)| key.starts_with("CUPEL_"))
                 .collect(),
+            no_color_variable: std::env::var_os("NO_COLOR").is_some_and(|value| !value.is_empty()),
         }
     }
 
@@ -53,6 +57,37 @@ impl Environment {
 
     fn debug_panic(&self) -> bool {
         self.variable("CUPEL_DEBUG_PANIC") == Some("1")
+    }
+
+    /// Whether `rendering` gets color: text on a terminal with neither `--no-color` nor
+    /// `NO_COLOR` (ADR-019 §4).
+    fn color(&self, rendering: Rendering, no_color_flag: bool) -> bool {
+        rendering == Rendering::Text
+            && self.stdout_is_terminal
+            && !no_color_flag
+            && !self.no_color_variable
+    }
+}
+
+/// How an envelope reaches stdout: its renderer, whether text is colored, and the findings page.
+struct Presentation {
+    rendering: Rendering,
+    color: bool,
+    page: Page,
+}
+
+impl Presentation {
+    fn new(
+        environment: &Environment,
+        rendering: Rendering,
+        no_color_flag: bool,
+        page: Page,
+    ) -> Self {
+        Self {
+            rendering,
+            color: environment.color(rendering, no_color_flag),
+            page,
+        }
     }
 }
 
@@ -84,11 +119,17 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     run.verb = cli.verb.as_ref().map(VerbArgs::verb);
     // P0.7 replaces this default with a random seed; an explicit seed is echoed as given.
     run.seed = cli.global.seed.unwrap_or(0);
+    let page = Page {
+        offset: cli.global.offset.unwrap_or(0),
+        limit: cli.global.limit,
+    };
+    let presentation =
+        |rendering| Presentation::new(environment, rendering, cli.global.no_color, page);
     // Until configuration resolves, errors render as ADR-018 §5 recovers the format.
     let early = |run: &Run, error: &CupelError| {
         let recovered = recovered_format(environment);
         let rendering = format::rendering(recovered).unwrap_or(Rendering::Json);
-        output(&run.failed(error), rendering, String::new())
+        output(run.failed(error), &presentation(rendering), String::new())
     };
     let root = match repository_root(
         environment.current_dir.as_deref(),
@@ -113,7 +154,13 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
         .unwrap_or_else(|| format::default_for(environment.stdout_is_terminal));
     let rendering = match format::rendering(format) {
         Ok(rendering) => rendering,
-        Err(error) => return output(&run.failed(&error), Rendering::Json, String::new()),
+        Err(error) => {
+            return output(
+                run.failed(&error),
+                &presentation(Rendering::Json),
+                String::new(),
+            );
+        }
     };
     let mut stderr = String::new();
     if cli.global.verbose {
@@ -126,7 +173,7 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     let envelope = guarded(run, &mut stderr, cli.global.quiet, || {
         execute(run, cli, environment.debug_panic())
     });
-    output(&envelope, rendering, stderr)
+    output(envelope, &presentation(rendering), stderr)
 }
 
 /// What configuration needs from the command line and the environment.
@@ -195,13 +242,16 @@ fn rejected(environment: &Environment, run: &mut Run, error: &clap::Error) -> Ou
         environment.stdout_is_terminal,
     );
     let rendering = format::rendering(recovered.format).unwrap_or(Rendering::Json);
+    // Paging flags are not trusted from a command line that did not parse.
+    let presentation =
+        Presentation::new(environment, rendering, recovered.no_color, Page::default());
     let words = command_words(&environment.args);
     run.verb = words.first().and_then(|word| verb_named(word));
     if recovered.describe
         && !words.is_empty()
         && let Ok(envelope) = describe::command(run, &words)
     {
-        return output(&envelope, rendering, String::new());
+        return output(envelope, &presentation, String::new());
     }
     let usage = if error.kind() == ErrorKind::DisplayHelpOnMissingArgumentOrSubcommand {
         CupelError::missing_verb(verb_names())
@@ -213,12 +263,13 @@ fn rejected(environment: &Environment, run: &mut Run, error: &clap::Error) -> Ou
     } else {
         error.render().to_string()
     };
-    output(&run.failed(&usage), rendering, stderr)
+    output(run.failed(&usage), &presentation, stderr)
 }
 
-fn output(envelope: &Envelope, rendering: Rendering, stderr: String) -> Output {
+fn output(mut envelope: Envelope, presentation: &Presentation, stderr: String) -> Output {
+    presentation.page.apply(&mut envelope);
     Output {
-        stdout: render::render(envelope, rendering),
+        stdout: render::render(&envelope, presentation.rendering, presentation.color),
         stderr,
         code: envelope.exit_code.code(),
     }
@@ -338,6 +389,7 @@ mod tests {
             current_dir: std::env::temp_dir().canonicalize().ok(),
             stdout_is_terminal: false,
             variables: BTreeMap::new(),
+            no_color_variable: false,
         }
     }
 
@@ -377,6 +429,27 @@ mod tests {
         assert_eq!(words(&["suppress", "--describe"]), ["suppress"]);
         assert_eq!(words(&["baseline", "set", "--bogus"]), ["baseline", "set"]);
         assert!(words(&["frobnicate"]).is_empty());
+    }
+
+    #[test]
+    fn text_on_a_terminal_is_colored_unless_color_is_turned_off() {
+        let on_terminal = |args: &[&str], no_color_variable: bool| {
+            let mut environment = environment(args);
+            environment.stdout_is_terminal = true;
+            environment.no_color_variable = no_color_variable;
+            run(&environment).stdout.contains('\u{1b}')
+        };
+        assert!(on_terminal(&["check"], false));
+        assert!(!on_terminal(&["check", "--no-color"], false));
+        assert!(!on_terminal(&["check"], true), "NO_COLOR");
+        assert!(!on_terminal(&["check", "--format", "json"], false));
+        assert!(on_terminal(&["check", "--bogus"], false), "rejected");
+        assert!(!on_terminal(&["check", "--bogus", "--no-color"], false));
+        assert!(
+            !run(&environment(&["check", "--format", "text"]))
+                .stdout
+                .contains('\u{1b}')
+        );
     }
 
     #[test]

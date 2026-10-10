@@ -59,13 +59,10 @@ pub struct GlobalArgs {
     pub timeout: Option<String>,
     #[arg(long, global = true, value_name = "N")]
     pub seed: Option<u64>,
-    // Parsed now; paging is P0.5.
     #[arg(long, global = true, value_name = "N")]
     pub limit: Option<u64>,
-    // Parsed now; paging is P0.5.
     #[arg(long, global = true, value_name = "N")]
     pub offset: Option<u64>,
-    // Parsed now; the text renderer has no color until P0.5.
     #[arg(long, global = true)]
     pub no_color: bool,
     // Parsed now; tool installation arrives with the first tool producers in P3.1.

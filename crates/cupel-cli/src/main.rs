@@ -5,6 +5,7 @@ mod cli;
 mod describe;
 mod error;
 mod format;
+mod page;
 mod registry;
 mod render;
 mod run;
