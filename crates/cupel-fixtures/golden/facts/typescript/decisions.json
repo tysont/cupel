@@ -258,6 +258,75 @@
       }
     },
     {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 41
+      }
+    },
+    {
       "decisions": [
         {
           "cognitive": 1,

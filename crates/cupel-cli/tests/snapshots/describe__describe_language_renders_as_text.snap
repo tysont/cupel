@@ -9,6 +9,7 @@ language typescript · family ecma · .ts .mts .cts .tsx · experimental
 facts
   symbols    lang.typescript (quick)
   decisions  lang.typescript (quick)
+  norm-tree  lang.typescript (quick)
 
 checks
   none registered

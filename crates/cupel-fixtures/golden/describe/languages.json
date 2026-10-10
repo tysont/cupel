@@ -26,7 +26,8 @@
         ],
         "facts": [
           "symbols",
-          "decisions"
+          "decisions",
+          "norm-tree"
         ],
         "family": "ecma",
         "id": "javascript",
@@ -71,7 +72,8 @@
         ],
         "facts": [
           "symbols",
-          "decisions"
+          "decisions",
+          "norm-tree"
         ],
         "family": "ecma",
         "id": "typescript",

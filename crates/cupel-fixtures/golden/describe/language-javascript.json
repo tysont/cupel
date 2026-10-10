@@ -32,6 +32,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "norm-tree",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "ecma",

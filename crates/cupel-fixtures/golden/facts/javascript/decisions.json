@@ -252,6 +252,75 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 30
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 38
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 26,
         "file": "test/math.test.js",
         "line": 5

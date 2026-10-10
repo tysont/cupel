@@ -380,6 +380,153 @@
     },
     {
       "body": {
+        "col": 66,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 1
+      },
+      "display": "twins.netTotal",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotal",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 82,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      },
+      "display": "twins.sumAfterCharge",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "sumAfterCharge",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 71,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 11
+      },
+      "display": "twins.netTotalFloor",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalFloor",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 11,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 19
+      },
+      "display": "twins.netTotalLaidOut",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalLaidOut",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 70,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 28
+      },
+      "display": "twins.netTotalPlus",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalPlus",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 28
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 72,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 33
+      },
+      "display": "twins.netTotalCapped",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalCapped",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 33
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 73,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 41
+      },
+      "display": "twins.netTotalProduct",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalProduct",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 41
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 75,
         "end_col": 2,
         "end_line": 3,

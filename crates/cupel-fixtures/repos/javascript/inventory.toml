@@ -74,3 +74,33 @@ name = "decide.classify"
 [decisions.catch]
 file = "src/decide.js"
 name = "decide.parseCents"
+
+[norm-tree.rename]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.sumAfterCharge"
+
+[norm-tree.literal]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalFloor"
+
+[norm-tree.layout]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalLaidOut"
+
+[norm-tree.operator]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalPlus"
+
+[norm-tree.branch]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalCapped"
+
+[norm-tree.call]
+file = "src/twins.js"
+name = "twins.netTotal"
+twin = "twins.netTotalProduct"

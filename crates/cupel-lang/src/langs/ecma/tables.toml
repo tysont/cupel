@@ -15,3 +15,47 @@ modifiers = { "public" = "public", "protected" = "private", "private" = "private
 # `else if` is an `if_statement` inside the `else_clause` of the branch it continues.
 [decisions]
 chain_parents = ["else_clause"]
+
+# Types, decorators, and accessibility say nothing about what a function does, so a JavaScript
+# function and its type-annotated TypeScript twin normalize to the same tree.
+[normalize]
+identifiers = [
+  "identifier",
+  "property_identifier",
+  "private_property_identifier",
+  "shorthand_property_identifier",
+  "shorthand_property_identifier_pattern",
+  "statement_identifier",
+  "type_identifier",
+]
+literals = [
+  "number",
+  "string",
+  "template_string",
+  "regex",
+  "true",
+  "false",
+  "null",
+  "undefined",
+]
+erase = [
+  "type_annotation",
+  "type_parameters",
+  "type_arguments",
+  "decorator",
+  "accessibility_modifier",
+  "override_modifier",
+]
+# TypeScript wraps each parameter with its type; JavaScript writes a default as a pattern.
+flatten = ["required_parameter", "assignment_pattern"]
+operators = ["typeof", "instanceof", "in", "of", "delete", "void"]
+# `this.items.push(x)` keeps `push`; `this.items` is a receiver and normalizes as usual.
+receivers = ["object"]
+
+[[normalize.calls]]
+kind = "call_expression"
+callee = "function"
+
+[[normalize.calls]]
+kind = "new_expression"
+callee = "constructor"
