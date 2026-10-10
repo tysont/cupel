@@ -110,10 +110,12 @@ fn invalid_format_is_a_usage_error_naming_the_valid_values() {
 }
 
 #[test]
-fn invalid_cupel_format_env_is_a_usage_error() {
+fn invalid_cupel_format_env_is_a_usage_error_naming_the_variable() {
     let outcome = run_with(cupel().env("CUPEL_FORMAT", "xml"), ["describe"]);
     assert_eq!(outcome.code, 2);
-    assert_eq!(outcome.finding()["evidence"]["argument"], json!("--format"));
+    let finding = outcome.finding();
+    assert_eq!(finding["evidence"]["argument"], json!("CUPEL_FORMAT"));
+    assert_eq!(finding["evidence"]["value"], json!("xml"));
 }
 
 #[test]

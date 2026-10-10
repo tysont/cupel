@@ -1,6 +1,7 @@
 // ABOUTME: `CupelError`, the failure every verb can return, and its mapping to an exit code and a
 // ABOUTME: `cli.*` finding: usage errors and unbuilt features exit 2, internal errors exit 6.
 use clap::error::{ContextKind, ContextValue, ErrorKind};
+use cupel_core::config::ConfigError;
 use cupel_core::{
     Action, ActionKind, CheckId, Evidence, ExitCode, Finding, FindingId, Severity, Tier,
 };
@@ -180,6 +181,26 @@ impl CupelError {
     }
 }
 
+impl From<cupel_core::Error> for CupelError {
+    /// Core errors reach the CLI from configuration; every one is a usage error (ADR-017).
+    fn from(error: cupel_core::Error) -> Self {
+        match error {
+            cupel_core::Error::Config(config) => Usage::from_config(&config).into(),
+            other => Usage {
+                subject: "configuration".to_owned(),
+                title: other.to_string(),
+                fix: "Fix the configuration; `cupel describe schema config` gives its shape."
+                    .to_owned(),
+                detail: None,
+                argument: None,
+                value: None,
+                valid: Vec::new(),
+            }
+            .into(),
+        }
+    }
+}
+
 impl From<Usage> for CupelError {
     fn from(usage: Usage) -> Self {
         Self::Usage(Box::new(usage))
@@ -194,6 +215,95 @@ fn object(value: Value) -> Map<String, Value> {
 }
 
 impl Usage {
+    /// Describes a configuration problem: which file, variable, or flag is at fault, and the fix.
+    /// The subject is the flag, variable, file, or key the user edits (ADR-016).
+    pub fn from_config(error: &ConfigError) -> Self {
+        let title = error.to_string();
+        let usage = |subject: &str, fix: String| Self {
+            subject: subject.to_owned(),
+            title: title.clone(),
+            fix,
+            detail: None,
+            argument: None,
+            value: None,
+            valid: Vec::new(),
+        };
+        match error {
+            ConfigError::Invalid { path, message } => {
+                // toml ends its message with the problem itself, such as "unknown field `x`,
+                // expected one of …"; the lines before it locate the problem in the file.
+                let problem = message.lines().last().unwrap_or(message).trim();
+                let short = problem.split(", expected").next().unwrap_or(problem);
+                Self {
+                    title: format!("Invalid configuration in `{}`: {short}", path.display()),
+                    detail: Some(title.clone()),
+                    value: Some(path.display().to_string()),
+                    ..usage(
+                        "cupel.toml",
+                        format!("Edit `{}`: {problem}.", path.display()),
+                    )
+                }
+            }
+            ConfigError::Missing { path } => Self {
+                argument: Some("--config".to_owned()),
+                value: Some(path.display().to_string()),
+                ..usage(
+                    "--config",
+                    "Pass --config an existing file, or omit it to use the nearest cupel.toml."
+                        .to_owned(),
+                )
+            },
+            ConfigError::Unreadable { path, .. } => Self {
+                value: Some(path.display().to_string()),
+                ..usage(
+                    "cupel.toml",
+                    format!(
+                        "Make `{}` readable, or pass --config another file.",
+                        path.display()
+                    ),
+                )
+            },
+            ConfigError::InvalidEnv { var, value, reason } => Self {
+                argument: Some((*var).to_owned()),
+                value: Some(value.clone()),
+                ..usage(
+                    var,
+                    format!("Set {var} to a valid value or unset it: {reason}."),
+                )
+            },
+            ConfigError::UnknownProfile { name, defined, .. } => Self {
+                argument: Some("--profile".to_owned()),
+                value: Some(name.clone()),
+                valid: defined.clone(),
+                ..usage(
+                    "--profile",
+                    if defined.is_empty() {
+                        "Define [profile.NAME] in cupel.toml, or select no profile.".to_owned()
+                    } else {
+                        format!("Select one of: {}.", defined.join(", "))
+                    },
+                )
+            },
+            ConfigError::InvalidGateRule { key, .. } => Self {
+                value: Some(key.clone()),
+                ..usage(
+                    key,
+                    "Write gate rules as \"<check-id>[.<metric>]\" = \"<op> <number>\" with op \
+                     one of >= > <= < ==, or \"<check-id>\" = \"none\" | \"no-breaking\"."
+                        .to_owned(),
+                )
+            },
+            ConfigError::Unregistered {
+                section,
+                registered,
+                ..
+            } => Self {
+                valid: registered.clone(),
+                ..usage(section, format!("Use a registered ID in `{section}`."))
+            },
+        }
+    }
+
     /// Translates clap's parse error, naming the argument at fault and the fix. `verbs` lists
     /// the top-level verbs, offered when the verb itself is missing or unknown.
     pub fn from_clap(error: &clap::Error, verbs: &[String]) -> Self {

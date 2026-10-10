@@ -1,5 +1,6 @@
-// ABOUTME: Runs one invocation end to end: parse, choose the format, resolve the root, dispatch the
-// ABOUTME: verb, and turn every outcome — success, usage error, unbuilt feature, panic — into an envelope.
+// ABOUTME: Runs one invocation end to end: parse, resolve the root and configuration, choose the format,
+// ABOUTME: dispatch the verb, and turn every outcome — success, usage error, panic — into an envelope.
+use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::fmt::Write as _;
 use std::io::IsTerminal;
@@ -9,9 +10,10 @@ use std::sync::Mutex;
 
 use clap::FromArgMatches;
 use clap::error::ErrorKind;
+use cupel_core::config::{Config, ConfigRequest, Setting, Settings};
 use cupel_core::{Envelope, Verb};
 
-use crate::cli::{Cli, Format, VerbArgs, verb_name};
+use crate::cli::{Cli, VerbArgs, verb_name};
 use crate::error::{BugReport, CupelError, Usage};
 use crate::format::{self, Rendering};
 use crate::run::Run;
@@ -25,10 +27,9 @@ pub struct Environment {
     /// The process working directory, the root when `--cwd` is absent.
     pub current_dir: Option<PathBuf>,
     pub stdout_is_terminal: bool,
-    /// `CUPEL_FORMAT`, for choosing a format when the command line did not parse.
-    pub format_variable: Option<String>,
-    /// `CUPEL_DEBUG_PANIC=1`: fail deliberately after parsing, to exercise exit 6 (ADR-018).
-    pub debug_panic: bool,
+    /// The `CUPEL_*` variables. Configuration reads its settings from them, and
+    /// `CUPEL_DEBUG_PANIC=1` fails deliberately after parsing to exercise exit 6 (ADR-018).
+    pub variables: BTreeMap<String, String>,
 }
 
 impl Environment {
@@ -37,9 +38,21 @@ impl Environment {
             args: std::env::args_os().skip(1).collect(),
             current_dir: std::env::current_dir().ok(),
             stdout_is_terminal: std::io::stdout().is_terminal(),
-            format_variable: std::env::var("CUPEL_FORMAT").ok(),
-            debug_panic: std::env::var_os("CUPEL_DEBUG_PANIC").is_some_and(|value| value == "1"),
+            variables: std::env::vars_os()
+                .filter_map(|(key, value)| {
+                    Some((key.into_string().ok()?, value.into_string().ok()?))
+                })
+                .filter(|(key, _)| key.starts_with("CUPEL_"))
+                .collect(),
         }
+    }
+
+    fn variable(&self, name: &str) -> Option<&str> {
+        self.variables.get(name).map(String::as_str)
+    }
+
+    fn debug_panic(&self) -> bool {
+        self.variable("CUPEL_DEBUG_PANIC") == Some("1")
     }
 }
 
@@ -71,30 +84,74 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     run.verb = cli.verb.as_ref().map(VerbArgs::verb);
     // P0.7 replaces this default with a random seed; an explicit seed is echoed as given.
     run.seed = cli.global.seed.unwrap_or(0);
-    let format = cli
-        .global
-        .format
-        .unwrap_or_else(|| Format::default_for(environment.stdout_is_terminal));
-    let rendering = match format.rendering() {
-        Ok(rendering) => rendering,
-        Err(error) => return output(&run.failed(&error), Rendering::Json, String::new()),
+    // Until configuration resolves, errors render as ADR-018 §5 recovers the format.
+    let early = |run: &Run, error: &CupelError| {
+        let recovered = recovered_format(environment);
+        let rendering = format::rendering(recovered).unwrap_or(Rendering::Json);
+        output(&run.failed(error), rendering, String::new())
     };
     let root = match repository_root(
         environment.current_dir.as_deref(),
         cli.global.cwd.as_deref(),
     ) {
         Ok(root) => root,
-        Err(error) => return output(&run.failed(&error), rendering, String::new()),
+        Err(error) => return early(run, &error),
+    };
+    let config = match Config::load(&config_request(environment, cli, root.clone())) {
+        Ok(config) => config,
+        Err(error) => return early(run, &error.into()),
+    };
+    run.config = config.echo();
+    run.depth = Some(config.effective.depth);
+    run.budget_ms = config
+        .effective
+        .budget
+        .map(|budget| u64::try_from(budget.as_duration().as_millis()).unwrap_or(u64::MAX));
+    let format = config
+        .effective
+        .format
+        .unwrap_or_else(|| format::default_for(environment.stdout_is_terminal));
+    let rendering = match format::rendering(format) {
+        Ok(rendering) => rendering,
+        Err(error) => return output(&run.failed(&error), Rendering::Json, String::new()),
     };
     let mut stderr = String::new();
     if cli.global.verbose {
         let _ = writeln!(stderr, "cupel: root: {}", root.display());
-        let _ = writeln!(stderr, "cupel: format: {}", format.name());
+        if let Some(path) = &config.path {
+            let _ = writeln!(stderr, "cupel: config: {}", path.display());
+        }
+        let _ = writeln!(stderr, "cupel: format: {}", format.as_str());
     }
     let envelope = guarded(run, &mut stderr, cli.global.quiet, || {
-        execute(run, cli, environment.debug_panic)
+        execute(run, cli, environment.debug_panic())
     });
     output(&envelope, rendering, stderr)
+}
+
+/// What configuration needs from the command line and the environment.
+fn config_request(environment: &Environment, cli: &Cli, root: PathBuf) -> ConfigRequest {
+    let scope = cli.verb.as_ref().and_then(VerbArgs::scope);
+    ConfigRequest {
+        root,
+        config_path: cli.global.config.clone(),
+        profile: cli.global.profile.clone(),
+        flags: Settings {
+            depth: scope.and_then(|scope| scope.depth),
+            format: cli.global.format,
+            budget: scope.and_then(|scope| scope.budget),
+        },
+        env: environment.variables.clone(),
+    }
+}
+
+fn recovered_format(environment: &Environment) -> cupel_core::config::Format {
+    format::recover(
+        &environment.args,
+        environment.variable(Setting::Format.env_var()),
+        environment.stdout_is_terminal,
+    )
+    .format
 }
 
 fn execute(run: &Run, cli: &Cli, debug_panic: bool) -> Result<Envelope, CupelError> {
@@ -134,10 +191,10 @@ fn rejected(environment: &Environment, run: &mut Run, error: &clap::Error) -> Ou
     }
     let recovered = format::recover(
         &environment.args,
-        environment.format_variable.as_deref(),
+        environment.variable(Setting::Format.env_var()),
         environment.stdout_is_terminal,
     );
-    let rendering = recovered.format.rendering().unwrap_or(Rendering::Json);
+    let rendering = format::rendering(recovered.format).unwrap_or(Rendering::Json);
     let words = command_words(&environment.args);
     run.verb = words.first().and_then(|word| verb_named(word));
     if recovered.describe
@@ -280,8 +337,7 @@ mod tests {
             args: args.iter().map(OsString::from).collect(),
             current_dir: std::env::temp_dir().canonicalize().ok(),
             stdout_is_terminal: false,
-            format_variable: None,
-            debug_panic: false,
+            variables: BTreeMap::new(),
         }
     }
 

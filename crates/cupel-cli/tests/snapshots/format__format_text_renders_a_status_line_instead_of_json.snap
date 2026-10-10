@@ -21,8 +21,8 @@ Global flags:
   --format FORMAT              Output format; json when stdout is not a terminal, text when it is.
   --dry-run                    Preview what would run or be written; change nothing. [pending P0.7]
   --describe                   Describe this verb instead of running it, and exit 0.
-  --config PATH                The cupel.toml to use instead of the nearest one. [pending P0.4]
-  --profile NAME               Apply [profile.NAME] from cupel.toml. [pending P0.4]
+  --config PATH                The cupel.toml to use instead of the nearest one.
+  --profile NAME               Apply [profile.NAME] from cupel.toml.
   --cwd PATH                   The repository root; defaults to the current directory.
   --quiet                      Write no diagnostics to stderr.
   --verbose                    Write extra diagnostics to stderr.

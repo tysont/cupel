@@ -315,7 +315,7 @@ ADRs: [017](adr/CUPEL_DECISION_017.md) (layered settings, gate-key grammar, sour
 
 #### P0.5 Renderers: JSON, JSONL, text
 
-**Status:** not started
+**Status:** in progress (2026-10-10)
 
 - `json`: pretty, stable key order (serde struct order), trailing newline.
 - `jsonl`: header line (envelope minus `findings`), then one finding per line.

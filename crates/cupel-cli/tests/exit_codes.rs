@@ -175,10 +175,6 @@ fn later_step_flags_parse_and_change_nothing() {
         "--no-color",
         "--no-install",
         "--write",
-        "--config",
-        "cupel.toml",
-        "--profile",
-        "ci",
     ]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     assert_eq!(support::redacted(outcome.envelope()), baseline);

@@ -1017,6 +1017,7 @@ expression: pretty(&schema)
           ]
         },
         "budget_ms": {
+          "description": "The effective budget in milliseconds; null when no layer set one.",
           "type": [
             "integer",
             "null"
@@ -1028,7 +1029,7 @@ expression: pretty(&schema)
           "$ref": "#/$defs/ConfigEcho"
         },
         "depth": {
-          "description": "Null for verbs that do not run checks.",
+          "description": "The effective depth from configuration; null only when configuration did not load.",
           "anyOf": [
             {
               "$ref": "#/$defs/CostClass"

@@ -8,6 +8,7 @@
 //! `pending_step` names the plan step that gives a verb or argument its behavior. An argument
 //! carries its own marker only when that step differs from its verb's.
 use clap::{Arg, Command, CommandFactory};
+use cupel_core::config::{PROFILE_ENV_VAR, Setting};
 use cupel_core::{
     ArgDescription, CliDescription, CommandDescription, CommandSummary, ConfigSource, Example,
     ExitCode, ExitCodeDescription, SchemaRef, Stability, ValueType, schema,
@@ -504,7 +505,7 @@ fn global_flags() -> Vec<ArgDescription> {
             &["json", "jsonl", "text", "sarif"],
             "Output format; json when stdout is not a terminal, text when it is.",
         )
-        .env("CUPEL_FORMAT"),
+        .env(Setting::Format.env_var()),
         switch(
             "--dry-run",
             "Preview what would run or be written; change nothing.",
@@ -519,15 +520,14 @@ fn global_flags() -> Vec<ArgDescription> {
             ValueType::Path,
             "PATH",
             "The cupel.toml to use instead of the nearest one.",
-        )
-        .pending("P0.4"),
+        ),
         valued(
             "--profile",
             ValueType::String,
             "NAME",
             "Apply [profile.NAME] from cupel.toml.",
         )
-        .pending("P0.4"),
+        .env(PROFILE_ENV_VAR),
         valued(
             "--cwd",
             ValueType::Path,
@@ -651,6 +651,7 @@ fn scope_how_much_flags() -> Vec<ArgDescription> {
             &["quick", "standard", "deep", "exhaustive"],
             "How much evidence to gather.",
         )
+        .env(Setting::Depth.env_var())
         .default_value("standard")
         .pending("P2.1"),
         valued(
@@ -659,6 +660,7 @@ fn scope_how_much_flags() -> Vec<ArgDescription> {
             "DURATION",
             "A time budget that overrides the depth.",
         )
+        .env(Setting::Budget.env_var())
         .pending("P4.3"),
     ]
 }
@@ -874,8 +876,25 @@ mod tests {
 
     use super::*;
 
+    /// The variable configuration reads for a flag: a layered setting's, or `CUPEL_PROFILE`.
+    /// Clap itself reads no variables, so configuration can report which layer set a value.
+    fn configured_env(name: &str) -> Option<String> {
+        if name == "--profile" {
+            return Some(PROFILE_ENV_VAR.to_owned());
+        }
+        Setting::ALL
+            .into_iter()
+            .find(|setting| format!("--{}", setting.key()) == name)
+            .map(|setting| setting.env_var().to_owned())
+    }
+
     /// What clap knows about one argument, in registry terms. Used to prove the two agree.
     fn as_registered(command: &Command, arg: &Arg) -> ArgDescription {
+        assert!(
+            arg.get_env().is_none(),
+            "{}: configuration, not clap, reads CUPEL_* variables",
+            arg.get_id()
+        );
         let takes_value = matches!(arg.get_action(), ArgAction::Set | ArgAction::Append);
         let values: Vec<String> = if takes_value {
             arg.get_possible_values()
@@ -914,7 +933,7 @@ mod tests {
             },
             values,
             default: None,
-            env: arg.get_env().map(|e| e.to_string_lossy().into_owned()),
+            env: configured_env(&registered_name(arg)),
             required: arg.is_required_set(),
             repeated: arg.get_num_args().is_some_and(|n| n.max_values() > 1),
             conflicts,
