@@ -24,12 +24,13 @@ fn version_matches_the_crate_version() {
         .stdout(format!("cupel {}\n", env!("CARGO_PKG_VERSION")));
 }
 
+/// Usage goes to stderr for people; stdout carries the usage-error envelope (ADR-017).
 #[test]
 fn no_arguments_prints_usage_to_stderr_and_exits_2() {
     cupel()
         .assert()
         .code(2)
-        .stdout(predicate::str::is_empty())
+        .stdout(predicate::str::contains("\"kind\": \"cli.usage\""))
         .stderr(predicate::str::contains("Usage: cupel"));
 }
 

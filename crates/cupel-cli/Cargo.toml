@@ -14,11 +14,15 @@ name = "cupel"
 path = "src/main.rs"
 
 [dependencies]
+cupel-core.workspace = true
 clap.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
 
 [dev-dependencies]
 assert_cmd.workspace = true
 predicates.workspace = true
+insta.workspace = true
 
 [lints]
 workspace = true

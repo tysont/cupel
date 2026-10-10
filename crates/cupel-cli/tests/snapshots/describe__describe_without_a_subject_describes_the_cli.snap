@@ -1,0 +1,495 @@
+---
+source: crates/cupel-cli/tests/describe.rs
+expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
+---
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "[version]"
+  },
+  "description": {
+    "config_precedence": [
+      "flags",
+      "env",
+      "profile",
+      "cupel.toml",
+      "defaults"
+    ],
+    "exit_codes": [
+      {
+        "code": 0,
+        "meaning": "Ran fully; gate passed or no gate.",
+        "name": "pass",
+        "stability": "stable"
+      },
+      {
+        "code": 1,
+        "meaning": "Ran fully; gate failed.",
+        "name": "fail",
+        "stability": "stable"
+      },
+      {
+        "code": 2,
+        "meaning": "Bad flags or config; the envelope names the fix.",
+        "name": "usage",
+        "stability": "stable"
+      },
+      {
+        "code": 3,
+        "meaning": "Missing tool, oracle, or toolchain; doctor findings attached.",
+        "name": "environment",
+        "stability": "stable"
+      },
+      {
+        "code": 4,
+        "meaning": "Baseline test suite fails or build broken; scoring refused.",
+        "name": "unevaluable",
+        "stability": "stable"
+      },
+      {
+        "code": 5,
+        "meaning": "Timeout or budget hit; the envelope has valid partial results.",
+        "name": "partial",
+        "stability": "stable"
+      },
+      {
+        "code": 6,
+        "meaning": "Cupel bug; the envelope includes a bug-report payload.",
+        "name": "internal",
+        "stability": "stable"
+      }
+    ],
+    "flags": [
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--version",
+        "pending_step": null,
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Print the version and exit.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      }
+    ],
+    "global_flags": [
+      {
+        "conflicts": [],
+        "default": null,
+        "env": "CUPEL_FORMAT",
+        "name": "--format",
+        "pending_step": null,
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Output format; json when stdout is not a terminal, text when it is.",
+        "value": "enum",
+        "value_name": "FORMAT",
+        "values": [
+          "json",
+          "jsonl",
+          "text",
+          "sarif"
+        ]
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--dry-run",
+        "pending_step": "P0.7",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Preview what would run or be written; change nothing.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--describe",
+        "pending_step": null,
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Describe this verb instead of running it, and exit 0.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--config",
+        "pending_step": "P0.4",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "The cupel.toml to use instead of the nearest one.",
+        "value": "path",
+        "value_name": "PATH",
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--profile",
+        "pending_step": "P0.4",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Apply [profile.NAME] from cupel.toml.",
+        "value": "string",
+        "value_name": "NAME",
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--cwd",
+        "pending_step": null,
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "The repository root; defaults to the current directory.",
+        "value": "path",
+        "value_name": "PATH",
+        "values": []
+      },
+      {
+        "conflicts": [
+          "--verbose"
+        ],
+        "default": null,
+        "env": null,
+        "name": "--quiet",
+        "pending_step": null,
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Write no diagnostics to stderr.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      },
+      {
+        "conflicts": [
+          "--quiet"
+        ],
+        "default": null,
+        "env": null,
+        "name": "--verbose",
+        "pending_step": null,
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Write extra diagnostics to stderr.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--events",
+        "pending_step": "P0.7",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Stream progress events as JSON lines.",
+        "value": "string",
+        "value_name": "PATH|stderr",
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--timeout",
+        "pending_step": "P0.7",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Stop after this long, keeping partial results.",
+        "value": "duration",
+        "value_name": "DURATION",
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--seed",
+        "pending_step": "P0.7",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Seed for generative checks; recorded in the envelope.",
+        "value": "integer",
+        "value_name": "N",
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--limit",
+        "pending_step": "P0.5",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Return at most N findings.",
+        "value": "integer",
+        "value_name": "N",
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--offset",
+        "pending_step": "P0.5",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Skip the first N findings.",
+        "value": "integer",
+        "value_name": "N",
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--no-color",
+        "pending_step": "P0.5",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Render text without color.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      },
+      {
+        "conflicts": [
+          "--install"
+        ],
+        "default": null,
+        "env": null,
+        "name": "--no-install",
+        "pending_step": "P3.1",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Never install tools; the default unless stdout is a terminal.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      },
+      {
+        "conflicts": [
+          "--no-install"
+        ],
+        "default": null,
+        "env": null,
+        "name": "--install",
+        "pending_step": "P3.1",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Install missing tools that producers need.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--write",
+        "pending_step": "P0.7",
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Permit writes outside .cupel/.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
+        "name": "--help",
+        "pending_step": null,
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Print help and exit.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      }
+    ],
+    "name": "cupel",
+    "schemas": [
+      {
+        "name": "run",
+        "stability": "experimental",
+        "url": "https://cupel.dev/schema/v1/run.json"
+      },
+      {
+        "name": "finding",
+        "stability": "experimental",
+        "url": "https://cupel.dev/schema/v1/finding.json"
+      },
+      {
+        "name": "events",
+        "stability": "experimental",
+        "url": "https://cupel.dev/schema/v1/events.json"
+      },
+      {
+        "name": "plugin",
+        "stability": "experimental",
+        "url": "https://cupel.dev/schema/v1/plugin.json"
+      }
+    ],
+    "stability": "experimental",
+    "subject": "cli",
+    "summary": "Cupel grades what a coding agent produced.",
+    "verbs": [
+      {
+        "name": "init",
+        "pending_step": "P0.8",
+        "stability": "experimental",
+        "summary": "Detect languages, project roots, and test commands; write cupel.toml."
+      },
+      {
+        "name": "doctor",
+        "pending_step": "P0.8",
+        "stability": "experimental",
+        "summary": "Verify the toolchain, tool producers, oracles, and configuration."
+      },
+      {
+        "name": "describe",
+        "pending_step": null,
+        "stability": "experimental",
+        "summary": "Describe the CLI, a verb, a check, a finding kind, or a schema."
+      },
+      {
+        "name": "check",
+        "pending_step": "P2.1",
+        "stability": "experimental",
+        "summary": "Run checks over a scope at a depth and evaluate the gate."
+      },
+      {
+        "name": "survey",
+        "pending_step": "P2.9",
+        "stability": "experimental",
+        "summary": "Rank a whole tree without a baseline: hot spots, weak tests, clones."
+      },
+      {
+        "name": "explain",
+        "pending_step": "P2.2",
+        "stability": "experimental",
+        "summary": "Give full context and remediation for one finding or check result."
+      },
+      {
+        "name": "baseline",
+        "pending_step": "P2.2",
+        "stability": "experimental",
+        "summary": "Set, show, diff, export, or import the baseline runs are compared with."
+      },
+      {
+        "name": "oracle",
+        "pending_step": "P5.2",
+        "stability": "experimental",
+        "summary": "Add, list, remove, or verify the oracles differential checks compare with."
+      },
+      {
+        "name": "tests",
+        "pending_step": "P3.3",
+        "stability": "experimental",
+        "summary": "List the tests that cover a scope, with a command to run them."
+      },
+      {
+        "name": "suppress",
+        "pending_step": "P2.2",
+        "stability": "experimental",
+        "summary": "Suppress a finding, with a reason and an optional expiry."
+      },
+      {
+        "name": "serve",
+        "pending_step": "P4.2",
+        "stability": "experimental",
+        "summary": "Run the daemon and MCP server with warm caches and event streaming."
+      }
+    ],
+    "version": "[version]"
+  },
+  "exit_code": 0,
+  "findings": [],
+  "next_actions": [],
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {},
+      "sources": []
+    },
+    "depth": null,
+    "duration_ms": 0,
+    "git": null,
+    "id": "[run id]",
+    "scope": null,
+    "seed": 0,
+    "started": "[started]",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}
