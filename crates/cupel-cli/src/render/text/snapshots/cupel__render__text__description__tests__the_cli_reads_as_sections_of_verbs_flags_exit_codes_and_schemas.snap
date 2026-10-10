@@ -21,7 +21,6 @@ global flags
   --format FORMAT       Output format; json when stdout is not a terminal, text when it is.
                         one of json, jsonl, text, sarif · env CUPEL_FORMAT
   --dry-run             Preview what would run or be written; change nothing.
-                        pending P0.7
   --describe            Describe this verb instead of running it, and exit 0.
   --config PATH         The cupel.toml to use instead of the nearest one.
                         path
@@ -33,12 +32,11 @@ global flags
                         conflicts with --verbose
   --verbose             Write extra diagnostics to stderr.
                         conflicts with --quiet
-  --events PATH|stderr  Stream progress events as JSON lines.
-                        pending P0.7
+  --events PATH|stderr  Stream progress events as JSON lines to stderr or a file under .cupel/.
   --timeout DURATION    Stop after this long, keeping partial results.
-                        duration · pending P0.7
+                        duration
   --seed N              Seed for generative checks; recorded in the envelope.
-                        integer · pending P0.7
+                        integer · default random
   --limit N             Return at most N findings.
                         integer
   --offset N            Skip the first N findings.
@@ -50,7 +48,6 @@ global flags
   --install             Install missing tools that producers need.
                         conflicts with --no-install · pending P3.1
   --write               Permit writes outside .cupel/.
-                        pending P0.7
   --help                Print help and exit.
 
 flags without a verb

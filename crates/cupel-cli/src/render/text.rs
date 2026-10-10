@@ -6,7 +6,7 @@ use std::fmt::Write as _;
 
 use cupel_core::{
     CheckResult, Envelope, Finding, GateOutcome, GateResult, Location, NextAction, RunInfo,
-    Severity, Status, Summary,
+    RunPlan, Severity, Skipped, Status, Summary,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -26,6 +26,11 @@ pub fn render(envelope: &Envelope, color: bool) -> String {
             .description
             .as_ref()
             .map(|d| description::render(d, &paint))
+            .unwrap_or_default(),
+        envelope
+            .plan
+            .as_ref()
+            .map(|plan| plan_block(plan, &paint))
             .unwrap_or_default(),
         envelope
             .summary
@@ -229,25 +234,7 @@ fn checks_block(checks: &[CheckResult], paint: &Paint) -> String {
             facts.push(format!("oracle {oracle}"));
         }
         if let Some(skipped) = &check.skipped {
-            let mut why = Vec::new();
-            if let Some(fact) = skipped.fact {
-                why.push(format!("fact {}", name(fact)));
-            }
-            if let Some(lang) = &skipped.lang {
-                why.push(format!("lang {lang}"));
-            }
-            if let Some(tool) = &skipped.tool {
-                why.push(format!("tool {tool}"));
-            }
-            if let Some(see) = &skipped.see {
-                why.push(format!("see `{see}`"));
-            }
-            let why = if why.is_empty() {
-                String::new()
-            } else {
-                format!(" ({})", why.join(", "))
-            };
-            facts.push(format!("skipped: {}{why}", name(skipped.reason)));
+            facts.push(format!("skipped: {}", skip_reason(skipped)));
         }
         let _ = writeln!(
             out,
@@ -256,6 +243,107 @@ fn checks_block(checks: &[CheckResult], paint: &Paint) -> String {
             name(check.status),
             facts.join(" · ")
         );
+    }
+    out
+}
+
+/// A skip's reason followed by whichever of its fact, language, tool, and pointer are present.
+fn skip_reason(skipped: &Skipped) -> String {
+    let mut why = Vec::new();
+    if let Some(fact) = skipped.fact {
+        why.push(format!("fact {}", name(fact)));
+    }
+    if let Some(lang) = &skipped.lang {
+        why.push(format!("lang {lang}"));
+    }
+    if let Some(tool) = &skipped.tool {
+        why.push(format!("tool {tool}"));
+    }
+    if let Some(see) = &skipped.see {
+        why.push(format!("see `{see}`"));
+    }
+    if why.is_empty() {
+        name(skipped.reason)
+    } else {
+        format!("{} ({})", name(skipped.reason), why.join(", "))
+    }
+}
+
+/// A dry run's plan (ADR-020 §6): the estimate, then each non-empty list, with diffs indented.
+fn plan_block(plan: &RunPlan, paint: &Paint) -> String {
+    let mut out = String::new();
+    labeled(
+        &mut out,
+        "plan",
+        &format!("est {} ms", plan.est_total_ms),
+        paint,
+    );
+    let rows = |out: &mut String, heading: &str, rows: Vec<(String, String)>| {
+        if rows.is_empty() {
+            return;
+        }
+        let width = rows.iter().map(|(key, _)| key.len()).max().unwrap_or(0);
+        let _ = writeln!(out, "{}", paint.bold(heading));
+        for (key, value) in rows {
+            if value.is_empty() {
+                let _ = writeln!(out, "  {key}");
+            } else {
+                let _ = writeln!(out, "  {key:<width$}  {}", continued(&value, width + 4));
+            }
+        }
+    };
+    rows(
+        &mut out,
+        "would run",
+        plan.would_run
+            .iter()
+            .map(|check| {
+                let mut facts = vec![
+                    format!("{} targets", check.targets),
+                    format!("est {} ms", check.est_ms),
+                ];
+                if !check.needs.is_empty() {
+                    facts.push(format!("needs {}", check.needs.join(", ")));
+                }
+                let mut value = facts.join(" · ");
+                if let Some(note) = &check.note {
+                    let _ = write!(value, "\n{note}");
+                }
+                (check.id.as_str().to_owned(), value)
+            })
+            .collect(),
+    );
+    rows(
+        &mut out,
+        "would skip",
+        plan.would_skip
+            .iter()
+            .map(|skip| (skip.id.as_str().to_owned(), skip_reason(&skip.skipped)))
+            .collect(),
+    );
+    rows(
+        &mut out,
+        "would install",
+        plan.would_install
+            .iter()
+            .map(|install| {
+                let command = install
+                    .command
+                    .as_ref()
+                    .map(|command| format!("$ {command}"))
+                    .unwrap_or_default();
+                (install.tool.to_string(), command)
+            })
+            .collect(),
+    );
+    if !plan.would_write.is_empty() {
+        let _ = writeln!(out, "{}", paint.bold("would write"));
+        for write in &plan.would_write {
+            let _ = writeln!(out, "  {}", write.path);
+            for line in write.diff.iter().flat_map(|diff| diff.lines()) {
+                let _ = writeln!(out, "    {}", paint.dim(line));
+            }
+        }
     }
     out
 }

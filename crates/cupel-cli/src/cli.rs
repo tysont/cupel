@@ -36,7 +36,6 @@ pub struct GlobalArgs {
     // `CUPEL_FORMAT` is read by configuration, not clap, so `run.config` can report its layer.
     #[arg(long, global = true, value_name = "FORMAT", value_parser = format_parser())]
     pub format: Option<Format>,
-    // Parsed now; the plan envelope arrives with P0.7.
     #[arg(long, global = true)]
     pub dry_run: bool,
     #[arg(long, global = true)]
@@ -51,12 +50,10 @@ pub struct GlobalArgs {
     pub quiet: bool,
     #[arg(long, global = true, conflicts_with = "quiet")]
     pub verbose: bool,
-    // Parsed now; the event sink is P0.7.
     #[arg(long, global = true, value_name = "PATH|stderr")]
     pub events: Option<String>,
-    // Parsed now; duration parsing and cancellation are P0.7.
-    #[arg(long, global = true, value_name = "DURATION")]
-    pub timeout: Option<String>,
+    #[arg(long, global = true, value_name = "DURATION", value_parser = time_limit)]
+    pub timeout: Option<TimeLimit>,
     #[arg(long, global = true, value_name = "N")]
     pub seed: Option<u64>,
     #[arg(long, global = true, value_name = "N")]
@@ -71,7 +68,6 @@ pub struct GlobalArgs {
     // Parsed now; tool installation arrives with the first tool producers in P3.1.
     #[arg(long, global = true, conflicts_with = "no_install")]
     pub install: bool,
-    // Parsed now; the `Writer` that enforces it is P0.7.
     #[arg(long, global = true)]
     pub write: bool,
     #[arg(long, global = true, action = ArgAction::Help)]

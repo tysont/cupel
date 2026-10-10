@@ -6,9 +6,9 @@ use cupel_core::{
     Action, ActionKind, ArgDescription, BaselineRef, CheckId, CheckResult, CheckStatus,
     CommandDescription, ConfigEcho, ConfigSource, CostClass, CupelInfo, Delta, Description,
     Envelope, Evidence, Example, ExitCode, FactKind, Finding, GateOutcome, GateResult, GateRule,
-    GitInfo, LangId, Location, NextAction, RunInfo, ScopeInfo, ScopeMode, Score, Severity,
-    SeverityCounts, SkipReason, Skipped, Stability, Status, Summary, Symbol, Tier, ToolId,
-    ToolchainInfo, ValueType, Verb,
+    GitInfo, LangId, Location, NextAction, PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite,
+    RunInfo, RunPlan, ScopeInfo, ScopeMode, Score, Severity, SeverityCounts, SkipReason, Skipped,
+    Stability, Status, Summary, Symbol, Tier, ToolId, ToolchainInfo, ValueType, Verb,
 };
 use serde_json::{Map, Value, json};
 
@@ -138,7 +138,7 @@ fn description() -> Description {
 
 /// The envelope of a failed `check` run with every field filled: three findings across two
 /// severities and two checks (one new, one suppressed), a run check and a skipped check, a gate
-/// with a passing and a failing rule, and two next actions.
+/// with a passing and a failing rule, two next actions, and a plan with every kind of entry.
 pub fn envelope() -> Envelope {
     let findings = vec![
         finding(0, "tests.mutation", "mutant.survived", Severity::Fail),
@@ -158,7 +158,7 @@ pub fn envelope() -> Envelope {
         summary: summary(),
         next_actions: next_actions(),
         description: Some(description()),
-        plan: None,
+        plan: Some(plan()),
         truncated: false,
         total_findings: 3,
     }
@@ -304,4 +304,55 @@ fn next_actions() -> Vec<NextAction> {
             command: Some("cupel check --changed --depth deep --only gen.differential".to_owned()),
         },
     ]
+}
+
+/// A plan with two checks to run (one with a note), a skip, an install, and two writes (one
+/// with a diff).
+fn plan() -> RunPlan {
+    RunPlan {
+        would_run: vec![
+            PlannedCheck {
+                id: CheckId::from("static.crap"),
+                targets: 11,
+                est_ms: 900,
+                needs: vec!["coverage(cached)".to_owned()],
+                note: None,
+            },
+            PlannedCheck {
+                id: CheckId::from("tests.mutation"),
+                targets: 34,
+                est_ms: 140_000,
+                needs: vec!["coverage(fresh)".to_owned(), "per-test-map".to_owned()],
+                note: Some("19/34 sites cached as killed; 15 will execute".to_owned()),
+            },
+        ],
+        would_skip: vec![PlannedSkip {
+            id: CheckId::from("conc.dst"),
+            skipped: Skipped {
+                reason: SkipReason::Unconfigured,
+                fact: None,
+                lang: Some(LangId::from("rust")),
+                tool: None,
+                see: Some("cupel describe conc.dst".to_owned()),
+            },
+        }],
+        would_install: vec![PlannedInstall {
+            tool: ToolId::from("cargo-llvm-cov"),
+            command: Some("cargo install cargo-llvm-cov".to_owned()),
+        }],
+        would_write: vec![
+            PlannedWrite {
+                path: ".cupel/runs/run_01JA2B3C4D5E6F7G8H9J0KMNPQ.json".to_owned(),
+                diff: None,
+            },
+            PlannedWrite {
+                path: "cupel.toml".to_owned(),
+                diff: Some(
+                    "--- a/cupel.toml\n+++ b/cupel.toml\n@@ -1 +1 @@\n-depth = \"quick\"\n+depth = \"deep\"\n"
+                        .to_owned(),
+                ),
+            },
+        ],
+        est_total_ms: 140_900,
+    }
 }

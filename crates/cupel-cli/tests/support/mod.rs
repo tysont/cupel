@@ -60,12 +60,20 @@ where
     run_with(&mut cupel(), args)
 }
 
+/// Runs `command` with `args` in a fresh temporary working directory, so a verb that keeps a run
+/// record under `.cupel/` never writes into the source tree; tests that inspect what a run
+/// wrote pass `--cwd` explicitly.
 pub fn run_with<I, S>(command: &mut Command, args: I) -> Outcome
 where
     I: IntoIterator<Item = S>,
     S: AsRef<std::ffi::OsStr>,
 {
-    let output = command.args(args).output().expect("cupel runs");
+    let dir = tempfile::tempdir().expect("temporary directory");
+    let output = command
+        .args(args)
+        .current_dir(dir.path())
+        .output()
+        .expect("cupel runs");
     Outcome {
         code: output.status.code().expect("exit code"),
         stdout: String::from_utf8(output.stdout).expect("stdout is UTF-8"),
@@ -78,6 +86,7 @@ pub fn redacted(mut envelope: Value) -> Value {
     envelope["run"]["id"] = json!("[run id]");
     envelope["run"]["started"] = json!("[started]");
     envelope["run"]["duration_ms"] = json!(0);
+    envelope["run"]["seed"] = json!("[seed]");
     envelope["cupel"]["version"] = json!("[version]");
     if let Some(description) = envelope["description"].as_object_mut()
         && description.contains_key("version")

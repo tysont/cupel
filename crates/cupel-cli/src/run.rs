@@ -1,10 +1,11 @@
-// ABOUTME: One invocation's run record: ID, start time, verb, and seed, and the envelope built from it.
+// ABOUTME: One invocation's run state: ID, start time, verb, seed, and time limit, and its envelopes.
 // ABOUTME: Successful verbs and every error path assemble their envelope here, so all share one shape.
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::{
-    ConfigEcho, CostClass, CupelInfo, Description, Envelope, ExitCode, Finding, RunId, RunInfo,
-    Severity, SeverityCounts, Status, Summary, ToolchainInfo, Verb, schema,
+    Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, ExitCode, Finding,
+    RunId, RunInfo, RunPlan, Severity, SeverityCounts, Status, Summary, ToolchainInfo, Verb,
+    schema,
 };
 
 use crate::error::CupelError;
@@ -13,8 +14,10 @@ pub struct Run {
     id: RunId,
     started: SystemTime,
     clock: Instant,
+    /// Fires when `--timeout` passes, counted from the start of the invocation.
+    cancel: Cancellation,
     pub verb: Option<Verb>,
-    /// `--seed`, or 0 until P0.7 generates a random default.
+    /// `--seed`, or a random seed once the command line parsed (ADR-020 §7).
     pub seed: u64,
     /// The command line after `cupel`, for repro strings.
     pub args: Vec<String>,
@@ -32,6 +35,7 @@ impl Run {
             id: RunId::generate(),
             started: SystemTime::now(),
             clock: Instant::now(),
+            cancel: Cancellation::new(),
             verb: None,
             seed: 0,
             args,
@@ -41,9 +45,42 @@ impl Run {
         }
     }
 
+    pub fn id(&self) -> RunId {
+        self.id
+    }
+
+    /// Cancels this run's work `limit` after the invocation started (`--timeout`).
+    pub fn set_timeout(&mut self, limit: Duration) {
+        self.cancel = Cancellation::with_deadline(self.clock + limit);
+    }
+
+    pub fn cancellation(&self) -> &Cancellation {
+        &self.cancel
+    }
+
     /// The envelope of a verb that ran to completion.
     pub fn passed(&self, description: Option<Description>) -> Envelope {
         self.envelope(Status::Pass, ExitCode::Pass, Vec::new(), description)
+    }
+
+    /// The envelope of a `--dry-run`: the plan, and nothing done.
+    pub fn planned(&self, plan: RunPlan) -> Envelope {
+        let mut envelope = self.envelope(Status::Plan, ExitCode::Pass, Vec::new(), None);
+        envelope.plan = Some(plan);
+        envelope
+    }
+
+    /// `envelope` for a run whose work was cut short by cancellation: a finished result becomes
+    /// `partial` (exit 5) with everything it holds kept; an error stays an error (ADR-020 §5).
+    pub fn interrupted(envelope: Envelope) -> Envelope {
+        if envelope.status == Status::Error {
+            return envelope;
+        }
+        Envelope {
+            status: Status::Partial,
+            exit_code: ExitCode::Partial,
+            ..envelope
+        }
     }
 
     /// The envelope reporting `error` as its one finding.
@@ -191,6 +228,32 @@ mod tests {
             r"cupel suppress --reason 'it'\''s flaky' --format=json"
         );
         assert_eq!(Run::start(Vec::new()).repro(), "cupel");
+    }
+
+    #[test]
+    fn interrupted_runs_keep_their_results_but_report_partial() {
+        let run = Run::start(vec!["describe".to_owned()]);
+        let partial = Run::interrupted(run.passed(None));
+        assert_eq!(partial.status, Status::Partial);
+        assert_eq!(partial.exit_code, ExitCode::Partial);
+        let error = run.failed(&CupelError::pending_verb(&["check".to_owned()], "P2.1"));
+        assert_eq!(Run::interrupted(error.clone()), error);
+    }
+
+    #[test]
+    fn a_timeout_counts_from_the_start_of_the_invocation() {
+        let mut run = Run::start(Vec::new());
+        assert!(!run.cancellation().is_cancelled());
+        run.set_timeout(Duration::ZERO);
+        assert!(run.cancellation().is_cancelled());
+    }
+
+    #[test]
+    fn planned_envelopes_carry_the_plan_with_status_plan_and_exit_0() {
+        let envelope = Run::start(Vec::new()).planned(RunPlan::default());
+        assert_eq!(envelope.status, Status::Plan);
+        assert_eq!(envelope.exit_code, ExitCode::Pass);
+        assert_eq!(envelope.plan, Some(RunPlan::default()));
     }
 
     #[test]

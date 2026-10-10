@@ -307,7 +307,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "git": null,
     "id": "[run id]",
     "scope": null,
-    "seed": 0,
+    "seed": "[seed]",
     "started": "[started]",
     "toolchain": {},
     "verb": "describe"

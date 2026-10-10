@@ -18,6 +18,24 @@ cupel check: [1;31mfail[0m (exit 1)
       [1mexamples[0m
         $ cupel baseline set FILE  [2m# Set it. (exit 0)[0m
 
+[1mplan      [0mest 140900 ms
+[1mwould run[0m
+  static.crap     11 targets · est 900 ms · needs coverage(cached)
+  tests.mutation  34 targets · est 140000 ms · needs coverage(fresh), per-test-map
+                  19/34 sites cached as killed; 15 will execute
+[1mwould skip[0m
+  conc.dst  unconfigured (lang rust, see `cupel describe conc.dst`)
+[1mwould install[0m
+  cargo-llvm-cov  $ cargo install cargo-llvm-cov
+[1mwould write[0m
+  .cupel/runs/run_01JA2B3C4D5E6F7G8H9J0KMNPQ.json
+  cupel.toml
+    [2m--- a/cupel.toml[0m
+    [2m+++ b/cupel.toml[0m
+    [2m@@ -1 +1 @@[0m
+    [2m-depth = "quick"[0m
+    [2m+depth = "deep"[0m
+
 [1mgate      [0m[31mfail[0m (gate.changed)
   [31mfail[0m  tests.mutation.score >= 0.80  actual 0.71
   [32mpass[0m  tests.weakening none

@@ -369,7 +369,56 @@ expression: out
       }
     ]
   },
-  "plan": null,
+  "plan": {
+    "would_run": [
+      {
+        "id": "static.crap",
+        "targets": 11,
+        "est_ms": 900,
+        "needs": [
+          "coverage(cached)"
+        ],
+        "note": null
+      },
+      {
+        "id": "tests.mutation",
+        "targets": 34,
+        "est_ms": 140000,
+        "needs": [
+          "coverage(fresh)",
+          "per-test-map"
+        ],
+        "note": "19/34 sites cached as killed; 15 will execute"
+      }
+    ],
+    "would_skip": [
+      {
+        "id": "conc.dst",
+        "reason": "unconfigured",
+        "fact": null,
+        "lang": "rust",
+        "tool": null,
+        "see": "cupel describe conc.dst"
+      }
+    ],
+    "would_install": [
+      {
+        "tool": "cargo-llvm-cov",
+        "command": "cargo install cargo-llvm-cov"
+      }
+    ],
+    "would_write": [
+      {
+        "path": ".cupel/runs/run_01JA2B3C4D5E6F7G8H9J0KMNPQ.json",
+        "diff": null
+      },
+      {
+        "path": "cupel.toml",
+        "diff": "--- a/cupel.toml\n+++ b/cupel.toml\n@@ -1 +1 @@\n-depth = \"quick\"\n+depth = \"deep\"\n"
+      }
+    ],
+    "est_total_ms": 140900
+  },
   "truncated": false,
   "total_findings": 3
 }

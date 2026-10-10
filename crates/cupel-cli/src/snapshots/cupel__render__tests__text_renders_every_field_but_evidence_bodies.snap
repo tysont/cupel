@@ -18,6 +18,24 @@ cupel baseline · Manage named baselines. · experimental · pending P2.2
       examples
         $ cupel baseline set FILE  # Set it. (exit 0)
 
+plan      est 140900 ms
+would run
+  static.crap     11 targets · est 900 ms · needs coverage(cached)
+  tests.mutation  34 targets · est 140000 ms · needs coverage(fresh), per-test-map
+                  19/34 sites cached as killed; 15 will execute
+would skip
+  conc.dst  unconfigured (lang rust, see `cupel describe conc.dst`)
+would install
+  cargo-llvm-cov  $ cargo install cargo-llvm-cov
+would write
+  .cupel/runs/run_01JA2B3C4D5E6F7G8H9J0KMNPQ.json
+  cupel.toml
+    --- a/cupel.toml
+    +++ b/cupel.toml
+    @@ -1 +1 @@
+    -depth = "quick"
+    +depth = "deep"
+
 gate      fail (gate.changed)
   fail  tests.mutation.score >= 0.80  actual 0.71
   pass  tests.weakening none

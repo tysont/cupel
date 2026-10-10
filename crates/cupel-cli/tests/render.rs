@@ -33,8 +33,8 @@ fn jsonl_writes_the_envelope_header_then_each_finding_on_its_own_line() {
 
 #[test]
 fn jsonl_reassembles_into_the_json_envelope() {
-    let (mut header, findings) = jsonl(&run(["check", "--format", "jsonl"]).stdout);
-    let mut whole = run(["check", "--format", "json"]).envelope();
+    let (mut header, findings) = jsonl(&run(["check", "--format", "jsonl", "--seed", "1"]).stdout);
+    let mut whole = run(["check", "--format", "json", "--seed", "1"]).envelope();
     header["findings"] = Value::Array(findings);
     for envelope in [&mut header, &mut whole] {
         envelope["run"]["id"] = json!("[run id]");

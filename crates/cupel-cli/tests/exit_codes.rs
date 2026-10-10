@@ -1,4 +1,4 @@
-// ABOUTME: Integration tests proving each exit code reachable in P0.3 via a deliberate trigger,
+// ABOUTME: Integration tests proving each exit code reachable so far via a deliberate trigger,
 // ABOUTME: and that every error path still writes one valid envelope to stdout.
 mod support;
 
@@ -159,13 +159,12 @@ fn seed_is_echoed_in_the_envelope() {
 }
 
 #[test]
-fn later_step_flags_parse_and_change_nothing() {
-    let baseline = support::redacted(run(["describe"]).envelope());
+fn flags_that_do_not_apply_to_describe_change_nothing() {
+    let baseline = support::redacted(run(["describe", "--seed", "1"]).envelope());
     let outcome = run([
         "describe",
-        "--dry-run",
-        "--events",
-        "stderr",
+        "--seed",
+        "1",
         "--timeout",
         "10s",
         "--limit",
@@ -178,6 +177,30 @@ fn later_step_flags_parse_and_change_nothing() {
     ]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     assert_eq!(support::redacted(outcome.envelope()), baseline);
+}
+
+#[test]
+fn exit_5_when_the_timeout_cuts_work_short_keeps_the_partial_results() {
+    let started = std::time::Instant::now();
+    let outcome = run_with(
+        cupel().env("CUPEL_DEBUG_SLEEP_MS", "60000"),
+        ["describe", "--timeout", "200ms"],
+    );
+    assert!(
+        started.elapsed() < std::time::Duration::from_secs(20),
+        "the slow task was cancelled, not waited out: {:?}",
+        started.elapsed()
+    );
+    assert_eq!(outcome.code, 5, "{}", outcome.stdout);
+    let envelope = outcome.envelope();
+    assert_eq!(envelope["status"], json!("partial"));
+    assert_eq!(envelope["exit_code"], json!(5));
+    assert_eq!(envelope["findings"], json!([]));
+    assert_eq!(
+        envelope["description"]["subject"],
+        json!("cli"),
+        "results completed before the timeout are included"
+    );
 }
 
 #[test]

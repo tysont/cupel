@@ -509,8 +509,7 @@ fn global_flags() -> Vec<ArgDescription> {
         switch(
             "--dry-run",
             "Preview what would run or be written; change nothing.",
-        )
-        .pending("P0.7"),
+        ),
         switch(
             "--describe",
             "Describe this verb instead of running it, and exit 0.",
@@ -540,23 +539,21 @@ fn global_flags() -> Vec<ArgDescription> {
             "--events",
             ValueType::String,
             "PATH|stderr",
-            "Stream progress events as JSON lines.",
-        )
-        .pending("P0.7"),
+            "Stream progress events as JSON lines to stderr or a file under .cupel/.",
+        ),
         valued(
             "--timeout",
             ValueType::Duration,
             "DURATION",
             "Stop after this long, keeping partial results.",
-        )
-        .pending("P0.7"),
+        ),
         valued(
             "--seed",
             ValueType::Integer,
             "N",
             "Seed for generative checks; recorded in the envelope.",
         )
-        .pending("P0.7"),
+        .default_value("random"),
         valued(
             "--limit",
             ValueType::Integer,
@@ -579,7 +576,7 @@ fn global_flags() -> Vec<ArgDescription> {
         switch("--install", "Install missing tools that producers need.")
             .pending("P3.1")
             .conflicts(&["--no-install"]),
-        switch("--write", "Permit writes outside .cupel/.").pending("P0.7"),
+        switch("--write", "Permit writes outside .cupel/."),
         switch("--help", "Print help and exit."),
     ]
 }

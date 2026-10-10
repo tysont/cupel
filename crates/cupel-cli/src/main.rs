@@ -4,6 +4,7 @@ mod app;
 mod cli;
 mod describe;
 mod error;
+mod events;
 mod format;
 mod page;
 mod registry;
