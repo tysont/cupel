@@ -1,0 +1,88 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 3,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "install_tool",
+        "priority": 1,
+        "summary": "Install a cupel matching `>=99.0`, or change required_version."
+      },
+      "check": "doctor",
+      "confidence": 1.0,
+      "detail": "This binary's version is the envelope's `cupel.version`.",
+      "evidence": {
+        "required": ">=99.0"
+      },
+      "id": "fnd_202eb1",
+      "kind": "doctor.version-unsatisfied",
+      "location": null,
+      "new_since_baseline": false,
+      "repro": "cupel doctor --format json",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_202eb1 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "This cupel does not satisfy required_version `>=99.0`"
+    }
+  ],
+  "next_actions": [],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": ">=99.0",
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "doctor"
+  },
+  "status": "error",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 1,
+  "truncated": false
+}

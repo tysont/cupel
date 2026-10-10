@@ -173,14 +173,27 @@ fn init_verb() -> CommandDescription {
 fn doctor_verb() -> CommandDescription {
     verb(
         "doctor",
-        "Verify the toolchain, tool producers, oracles, and configuration.",
-        Some("P0.8"),
-        vec![switch("--fix", "Attempt to fix what doctor finds.")],
-        vec![example(
-            "cupel doctor",
-            "Check this repository's setup.",
-            ExitCode::Usage,
-        )],
+        "Verify the binary's version, the configuration, .cupel/ write access, and needed tools.",
+        None,
+        vec![
+            switch(
+                "--fix",
+                "Install missing tools; with --install, without asking.",
+            )
+            .pending("P3.1"),
+        ],
+        vec![
+            example(
+                "cupel doctor",
+                "Check this repository's setup; exits 3 if something required is missing.",
+                ExitCode::Pass,
+            ),
+            example(
+                "cupel doctor --dry-run",
+                "A dry run; doctor writes nothing worth planning, so the plan is empty.",
+                ExitCode::Pass,
+            ),
+        ],
     )
 }
 

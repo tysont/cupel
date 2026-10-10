@@ -2,10 +2,10 @@
 // ABOUTME: `cli.*` finding: usage errors and unbuilt features exit 2, internal errors exit 6.
 use clap::error::{ContextKind, ContextValue, ErrorKind};
 use cupel_core::config::ConfigError;
-use cupel_core::{
-    Action, ActionKind, CheckId, Evidence, ExitCode, Finding, FindingId, Severity, Tier,
-};
-use serde_json::{Map, Value, json};
+use cupel_core::{ActionKind, ExitCode, Finding, Severity};
+use serde_json::json;
+
+use crate::problem::Problem;
 
 /// Why a verb did not produce a result. See ADR-018 for the findings each variant becomes.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
@@ -112,35 +112,31 @@ impl CupelError {
 
     /// The finding that reports this error. `repro` is the command line that produced it.
     pub fn finding(&self, repro: &str) -> Finding {
-        let (kind, subject, title, detail, evidence, action, fix) = match self {
-            Self::Usage(usage) => (
-                "cli.usage",
-                usage.subject.as_str(),
-                usage.title.clone(),
-                usage.detail.clone(),
-                json!({"argument": usage.argument, "value": usage.value, "valid": usage.valid}),
-                ActionKind::Configure,
-                usage.fix.clone(),
-            ),
-            Self::NotImplemented(pending) => (
-                "cli.not-implemented",
-                pending.subject.as_str(),
-                self.to_string(),
-                Some(format!("Implemented in plan step {}.", pending.step)),
-                json!({"step": pending.step}),
-                ActionKind::Review,
-                pending.fix.clone(),
-            ),
-            Self::Internal(report) => (
-                "cli.internal",
-                report.location.as_str(),
-                format!("Cupel failed internally: {}", report.message),
-                Some(
+        let problem = match self {
+            Self::Usage(usage) => usage.problem("cli", "cli.usage"),
+            Self::NotImplemented(pending) => Problem {
+                check: "cli",
+                kind: "cli.not-implemented",
+                subject: pending.subject.clone(),
+                severity: Severity::Fail,
+                title: self.to_string(),
+                detail: Some(format!("Implemented in plan step {}.", pending.step)),
+                evidence: json!({"step": pending.step}),
+                action: ActionKind::Review,
+                fix: pending.fix.clone(),
+            },
+            Self::Internal(report) => Problem {
+                check: "cli",
+                kind: "cli.internal",
+                subject: report.location.clone(),
+                severity: Severity::Fail,
+                title: format!("Cupel failed internally: {}", report.message),
+                detail: Some(
                     "This is a bug in Cupel, not in the code under test. Please report it with \
                      the bug_report evidence."
                         .to_owned(),
                 ),
-                json!({"bug_report": {
+                evidence: json!({"bug_report": {
                     "version": env!("CARGO_PKG_VERSION"),
                     "os": std::env::consts::OS,
                     "arch": std::env::consts::ARCH,
@@ -149,55 +145,18 @@ impl CupelError {
                     "args": report.args,
                     "report": concat!(env!("CARGO_PKG_REPOSITORY"), "/issues/new"),
                 }}),
-                ActionKind::Review,
-                "Report this Cupel bug with the bug_report evidence attached.".to_owned(),
-            ),
-        };
-        let check = CheckId::from("cli");
-        let id = FindingId::for_subject(&check, kind, subject);
-        Finding {
-            suppress: format!("cupel suppress {id} --reason '…'"),
-            id,
-            check,
-            kind: kind.to_owned(),
-            severity: Severity::Fail,
-            confidence: 1.0,
-            tier: Tier::try_from(0).expect("tier 0 is valid"),
-            symbol: None,
-            location: None,
-            title,
-            detail,
-            evidence: Evidence(object(evidence)),
-            action: Action {
-                kind: action,
-                priority: 1,
-                summary: fix,
-                hints: Map::new(),
+                action: ActionKind::Review,
+                fix: "Report this Cupel bug with the bug_report evidence attached.".to_owned(),
             },
-            repro: repro.to_owned(),
-            new_since_baseline: false,
-            suppressed: false,
-        }
+        };
+        problem.finding(repro)
     }
 }
 
 impl From<cupel_core::Error> for CupelError {
     /// Core errors reach the CLI from configuration; every one is a usage error (ADR-017).
     fn from(error: cupel_core::Error) -> Self {
-        match error {
-            cupel_core::Error::Config(config) => Usage::from_config(&config).into(),
-            other => Usage {
-                subject: "configuration".to_owned(),
-                title: other.to_string(),
-                fix: "Fix the configuration; `cupel describe schema config` gives its shape."
-                    .to_owned(),
-                detail: None,
-                argument: None,
-                value: None,
-                valid: Vec::new(),
-            }
-            .into(),
-        }
+        Usage::from_core(&error).into()
     }
 }
 
@@ -207,14 +166,40 @@ impl From<Usage> for CupelError {
     }
 }
 
-fn object(value: Value) -> Map<String, Value> {
-    match value {
-        Value::Object(map) => map,
-        _ => Map::new(),
-    }
-}
-
 impl Usage {
+    /// Describes a core error, which reaches the CLI from configuration.
+    pub fn from_core(error: &cupel_core::Error) -> Self {
+        match error {
+            cupel_core::Error::Config(config) => Self::from_config(config),
+            other => Self {
+                subject: "configuration".to_owned(),
+                title: other.to_string(),
+                fix: "Fix the configuration; `cupel describe schema config` gives its shape."
+                    .to_owned(),
+                detail: None,
+                argument: None,
+                value: None,
+                valid: Vec::new(),
+            },
+        }
+    }
+
+    /// This usage problem as `check`'s finding of `kind`, asking to configure: its evidence
+    /// names the argument, the value given, and the valid values.
+    pub fn problem(&self, check: &'static str, kind: &'static str) -> Problem {
+        Problem {
+            check,
+            kind,
+            subject: self.subject.clone(),
+            severity: Severity::Fail,
+            title: self.title.clone(),
+            detail: self.detail.clone(),
+            evidence: json!({"argument": self.argument, "value": self.value, "valid": self.valid}),
+            action: ActionKind::Configure,
+            fix: self.fix.clone(),
+        }
+    }
+
     /// Describes a configuration problem: which file, variable, or flag is at fault, and the fix.
     /// The subject is the flag, variable, file, or key the user edits (ADR-016).
     pub fn from_config(error: &ConfigError) -> Self {
@@ -410,6 +395,9 @@ fn all(error: &clap::Error, kind: ContextKind) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
+    use cupel_core::{CheckId, FindingId};
+    use serde_json::Value;
+
     use super::*;
 
     fn report() -> BugReport {

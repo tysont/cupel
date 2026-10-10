@@ -165,6 +165,18 @@ impl Writer {
         Ok(target)
     }
 
+    /// Proves this writer's area can be written: creates it if needed (with `.cupel/.gitignore`),
+    /// then creates and removes a uniquely named file in it. A recording writer touches nothing.
+    pub fn probe(&self) -> Result<()> {
+        if self.recorded.is_some() {
+            return Ok(());
+        }
+        let probe = self.area.join(format!(".probe-{}", RunId::generate()));
+        self.create_parent(&probe)?;
+        File::create_new(&probe).map_err(|error| WriteError::io(&probe, &error))?;
+        fs::remove_file(&probe).map_err(|error| WriteError::io(&probe, &error))
+    }
+
     /// Opens `path` for streaming output, truncating it. A stream is an output channel the user
     /// asked for (such as `--events`), so it is opened even by a recording writer.
     pub fn stream(&self, path: &Path) -> Result<File> {

@@ -398,9 +398,9 @@
       },
       {
         "name": "doctor",
-        "pending_step": "P0.8",
+        "pending_step": null,
         "stability": "experimental",
-        "summary": "Verify the toolchain, tool producers, oracles, and configuration."
+        "summary": "Verify the binary's version, the configuration, .cupel/ write access, and needed tools."
       },
       {
         "name": "describe",

@@ -124,7 +124,10 @@ fn exit_2_for_every_unimplemented_verb_names_its_plan_step() {
         let detail = finding["detail"].as_str().unwrap();
         assert!(detail.contains(step), "{example}: {detail}");
     }
-    assert_eq!(pending, 9, "every verb but describe and init is pending");
+    assert_eq!(
+        pending, 8,
+        "every verb but describe, init, and doctor is pending"
+    );
 }
 
 #[test]
@@ -177,6 +180,18 @@ fn flags_that_do_not_apply_to_describe_change_nothing() {
     ]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     assert_eq!(support::redacted(outcome.envelope()), baseline);
+}
+
+#[test]
+fn exit_3_when_doctor_finds_something_required_missing() {
+    let repo = support::Repo::new();
+    repo.write("cupel.toml", "required_version = \">=99.0\"\n");
+    let outcome = repo.run(&["doctor"]);
+    assert_eq!(outcome.code, 3, "{}", outcome.stdout);
+    let envelope = outcome.envelope();
+    assert_eq!(envelope["status"], json!("error"));
+    assert_eq!(envelope["exit_code"], json!(3));
+    assert_eq!(envelope["findings"][0]["check"], json!("doctor"));
 }
 
 #[test]

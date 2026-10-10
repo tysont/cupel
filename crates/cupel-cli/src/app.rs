@@ -20,7 +20,7 @@ use crate::events::Events;
 use crate::format::{self, Rendering};
 use crate::page::Page;
 use crate::run::Run;
-use crate::{describe, init, registry, render};
+use crate::{describe, doctor, init, registry, render};
 
 /// Everything an invocation reads from its process. `main` gathers it once; nothing else looks
 /// at the process environment or working directory.
@@ -206,9 +206,9 @@ fn configured(
 ) -> (Envelope, Rendering) {
     let config = match Config::load(&config_request(environment, cli, writer.root().to_owned())) {
         Ok(config) => config,
-        Err(_) if runs_without_configuration(cli) => {
+        Err(error) if runs_without_configuration(cli) => {
             let envelope = guarded(run, stderr, cli.global.quiet, || {
-                execute(run, cli, environment, writer, events)
+                execute(run, cli, environment, writer, events, Err(&error))
             });
             return (envelope, recovered_rendering(environment));
         }
@@ -236,15 +236,18 @@ fn configured(
         let _ = writeln!(stderr, "cupel: format: {}", format.as_str());
     }
     let envelope = guarded(run, stderr, cli.global.quiet, || {
-        execute(run, cli, environment, writer, events)
+        execute(run, cli, environment, writer, events, Ok(&config))
     });
     (envelope, rendering)
 }
 
-/// `init` runs even when configuration does not load: it is the verb that replaces a broken
-/// `cupel.toml` (ADR-021 §6).
+/// `init` and `doctor` run even when configuration does not load: `init` replaces a broken
+/// `cupel.toml` and `doctor` reports it (ADR-021 §6, ADR-022 §2).
 fn runs_without_configuration(cli: &Cli) -> bool {
-    matches!(cli.verb, Some(VerbArgs::Init { .. }))
+    matches!(
+        cli.verb,
+        Some(VerbArgs::Init { .. } | VerbArgs::Doctor { .. })
+    )
 }
 
 /// What configuration needs from the command line and the environment.
@@ -274,14 +277,16 @@ fn recovered_rendering(environment: &Environment) -> Rendering {
     format::rendering(recovered.format).unwrap_or(Rendering::Json)
 }
 
-/// Runs the verb. A dry run plans instead; a run whose slow work the timeout cut short reports
-/// its results as partial (ADR-020 §5, §6).
+/// Runs the verb with `config`, the loaded configuration or why it did not load. A dry run
+/// plans instead; a run whose slow work the timeout cut short reports its results as partial
+/// (ADR-020 §5, §6).
 fn execute(
     run: &Run,
     cli: &Cli,
     environment: &Environment,
     writer: &Writer,
     events: &mut dyn EventSink,
+    config: Result<&Config, &cupel_core::Error>,
 ) -> Result<Envelope, CupelError> {
     assert!(
         !environment.debug_panic(),
@@ -305,6 +310,14 @@ fn execute(
                 Ok(plan(run, RunPlan::default(), writer, events))
             } else {
                 Ok(described)
+            }
+        }
+        Some(VerbArgs::Doctor { fix }) => {
+            if dry_run {
+                // `doctor` writes only its probe and run record; its plan is empty (ADR-022 §6).
+                Ok(plan(run, RunPlan::default(), writer, events))
+            } else {
+                Ok(doctor::run(run, config, writer, *fix))
             }
         }
         Some(VerbArgs::Init { force }) => {

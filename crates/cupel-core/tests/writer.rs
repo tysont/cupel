@@ -368,3 +368,36 @@ fn a_missing_root_is_an_io_error() {
         Err(Error::Write(WriteError::Io { .. }))
     ));
 }
+
+#[test]
+fn a_probe_creates_cupel_and_leaves_only_its_gitignore() {
+    let repo = Repo::new();
+    repo.writer(false).probe().unwrap();
+    assert_eq!(repo.files(), [".cupel/.gitignore"]);
+    repo.writer(false).probe().unwrap();
+    assert_eq!(
+        repo.files(),
+        [".cupel/.gitignore"],
+        "the probe file is removed"
+    );
+}
+
+#[test]
+fn a_probe_fails_when_cupel_is_not_a_directory() {
+    let repo = Repo::new();
+    fs::write(repo.path(".cupel"), "").unwrap();
+    match repo.writer(false).probe() {
+        Err(Error::Write(WriteError::Io { path, .. })) => {
+            assert!(path.starts_with(repo.path(".cupel")), "{}", path.display());
+        }
+        other => panic!("expected an I/O error, got {other:?}"),
+    }
+}
+
+#[test]
+fn a_recording_probe_touches_nothing() {
+    let repo = Repo::new();
+    repo.writer(false).recording().probe().unwrap();
+    assert!(repo.files().is_empty());
+    assert!(!repo.path(".cupel").exists());
+}

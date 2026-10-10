@@ -19,6 +19,7 @@ serde_json = "1.0.152"
 toml = { version = "1.1.8", features = ["preserve_order"] }
 schemars = "1.2.2"
 blake3 = "1.8.7"
+semver = "1.0.28"
 ulid = "3.0.0"
 thiserror = "2.0.21"
 assert_cmd = "2.2.2"

@@ -63,6 +63,16 @@ impl Run {
         self.envelope(Status::Pass, ExitCode::Pass, Vec::new(), description)
     }
 
+    /// The envelope of a verb that ran and reports `findings` with this outcome.
+    pub fn reported(
+        &self,
+        status: Status,
+        exit_code: ExitCode,
+        findings: Vec<Finding>,
+    ) -> Envelope {
+        self.envelope(status, exit_code, findings, None)
+    }
+
     /// The envelope of a `--dry-run`: the plan, and nothing done.
     pub fn planned(&self, plan: RunPlan) -> Envelope {
         let mut envelope = self.envelope(Status::Plan, ExitCode::Pass, Vec::new(), None);
