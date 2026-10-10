@@ -7,7 +7,7 @@ cupel describe: pass (exit 0)
 cupel [version] · Cupel grades what a coding agent produced. · experimental
 
 verbs
-  init      Detect languages, project roots, and test commands; write cupel.toml. · pending P0.8
+  init      Detect project roots, languages, and test, coverage, and bench commands; write cupel.toml.
   doctor    Verify the toolchain, tool producers, oracles, and configuration. · pending P0.8
   describe  Describe the CLI, a verb, a check, a finding kind, or a schema.
   check     Run checks over a scope at a depth and evaluate the gate. · pending P2.1

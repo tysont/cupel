@@ -5,12 +5,15 @@
 //! A golden test runs the built `cupel` binary with [`run_cupel`], redacts the fields that vary
 //! between runs with [`redact`], and compares the result with `golden/<name>.json` through
 //! [`assert_golden`]. `UPDATE_GOLDENS=1 make test` rewrites goldens instead of comparing.
-//! The volatile fields, placeholders, and file format are fixed by ADR-003.
+//! The volatile fields, placeholders, and file format are fixed by ADR-003. Fixture
+//! repositories live under `repos/`; [`copy_repo`] copies one into a scratch directory to run in.
 
 mod golden;
 mod redact;
+mod repos;
 mod run;
 
 pub use golden::{GoldenError, GoldenMode, Goldens, assert_golden, canonical_json};
 pub use redact::redact;
+pub use repos::{copy_repo, repo_path};
 pub use run::{Outcome, run_cupel};

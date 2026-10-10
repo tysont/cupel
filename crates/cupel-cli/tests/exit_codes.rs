@@ -124,7 +124,7 @@ fn exit_2_for_every_unimplemented_verb_names_its_plan_step() {
         let detail = finding["detail"].as_str().unwrap();
         assert!(detail.contains(step), "{example}: {detail}");
     }
-    assert_eq!(pending, 10, "every verb but describe is pending in P0.3");
+    assert_eq!(pending, 9, "every verb but describe and init is pending");
 }
 
 #[test]

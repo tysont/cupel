@@ -20,7 +20,7 @@ use crate::events::Events;
 use crate::format::{self, Rendering};
 use crate::page::Page;
 use crate::run::Run;
-use crate::{describe, registry, render};
+use crate::{describe, init, registry, render};
 
 /// Everything an invocation reads from its process. `main` gathers it once; nothing else looks
 /// at the process environment or working directory.
@@ -146,7 +146,7 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     let writer = root.and_then(|root| {
         let writer = Writer::new(&root, cli.global.write)
             .map_err(|_| not_a_directory(&root.display().to_string()))?;
-        Ok(if cli.global.dry_run {
+        Ok(if cli.plans_only() {
             writer.recording()
         } else {
             writer
@@ -189,11 +189,9 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
 }
 
 /// Every parsed run of a verb other than `describe` keeps its envelope under `.cupel/runs/`,
-/// except a dry run, which writes nothing (ADR-020 §3).
+/// except a dry run or an `init` preview, which write nothing (ADR-020 §3, ADR-021 §5).
 fn keeps_run_record(run: &Run, cli: &Cli) -> bool {
-    !cli.global.dry_run
-        && !cli.global.describe
-        && run.verb.is_some_and(|verb| verb != Verb::Describe)
+    !cli.plans_only() && !cli.global.describe && run.verb.is_some_and(|verb| verb != Verb::Describe)
 }
 
 /// Loads configuration, chooses the format, and runs the verb. Errors before the format is
@@ -208,6 +206,12 @@ fn configured(
 ) -> (Envelope, Rendering) {
     let config = match Config::load(&config_request(environment, cli, writer.root().to_owned())) {
         Ok(config) => config,
+        Err(_) if runs_without_configuration(cli) => {
+            let envelope = guarded(run, stderr, cli.global.quiet, || {
+                execute(run, cli, environment, writer, events)
+            });
+            return (envelope, recovered_rendering(environment));
+        }
         Err(error) => return (run.failed(&error.into()), recovered_rendering(environment)),
     };
     run.config = config.echo();
@@ -235,6 +239,12 @@ fn configured(
         execute(run, cli, environment, writer, events)
     });
     (envelope, rendering)
+}
+
+/// `init` runs even when configuration does not load: it is the verb that replaces a broken
+/// `cupel.toml` (ADR-021 §6).
+fn runs_without_configuration(cli: &Cli) -> bool {
+    matches!(cli.verb, Some(VerbArgs::Init { .. }))
 }
 
 /// What configuration needs from the command line and the environment.
@@ -282,7 +292,7 @@ fn execute(
         return describe::command(run, &words);
     }
     let dry_run = cli.global.dry_run;
-    let cut_short = !dry_run
+    let cut_short = !cli.plans_only()
         && environment
             .debug_sleep()
             .is_some_and(|duration| !run.cancellation().wait(duration));
@@ -295,6 +305,20 @@ fn execute(
                 Ok(plan(run, RunPlan::default(), writer, events))
             } else {
                 Ok(described)
+            }
+        }
+        Some(VerbArgs::Init { force }) => {
+            if cli.plans_only() {
+                // A preview shows what `--write` would do, so its recording writer may plan
+                // writes outside `.cupel/`; it never writes anything.
+                let preview = Writer::new(writer.root(), true)?.recording();
+                init::write(&preview, *force)?;
+                let mut envelope = plan(run, RunPlan::default(), &preview, events);
+                envelope.next_actions.push(init::apply(*force));
+                Ok(envelope)
+            } else {
+                init::write(writer, *force)?;
+                Ok(run.passed(None))
             }
         }
         Some(verb) => {

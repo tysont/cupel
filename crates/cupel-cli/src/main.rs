@@ -3,9 +3,12 @@
 mod app;
 mod cli;
 mod describe;
+mod detect;
 mod error;
 mod events;
 mod format;
+mod git;
+mod init;
 mod page;
 mod registry;
 mod render;

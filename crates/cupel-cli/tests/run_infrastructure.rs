@@ -3,64 +3,13 @@
 mod support;
 
 use std::fs;
-use std::path::{Path, PathBuf};
 
 use serde_json::{Value, json};
-use support::{Outcome, cupel, run, run_with};
-use tempfile::TempDir;
+use support::{Repo, cupel, run, run_with};
 
-/// A temporary repository the binary is pointed at with `--cwd`.
-struct Repo {
-    dir: TempDir,
-}
-
-impl Repo {
-    fn new() -> Self {
-        Self {
-            dir: tempfile::tempdir().expect("temporary directory"),
-        }
-    }
-
-    fn root(&self) -> PathBuf {
-        self.dir.path().canonicalize().unwrap()
-    }
-
-    fn path(&self, relative: &str) -> PathBuf {
-        self.root().join(relative)
-    }
-
-    /// Runs cupel with `--cwd` set to this repository.
-    fn run(&self, args: &[&str]) -> Outcome {
-        let root = self.root().display().to_string();
-        let mut all: Vec<&str> = args.to_vec();
-        all.extend(["--cwd", root.as_str()]);
-        run(all)
-    }
-
-    /// Every path under the root with its content, sorted.
-    fn tree(&self) -> Vec<(String, Vec<u8>)> {
-        fn walk(dir: &Path, root: &Path, out: &mut Vec<(String, Vec<u8>)>) {
-            for entry in fs::read_dir(dir).unwrap() {
-                let path = entry.unwrap().path();
-                let name = path.strip_prefix(root).unwrap().display().to_string();
-                if path.is_dir() {
-                    out.push((format!("{name}/"), Vec::new()));
-                    walk(&path, root, out);
-                } else {
-                    out.push((name, fs::read(&path).unwrap()));
-                }
-            }
-        }
-        let mut out = Vec::new();
-        walk(&self.root(), &self.root(), &mut out);
-        out.sort();
-        out
-    }
-
-    /// The lines of an events file, parsed.
-    fn events(&self, relative: &str) -> Vec<Value> {
-        lines(&fs::read_to_string(self.path(relative)).expect("events file exists"))
-    }
+/// The lines of an events file in `repo`, parsed.
+fn events(repo: &Repo, relative: &str) -> Vec<Value> {
+    lines(&fs::read_to_string(repo.path(relative)).expect("events file exists"))
 }
 
 fn lines(text: &str) -> Vec<Value> {
@@ -170,7 +119,7 @@ fn a_dry_run_streams_plan_then_run_end() {
     let repo = Repo::new();
     let outcome = repo.run(&["describe", "--dry-run", "--events", ".cupel/events.jsonl"]);
     let envelope = outcome.envelope();
-    let events = repo.events(".cupel/events.jsonl");
+    let events = events(&repo, ".cupel/events.jsonl");
     assert_eq!(names(&events), ["plan", "run.end"]);
     assert_eq!(
         events[0],
@@ -188,7 +137,7 @@ fn a_run_streams_run_end_with_the_envelope_status_and_exit_code() {
     let outcome = repo.run(&["check", "--events", ".cupel/events.jsonl"]);
     assert_eq!(outcome.code, 2);
     assert_eq!(
-        repo.events(".cupel/events.jsonl"),
+        events(&repo, ".cupel/events.jsonl"),
         [json!({"ev": "run.end", "status": "error", "exit_code": 2})]
     );
 }
@@ -216,7 +165,7 @@ fn an_events_file_outside_cupel_needs_write() {
 
     let outcome = repo.run(&["describe", "--events", "events.jsonl", "--write"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    assert_eq!(names(&repo.events("events.jsonl")), ["run.end"]);
+    assert_eq!(names(&events(&repo, "events.jsonl")), ["run.end"]);
 }
 
 #[test]

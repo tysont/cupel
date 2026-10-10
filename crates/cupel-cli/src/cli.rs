@@ -262,6 +262,15 @@ impl VerbArgs {
     }
 }
 
+impl Cli {
+    /// Whether this invocation only plans: `--dry-run`, or `init` without `--write`, which
+    /// previews (ADR-021 §5). Planning invocations write nothing, not even a run record.
+    pub fn plans_only(&self) -> bool {
+        self.global.dry_run
+            || matches!(self.verb, Some(VerbArgs::Init { .. }) if !self.global.write)
+    }
+}
+
 /// A verb's command-line spelling.
 pub fn verb_name(verb: Verb) -> String {
     serde_json::to_value(verb)

@@ -5,9 +5,13 @@
     reason = "each test crate uses a different subset of the helpers"
 )]
 
+use std::fs;
+use std::path::{Path, PathBuf};
+
 use assert_cmd::Command;
 use cupel_core::{CheckId, Envelope, FindingId};
 use serde_json::{Value, json};
+use tempfile::TempDir;
 
 /// The `cupel` binary with a clean environment: no `CUPEL_*` variables leak in from the caller.
 pub fn cupel() -> Command {
@@ -115,4 +119,65 @@ pub fn redacted_text(text: &str) -> String {
 /// The ID ADR-016 assigns a CLI finding about `subject`.
 pub fn cli_finding_id(kind: &str, subject: &str) -> String {
     FindingId::for_subject(&CheckId::from("cli"), kind, subject).to_string()
+}
+
+/// A temporary repository the binary is pointed at with `--cwd`.
+pub struct Repo {
+    dir: TempDir,
+}
+
+impl Repo {
+    pub fn new() -> Self {
+        Self {
+            dir: tempfile::tempdir().expect("temporary directory"),
+        }
+    }
+
+    pub fn root(&self) -> PathBuf {
+        self.dir.path().canonicalize().unwrap()
+    }
+
+    pub fn path(&self, relative: &str) -> PathBuf {
+        self.root().join(relative)
+    }
+
+    /// Writes `text` to `relative`, creating parent directories.
+    pub fn write(&self, relative: &str, text: &str) {
+        let path = self.path(relative);
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(path, text).unwrap();
+    }
+
+    /// Runs cupel with `--cwd` set to this repository.
+    pub fn run(&self, args: &[&str]) -> Outcome {
+        self.run_with(&mut cupel(), args)
+    }
+
+    /// Runs `command` with `args` and `--cwd` set to this repository.
+    pub fn run_with(&self, command: &mut Command, args: &[&str]) -> Outcome {
+        let root = self.root().display().to_string();
+        let mut all: Vec<&str> = args.to_vec();
+        all.extend(["--cwd", root.as_str()]);
+        run_with(command, all)
+    }
+
+    /// Every path under the root with its content, sorted.
+    pub fn tree(&self) -> Vec<(String, Vec<u8>)> {
+        fn walk(dir: &Path, root: &Path, out: &mut Vec<(String, Vec<u8>)>) {
+            for entry in fs::read_dir(dir).unwrap() {
+                let path = entry.unwrap().path();
+                let name = path.strip_prefix(root).unwrap().display().to_string();
+                if path.is_dir() {
+                    out.push((format!("{name}/"), Vec::new()));
+                    walk(&path, root, out);
+                } else {
+                    out.push((name, fs::read(&path).unwrap()));
+                }
+            }
+        }
+        let mut out = Vec::new();
+        walk(&self.root(), &self.root(), &mut out);
+        out.sort();
+        out
+    }
 }

@@ -396,9 +396,9 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "verbs": [
       {
         "name": "init",
-        "pending_step": "P0.8",
+        "pending_step": null,
         "stability": "experimental",
-        "summary": "Detect languages, project roots, and test commands; write cupel.toml."
+        "summary": "Detect project roots, languages, and test, coverage, and bench commands; write cupel.toml."
       },
       {
         "name": "doctor",

@@ -147,14 +147,26 @@ pub fn commands() -> Vec<CommandDescription> {
 fn init_verb() -> CommandDescription {
     verb(
         "init",
-        "Detect languages, project roots, and test commands; write cupel.toml.",
-        Some("P0.8"),
-        vec![switch("--force", "Overwrite an existing cupel.toml.")],
-        vec![example(
-            "cupel init --dry-run",
-            "Show the cupel.toml init would write.",
-            ExitCode::Usage,
-        )],
+        "Detect project roots, languages, and test, coverage, and bench commands; write cupel.toml.",
+        None,
+        vec![switch("--force", "Replace an existing cupel.toml.")],
+        vec![
+            example(
+                "cupel init",
+                "Preview the cupel.toml and .cupel/.gitignore init would write; writes nothing.",
+                ExitCode::Pass,
+            ),
+            example(
+                "cupel init --dry-run",
+                "The same preview, as a dry run.",
+                ExitCode::Pass,
+            ),
+            example(
+                "cupel init --write",
+                "Write cupel.toml and .cupel/.gitignore.",
+                ExitCode::Pass,
+            ),
+        ],
     )
 }
 
