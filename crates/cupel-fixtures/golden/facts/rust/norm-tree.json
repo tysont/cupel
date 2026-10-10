@@ -1,6 +1,67 @@
 {
   "symbols": [
     {
+      "hash": "sh_6f23320d34e5fc0d",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "primitive_type"
+                  }
+                ],
+                "label": "parameter"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [],
+            "label": "->"
+          },
+          {
+            "children": [],
+            "label": "primitive_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "*"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "binary_expression"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "shapes/src/lib.rs",
+        "line": 1
+      }
+    },
+    {
       "hash": "sh_d4a8d15a4597e9c6",
       "root": {
         "children": [
@@ -108,7 +169,7 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 11
+        "line": 14
       }
     },
     {
@@ -192,7 +253,7 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 18
+        "line": 21
       }
     },
     {
@@ -490,7 +551,7 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 22
+        "line": 25
       }
     },
     {
@@ -578,7 +639,7 @@
       "symbol": {
         "col": 9,
         "file": "src/account.rs",
-        "line": 23
+        "line": 26
       }
     },
     {
@@ -657,7 +718,7 @@
       "symbol": {
         "col": 9,
         "file": "src/account.rs",
-        "line": 26
+        "line": 29
       }
     },
     {
@@ -809,7 +870,7 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 32
+        "line": 35
       }
     },
     {
@@ -893,7 +954,7 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 40
+        "line": 43
       }
     },
     {
@@ -1743,7 +1804,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 12
+        "line": 14
       }
     },
     {
@@ -1777,7 +1838,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 16
+        "line": 18
       }
     },
     {
@@ -1851,7 +1912,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 20
+        "line": 22
       }
     },
     {
@@ -3007,7 +3068,69 @@
       "symbol": {
         "col": 1,
         "file": "src/report/mod.rs",
-        "line": 3
+        "line": 5
+      }
+    },
+    {
+      "hash": "sh_ae53ae2b448943b5",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "primitive_type"
+                  }
+                ],
+                "label": "parameter"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [],
+            "label": "->"
+          },
+          {
+            "children": [],
+            "label": "primitive_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "square"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "arguments"
+                  }
+                ],
+                "label": "call_expression"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/report/mod.rs",
+        "line": 9
       }
     },
     {

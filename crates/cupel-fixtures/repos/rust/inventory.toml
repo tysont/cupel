@@ -221,3 +221,32 @@ name = "tests/ledger.rs"
 [test-conventions.inline-tests]
 file = "src/pricing.rs"
 name = "src/pricing.rs"
+
+[module-graph.relative]
+file = "src/pricing.rs"
+name = "super::*"
+expect = { target = { path = "src/pricing.rs" } }
+
+[module-graph.absolute]
+file = "src/account.rs"
+name = "crate::report::format::render"
+expect = { target = { path = "src/report/format.rs" } }
+
+[module-graph.workspace-member]
+file = "src/report/mod.rs"
+name = "shapes::square"
+expect = { target = { path = "shapes/src/lib.rs" } }
+
+[module-graph.external]
+file = "src/account.rs"
+name = "serde::Serialize"
+expect = { target = { package = "serde" } }
+
+[module-graph.standard-library]
+file = "src/account.rs"
+name = "std::fmt"
+expect = { target = { package = "std" } }
+
+[module-graph.unresolved]
+file = "src/lib.rs"
+name = "generated"

@@ -3,9 +3,9 @@
     {
       "decisions": [],
       "symbol": {
-        "col": 5,
-        "file": "src/account.rs",
-        "line": 11
+        "col": 1,
+        "file": "shapes/src/lib.rs",
+        "line": 1
       }
     },
     {
@@ -13,7 +13,7 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 18
+        "line": 14
       }
     },
     {
@@ -21,15 +21,15 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 22
+        "line": 21
       }
     },
     {
       "decisions": [],
       "symbol": {
-        "col": 9,
+        "col": 5,
         "file": "src/account.rs",
-        "line": 23
+        "line": 25
       }
     },
     {
@@ -43,9 +43,9 @@
     {
       "decisions": [],
       "symbol": {
-        "col": 5,
+        "col": 9,
         "file": "src/account.rs",
-        "line": 32
+        "line": 29
       }
     },
     {
@@ -53,7 +53,15 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 40
+        "line": 35
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 43
       }
     },
     {
@@ -151,7 +159,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 12
+        "line": 14
       }
     },
     {
@@ -159,7 +167,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 16
+        "line": 18
       }
     },
     {
@@ -167,7 +175,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 20
+        "line": 22
       }
     },
     {
@@ -271,7 +279,15 @@
       "symbol": {
         "col": 1,
         "file": "src/report/mod.rs",
-        "line": 3
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/report/mod.rs",
+        "line": 9
       }
     },
     {

@@ -3,6 +3,30 @@
     {
       "sites": [
         {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "8a8f6411ebcb0bcf",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "shapes/src/lib.rs",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "0",
           "operator": "zero-one",
           "set": "default",
@@ -10,8 +34,8 @@
           "span": {
             "col": 20,
             "end_col": 21,
-            "end_line": 14,
-            "line": 14
+            "end_line": 17,
+            "line": 17
           },
           "to": [
             "1"
@@ -21,7 +45,7 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 11
+        "line": 14
       }
     },
     {
@@ -34,8 +58,8 @@
           "span": {
             "col": 9,
             "end_col": 29,
-            "end_line": 19,
-            "line": 19
+            "end_line": 22,
+            "line": 22
           },
           "to": [
             ""
@@ -49,8 +73,8 @@
           "span": {
             "col": 20,
             "end_col": 22,
-            "end_line": 19,
-            "line": 19
+            "end_line": 22,
+            "line": 22
           },
           "to": [
             "-="
@@ -60,7 +84,7 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 18
+        "line": 21
       }
     },
     {
@@ -68,15 +92,7 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 22
-      }
-    },
-    {
-      "sites": [],
-      "symbol": {
-        "col": 9,
-        "file": "src/account.rs",
-        "line": 23
+        "line": 25
       }
     },
     {
@@ -90,9 +106,9 @@
     {
       "sites": [],
       "symbol": {
-        "col": 5,
+        "col": 9,
         "file": "src/account.rs",
-        "line": 32
+        "line": 29
       }
     },
     {
@@ -100,7 +116,15 @@
       "symbol": {
         "col": 5,
         "file": "src/account.rs",
-        "line": 40
+        "line": 35
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 43
       }
     },
     {
@@ -416,7 +440,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 12
+        "line": 14
       }
     },
     {
@@ -429,8 +453,8 @@
           "span": {
             "col": 5,
             "end_col": 11,
-            "end_line": 17,
-            "line": 17
+            "end_line": 19,
+            "line": 19
           },
           "to": [
             "0"
@@ -440,7 +464,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 16
+        "line": 18
       }
     },
     {
@@ -453,8 +477,8 @@
           "span": {
             "col": 12,
             "end_col": 13,
-            "end_line": 21,
-            "line": 21
+            "end_line": 23,
+            "line": 23
           },
           "to": [
             "/"
@@ -464,7 +488,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 20
+        "line": 22
       }
     },
     {
@@ -1038,7 +1062,15 @@
       "symbol": {
         "col": 1,
         "file": "src/report/mod.rs",
-        "line": 3
+        "line": 5
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/report/mod.rs",
+        "line": 9
       }
     },
     {

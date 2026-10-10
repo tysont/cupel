@@ -1,0 +1,33 @@
+# ABOUTME: Conformance inventory for the `module-graph` fact: kinds of import a ModuleGraph producer must
+# ABOUTME: resolve. `name` is the edge's specifier as reported; `expect` may name the target.
+fact = "module-graph"
+
+[[constructs]]
+id = "relative"
+summary = "A path-relative import (`./b`, `super::`, `from . import x`) resolved to a file in the repository."
+expect = { relative = true, target = { kind = "file" } }
+
+[[constructs]]
+id = "absolute"
+summary = "An import by the project's own module or package path resolved to a file in the repository."
+expect = { relative = false, target = { kind = "file" } }
+
+[[constructs]]
+id = "workspace-member"
+summary = "An import of another package or crate in the same repository (a workspace member, a path dependency), resolved to its file."
+expect = { target = { kind = "file" } }
+
+[[constructs]]
+id = "external"
+summary = "An import of a third-party package."
+expect = { target = { kind = "external" } }
+
+[[constructs]]
+id = "standard-library"
+summary = "An import from the language's standard library, reported as an external package."
+expect = { target = { kind = "external" } }
+
+[[constructs]]
+id = "unresolved"
+summary = "An import whose target cannot be found (a generated module, a typo)."
+expect = { target = { kind = "unresolved" } }

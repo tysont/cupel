@@ -1,7 +1,10 @@
 use std::fmt;
 
+use serde::Serialize;
+
 use crate::report::format::render;
 
+#[derive(Serialize)]
 pub struct Account {
     owner: String,
     cents: i64,

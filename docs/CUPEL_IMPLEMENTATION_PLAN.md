@@ -496,7 +496,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.7 Fact: `ModuleGraph`
 
-**Status:** not started
+**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-028](adr/CUPEL_DECISION_028.md)
 
 - `QueryImports` over `imports.scm` → raw edges with specifiers (ESM/CJS `import`/`require`, Rust `use`/`mod`, Go `import`, Python `import`/`from … import`).
 - Hand-written per-language resolution producing `ModuleGraph` with edges `File(path) | External(name) | Unresolved` and a `relative` flag: Node resolution with `package.json` `exports`/`main` and `tsconfig` `paths`; Rust `mod` tree and workspace members; Go module path → directory via `go.mod`; Python packages via `__init__.py` and project roots. This is the one syntactic fact that is mostly Rust rather than queries, by design.

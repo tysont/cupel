@@ -2,10 +2,31 @@
   "symbols": [
     {
       "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "square",
+      "file": "shapes/src/lib.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "square",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 37,
         "end_col": 6,
-        "end_line": 16,
-        "line": 11
+        "end_line": 19,
+        "line": 14
       },
       "display": "account::Account::new",
       "file": "src/account.rs",
@@ -16,8 +37,8 @@
       "span": {
         "col": 5,
         "end_col": 6,
-        "end_line": 16,
-        "line": 11
+        "end_line": 19,
+        "line": 14
       },
       "visibility": "public"
     },
@@ -25,8 +46,8 @@
       "body": {
         "col": 43,
         "end_col": 6,
-        "end_line": 20,
-        "line": 18
+        "end_line": 23,
+        "line": 21
       },
       "display": "account::Account::deposit",
       "file": "src/account.rs",
@@ -37,8 +58,8 @@
       "span": {
         "col": 5,
         "end_col": 6,
-        "end_line": 20,
-        "line": 18
+        "end_line": 23,
+        "line": 21
       },
       "visibility": "public"
     },
@@ -46,8 +67,8 @@
       "body": {
         "col": 39,
         "end_col": 6,
-        "end_line": 28,
-        "line": 22
+        "end_line": 31,
+        "line": 25
       },
       "display": "account::Account::statement",
       "file": "src/account.rs",
@@ -58,8 +79,8 @@
       "span": {
         "col": 5,
         "end_col": 6,
-        "end_line": 28,
-        "line": 22
+        "end_line": 31,
+        "line": 25
       },
       "visibility": "public"
     },
@@ -67,8 +88,8 @@
       "body": {
         "col": 52,
         "end_col": 10,
-        "end_line": 25,
-        "line": 23
+        "end_line": 28,
+        "line": 26
       },
       "display": "account::Account::statement::line",
       "file": "src/account.rs",
@@ -79,8 +100,8 @@
       "span": {
         "col": 9,
         "end_col": 10,
-        "end_line": 25,
-        "line": 23
+        "end_line": 28,
+        "line": 26
       },
       "visibility": "private"
     },
@@ -88,8 +109,8 @@
       "body": {
         "col": 36,
         "end_col": 65,
-        "end_line": 26,
-        "line": 26
+        "end_line": 29,
+        "line": 29
       },
       "display": "account::Account::statement::header",
       "file": "src/account.rs",
@@ -100,8 +121,8 @@
       "span": {
         "col": 9,
         "end_col": 66,
-        "end_line": 26,
-        "line": 26
+        "end_line": 29,
+        "line": 29
       },
       "visibility": "private"
     },
@@ -109,8 +130,8 @@
       "body": {
         "col": 62,
         "end_col": 6,
-        "end_line": 34,
-        "line": 32
+        "end_line": 37,
+        "line": 35
       },
       "display": "account::Account::fmt",
       "file": "src/account.rs",
@@ -121,8 +142,8 @@
       "span": {
         "col": 5,
         "end_col": 6,
-        "end_line": 34,
-        "line": 32
+        "end_line": 37,
+        "line": 35
       },
       "visibility": "public"
     },
@@ -130,8 +151,8 @@
       "body": {
         "col": 32,
         "end_col": 6,
-        "end_line": 42,
-        "line": 40
+        "end_line": 45,
+        "line": 43
       },
       "display": "account::Audited::is_clean",
       "file": "src/account.rs",
@@ -142,8 +163,8 @@
       "span": {
         "col": 5,
         "end_col": 6,
-        "end_line": 42,
-        "line": 40
+        "end_line": 45,
+        "line": 43
       },
       "visibility": "public"
     },
@@ -235,8 +256,8 @@
       "body": {
         "col": 40,
         "end_col": 2,
-        "end_line": 14,
-        "line": 12
+        "end_line": 16,
+        "line": 14
       },
       "display": "balance",
       "file": "src/lib.rs",
@@ -247,8 +268,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 14,
-        "line": 12
+        "end_line": 16,
+        "line": 14
       },
       "visibility": "public"
     },
@@ -256,8 +277,8 @@
       "body": {
         "col": 36,
         "end_col": 2,
-        "end_line": 18,
-        "line": 16
+        "end_line": 20,
+        "line": 18
       },
       "display": "audit_limit",
       "file": "src/lib.rs",
@@ -268,8 +289,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 18,
-        "line": 16
+        "end_line": 20,
+        "line": 18
       },
       "visibility": "internal"
     },
@@ -277,8 +298,8 @@
       "body": {
         "col": 43,
         "end_col": 2,
-        "end_line": 22,
-        "line": 20
+        "end_line": 24,
+        "line": 22
       },
       "display": "scale",
       "file": "src/lib.rs",
@@ -289,8 +310,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 22,
-        "line": 20
+        "end_line": 24,
+        "line": 22
       },
       "visibility": "private"
     },
@@ -466,8 +487,8 @@
       "body": {
         "col": 44,
         "end_col": 2,
-        "end_line": 5,
-        "line": 3
+        "end_line": 7,
+        "line": 5
       },
       "display": "report::summary",
       "file": "src/report/mod.rs",
@@ -478,8 +499,29 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 5,
-        "line": 3
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "report::floor_area",
+      "file": "src/report/mod.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "floor_area",
+      "namespace": "report",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
       },
       "visibility": "public"
     },

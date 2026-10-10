@@ -198,7 +198,7 @@ const TESTS: Contract = Contract {
 const IMPORTS: Contract = Contract {
     file: QueryFile::Imports,
     required: &[&[c::IMPORT], &[c::IMPORT_SPECIFIER]],
-    optional: &[c::IMPORT_NAME, c::IMPORT_MODULE],
+    optional: &[c::IMPORT_NAME, c::IMPORT_MODULE, c::SCOPE, c::SCOPE_NAME],
     open: &[],
 };
 

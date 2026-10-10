@@ -57,23 +57,23 @@ fn impl_blocks_trait_impls_and_trait_defaults_are_methods_on_their_type() {
         &symbols,
         "src/account.rs",
         &[
-            ("account::Account::new", Method, Public, (11, 16)),
-            ("account::Account::deposit", Method, Public, (18, 20)),
-            ("account::Account::statement", Method, Public, (22, 28)),
+            ("account::Account::new", Method, Public, (14, 19)),
+            ("account::Account::deposit", Method, Public, (21, 23)),
+            ("account::Account::statement", Method, Public, (25, 31)),
             (
                 "account::Account::statement::line",
                 Function,
                 Private,
-                (23, 25),
+                (26, 28),
             ),
             (
                 "account::Account::statement::header",
                 Closure,
                 Private,
-                (26, 26),
+                (29, 29),
             ),
-            ("account::Account::fmt", Method, Public, (32, 34)),
-            ("account::Audited::is_clean", Method, Public, (40, 42)),
+            ("account::Account::fmt", Method, Public, (35, 37)),
+            ("account::Audited::is_clean", Method, Public, (43, 45)),
         ],
     );
 }
@@ -84,7 +84,10 @@ fn module_files_take_their_namespace_from_their_path() {
     expect(
         &symbols,
         "src/report/mod.rs",
-        &[("report::summary", Function, Public, (3, 5))],
+        &[
+            ("report::summary", Function, Public, (5, 7)),
+            ("report::floor_area", Function, Public, (9, 11)),
+        ],
     );
     expect(
         &symbols,

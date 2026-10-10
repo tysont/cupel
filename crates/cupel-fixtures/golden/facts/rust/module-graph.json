@@ -1,0 +1,172 @@
+{
+  "roots": [
+    {
+      "edges": [
+        {
+          "from": "src/account.rs",
+          "line": 1,
+          "relative": false,
+          "specifier": "std::fmt",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "src/account.rs",
+          "line": 3,
+          "relative": false,
+          "specifier": "serde::Serialize",
+          "target": {
+            "kind": "external",
+            "package": "serde"
+          }
+        },
+        {
+          "from": "src/account.rs",
+          "line": 5,
+          "relative": false,
+          "specifier": "crate::report::format::render",
+          "target": {
+            "kind": "file",
+            "path": "src/report/format.rs"
+          }
+        },
+        {
+          "from": "src/lib.rs",
+          "line": 3,
+          "relative": true,
+          "specifier": "account",
+          "target": {
+            "kind": "file",
+            "path": "src/account.rs"
+          }
+        },
+        {
+          "from": "src/lib.rs",
+          "line": 4,
+          "relative": true,
+          "specifier": "decide",
+          "target": {
+            "kind": "file",
+            "path": "src/decide.rs"
+          }
+        },
+        {
+          "from": "src/lib.rs",
+          "line": 6,
+          "relative": true,
+          "specifier": "generated",
+          "target": {
+            "kind": "unresolved"
+          }
+        },
+        {
+          "from": "src/lib.rs",
+          "line": 7,
+          "relative": true,
+          "specifier": "pricing",
+          "target": {
+            "kind": "file",
+            "path": "src/pricing.rs"
+          }
+        },
+        {
+          "from": "src/lib.rs",
+          "line": 8,
+          "relative": true,
+          "specifier": "report",
+          "target": {
+            "kind": "file",
+            "path": "src/report/mod.rs"
+          }
+        },
+        {
+          "from": "src/lib.rs",
+          "line": 9,
+          "relative": true,
+          "specifier": "twins",
+          "target": {
+            "kind": "file",
+            "path": "src/twins.rs"
+          }
+        },
+        {
+          "from": "src/lib.rs",
+          "line": 11,
+          "relative": true,
+          "specifier": "account::Account",
+          "target": {
+            "kind": "file",
+            "path": "src/account.rs"
+          }
+        },
+        {
+          "from": "src/pricing.rs",
+          "line": 33,
+          "relative": false,
+          "specifier": "rstest::fixture",
+          "target": {
+            "kind": "external",
+            "package": "rstest"
+          }
+        },
+        {
+          "from": "src/pricing.rs",
+          "line": 35,
+          "relative": true,
+          "specifier": "super::*",
+          "target": {
+            "kind": "file",
+            "path": "src/pricing.rs"
+          }
+        },
+        {
+          "from": "src/report/mod.rs",
+          "line": 1,
+          "relative": true,
+          "specifier": "format",
+          "target": {
+            "kind": "file",
+            "path": "src/report/format.rs"
+          }
+        },
+        {
+          "from": "src/report/mod.rs",
+          "line": 3,
+          "relative": false,
+          "specifier": "shapes::square",
+          "target": {
+            "kind": "file",
+            "path": "shapes/src/lib.rs"
+          }
+        },
+        {
+          "from": "tests/ledger.rs",
+          "line": 1,
+          "relative": false,
+          "specifier": "ledger::Account",
+          "target": {
+            "kind": "file",
+            "path": "src/lib.rs"
+          }
+        },
+        {
+          "from": "tests/ledger.rs",
+          "line": 2,
+          "relative": false,
+          "specifier": "ledger::pricing::discounted",
+          "target": {
+            "kind": "file",
+            "path": "src/pricing.rs"
+          }
+        }
+      ],
+      "root": "."
+    },
+    {
+      "edges": [],
+      "root": "shapes"
+    }
+  ]
+}

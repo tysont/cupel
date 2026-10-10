@@ -2,6 +2,8 @@
 
 pub mod account;
 pub mod decide;
+#[cfg(feature = "codegen")]
+mod generated;
 pub mod pricing;
 pub mod report;
 pub mod twins;
