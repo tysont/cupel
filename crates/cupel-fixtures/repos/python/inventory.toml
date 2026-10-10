@@ -105,3 +105,63 @@ twin = "ledger.twins.net_total_capped"
 file = "src/ledger/twins.py"
 name = "ledger.twins.net_total"
 twin = "ledger.twins.net_total_product"
+
+[mutation-sites.relational]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "!=", to = ["=="] }
+
+[mutation-sites.arith-add-sub]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "+=", to = ["-="] }
+
+[mutation-sites.arith-mul-div]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "and", to = ["or"] }
+
+[mutation-sites.boolean-literal]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "False", to = ["True"] }
+
+[mutation-sites.zero-one]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "log_total(total)", to = ["pass"] }
+
+[mutation-sites.return-value]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "price - cut", to = ["None"] }
+
+[mutation-sites.constant]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
+expect = { from = "0", to = ["0 + 1", "0 - 1"] }
+
+[mutation-sites.negation]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "member and cut != 0", to = ["not (member and cut != 0)"] }

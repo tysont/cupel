@@ -5,14 +5,14 @@ mod normalize;
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::{Decisions, NormTree, Symbols};
+use cupel_core::syntax::{Decisions, MutationSites, NormTree, Symbols};
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::producer::QueryProducer;
 use crate::spec::LanguageSpec;
-use crate::{decisions, symbols};
+use crate::{decisions, mutations, symbols};
 
 use crate::spec::QueryFile;
 
@@ -22,6 +22,7 @@ static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
         &[
             (QueryFile::Symbols, include_str!("queries/symbols.scm")),
             (QueryFile::Decisions, include_str!("queries/decisions.scm")),
+            (QueryFile::Mutations, include_str!("queries/mutations.scm")),
         ],
         include_str!("tables.toml"),
     )
@@ -80,9 +81,14 @@ impl Language for Python {
             decisions::extract,
         ));
         reg.register::<NormTree, _>(QueryProducer::new(
-            language,
+            Arc::clone(&language),
             Arc::clone(cache),
             normalize::extract,
+        ));
+        reg.register::<MutationSites, _>(QueryProducer::new(
+            language,
+            Arc::clone(cache),
+            mutations::extract,
         ));
     }
 }

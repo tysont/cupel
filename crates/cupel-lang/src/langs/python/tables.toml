@@ -58,3 +58,39 @@ receivers = ["object"]
 [[normalize.calls]]
 kind = "call"
 callee = "function"
+
+[mutations.relational]
+replace = { "<" = ["<="], "<=" = ["<"], ">" = [">="], ">=" = [">"] }
+
+[mutations.equality]
+replace = { "==" = ["!="], "!=" = ["=="], "is" = ["is not"], "is not" = ["is"] }
+
+[mutations.arith-add-sub]
+replace = { "+" = ["-"], "-" = ["+"], "+=" = ["-="], "-=" = ["+="] }
+
+[mutations.arith-mul-div]
+replace = { "*" = ["/"], "/" = ["*"], "//" = ["*"], "*=" = ["/="], "/=" = ["*="], "//=" = ["*="] }
+
+[mutations.boolean-op]
+replace = { "and" = ["or"], "or" = ["and"] }
+
+[mutations.boolean-literal]
+replace = { "True" = ["False"], "False" = ["True"] }
+
+[mutations.zero-one]
+replace = { "0" = ["1"], "1" = ["0"] }
+
+[mutations.statement-deletion]
+templates = ["pass"]
+
+[mutations.return-value]
+templates = ["None"]
+
+[mutations.constant]
+templates = ["0"]
+
+[mutations.boundary]
+templates = ["{} + 1", "{} - 1"]
+
+[mutations.negation]
+templates = ["not ({})"]
