@@ -1,12 +1,14 @@
 # ABOUTME: Tables the generic producers read for python, alongside its queries.
 # ABOUTME: Keys and shapes are documented in the cupel-lang crate docs; unknown keys are errors.
 
+# `src/ledger/report/format.py` is `ledger.report.format`; a package's `__init__.py` is the package.
 [namespace]
 separator = "."
 source_roots = ["src"]
 index_files = ["__init__"]
 
-# Dunder names are protocol methods; a leading underscore marks a name private by convention.
+# Dunder names are protocol methods; `__name` is mangled to its class; `_name` is internal by
+# convention (PEP 8). symbols.scm fixes `__all__` and nested definitions outright (ADR-034).
 [visibility]
 default = "public"
 
@@ -16,5 +18,9 @@ suffix = "__"
 visibility = "public"
 
 [[visibility.names]]
-prefix = "_"
+prefix = "__"
 visibility = "private"
+
+[[visibility.names]]
+prefix = "_"
+visibility = "internal"

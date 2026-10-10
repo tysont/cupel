@@ -2,37 +2,38 @@
 # repository that exhibits it, or marks it not-applicable with a reason.
 
 [symbols.function]
-file = "shapes/circle.py"
-name = "shapes.circle.perimeter"
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
 
 [symbols.method]
-file = "shapes/circle.py"
-name = "shapes.circle.Circle.area"
+file = "src/ledger/account.py"
+name = "ledger.account.Account.deposit"
 
 [symbols.static-method]
-file = "shapes/circle.py"
-name = "shapes.circle.Circle.unit"
+file = "src/ledger/account.py"
+name = "ledger.account.Account.opening"
 
 [symbols.nested-function]
-file = "shapes/circle.py"
-name = "shapes.circle.perimeter.twice"
+file = "src/ledger/account.py"
+name = "ledger.account.Account.statement.line"
 
 [symbols.closure]
-file = "shapes/circle.py"
-name = "shapes.circle.scale"
+file = "src/ledger/account.py"
+name = "ledger.account.Account.statement.header"
 
 [symbols.public]
-file = "shapes/circle.py"
-name = "shapes.circle.perimeter"
+file = "src/ledger/__init__.py"
+name = "ledger.balance"
 
 [symbols.internal]
-not-applicable = "Python has no package-level visibility; a leading underscore marks a name private by convention."
+file = "src/ledger/__init__.py"
+name = "ledger._scale"
 
 [symbols.private]
-file = "shapes/circle.py"
-name = "shapes.circle.Circle._is_valid"
+file = "src/ledger/account.py"
+name = "ledger.account.Account.__check"
 
 [symbols.file-namespace]
-file = "shapes/circle.py"
-name = "shapes.circle.perimeter"
-expect = { namespace = "shapes.circle" }
+file = "src/ledger/report/format.py"
+name = "ledger.report.format.render"
+expect = { namespace = "ledger.report.format" }
