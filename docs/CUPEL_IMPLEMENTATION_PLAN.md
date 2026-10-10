@@ -326,7 +326,7 @@ ADRs: [017](adr/CUPEL_DECISION_017.md) (layered settings, gate-key grammar, sour
 
 #### P0.6 Fixture and golden-envelope harness
 
-**Status:** in progress (2026-10-10)
+**Status:** complete (2026-10-10, 9981a5f)
 
 - `crates/cupel-fixtures` with `repos/` (populated per language from P1), `golden/`, and a library offering `run_cupel(args, fixture) -> Envelope` and `assert_golden(name, envelope)`.
 - Redaction of volatile fields (`run.id`, `run.started`, all `duration_ms`, `toolchain` versions, absolute paths, `git.sha`) before comparison. `UPDATE_GOLDENS=1 make test` rewrites goldens; CI never sets it. Golden diffs are printed as unified diffs.
@@ -392,6 +392,11 @@ ADRs: [003](adr/CUPEL_DECISION_003.md) (volatile fields and placeholders, golden
 - **P0.4 — registration point.** Parsing validates ID syntax only (check IDs are exactly `<group>.<name>`). `Config::validate_registered(&CheckRegistry, &[LangId])` rejects unknown checks, gate metrics not in the check's `Manifest.metrics`, and unknown languages; the CLI must call it once P2.1 (checks) and P1.1 (languages) populate the registries. `[checks."<id>"]` and `[lang.<id>]` values stay open tables until manifests declare parameters.
 - **P0.4 — schemas.** `schema::config()` is the `cupel.toml` schema. Input schemas are generated without the ADR-013 "every property required" transform, so keys stay optional while closed sections keep `additionalProperties: false`.
 - **P0.4 — tests.** 49 new in `cupel-core` (128 total): `config_gate` 5, `config_settings` 7, `config_file` 11 (three `insta` error-message snapshots), `config_discovery` 8 (`tempfile`), `config_resolve` 8 (16-row precedence matrix), `config_slices` 6, `config_registry` 2, `schemas` +2.
+- **P0.6 — API.** `cupel_fixtures::run_cupel(args, cwd) -> Outcome { code, stdout, stderr, envelope: Option<Envelope>, cwd }` runs the workspace-built binary (`assert_cmd`'s lookup) with stdin closed and `CUPEL_*` removed; JSON stdout that is not an envelope panics. `redact(&Envelope, root) -> Value`; `assert_golden(name, &Envelope, root)` and `Outcome::assert_golden(name)` (root = the run's `cwd`). `Goldens::new(dir, GoldenMode)` / `Goldens::from_env()` with `check(name, &Value) -> Result<(), GoldenError>` and `path(name)` is the testable core; `canonical_json` writes the file format. Golden names are slash-separated (`cli/describe`, later `<check>/<lang>`), so the §8.3.7 matrix test needs no harness changes. See [ADR-003](adr/CUPEL_DECISION_003.md).
+- **P0.6 — decisions beyond the step text.** Redaction also masks `run.seed` (random by default from P0.7), `run.baseline.id`, `run.git.branch`/`dirty`, and the CLI version inside `describe`/`describe --all`; nulls are never masked. Goldens store keys sorted recursively and compare as parsed JSON. `similar` is pinned at 2.7 (insta's version) rather than 3.x. The CLI goldens run in a fresh temp directory so config discovery cannot see a repository `cupel.toml`; fixture repos must carry their own (ADR-003 Consequences).
+- **P0.6 — staleness.** The harness uses whatever `cupel` binary is in the target directory. `make test` (`cargo test --workspace`) rebuilds it first; `cargo test -p cupel-fixtures` alone can run a stale binary. `UPDATE_GOLDENS` reaches the tests because `make` passes the environment through (verified by generating the first goldens with `UPDATE_GOLDENS=1 make test`).
+- **P0.6 — layout.** Only `golden/cli/` exists; `repos/` and `conformance/` are created by the first step that puts a file in them (P0.8 `repos/detect/`, P1.1), since git does not track empty directories.
+- **P0.6 — tests.** 21 in `cupel-fixtures`: `redact` 6, `golden` 10, `cli_goldens` 5 (three real goldens: `cli/describe`, `cli/describe-check`, `cli/unknown-verb`). Any change to `describe` output or the envelope (for example P0.5's config wiring populating `run.config`) changes these goldens; regenerate with `UPDATE_GOLDENS=1 make test` and review the diff.
 
 ---
 
