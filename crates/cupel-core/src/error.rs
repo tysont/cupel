@@ -14,6 +14,13 @@ pub enum Error {
         value: String,
         expected: &'static str,
     },
+    /// A string value did not have the shape its type requires.
+    #[error("invalid {what} `{value}`: expected {expected}")]
+    InvalidValue {
+        what: &'static str,
+        value: String,
+        expected: &'static str,
+    },
     /// A numeric value was outside the range its type allows.
     #[error("invalid {what} `{value}`: expected {expected}")]
     OutOfRange {

@@ -1,8 +1,10 @@
 // ABOUTME: The `cupel.toml` configuration model, its discovery, and layered resolution (design §6.7).
 // ABOUTME: Produces the effective settings, per-check config slices, typed gate rules, and the `run.config` echo.
 mod gate;
+mod settings;
 
 pub use gate::{Comparison, GateCondition, GateKey, GateRuleSpec, Threshold};
+pub use settings::{Format, PROFILE_ENV_VAR, Setting, Settings, TimeLimit};
 
 use std::path::PathBuf;
 
@@ -14,6 +16,13 @@ pub enum ConfigError {
     InvalidGateRule {
         key: String,
         condition: String,
+        reason: String,
+    },
+    /// A `CUPEL_*` variable holds a value its setting does not accept.
+    #[error("invalid value `{value}` for {var}: {reason}")]
+    InvalidEnv {
+        var: &'static str,
+        value: String,
         reason: String,
     },
     /// The file could not be parsed or has unknown keys; the message lists the valid keys.
