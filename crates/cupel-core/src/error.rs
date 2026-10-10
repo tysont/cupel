@@ -3,6 +3,7 @@
 use crate::config::ConfigError;
 use crate::fact::FactKind;
 use crate::id::CheckId;
+use crate::writer::WriteError;
 
 /// Errors raised by cupel-core.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -40,6 +41,9 @@ pub enum Error {
     /// The configuration is invalid; a usage error (exit 2).
     #[error(transparent)]
     Config(#[from] ConfigError),
+    /// A file write was refused or failed (ADR-020).
+    #[error(transparent)]
+    Write(#[from] WriteError),
 }
 
 /// Result type for cupel-core APIs.

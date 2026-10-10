@@ -6,6 +6,7 @@
 mod check;
 pub mod config;
 mod describe;
+mod dry_run;
 mod envelope;
 mod error;
 mod event;
@@ -20,6 +21,7 @@ mod producer;
 pub mod schema;
 mod scope;
 pub mod syntax;
+mod writer;
 
 pub use check::{
     Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,
@@ -28,6 +30,7 @@ pub use describe::{
     AllDescription, ArgDescription, CliDescription, CommandDescription, CommandSummary,
     Description, Example, ExitCodeDescription, SchemaDescription, SchemaRef, ValueType,
 };
+pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPlan};
 pub use envelope::{
     BaselineRef, CheckResult, CheckStatus, ConfigEcho, ConfigSource, CupelInfo, Delta, Envelope,
     ExitCode, GateOutcome, GateResult, GateRule, GitInfo, NextAction, RunInfo, ScopeInfo,
@@ -44,3 +47,4 @@ pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
 pub use producer::{Availability, Ctx, ProduceCtx, Producer, ProducerRegistry, RegisteredProducer};
 pub use scope::Scope;
+pub use writer::{WriteError, Writer};

@@ -264,6 +264,7 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
+ "similar",
  "tempfile",
  "thiserror",
  "toml",

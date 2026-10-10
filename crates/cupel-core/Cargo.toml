@@ -17,6 +17,7 @@ schemars.workspace = true
 blake3.workspace = true
 ulid.workspace = true
 thiserror.workspace = true
+similar.workspace = true
 
 [dev-dependencies]
 insta.workspace = true
