@@ -70,3 +70,33 @@ not-applicable = "Go has no conditional operator; a value chosen by a condition 
 
 [decisions.catch]
 not-applicable = "Go has no exception handlers: errors are values tested by `if err != nil` (a branch), and `recover` is an ordinary call in a deferred function whose result is tested by an `if`."
+
+[norm-tree.rename]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.sumAfterCharge"
+
+[norm-tree.literal]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalFloor"
+
+[norm-tree.layout]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalLaidOut"
+
+[norm-tree.operator]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalPlus"
+
+[norm-tree.branch]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalCapped"
+
+[norm-tree.call]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalProduct"

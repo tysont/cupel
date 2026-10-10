@@ -12,7 +12,8 @@
         ],
         "facts": [
           "symbols",
-          "decisions"
+          "decisions",
+          "norm-tree"
         ],
         "family": "go",
         "id": "go",

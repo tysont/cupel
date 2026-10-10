@@ -18,3 +18,32 @@ visibility = "public"
 # `else if` is an `if_statement` in the `alternative` field of the branch it continues.
 [decisions]
 chain_parents = ["if_statement"]
+
+# Types are names like any other, so `int64` and `Money` both become `$id`. A method's receiver
+# is an ordinary parameter list: its names normalize away and its shape (pointer or value) stays,
+# so no hand-written override is needed for receivers.
+[normalize]
+identifiers = [
+  "identifier",
+  "field_identifier",
+  "type_identifier",
+  "package_identifier",
+  "label_name",
+]
+literals = [
+  "int_literal",
+  "float_literal",
+  "imaginary_literal",
+  "rune_literal",
+  "interpreted_string_literal",
+  "raw_string_literal",
+  "true",
+  "false",
+]
+# `strings.ToUpper(s)` and `w.Close()` keep the function name; the package or value before the
+# dot is a receiver and normalizes as usual.
+receivers = ["operand"]
+
+[[normalize.calls]]
+kind = "call_expression"
+callee = "function"
