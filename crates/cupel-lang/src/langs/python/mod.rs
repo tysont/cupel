@@ -1,16 +1,18 @@
 // ABOUTME: Python: one grammar for `.py`, the queries and tables under this directory, and the
-// ABOUTME: producers it registers, including the NormTree override for receivers and docstrings.
+// ABOUTME: producers it registers: a NormTree override for receivers and docstrings, and module resolution.
 mod normalize;
+mod resolve;
 
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
 use cupel_core::syntax::{
-    Decisions, MutationSites, NormTree, Symbols, TestConventions, TestFrames,
+    Decisions, ModuleGraph, MutationSites, NormTree, Symbols, TestConventions, TestFrames,
 };
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::conventions::GlobTestConventions;
+use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::producer::QueryProducer;
@@ -27,6 +29,7 @@ static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
             (QueryFile::Decisions, include_str!("queries/decisions.scm")),
             (QueryFile::Mutations, include_str!("queries/mutations.scm")),
             (QueryFile::Tests, include_str!("queries/tests.scm")),
+            (QueryFile::Imports, include_str!("queries/imports.scm")),
         ],
         include_str!("tables.toml"),
     )
@@ -99,6 +102,12 @@ impl Language for Python {
             Arc::clone(cache),
             testframes::extract,
         ));
-        reg.register::<TestConventions, _>(GlobTestConventions::new(language));
+        reg.register::<TestConventions, _>(GlobTestConventions::new(Arc::clone(&language)));
+        // Module resolution needs packages, layouts, and manifests, which queries cannot see.
+        reg.register::<ModuleGraph, _>(ImportGraph::new(
+            language,
+            Arc::clone(cache),
+            resolve::graph,
+        ));
     }
 }

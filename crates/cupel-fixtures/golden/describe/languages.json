@@ -41,6 +41,7 @@
           "norm-tree",
           "mutation-sites",
           "test-frames",
+          "module-graph",
           "test-conventions"
         ],
         "family": "python",

@@ -1,0 +1,242 @@
+{
+  "roots": [
+    {
+      "edges": [
+        {
+          "from": "src/ledger/__init__.py",
+          "line": 5,
+          "relative": true,
+          "specifier": ".account.Account",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/account.py"
+          }
+        },
+        {
+          "from": "src/ledger/__init__.py",
+          "line": 5,
+          "relative": true,
+          "specifier": ".account.Audited",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/account.py"
+          }
+        },
+        {
+          "from": "src/ledger/__init__.py",
+          "line": 6,
+          "relative": true,
+          "specifier": ".generated.schema",
+          "target": {
+            "kind": "unresolved"
+          }
+        },
+        {
+          "from": "src/ledger/account.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "typing.Protocol",
+          "target": {
+            "kind": "external",
+            "package": "typing"
+          }
+        },
+        {
+          "from": "src/ledger/account.py",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.report.format.render",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/report/format.py"
+          }
+        },
+        {
+          "from": "src/ledger/cli.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "sys",
+          "target": {
+            "kind": "external",
+            "package": "sys"
+          }
+        },
+        {
+          "from": "src/ledger/cli.py",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.balance",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "from": "src/ledger/report/__init__.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "units.cents",
+          "target": {
+            "kind": "file",
+            "path": "libs/units/src/units/__init__.py"
+          }
+        },
+        {
+          "from": "src/ledger/report/__init__.py",
+          "line": 3,
+          "relative": true,
+          "specifier": ".format",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/report/format.py"
+          }
+        },
+        {
+          "from": "src/ledger/report/format.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "requests",
+          "target": {
+            "kind": "external",
+            "package": "requests"
+          }
+        },
+        {
+          "from": "tests/conftest.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "pytest",
+          "target": {
+            "kind": "external",
+            "package": "pytest"
+          }
+        },
+        {
+          "from": "tests/conftest.py",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.Account",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "from": "tests/test_ledger.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "unittest.mock.patch",
+          "target": {
+            "kind": "external",
+            "package": "unittest"
+          }
+        },
+        {
+          "from": "tests/test_ledger.py",
+          "line": 3,
+          "relative": false,
+          "specifier": "pytest",
+          "target": {
+            "kind": "external",
+            "package": "pytest"
+          }
+        },
+        {
+          "from": "tests/test_ledger.py",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.Account",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "from": "tests/test_ledger.py",
+          "line": 6,
+          "relative": false,
+          "specifier": "ledger.decide.parse_cents",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.py"
+          }
+        },
+        {
+          "from": "tests/test_ledger.py",
+          "line": 6,
+          "relative": false,
+          "specifier": "ledger.decide.require_positive",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.py"
+          }
+        },
+        {
+          "from": "tests/test_ledger.py",
+          "line": 7,
+          "relative": false,
+          "specifier": "ledger.report.format.publish",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/report/format.py"
+          }
+        },
+        {
+          "from": "tests/test_ledger.py",
+          "line": 7,
+          "relative": false,
+          "specifier": "ledger.report.format.render",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/report/format.py"
+          }
+        },
+        {
+          "from": "tests/test_pricing.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "unittest",
+          "target": {
+            "kind": "external",
+            "package": "unittest"
+          }
+        },
+        {
+          "from": "tests/test_pricing.py",
+          "line": 2,
+          "relative": false,
+          "specifier": "unittest.mock",
+          "target": {
+            "kind": "external",
+            "package": "unittest"
+          }
+        },
+        {
+          "from": "tests/test_pricing.py",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.pricing.discounted",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.py"
+          }
+        },
+        {
+          "from": "tests/test_pricing.py",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.pricing.tally",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.py"
+          }
+        }
+      ],
+      "root": "."
+    },
+    {
+      "edges": [],
+      "root": "libs/units"
+    }
+  ]
+}

@@ -222,3 +222,32 @@ name = "tests/test_pricing.py"
 
 [test-conventions.inline-tests]
 not-applicable = "Python runners collect tests from separate test modules; a module does not carry its own test cases (doctests are documentation examples that TestFrames does not model)."
+
+[module-graph.relative]
+file = "src/ledger/report/__init__.py"
+name = ".format"
+expect = { target = { path = "src/ledger/report/format.py" } }
+
+[module-graph.absolute]
+file = "src/ledger/account.py"
+name = "ledger.report.format.render"
+expect = { target = { path = "src/ledger/report/format.py" } }
+
+[module-graph.workspace-member]
+file = "src/ledger/report/__init__.py"
+name = "units.cents"
+expect = { target = { path = "libs/units/src/units/__init__.py" } }
+
+[module-graph.external]
+file = "src/ledger/report/format.py"
+name = "requests"
+expect = { target = { package = "requests" } }
+
+[module-graph.standard-library]
+file = "src/ledger/account.py"
+name = "typing.Protocol"
+expect = { target = { package = "typing" } }
+
+[module-graph.unresolved]
+file = "src/ledger/__init__.py"
+name = ".generated.schema"
