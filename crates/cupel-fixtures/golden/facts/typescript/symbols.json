@@ -2,6 +2,48 @@
   "symbols": [
     {
       "body": {
+        "col": 48,
+        "end_col": 4,
+        "end_line": 4,
+        "line": 2
+      },
+      "display": "legacy.Legacy.round",
+      "file": "src/legacy.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "round",
+      "namespace": "legacy.Legacy",
+      "span": {
+        "col": 10,
+        "end_col": 4,
+        "end_line": 4,
+        "line": 2
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "math.add.adds two numbers",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "adds two numbers",
+      "namespace": "math.add",
+      "span": {
+        "col": 26,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 51,
         "end_col": 2,
         "end_line": 3,
@@ -23,10 +65,73 @@
     },
     {
       "body": {
+        "col": 71,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "display": "math.range",
+      "file": "src/math.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "range",
+      "namespace": "math",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "plugin.default",
+      "file": "src/plugin.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "default",
+      "namespace": "plugin",
+      "span": {
+        "col": 16,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 22,
+        "end_col": 4,
+        "end_line": 6,
+        "line": 4
+      },
+      "display": "shapes.geometry.Shape.describe",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "describe",
+      "namespace": "shapes.geometry.Shape",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 6,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 40,
-        "end_col": 42,
-        "end_line": 2,
-        "line": 2
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
       },
       "display": "shapes.geometry.Circle.constructor",
       "file": "src/shapes/geometry.ts",
@@ -36,9 +141,9 @@
       "namespace": "shapes.geometry.Circle",
       "span": {
         "col": 3,
-        "end_col": 42,
-        "end_line": 2,
-        "line": 2
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
       },
       "visibility": "public"
     },
@@ -46,8 +151,8 @@
       "body": {
         "col": 18,
         "end_col": 4,
-        "end_line": 6,
-        "line": 4
+        "end_line": 16,
+        "line": 14
       },
       "display": "shapes.geometry.Circle.area",
       "file": "src/shapes/geometry.ts",
@@ -58,8 +163,8 @@
       "span": {
         "col": 3,
         "end_col": 4,
-        "end_line": 6,
-        "line": 4
+        "end_line": 16,
+        "line": 14
       },
       "visibility": "public"
     },
@@ -67,8 +172,8 @@
       "body": {
         "col": 25,
         "end_col": 4,
-        "end_line": 10,
-        "line": 8
+        "end_line": 20,
+        "line": 18
       },
       "display": "shapes.geometry.Circle.unit",
       "file": "src/shapes/geometry.ts",
@@ -79,8 +184,8 @@
       "span": {
         "col": 3,
         "end_col": 4,
-        "end_line": 10,
-        "line": 8
+        "end_line": 20,
+        "line": 18
       },
       "visibility": "public"
     },
@@ -88,8 +193,8 @@
       "body": {
         "col": 30,
         "end_col": 4,
-        "end_line": 14,
-        "line": 12
+        "end_line": 24,
+        "line": 22
       },
       "display": "shapes.geometry.Circle.isValid",
       "file": "src/shapes/geometry.ts",
@@ -100,8 +205,29 @@
       "span": {
         "col": 3,
         "end_col": 4,
-        "end_line": 14,
-        "line": 12
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 18,
+        "end_col": 20,
+        "end_line": 26,
+        "line": 26
+      },
+      "display": "shapes.geometry.Circle.#cache",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "#cache",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 20,
+        "end_line": 26,
+        "line": 26
       },
       "visibility": "private"
     },
@@ -109,8 +235,8 @@
       "body": {
         "col": 3,
         "end_col": 37,
-        "end_line": 18,
-        "line": 18
+        "end_line": 30,
+        "line": 30
       },
       "display": "shapes.geometry.scale",
       "file": "src/shapes/geometry.ts",
@@ -121,8 +247,8 @@
       "span": {
         "col": 14,
         "end_col": 37,
-        "end_line": 18,
-        "line": 17
+        "end_line": 30,
+        "line": 29
       },
       "visibility": "public"
     },
@@ -130,8 +256,8 @@
       "body": {
         "col": 44,
         "end_col": 2,
-        "end_line": 25,
-        "line": 20
+        "end_line": 37,
+        "line": 32
       },
       "display": "shapes.geometry.perimeter",
       "file": "src/shapes/geometry.ts",
@@ -142,8 +268,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 25,
-        "line": 20
+        "end_line": 37,
+        "line": 32
       },
       "visibility": "private"
     },
@@ -151,8 +277,8 @@
       "body": {
         "col": 41,
         "end_col": 4,
-        "end_line": 23,
-        "line": 21
+        "end_line": 35,
+        "line": 33
       },
       "display": "shapes.geometry.perimeter.twice",
       "file": "src/shapes/geometry.ts",
@@ -163,10 +289,31 @@
       "span": {
         "col": 3,
         "end_col": 4,
-        "end_line": 23,
-        "line": 21
+        "end_line": 35,
+        "line": 33
       },
       "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 75,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "widget.Badge",
+      "file": "src/widget.tsx",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "Badge",
+      "namespace": "widget",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
     }
   ]
 }

@@ -2,6 +2,48 @@
   "symbols": [
     {
       "body": {
+        "col": 21,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "display": "bin.cli.main",
+      "file": "bin/cli.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "main",
+      "namespace": "bin.cli",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "format.money",
+      "file": "src/format.cjs",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "money",
+      "namespace": "format",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 27,
         "end_col": 2,
         "end_line": 3,
@@ -20,6 +62,69 @@
         "line": 1
       },
       "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "display": "math.range",
+      "file": "src/math.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "range",
+      "namespace": "math",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "plugin.default",
+      "file": "src/plugin.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "default",
+      "namespace": "plugin",
+      "span": {
+        "col": 16,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 27,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "report.summary",
+      "file": "src/report.cjs",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "summary",
+      "namespace": "report",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "private"
     },
     {
       "body": {
@@ -165,6 +270,27 @@
         "end_col": 4,
         "end_line": 24,
         "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "test.math.add.adds two numbers",
+      "file": "test/math.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "adds two numbers",
+      "namespace": "test.math.add",
+      "span": {
+        "col": 26,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
       },
       "visibility": "private"
     }
