@@ -2,6 +2,7 @@
 // ABOUTME: Produces the effective settings, per-check config slices, typed gate rules, and the `run.config` echo.
 mod file;
 mod gate;
+mod registered;
 mod resolve;
 mod settings;
 
@@ -69,5 +70,17 @@ pub enum ConfigError {
         name: String,
         defined: Vec<String>,
         file_found: bool,
+    },
+    /// An ID is well formed but no registry knows it (ADR-017).
+    #[error(
+        "unknown {what} in `{section}`; registered: {}",
+        quoted_list(registered)
+    )]
+    Unregistered {
+        /// What is unknown, such as ``check `tests.mutaton` ``.
+        what: String,
+        /// The section naming it, such as `[gate.changed]`.
+        section: String,
+        registered: Vec<String>,
     },
 }
