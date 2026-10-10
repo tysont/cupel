@@ -1,0 +1,22 @@
+# ABOUTME: Continuous integration: runs `make check` on Linux and macOS for every push and pull request.
+# ABOUTME: The toolchain comes from rust-toolchain.toml, so CI compiles with the pinned compiler.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned toolchain
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: make check
+        run: make check

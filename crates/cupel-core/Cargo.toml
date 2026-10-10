@@ -1,0 +1,15 @@
+# ABOUTME: Manifest for cupel-core: the output contract, fact vocabulary, and extension-model traits.
+# ABOUTME: Depends on no other Cupel crate; every other crate depends on it.
+[package]
+name = "cupel-core"
+description = "Cupel's output contract, fact vocabulary, and extension-model traits."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true
