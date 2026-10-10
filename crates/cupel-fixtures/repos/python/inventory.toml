@@ -251,3 +251,49 @@ expect = { target = { package = "typing" } }
 [module-graph.unresolved]
 file = "src/ledger/__init__.py"
 name = ".generated.schema"
+
+[api-surface.function]
+file = "src/ledger/__init__.py"
+name = "ledger.balance"
+expect = { signature = "(_: list[int]) -> int" }
+
+[api-surface.method]
+file = "src/ledger/account.py"
+name = "ledger.account.Account.deposit"
+expect = { signature = "(self, _: int) -> None" }
+
+[api-surface.type]
+file = "src/ledger/account.py"
+name = "ledger.account.Account"
+
+[api-surface.interface]
+file = "src/ledger/account.py"
+name = "ledger.account.Audited"
+
+[api-surface.constant]
+file = "src/ledger/__init__.py"
+name = "ledger.MAX_ENTRIES"
+expect = { signature = "int" }
+
+[api-surface.variable]
+file = "src/ledger/__init__.py"
+name = "ledger.default_currency"
+
+[api-surface.module]
+not-applicable = "Python declares no modules in source: a module is its file, and its path is the namespace of every item in it."
+
+[roots.entry-point]
+file = "src/ledger/cli.py"
+name = "ledger.cli.run"
+
+[roots.export]
+file = "src/ledger/__init__.py"
+name = "ledger.balance"
+
+[roots.test]
+file = "tests/test_ledger.py"
+name = "tests.test_ledger.test_deposit_adds_to_the_balance"
+
+[roots.hook]
+file = "src/ledger/account.py"
+name = "ledger.account.Account.__init__"

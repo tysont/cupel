@@ -167,3 +167,27 @@ template = "{base}tests/**/test_{stem}.py"
 
 [[conventions.tests_for]]
 template = "{base}tests/**/{stem}_test.py"
+
+# `main` is an entry point by name; api.scm adds functions a `__main__` guard calls, dunder
+# methods, pytest hooks, and fixtures. These unittest and pytest setup and teardown methods are
+# called by their runner.
+[roots]
+entry_points = ["main"]
+hooks = [
+  "setUp",
+  "tearDown",
+  "setUpClass",
+  "tearDownClass",
+  "setUpModule",
+  "tearDownModule",
+  "asyncSetUp",
+  "asyncTearDown",
+  "setup_method",
+  "teardown_method",
+  "setup_class",
+  "teardown_class",
+  "setup_function",
+  "teardown_function",
+  "setup_module",
+  "teardown_module",
+]

@@ -71,6 +71,26 @@
         ]
       },
       {
+        "kind": "api-surface",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "roots",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
         "kind": "test-conventions",
         "producers": [
           {

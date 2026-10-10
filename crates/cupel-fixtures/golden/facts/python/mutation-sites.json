@@ -248,7 +248,7 @@
           "from": "Account(owner)",
           "operator": "return-value",
           "set": "extended",
-          "site_hash": "3213f64c6eb781cc",
+          "site_hash": "746768f05b0b8e55",
           "span": {
             "col": 16,
             "end_col": 30,

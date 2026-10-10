@@ -1,0 +1,628 @@
+{
+  "items": [
+    {
+      "file": "libs/units/src/units/__init__.py",
+      "kind": "function",
+      "path": "units.cents",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 2,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/ledger/__init__.py",
+      "kind": "constant",
+      "path": "ledger.MAX_ENTRIES",
+      "signature": "int",
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 8,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/ledger/__init__.py",
+      "kind": "variable",
+      "path": "ledger.default_currency",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 9,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/ledger/__init__.py",
+      "kind": "function",
+      "path": "ledger.balance",
+      "signature": "(_: list[int]) -> int",
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 14,
+        "line": 13
+      }
+    },
+    {
+      "file": "src/ledger/account.py",
+      "kind": "interface",
+      "path": "ledger.account.Audited",
+      "signature": "(Protocol)",
+      "span": {
+        "col": 1,
+        "end_col": 38,
+        "end_line": 10,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "path": "ledger.account.Audited.audit_trail",
+      "signature": "(self) -> list[str]",
+      "span": {
+        "col": 5,
+        "end_col": 44,
+        "end_line": 7,
+        "line": 7
+      }
+    },
+    {
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "path": "ledger.account.Audited.is_clean",
+      "signature": "(self) -> bool",
+      "span": {
+        "col": 5,
+        "end_col": 38,
+        "end_line": 10,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/ledger/account.py",
+      "kind": "type",
+      "path": "ledger.account.Account",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 38,
+        "line": 13
+      }
+    },
+    {
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "path": "ledger.account.Account.__init__",
+      "signature": "(self, _: str)",
+      "span": {
+        "col": 5,
+        "end_col": 23,
+        "end_line": 18,
+        "line": 16
+      }
+    },
+    {
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "path": "ledger.account.Account.opening",
+      "signature": "(_: str)",
+      "span": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 22,
+        "line": 21
+      }
+    },
+    {
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "path": "ledger.account.Account.deposit",
+      "signature": "(self, _: int) -> None",
+      "span": {
+        "col": 5,
+        "end_col": 28,
+        "end_line": 25,
+        "line": 24
+      }
+    },
+    {
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "path": "ledger.account.Account.statement",
+      "signature": "(self) -> str",
+      "span": {
+        "col": 5,
+        "end_col": 52,
+        "end_line": 32,
+        "line": 27
+      }
+    },
+    {
+      "file": "src/ledger/cli.py",
+      "kind": "function",
+      "path": "ledger.cli.main",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/ledger/cli.py",
+      "kind": "function",
+      "path": "ledger.cli.run",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 11,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "path": "ledger.decide.classify",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 8,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "path": "ledger.decide.first_overdraft",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 17,
+        "line": 11
+      }
+    },
+    {
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "path": "ledger.decide.parse_cents",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 25,
+        "line": 20
+      }
+    },
+    {
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "path": "ledger.decide.require_positive",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 31,
+        "line": 28
+      }
+    },
+    {
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "path": "ledger.decide.describe",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 41,
+        "line": 34
+      }
+    },
+    {
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "path": "ledger.decide.sign",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 37,
+        "end_line": 45,
+        "line": 44
+      }
+    },
+    {
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "path": "ledger.decide.positives",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 53,
+        "end_line": 49,
+        "line": 48
+      }
+    },
+    {
+      "file": "src/ledger/pricing.py",
+      "kind": "function",
+      "path": "ledger.pricing.discounted",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 5,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/ledger/pricing.py",
+      "kind": "function",
+      "path": "ledger.pricing.tally",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 16,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/ledger/pricing.py",
+      "kind": "function",
+      "path": "ledger.pricing.has_price",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 34,
+        "end_line": 20,
+        "line": 19
+      }
+    },
+    {
+      "file": "src/ledger/pricing.py",
+      "kind": "function",
+      "path": "ledger.pricing.log_total",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 24,
+        "line": 23
+      }
+    },
+    {
+      "file": "src/ledger/report/__init__.py",
+      "kind": "function",
+      "path": "ledger.report.summary",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 40,
+        "end_line": 7,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/ledger/report/format.py",
+      "kind": "function",
+      "path": "ledger.report.format.render",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 5,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/report/format.py",
+      "kind": "function",
+      "path": "ledger.report.format.publish",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 73,
+        "end_line": 9,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "path": "ledger.twins.net_total",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 5,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "path": "ledger.twins.sum_after_charge",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 12,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "path": "ledger.twins.net_total_floor",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 14,
+        "end_line": 19,
+        "line": 15
+      }
+    },
+    {
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "path": "ledger.twins.net_total_laid_out",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 30,
+        "line": 22
+      }
+    },
+    {
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "path": "ledger.twins.net_total_plus",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 37,
+        "line": 33
+      }
+    },
+    {
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "path": "ledger.twins.net_total_capped",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 46,
+        "line": 40
+      }
+    },
+    {
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "path": "ledger.twins.net_total_product",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 53,
+        "line": 49
+      }
+    },
+    {
+      "file": "tests/conftest.py",
+      "kind": "function",
+      "path": "tests.conftest.account",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 8,
+        "line": 7
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_deposit_adds_to_the_balance",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 12,
+        "line": 10
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_statements_mention_the_owner",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 16,
+        "line": 15
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_parsing_garbage_gives_nothing",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 20,
+        "line": 19
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_an_opening_account_exists",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 46,
+        "end_line": 24,
+        "line": 23
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_negative_deposits_are_rejected",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 29,
+        "line": 27
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_rounding_is_close",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 70,
+        "end_line": 33,
+        "line": 32
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_statement_is_published",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 38,
+        "line": 37
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_report_matches_snapshot",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 36,
+        "end_line": 42,
+        "line": 41
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_publish_posts_once",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 48,
+        "line": 46
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_rendering_can_be_replaced",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 53,
+        "line": 51
+      }
+    },
+    {
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "path": "tests.test_ledger.test_opening_an_account_does_not_raise",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 57,
+        "line": 56
+      }
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "kind": "type",
+      "path": "tests.test_pricing.PricingTest",
+      "signature": "(unittest.TestCase)",
+      "span": {
+        "col": 1,
+        "end_col": 45,
+        "end_line": 23,
+        "line": 7
+      }
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "kind": "method",
+      "path": "tests.test_pricing.PricingTest.setUp",
+      "signature": "(self)",
+      "span": {
+        "col": 5,
+        "end_col": 32,
+        "end_line": 9,
+        "line": 8
+      }
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "kind": "method",
+      "path": "tests.test_pricing.PricingTest.test_tally_reports_overdraft",
+      "signature": "(self)",
+      "span": {
+        "col": 5,
+        "end_col": 35,
+        "end_line": 14,
+        "line": 11
+      }
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "kind": "method",
+      "path": "tests.test_pricing.PricingTest.test_members_get_a_discount",
+      "signature": "(self)",
+      "span": {
+        "col": 5,
+        "end_col": 56,
+        "end_line": 18,
+        "line": 17
+      }
+    },
+    {
+      "file": "tests/test_pricing.py",
+      "kind": "method",
+      "path": "tests.test_pricing.PricingTest.test_tally_logs_once",
+      "signature": "(self, _)",
+      "span": {
+        "col": 5,
+        "end_col": 45,
+        "end_line": 23,
+        "line": 21
+      }
+    }
+  ]
+}

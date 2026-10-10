@@ -18,7 +18,7 @@ class Account:
         self.cents = 0
 
     @staticmethod
-    def opening(owner: str) -> "Account":
+    def opening(owner: str):
         return Account(owner)
 
     def deposit(self, cents: int) -> None:

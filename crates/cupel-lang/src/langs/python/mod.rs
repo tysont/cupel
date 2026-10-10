@@ -7,7 +7,8 @@ use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
 use cupel_core::syntax::{
-    Decisions, ModuleGraph, MutationSites, NormTree, Symbols, TestConventions, TestFrames,
+    ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, Roots, Symbols, TestConventions,
+    TestFrames,
 };
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
@@ -17,7 +18,7 @@ use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::producer::QueryProducer;
 use crate::spec::LanguageSpec;
-use crate::{decisions, mutations, symbols, testframes};
+use crate::{api, decisions, mutations, roots, symbols, testframes};
 
 use crate::spec::QueryFile;
 
@@ -30,6 +31,7 @@ static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
             (QueryFile::Mutations, include_str!("queries/mutations.scm")),
             (QueryFile::Tests, include_str!("queries/tests.scm")),
             (QueryFile::Imports, include_str!("queries/imports.scm")),
+            (QueryFile::Api, include_str!("queries/api.scm")),
         ],
         include_str!("tables.toml"),
     )
@@ -103,6 +105,16 @@ impl Language for Python {
             testframes::extract,
         ));
         reg.register::<TestConventions, _>(GlobTestConventions::new(Arc::clone(&language)));
+        reg.register::<ApiSurface, _>(QueryProducer::new(
+            Arc::clone(&language),
+            Arc::clone(cache),
+            api::extract,
+        ));
+        reg.register::<Roots, _>(QueryProducer::new(
+            Arc::clone(&language),
+            Arc::clone(cache),
+            roots::extract,
+        ));
         // Module resolution needs packages, layouts, and manifests, which queries cannot see.
         reg.register::<ModuleGraph, _>(ImportGraph::new(
             language,
