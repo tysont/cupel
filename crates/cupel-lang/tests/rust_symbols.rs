@@ -34,9 +34,9 @@ fn the_crate_root_has_top_level_functions_of_each_visibility() {
         &symbols,
         "src/lib.rs",
         &[
-            ("balance", Function, Public, (9, 11)),
-            ("audit_limit", Function, Internal, (13, 15)),
-            ("scale", Function, Private, (17, 19)),
+            ("balance", Function, Public, (10, 12)),
+            ("audit_limit", Function, Internal, (14, 16)),
+            ("scale", Function, Private, (18, 20)),
         ],
     );
 }

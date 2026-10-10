@@ -1,0 +1,198 @@
+{
+  "symbols": [
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/account.rs",
+        "line": 23
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/account.rs",
+        "line": 26
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 40
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 2
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 20
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0
+        },
+        {
+          "cognitive": 0,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/lib.rs",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/lib.rs",
+        "line": 14
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/lib.rs",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/report/format.rs",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/report/mod.rs",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 4
+      }
+    }
+  ]
+}

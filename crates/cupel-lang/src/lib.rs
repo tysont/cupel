@@ -44,6 +44,7 @@
 //! on the producer that reads them.
 
 mod contract;
+pub mod decisions;
 mod generic;
 mod langs;
 mod language;
@@ -62,5 +63,5 @@ pub use parse::{CacheStats, ParseCache, ParseProblem, Parsed, Syntax};
 pub use producer::{Extract, Merge, QueryProducer, Source, parse_scope, producer_id};
 pub use query::{Match, matches, span};
 pub use spec::{LanguageSpec, QueryFile, SpecError};
-pub use tables::{NameRule, NamespaceRules, Tables, VisibilityRules};
+pub use tables::{DecisionRules, NameRule, NamespaceRules, Tables, VisibilityRules, Weight};
 pub use walk::walk;

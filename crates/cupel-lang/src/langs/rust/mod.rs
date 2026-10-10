@@ -14,7 +14,10 @@ use crate::spec::QueryFile;
 static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
     LanguageSpec::new(
         "rust",
-        &[(QueryFile::Symbols, include_str!("queries/symbols.scm"))],
+        &[
+            (QueryFile::Symbols, include_str!("queries/symbols.scm")),
+            (QueryFile::Decisions, include_str!("queries/decisions.scm")),
+        ],
         include_str!("tables.toml"),
     )
 });

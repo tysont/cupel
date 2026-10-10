@@ -47,7 +47,8 @@
           ".rs"
         ],
         "facts": [
-          "symbols"
+          "symbols",
+          "decisions"
         ],
         "family": "rust",
         "id": "rust",

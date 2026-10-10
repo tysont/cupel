@@ -37,3 +37,39 @@ name = "scale"
 file = "src/report/format.rs"
 name = "report::format::render"
 expect = { namespace = "report::format" }
+
+[decisions.if]
+file = "src/decide.rs"
+name = "decide::classify"
+
+[decisions.else-if]
+file = "src/decide.rs"
+name = "decide::classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "src/decide.rs"
+name = "decide::first_overdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "src/decide.rs"
+name = "decide::first_overdraft"
+
+[decisions.boolean-op]
+file = "src/decide.rs"
+name = "decide::classify"
+
+[decisions.early-return]
+file = "src/decide.rs"
+name = "decide::parse_cents"
+
+[decisions.case]
+file = "src/decide.rs"
+name = "decide::describe"
+
+[decisions.ternary]
+not-applicable = "Rust has no conditional operator; `if` is an expression and is a branch."
+
+[decisions.catch]
+not-applicable = "Rust has no exception handlers; errors are values, and `?` is an early return."

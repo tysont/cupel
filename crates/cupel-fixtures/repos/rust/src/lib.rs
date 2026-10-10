@@ -1,6 +1,7 @@
 //! A small ledger: the Rust fixture repository for Cupel's language layer.
 
 pub mod account;
+pub mod decide;
 pub mod report;
 
 pub use account::Account;

@@ -461,7 +461,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.3 Fact: `Decisions`
 
-**Status:** not started
+**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-024](adr/CUPEL_DECISION_024.md)
 
 - `QueryDecisions` over `decisions.scm` → `Decision { kind, nesting }` per symbol with the semantic kind enum from design §8.3.2; cyclomatic and cognitive weights per kind in `tables.toml`, following crapper's per-language tables (design §3). The producer emits decisions; *computing* complexity from them is the check's job (P2.1).
 

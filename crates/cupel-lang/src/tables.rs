@@ -1,8 +1,8 @@
 // ABOUTME: The typed form of a language's `tables.toml`: the data the generic producers read
 // ABOUTME: alongside the queries. Unknown keys are errors, so a typo fails the spec test.
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
-use cupel_core::syntax::Visibility;
+use cupel_core::syntax::{DecisionKind, Visibility};
 use serde::Deserialize;
 
 /// Everything a language's `tables.toml` may contain. Every section is optional; a section a
@@ -12,6 +12,7 @@ use serde::Deserialize;
 pub struct Tables {
     pub namespace: NamespaceRules,
     pub visibility: VisibilityRules,
+    pub decisions: DecisionRules,
 }
 
 impl Tables {
@@ -130,5 +131,78 @@ impl VisibilityRules {
             .iter()
             .find(|rule| rule.matches(name))
             .map_or(self.default, |rule| rule.visibility)
+    }
+}
+
+/// `[decisions]`: how decisions captured by decisions.scm weigh and nest.
+///
+/// ```toml
+/// [decisions]
+/// chain_parents = ["else_clause"]   # a branch whose parent is one of these continues a chain
+/// condition_fields = ["condition"]  # decisions in these fields of a decision do not nest in it
+///
+/// [decisions.weights.early-return]  # overrides one kind's default weight
+/// cyclomatic = 0
+/// cognitive = 1
+/// nests = false
+/// ```
+///
+/// Default weights (`cyclomatic`, `cognitive`, `nests`): `branch`, `loop`, `case`, `catch`,
+/// and `ternary` are (1, 1, yes); `boolean-op` is (1, 1, no); `early-return` is (0, 1, no).
+/// Only the first `case` among siblings keeps its cognitive weight, so a switch counts once.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct DecisionRules {
+    pub chain_parents: Vec<String>,
+    pub condition_fields: Vec<String>,
+    pub weights: HashMap<DecisionKind, Weight>,
+}
+
+impl Default for DecisionRules {
+    fn default() -> Self {
+        Self {
+            chain_parents: Vec::new(),
+            condition_fields: vec!["condition".to_owned()],
+            weights: HashMap::new(),
+        }
+    }
+}
+
+impl DecisionRules {
+    /// The weight of `kind`: the table's, else the default.
+    pub fn weight(&self, kind: DecisionKind) -> Weight {
+        self.weights
+            .get(&kind)
+            .copied()
+            .unwrap_or_else(|| Weight::default_for(kind))
+    }
+}
+
+/// How much one decision adds to cyclomatic and cognitive complexity, and whether decisions
+/// inside it are nested one level deeper.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Weight {
+    pub cyclomatic: u32,
+    pub cognitive: u32,
+    pub nests: bool,
+}
+
+impl Weight {
+    pub fn default_for(kind: DecisionKind) -> Self {
+        let (cyclomatic, cognitive, nests) = match kind {
+            DecisionKind::Branch
+            | DecisionKind::Loop
+            | DecisionKind::Case
+            | DecisionKind::Catch
+            | DecisionKind::Ternary => (1, 1, true),
+            DecisionKind::BooleanOp => (1, 1, false),
+            DecisionKind::EarlyReturn => (0, 1, false),
+        };
+        Self {
+            cyclomatic,
+            cognitive,
+            nests,
+        }
     }
 }

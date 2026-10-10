@@ -11,3 +11,7 @@ default = "private"
 modifiers = { "pub" = "public", "pub(self)" = "private" }
 # pub(crate), pub(super), pub(in path): visible inside the crate, not exported.
 modifier_default = "internal"
+
+# `else if` is an `if_expression` inside the `else_clause` of the branch it continues.
+[decisions]
+chain_parents = ["else_clause"]

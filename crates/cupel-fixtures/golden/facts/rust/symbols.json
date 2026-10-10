@@ -149,10 +149,94 @@
     },
     {
       "body": {
+        "col": 58,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 1
+      },
+      "display": "decide::classify",
+      "file": "src/decide.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "classify",
+      "namespace": "decide",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 59,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 11
+      },
+      "display": "decide::first_overdraft",
+      "file": "src/decide.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "first_overdraft",
+      "namespace": "decide",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 72,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 20
+      },
+      "display": "decide::parse_cents",
+      "file": "src/decide.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "parse_cents",
+      "namespace": "decide",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 20
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 25
+      },
+      "display": "decide::describe",
+      "file": "src/decide.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "describe",
+      "namespace": "decide",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 40,
         "end_col": 2,
-        "end_line": 11,
-        "line": 9
+        "end_line": 12,
+        "line": 10
       },
       "display": "balance",
       "file": "src/lib.rs",
@@ -163,8 +247,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 11,
-        "line": 9
+        "end_line": 12,
+        "line": 10
       },
       "visibility": "public"
     },
@@ -172,8 +256,8 @@
       "body": {
         "col": 36,
         "end_col": 2,
-        "end_line": 15,
-        "line": 13
+        "end_line": 16,
+        "line": 14
       },
       "display": "audit_limit",
       "file": "src/lib.rs",
@@ -184,8 +268,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 15,
-        "line": 13
+        "end_line": 16,
+        "line": 14
       },
       "visibility": "internal"
     },
@@ -193,8 +277,8 @@
       "body": {
         "col": 43,
         "end_col": 2,
-        "end_line": 19,
-        "line": 17
+        "end_line": 20,
+        "line": 18
       },
       "display": "scale",
       "file": "src/lib.rs",
@@ -205,8 +289,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 19,
-        "line": 17
+        "end_line": 20,
+        "line": 18
       },
       "visibility": "private"
     },

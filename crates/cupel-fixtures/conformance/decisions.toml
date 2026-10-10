@@ -1,0 +1,56 @@
+# ABOUTME: Conformance inventory for the `decisions` fact: the decision points every Decisions producer
+# ABOUTME: must report. Each language maps them in repos/<lang>/inventory.toml under [decisions.<id>].
+fact = "decisions"
+
+[[constructs]]
+id = "if"
+summary = "A conditional branch (`if`, `if let`, `let … else`); a `branch` decision."
+within = "decisions"
+expect = { kind = "branch", nesting = 0 }
+
+[[constructs]]
+id = "else-if"
+summary = "A branch continuing an if/else-if chain; it is not nested under the branch it continues. Map a function whose only nested-looking branch is an else-if; `expect` gives its nesting (0)."
+within = "decisions"
+expect = { kind = "branch" }
+
+[[constructs]]
+id = "nested"
+summary = "A decision inside the body of another decision; its nesting is one more than the enclosing one's. The mapping's `expect` names the nested decision's kind and nesting."
+within = "decisions"
+
+[[constructs]]
+id = "loop"
+summary = "A loop (`for`, `while`, `loop`, comprehension loops where the language has them)."
+within = "decisions"
+expect = { kind = "loop" }
+
+[[constructs]]
+id = "boolean-op"
+summary = "A short-circuit boolean operator (`&&`, `||`, `and`, `or`, `??` where it short-circuits)."
+within = "decisions"
+expect = { kind = "boolean-op" }
+
+[[constructs]]
+id = "early-return"
+summary = "A return (or an error-propagating `?`) that is not the final statement of the body."
+within = "decisions"
+expect = { kind = "early-return" }
+
+[[constructs]]
+id = "case"
+summary = "A non-default arm of a switch or match; only the first arm of each switch weighs toward cognitive complexity."
+within = "decisions"
+expect = { kind = "case" }
+
+[[constructs]]
+id = "ternary"
+summary = "A conditional expression (`c ? a : b`, `a if c else b`)."
+within = "decisions"
+expect = { kind = "ternary" }
+
+[[constructs]]
+id = "catch"
+summary = "An exception handler (`catch`, `except`)."
+within = "decisions"
+expect = { kind = "catch" }
