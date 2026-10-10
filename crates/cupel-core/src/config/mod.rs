@@ -1,8 +1,12 @@
 // ABOUTME: The `cupel.toml` configuration model, its discovery, and layered resolution (design §6.7).
 // ABOUTME: Produces the effective settings, per-check config slices, typed gate rules, and the `run.config` echo.
+mod file;
 mod gate;
 mod settings;
 
+pub use file::{
+    CheckConfig, ConfigFile, GateConfig, GateSection, OracleConfig, OracleKind, RootConfig, Table,
+};
 pub use gate::{Comparison, GateCondition, GateKey, GateRuleSpec, Threshold};
 pub use settings::{Format, PROFILE_ENV_VAR, Setting, Settings, TimeLimit};
 

@@ -1,0 +1,9 @@
+---
+source: crates/cupel-core/tests/config_file.rs
+expression: "error_message(\"[profile.ci]\\ndepth = \\\"deep\\\"\\nseed = 7\\n\")"
+---
+invalid configuration in `/repo/cupel.toml`: TOML parse error at line 3, column 1
+  |
+3 | seed = 7
+  | ^^^^
+unknown field `seed`, expected one of `depth`, `format`, `budget`
