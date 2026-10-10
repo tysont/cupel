@@ -217,3 +217,30 @@ name = "ledger_test.go"
 
 [test-conventions.inline-tests]
 not-applicable = "The go tool runs only functions in `_test.go` files; a source file cannot contain its own tests."
+
+[module-graph.relative]
+not-applicable = "Go modules have no path-relative imports: every import path is absolute, starting at a module path or the standard library."
+
+[module-graph.absolute]
+file = "ledger.go"
+name = "example.com/ledger/report"
+expect = { target = { path = "report/format.go" } }
+
+[module-graph.workspace-member]
+file = "ledger.go"
+name = "example.com/shapes"
+expect = { target = { path = "shapes/geometry.go" } }
+
+[module-graph.external]
+file = "ledger.go"
+name = "github.com/google/uuid"
+expect = { target = { package = "github.com/google/uuid" } }
+
+[module-graph.standard-library]
+file = "ledger.go"
+name = "fmt"
+expect = { target = { package = "std" } }
+
+[module-graph.unresolved]
+file = "ledger.go"
+name = "example.com/ledger/gen"

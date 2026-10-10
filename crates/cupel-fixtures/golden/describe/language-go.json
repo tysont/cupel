@@ -61,6 +61,16 @@
         ]
       },
       {
+        "kind": "module-graph",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
         "kind": "test-conventions",
         "producers": [
           {

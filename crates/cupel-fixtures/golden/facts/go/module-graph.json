@@ -1,0 +1,253 @@
+{
+  "roots": [
+    {
+      "edges": [
+        {
+          "from": "cmd/ledger/main.go",
+          "line": 4,
+          "relative": false,
+          "specifier": "fmt",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "cmd/ledger/main.go",
+          "line": 5,
+          "relative": false,
+          "specifier": "os",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
+            "path": "decide.go"
+          }
+        },
+        {
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
+            "path": "ledger.go"
+          }
+        },
+        {
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
+            "path": "pricing.go"
+          }
+        },
+        {
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
+            "path": "twins.go"
+          }
+        },
+        {
+          "from": "decide.go",
+          "line": 4,
+          "relative": false,
+          "specifier": "errors",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "decide.go",
+          "line": 5,
+          "relative": false,
+          "specifier": "strconv",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "decide.go",
+          "line": 6,
+          "relative": false,
+          "specifier": "strings",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "ledger.go",
+          "line": 4,
+          "relative": false,
+          "specifier": "fmt",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "ledger.go",
+          "line": 6,
+          "relative": false,
+          "specifier": "github.com/google/uuid",
+          "target": {
+            "kind": "external",
+            "package": "github.com/google/uuid"
+          }
+        },
+        {
+          "from": "ledger.go",
+          "line": 8,
+          "relative": false,
+          "specifier": "example.com/ledger/gen",
+          "target": {
+            "kind": "unresolved"
+          }
+        },
+        {
+          "from": "ledger.go",
+          "line": 9,
+          "relative": false,
+          "specifier": "example.com/ledger/report",
+          "target": {
+            "kind": "file",
+            "path": "report/format.go"
+          }
+        },
+        {
+          "from": "ledger.go",
+          "line": 10,
+          "relative": false,
+          "specifier": "example.com/shapes",
+          "target": {
+            "kind": "file",
+            "path": "shapes/geometry.go"
+          }
+        },
+        {
+          "from": "ledger_test.go",
+          "line": 4,
+          "relative": false,
+          "specifier": "os",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "ledger_test.go",
+          "line": 5,
+          "relative": false,
+          "specifier": "testing",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "pricing.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "log",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "pricing_test.go",
+          "line": 4,
+          "relative": false,
+          "specifier": "testing",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "pricing_test.go",
+          "line": 6,
+          "relative": false,
+          "specifier": "github.com/gkampitakis/go-snaps/snaps",
+          "target": {
+            "kind": "external",
+            "package": "github.com/gkampitakis/go-snaps"
+          }
+        },
+        {
+          "from": "pricing_test.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "github.com/stretchr/testify/assert",
+          "target": {
+            "kind": "external",
+            "package": "github.com/stretchr/testify"
+          }
+        },
+        {
+          "from": "pricing_test.go",
+          "line": 8,
+          "relative": false,
+          "specifier": "github.com/stretchr/testify/mock",
+          "target": {
+            "kind": "external",
+            "package": "github.com/stretchr/testify"
+          }
+        },
+        {
+          "from": "pricing_test.go",
+          "line": 9,
+          "relative": false,
+          "specifier": "github.com/stretchr/testify/require",
+          "target": {
+            "kind": "external",
+            "package": "github.com/stretchr/testify"
+          }
+        },
+        {
+          "from": "report/format.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "fmt",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        }
+      ],
+      "root": "."
+    },
+    {
+      "edges": [
+        {
+          "from": "shapes/geometry.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "math",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        }
+      ],
+      "root": "shapes"
+    }
+  ]
+}
