@@ -28,3 +28,33 @@ visibility = "internal"
 # `elif` is an `elif_clause` directly under the `if_statement` whose chain it continues.
 [decisions]
 chain_parents = ["if_statement"]
+
+# Annotations, decorators, and the return arrow say nothing about what a function does, so an
+# annotated function and its unannotated twin normalize alike. Strings are literals, f-strings
+# included. langs/python/normalize.rs then drops docstrings and `self`/`cls` (ADR-034).
+[normalize]
+identifiers = ["identifier"]
+literals = [
+  "integer",
+  "float",
+  "string",
+  "concatenated_string",
+  "true",
+  "false",
+  "none",
+  "ellipsis",
+]
+erase = ["decorator", "type", "->"]
+flatten = [
+  "decorated_definition",
+  "typed_parameter",
+  "default_parameter",
+  "typed_default_parameter",
+]
+operators = ["and", "or", "not", "in", "is", "is not", "not in"]
+# `self.items.append(x)` keeps `append`; `self.items` is a receiver and normalizes as usual.
+receivers = ["object"]
+
+[[normalize.calls]]
+kind = "call"
+callee = "function"

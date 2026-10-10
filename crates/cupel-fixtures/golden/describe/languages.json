@@ -37,7 +37,8 @@
         ],
         "facts": [
           "symbols",
-          "decisions"
+          "decisions",
+          "norm-tree"
         ],
         "family": "python",
         "id": "python",

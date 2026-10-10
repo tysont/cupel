@@ -1,13 +1,18 @@
 // ABOUTME: Python: one grammar for `.py`, the queries and tables under this directory, and the
-// ABOUTME: producers it registers.
+// ABOUTME: producers it registers, including the NormTree override for receivers and docstrings.
+mod normalize;
+
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
+use cupel_core::syntax::{Decisions, NormTree, Symbols};
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::language::Language;
 use crate::parse::ParseCache;
+use crate::producer::QueryProducer;
 use crate::spec::LanguageSpec;
+use crate::{decisions, symbols};
 
 use crate::spec::QueryFile;
 
@@ -58,8 +63,26 @@ impl Language for Python {
         Stability::Experimental
     }
 
+    /// The generic producers, registered one by one rather than through `generic::register`
+    /// because `NormTree` is Python's own: `self`/`cls` receivers and docstrings are positional
+    /// rules the `[normalize]` table cannot express (see `normalize`).
     fn register(&self, reg: &mut ProducerRegistry) {
         let language: Arc<dyn Language> = Arc::new(self.clone());
-        crate::generic::register(&language, &self.cache, reg);
+        let cache = &self.cache;
+        reg.register::<Symbols, _>(QueryProducer::new(
+            Arc::clone(&language),
+            Arc::clone(cache),
+            symbols::extract,
+        ));
+        reg.register::<Decisions, _>(QueryProducer::new(
+            Arc::clone(&language),
+            Arc::clone(cache),
+            decisions::extract,
+        ));
+        reg.register::<NormTree, _>(QueryProducer::new(
+            language,
+            Arc::clone(cache),
+            normalize::extract,
+        ));
     }
 }

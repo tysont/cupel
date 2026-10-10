@@ -29,6 +29,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "norm-tree",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "python",
