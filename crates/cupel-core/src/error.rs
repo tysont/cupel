@@ -1,5 +1,6 @@
 // ABOUTME: The error type shared by cupel-core's parsing, registries, and fact access.
 // ABOUTME: Every fallible core API returns `cupel_core::Result`.
+use crate::config::ConfigError;
 use crate::fact::FactKind;
 use crate::id::CheckId;
 
@@ -29,6 +30,9 @@ pub enum Error {
     /// Two checks were registered under the same ID.
     #[error("check `{id}` is already registered")]
     DuplicateCheck { id: CheckId },
+    /// The configuration is invalid; a usage error (exit 2).
+    #[error(transparent)]
+    Config(#[from] ConfigError),
 }
 
 /// Result type for cupel-core APIs.

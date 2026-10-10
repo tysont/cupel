@@ -4,6 +4,7 @@
 //! structural hashes, and the extension model of facts, producers, and checks (design §8.3).
 
 mod check;
+pub mod config;
 mod envelope;
 mod error;
 mod event;
