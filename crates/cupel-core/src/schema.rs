@@ -6,6 +6,7 @@ use schemars::{JsonSchema, Schema};
 use serde_json::{Value, json};
 
 use crate::check::Manifest;
+use crate::config::ConfigFile;
 use crate::envelope::Envelope;
 use crate::event::Event;
 use crate::fact::{Fact, FactKind};
@@ -31,6 +32,11 @@ pub fn finding() -> Schema {
 /// Schema of one `--events` line.
 pub fn events() -> Schema {
     root::<Event>("events.json")
+}
+
+/// Schema of `cupel.toml` (design §6.7).
+pub fn config() -> Schema {
+    input_root::<ConfigFile>("config.json")
 }
 
 /// Schema of the plugin protocol. Today that is the `Manifest` a plugin's `describe` emits;
@@ -73,11 +79,28 @@ fn fact_schema<F: Fact>() -> Schema {
     schema
 }
 
+/// Schema of a type Cupel emits: every property is required (ADR-013).
 fn root<T: JsonSchema>(path: &str) -> Schema {
-    let mut schema = SchemaSettings::draft2020_12()
-        .with_transform(require_every_property)
-        .into_generator()
-        .into_root_schema_for::<T>();
+    with_id(
+        SchemaSettings::draft2020_12()
+            .with_transform(require_every_property)
+            .into_generator()
+            .into_root_schema_for::<T>(),
+        path,
+    )
+}
+
+/// Schema of a type Cupel reads, such as `cupel.toml`, where keys may be omitted.
+fn input_root<T: JsonSchema>(path: &str) -> Schema {
+    with_id(
+        SchemaSettings::draft2020_12()
+            .into_generator()
+            .into_root_schema_for::<T>(),
+        path,
+    )
+}
+
+fn with_id(mut schema: Schema, path: &str) -> Schema {
     schema.insert("$id".to_owned(), json!(format!("{BASE_URL}{path}")));
     schema
 }

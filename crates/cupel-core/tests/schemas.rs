@@ -54,6 +54,34 @@ fn plugin_schema_describes_the_manifest() {
 }
 
 #[test]
+fn config_schema() {
+    let schema = schema::config();
+    assert_identity(
+        &schema,
+        "https://cupel.dev/schema/v1/config.json",
+        "ConfigFile",
+    );
+    insta::assert_snapshot!(pretty(&schema));
+}
+
+/// `cupel.toml` is input: every key is optional, and unknown keys at closed levels are errors.
+#[test]
+fn config_schema_keys_are_optional_and_closed() {
+    let schema = schema::config();
+    let value = schema.as_value();
+    assert_eq!(value.get("required"), None);
+    assert_eq!(value["additionalProperties"], json!(false));
+    for def in ["Settings", "RootConfig", "OracleConfig", "GateConfig"] {
+        assert_eq!(
+            value["$defs"][def]["additionalProperties"],
+            json!(false),
+            "{def}"
+        );
+    }
+    assert_eq!(value["$defs"]["Settings"].get("required"), None);
+}
+
+#[test]
 fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
     for kind in FactKind::ALL {
         assert_eq!(
