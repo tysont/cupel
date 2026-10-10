@@ -252,7 +252,7 @@ Cupel's three extension axes meet only through facts (design §8.3). Every step 
 
 #### P0.1 Workspace, automation, CI
 
-**Status:** in progress (2026-10-10)
+**Status:** complete (2026-10-10, de1ff35)
 
 - Cargo workspace with `cupel-cli` and `cupel-core` crates; `rust-toolchain.toml`; `[workspace.lints]` enabling `clippy::all`, `clippy::pedantic` selectively, `unsafe_code = "forbid"` (relax per-crate only via ADR).
 - `Makefile` per §2.3. `.github/workflows/ci.yml` running `make check` on Linux and macOS.
@@ -266,7 +266,7 @@ ADRs: [001](adr/CUPEL_DECISION_001.md) (crate granularity), [010](adr/CUPEL_DECI
 
 #### P0.2 Core types and schemas
 
-**Status:** in progress (2026-10-10)
+**Status:** complete (2026-10-10, e3cea34)
 
 In `cupel-core`, define the output contract exactly as design §7 specifies, deriving `Serialize`, `Deserialize`, `JsonSchema`:
 
