@@ -4,6 +4,8 @@ use std::collections::BTreeMap;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
+use serde_json::{Map, Value};
+
 use crate::error::Result;
 use crate::event::EventSink;
 use crate::fact::{Fact, FactKind};
@@ -19,11 +21,14 @@ pub struct Ctx {
     pub root: PathBuf,
 }
 
-/// What a producer can see while producing. Grows cancellation and configuration as the run
-/// infrastructure lands (P0.4, P0.7).
-#[derive(Debug, Clone, PartialEq, Eq)]
+/// What a producer can see while producing. Grows cancellation as the run infrastructure
+/// lands (P0.7).
+#[derive(Debug, Clone, PartialEq)]
 pub struct ProduceCtx {
     pub ctx: Ctx,
+    /// The `[lang.<lang>]` table for the language being produced (`Config::lang_config`).
+    /// Producers never see `[checks.*]` (design §6.7).
+    pub config: Map<String, Value>,
 }
 
 /// Whether a producer can run in this environment.
