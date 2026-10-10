@@ -1,0 +1,73 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/roots.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Roots",
+  "description": "Symbols that are live by convention even with no caller in scope.",
+  "type": "object",
+  "properties": {
+    "roots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/LiveRoot"
+      }
+    }
+  },
+  "required": [
+    "roots"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "LiveRoot": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "$ref": "#/$defs/RootReason"
+        },
+        "symbol": {
+          "$ref": "#/$defs/SymbolKey"
+        }
+      },
+      "required": [
+        "reason",
+        "symbol"
+      ]
+    },
+    "RootReason": {
+      "type": "string",
+      "enum": [
+        "entry-point",
+        "export",
+        "test",
+        "framework-hook"
+      ]
+    },
+    "SymbolKey": {
+      "description": "Identifies a symbol within one run by where it starts. Not stable across edits; anything\npersisted across runs uses `SymbolHash` (ADR-014).",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "file",
+        "line"
+      ]
+    }
+  }
+}

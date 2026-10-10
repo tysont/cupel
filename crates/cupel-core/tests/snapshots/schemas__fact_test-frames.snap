@@ -1,0 +1,199 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/test-frames.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TestFrames",
+  "description": "Test cases and what they assert, mock, skip, and set up.",
+  "type": "object",
+  "properties": {
+    "files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TestFile"
+      }
+    }
+  },
+  "required": [
+    "files"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "Assertion": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/AssertionKind"
+        },
+        "span": {
+          "$ref": "#/$defs/Span"
+        },
+        "strength": {
+          "$ref": "#/$defs/AssertionStrength"
+        }
+      },
+      "required": [
+        "kind",
+        "span",
+        "strength"
+      ]
+    },
+    "AssertionKind": {
+      "type": "string",
+      "enum": [
+        "equality",
+        "truthiness",
+        "not-null",
+        "throws",
+        "snapshot",
+        "custom"
+      ]
+    },
+    "AssertionStrength": {
+      "type": "string",
+      "enum": [
+        "strong",
+        "weak"
+      ]
+    },
+    "Mock": {
+      "type": "object",
+      "properties": {
+        "span": {
+          "$ref": "#/$defs/Span"
+        },
+        "target": {
+          "description": "What is replaced, as written.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "span",
+        "target"
+      ]
+    },
+    "SkipMarker": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "span": {
+          "$ref": "#/$defs/Span"
+        }
+      },
+      "required": [
+        "reason",
+        "span"
+      ]
+    },
+    "Span": {
+      "description": "A 1-based range within one file.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "line"
+      ]
+    },
+    "TestCase": {
+      "type": "object",
+      "properties": {
+        "assertions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Assertion"
+          }
+        },
+        "mocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Mock"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "skip": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SkipMarker"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "span": {
+          "$ref": "#/$defs/Span"
+        }
+      },
+      "required": [
+        "assertions",
+        "mocks",
+        "name",
+        "skip",
+        "span"
+      ]
+    },
+    "TestFile": {
+      "type": "object",
+      "properties": {
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TestCase"
+          }
+        },
+        "file": {
+          "type": "string"
+        },
+        "framework": {
+          "description": "The test framework, such as `pytest` or `vitest`.",
+          "type": "string"
+        },
+        "setup": {
+          "description": "Setup and fixture blocks shared by the file's cases.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Span"
+          }
+        }
+      },
+      "required": [
+        "cases",
+        "file",
+        "framework",
+        "setup"
+      ]
+    }
+  }
+}

@@ -1,0 +1,92 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/norm-tree.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NormTree",
+  "description": "Normalized syntax trees per symbol, and the structural hash each yields.",
+  "type": "object",
+  "properties": {
+    "symbols": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/NormalizedSymbol"
+      }
+    }
+  },
+  "required": [
+    "symbols"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "NormNode": {
+      "description": "A node of a normalized tree. Labels are language-independent so trees in one family compare.",
+      "type": "object",
+      "properties": {
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NormNode"
+          }
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "children",
+        "label"
+      ]
+    },
+    "NormalizedSymbol": {
+      "type": "object",
+      "properties": {
+        "hash": {
+          "$ref": "#/$defs/SymbolHash"
+        },
+        "root": {
+          "$ref": "#/$defs/NormNode"
+        },
+        "symbol": {
+          "$ref": "#/$defs/SymbolKey"
+        }
+      },
+      "required": [
+        "hash",
+        "root",
+        "symbol"
+      ]
+    },
+    "SymbolHash": {
+      "description": "`sh_` followed by lowercase hex",
+      "type": "string",
+      "pattern": "^sh_[0-9a-f]+$"
+    },
+    "SymbolKey": {
+      "description": "Identifies a symbol within one run by where it starts. Not stable across edits; anything\npersisted across runs uses `SymbolHash` (ADR-014).",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "file",
+        "line"
+      ]
+    }
+  }
+}

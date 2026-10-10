@@ -1,0 +1,139 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/symbols.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Symbols",
+  "description": "Functions and methods in scope.",
+  "type": "object",
+  "properties": {
+    "symbols": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SymbolDef"
+      }
+    }
+  },
+  "required": [
+    "symbols"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "LangId": {
+      "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
+      "type": "string"
+    },
+    "Span": {
+      "description": "A 1-based range within one file.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "line"
+      ]
+    },
+    "SymbolDef": {
+      "description": "One function, method, or named closure.",
+      "type": "object",
+      "properties": {
+        "body": {
+          "description": "The body, when the symbol has one separate from its signature.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "display": {
+          "description": "`namespace::name`.",
+          "type": "string"
+        },
+        "file": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/SymbolKind"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "name": {
+          "type": "string"
+        },
+        "namespace": {
+          "description": "Enclosing namespace, such as `module::Type`; empty at top level.",
+          "type": "string"
+        },
+        "span": {
+          "$ref": "#/$defs/Span"
+        },
+        "visibility": {
+          "$ref": "#/$defs/Visibility"
+        }
+      },
+      "required": [
+        "body",
+        "display",
+        "file",
+        "kind",
+        "lang",
+        "name",
+        "namespace",
+        "span",
+        "visibility"
+      ]
+    },
+    "SymbolKind": {
+      "type": "string",
+      "enum": [
+        "function",
+        "method",
+        "closure"
+      ]
+    },
+    "Visibility": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "public",
+            "private"
+          ]
+        },
+        {
+          "description": "Visible within a package, crate, or module tree but not exported.",
+          "type": "string",
+          "const": "internal"
+        }
+      ]
+    }
+  }
+}

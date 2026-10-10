@@ -1,0 +1,123 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/module-graph.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ModuleGraph",
+  "description": "Resolved import edges per project root.",
+  "type": "object",
+  "properties": {
+    "roots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RootImports"
+      }
+    }
+  },
+  "required": [
+    "roots"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "ImportEdge": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "description": "The importing file.",
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "relative": {
+          "description": "True for path-relative imports such as `./b`.",
+          "type": "boolean"
+        },
+        "specifier": {
+          "description": "The import as written.",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/ImportTarget"
+        }
+      },
+      "required": [
+        "from",
+        "line",
+        "relative",
+        "specifier",
+        "target"
+      ]
+    },
+    "ImportTarget": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "file"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "path"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "external"
+            },
+            "package": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "package"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "unresolved"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "RootImports": {
+      "type": "object",
+      "properties": {
+        "edges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ImportEdge"
+          }
+        },
+        "root": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "edges",
+        "root"
+      ]
+    }
+  }
+}

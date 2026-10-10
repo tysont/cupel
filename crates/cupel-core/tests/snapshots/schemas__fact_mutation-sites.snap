@@ -1,0 +1,166 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/mutation-sites.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MutationSites",
+  "description": "Places a mutation operator can apply, per symbol.",
+  "type": "object",
+  "properties": {
+    "symbols": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SymbolSites"
+      }
+    }
+  },
+  "required": [
+    "symbols"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "MutationOperator": {
+      "type": "string",
+      "enum": [
+        "relational",
+        "equality",
+        "arith-add-sub",
+        "arith-mul-div",
+        "boolean-op",
+        "boolean-literal",
+        "zero-one",
+        "statement-deletion",
+        "return-value",
+        "constant",
+        "boundary",
+        "negation"
+      ]
+    },
+    "OperatorSet": {
+      "description": "Operator sets: `default` keeps the equivalent-mutant rate low; `extended` is opt-in.",
+      "type": "string",
+      "enum": [
+        "default",
+        "extended"
+      ]
+    },
+    "Site": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "description": "The source text being replaced.",
+          "type": "string"
+        },
+        "operator": {
+          "$ref": "#/$defs/MutationOperator"
+        },
+        "set": {
+          "$ref": "#/$defs/OperatorSet"
+        },
+        "site_hash": {
+          "description": "Structural position within the symbol.",
+          "$ref": "#/$defs/SiteHash"
+        },
+        "span": {
+          "$ref": "#/$defs/Span"
+        },
+        "to": {
+          "description": "Each replacement the operator produces.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "from",
+        "operator",
+        "set",
+        "site_hash",
+        "span",
+        "to"
+      ]
+    },
+    "SiteHash": {
+      "description": "lowercase hex",
+      "type": "string",
+      "pattern": "^[0-9a-f]+$"
+    },
+    "Span": {
+      "description": "A 1-based range within one file.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "line"
+      ]
+    },
+    "SymbolKey": {
+      "description": "Identifies a symbol within one run by where it starts. Not stable across edits; anything\npersisted across runs uses `SymbolHash` (ADR-014).",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "file",
+        "line"
+      ]
+    },
+    "SymbolSites": {
+      "type": "object",
+      "properties": {
+        "sites": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Site"
+          }
+        },
+        "symbol": {
+          "$ref": "#/$defs/SymbolKey"
+        }
+      },
+      "required": [
+        "sites",
+        "symbol"
+      ]
+    }
+  }
+}

@@ -1,0 +1,199 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/plugin.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Manifest",
+  "description": "Everything Cupel knows about a check without running it. Plugins describe themselves with\nthe same shape. Language applicability is never declared; it is derived (design §8.3.5).",
+  "type": "object",
+  "properties": {
+    "cost": {
+      "$ref": "#/$defs/CostClass"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FindingKindSpec"
+      }
+    },
+    "id": {
+      "$ref": "#/$defs/CheckId"
+    },
+    "metrics": {
+      "description": "Metrics usable as gate keys (`<check-id>.<metric>`).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/MetricSpec"
+      }
+    },
+    "needs": {
+      "description": "Facts the check cannot run without.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FactKind"
+      }
+    },
+    "stability": {
+      "$ref": "#/$defs/Stability"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "tier": {
+      "$ref": "#/$defs/Tier"
+    },
+    "version": {
+      "description": "Bumped when results change for the same facts; invalidates cached results.",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    },
+    "wants": {
+      "description": "Facts the check uses for enrichment when present.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FactKind"
+      }
+    }
+  },
+  "required": [
+    "cost",
+    "findings",
+    "id",
+    "metrics",
+    "needs",
+    "stability",
+    "summary",
+    "tier",
+    "version",
+    "wants"
+  ],
+  "$defs": {
+    "ActionKind": {
+      "description": "The closed set of things a finding can ask an agent to do (design §7.2).",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "write_test",
+            "strengthen_assertion",
+            "restore_test",
+            "refactor_extract",
+            "reduce_complexity",
+            "break_cycle",
+            "fix_bug",
+            "add_contract",
+            "add_property",
+            "investigate_flake",
+            "rerun",
+            "configure",
+            "install_tool",
+            "verify_oracle"
+          ]
+        },
+        {
+          "description": "Last resort when no mechanical action exists.",
+          "type": "string",
+          "const": "review"
+        }
+      ]
+    },
+    "CheckId": {
+      "description": "A check's stable namespaced ID, such as `tests.mutation`.",
+      "type": "string"
+    },
+    "CostClass": {
+      "description": "How expensive a check or producer is to run. The same names select a run's depth (design §5.8).",
+      "type": "string",
+      "enum": [
+        "quick",
+        "standard",
+        "deep",
+        "exhaustive"
+      ]
+    },
+    "FactKind": {
+      "description": "One row of the fact catalog (design §8.3.2). Adding a kind requires an ADR.",
+      "type": "string",
+      "enum": [
+        "symbols",
+        "decisions",
+        "norm-tree",
+        "mutation-sites",
+        "test-frames",
+        "module-graph",
+        "api-surface",
+        "roots",
+        "test-conventions",
+        "project-info",
+        "test-results",
+        "coverage-map",
+        "per-test-map",
+        "mutation-outcomes",
+        "bench-samples",
+        "property-results",
+        "fuzz-results",
+        "race-reports",
+        "analyzer-report",
+        "divergence-results"
+      ]
+    },
+    "FindingKindSpec": {
+      "description": "A finding kind a check emits, the action it maps to, and its evidence schema (ADR-012).",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "evidence": {
+          "description": "JSON Schema of this kind's `evidence` object.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "kind": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "evidence",
+        "kind",
+        "summary"
+      ]
+    },
+    "MetricSpec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "summary"
+      ]
+    },
+    "Stability": {
+      "description": "Whether a described entity's contract may still change.",
+      "type": "string",
+      "enum": [
+        "stable",
+        "experimental"
+      ]
+    },
+    "Tier": {
+      "description": "Evidence tier: 0 structural metric … 6 proof.",
+      "type": "integer",
+      "maximum": 6,
+      "minimum": 0
+    }
+  }
+}
