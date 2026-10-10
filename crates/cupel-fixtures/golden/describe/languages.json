@@ -49,7 +49,8 @@
         "facts": [
           "symbols",
           "decisions",
-          "norm-tree"
+          "norm-tree",
+          "mutation-sites"
         ],
         "family": "rust",
         "id": "rust",

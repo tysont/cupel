@@ -235,8 +235,8 @@
       "body": {
         "col": 40,
         "end_col": 2,
-        "end_line": 13,
-        "line": 11
+        "end_line": 14,
+        "line": 12
       },
       "display": "balance",
       "file": "src/lib.rs",
@@ -247,8 +247,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 13,
-        "line": 11
+        "end_line": 14,
+        "line": 12
       },
       "visibility": "public"
     },
@@ -256,8 +256,8 @@
       "body": {
         "col": 36,
         "end_col": 2,
-        "end_line": 17,
-        "line": 15
+        "end_line": 18,
+        "line": 16
       },
       "display": "audit_limit",
       "file": "src/lib.rs",
@@ -268,8 +268,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 17,
-        "line": 15
+        "end_line": 18,
+        "line": 16
       },
       "visibility": "internal"
     },
@@ -277,8 +277,8 @@
       "body": {
         "col": 43,
         "end_col": 2,
-        "end_line": 21,
-        "line": 19
+        "end_line": 22,
+        "line": 20
       },
       "display": "scale",
       "file": "src/lib.rs",
@@ -289,8 +289,71 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 21,
-        "line": 19
+        "end_line": 22,
+        "line": 20
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 66,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "display": "pricing::discounted",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "discounted",
+      "namespace": "pricing",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "display": "pricing::tally",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "tally",
+      "namespace": "pricing",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "pricing::log_total",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "log_total",
+      "namespace": "pricing",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
       },
       "visibility": "private"
     },

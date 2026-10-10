@@ -1,0 +1,1427 @@
+{
+  "symbols": [
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f0d7751163d6f02e",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 11
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "self.cents += cents;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 29,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "4553d968a53d1a51",
+          "span": {
+            "col": 20,
+            "end_col": 22,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "-="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 18
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 22
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/account.rs",
+        "line": 23
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/account.rs",
+        "line": 26
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 32
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 40
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "20ad5ab612d2c447",
+          "span": {
+            "col": 8,
+            "end_col": 18,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "!(amount < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "679137a6dd9fbfc9",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "2218176405eee1aa",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "cd76f079d514daf3",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "amount > limit && limit > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "c07812e0475f5fde",
+          "span": {
+            "col": 15,
+            "end_col": 42,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "!(amount > limit && limit > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "4a890bd844800e89",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "&&",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "3073b752c8d51305",
+          "span": {
+            "col": 30,
+            "end_col": 32,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "||"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "d219204733806b18",
+          "span": {
+            "col": 39,
+            "end_col": 40,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c4f48c17005ba08d",
+          "span": {
+            "col": 41,
+            "end_col": 42,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "8b977437883af698",
+          "span": {
+            "col": 41,
+            "end_col": 42,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*balance < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "bbec02733eb14592",
+          "span": {
+            "col": 12,
+            "end_col": 24,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "!(*balance < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "fe6a642d728cf91b",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "de7f23768fd15311",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "04ef79190ff0f11e",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "Some(index)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "613bd88a32d0364d",
+          "span": {
+            "col": 20,
+            "end_col": 31,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "Default::default()"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 11
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 20
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "0e59ba0b253aabaf",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b55010555ab7291a",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "081767f832082190",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 25
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/lib.rs",
+        "line": 12
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "10_000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7f4e0e5b535f669b",
+          "span": {
+            "col": 5,
+            "end_col": 11,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/lib.rs",
+        "line": 16
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f68c9f2c3deed986",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/lib.rs",
+        "line": 20
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "172197e53e6b40ca",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "4a5de3d5dd0f6c8e",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2a1b86f36987a3f4",
+          "span": {
+            "col": 33,
+            "end_col": 36,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "member && cut != 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 26,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "!(member && cut != 0)"
+          ]
+        },
+        {
+          "from": "&&",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "211fb9b99e97c63d",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "||"
+          ]
+        },
+        {
+          "from": "!=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "78f6e54bad3d543f",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "=="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "67eed3a983567df0",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "price - cut",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d178a91edd3fadf1",
+          "span": {
+            "col": 16,
+            "end_col": 27,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "Default::default()"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "f5ab9366b9f91579",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.rs",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9373a348e4ae3b48",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "false",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "cd24dbc66d287095",
+          "span": {
+            "col": 25,
+            "end_col": 30,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "true"
+          ]
+        },
+        {
+          "from": "total += entry;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b668cf9a744c0a6e",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "9e5f1ecfe8891467",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "total < -1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "c66abcdd81cab9f1",
+          "span": {
+            "col": 12,
+            "end_col": 22,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "!(total < -1)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "2dafc751e652a0d8",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "81b144d0dd3895ad",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "overdrawn = true;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "9cb953a9eca88c6c",
+          "span": {
+            "col": 13,
+            "end_col": 30,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "811b06bedeb01cc5",
+          "span": {
+            "col": 25,
+            "end_col": 29,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "log_total(total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e964a5509c2d7097",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.rs",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "println!(\"total {total}\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.rs",
+        "line": 22
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/report/format.rs",
+        "line": 1
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/report/mod.rs",
+        "line": 3
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 19,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8ea9f496f9dbf2eb",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e4911df7a0d84a4b",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "954b0eecbfaf4179",
+          "span": {
+            "col": 43,
+            "end_col": 44,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 3
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "subtotal > charge",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 25,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "!(subtotal > charge)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8ea9f496f9dbf2eb",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e4911df7a0d84a4b",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "954b0eecbfaf4179",
+          "span": {
+            "col": 55,
+            "end_col": 56,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 19,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8ea9f496f9dbf2eb",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e4911df7a0d84a4b",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "356ea11478859577",
+          "span": {
+            "col": 43,
+            "end_col": 46,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 13
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 19,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8ea9f496f9dbf2eb",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e4911df7a0d84a4b",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "954b0eecbfaf4179",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 18
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 19,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8ea9f496f9dbf2eb",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "81cfee8cc6412492",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "954b0eecbfaf4179",
+          "span": {
+            "col": 43,
+            "end_col": 44,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 30
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 19,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8ea9f496f9dbf2eb",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e4911df7a0d84a4b",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "gross < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d171c2099d3afb56",
+          "span": {
+            "col": 15,
+            "end_col": 24,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "!(gross < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7f0fdf56ac00897d",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "10f58bb957fd1c30",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "d46750af63fb97b1",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "05f6e29264f76161",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 35
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 19,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8ea9f496f9dbf2eb",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e4911df7a0d84a4b",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "954b0eecbfaf4179",
+          "span": {
+            "col": 43,
+            "end_col": 44,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 46
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(balance(&[3, -1]), 2);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 38,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "275a367160767c17",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "aa626441d6df8c4c",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "cddbe8ee5ec7efc3",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 4
+      }
+    }
+  ]
+}

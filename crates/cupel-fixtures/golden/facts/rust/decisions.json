@@ -151,7 +151,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 11
+        "line": 12
       }
     },
     {
@@ -159,7 +159,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 15
+        "line": 16
       }
     },
     {
@@ -167,7 +167,63 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 19
+        "line": 20
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.rs",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.rs",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.rs",
+        "line": 22
       }
     },
     {

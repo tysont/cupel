@@ -479,7 +479,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.5 Fact: `MutationSites`
 
-**Status:** not started
+**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-026](adr/CUPEL_DECISION_026.md)
 
 - `QueryMutationSites` over `mutations.scm` → `Site { operator, set, from, to[], site_hash }` with the semantic operator enum; operator set `default` (boolean flips, relational/equality swaps, `+/-`, `*//`, `&&/||`, `0/1`) and `extended` (statement deletion, return-value replacement, constant replacement, boundary ±1, negation). `site_hash` is the structural position within the symbol, not the line. Replacement spellings live in `tables.toml` (Python `and/or`, Go/Rust/JS `&&/||`; Python `True/False`, others `true/false`).
 

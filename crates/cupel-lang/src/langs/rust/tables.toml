@@ -44,3 +44,41 @@ callee = "function"
 [[normalize.calls]]
 kind = "macro_invocation"
 callee = "macro"
+
+[mutations.relational]
+replace = { "<" = ["<="], "<=" = ["<"], ">" = [">="], ">=" = [">"] }
+
+[mutations.equality]
+replace = { "==" = ["!="], "!=" = ["=="] }
+
+[mutations.arith-add-sub]
+replace = { "+" = ["-"], "-" = ["+"], "+=" = ["-="], "-=" = ["+="] }
+
+[mutations.arith-mul-div]
+replace = { "*" = ["/"], "/" = ["*"], "*=" = ["/="], "/=" = ["*="] }
+
+[mutations.boolean-op]
+replace = { "&&" = ["||"], "||" = ["&&"] }
+
+[mutations.boolean-literal]
+replace = { "true" = ["false"], "false" = ["true"] }
+
+[mutations.zero-one]
+replace = { "0" = ["1"], "1" = ["0"] }
+
+[mutations.statement-deletion]
+templates = [""]
+
+# Every returned type a mutant can compile against implements Default far more often than not;
+# a mutant that does not compile is reported as such by the mutation engine.
+[mutations.return-value]
+templates = ["Default::default()"]
+
+[mutations.constant]
+templates = ["0"]
+
+[mutations.boundary]
+templates = ["{} + 1", "{} - 1"]
+
+[mutations.negation]
+templates = ["!({})"]

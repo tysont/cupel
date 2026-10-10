@@ -27,18 +27,27 @@ fn expect(symbols: &Symbols, file: &str, expected: &[Row]) {
 use SymbolKind::{Closure, Function, Method};
 use Visibility::{Internal, Private, Public};
 
+/// The 1-based line of the first line of `file` in the Rust fixture that contains `needle`.
+/// The crate root gains a `mod` line with every fixture module, so its lines are looked up.
+fn line_of(file: &str, needle: &str) -> u32 {
+    let text = std::fs::read_to_string(fixture("rust").join(file)).unwrap();
+    let index = text.lines().position(|line| line.contains(needle)).unwrap();
+    u32::try_from(index + 1).unwrap()
+}
+
 #[test]
 fn the_crate_root_has_top_level_functions_of_each_visibility() {
     let symbols: Symbols = produce("rust", &fixture("rust"));
-    expect(
-        &symbols,
-        "src/lib.rs",
-        &[
-            ("balance", Function, Public, (11, 13)),
-            ("audit_limit", Function, Internal, (15, 17)),
-            ("scale", Function, Private, (19, 21)),
-        ],
-    );
+    let at = |needle: &str| {
+        let line = line_of("src/lib.rs", needle);
+        (line, line + 2)
+    };
+    let rows = [
+        ("balance", Function, Public, at("pub fn balance")),
+        ("audit_limit", Function, Internal, at("fn audit_limit")),
+        ("scale", Function, Private, at("fn scale")),
+    ];
+    expect(&symbols, "src/lib.rs", &rows);
 }
 
 #[test]

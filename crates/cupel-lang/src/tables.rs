@@ -2,7 +2,7 @@
 // ABOUTME: alongside the queries. Unknown keys are errors, so a typo fails the spec test.
 use std::collections::{BTreeMap, HashMap};
 
-use cupel_core::syntax::{DecisionKind, Visibility};
+use cupel_core::syntax::{DecisionKind, MutationOperator, Visibility};
 use serde::Deserialize;
 
 /// Everything a language's `tables.toml` may contain. Every section is optional; a section a
@@ -15,6 +15,7 @@ pub struct Tables {
     pub decisions: DecisionRules,
     /// Present when the language has a `NormTree` producer.
     pub normalize: Option<NormalizeRules>,
+    pub mutations: HashMap<MutationOperator, Replacements>,
 }
 
 impl Tables {
@@ -243,4 +244,43 @@ pub struct NormalizeRules {
 pub struct CallRule {
     pub kind: String,
     pub callee: String,
+}
+
+/// `[mutations.<operator>]`: the replacements a site captured as `@mut.<operator>` produces.
+/// `replace` maps the site's exact text to its replacements; each of `templates` is a
+/// replacement with `{}` standing for the site's text. Replacements equal to the original are
+/// dropped, and a site with none left is not reported.
+///
+/// ```toml
+/// [mutations.relational]
+/// replace = { "<" = ["<="], "<=" = ["<"], ">" = [">="], ">=" = [">"] }
+///
+/// [mutations.negation]
+/// templates = ["!({})"]
+/// ```
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct Replacements {
+    pub replace: BTreeMap<String, Vec<String>>,
+    pub templates: Vec<String>,
+}
+
+impl Replacements {
+    /// Every distinct replacement for `from`, in table order, without `from` itself.
+    pub fn of(&self, from: &str) -> Vec<String> {
+        let mut out: Vec<String> = Vec::new();
+        let candidates = self
+            .replace
+            .get(from)
+            .into_iter()
+            .flatten()
+            .cloned()
+            .chain(self.templates.iter().map(|t| t.replace("{}", from)));
+        for candidate in candidates {
+            if candidate != from && !out.contains(&candidate) {
+                out.push(candidate);
+            }
+        }
+        out
+    }
 }

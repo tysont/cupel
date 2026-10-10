@@ -2,6 +2,7 @@
 
 pub mod account;
 pub mod decide;
+pub mod pricing;
 pub mod report;
 pub mod twins;
 

@@ -3,13 +3,13 @@
 use std::sync::Arc;
 
 use cupel_core::ProducerRegistry;
-use cupel_core::syntax::{Decisions, NormTree, Symbols};
+use cupel_core::syntax::{Decisions, MutationSites, NormTree, Symbols};
 
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::producer::QueryProducer;
 use crate::spec::{LanguageSpec, QueryFile};
-use crate::{decisions, normalize, symbols};
+use crate::{decisions, mutations, normalize, symbols};
 
 /// Whether a language's spec can drive a generic producer.
 type Drives = fn(&LanguageSpec) -> bool;
@@ -35,6 +35,16 @@ const GENERIC: &[(Drives, Attach)] = &[
         |spec| spec.has(QueryFile::Symbols) && spec.tables().normalize.is_some(),
         |language, cache, reg| {
             reg.register::<NormTree, _>(QueryProducer::new(language, cache, normalize::extract));
+        },
+    ),
+    (
+        |spec| spec.has(QueryFile::Symbols) && spec.has(QueryFile::Mutations),
+        |language, cache, reg| {
+            reg.register::<MutationSites, _>(QueryProducer::new(
+                language,
+                cache,
+                mutations::extract,
+            ));
         },
     ),
 ];
