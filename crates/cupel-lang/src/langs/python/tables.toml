@@ -94,3 +94,76 @@ templates = ["{} + 1", "{} - 1"]
 
 [mutations.negation]
 templates = ["not ({})"]
+
+[tests]
+framework = "pytest"
+
+[tests.assertions]
+# Idioms captured as @assertion.idiom.<key> from `assert` statements and `pytest.raises`.
+equal = { kind = "equality", strength = "strong" }
+approx = { kind = "equality", strength = "strong" }
+is-none = { kind = "equality", strength = "strong" }
+# Inequality rules out one value and allows every other: weak.
+not-equal = { kind = "equality", strength = "weak" }
+is-not-none = { kind = "not-null", strength = "weak" }
+snapshot = { kind = "snapshot", strength = "strong" }
+ordering = { kind = "custom", strength = "weak" }
+membership = { kind = "custom", strength = "weak" }
+truthy = { kind = "truthiness", strength = "weak" }
+raises = { kind = "throws", strength = "strong" }
+# unittest assert methods.
+assertEqual = { kind = "equality", strength = "strong" }
+assertEquals = { kind = "equality", strength = "strong" }
+assertAlmostEqual = { kind = "equality", strength = "strong" }
+assertIs = { kind = "equality", strength = "strong" }
+assertIsNone = { kind = "equality", strength = "strong" }
+assertCountEqual = { kind = "equality", strength = "strong" }
+assertListEqual = { kind = "equality", strength = "strong" }
+assertTupleEqual = { kind = "equality", strength = "strong" }
+assertSetEqual = { kind = "equality", strength = "strong" }
+assertDictEqual = { kind = "equality", strength = "strong" }
+assertSequenceEqual = { kind = "equality", strength = "strong" }
+assertMultiLineEqual = { kind = "equality", strength = "strong" }
+assertNotEqual = { kind = "equality", strength = "weak" }
+assertNotAlmostEqual = { kind = "equality", strength = "weak" }
+assertIsNot = { kind = "equality", strength = "weak" }
+assertIsNotNone = { kind = "not-null", strength = "weak" }
+assertTrue = { kind = "truthiness", strength = "weak" }
+assertFalse = { kind = "truthiness", strength = "weak" }
+assertIsInstance = { kind = "truthiness", strength = "weak" }
+assertNotIsInstance = { kind = "truthiness", strength = "weak" }
+assertIn = { kind = "custom", strength = "weak" }
+assertNotIn = { kind = "custom", strength = "weak" }
+assertGreater = { kind = "custom", strength = "weak" }
+assertGreaterEqual = { kind = "custom", strength = "weak" }
+assertLess = { kind = "custom", strength = "weak" }
+assertLessEqual = { kind = "custom", strength = "weak" }
+assertRegex = { kind = "custom", strength = "weak" }
+assertNotRegex = { kind = "custom", strength = "weak" }
+assertRaises = { kind = "throws", strength = "strong" }
+assertRaisesRegex = { kind = "throws", strength = "strong" }
+# Mock and snapshot assertion methods; other `assert_*` methods pin a call: custom, strong.
+assert_called = { kind = "custom", strength = "weak" }
+assert_any_call = { kind = "custom", strength = "weak" }
+assert_match = { kind = "snapshot", strength = "strong" }
+
+[conventions]
+test_globs = ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/conftest.py"]
+
+# A module's tests sit beside it, in a `tests/` directory below it, or in its project's
+# `tests/` directory (`{base}` is the path above `src/`), named `test_<module>.py` or
+# `<module>_test.py`.
+[[conventions.tests_for]]
+template = "{dir}/test_{stem}.py"
+
+[[conventions.tests_for]]
+template = "{dir}/{stem}_test.py"
+
+[[conventions.tests_for]]
+template = "{dir}/tests/**/test_{stem}.py"
+
+[[conventions.tests_for]]
+template = "{base}tests/**/test_{stem}.py"
+
+[[conventions.tests_for]]
+template = "{base}tests/**/{stem}_test.py"

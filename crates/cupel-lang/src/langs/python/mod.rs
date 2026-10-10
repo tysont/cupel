@@ -5,14 +5,17 @@ mod normalize;
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::{Decisions, MutationSites, NormTree, Symbols};
+use cupel_core::syntax::{
+    Decisions, MutationSites, NormTree, Symbols, TestConventions, TestFrames,
+};
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
+use crate::conventions::GlobTestConventions;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::producer::QueryProducer;
 use crate::spec::LanguageSpec;
-use crate::{decisions, mutations, symbols};
+use crate::{decisions, mutations, symbols, testframes};
 
 use crate::spec::QueryFile;
 
@@ -23,6 +26,7 @@ static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
             (QueryFile::Symbols, include_str!("queries/symbols.scm")),
             (QueryFile::Decisions, include_str!("queries/decisions.scm")),
             (QueryFile::Mutations, include_str!("queries/mutations.scm")),
+            (QueryFile::Tests, include_str!("queries/tests.scm")),
         ],
         include_str!("tables.toml"),
     )
@@ -86,9 +90,15 @@ impl Language for Python {
             normalize::extract,
         ));
         reg.register::<MutationSites, _>(QueryProducer::new(
-            language,
+            Arc::clone(&language),
             Arc::clone(cache),
             mutations::extract,
         ));
+        reg.register::<TestFrames, _>(QueryProducer::new(
+            Arc::clone(&language),
+            Arc::clone(cache),
+            testframes::extract,
+        ));
+        reg.register::<TestConventions, _>(GlobTestConventions::new(language));
     }
 }

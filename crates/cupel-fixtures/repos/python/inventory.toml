@@ -165,3 +165,60 @@ expect = { from = "0", to = ["0 + 1", "0 - 1"] }
 file = "src/ledger/pricing.py"
 name = "ledger.pricing.discounted"
 expect = { from = "member and cut != 0", to = ["not (member and cut != 0)"] }
+
+[test-frames.case]
+file = "tests/test_ledger.py"
+name = "test_deposit_adds_to_the_balance"
+
+[test-frames.assertion-equality]
+file = "tests/test_ledger.py"
+name = "test_deposit_adds_to_the_balance"
+
+[test-frames.assertion-truthiness]
+file = "tests/test_ledger.py"
+name = "test_statements_mention_the_owner"
+
+[test-frames.assertion-not-null]
+file = "tests/test_ledger.py"
+name = "test_an_opening_account_exists"
+
+[test-frames.assertion-throws]
+file = "tests/test_ledger.py"
+name = "test_negative_deposits_are_rejected"
+
+[test-frames.assertion-snapshot]
+file = "tests/test_ledger.py"
+name = "test_report_matches_snapshot"
+
+[test-frames.weak-assertion]
+file = "tests/test_ledger.py"
+name = "test_statement_is_published"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "tests/test_ledger.py"
+name = "test_opening_an_account_does_not_raise"
+
+[test-frames.skip]
+file = "tests/test_ledger.py"
+name = "test_statement_is_published"
+expect = { skip = { reason = "talks to the network" } }
+
+[test-frames.mock]
+file = "tests/test_ledger.py"
+name = "test_publish_posts_once"
+expect = { target = "ledger.report.format.requests" }
+
+[test-frames.setup]
+file = "tests/test_pricing.py"
+
+[test-frames.framework]
+file = "tests/test_pricing.py"
+expect = { framework = "unittest" }
+
+[test-conventions.separate-test-file]
+file = "src/ledger/pricing.py"
+name = "tests/test_pricing.py"
+
+[test-conventions.inline-tests]
+not-applicable = "Python runners collect tests from separate test modules; a module does not carry its own test cases (doctests are documentation examples that TestFrames does not model)."

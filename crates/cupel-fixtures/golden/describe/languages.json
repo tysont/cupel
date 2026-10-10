@@ -39,7 +39,9 @@
           "symbols",
           "decisions",
           "norm-tree",
-          "mutation-sites"
+          "mutation-sites",
+          "test-frames",
+          "test-conventions"
         ],
         "family": "python",
         "id": "python",
