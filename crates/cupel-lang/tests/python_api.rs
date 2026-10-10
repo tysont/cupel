@@ -94,7 +94,7 @@ fn without_all_every_module_level_name_without_an_underscore_is_public() {
             item(
                 "pkg.shapes.build",
                 Function,
-                "(*_: int, _: str = \" m \", ** _) -> Square"
+                "(*_: int, _: str = \"m\", ** _) -> Square"
             ),
         ]
     );
@@ -119,8 +119,8 @@ fn with_all_unlisted_classes_and_their_methods_are_not_public() {
     );
 }
 
-/// Signatures are token spans joined by `cupel_lang::api`'s spacing rule, which spaces the
-/// quote tokens of a string literal (`""` reads `" "`); the text is stable, so it compares.
+/// Signatures are token spans joined by `cupel_lang::api`'s spacing rule; a string literal is one
+/// token, so its quotes stay attached (`""` reads `""`).
 #[test]
 fn signatures_ignore_layout_and_parameter_names_and_see_removed_parameters() {
     let compact = tree(&[(
@@ -137,7 +137,7 @@ fn signatures_ignore_layout_and_parameter_names_and_see_removed_parameters() {
     let removed: ApiSurface = produce("python", removed.path());
     assert_eq!(
         compact.items[0].signature,
-        "(_: int, _: str = \" \") -> None"
+        "(_: int, _: str = \"\") -> None"
     );
     assert_eq!(spread.items[0].signature, compact.items[0].signature);
     assert_eq!(removed.items[0].path, compact.items[0].path);

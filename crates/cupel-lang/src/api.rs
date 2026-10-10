@@ -17,7 +17,8 @@
 //!   inside a signature each becomes `_`.
 //! - `@root.entry-point` and `@root.hook` belong to `QueryRoots` (see `cupel_lang::roots`).
 //!
-//! Tokens are joined by single spaces, except none before `, ) ] > : ; ? .` and `::`, none
+//! A node whose kind is in `[normalize].literals` (a string literal, say) is one token, its
+//! source text, so quotes stay attached to what they quote. Tokens are joined by single spaces, except none before `, ) ] > : ; ? .` and `::`, none
 //! after `( [ < & * ' .` and `::` or after a token in `[api].tight_after`, and none before an
 //! opening bracket that follows a name (the `_` standing for a local is not a name); a comma
 //! right before a closing bracket or at the end is dropped.
@@ -69,6 +70,11 @@ pub fn extract(source: &Source<'_>) -> ApiSurface {
     items.sort_by_key(|(_, _, node)| node.start_byte());
     let none: [Scope<'_>; 0] = [];
     let tight_after = &spec.tables().api.tight_after;
+    let literals = spec
+        .tables()
+        .normalize
+        .as_ref()
+        .map_or(&[][..], |rules| rules.literals.as_slice());
     ApiSurface {
         items: items
             .into_iter()
@@ -80,7 +86,16 @@ pub fn extract(source: &Source<'_>) -> ApiSurface {
                 Some(ApiItem {
                     path: namespaces.display(&namespace, name),
                     kind,
-                    signature: signature(parsed, node, &signature_nodes, &locals, tight_after),
+                    signature: signature(
+                        parsed,
+                        node,
+                        &signature_nodes,
+                        &locals,
+                        Spelling {
+                            tight_after,
+                            literals,
+                        },
+                    ),
                     file: parsed.file.clone(),
                     span: span(node),
                 })
@@ -98,13 +113,22 @@ fn item_capture<'t>(m: &Match<'_, 't>) -> Option<(ApiItemKind, Node<'t>)> {
     Some((kind, node))
 }
 
-/// The normalized signature spanning `nodes`, read from the leaves of `item`.
+/// The language's tables that shape a signature's tokens.
+#[derive(Clone, Copy)]
+struct Spelling<'a> {
+    /// Tokens with no space after them.
+    tight_after: &'a [String],
+    /// Node kinds read as one token.
+    literals: &'a [String],
+}
+
+/// The normalized signature spanning `nodes`, read from the tokens of `item`.
 fn signature(
     parsed: &Parsed,
     item: Node<'_>,
     nodes: &[Node<'_>],
     locals: &[Node<'_>],
-    tight_after: &[String],
+    spelling: Spelling<'_>,
 ) -> String {
     let (Some(start), Some(end)) = (
         nodes.iter().map(Node::start_byte).min(),
@@ -114,7 +138,7 @@ fn signature(
     };
     let mut tokens: Vec<String> = Vec::new();
     let mut last_local = None;
-    leaves(item, &mut |leaf| {
+    tokens_of(item, spelling.literals, &mut |leaf| {
         if leaf.start_byte() < start || leaf.end_byte() > end {
             return;
         }
@@ -133,21 +157,22 @@ fn signature(
             }
         }
     });
-    join(&tokens, tight_after)
+    join(&tokens, spelling.tight_after)
 }
 
-/// Calls `visit` on every leaf below `node`, in document order, skipping comments.
-fn leaves<'t>(node: Node<'t>, visit: &mut dyn FnMut(Node<'t>)) {
+/// Calls `visit` on every token below `node`, in document order, skipping comments: a leaf, or
+/// a node whose kind is one of `literals`.
+fn tokens_of<'t>(node: Node<'t>, literals: &[String], visit: &mut dyn FnMut(Node<'t>)) {
     if node.is_extra() {
         return;
     }
-    if node.child_count() == 0 {
+    if node.child_count() == 0 || literals.iter().any(|kind| kind == node.kind()) {
         visit(node);
         return;
     }
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
-        leaves(child, visit);
+        tokens_of(child, literals, visit);
     }
 }
 

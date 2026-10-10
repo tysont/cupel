@@ -261,3 +261,20 @@ fn every_test_case_in_the_fixtures_is_a_test_root() {
         assert_eq!(checked, cases, "{lang}");
     }
 }
+
+#[test]
+fn string_literals_in_signatures_are_single_tokens() {
+    let dir = tree(&[(
+        "src/kind.ts",
+        "export function kind(k: \"in\" | 'out', label: string = `x y`): string {\n  return k;\n}\n",
+    )]);
+    let api: ApiSurface = produce("typescript", dir.path());
+    assert_eq!(
+        items(&api, "src/kind.ts"),
+        [item(
+            "kind.kind",
+            Function,
+            "(_: \"in\" | 'out', _: string = `x y`): string"
+        )]
+    );
+}

@@ -52,7 +52,7 @@
       "file": "src/decide.ts",
       "kind": "function",
       "path": "decide.label",
-      "signature": "(_: \" deposit \" | \" withdrawal \" | string): string",
+      "signature": "(_: \"deposit\" | \"withdrawal\" | string): string",
       "span": {
         "col": 8,
         "end_col": 2,
