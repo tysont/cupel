@@ -34,3 +34,39 @@ not-applicable = "Go has no file- or type-private visibility; unexported names a
 file = "report/format.go"
 name = "report.Render"
 expect = { namespace = "report" }
+
+[decisions.if]
+file = "decide.go"
+name = "ledger.classify"
+
+[decisions.else-if]
+file = "decide.go"
+name = "ledger.classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "decide.go"
+name = "ledger.firstOverdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "decide.go"
+name = "ledger.firstOverdraft"
+
+[decisions.boolean-op]
+file = "decide.go"
+name = "ledger.classify"
+
+[decisions.early-return]
+file = "decide.go"
+name = "ledger.parseCents"
+
+[decisions.case]
+file = "decide.go"
+name = "ledger.describe"
+
+[decisions.ternary]
+not-applicable = "Go has no conditional operator; a value chosen by a condition is assigned in an `if`, which is a branch."
+
+[decisions.catch]
+not-applicable = "Go has no exception handlers: errors are values tested by `if err != nil` (a branch), and `recover` is an ordinary call in a deferred function whose result is tested by an `if`."

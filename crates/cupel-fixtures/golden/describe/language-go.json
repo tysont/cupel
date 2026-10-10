@@ -19,6 +19,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "decisions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "go",

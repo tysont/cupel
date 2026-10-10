@@ -14,3 +14,7 @@ default = "internal"
 [[visibility.names]]
 capitalized = true
 visibility = "public"
+
+# `else if` is an `if_statement` in the `alternative` field of the branch it continues.
+[decisions]
+chain_parents = ["if_statement"]

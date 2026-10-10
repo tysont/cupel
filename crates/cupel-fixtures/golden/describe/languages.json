@@ -11,7 +11,8 @@
           ".go"
         ],
         "facts": [
-          "symbols"
+          "symbols",
+          "decisions"
         ],
         "family": "go",
         "id": "go",
