@@ -138,3 +138,58 @@ fn unregistered_ids_are_usage_errors_listing_the_valid_ones() {
         assert_eq!(err.to_string(), expected, "{text}");
     }
 }
+
+fn validate_languages(text: &str) -> Result<()> {
+    let file = ConfigFile::parse(text, Path::new("/repo/cupel.toml")).unwrap();
+    let config = Config::resolve(
+        Some(PathBuf::from("/repo/cupel.toml")),
+        file,
+        &ConfigRequest::default(),
+    )
+    .unwrap();
+    config.validate_languages(&langs())
+}
+
+#[test]
+fn language_validation_accepts_check_tables_and_gates_while_no_check_is_registered() {
+    validate_languages(
+        r#"
+[roots]
+api = { path = "api", lang = "go" }
+
+[lang.rust]
+test = "cargo test"
+
+[checks."static.clones"]
+threshold = 0.82
+
+[checks."static.clones".lang.python]
+threshold = 0.9
+
+[gate.changed]
+"tests.mutation.score" = ">= 0.80"
+"#,
+    )
+    .unwrap();
+}
+
+#[test]
+fn language_validation_rejects_unregistered_languages_wherever_they_appear() {
+    for (text, section) in [
+        ("[lang.java]\ntest = \"mvn test\"\n", "[lang]"),
+        (
+            "[roots]\nsvc = { path = \"svc\", lang = \"java\" }\n",
+            "[roots.svc]",
+        ),
+        (
+            "[checks.\"static.clones\".lang.java]\nthreshold = 1\n",
+            "[checks.\"static.clones\".lang]",
+        ),
+    ] {
+        let err = validate_languages(text).expect_err(text);
+        assert_eq!(
+            err.to_string(),
+            format!("unknown language `java` in `{section}`; registered: `go`, `python`, `rust`")
+        );
+    }
+}
