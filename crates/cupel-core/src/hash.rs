@@ -120,15 +120,33 @@ impl FindingId {
         symbol: &SymbolHash,
         site: Option<&SiteHash>,
     ) -> Self {
-        const SEPARATOR: &[u8] = &[0];
+        Self::digest([
+            check.as_str(),
+            kind,
+            symbol.as_str(),
+            site.map_or("", SiteHash::as_str),
+        ])
+    }
+
+    /// Derives the ID of a finding that concerns no symbol, such as a usage error or a missing
+    /// tool, from the structural name of its subject: the flag, verb, tool, or configuration key
+    /// the fix touches — never a supplied value, a message, or a line (ADR-016).
+    ///
+    /// The symbol position is hashed as the empty string, which no `SymbolHash` can be, so
+    /// subject IDs and symbol IDs come from disjoint inputs.
+    pub fn for_subject(check: &CheckId, kind: &str, subject: &str) -> Self {
+        Self::digest([check.as_str(), kind, "", subject])
+    }
+
+    /// `fnd_` plus the first three bytes of the BLAKE3 digest of the NUL-separated parts.
+    fn digest(parts: [&str; 4]) -> Self {
         let mut hasher = blake3::Hasher::new();
-        hasher.update(check.as_str().as_bytes());
-        hasher.update(SEPARATOR);
-        hasher.update(kind.as_bytes());
-        hasher.update(SEPARATOR);
-        hasher.update(symbol.as_str().as_bytes());
-        hasher.update(SEPARATOR);
-        hasher.update(site.map_or("", SiteHash::as_str).as_bytes());
+        for (index, part) in parts.into_iter().enumerate() {
+            if index > 0 {
+                hasher.update(&[0]);
+            }
+            hasher.update(part.as_bytes());
+        }
         let digest = hasher.finalize();
         let [a, b, c, ..] = *digest.as_bytes();
         Self(format!("fnd_{a:02x}{b:02x}{c:02x}"))
