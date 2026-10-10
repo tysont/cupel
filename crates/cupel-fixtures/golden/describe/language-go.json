@@ -71,6 +71,26 @@
         ]
       },
       {
+        "kind": "api-surface",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "roots",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
         "kind": "test-conventions",
         "producers": [
           {

@@ -244,3 +244,48 @@ expect = { target = { package = "std" } }
 [module-graph.unresolved]
 file = "ledger.go"
 name = "example.com/ledger/gen"
+
+[api-surface.function]
+file = "ledger.go"
+name = "ledger.Balance"
+expect = { signature = "(_ []int64) int64" }
+
+[api-surface.method]
+file = "ledger.go"
+name = "ledger.Account.Deposit"
+expect = { signature = "(_ *Account) Deposit(_ int64)" }
+
+[api-surface.type]
+file = "ledger.go"
+name = "ledger.Account"
+
+[api-surface.interface]
+file = "ledger.go"
+name = "ledger.Audited"
+
+[api-surface.constant]
+file = "ledger.go"
+name = "ledger.MaxEntries"
+
+[api-surface.variable]
+file = "ledger.go"
+name = "ledger.Currency"
+
+[api-surface.module]
+not-applicable = "Go declares no modules or packages in source: a package is a directory, and the package clause every file repeats names the namespace of its items rather than declaring an item."
+
+[roots.entry-point]
+file = "cmd/ledger/main.go"
+name = "main.main"
+
+[roots.export]
+file = "ledger.go"
+name = "ledger.Balance"
+
+[roots.test]
+file = "ledger_test.go"
+name = "ledger.TestDepositAddsToTheBalance"
+
+[roots.hook]
+file = "ledger.go"
+name = "ledger.init"

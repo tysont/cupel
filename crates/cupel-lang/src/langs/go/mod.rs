@@ -24,6 +24,7 @@ static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
             (QueryFile::Mutations, include_str!("queries/mutations.scm")),
             (QueryFile::Tests, include_str!("queries/tests.scm")),
             (QueryFile::Imports, include_str!("queries/imports.scm")),
+            (QueryFile::Api, include_str!("queries/api.scm")),
         ],
         include_str!("tables.toml"),
     )

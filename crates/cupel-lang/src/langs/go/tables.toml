@@ -136,3 +136,13 @@ test_globs = ["**/*_test.go", "**/testdata/**"]
 
 [[conventions.tests_for]]
 template = "{dir}/{stem}_test.go"
+
+# `[]T`, `map[K]V`, `[T any](…)`, and `...T` read without a space after the bracket or dots.
+[api]
+tight_after = ["]", "..."]
+
+# `main` starts a program; the runtime calls `init` before it, and `go test` calls `TestMain`
+# instead of running a package's tests directly.
+[roots]
+entry_points = ["main"]
+hooks = ["init", "TestMain"]
