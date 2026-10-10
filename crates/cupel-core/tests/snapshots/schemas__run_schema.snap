@@ -18,6 +18,17 @@ expression: pretty(&schema)
     "cupel": {
       "$ref": "#/$defs/CupelInfo"
     },
+    "description": {
+      "description": "What `describe` returns; null for every other verb (ADR-018).",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Description"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "exit_code": {
       "$ref": "#/$defs/ExitCode"
     },
@@ -55,6 +66,7 @@ expression: pretty(&schema)
   "required": [
     "checks",
     "cupel",
+    "description",
     "exit_code",
     "findings",
     "next_actions",
@@ -120,6 +132,119 @@ expression: pretty(&schema)
           "type": "string",
           "const": "review"
         }
+      ]
+    },
+    "AllDescription": {
+      "description": "Everything `describe` knows, in one document.",
+      "type": "object",
+      "properties": {
+        "cli": {
+          "$ref": "#/$defs/CliDescription"
+        },
+        "commands": {
+          "description": "Every verb, with its sub-verbs nested.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommandDescription"
+          }
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SchemaDescription"
+          }
+        }
+      },
+      "required": [
+        "cli",
+        "commands",
+        "schemas"
+      ]
+    },
+    "ArgDescription": {
+      "description": "A flag or positional argument.",
+      "type": "object",
+      "properties": {
+        "conflicts": {
+          "description": "Flags that cannot be combined with this one.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "default": {
+          "description": "The value used when the argument is absent, if it is a fixed value.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "env": {
+          "description": "The environment variable read when the flag is absent.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "`--name` for a flag, the value name (such as `FINDING`) for a positional.",
+          "type": "string"
+        },
+        "pending_step": {
+          "description": "The implementation-plan step that gives this argument its behavior; null once it has it.\nUntil then it parses and is otherwise ignored.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "positional": {
+          "type": "boolean"
+        },
+        "repeated": {
+          "description": "Whether the argument accepts several values.",
+          "type": "boolean"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ValueType"
+        },
+        "value_name": {
+          "description": "The placeholder shown in help, such as `PATH`; null for switches.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "values": {
+          "description": "The accepted values of an `enum`; empty otherwise.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "conflicts",
+        "default",
+        "env",
+        "name",
+        "pending_step",
+        "positional",
+        "repeated",
+        "required",
+        "stability",
+        "summary",
+        "value",
+        "value_name",
+        "values"
       ]
     },
     "BaselineRef": {
@@ -231,6 +356,153 @@ expression: pretty(&schema)
         "skipped"
       ]
     },
+    "CliDescription": {
+      "description": "Verbs, global flags, exit codes, schema URLs, and configuration precedence.",
+      "type": "object",
+      "properties": {
+        "config_precedence": {
+          "description": "Configuration layers, highest precedence first.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConfigSource"
+          }
+        },
+        "exit_codes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExitCodeDescription"
+          }
+        },
+        "flags": {
+          "description": "Flags accepted only without a verb, such as `--version`.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArgDescription"
+          }
+        },
+        "global_flags": {
+          "description": "Flags every verb accepts.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArgDescription"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SchemaRef"
+          }
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "verbs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommandSummary"
+          }
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "config_precedence",
+        "exit_codes",
+        "flags",
+        "global_flags",
+        "name",
+        "schemas",
+        "stability",
+        "summary",
+        "verbs",
+        "version"
+      ]
+    },
+    "CommandDescription": {
+      "description": "A verb or sub-verb with its own arguments (global flags are listed once, on the CLI).",
+      "type": "object",
+      "properties": {
+        "arguments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArgDescription"
+          }
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Example"
+          }
+        },
+        "name": {
+          "description": "The words that invoke it after `cupel`, such as `check` or `baseline set`.",
+          "type": "string"
+        },
+        "pending_step": {
+          "description": "The implementation-plan step that gives this command its behavior; null once it has it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "subcommands": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommandDescription"
+          }
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "arguments",
+        "examples",
+        "name",
+        "pending_step",
+        "stability",
+        "subcommands",
+        "summary"
+      ]
+    },
+    "CommandSummary": {
+      "description": "One line about a verb; `describe <verb>` has the rest.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "pending_step": {
+          "description": "The implementation-plan step that gives this verb its behavior; null once it has it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "pending_step",
+        "stability",
+        "summary"
+      ]
+    },
     "ConfigEcho": {
       "description": "The effective configuration and the layers it came from.",
       "type": "object",
@@ -306,10 +578,91 @@ expression: pretty(&schema)
         "vs"
       ]
     },
+    "Description": {
+      "description": "What `describe` returns, tagged by the kind of thing described.",
+      "oneOf": [
+        {
+          "description": "`cupel describe`: the whole command line at a glance.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "cli"
+            }
+          },
+          "$ref": "#/$defs/CliDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe <verb>` or `cupel <verb> --describe`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "command"
+            }
+          },
+          "$ref": "#/$defs/CommandDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe schema <name>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "schema"
+            }
+          },
+          "$ref": "#/$defs/SchemaDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe --all`: everything, in one document.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "all"
+            }
+          },
+          "$ref": "#/$defs/AllDescription",
+          "required": [
+            "subject"
+          ]
+        }
+      ]
+    },
     "Evidence": {
       "description": "Check-specific supporting data. Its shape per finding kind is the JSON Schema the emitting\ncheck declares in its manifest (ADR-012).",
       "type": "object",
       "additionalProperties": true
+    },
+    "Example": {
+      "description": "An invocation and the exit code it produces.",
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "exit_code": {
+          "$ref": "#/$defs/ExitCode"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "command",
+        "exit_code",
+        "summary"
+      ]
     },
     "ExitCode": {
       "description": "0 pass · 1 fail · 2 usage · 3 environment · 4 unevaluable · 5 partial · 6 internal",
@@ -322,6 +675,29 @@ expression: pretty(&schema)
         4,
         5,
         6
+      ]
+    },
+    "ExitCodeDescription": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ExitCode"
+        },
+        "meaning": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        }
+      },
+      "required": [
+        "code",
+        "meaning",
+        "name",
+        "stability"
       ]
     },
     "FactKind": {
@@ -705,7 +1081,15 @@ expression: pretty(&schema)
           "$ref": "#/$defs/ToolchainInfo"
         },
         "verb": {
-          "$ref": "#/$defs/Verb"
+          "description": "Null only when the command line named no valid verb (ADR-018).",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Verb"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -721,6 +1105,51 @@ expression: pretty(&schema)
         "started",
         "toolchain",
         "verb"
+      ]
+    },
+    "SchemaDescription": {
+      "description": "A published schema and the schema itself (JSON Schema draft 2020-12).",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "schema",
+        "stability",
+        "url"
+      ]
+    },
+    "SchemaRef": {
+      "description": "Where a published schema lives.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "stability",
+        "url"
       ]
     },
     "ScopeInfo": {
@@ -895,6 +1324,14 @@ expression: pretty(&schema)
         "tool"
       ]
     },
+    "Stability": {
+      "description": "Whether a described entity's contract may still change.",
+      "type": "string",
+      "enum": [
+        "stable",
+        "experimental"
+      ]
+    },
     "Status": {
       "description": "Overall outcome. `partial` and `error` are distinct from `fail`.",
       "oneOf": [
@@ -998,6 +1435,34 @@ expression: pretty(&schema)
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "ValueType": {
+      "description": "The type of value an argument takes.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "string",
+            "integer",
+            "path"
+          ]
+        },
+        {
+          "description": "A flag that takes no value.",
+          "type": "string",
+          "const": "switch"
+        },
+        {
+          "description": "A duration such as `10s`, `5m`, or `1h`.",
+          "type": "string",
+          "const": "duration"
+        },
+        {
+          "description": "One of `values`.",
+          "type": "string",
+          "const": "enum"
+        }
+      ]
     },
     "Verb": {
       "description": "The verbs of design §6.2.",

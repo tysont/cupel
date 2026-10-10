@@ -7,6 +7,7 @@ use schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
+use crate::describe::Description;
 use crate::error::{Error, Result};
 use crate::fact::FactKind;
 use crate::finding::{ActionKind, Finding};
@@ -25,6 +26,8 @@ pub struct Envelope {
     pub findings: Vec<Finding>,
     pub summary: Summary,
     pub next_actions: Vec<NextAction>,
+    /// What `describe` returns; null for every other verb (ADR-018).
+    pub description: Option<Description>,
     /// True when paging (`--limit`/`--offset`) left findings out.
     pub truncated: bool,
     pub total_findings: u64,
@@ -41,7 +44,8 @@ pub struct CupelInfo {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct RunInfo {
     pub id: RunId,
-    pub verb: Verb,
+    /// Null only when the command line named no valid verb (ADR-018).
+    pub verb: Option<Verb>,
     /// Start time, RFC 3339 in UTC (ADR-013).
     pub started: String,
     pub duration_ms: u64,
@@ -199,6 +203,19 @@ impl ExitCode {
 
     pub fn code(self) -> u8 {
         self as u8
+    }
+
+    /// What the code means, as in the design's exit-code table.
+    pub fn meaning(self) -> &'static str {
+        match self {
+            Self::Pass => "Ran fully; gate passed or no gate.",
+            Self::Fail => "Ran fully; gate failed.",
+            Self::Usage => "Bad flags or config; the envelope names the fix.",
+            Self::Environment => "Missing tool, oracle, or toolchain; doctor findings attached.",
+            Self::Unevaluable => "Baseline test suite fails or build broken; scoring refused.",
+            Self::Partial => "Timeout or budget hit; the envelope has valid partial results.",
+            Self::Internal => "Cupel bug; the envelope includes a bug-report payload.",
+        }
     }
 
     pub fn name(self) -> &'static str {

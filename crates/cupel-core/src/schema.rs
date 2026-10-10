@@ -19,30 +19,48 @@ use crate::syntax::{
 /// Every published schema's `$id` starts with this.
 pub const BASE_URL: &str = "https://cupel.dev/schema/v1/";
 
+/// Every top-level schema `describe schema <name>` serves, by name. A schema named `n` has the
+/// `$id` [`url`]`(n)`. Register a new top-level schema here.
+pub const PUBLISHED: &[(&str, Generate)] = &[
+    ("run", run),
+    ("finding", finding),
+    ("events", events),
+    ("config", config),
+    ("plugin", plugin),
+];
+
+/// Generates one top-level schema.
+pub type Generate = fn() -> Schema;
+
+/// The `$id` of the top-level schema called `name`.
+pub fn url(name: &str) -> String {
+    format!("{BASE_URL}{name}.json")
+}
+
 /// Schema of the envelope every verb emits.
 pub fn run() -> Schema {
-    root::<Envelope>("run.json")
+    root::<Envelope>(&url("run"))
 }
 
 /// Schema of one finding.
 pub fn finding() -> Schema {
-    root::<Finding>("finding.json")
+    root::<Finding>(&url("finding"))
 }
 
 /// Schema of one `--events` line.
 pub fn events() -> Schema {
-    root::<Event>("events.json")
+    root::<Event>(&url("events"))
 }
 
 /// Schema of `cupel.toml` (design §6.7).
 pub fn config() -> Schema {
-    input_root::<ConfigFile>("config.json")
+    input_root::<ConfigFile>(&url("config"))
 }
 
 /// Schema of the plugin protocol. Today that is the `Manifest` a plugin's `describe` emits;
 /// the run request and plugin events join it in P5.1 (ADR-013).
 pub fn plugin() -> Schema {
-    root::<Manifest>("plugin.json")
+    root::<Manifest>(&url("plugin"))
 }
 
 /// Schema of a fact kind's payload, or `None` for kinds whose payload type does not exist yet.
@@ -74,34 +92,34 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 
 /// A fact payload's schema, carrying the fact version it describes.
 fn fact_schema<F: Fact>() -> Schema {
-    let mut schema = root::<F>(&format!("fact/{}.json", F::KIND));
+    let mut schema = root::<F>(&format!("{BASE_URL}fact/{}.json", F::KIND));
     schema.insert("x-cupel-fact-version".to_owned(), json!(F::VERSION));
     schema
 }
 
 /// Schema of a type Cupel emits: every property is required (ADR-013).
-fn root<T: JsonSchema>(path: &str) -> Schema {
+fn root<T: JsonSchema>(id: &str) -> Schema {
     with_id(
         SchemaSettings::draft2020_12()
             .with_transform(require_every_property)
             .into_generator()
             .into_root_schema_for::<T>(),
-        path,
+        id,
     )
 }
 
 /// Schema of a type Cupel reads, such as `cupel.toml`, where keys may be omitted.
-fn input_root<T: JsonSchema>(path: &str) -> Schema {
+fn input_root<T: JsonSchema>(id: &str) -> Schema {
     with_id(
         SchemaSettings::draft2020_12()
             .into_generator()
             .into_root_schema_for::<T>(),
-        path,
+        id,
     )
 }
 
-fn with_id(mut schema: Schema, path: &str) -> Schema {
-    schema.insert("$id".to_owned(), json!(format!("{BASE_URL}{path}")));
+fn with_id(mut schema: Schema, id: &str) -> Schema {
+    schema.insert("$id".to_owned(), json!(id));
     schema
 }
 

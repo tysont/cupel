@@ -34,6 +34,37 @@ fn finding_id_matches_known_vector_for_a_whole_symbol() {
 }
 
 #[test]
+fn subject_finding_id_matches_known_vector() {
+    // blake3(b"cli\0cli.not-implemented\0\0check") = 88808d37…, computed with the Python
+    // `blake3` package (ADR-016).
+    let id = FindingId::for_subject(&CheckId::from("cli"), "cli.not-implemented", "check");
+    assert_eq!(id.as_str(), "fnd_88808d");
+}
+
+#[test]
+fn subject_finding_id_depends_on_check_kind_and_subject() {
+    let base = FindingId::for_subject(&CheckId::from("cli"), "cli.usage", "--format");
+    assert_eq!(base.as_str(), "fnd_e2de2f");
+    for variant in [
+        FindingId::for_subject(&CheckId::from("doctor"), "cli.usage", "--format"),
+        FindingId::for_subject(&CheckId::from("cli"), "cli.not-implemented", "--format"),
+        FindingId::for_subject(&CheckId::from("cli"), "cli.usage", "--cwd"),
+    ] {
+        assert_ne!(base, variant);
+    }
+}
+
+#[test]
+fn subject_finding_ids_never_collide_with_symbol_finding_ids() {
+    // A symbol hash is never empty, so the empty symbol slot separates the two input spaces:
+    // a subject that looks like a site cannot reproduce a symbol finding's ID.
+    let site: SiteHash = "a1b2c3".parse().unwrap();
+    let by_symbol = FindingId::compute(&CheckId::from("c"), "k", &symbol(), Some(&site));
+    let by_subject = FindingId::for_subject(&CheckId::from("c"), "k", "sh_4b1d9e0c\0a1b2c3");
+    assert_ne!(by_symbol, by_subject);
+}
+
+#[test]
 fn finding_id_keeps_24_bits_as_six_hex_digits_after_prefix() {
     let id = FindingId::compute(&CheckId::from("a"), "b", &symbol(), None);
     let hex = id.as_str().strip_prefix("fnd_").expect("fnd_ prefix");
