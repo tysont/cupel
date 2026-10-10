@@ -66,6 +66,21 @@ impl Settings {
             budget: parse_env(Setting::Budget, var(Setting::Budget))?,
         })
     }
+
+    /// Each setting from `self` where set, else from `lower`.
+    #[must_use]
+    pub fn or(self, lower: &Settings) -> Settings {
+        Settings {
+            depth: self.depth.or(lower.depth),
+            format: self.format.or(lower.format),
+            budget: self.budget.or(lower.budget),
+        }
+    }
+
+    /// Whether this layer sets nothing.
+    pub fn is_empty(&self) -> bool {
+        *self == Self::default()
+    }
 }
 
 /// Parses an env value with the setting's own deserializer, so env accepts exactly what
