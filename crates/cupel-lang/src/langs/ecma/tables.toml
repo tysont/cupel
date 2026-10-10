@@ -59,3 +59,41 @@ callee = "function"
 [[normalize.calls]]
 kind = "new_expression"
 callee = "constructor"
+
+[mutations.relational]
+replace = { "<" = ["<="], "<=" = ["<"], ">" = [">="], ">=" = [">"] }
+
+[mutations.equality]
+replace = { "===" = ["!=="], "!==" = ["==="], "==" = ["!="], "!=" = ["=="] }
+
+[mutations.arith-add-sub]
+replace = { "+" = ["-"], "-" = ["+"], "+=" = ["-="], "-=" = ["+="] }
+
+[mutations.arith-mul-div]
+replace = { "*" = ["/"], "/" = ["*"], "*=" = ["/="], "/=" = ["*="] }
+
+[mutations.boolean-op]
+replace = { "&&" = ["||"], "||" = ["&&"] }
+
+[mutations.boolean-literal]
+replace = { "true" = ["false"], "false" = ["true"] }
+
+[mutations.zero-one]
+replace = { "0" = ["1"], "1" = ["0"] }
+
+[mutations.statement-deletion]
+templates = [""]
+
+# `undefined` is what a function without a `return` value gives; TypeScript may reject the
+# mutant, which the mutation engine reports as not viable.
+[mutations.return-value]
+templates = ["undefined"]
+
+[mutations.constant]
+templates = ["0"]
+
+[mutations.boundary]
+templates = ["{} + 1", "{} - 1"]
+
+[mutations.negation]
+templates = ["!({})"]

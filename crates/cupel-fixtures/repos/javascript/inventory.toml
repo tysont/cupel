@@ -104,3 +104,63 @@ twin = "twins.netTotalCapped"
 file = "src/twins.js"
 name = "twins.netTotal"
 twin = "twins.netTotalProduct"
+
+[mutation-sites.relational]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "!==", to = ["==="] }
+
+[mutation-sites.arith-add-sub]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "+=", to = ["-="] }
+
+[mutation-sites.arith-mul-div]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "&&", to = ["||"] }
+
+[mutation-sites.boolean-literal]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "false", to = ["true"] }
+
+[mutation-sites.zero-one]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "src/pricing.js"
+name = "pricing.tally"
+expect = { from = "logTotal(total);", to = [""] }
+
+[mutation-sites.return-value]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "price - cut", to = ["undefined"] }
+
+[mutation-sites.constant]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "src/decide.js"
+name = "decide.classify"
+expect = { from = "0", to = ["0 + 1", "0 - 1"] }
+
+[mutation-sites.negation]
+file = "src/pricing.js"
+name = "pricing.discounted"
+expect = { from = "member && cut !== 0", to = ["!(member && cut !== 0)"] }

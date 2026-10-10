@@ -1,0 +1,2316 @@
+{
+  "symbols": [
+    {
+      "sites": [
+        {
+          "from": "console.log(add(Number(argv[2]), Number(argv[3])));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "fdf88e7c36a2b8ee",
+          "span": {
+            "col": 3,
+            "end_col": 54,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "33dd0e7542c5888c",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5067fb9c6b25b6ef",
+          "span": {
+            "col": 48,
+            "end_col": 49,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "bin/cli.js",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "balance < 0 && limit > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6bc6da5cfd9b489f",
+          "span": {
+            "col": 7,
+            "end_col": 31,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "!(balance < 0 && limit > 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "14c468ed468135a5",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "36696d9ad458dac5",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "bfa691921c5906db",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "&&",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "26638e5bbc5bbe31",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "||"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "d2e457c84657cdf1",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "884a1ec7a108f5c6",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "daf6c9fa8f5f152d",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "\"overdrawn\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "56e3360f045b4193",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "balance === 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "4b77ab24aed784bc",
+          "span": {
+            "col": 14,
+            "end_col": 27,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "!(balance === 0)"
+          ]
+        },
+        {
+          "from": "===",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "16c970bf81a1f2c3",
+          "span": {
+            "col": 22,
+            "end_col": 25,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "!=="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4ed356d45f3b427a",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "\"empty\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "06769e2b3373f943",
+          "span": {
+            "col": 12,
+            "end_col": 19,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "balance > limit ? \"rich\" : \"ok\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "69b0eda908c9a192",
+          "span": {
+            "col": 10,
+            "end_col": 41,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "ef713f2c872be17f",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            ">="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.js",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "entry.balance < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6e248f83e24a21e2",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "!(entry.balance < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "1c12a6819aaeefc9",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "bddad0507ed056b5",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "3947315a2b352cf0",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "entry",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b0225561db3305cb",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "null",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "0834a7b995f2d9b3",
+          "span": {
+            "col": 10,
+            "end_col": 14,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.js",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "\"money in\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d0d6ffcf7f4f388f",
+          "span": {
+            "col": 14,
+            "end_col": 24,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "\"money out\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "8702767bb7769395",
+          "span": {
+            "col": 14,
+            "end_col": 25,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "\"unknown\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "9b09fd409ab9fa60",
+          "span": {
+            "col": 14,
+            "end_col": 23,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.js",
+        "line": 19
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "!text",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "98a67d4284f3b7f6",
+          "span": {
+            "col": 7,
+            "end_col": 12,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "!(!text)"
+          ]
+        },
+        {
+          "from": "Math.round(Number.parseFloat(text) * 100)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7efe25e99e55d420",
+          "span": {
+            "col": 12,
+            "end_col": 53,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d2d66bde4672ab26",
+          "span": {
+            "col": 47,
+            "end_col": 48,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "688b4de6f4621352",
+          "span": {
+            "col": 49,
+            "end_col": 52,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "ef5e2f8b59e7b495",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "6a25219466bc3434",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.js",
+        "line": 30
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(cents / 100).toFixed(2)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "3e4b6e2724572da9",
+          "span": {
+            "col": 10,
+            "end_col": 34,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "5810de348faa9c0a",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "01ade62680686aa5",
+          "span": {
+            "col": 19,
+            "end_col": 22,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3c23aa478ba7c45e",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/format.cjs",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "a + b",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "43e7e6c216862855",
+          "span": {
+            "col": 10,
+            "end_col": 15,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "95a2d9dbfe30ec85",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "-"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/math.js",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "b067db05228f5d48",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b6c60c45fcd5979a",
+          "span": {
+            "col": 34,
+            "end_col": 36,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "7a4f9f4294283131",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/math.js",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "registry.register(\"ledger\", { version: 1 });",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 47,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "2aee898d4d94e7d9",
+          "span": {
+            "col": 42,
+            "end_col": 43,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 16,
+        "file": "src/plugin.js",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "ecbf59c71f5a7f09",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "15",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f6f515b11ab8f790",
+          "span": {
+            "col": 24,
+            "end_col": 26,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "fae8dcb14d303579",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "811ebc26d15ed939",
+          "span": {
+            "col": 30,
+            "end_col": 33,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "member && cut !== 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "96b9c60626010a58",
+          "span": {
+            "col": 7,
+            "end_col": 26,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "!(member && cut !== 0)"
+          ]
+        },
+        {
+          "from": "&&",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "d3a67eb5226c0b1e",
+          "span": {
+            "col": 14,
+            "end_col": 16,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "||"
+          ]
+        },
+        {
+          "from": "!==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "721bb52aec58ae85",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "==="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "20117cdc789a54af",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "price - cut",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "4dedbba42452d746",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "8003b09aba671be9",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "price",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b92bbf1f458fa8c3",
+          "span": {
+            "col": 10,
+            "end_col": 15,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.js",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "dd1380d765326f53",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "false",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "51bc7f6af7e808bf",
+          "span": {
+            "col": 19,
+            "end_col": 24,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "true"
+          ]
+        },
+        {
+          "from": "total += entry;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a4590c41c105bf48",
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "a36f327d71fb44c7",
+          "span": {
+            "col": 11,
+            "end_col": 13,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "total < -1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "8916b34763484e96",
+          "span": {
+            "col": 9,
+            "end_col": 19,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "!(total < -1)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "ae0df776d8d96661",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c9a40074732fd94d",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "overdrawn = true;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d1d9e6efc8a874c3",
+          "span": {
+            "col": 7,
+            "end_col": 24,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "21566ffce3188a74",
+          "span": {
+            "col": 19,
+            "end_col": 23,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "logTotal(total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a45f06176c39ff7d",
+          "span": {
+            "col": 3,
+            "end_col": 19,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "{ total, overdrawn }",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "47c7f1cacfb3685c",
+          "span": {
+            "col": 10,
+            "end_col": 30,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.js",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "console.log(total == null ? \"none\" : total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "fdf88e7c36a2b8ee",
+          "span": {
+            "col": 3,
+            "end_col": 47,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "8b522b7e00da29a6",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.js",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "entries.map((cents) => money(cents)).join(\"\\n\")",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "5ea6c6034cc973eb",
+          "span": {
+            "col": 10,
+            "end_col": 57,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/report.cjs",
+        "line": 3
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "this.radius = radius;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 26,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.js",
+        "line": 2
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Math.PI * this.radius * this.radius",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "788d3e2b12d6ffdb",
+          "span": {
+            "col": 12,
+            "end_col": 47,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "96c20cdc83d48472",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "70d81cc9df55fa7d",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.js",
+        "line": 6
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "new Circle(1)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "41d82cd892903428",
+          "span": {
+            "col": 12,
+            "end_col": 25,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "7530797e89ababc4",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.js",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "this.radius > 0",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "788d3e2b12d6ffdb",
+          "span": {
+            "col": 12,
+            "end_col": 27,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "cf835fe804a38e62",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "5b070fdf001e5f4e",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "16608dd2642fd51c",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.js",
+        "line": 14
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "841a69dd906478ab",
+          "span": {
+            "col": 67,
+            "end_col": 68,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 14,
+        "file": "src/shapes/geometry.js",
+        "line": 19
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "twice(Math.PI * circle.radius)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "93fb9baaad9af2b6",
+          "span": {
+            "col": 10,
+            "end_col": 40,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "410448d44205de89",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/shapes/geometry.js",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "value * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "43e7e6c216862855",
+          "span": {
+            "col": 12,
+            "end_col": 21,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d069e4b6538ffe54",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f49a25fcb6c323a6",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.js",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bd8fe76bcda17cff",
+          "span": {
+            "col": 52,
+            "end_col": 53,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d5cd32a4da7aeacb",
+          "span": {
+            "col": 61,
+            "end_col": 62,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross - fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "9143a57f2083cb0f",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "7fbc5d06dc9481c1",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "752297b9d3b8f29c",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5a5c2e4e4ee2ba17",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bd8fe76bcda17cff",
+          "span": {
+            "col": 49,
+            "end_col": 50,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d5cd32a4da7aeacb",
+          "span": {
+            "col": 57,
+            "end_col": 58,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "total - charge * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "9143a57f2083cb0f",
+          "span": {
+            "col": 10,
+            "end_col": 28,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "7fbc5d06dc9481c1",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "752297b9d3b8f29c",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5a5c2e4e4ee2ba17",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 6
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bd8fe76bcda17cff",
+          "span": {
+            "col": 52,
+            "end_col": 53,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d09a401573a033ee",
+          "span": {
+            "col": 61,
+            "end_col": 64,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "gross - fee * 3",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "9143a57f2083cb0f",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "7fbc5d06dc9481c1",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "752297b9d3b8f29c",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5a5c2e4e4ee2ba17",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 11
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bd8fe76bcda17cff",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d5cd32a4da7aeacb",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross - fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "9143a57f2083cb0f",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "7fbc5d06dc9481c1",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "752297b9d3b8f29c",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5a5c2e4e4ee2ba17",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 16
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bd8fe76bcda17cff",
+          "span": {
+            "col": 52,
+            "end_col": 53,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d5cd32a4da7aeacb",
+          "span": {
+            "col": 61,
+            "end_col": 62,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross + fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "9143a57f2083cb0f",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ef714c37b8531a89",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "752297b9d3b8f29c",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5a5c2e4e4ee2ba17",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 25
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bd8fe76bcda17cff",
+          "span": {
+            "col": 52,
+            "end_col": 53,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d5cd32a4da7aeacb",
+          "span": {
+            "col": 61,
+            "end_col": 62,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross > 1000",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "96b9c60626010a58",
+          "span": {
+            "col": 7,
+            "end_col": 19,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "!(gross > 1000)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "e4d291c887960395",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3165968dcddbb0f4",
+          "span": {
+            "col": 15,
+            "end_col": 19,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "be35237a273be42f",
+          "span": {
+            "col": 15,
+            "end_col": 19,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "1000 + 1",
+            "1000 - 1"
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "384cfc6cf9fa2bdf",
+          "span": {
+            "col": 12,
+            "end_col": 16,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "18b65ef11dc5e2a7",
+          "span": {
+            "col": 12,
+            "end_col": 16,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "gross - fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "1c260808231b210a",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "fca12297246d7e43",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "31b5b18923a6c605",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2c2f7ce7a8cb3d02",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 30
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bd8fe76bcda17cff",
+          "span": {
+            "col": 57,
+            "end_col": 58,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d5cd32a4da7aeacb",
+          "span": {
+            "col": 66,
+            "end_col": 67,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross - fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "9143a57f2083cb0f",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "7fbc5d06dc9481c1",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "752297b9d3b8f29c",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5a5c2e4e4ee2ba17",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 38
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(1, 2)).toBe(3);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "dbd8618c4566a6e1",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "440e727e437dce62",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1bca0de08244165a",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 26,
+        "file": "test/math.test.js",
+        "line": 5
+      }
+    }
+  ]
+}

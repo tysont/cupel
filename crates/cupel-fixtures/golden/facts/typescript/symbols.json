@@ -191,6 +191,69 @@
     },
     {
       "body": {
+        "col": 68,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "display": "pricing.discounted",
+      "file": "src/pricing.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "discounted",
+      "namespace": "pricing",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 81,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "display": "pricing.tally",
+      "file": "src/pricing.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "tally",
+      "namespace": "pricing",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "pricing.logTotal",
+      "file": "src/pricing.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "logTotal",
+      "namespace": "pricing",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 22,
         "end_col": 4,
         "end_line": 6,

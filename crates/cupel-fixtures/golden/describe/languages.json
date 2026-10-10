@@ -27,7 +27,8 @@
         "facts": [
           "symbols",
           "decisions",
-          "norm-tree"
+          "norm-tree",
+          "mutation-sites"
         ],
         "family": "ecma",
         "id": "javascript",
@@ -73,7 +74,8 @@
         "facts": [
           "symbols",
           "decisions",
-          "norm-tree"
+          "norm-tree",
+          "mutation-sites"
         ],
         "family": "ecma",
         "id": "typescript",

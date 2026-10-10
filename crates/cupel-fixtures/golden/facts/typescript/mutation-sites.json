@@ -1,0 +1,2295 @@
+{
+  "symbols": [
+    {
+      "sites": [
+        {
+          "from": "balance < 0 && limit > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "3f3e2883f17a8e10",
+          "span": {
+            "col": 7,
+            "end_col": 31,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "!(balance < 0 && limit > 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "26412c8b0249e47f",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "cdf611d447f41c2e",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "b3608d5ac01de7eb",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "&&",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "c839040f632baee9",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "||"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "ad5a0157979ca8a1",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f69fb96519cfc953",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "512db8f7d5f53992",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "\"overdrawn\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "c3056feec1649eac",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "balance === 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "9909f8aca9b3ddde",
+          "span": {
+            "col": 14,
+            "end_col": 27,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "!(balance === 0)"
+          ]
+        },
+        {
+          "from": "===",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "6cc3f78e0ee6b8e1",
+          "span": {
+            "col": 22,
+            "end_col": 25,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "!=="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "dd11c89e5f1f659c",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "\"empty\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "1b9380a0be877b22",
+          "span": {
+            "col": 12,
+            "end_col": 19,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "balance > limit ? \"rich\" : \"ok\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "fc93226c358d8d60",
+          "span": {
+            "col": 10,
+            "end_col": 41,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "1537e9b3c3fa5e0b",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ">="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "entry.balance < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "58192734e4f8e778",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "!(entry.balance < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "1bc4060f434f8efe",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "3b34304a28bcb2c7",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "0ecb200adb9f1ec0",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "entry",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "1276d1dde41be13a",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "null",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "6391d39e7a91487e",
+          "span": {
+            "col": 10,
+            "end_col": 14,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 14
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "\"money in\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "222c1faa2c0d4e3f",
+          "span": {
+            "col": 14,
+            "end_col": 24,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "\"money out\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "ab8d69777ca03bad",
+          "span": {
+            "col": 14,
+            "end_col": 25,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "\"unknown\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "bc5adaa71ced571f",
+          "span": {
+            "col": 14,
+            "end_col": 23,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 23
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "!text",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "63c4f13572aa8de7",
+          "span": {
+            "col": 7,
+            "end_col": 12,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "!(!text)"
+          ]
+        },
+        {
+          "from": "Math.round(Number.parseFloat(text) * 100)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "5b87591b0d466e8f",
+          "span": {
+            "col": 12,
+            "end_col": 53,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "b558ed24238f23cd",
+          "span": {
+            "col": 47,
+            "end_col": 48,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "97b14946cfda02c9",
+          "span": {
+            "col": 49,
+            "end_col": 52,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "8c6c2cc7131c53a2",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d98842a4777329bb",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.ts",
+        "line": 34
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Math.round(cents)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "9cbe0db47b479db0",
+          "span": {
+            "col": 12,
+            "end_col": 29,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 10,
+        "file": "src/legacy.ts",
+        "line": 2
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(1, 2)).toBe(3);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "dbd8618c4566a6e1",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "440e727e437dce62",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1bca0de08244165a",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 26,
+        "file": "src/math.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "a + b",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d430bad8a61f4434",
+          "span": {
+            "col": 10,
+            "end_col": 15,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b4f0390e1b23af16",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "-"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/math.ts",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "a76f79510955ad6c",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "c797fb3135fcdef0",
+          "span": {
+            "col": 34,
+            "end_col": 36,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "527e3b452a9bf32d",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/math.ts",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "registry.register(\"ledger\", { version: 1 });",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "fdf88e7c36a2b8ee",
+          "span": {
+            "col": 3,
+            "end_col": 47,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "0fa1ed4362d7cc4c",
+          "span": {
+            "col": 42,
+            "end_col": 43,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 16,
+        "file": "src/plugin.ts",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "416cf79a5be78bca",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "15",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bf68d17994f2ccdd",
+          "span": {
+            "col": 24,
+            "end_col": 26,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "0fde7cfce7ef5ba1",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c3f4c123602f8097",
+          "span": {
+            "col": 30,
+            "end_col": 33,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "member && cut !== 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b84b9d9a604f4ffa",
+          "span": {
+            "col": 7,
+            "end_col": 26,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "!(member && cut !== 0)"
+          ]
+        },
+        {
+          "from": "&&",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "ea074dd8ddf68a8f",
+          "span": {
+            "col": 14,
+            "end_col": 16,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "||"
+          ]
+        },
+        {
+          "from": "!==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "ef80a109f8a161af",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "==="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "3a8db2a818809038",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "price - cut",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "903711e67129b119",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "1715b1d8e074b8be",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "price",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "53e5ef68cd3b9a39",
+          "span": {
+            "col": 10,
+            "end_col": 15,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.ts",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "5b40c5f94d83d34b",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "false",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "bcbb9d8e11ac727d",
+          "span": {
+            "col": 19,
+            "end_col": 24,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "true"
+          ]
+        },
+        {
+          "from": "total += entry;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "670824969fee9e78",
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "28790df1ffab9f25",
+          "span": {
+            "col": 11,
+            "end_col": 13,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "total < -1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b9212c1f23b46f47",
+          "span": {
+            "col": 9,
+            "end_col": 19,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "!(total < -1)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "79b092a3c911830c",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "07af4bfedf75d8a0",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "overdrawn = true;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "dde7e96b1206e89a",
+          "span": {
+            "col": 7,
+            "end_col": 24,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "41416a24b3b3b48f",
+          "span": {
+            "col": 19,
+            "end_col": 23,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "logTotal(total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "9673f83e6c703315",
+          "span": {
+            "col": 3,
+            "end_col": 19,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "{ total, overdrawn }",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7840cca65a328e31",
+          "span": {
+            "col": 10,
+            "end_col": 30,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.ts",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "console.log(total == null ? \"none\" : total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "c000cc3d3cf43389",
+          "span": {
+            "col": 3,
+            "end_col": 47,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "2cecb5f7a5b6a7bb",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.ts",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "`area ${this.area()}`",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7dc94ee0c9cc20ca",
+          "span": {
+            "col": 12,
+            "end_col": 33,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "super();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 13,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Math.PI * this.radius * this.radius",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "43e7e6c216862855",
+          "span": {
+            "col": 12,
+            "end_col": 47,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "fe2134ee2a89f5b0",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d069e4b6538ffe54",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 14
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "new Circle(1)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "4de658e3dae0e472",
+          "span": {
+            "col": 12,
+            "end_col": 25,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c89642e787abe930",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 18
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "this.radius > 0",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d430bad8a61f4434",
+          "span": {
+            "col": 12,
+            "end_col": 27,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "d1cdaa341a357937",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "1351e221784ee034",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "f64113d39438f9a8",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 22
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 26
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "c6b62cd1368ffaa6",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 14,
+        "file": "src/shapes/geometry.ts",
+        "line": 29
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "twice(Math.PI * circle.radius)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "22fe03cd11a93283",
+          "span": {
+            "col": 10,
+            "end_col": 40,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "3b1534b4cdd87e54",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/shapes/geometry.ts",
+        "line": 32
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "value * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d430bad8a61f4434",
+          "span": {
+            "col": 12,
+            "end_col": 21,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d84ef32e586a5de3",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b39b88a6b0d53a45",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.ts",
+        "line": 33
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d82ae279afb96d32",
+          "span": {
+            "col": 76,
+            "end_col": 77,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "56ae6ffadf3982eb",
+          "span": {
+            "col": 85,
+            "end_col": 86,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross - fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "dd16c99082269ee8",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b09c880578f455b9",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "00d78634fee4db6a",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5d7d8e9f4b50d3ea",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ed2632fa39f825b4",
+          "span": {
+            "col": 57,
+            "end_col": 58,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9e1f76bdbcdb7c9a",
+          "span": {
+            "col": 65,
+            "end_col": 66,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "total - charge * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "dd16c99082269ee8",
+          "span": {
+            "col": 10,
+            "end_col": 28,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b09c880578f455b9",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "00d78634fee4db6a",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5d7d8e9f4b50d3ea",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 6
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d82ae279afb96d32",
+          "span": {
+            "col": 76,
+            "end_col": 77,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2c42c197ddef5fd5",
+          "span": {
+            "col": 85,
+            "end_col": 88,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "gross - fee * 3",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "dd16c99082269ee8",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b09c880578f455b9",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "00d78634fee4db6a",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5d7d8e9f4b50d3ea",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 11
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d82ae279afb96d32",
+          "span": {
+            "col": 41,
+            "end_col": 42,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "56ae6ffadf3982eb",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross - fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "dd16c99082269ee8",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b09c880578f455b9",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "00d78634fee4db6a",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5d7d8e9f4b50d3ea",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 16
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d82ae279afb96d32",
+          "span": {
+            "col": 76,
+            "end_col": 77,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "56ae6ffadf3982eb",
+          "span": {
+            "col": 85,
+            "end_col": 86,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross + fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "dd16c99082269ee8",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "4867362dbf00e068",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "00d78634fee4db6a",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5d7d8e9f4b50d3ea",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 28
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d82ae279afb96d32",
+          "span": {
+            "col": 76,
+            "end_col": 77,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "56ae6ffadf3982eb",
+          "span": {
+            "col": 85,
+            "end_col": 86,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross > 1000",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b84b9d9a604f4ffa",
+          "span": {
+            "col": 7,
+            "end_col": 19,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "!(gross > 1000)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "5f5059c465dbd3f2",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a11ddf03ae867a7f",
+          "span": {
+            "col": 15,
+            "end_col": 19,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "34676b2aad5f5f46",
+          "span": {
+            "col": 15,
+            "end_col": 19,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "1000 + 1",
+            "1000 - 1"
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "1c9eb4dbd8b13e36",
+          "span": {
+            "col": 12,
+            "end_col": 16,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "dddd08747a0c5a6e",
+          "span": {
+            "col": 12,
+            "end_col": 16,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "gross - fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "fbecebd7ed3ae523",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "29c11402777dde06",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f6832551a90bcf77",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "637f46b2d1886db1",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 33
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d82ae279afb96d32",
+          "span": {
+            "col": 81,
+            "end_col": 82,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "56ae6ffadf3982eb",
+          "span": {
+            "col": 90,
+            "end_col": 91,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "gross - fee * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "dd16c99082269ee8",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b09c880578f455b9",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "00d78634fee4db6a",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5d7d8e9f4b50d3ea",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.ts",
+        "line": 41
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "<span className=\"badge\">{count > 0 ? `${label} (${count})` : label}</span>",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "58cad72aa22869cc",
+          "span": {
+            "col": 10,
+            "end_col": 84,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "6c495c231b13ec67",
+          "span": {
+            "col": 41,
+            "end_col": 42,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "aa25245dac1e49a1",
+          "span": {
+            "col": 43,
+            "end_col": 44,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "0932b046ad883f4d",
+          "span": {
+            "col": 43,
+            "end_col": 44,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/widget.tsx",
+        "line": 1
+      }
+    }
+  ]
+}
