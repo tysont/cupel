@@ -117,6 +117,22 @@ fn a_method_hashes_like_the_free_function_with_its_body_once_self_or_cls_is_drop
     assert_ne!(hash_of(source, "m.Till.odd"), free);
 }
 
+/// Python registers its generic producers one by one so that its `NormTree` override replaces
+/// the table-driven one; every syntactic fact but `ProjectInfo` (P1.9) must still have exactly
+/// one producer, so a generic producer added later cannot silently skip Python.
+#[test]
+fn python_has_one_producer_for_every_syntactic_fact_but_project_info() {
+    let languages = cupel_lang::LanguageRegistry::builtin();
+    let mut producers = cupel_core::ProducerRegistry::default();
+    languages.register_producers(&mut producers);
+    let python = cupel_lang::lang(languages.get(&"python".into()).unwrap().as_ref());
+    for kind in cupel_core::FactKind::SYNTACTIC {
+        let expected = usize::from(kind != cupel_core::FactKind::ProjectInfo);
+        let count = producers.producers_for(kind, &python).count();
+        assert_eq!(count, expected, "{kind}");
+    }
+}
+
 #[test]
 fn a_parameter_called_self_is_kept_outside_a_class() {
     assert_ne!(
