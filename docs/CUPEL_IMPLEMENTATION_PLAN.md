@@ -289,7 +289,7 @@ ADRs: [011](adr/CUPEL_DECISION_011.md) (language identity in core), [012](adr/CU
 
 #### P0.3 CLI framework and `describe`
 
-**Status:** not started
+**Status:** in progress (2026-10-10)
 
 - `clap` derive with every global flag from §6.3 on a shared struct; every verb from §6.2 declared (unimplemented verbs return exit 2 with a finding `kind: cli.not-implemented` and a `detail` naming the phase — remove this as verbs land).
 - Format auto-detection: JSON when stdout is not a terminal, text when it is; `--format` overrides; `CUPEL_FORMAT` env respected.
