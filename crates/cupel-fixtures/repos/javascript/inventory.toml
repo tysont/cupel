@@ -26,7 +26,7 @@ file = "src/math.js"
 name = "math.add"
 
 [symbols.internal]
-not-applicable = "JavaScript modules have no package-level visibility: a name is exported or private to its module."
+not-applicable = "JavaScript has no package-level visibility: a top-level name is exported (public) or private to its module, and `#name` class members are private."
 
 [symbols.private]
 file = "src/shapes/geometry.js"
