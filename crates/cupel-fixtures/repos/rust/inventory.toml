@@ -73,3 +73,33 @@ not-applicable = "Rust has no conditional operator; `if` is an expression and is
 
 [decisions.catch]
 not-applicable = "Rust has no exception handlers; errors are values, and `?` is an early return."
+
+[norm-tree.rename]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::sum_after_charge"
+
+[norm-tree.literal]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_floor"
+
+[norm-tree.layout]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_laid_out"
+
+[norm-tree.operator]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_plus"
+
+[norm-tree.branch]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_capped"
+
+[norm-tree.call]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_product"

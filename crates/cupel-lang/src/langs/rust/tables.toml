@@ -15,3 +15,32 @@ modifier_default = "internal"
 # `else if` is an `if_expression` inside the `else_clause` of the branch it continues.
 [decisions]
 chain_parents = ["else_clause"]
+
+[normalize]
+identifiers = [
+  "identifier",
+  "field_identifier",
+  "type_identifier",
+  "shorthand_field_identifier",
+  "lifetime",
+]
+literals = [
+  "integer_literal",
+  "float_literal",
+  "string_literal",
+  "raw_string_literal",
+  "char_literal",
+  "boolean_literal",
+]
+# Attributes and visibility say nothing about what a function does.
+erase = ["attribute_item", "inner_attribute_item", "visibility_modifier"]
+# `self.items.push(x)` keeps `push`; `self.items` is a receiver and normalizes as usual.
+receivers = ["value"]
+
+[[normalize.calls]]
+kind = "call_expression"
+callee = "function"
+
+[[normalize.calls]]
+kind = "macro_invocation"
+callee = "macro"

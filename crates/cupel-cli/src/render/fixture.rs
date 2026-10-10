@@ -26,6 +26,7 @@ fn tier(value: u8) -> Tier {
 /// A finding with every field set; `n` varies the distinctive values.
 pub fn finding(n: u32, check: &str, kind: &str, severity: Severity) -> Finding {
     let id = format!("fnd_{:06x}", 0x7c_2e1a + n);
+    let symbol = format!("sh_{:016x}", 0x4b1d_9e0c_4b1d_9e00_u64 + u64::from(n));
     Finding {
         id: id.parse().expect("valid finding ID"),
         check: CheckId::from(check),
@@ -35,9 +36,7 @@ pub fn finding(n: u32, check: &str, kind: &str, severity: Severity) -> Finding {
         tier: tier(3),
         symbol: Some(Symbol {
             display: format!("exonym::rewrite::Planner::push_limit_{n}"),
-            hash: format!("sh_4b1d{n:02x}")
-                .parse()
-                .expect("valid symbol hash"),
+            hash: symbol.parse().expect("valid symbol hash"),
             lang: LangId::from("rust"),
         }),
         location: Some(Location {
@@ -69,7 +68,7 @@ pub fn finding(n: u32, check: &str, kind: &str, severity: Severity) -> Finding {
                 "covering_tests": ["pushes_through_sort"],
             })),
         },
-        repro: format!("cupel check --only {check} --symbols sh_4b1d{n:02x} --seed 42"),
+        repro: format!("cupel check --only {check} --symbols {symbol} --seed 42"),
         suppress: format!("cupel suppress {id} --reason '…'"),
         new_since_baseline: n.is_multiple_of(2),
         suppressed: n == 2,

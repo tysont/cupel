@@ -49,6 +49,7 @@ mod generic;
 mod langs;
 mod language;
 mod namespace;
+pub mod normalize;
 mod parse;
 mod producer;
 mod query;

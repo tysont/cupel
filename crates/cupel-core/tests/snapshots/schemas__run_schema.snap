@@ -2012,9 +2012,9 @@ expression: pretty(&schema)
       ]
     },
     "SymbolHash": {
-      "description": "`sh_` followed by lowercase hex",
+      "description": "`sh_` followed by sixteen lowercase hex digits",
       "type": "string",
-      "pattern": "^sh_[0-9a-f]+$"
+      "pattern": "^sh_[0-9a-f]{16}$"
     },
     "Tier": {
       "description": "Evidence tier: 0 structural metric … 6 proof.",

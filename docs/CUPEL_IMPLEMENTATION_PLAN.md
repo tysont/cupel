@@ -469,7 +469,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.4 Fact: `NormTree` and structural hash
 
-**Status:** not started
+**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-025](adr/CUPEL_DECISION_025.md)
 
 - `TableNormalize` over normalize rules in `tables.toml` → `NormTree`: locals, fields, literals, keywords → generic markers; call names, operators, tree shape preserved (dryer's rules, design §3). Hand-written overrides only for constructs the rules cannot express (Python `self`, Rust macros, Go receivers), each justified by a comment and still passing the same inventory.
 - `NormTree` serialization is language-independent so `ecma`-family symbols compare across JS and TS.

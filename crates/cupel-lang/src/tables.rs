@@ -13,6 +13,8 @@ pub struct Tables {
     pub namespace: NamespaceRules,
     pub visibility: VisibilityRules,
     pub decisions: DecisionRules,
+    /// Present when the language has a `NormTree` producer.
+    pub normalize: Option<NormalizeRules>,
 }
 
 impl Tables {
@@ -205,4 +207,40 @@ impl Weight {
             nests,
         }
     }
+}
+
+/// `[normalize]`: how `TableNormalize` turns a symbol's syntax tree into a `NormTree`
+/// (ADR-025). Comments are always dropped, as is the symbol's own name.
+///
+/// ```toml
+/// [normalize]
+/// identifiers = ["identifier", "field_identifier"]  # named kinds that become `$id`
+/// literals = ["integer_literal", "string_literal"]  # named kinds that become `$lit`
+/// erase = ["attribute_item"]                        # kinds dropped with their subtrees
+/// flatten = []                                      # kinds replaced by their children
+/// operators = []                                    # word tokens kept as operators (`and`)
+/// receivers = ["value"]                             # callee fields that hold a receiver
+///
+/// [[normalize.calls]]                               # identifiers in `callee` keep their text
+/// kind = "call_expression"
+/// callee = "function"
+/// ```
+#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct NormalizeRules {
+    pub identifiers: Vec<String>,
+    pub literals: Vec<String>,
+    pub erase: Vec<String>,
+    pub flatten: Vec<String>,
+    pub operators: Vec<String>,
+    pub receivers: Vec<String>,
+    pub calls: Vec<CallRule>,
+}
+
+/// A node kind whose `callee` field names the function it calls.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CallRule {
+    pub kind: String,
+    pub callee: String,
 }

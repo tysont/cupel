@@ -53,7 +53,7 @@ fn design_finding() -> Value {
         "id": "fnd_7c2e1a",
         "check": "tests.mutation", "kind": "mutant.survived",
         "severity": "fail", "confidence": 0.95, "tier": 3,
-        "symbol": {"display": "exonym::rewrite::Planner::push_limit", "hash": "sh_4b1d9e0c", "lang": "rust"},
+        "symbol": {"display": "exonym::rewrite::Planner::push_limit", "hash": "sh_4b1d9e0c4b1d9e0c", "lang": "rust"},
         "location": {"file": "src/rewrite/planner.rs", "line": 142, "col": 21, "end_line": 142, "end_col": 23},
         "title": "Mutant survived: `<=` → `<` at planner.rs:142",
         "detail": "No test distinguishes limit == offset from limit < offset.",
@@ -63,7 +63,7 @@ fn design_finding() -> Value {
                    "summary": "Add a test where limit == offset asserting the boundary.",
                    "hints": {"nearest_test_file": "tests/rewrite/limit_tests.rs",
                              "covering_tests": ["pushes_through_sort"]}},
-        "repro": "cupel check --only tests.mutation --symbols sh_4b1d9e0c --seed 42",
+        "repro": "cupel check --only tests.mutation --symbols sh_4b1d9e0c4b1d9e0c --seed 42",
         "suppress": "cupel suppress fnd_7c2e1a --reason '…'",
         "new_since_baseline": true, "suppressed": false
     })

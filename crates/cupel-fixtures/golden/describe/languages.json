@@ -48,7 +48,8 @@
         ],
         "facts": [
           "symbols",
-          "decisions"
+          "decisions",
+          "norm-tree"
         ],
         "family": "rust",
         "id": "rust",

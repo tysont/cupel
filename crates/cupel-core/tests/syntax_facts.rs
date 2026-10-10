@@ -123,7 +123,7 @@ fn norm_tree_payload_carries_symbol_hash() {
     let json = assert_round_trip(&NormTree {
         symbols: vec![NormalizedSymbol {
             symbol: key(),
-            hash: "sh_4b1d9e0c".parse().unwrap(),
+            hash: "sh_4b1d9e0c4b1d9e0c".parse().unwrap(),
             root: NormNode {
                 label: "function".into(),
                 children: vec![NormNode {
@@ -133,7 +133,7 @@ fn norm_tree_payload_carries_symbol_hash() {
             },
         }],
     });
-    assert_eq!(json["symbols"][0]["hash"], json!("sh_4b1d9e0c"));
+    assert_eq!(json["symbols"][0]["hash"], json!("sh_4b1d9e0c4b1d9e0c"));
     assert_eq!(
         json["symbols"][0]["root"]["children"][0]["label"],
         json!("$local")
@@ -150,7 +150,7 @@ fn mutation_sites_payload_shape() {
                 set: OperatorSet::Default,
                 from: "<=".into(),
                 to: vec!["<".into(), ">".into()],
-                site_hash: "a1b2c3".parse().unwrap(),
+                site_hash: "a1b2c3d4e5f60718".parse().unwrap(),
                 span: span(12),
             }],
         }],
@@ -158,7 +158,7 @@ fn mutation_sites_payload_shape() {
     let site = &json["symbols"][0]["sites"][0];
     assert_eq!(site["operator"], json!("relational"));
     assert_eq!(site["set"], json!("default"));
-    assert_eq!(site["site_hash"], json!("a1b2c3"));
+    assert_eq!(site["site_hash"], json!("a1b2c3d4e5f60718"));
 }
 
 #[test]

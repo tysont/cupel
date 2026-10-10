@@ -235,8 +235,8 @@
       "body": {
         "col": 40,
         "end_col": 2,
-        "end_line": 12,
-        "line": 10
+        "end_line": 13,
+        "line": 11
       },
       "display": "balance",
       "file": "src/lib.rs",
@@ -247,8 +247,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 12,
-        "line": 10
+        "end_line": 13,
+        "line": 11
       },
       "visibility": "public"
     },
@@ -256,8 +256,8 @@
       "body": {
         "col": 36,
         "end_col": 2,
-        "end_line": 16,
-        "line": 14
+        "end_line": 17,
+        "line": 15
       },
       "display": "audit_limit",
       "file": "src/lib.rs",
@@ -268,8 +268,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 16,
-        "line": 14
+        "end_line": 17,
+        "line": 15
       },
       "visibility": "internal"
     },
@@ -277,8 +277,8 @@
       "body": {
         "col": 43,
         "end_col": 2,
-        "end_line": 20,
-        "line": 18
+        "end_line": 21,
+        "line": 19
       },
       "display": "scale",
       "file": "src/lib.rs",
@@ -289,8 +289,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 20,
-        "line": 18
+        "end_line": 21,
+        "line": 19
       },
       "visibility": "private"
     },
@@ -333,6 +333,153 @@
         "end_col": 2,
         "end_line": 5,
         "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 50,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 3
+      },
+      "display": "twins::net_total",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 61,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 8
+      },
+      "display": "twins::sum_after_charge",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "sum_after_charge",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 56,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "display": "twins::net_total_floor",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_floor",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 59,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 18
+      },
+      "display": "twins::net_total_laid_out",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_laid_out",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 18
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 55,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 30
+      },
+      "display": "twins::net_total_plus",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_plus",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 30
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 35
+      },
+      "display": "twins::net_total_capped",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_capped",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 35
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 58,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 46
+      },
+      "display": "twins::net_total_product",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_product",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 46
       },
       "visibility": "public"
     },

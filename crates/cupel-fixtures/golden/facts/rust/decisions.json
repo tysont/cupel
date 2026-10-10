@@ -151,7 +151,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 10
+        "line": 11
       }
     },
     {
@@ -159,7 +159,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 14
+        "line": 15
       }
     },
     {
@@ -167,7 +167,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 18
+        "line": 19
       }
     },
     {
@@ -184,6 +184,117 @@
         "col": 1,
         "file": "src/report/mod.rs",
         "line": 3
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 30
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 35
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 46
       }
     },
     {

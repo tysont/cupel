@@ -84,9 +84,9 @@ expression: pretty(&schema)
       ]
     },
     "SiteHash": {
-      "description": "lowercase hex",
+      "description": "sixteen lowercase hex digits",
       "type": "string",
-      "pattern": "^[0-9a-f]+$"
+      "pattern": "^[0-9a-f]{16}$"
     },
     "Span": {
       "description": "A 1-based range within one file.",
