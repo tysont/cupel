@@ -304,7 +304,7 @@ fn execute(
     let envelope = match &cli.verb {
         None => Err(CupelError::missing_verb(verb_names())),
         Some(VerbArgs::Describe(args)) => {
-            let described = describe::run(run, args)?;
+            let described = describe::run(run, args, writer.root())?;
             if dry_run {
                 // `describe` runs nothing and writes nothing; its plan is empty.
                 Ok(plan(run, RunPlan::default(), writer, events))

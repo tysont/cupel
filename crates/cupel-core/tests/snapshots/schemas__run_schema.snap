@@ -368,6 +368,21 @@ expression: pretty(&schema)
         "skipped"
       ]
     },
+    "CheckSupport": {
+      "type": "object",
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "support": {
+          "$ref": "#/$defs/SupportDescription"
+        }
+      },
+      "required": [
+        "check",
+        "support"
+      ]
+    },
     "CliDescription": {
       "description": "Verbs, global flags, exit codes, schema URLs, and configuration precedence.",
       "type": "object",
@@ -648,6 +663,62 @@ expression: pretty(&schema)
           "required": [
             "subject"
           ]
+        },
+        {
+          "description": "`cupel describe language <id>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "language"
+            }
+          },
+          "$ref": "#/$defs/LanguageDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe languages`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "languages"
+            }
+          },
+          "$ref": "#/$defs/LanguagesDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe fact <kind>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "fact"
+            }
+          },
+          "$ref": "#/$defs/FactDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe matrix`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "matrix"
+            }
+          },
+          "$ref": "#/$defs/MatrixDescription",
+          "required": [
+            "subject"
+          ]
         }
       ]
     },
@@ -712,6 +783,58 @@ expression: pretty(&schema)
         "stability"
       ]
     },
+    "FactDescription": {
+      "description": "One fact kind: its payload version and schema, its producers per language, and the checks\nthat consume it.",
+      "type": "object",
+      "properties": {
+        "consumers": {
+          "description": "Checks that need or want this fact.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CheckId"
+          }
+        },
+        "kind": {
+          "$ref": "#/$defs/FactKind"
+        },
+        "producers": {
+          "description": "Every registered language, with its producers of this fact (empty when it has none).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LanguageProducers"
+          }
+        },
+        "schema": {
+          "description": "The payload's JSON Schema; null until the payload type exists.",
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true
+        },
+        "syntactic": {
+          "description": "Whether language producers make it from the syntax tree.",
+          "type": "boolean"
+        },
+        "version": {
+          "description": "The payload's `Fact::VERSION`; null until the payload type exists.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "consumers",
+        "kind",
+        "producers",
+        "schema",
+        "syntactic",
+        "version"
+      ]
+    },
     "FactKind": {
       "description": "One row of the fact catalog (design §8.3.2). Adding a kind requires an ADR.",
       "type": "string",
@@ -736,6 +859,25 @@ expression: pretty(&schema)
         "race-reports",
         "analyzer-report",
         "divergence-results"
+      ]
+    },
+    "FactProducers": {
+      "description": "The producers registered for one fact kind, in selection order.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/FactKind"
+        },
+        "producers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProducerDescription"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "producers"
       ]
     },
     "Finding": {
@@ -923,9 +1065,124 @@ expression: pretty(&schema)
         "sha"
       ]
     },
+    "LangFamily": {
+      "description": "A family of languages whose symbols are comparable, such as `ecma` for JavaScript and\nTypeScript (ADR-011).",
+      "type": "string"
+    },
     "LangId": {
       "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
       "type": "string"
+    },
+    "LanguageDescription": {
+      "description": "One language: identity, the facts it produces and by which producers, and which checks can\ntherefore run for it (design §8.4.2).",
+      "type": "object",
+      "properties": {
+        "checks": {
+          "description": "Every registered check and whether it can run for this language.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CheckSupport"
+          }
+        },
+        "extensions": {
+          "description": "With the leading dot, such as `.rs`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "facts": {
+          "description": "Every fact kind the language has a producer for, in catalog order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactProducers"
+          }
+        },
+        "family": {
+          "$ref": "#/$defs/LangFamily"
+        },
+        "id": {
+          "$ref": "#/$defs/LangId"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        }
+      },
+      "required": [
+        "checks",
+        "extensions",
+        "facts",
+        "family",
+        "id",
+        "stability"
+      ]
+    },
+    "LanguageProducers": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "producers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProducerDescription"
+          }
+        }
+      },
+      "required": [
+        "lang",
+        "producers"
+      ]
+    },
+    "LanguageSummary": {
+      "type": "object",
+      "properties": {
+        "extensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "facts": {
+          "description": "The fact kinds the language has a producer for, in catalog order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        },
+        "family": {
+          "$ref": "#/$defs/LangFamily"
+        },
+        "id": {
+          "$ref": "#/$defs/LangId"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        }
+      },
+      "required": [
+        "extensions",
+        "facts",
+        "family",
+        "id",
+        "stability"
+      ]
+    },
+    "LanguagesDescription": {
+      "description": "Every language, one line each.",
+      "type": "object",
+      "properties": {
+        "languages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LanguageSummary"
+          }
+        }
+      },
+      "required": [
+        "languages"
+      ]
     },
     "Location": {
       "description": "A span in a file. Paths are relative to the repository root; lines and columns are 1-based.",
@@ -967,6 +1224,55 @@ expression: pretty(&schema)
         "end_line",
         "file",
         "line"
+      ]
+    },
+    "MatrixCell": {
+      "type": "object",
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "support": {
+          "$ref": "#/$defs/SupportDescription"
+        }
+      },
+      "required": [
+        "check",
+        "lang",
+        "support"
+      ]
+    },
+    "MatrixDescription": {
+      "description": "Checks × languages (design §8.3.5): derived from check needs and registered producers.",
+      "type": "object",
+      "properties": {
+        "cells": {
+          "description": "One cell per check and language, ordered by check, then language.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MatrixCell"
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CheckId"
+          }
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LangId"
+          }
+        }
+      },
+      "required": [
+        "cells",
+        "checks",
+        "languages"
       ]
     },
     "NextAction": {
@@ -1148,6 +1454,33 @@ expression: pretty(&schema)
         "diff",
         "path"
       ]
+    },
+    "ProducerDescription": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/CostClass"
+        },
+        "id": {
+          "$ref": "#/$defs/ProducerId"
+        },
+        "needs": {
+          "description": "Facts the producer consumes.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        }
+      },
+      "required": [
+        "cost",
+        "id",
+        "needs"
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
     },
     "RunId": {
       "description": "A run ID: `run_` followed by a ULID.",
@@ -1586,6 +1919,74 @@ expression: pretty(&schema)
         "new",
         "resolved",
         "suppressed"
+      ]
+    },
+    "SupportDescription": {
+      "description": "A [`Support`] value as `describe` reports it.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "const": "supported"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        {
+          "description": "No producer can make this fact for the language.",
+          "type": "object",
+          "properties": {
+            "fact": {
+              "$ref": "#/$defs/FactKind"
+            },
+            "status": {
+              "type": "string",
+              "const": "unsupported"
+            }
+          },
+          "required": [
+            "fact",
+            "status"
+          ]
+        },
+        {
+          "description": "A producer's tool is missing here.",
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "const": "unavailable"
+            },
+            "tool": {
+              "$ref": "#/$defs/ToolId"
+            }
+          },
+          "required": [
+            "status",
+            "tool"
+          ]
+        },
+        {
+          "description": "A producer needs this configuration key set.",
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "const": "unconfigured"
+            }
+          },
+          "required": [
+            "key",
+            "status"
+          ]
+        }
       ]
     },
     "Symbol": {

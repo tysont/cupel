@@ -433,13 +433,13 @@ ADRs: [021](adr/CUPEL_DECISION_021.md) (detection, generated `cupel.toml`, previ
 
 **Goal:** `cupel-lang` with the `Language` trait (design §8.4.1), the generic query-driven producers, and the per-language `langs/<id>/` specs for JavaScript, TypeScript, Rust, Go, and Python — producing every syntactic fact in design §8.3.2; structural hashing; a content-hash parse cache; a parallel tree walk; and the per-fact conformance suites that make each producer an enforceable contract.
 
-**Status:** not started
+**Status:** in progress (2026-10-10)
 
 Each step below delivers **one fact kind** through a generic producer plus any hand-written overrides, for all five languages, before moving on (§2.8). Fixture repos under `cupel-fixtures/repos/{javascript,typescript,rust,go,python}/` are created in P1.1 and grow with each step; every step adds `cupel-fixtures/conformance/<fact>.toml` and maps its constructs in each language's `inventory.toml`. By the end of P1 the support matrix for the P2 checks is fully `supported` for all five languages, and that is verified by `describe matrix`.
 
 #### P1.1 Language trait, spec, generic-producer scaffold, grammars, walk, cache, conformance harness
 
-**Status:** not started
+**Status:** in progress (2026-10-10) · [ADR-023](adr/CUPEL_DECISION_023.md)
 
 - `Language` trait exactly as design §8.4.1; `LangId`, `LangFamily`; language registry by extension; `grammar(path)` selecting among a language's grammars (`javascript`: js/jsx; `typescript`: typescript/tsx); `register()` attaching producers to the `ProducerRegistry` from P0.2.
 - `LanguageSpec` loader: `queries/*.scm` embedded with `include_str!`, `tables.toml` parsed at startup once; a test compiles every `.scm` against its grammar and checks that every capture name a generic producer expects is present.

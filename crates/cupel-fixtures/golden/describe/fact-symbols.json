@@ -1,0 +1,224 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "consumers": [],
+    "kind": "symbols",
+    "producers": [
+      {
+        "lang": "go",
+        "producers": []
+      },
+      {
+        "lang": "javascript",
+        "producers": []
+      },
+      {
+        "lang": "python",
+        "producers": []
+      },
+      {
+        "lang": "rust",
+        "producers": []
+      },
+      {
+        "lang": "typescript",
+        "producers": []
+      }
+    ],
+    "schema": {
+      "$defs": {
+        "LangId": {
+          "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
+          "type": "string"
+        },
+        "Span": {
+          "description": "A 1-based range within one file.",
+          "properties": {
+            "col": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "end_col": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "end_line": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "line": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "col",
+            "end_col",
+            "end_line",
+            "line"
+          ],
+          "type": "object"
+        },
+        "SymbolDef": {
+          "description": "One function, method, or named closure.",
+          "properties": {
+            "body": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Span"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The body, when the symbol has one separate from its signature."
+            },
+            "display": {
+              "description": "`namespace::name`.",
+              "type": "string"
+            },
+            "file": {
+              "type": "string"
+            },
+            "kind": {
+              "$ref": "#/$defs/SymbolKind"
+            },
+            "lang": {
+              "$ref": "#/$defs/LangId"
+            },
+            "name": {
+              "type": "string"
+            },
+            "namespace": {
+              "description": "Enclosing namespace, such as `module::Type`; empty at top level.",
+              "type": "string"
+            },
+            "span": {
+              "$ref": "#/$defs/Span"
+            },
+            "visibility": {
+              "$ref": "#/$defs/Visibility"
+            }
+          },
+          "required": [
+            "body",
+            "display",
+            "file",
+            "kind",
+            "lang",
+            "name",
+            "namespace",
+            "span",
+            "visibility"
+          ],
+          "type": "object"
+        },
+        "SymbolKind": {
+          "enum": [
+            "function",
+            "method",
+            "closure"
+          ],
+          "type": "string"
+        },
+        "Visibility": {
+          "oneOf": [
+            {
+              "enum": [
+                "public",
+                "private"
+              ],
+              "type": "string"
+            },
+            {
+              "const": "internal",
+              "description": "Visible within a package, crate, or module tree but not exported.",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "$id": "https://cupel.dev/schema/v1/fact/symbols.json",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "Functions and methods in scope.",
+      "properties": {
+        "symbols": {
+          "items": {
+            "$ref": "#/$defs/SymbolDef"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "symbols"
+      ],
+      "title": "Symbols",
+      "type": "object",
+      "x-cupel-fact-version": 1
+    },
+    "subject": "fact",
+    "syntactic": true,
+    "version": 1
+  },
+  "exit_code": 0,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

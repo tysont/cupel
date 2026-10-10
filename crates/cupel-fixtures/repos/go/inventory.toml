@@ -1,0 +1,2 @@
+# Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
+# repository that exhibits it, or marks it not-applicable with a reason.

@@ -179,10 +179,6 @@ fn describe_unknown_subject_is_a_usage_error_listing_subjects() {
 #[test]
 fn describe_subjects_from_later_steps_are_not_implemented_yet() {
     for (args, step) in [
-        (vec!["describe", "matrix"], "P1.1"),
-        (vec!["describe", "languages"], "P1.1"),
-        (vec!["describe", "language", "rust"], "P1.1"),
-        (vec!["describe", "fact", "symbols"], "P1.1"),
         (vec!["describe", "finding", "mutant.survived"], "P2.1"),
         (vec!["describe", "static.complexity"], "P2.1"),
         (vec!["describe", "--agent"], "P8.3"),
@@ -277,4 +273,139 @@ fn exit_codes_are_stable_and_everything_else_is_experimental() {
         assert_eq!(code["stability"], json!("stable"));
     }
     assert_eq!(description["stability"], json!("experimental"));
+}
+
+#[test]
+fn describe_languages_lists_every_language_with_its_family_and_extensions() {
+    let outcome = run(["describe", "languages"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let description = outcome.envelope()["description"].clone();
+    assert_eq!(description["subject"], json!("languages"));
+    let languages = description["languages"].as_array().unwrap();
+    let ids: Vec<&str> = languages
+        .iter()
+        .map(|language| language["id"].as_str().unwrap())
+        .collect();
+    assert_eq!(ids, ["go", "javascript", "python", "rust", "typescript"]);
+    let typescript = &languages[4];
+    assert_eq!(typescript["family"], json!("ecma"));
+    assert_eq!(
+        typescript["extensions"],
+        json!([".ts", ".mts", ".cts", ".tsx"])
+    );
+    assert_eq!(typescript["stability"], json!("experimental"));
+    assert!(typescript["facts"].is_array());
+}
+
+#[test]
+fn describe_language_shows_identity_facts_and_check_support() {
+    let outcome = run(["describe", "language", "rust"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let description = outcome.envelope()["description"].clone();
+    assert_eq!(description["subject"], json!("language"));
+    assert_eq!(description["id"], json!("rust"));
+    assert_eq!(description["family"], json!("rust"));
+    assert_eq!(description["extensions"], json!([".rs"]));
+    assert!(description["facts"].is_array());
+    assert_eq!(description["checks"], json!([]));
+}
+
+#[test]
+fn describe_language_with_an_unknown_id_is_a_usage_error_listing_languages() {
+    let outcome = run(["describe", "language", "cobol"]);
+    assert_eq!(outcome.code, 2);
+    let finding = outcome.finding();
+    assert_eq!(finding["kind"], json!("cli.usage"));
+    assert_eq!(
+        finding["evidence"]["valid"],
+        json!(["go", "javascript", "python", "rust", "typescript"])
+    );
+    assert_eq!(finding["evidence"]["value"], json!("cobol"));
+}
+
+#[test]
+fn describe_fact_shows_version_schema_and_producers_for_every_language() {
+    let outcome = run(["describe", "fact", "norm-tree"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let description = outcome.envelope()["description"].clone();
+    assert_eq!(description["subject"], json!("fact"));
+    assert_eq!(description["kind"], json!("norm-tree"));
+    assert_eq!(description["syntactic"], json!(true));
+    assert!(description["version"].as_u64().is_some());
+    assert_eq!(
+        description["schema"]["$id"],
+        json!("https://cupel.dev/schema/v1/fact/norm-tree.json")
+    );
+    let langs: Vec<&str> = description["producers"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|entry| entry["lang"].as_str().unwrap())
+        .collect();
+    assert_eq!(langs, ["go", "javascript", "python", "rust", "typescript"]);
+    assert_eq!(description["consumers"], json!([]));
+}
+
+#[test]
+fn describe_fact_without_a_payload_type_yet_has_no_version_or_schema() {
+    let description = run(["describe", "fact", "coverage-map"]).envelope()["description"].clone();
+    assert_eq!(description["syntactic"], json!(false));
+    assert_eq!(description["version"], Value::Null);
+    assert_eq!(description["schema"], Value::Null);
+}
+
+#[test]
+fn describe_fact_with_an_unknown_kind_is_a_usage_error_listing_kinds() {
+    let outcome = run(["describe", "fact", "vibes"]);
+    assert_eq!(outcome.code, 2);
+    let finding = outcome.finding();
+    let valid = finding["evidence"]["valid"].as_array().unwrap();
+    assert_eq!(valid.len(), cupel_core::FactKind::ALL.len());
+    assert_eq!(valid[0], json!("symbols"));
+}
+
+#[test]
+fn describe_matrix_has_every_language_and_no_rows_without_checks() {
+    let outcome = run(["describe", "matrix"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let description = outcome.envelope()["description"].clone();
+    assert_eq!(description["subject"], json!("matrix"));
+    assert_eq!(
+        description["languages"],
+        json!(["go", "javascript", "python", "rust", "typescript"])
+    );
+    assert_eq!(description["checks"], json!([]));
+    assert_eq!(description["cells"], json!([]));
+}
+
+#[test]
+fn describe_matrix_renders_as_text() {
+    let outcome = run(["describe", "matrix", "--format", "text"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    insta::assert_snapshot!(support::redacted_text(&outcome.stdout));
+}
+
+#[test]
+fn describe_language_renders_as_text() {
+    let outcome = run(["describe", "language", "typescript", "--format", "text"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    insta::assert_snapshot!(support::redacted_text(&outcome.stdout));
+}
+
+#[test]
+fn describe_subjects_that_need_an_argument_say_which() {
+    for (args, subject) in [
+        (vec!["describe", "language"], "describe language"),
+        (vec!["describe", "fact"], "describe fact"),
+    ] {
+        let outcome = run(&args);
+        assert_eq!(outcome.code, 2, "{args:?}");
+        let finding = outcome.finding();
+        assert_eq!(finding["kind"], json!("cli.usage"), "{args:?}");
+        assert!(
+            finding["title"].as_str().unwrap().contains(subject),
+            "{args:?}: {}",
+            finding["title"]
+        );
+    }
 }

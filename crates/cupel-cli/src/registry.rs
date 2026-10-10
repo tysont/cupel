@@ -200,13 +200,13 @@ fn doctor_verb() -> CommandDescription {
 fn describe_verb() -> CommandDescription {
     verb(
         "describe",
-        "Describe the CLI, a verb, a check, a finding kind, or a schema.",
+        "Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema.",
         None,
         vec![
             positional(
                 "SUBJECT",
                 ValueType::String,
-                "What to describe: a verb (optionally with a sub-verb), or `schema <name>`.",
+                "What to describe: a verb (optionally with a sub-verb), `languages`, `language <id>`, `fact <kind>`, `matrix`, or `schema <name>`.",
             )
             .optional()
             .repeated()
@@ -236,6 +236,26 @@ fn describe_verb() -> CommandDescription {
             example(
                 "cupel describe schema run",
                 "The envelope's JSON Schema.",
+                ExitCode::Pass,
+            ),
+            example(
+                "cupel describe languages",
+                "Every language, one line each.",
+                ExitCode::Pass,
+            ),
+            example(
+                "cupel describe language rust",
+                "A language's extensions, family, facts, and checks.",
+                ExitCode::Pass,
+            ),
+            example(
+                "cupel describe fact symbols",
+                "A fact's schema, version, and producers per language.",
+                ExitCode::Pass,
+            ),
+            example(
+                "cupel describe matrix",
+                "Which checks can run for which languages, and why not.",
                 ExitCode::Pass,
             ),
             example(

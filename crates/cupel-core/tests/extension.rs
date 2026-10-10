@@ -663,3 +663,24 @@ fn a_check_context_carries_a_scratch_writer_for_its_run() {
     };
     assert_eq!(ctx.writer.area(), writer.work_dir(&run));
 }
+
+#[test]
+fn a_registered_producer_produces_its_fact_with_the_type_erased() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut registry = ProducerRegistry::default();
+    registry.register::<Decisions, _>(producer("lang.rust", only(&["rust"]), &[]));
+    let producer = registry
+        .producers_for(FactKind::Decisions, &rust())
+        .next()
+        .unwrap();
+    let ctx = produce_ctx(dir.path(), Cancellation::new());
+
+    let fact = producer
+        .produce(&ctx, &Scope::default(), &mut Vec::new())
+        .unwrap();
+
+    assert_eq!(fact.kind(), FactKind::Decisions);
+    assert_eq!(fact.to_json(), json!({ "symbols": [] }));
+    assert!(fact.downcast_ref::<Symbols>().is_none());
+    assert_eq!(fact.downcast::<Decisions>(), Some(Decisions::default()));
+}

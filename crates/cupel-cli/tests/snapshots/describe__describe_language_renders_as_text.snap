@@ -1,0 +1,22 @@
+---
+source: crates/cupel-cli/tests/describe.rs
+expression: "support::redacted_text(&outcome.stdout)"
+---
+cupel describe: pass (exit 0)
+
+language typescript · family ecma · .ts .mts .cts .tsx · experimental
+
+facts
+  none
+
+checks
+  none registered
+
+summary   0 findings · fail 0 · warn 0 · info 0 · new 0 · resolved 0 · suppressed 0
+
+run       [run id, start, duration, seed]
+depth     standard
+config    from flags, defaults
+          depth: standard
+          format: text
+cupel     [version] · https://cupel.dev/schema/v1/run.json
