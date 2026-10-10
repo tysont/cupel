@@ -287,3 +287,21 @@ fn files_outside_any_package_are_grouped_under_the_repository_root() {
         ]
     );
 }
+
+#[test]
+fn module_names_are_case_sensitive_even_where_the_file_system_is_not() {
+    let dir = tree(&[
+        ("Cargo.toml", "[package]\nname = \"cased\"\n"),
+        ("src/lib.rs", "mod Account;\nmod ledger;\n"),
+        ("src/account.rs", ""),
+        ("src/ledger.rs", ""),
+    ]);
+    let graph: ModuleGraph = produce("rust", dir.path());
+    assert_eq!(
+        rows(&graph),
+        [
+            row(".", "src/lib.rs", 1, "Account", "unresolved", true),
+            row(".", "src/lib.rs", 2, "ledger", "src/ledger.rs", true),
+        ]
+    );
+}

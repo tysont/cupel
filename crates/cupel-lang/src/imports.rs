@@ -14,10 +14,10 @@
 //!   the declaring file (Rust `mod a;`).
 //! - `@scope` + `@scope.name` (optional) on inline modules, so the resolver knows which module
 //!   an import inside one is written in.
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 use std::fs;
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, PoisonError};
 
 use cupel_core::syntax::ModuleGraph;
 use cupel_core::{
@@ -120,11 +120,29 @@ fn unquote(text: &str) -> &str {
 
 /// What a resolver may look at: the scope, and any file of the language under the root
 /// (module trees reach files outside the scope).
+///
+/// Paths are relative to the root and compare exactly, by the names directories list, so
+/// `src/Account.rs` does not exist beside `src/account.rs` even on a file system that ignores
+/// case: module systems and other machines do not. Listings are read once per directory.
 pub struct Imports<'a> {
     root: &'a Path,
     language: &'a dyn Language,
     cache: &'a ParseCache,
     scope: Vec<String>,
+    listings: Mutex<HashMap<String, Arc<Listing>>>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Entry {
+    File,
+    Dir,
+}
+
+/// The names of one directory's files and subdirectories (symbolic links followed).
+#[derive(Default)]
+struct Listing {
+    files: BTreeSet<String>,
+    dirs: BTreeSet<String>,
 }
 
 impl Imports<'_> {
@@ -137,47 +155,88 @@ impl Imports<'_> {
         &self.scope
     }
 
+    /// Whether `path` names a file, every component spelled as its directory lists it.
     pub fn is_file(&self, path: &str) -> bool {
-        self.root.join(path).is_file()
+        self.exists(path, Entry::File)
     }
 
+    /// Whether `path` names a directory, every component spelled as its directory lists it.
+    /// The root (`.` or empty) is one.
     pub fn is_dir(&self, path: &str) -> bool {
-        self.root.join(path).is_dir()
+        self.exists(path, Entry::Dir)
     }
 
     pub fn read(&self, path: &str) -> Option<String> {
+        if !self.is_file(path) {
+            return None;
+        }
         fs::read_to_string(self.root.join(path)).ok()
     }
 
     /// Subdirectories of `dir` (relative to the root), sorted.
     pub fn dirs_in(&self, dir: &str) -> Vec<String> {
-        let mut found: BTreeSet<String> = BTreeSet::new();
-        if let Ok(entries) = fs::read_dir(self.root.join(dir)) {
-            for entry in entries.flatten() {
-                if entry.file_type().is_ok_and(|t| t.is_dir())
-                    && let Some(name) = entry.file_name().to_str()
-                {
-                    found.insert(join(dir, name));
-                }
-            }
-        }
-        found.into_iter().collect()
+        self.listing(dir)
+            .dirs
+            .iter()
+            .map(|name| join(dir, name))
+            .collect()
     }
 
     /// Files directly in `dir` with `extension` (such as `.rs`), sorted.
     pub fn files_in(&self, dir: &str, extension: &str) -> Vec<String> {
-        let mut found: BTreeSet<String> = BTreeSet::new();
-        if let Ok(entries) = fs::read_dir(self.root.join(dir)) {
-            for entry in entries.flatten() {
-                if entry.file_type().is_ok_and(|t| t.is_file())
-                    && let Some(name) = entry.file_name().to_str()
-                    && name.ends_with(extension)
-                {
-                    found.insert(join(dir, name));
-                }
+        self.listing(dir)
+            .files
+            .iter()
+            .filter(|name| name.ends_with(extension))
+            .map(|name| join(dir, name))
+            .collect()
+    }
+
+    /// Whether `path` is an entry of kind `entry`, listed by exactly that name in its parent,
+    /// below directories each listed by exactly their names.
+    fn exists(&self, path: &str, entry: Entry) -> bool {
+        let Some(mut parts) = components(path) else {
+            return false;
+        };
+        let Some(last) = parts.pop() else {
+            return entry == Entry::Dir;
+        };
+        let mut dir = String::from(".");
+        for part in parts {
+            if !self.listing(&dir).dirs.contains(&part) {
+                return false;
             }
+            dir = join(&dir, &part);
         }
-        found.into_iter().collect()
+        let listing = self.listing(&dir);
+        match entry {
+            Entry::File => listing.files.contains(&last),
+            Entry::Dir => listing.dirs.contains(&last),
+        }
+    }
+
+    /// The listing of `dir`; empty when it is not a directory spelled exactly so.
+    fn listing(&self, dir: &str) -> Arc<Listing> {
+        let key = components(dir).map_or_else(String::new, |parts| parts.join("/"));
+        if let Some(listing) = self
+            .listings
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .get(&key)
+        {
+            return Arc::clone(listing);
+        }
+        let exact = key.is_empty() || self.is_dir(&key);
+        let listing = Arc::new(if exact {
+            Listing::read(&self.root.join(&key))
+        } else {
+            Listing::default()
+        });
+        self.listings
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .insert(key, Arc::clone(&listing));
+        listing
     }
 
     /// The imports of `path`, parsed through the cache; empty when it cannot be parsed.
@@ -192,6 +251,42 @@ impl Imports<'_> {
         .map(|parsed| file_imports(&parsed, self.language))
         .unwrap_or_default()
     }
+}
+
+impl Listing {
+    fn read(dir: &Path) -> Self {
+        let mut listing = Self::default();
+        for entry in fs::read_dir(dir).into_iter().flatten().flatten() {
+            let Some(name) = entry.file_name().to_str().map(str::to_owned) else {
+                continue;
+            };
+            let Ok(kind) = fs::metadata(entry.path()).map(|meta| meta.file_type()) else {
+                continue;
+            };
+            if kind.is_dir() {
+                listing.dirs.insert(name);
+            } else if kind.is_file() {
+                listing.files.insert(name);
+            }
+        }
+        listing
+    }
+}
+
+/// The components of a root-relative path, `.` segments dropped and `..` applied; `None` when
+/// it climbs above the root.
+fn components(path: &str) -> Option<Vec<String>> {
+    let mut parts: Vec<String> = Vec::new();
+    for part in path.split('/') {
+        match part {
+            "" | "." => {}
+            ".." => {
+                parts.pop()?;
+            }
+            part => parts.push(part.to_owned()),
+        }
+    }
+    Some(parts)
 }
 
 /// `dir/name`, or `name` at the root.
@@ -261,6 +356,7 @@ impl Producer<ModuleGraph> for ImportGraph {
                 .filter(|file| owns(self.language.as_ref(), file))
                 .cloned()
                 .collect(),
+            listings: Mutex::new(HashMap::new()),
         };
         let graph = (self.resolve)(&imports);
         ctx.cancel.checkpoint()?;

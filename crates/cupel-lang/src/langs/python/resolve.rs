@@ -18,8 +18,7 @@
 //!   target is the imported name's own file when it is a submodule, else the module's file;
 //!   a path that does not lead to a file is `Unresolved`. Names compare case-sensitively, as
 //!   Python's importer does, even on case-insensitive file systems.
-use std::cell::RefCell;
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 
 use cupel_core::syntax::{ImportEdge, ImportTarget, ModuleGraph, RootImports};
 use globset::Glob;
@@ -32,17 +31,16 @@ const MANIFESTS: [&str; 3] = ["pyproject.toml", "setup.py", "setup.cfg"];
 /// Resolves every import in scope.
 pub fn graph(imports: &Imports<'_>) -> ModuleGraph {
     let projects = projects(imports);
-    let layout = Layout::new(imports);
     let mut roots: BTreeMap<String, Vec<ImportEdge>> = projects
         .iter()
         .map(|project| (project.clone(), Vec::new()))
         .collect();
     for file in imports.scope() {
         let project = project_of(&projects, file).unwrap_or(".");
-        let search = import_roots(&layout, &projects, project, file);
+        let search = import_roots(imports, &projects, project, file);
         let edges = roots.entry(project.to_owned()).or_default();
         for import in &imports.of(file).imports {
-            edges.push(edge(&layout, &search, file, import));
+            edges.push(edge(imports, &search, file, import));
         }
     }
     ModuleGraph {
@@ -59,7 +57,7 @@ pub fn graph(imports: &Imports<'_>) -> ModuleGraph {
 }
 
 /// The edge one imported module or name contributes.
-fn edge(layout: &Layout<'_>, roots: &[String], file: &str, import: &RawImport) -> ImportEdge {
+fn edge(imports: &Imports<'_>, roots: &[String], file: &str, import: &RawImport) -> ImportEdge {
     let dots = import.specifier.len() - import.specifier.trim_start_matches('.').len();
     let segments: Vec<&str> = import.specifier[dots..]
         .split('.')
@@ -74,10 +72,10 @@ fn edge(layout: &Layout<'_>, roots: &[String], file: &str, import: &RawImport) -
     let target = if dots > 0 {
         (1..dots)
             .try_fold(dir_of(file), |dir, _| parent(&dir))
-            .and_then(|start| resolve_below(layout, &start, &segments, name))
+            .and_then(|start| resolve_below(imports, &start, &segments, name))
             .map_or(ImportTarget::Unresolved, |path| ImportTarget::File { path })
     } else {
-        absolute(layout, roots, &segments, name)
+        absolute(imports, roots, &segments, name)
     };
     ImportEdge {
         from: file.to_owned(),
@@ -90,7 +88,7 @@ fn edge(layout: &Layout<'_>, roots: &[String], file: &str, import: &RawImport) -
 
 /// Where an absolute module path leads: resolved in the first root that has its first segment.
 fn absolute(
-    layout: &Layout<'_>,
+    imports: &Imports<'_>,
     roots: &[String],
     segments: &[&str],
     name: Option<&str>,
@@ -98,11 +96,11 @@ fn absolute(
     let Some(first) = segments.first() else {
         return ImportTarget::Unresolved;
     };
-    let root = roots
-        .iter()
-        .find(|root| layout.is_file(root, &format!("{first}.py")) || layout.is_dir(root, first));
+    let root = roots.iter().find(|root| {
+        imports.is_file(&join(root, &format!("{first}.py"))) || imports.is_dir(&join(root, first))
+    });
     match root {
-        Some(root) => resolve_below(layout, root, segments, name)
+        Some(root) => resolve_below(imports, root, segments, name)
             .map_or(ImportTarget::Unresolved, |path| ImportTarget::File { path }),
         None => ImportTarget::External {
             package: (*first).to_owned(),
@@ -112,24 +110,24 @@ fn absolute(
 
 /// The file `from <segments> import <name>` (or `import <segments>`) names below `start`.
 fn resolve_below(
-    layout: &Layout<'_>,
+    imports: &Imports<'_>,
     start: &str,
     segments: &[&str],
     name: Option<&str>,
 ) -> Option<String> {
     let mut dir = start.to_owned();
-    let mut module = layout.package_file(&dir);
+    let mut module = package_file(imports, &dir);
     for (index, segment) in segments.iter().enumerate() {
         let file = format!("{segment}.py");
-        if !layout.is_dir(&dir, segment) {
-            return (layout.is_file(&dir, &file) && index + 1 == segments.len())
+        if !imports.is_dir(&join(&dir, segment)) {
+            return (imports.is_file(&join(&dir, &file)) && index + 1 == segments.len())
                 .then(|| join(&dir, &file));
         }
         let child = join(&dir, segment);
-        match layout.package_file(&child) {
+        match package_file(imports, &child) {
             Some(init) => module = Some(init),
             // A module file beside a namespace directory of the same name wins over it.
-            None if layout.is_file(&dir, &file) && index + 1 == segments.len() => {
+            None if imports.is_file(&join(&dir, &file)) && index + 1 == segments.len() => {
                 return Some(join(&dir, &file));
             }
             None => module = None,
@@ -139,10 +137,10 @@ fn resolve_below(
     name.filter(|name| *name != "*")
         .and_then(|name| {
             let file = format!("{name}.py");
-            if layout.is_file(&dir, &file) {
+            if imports.is_file(&join(&dir, &file)) {
                 Some(join(&dir, &file))
-            } else if layout.is_dir(&dir, name) {
-                layout.package_file(&join(&dir, name))
+            } else if imports.is_dir(&join(&dir, name)) {
+                package_file(imports, &join(&dir, name))
             } else {
                 None
             }
@@ -150,60 +148,21 @@ fn resolve_below(
         .or(module)
 }
 
-/// One directory's entries: files and subdirectories, as paths from the repository root.
-type Listing = (BTreeSet<String>, BTreeSet<String>);
-
-/// The repository's directories as listed, cached per directory; names compare exactly.
-struct Layout<'a> {
-    imports: &'a Imports<'a>,
-    listings: RefCell<HashMap<String, Listing>>,
-}
-
-impl<'a> Layout<'a> {
-    fn new(imports: &'a Imports<'a>) -> Self {
-        Self {
-            imports,
-            listings: RefCell::new(HashMap::new()),
-        }
-    }
-
-    /// Whether `dir` holds a file called exactly `name`.
-    fn is_file(&self, dir: &str, name: &str) -> bool {
-        self.listed(dir, |(files, _)| files.contains(&join(dir, name)))
-    }
-
-    /// Whether `dir` holds a directory called exactly `name`.
-    fn is_dir(&self, dir: &str, name: &str) -> bool {
-        self.listed(dir, |(_, dirs)| dirs.contains(&join(dir, name)))
-    }
-
-    /// `dir/__init__.py`, when the directory `dir` is a regular package.
-    fn package_file(&self, dir: &str) -> Option<String> {
-        self.is_file(dir, "__init__.py")
-            .then(|| join(dir, "__init__.py"))
-    }
-
-    fn listed(&self, dir: &str, check: impl Fn(&Listing) -> bool) -> bool {
-        let mut listings = self.listings.borrow_mut();
-        let listing = listings.entry(dir.to_owned()).or_insert_with(|| {
-            (
-                self.imports.files_in(dir, "").into_iter().collect(),
-                self.imports.dirs_in(dir).into_iter().collect(),
-            )
-        });
-        check(listing)
-    }
+/// `dir/__init__.py`, when the directory `dir` is a regular package.
+fn package_file(imports: &Imports<'_>, dir: &str) -> Option<String> {
+    let init = join(dir, "__init__.py");
+    imports.is_file(&init).then_some(init)
 }
 
 /// The directories on `sys.path` for `file`, in search order, without repeats.
 fn import_roots(
-    layout: &Layout<'_>,
+    imports: &Imports<'_>,
     projects: &[String],
     project: &str,
     file: &str,
 ) -> Vec<String> {
     let mut base = dir_of(file);
-    while layout.package_file(&base).is_some() {
+    while package_file(imports, &base).is_some() {
         match parent(&base) {
             Some(up) => base = up,
             None => break,
@@ -215,7 +174,7 @@ fn import_roots(
         .map(String::as_str)
         .filter(|p| *p != project);
     for dir in std::iter::once(project).chain(others) {
-        if layout.is_dir(dir, "src") {
+        if imports.is_dir(&join(dir, "src")) {
             roots.push(join(dir, "src"));
         }
         roots.push(dir.to_owned());
