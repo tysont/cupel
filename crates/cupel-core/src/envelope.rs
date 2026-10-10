@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::describe::Description;
+use crate::dry_run::RunPlan;
 use crate::error::{Error, Result};
 use crate::fact::FactKind;
 use crate::finding::{ActionKind, Finding};
@@ -28,6 +29,8 @@ pub struct Envelope {
     pub next_actions: Vec<NextAction>,
     /// What `describe` returns; null for every other verb (ADR-018).
     pub description: Option<Description>,
+    /// What a `--dry-run` would do; null unless `status` is `plan` (ADR-020).
+    pub plan: Option<RunPlan>,
     /// True when paging (`--limit`/`--offset`) left findings out.
     pub truncated: bool,
     pub total_findings: u64,

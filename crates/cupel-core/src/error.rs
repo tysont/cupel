@@ -41,6 +41,9 @@ pub enum Error {
     /// The configuration is invalid; a usage error (exit 2).
     #[error(transparent)]
     Config(#[from] ConfigError),
+    /// The run's `Cancellation` fired (`--timeout`); the work stopped early.
+    #[error("cancelled: the run's time limit passed")]
+    Cancelled,
     /// A file write was refused or failed (ADR-020).
     #[error(transparent)]
     Write(#[from] WriteError),

@@ -4,6 +4,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
+use crate::cancel::Cancellation;
 use crate::envelope::CheckResult;
 use crate::error::{Error, Result};
 use crate::event::EventSink;
@@ -12,6 +13,7 @@ use crate::finding::ActionKind;
 use crate::grade::{CostClass, Tier};
 use crate::id::CheckId;
 use crate::scope::Scope;
+use crate::writer::Writer;
 
 /// Everything Cupel knows about a check without running it. Plugins describe themselves with
 /// the same shape. Language applicability is never declared; it is derived (design §8.3.5).
@@ -64,12 +66,16 @@ pub struct Plan {
     pub est_ms: u64,
 }
 
-/// What a check can see besides its facts. Grows store access, cancellation, and a scratch
-/// directory as those land (P0.7, P2.2); it never offers file-system or process access.
-#[derive(Debug, Clone, Default, PartialEq)]
+/// What a check can see besides its facts. Grows store access in P2.2. It offers no file-system
+/// or process access beyond a writer confined to the run's scratch directory.
+#[derive(Debug, Clone)]
 pub struct CheckCtx {
     /// This check's resolved configuration, per-language overrides merged.
     pub config: Map<String, Value>,
+    /// Writes only inside `.cupel/work/<run>/` (`Writer::scratch`).
+    pub writer: Writer,
+    /// Fires on `--timeout`; poll it between targets.
+    pub cancel: Cancellation,
 }
 
 /// One verification technique.

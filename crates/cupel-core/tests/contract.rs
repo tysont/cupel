@@ -182,6 +182,45 @@ fn design_event_lines_round_trip_exactly() {
     }
 }
 
+/// The design §6.8 plan as ADR-020 types it: skips carry the `Skipped` fields beside the ID,
+/// and writes are objects with an optional diff.
+fn design_plan() -> Value {
+    json!({
+        "would_run": [
+            {"id": "static.crap", "targets": 11, "est_ms": 900, "needs": ["coverage(cached)"], "note": null},
+            {"id": "tests.mutation", "targets": 34, "est_ms": 140_000,
+             "needs": ["coverage(fresh)", "per-test-map"],
+             "note": "19/34 sites cached as killed; 15 will execute; schemata build x1"}
+        ],
+        "would_skip": [
+            {"id": "conc.dst", "reason": "unconfigured", "fact": null, "lang": null, "tool": null,
+             "see": "cupel describe conc.dst"}
+        ],
+        "would_install": [{"tool": "cargo-llvm-cov", "command": "cargo install cargo-llvm-cov"}],
+        "would_write": [
+            {"path": ".cupel/runs/run_01JA2B3C4D5E6F7G8H9JKMNPQR.json", "diff": null},
+            {"path": "cupel.toml", "diff": "--- /dev/null\n+++ b/cupel.toml\n@@ -0,0 +1 @@\n+depth = \"quick\"\n"}
+        ],
+        "est_total_ms": 140_900
+    })
+}
+
+#[test]
+fn design_plan_round_trips_exactly_inside_a_plan_envelope() {
+    let mut example = design_envelope();
+    example["status"] = json!("plan");
+    example["exit_code"] = json!(0);
+    example["plan"] = design_plan();
+    let output = assert_round_trip::<Envelope>(&example);
+    assert_eq!(output["plan"], design_plan());
+}
+
+#[test]
+fn envelopes_without_a_plan_carry_a_null_plan() {
+    let output = assert_round_trip::<Envelope>(&design_envelope());
+    assert_eq!(output["plan"], Value::Null);
+}
+
 #[test]
 fn unknown_event_tag_is_rejected() {
     assert!(serde_json::from_value::<Event>(json!({"ev": "run.start"})).is_err());

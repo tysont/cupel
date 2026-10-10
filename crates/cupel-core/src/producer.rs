@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 use serde_json::{Map, Value};
 
+use crate::cancel::Cancellation;
 use crate::error::Result;
 use crate::event::EventSink;
 use crate::fact::{Fact, FactKind};
@@ -13,6 +14,7 @@ use crate::grade::CostClass;
 use crate::id::{ProducerId, ToolId};
 use crate::lang::{Lang, Langs};
 use crate::scope::Scope;
+use crate::writer::Writer;
 
 /// What a producer can see when reporting whether it can run here.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -21,14 +23,17 @@ pub struct Ctx {
     pub root: PathBuf,
 }
 
-/// What a producer can see while producing. Grows cancellation as the run infrastructure
-/// lands (P0.7).
-#[derive(Debug, Clone, PartialEq)]
+/// What a producer can see while producing.
+#[derive(Debug, Clone)]
 pub struct ProduceCtx {
     pub ctx: Ctx,
     /// The `[lang.<lang>]` table for the language being produced (`Config::lang_config`).
     /// Producers never see `[checks.*]` (design §6.7).
     pub config: Map<String, Value>,
+    /// Writes only under `.cupel/` (`Writer::confined`), such as `.cupel/cache/`.
+    pub writer: Writer,
+    /// Fires on `--timeout`; poll it between units of work.
+    pub cancel: Cancellation,
 }
 
 /// Whether a producer can run in this environment.

@@ -369,6 +369,7 @@ expression: out
       }
     ]
   },
+  "plan": null,
   "truncated": false,
   "total_findings": 3
 }

@@ -80,6 +80,16 @@ impl RunId {
     }
 }
 
+/// A random seed for a run without `--seed`: the low 64 of the 80 random bits of a fresh ULID,
+/// drawn from the OS-seeded generator run IDs already use, and never 0 (ADR-020 §7).
+pub fn random_seed() -> u64 {
+    let bits = ulid::Ulid::generate().random();
+    // Truncation keeps the low 64 random bits.
+    #[allow(clippy::cast_possible_truncation)]
+    let seed = bits as u64;
+    seed.max(1)
+}
+
 impl fmt::Display for RunId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}{}", Self::PREFIX, self.0)

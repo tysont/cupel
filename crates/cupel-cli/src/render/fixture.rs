@@ -158,6 +158,7 @@ pub fn envelope() -> Envelope {
         summary: summary(),
         next_actions: next_actions(),
         description: Some(description()),
+        plan: None,
         truncated: false,
         total_findings: 3,
     }

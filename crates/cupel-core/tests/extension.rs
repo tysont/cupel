@@ -5,10 +5,11 @@ use std::path::PathBuf;
 
 use cupel_core::syntax::{Decisions, MutationSites, Symbols};
 use cupel_core::{
-    ActionKind, Availability, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    CostClass, Ctx, Error, Event, EventSink, Fact, FactKind, Facts, FindingKindSpec, Lang,
-    LangFamily, LangId, Langs, Manifest, MetricSpec, Plan, ProduceCtx, Producer, ProducerId,
-    ProducerRegistry, Result, Scope, Stability, Support, SupportMatrix, Tier, ToolId,
+    ActionKind, Availability, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult,
+    CheckStatus, CostClass, Ctx, Error, Event, EventSink, Fact, FactKind, Facts, FindingKindSpec,
+    Lang, LangFamily, LangId, Langs, Manifest, MetricSpec, Plan, ProduceCtx, Producer, ProducerId,
+    ProducerRegistry, Result, RunId, Scope, Stability, Support, SupportMatrix, Tier, ToolId,
+    WriteError, Writer,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -574,4 +575,91 @@ fn matrix_has_one_cell_per_check_and_language() {
         support(&m, "a", &go()),
         Support::Unsupported(FactKind::Symbols)
     );
+}
+
+// ---------------------------------------------------------------- run controls in contexts
+
+/// Caches its output under `.cupel/cache/` and tries to write into the repository, stopping
+/// first if the run was cancelled.
+struct CachingProducer;
+
+impl Producer<Symbols> for CachingProducer {
+    fn id(&self) -> ProducerId {
+        ProducerId::from("lang.caching")
+    }
+
+    fn languages(&self) -> Langs {
+        Langs::Any
+    }
+
+    fn needs(&self) -> &[FactKind] {
+        &[]
+    }
+
+    fn cost(&self) -> CostClass {
+        CostClass::Quick
+    }
+
+    fn availability(&self, _: &Ctx) -> Availability {
+        Availability::Ready
+    }
+
+    fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<Symbols> {
+        ctx.cancel.checkpoint()?;
+        ctx.writer
+            .write(&ctx.writer.cache_dir().join("symbols"), b"cached")?;
+        ctx.writer
+            .write(std::path::Path::new("src/generated.rs"), b"")?;
+        Ok(Symbols::default())
+    }
+}
+
+fn produce_ctx(root: &std::path::Path, cancel: Cancellation) -> ProduceCtx {
+    // `--write` was given, yet producers only ever get the confined writer.
+    let writer = Writer::new(root, true).unwrap().confined();
+    ProduceCtx {
+        ctx: Ctx {
+            root: writer.root().to_path_buf(),
+        },
+        config: serde_json::Map::new(),
+        writer,
+        cancel,
+    }
+}
+
+#[test]
+fn producers_write_only_under_cupel_through_their_context() {
+    let dir = tempfile::tempdir().unwrap();
+    let ctx = produce_ctx(dir.path(), Cancellation::new());
+    let result = CachingProducer.produce(&ctx, &Scope::default(), &mut Vec::new());
+    assert!(
+        matches!(result, Err(Error::Write(WriteError::Outside { .. }))),
+        "{result:?}"
+    );
+    assert!(dir.path().join(".cupel/cache/symbols").exists());
+    assert!(!dir.path().join("src").exists());
+}
+
+#[test]
+fn producers_stop_at_a_checkpoint_once_the_run_is_cancelled() {
+    let dir = tempfile::tempdir().unwrap();
+    let cancel = Cancellation::new();
+    cancel.cancel();
+    let ctx = produce_ctx(dir.path(), cancel);
+    let result = CachingProducer.produce(&ctx, &Scope::default(), &mut Vec::new());
+    assert_eq!(result, Err(Error::Cancelled));
+    assert!(!dir.path().join(".cupel").exists());
+}
+
+#[test]
+fn a_check_context_carries_a_scratch_writer_for_its_run() {
+    let dir = tempfile::tempdir().unwrap();
+    let run = RunId::generate();
+    let writer = Writer::new(dir.path(), true).unwrap();
+    let ctx = CheckCtx {
+        config: serde_json::Map::new(),
+        writer: writer.scratch(&run),
+        cancel: Cancellation::new(),
+    };
+    assert_eq!(ctx.writer.area(), writer.work_dir(&run));
 }

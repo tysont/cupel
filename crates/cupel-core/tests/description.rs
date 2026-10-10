@@ -16,7 +16,7 @@ fn envelope_with(verb: &Value, description: &Value) -> Value {
         "summary": {"findings": {"fail": 0, "warn": 0, "info": 0},
                     "new": 0, "resolved": 0, "suppressed": 0, "gate": null},
         "next_actions": [],
-        "description": description,
+        "description": description, "plan": null,
         "truncated": false, "total_findings": 0
     })
 }

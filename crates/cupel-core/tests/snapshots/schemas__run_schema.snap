@@ -44,6 +44,17 @@ expression: pretty(&schema)
         "$ref": "#/$defs/NextAction"
       }
     },
+    "plan": {
+      "description": "What a `--dry-run` would do; null unless `status` is `plan` (ADR-020).",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RunPlan"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "run": {
       "$ref": "#/$defs/RunInfo"
     },
@@ -70,6 +81,7 @@ expression: pretty(&schema)
     "exit_code",
     "findings",
     "next_actions",
+    "plan",
     "run",
     "status",
     "summary",
@@ -997,6 +1009,146 @@ expression: pretty(&schema)
         "summary"
       ]
     },
+    "PlannedCheck": {
+      "description": "A check the run would execute.",
+      "type": "object",
+      "properties": {
+        "est_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "id": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "needs": {
+          "description": "The facts it needs and where they would come from, such as `coverage(cached)`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "note": {
+          "description": "What the estimate rests on, such as how many targets are cached.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "targets": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "est_ms",
+        "id",
+        "needs",
+        "note",
+        "targets"
+      ]
+    },
+    "PlannedInstall": {
+      "description": "A tool the run would install (`--install`).",
+      "type": "object",
+      "properties": {
+        "command": {
+          "description": "The command that would install it, when one is known.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tool": {
+          "$ref": "#/$defs/ToolId"
+        }
+      },
+      "required": [
+        "command",
+        "tool"
+      ]
+    },
+    "PlannedSkip": {
+      "description": "A check the run would skip, and why.",
+      "type": "object",
+      "properties": {
+        "fact": {
+          "description": "The missing fact, for `unsupported`.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FactKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "lang": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LangId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "$ref": "#/$defs/SkipReason"
+        },
+        "see": {
+          "description": "A command that explains the reason.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tool": {
+          "description": "The missing tool, for `unavailable`.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "fact",
+        "id",
+        "lang",
+        "reason",
+        "see",
+        "tool"
+      ]
+    },
+    "PlannedWrite": {
+      "description": "A file the run would write.",
+      "type": "object",
+      "properties": {
+        "diff": {
+          "description": "A unified diff from the current content; null when the content is only known once the\nrun happens, such as a run record.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path": {
+          "description": "Relative to the repository root; absolute when outside it.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "diff",
+        "path"
+      ]
+    },
     "RunId": {
       "description": "A run ID: `run_` followed by a ULID.",
       "type": "string",
@@ -1106,6 +1258,49 @@ expression: pretty(&schema)
         "started",
         "toolchain",
         "verb"
+      ]
+    },
+    "RunPlan": {
+      "description": "Everything a run would do, without doing it.",
+      "type": "object",
+      "properties": {
+        "est_total_ms": {
+          "description": "The sum of the planned checks' estimates.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "would_install": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlannedInstall"
+          }
+        },
+        "would_run": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlannedCheck"
+          }
+        },
+        "would_skip": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlannedSkip"
+          }
+        },
+        "would_write": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlannedWrite"
+          }
+        }
+      },
+      "required": [
+        "est_total_ms",
+        "would_install",
+        "would_run",
+        "would_skip",
+        "would_write"
       ]
     },
     "SchemaDescription": {

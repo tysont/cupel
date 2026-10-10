@@ -1,5 +1,7 @@
 // ABOUTME: The `--events` stream: one JSON object per line, tagged by `ev` (design §7.4).
-// ABOUTME: Also defines `EventSink`, the destination checks and producers report through.
+// ABOUTME: Also defines `EventSink`, the destination checks and producers report through, and `JsonlSink`.
+use std::io::Write;
+
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -50,5 +52,41 @@ pub trait EventSink {
 impl EventSink for Vec<Event> {
     fn emit(&mut self, event: Event) {
         self.push(event);
+    }
+}
+
+/// Writes each event as one compact JSON line and flushes it, so a reader sees it at once. The
+/// first write error stops the stream; [`error`](Self::error) reports it.
+pub struct JsonlSink<W: Write> {
+    out: W,
+    error: Option<String>,
+}
+
+impl<W: Write> JsonlSink<W> {
+    pub fn new(out: W) -> Self {
+        Self { out, error: None }
+    }
+
+    /// Why the stream stopped, if it did.
+    pub fn error(&self) -> Option<&str> {
+        self.error.as_deref()
+    }
+
+    fn write_line(&mut self, event: &Event) -> std::io::Result<()> {
+        let mut line = serde_json::to_vec(event).map_err(std::io::Error::other)?;
+        line.push(b'\n');
+        self.out.write_all(&line)?;
+        self.out.flush()
+    }
+}
+
+impl<W: Write> EventSink for JsonlSink<W> {
+    fn emit(&mut self, event: Event) {
+        if self.error.is_some() {
+            return;
+        }
+        if let Err(error) = self.write_line(&event) {
+            self.error = Some(error.to_string());
+        }
     }
 }

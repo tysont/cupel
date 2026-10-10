@@ -3,6 +3,7 @@
 //! Core types shared by every Cupel crate: the output contract (design §7), identifiers and
 //! structural hashes, and the extension model of facts, producers, and checks (design §8.3).
 
+mod cancel;
 mod check;
 pub mod config;
 mod describe;
@@ -23,6 +24,7 @@ mod scope;
 pub mod syntax;
 mod writer;
 
+pub use cancel::Cancellation;
 pub use check::{
     Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,
 };
@@ -37,12 +39,12 @@ pub use envelope::{
     ScopeMode, Score, SeverityCounts, SkipReason, Skipped, Status, Summary, ToolchainInfo, Verb,
 };
 pub use error::{Error, Result};
-pub use event::{Event, EventSink};
+pub use event::{Event, EventSink, JsonlSink};
 pub use fact::{Fact, FactKind, Facts};
 pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Symbol};
 pub use grade::{CostClass, Tier};
 pub use hash::{FindingId, SiteHash, SymbolHash};
-pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId};
+pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
 pub use producer::{Availability, Ctx, ProduceCtx, Producer, ProducerRegistry, RegisteredProducer};

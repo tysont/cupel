@@ -277,6 +277,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
   "exit_code": 0,
   "findings": [],
   "next_actions": [],
+  "plan": null,
   "run": {
     "baseline": null,
     "budget_ms": null,
