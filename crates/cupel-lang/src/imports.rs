@@ -24,6 +24,7 @@ use cupel_core::{
     Availability, Cancellation, CostClass, Ctx, EventSink, FactKind, Langs, ProduceCtx, Producer,
     ProducerId, Result, Scope,
 };
+use globset::Glob;
 
 use crate::contract::capture;
 use crate::language::{Language, owns, parse_one};
@@ -190,6 +191,40 @@ impl Imports<'_> {
             .filter(|name| name.ends_with(extension))
             .map(|name| join(dir, name))
             .collect()
+    }
+
+    /// The directories below `base` a workspace member pattern (Cargo `members`, uv
+    /// `members`, npm `workspaces`) names, in sorted order. Segments containing `*`, `?`, or
+    /// `[…]` are globs matching one directory name; other segments name a directory exactly.
+    pub fn expand(&self, base: &str, pattern: &str) -> Vec<String> {
+        let mut dirs = vec![base.to_owned()];
+        for segment in pattern.split('/').filter(|s| !s.is_empty() && *s != ".") {
+            let glob = segment
+                .contains(['*', '?', '['])
+                .then(|| Glob::new(segment).ok().map(|glob| glob.compile_matcher()));
+            dirs = dirs
+                .iter()
+                .flat_map(|dir| match &glob {
+                    Some(Some(matcher)) => self
+                        .listing(dir)
+                        .dirs
+                        .iter()
+                        .filter(|name| matcher.is_match(name.as_str()))
+                        .map(|name| join(dir, name))
+                        .collect(),
+                    Some(None) => Vec::new(),
+                    None => {
+                        let child = join(dir, segment);
+                        if self.is_dir(&child) {
+                            vec![child]
+                        } else {
+                            Vec::new()
+                        }
+                    }
+                })
+                .collect();
+        }
+        dirs
     }
 
     /// Whether `path` is an entry of kind `entry`, listed by exactly that name in its parent,

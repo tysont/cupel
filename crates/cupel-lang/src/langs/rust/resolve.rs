@@ -5,7 +5,7 @@
 //! which a query cannot see, so this part of the language is hand-written.
 //!
 //! - **Packages** are the directories whose `Cargo.toml` has a `[package]`: the root manifest's,
-//!   its `[workspace] members` (with `*` globs), and the nearest one above each file in scope.
+//!   its `[workspace] members` (globs as `Imports::expand` reads them), and the nearest one above each file in scope.
 //! - **Crate roots** of a package: `src/lib.rs` first, then `src/main.rs`, `src/bin/*.rs`,
 //!   `src/bin/*/main.rs`, `tests/*.rs`, `benches/*.rs`, `examples/*.rs`, and `build.rs`. A file
 //!   no root reaches through `mod` declarations is treated as a crate root of its own.
@@ -22,7 +22,6 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
 
 use cupel_core::syntax::{ImportEdge, ImportTarget, ModuleGraph, RootImports};
-use globset::Glob;
 
 use crate::imports::{FileImports, Imports, RawImport, join};
 
@@ -374,7 +373,7 @@ fn packages(imports: &Imports<'_>) -> Vec<Package> {
             .cloned()
             .unwrap_or_default();
         for member in members.iter().filter_map(toml::Value::as_str) {
-            for dir in expand_member(imports, member) {
+            for dir in imports.expand(".", member) {
                 dirs.insert(dir);
             }
         }
@@ -430,35 +429,6 @@ fn package(imports: &Imports<'_>, dir: &str) -> Option<Package> {
         name,
         deps,
     })
-}
-
-/// A workspace member pattern's directories; `*` and `?` match one path segment.
-fn expand_member(imports: &Imports<'_>, pattern: &str) -> Vec<String> {
-    let mut dirs = vec![".".to_owned()];
-    for segment in pattern.split('/').filter(|s| !s.is_empty() && *s != ".") {
-        let glob = Glob::new(segment).ok().map(|g| g.compile_matcher());
-        dirs = dirs
-            .iter()
-            .flat_map(|dir| match &glob {
-                Some(matcher) if segment.contains(['*', '?', '[']) => imports
-                    .dirs_in(dir)
-                    .into_iter()
-                    .filter(|child| {
-                        matcher.is_match(child.rsplit_once('/').map_or(child.as_str(), |(_, n)| n))
-                    })
-                    .collect(),
-                _ => {
-                    let child = join(dir, segment);
-                    if imports.is_dir(&child) {
-                        vec![child]
-                    } else {
-                        Vec::new()
-                    }
-                }
-            })
-            .collect();
-    }
-    dirs
 }
 
 /// `a/b/../c` as `a/c`.

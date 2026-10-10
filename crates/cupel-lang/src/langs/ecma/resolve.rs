@@ -368,7 +368,7 @@ impl Resolver<'_, '_> {
                 .cloned()
                 .unwrap_or_default();
             for pattern in workspaces.iter().filter_map(Value::as_str) {
-                for dir in self.expand(pattern) {
+                for dir in self.imports.expand(".", pattern) {
                     if self.imports.is_file(&join(&dir, "package.json")) {
                         dirs.insert(dir);
                     }
@@ -400,37 +400,6 @@ impl Resolver<'_, '_> {
                 dir,
             })
             .collect()
-    }
-
-    /// A workspace pattern's directories; `*` matches one path segment.
-    fn expand(&self, pattern: &str) -> Vec<String> {
-        let mut dirs = vec![".".to_owned()];
-        for segment in pattern.split('/').filter(|s| !s.is_empty() && *s != ".") {
-            dirs = dirs
-                .iter()
-                .flat_map(|dir| {
-                    if segment.contains('*') {
-                        self.imports
-                            .dirs_in(dir)
-                            .into_iter()
-                            .filter(|child| {
-                                let name =
-                                    child.rsplit_once('/').map_or(child.as_str(), |(_, n)| n);
-                                match_pattern(segment, name).is_some()
-                            })
-                            .collect()
-                    } else {
-                        let child = join(dir, segment);
-                        if self.imports.is_dir(&child) {
-                            vec![child]
-                        } else {
-                            Vec::new()
-                        }
-                    }
-                })
-                .collect();
-        }
-        dirs
     }
 }
 

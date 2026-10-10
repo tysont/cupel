@@ -21,7 +21,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use cupel_core::syntax::{ImportEdge, ImportTarget, ModuleGraph, RootImports};
-use globset::Glob;
 
 use crate::imports::{Imports, RawImport, join};
 
@@ -242,42 +241,8 @@ fn workspace_members(imports: &Imports<'_>, project: &str) -> Vec<String> {
     members
         .iter()
         .filter_map(toml::Value::as_str)
-        .flat_map(|pattern| expand(imports, project, pattern))
+        .flat_map(|pattern| imports.expand(project, pattern))
         .collect()
-}
-
-/// The directories below `base` a member pattern names; `*` and `?` match one path segment.
-fn expand(imports: &Imports<'_>, base: &str, pattern: &str) -> Vec<String> {
-    let mut dirs = vec![base.to_owned()];
-    for segment in pattern.split('/').filter(|s| !s.is_empty() && *s != ".") {
-        let matcher = segment
-            .contains(['*', '?', '['])
-            .then(|| Glob::new(segment).ok().map(|glob| glob.compile_matcher()))
-            .flatten();
-        dirs = dirs
-            .iter()
-            .flat_map(|dir| {
-                if let Some(matcher) = &matcher {
-                    imports
-                        .dirs_in(dir)
-                        .into_iter()
-                        .filter(|child| {
-                            let name = child.rsplit_once('/').map_or(child.as_str(), |(_, n)| n);
-                            matcher.is_match(name)
-                        })
-                        .collect()
-                } else {
-                    let child = join(dir, segment);
-                    if imports.is_dir(&child) {
-                        vec![child]
-                    } else {
-                        Vec::new()
-                    }
-                }
-            })
-            .collect();
-    }
-    dirs
 }
 
 /// The directory of `file`, `.` at the root.

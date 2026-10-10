@@ -380,3 +380,19 @@ fn base_url_exports_patterns_and_missing_workspace_subpaths() {
         ]
     );
 }
+
+#[test]
+fn workspace_patterns_match_one_segment_with_wildcards_and_classes() {
+    let dir = tree(&[
+        (
+            "package.json",
+            "{ \"workspaces\": [\"libs/[a-m]*\", \"tools/?li\"] }",
+        ),
+        ("libs/core/package.json", "{ \"name\": \"@acme/core\" }"),
+        ("libs/ui/package.json", "{ \"name\": \"@acme/ui\" }"),
+        ("tools/cli/package.json", "{ \"name\": \"@acme/cli\" }"),
+        ("index.js", "import core from \"@acme/core\";\n"),
+    ]);
+    let graph: ModuleGraph = produce("javascript", dir.path());
+    assert_eq!(roots(&graph), [".", "libs/core", "tools/cli"]);
+}
