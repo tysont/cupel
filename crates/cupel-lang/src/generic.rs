@@ -4,7 +4,7 @@ use std::sync::Arc;
 
 use cupel_core::ProducerRegistry;
 use cupel_core::syntax::{
-    Decisions, MutationSites, NormTree, Symbols, TestConventions, TestFrames,
+    ApiSurface, Decisions, MutationSites, NormTree, Roots, Symbols, TestConventions, TestFrames,
 };
 
 use crate::conventions::GlobTestConventions;
@@ -12,7 +12,7 @@ use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::producer::QueryProducer;
 use crate::spec::{LanguageSpec, QueryFile};
-use crate::{decisions, mutations, normalize, symbols, testframes};
+use crate::{api, decisions, mutations, normalize, roots, symbols, testframes};
 
 /// Whether a language's spec can drive a generic producer.
 type Drives = fn(&LanguageSpec) -> bool;
@@ -60,6 +60,18 @@ const GENERIC: &[(Drives, Attach)] = &[
         |spec| spec.tables().conventions.is_some(),
         |language, _, reg| {
             reg.register::<TestConventions, _>(GlobTestConventions::new(language));
+        },
+    ),
+    (
+        |spec| spec.has(QueryFile::Api),
+        |language, cache, reg| {
+            reg.register::<ApiSurface, _>(QueryProducer::new(language, cache, api::extract));
+        },
+    ),
+    (
+        |spec| spec.has(QueryFile::Symbols) && spec.tables().roots.is_some(),
+        |language, cache, reg| {
+            reg.register::<Roots, _>(QueryProducer::new(language, cache, roots::extract));
         },
     ),
 ];

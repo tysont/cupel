@@ -1,0 +1,23 @@
+# ABOUTME: Conformance inventory for the `roots` fact: symbols that are live by convention even with no
+# ABOUTME: caller in scope. `name` is the symbol's display name.
+fact = "roots"
+
+[[constructs]]
+id = "entry-point"
+summary = "A program's entry point (`main`, a `__main__` guard's function, a bin script)."
+expect = { reason = "entry-point" }
+
+[[constructs]]
+id = "export"
+summary = "A symbol exported from its package or module."
+expect = { reason = "export" }
+
+[[constructs]]
+id = "test"
+summary = "A test function the test runner calls."
+expect = { reason = "test" }
+
+[[constructs]]
+id = "hook"
+summary = "A function a framework, runtime, or linker calls by convention (`#[no_mangle]`, `init()`, `__init__`, `TestMain`, a default export)."
+expect = { reason = "framework-hook" }

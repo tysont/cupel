@@ -1,0 +1,292 @@
+{
+  "roots": [
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "shapes/src/lib.rs",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 14
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 25
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 35
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/account.rs",
+        "line": 43
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 20
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/decide.rs",
+        "line": 25
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/lib.rs",
+        "line": 20
+      }
+    },
+    {
+      "reason": "entry-point",
+      "symbol": {
+        "col": 1,
+        "file": "src/main.rs",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/main.rs",
+        "line": 8
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 1,
+        "file": "src/main.rs",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.rs",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/pricing.rs",
+        "line": 9
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 43
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 50
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/pricing.rs",
+        "line": 55
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/report/format.rs",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/report/mod.rs",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/report/mod.rs",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 13
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 18
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 30
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 35
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/twins.rs",
+        "line": 46
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 5
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 12
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 17
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 22
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 28
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 36
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/ledger.rs",
+        "line": 42
+      }
+    }
+  ]
+}

@@ -10,6 +10,12 @@ pub mod twins;
 
 pub use account::Account;
 
+/// The most entries a ledger holds.
+pub const MAX_ENTRIES: usize = 1_000;
+
+/// The currency every amount is in.
+pub static CURRENCY: &str = "USD";
+
 /// Sums every entry.
 pub fn balance(entries: &[i64]) -> i64 {
     entries.iter().sum()

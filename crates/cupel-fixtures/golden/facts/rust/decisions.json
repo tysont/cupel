@@ -159,7 +159,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 14
+        "line": 20
       }
     },
     {
@@ -167,7 +167,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 18
+        "line": 24
       }
     },
     {
@@ -175,7 +175,23 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 22
+        "line": 28
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/main.rs",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/main.rs",
+        "line": 8
       }
     },
     {

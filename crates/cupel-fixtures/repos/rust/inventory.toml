@@ -250,3 +250,51 @@ expect = { target = { package = "std" } }
 [module-graph.unresolved]
 file = "src/lib.rs"
 name = "generated"
+
+[api-surface.function]
+file = "src/lib.rs"
+name = "balance"
+expect = { signature = "(_: &[i64]) -> i64" }
+
+[api-surface.method]
+file = "src/account.rs"
+name = "account::Account::deposit"
+expect = { signature = "(&mut self, _: i64)" }
+
+[api-surface.type]
+file = "src/account.rs"
+name = "account::Account"
+
+[api-surface.interface]
+file = "src/account.rs"
+name = "account::Audited"
+
+[api-surface.constant]
+file = "src/lib.rs"
+name = "MAX_ENTRIES"
+expect = { signature = "usize" }
+
+[api-surface.variable]
+file = "src/lib.rs"
+name = "CURRENCY"
+expect = { signature = "&str" }
+
+[api-surface.module]
+file = "src/lib.rs"
+name = "account"
+
+[roots.entry-point]
+file = "src/main.rs"
+name = "main"
+
+[roots.export]
+file = "src/lib.rs"
+name = "balance"
+
+[roots.test]
+file = "tests/ledger.rs"
+name = "tests::ledger::deposit_adds_to_the_balance"
+
+[roots.hook]
+file = "src/main.rs"
+name = "ledger_version"

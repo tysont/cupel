@@ -43,6 +43,7 @@
 //! The meaning of each capture and the `tables.toml` keys each producer reads are documented
 //! on the producer that reads them.
 
+pub mod api;
 mod contract;
 mod conventions;
 pub mod decisions;
@@ -56,6 +57,7 @@ pub mod normalize;
 mod parse;
 mod producer;
 mod query;
+pub mod roots;
 mod spec;
 pub mod symbols;
 mod tables;

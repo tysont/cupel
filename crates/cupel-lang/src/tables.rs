@@ -21,6 +21,8 @@ pub struct Tables {
     pub tests: TestRules,
     /// Present when the language has a `TestConventions` producer.
     pub conventions: Option<ConventionRules>,
+    /// Present when the language has a `Roots` producer.
+    pub roots: Option<RootRules>,
 }
 
 impl Tables {
@@ -376,4 +378,19 @@ pub struct TestsFor {
     pub stems: Vec<String>,
     #[serde(default)]
     pub contains: Option<String>,
+}
+
+/// `[roots]`: which symbols `QueryRoots` treats as live by name. Exports (public symbols), test
+/// cases (tests.scm), and `@root.<reason>` captures in api.scm need no table entry.
+///
+/// ```toml
+/// [roots]
+/// entry_points = ["main"]        # functions with these names are entry points
+/// hooks = ["__init__", "init"]   # symbols with these names are framework hooks
+/// ```
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct RootRules {
+    pub entry_points: Vec<String>,
+    pub hooks: Vec<String>,
 }

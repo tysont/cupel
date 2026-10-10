@@ -83,6 +83,14 @@ fn the_fixture_graph_is_exactly_its_mod_and_use_edges() {
             ),
             row(
                 ".",
+                "src/main.rs",
+                1,
+                "ledger::balance",
+                "src/lib.rs",
+                false
+            ),
+            row(
+                ".",
                 "src/pricing.rs",
                 33,
                 "rstest::fixture",

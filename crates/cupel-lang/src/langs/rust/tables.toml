@@ -123,3 +123,6 @@ stems = ["lib"]
 [[conventions.tests_for]]
 template = "{path}"
 contains = "#[cfg(test)]"
+
+[roots]
+entry_points = ["main"]

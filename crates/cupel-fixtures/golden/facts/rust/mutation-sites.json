@@ -440,7 +440,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 14
+        "line": 20
       }
     },
     {
@@ -453,8 +453,8 @@
           "span": {
             "col": 5,
             "end_col": 11,
-            "end_line": 19,
-            "line": 19
+            "end_line": 25,
+            "line": 25
           },
           "to": [
             "0"
@@ -464,7 +464,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 18
+        "line": 24
       }
     },
     {
@@ -477,8 +477,8 @@
           "span": {
             "col": 12,
             "end_col": 13,
-            "end_line": 23,
-            "line": 23
+            "end_line": 29,
+            "line": 29
           },
           "to": [
             "/"
@@ -488,7 +488,100 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 22
+        "line": 28
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "println!(\"{}\", balance(&[1, 2, 3]));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 41,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "1dc4244fdd197906",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "019ab03fa90e4d70",
+          "span": {
+            "col": 33,
+            "end_col": 34,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b366b7758fb014eb",
+          "span": {
+            "col": 36,
+            "end_col": 37,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/main.rs",
+        "line": 3
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "244223ef71977b38",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/main.rs",
+        "line": 8
       }
     },
     {

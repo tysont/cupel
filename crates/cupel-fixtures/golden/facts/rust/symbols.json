@@ -256,8 +256,8 @@
       "body": {
         "col": 40,
         "end_col": 2,
-        "end_line": 16,
-        "line": 14
+        "end_line": 22,
+        "line": 20
       },
       "display": "balance",
       "file": "src/lib.rs",
@@ -268,8 +268,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 16,
-        "line": 14
+        "end_line": 22,
+        "line": 20
       },
       "visibility": "public"
     },
@@ -277,8 +277,8 @@
       "body": {
         "col": 36,
         "end_col": 2,
-        "end_line": 20,
-        "line": 18
+        "end_line": 26,
+        "line": 24
       },
       "display": "audit_limit",
       "file": "src/lib.rs",
@@ -289,8 +289,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 20,
-        "line": 18
+        "end_line": 26,
+        "line": 24
       },
       "visibility": "internal"
     },
@@ -298,8 +298,8 @@
       "body": {
         "col": 43,
         "end_col": 2,
-        "end_line": 24,
-        "line": 22
+        "end_line": 30,
+        "line": 28
       },
       "display": "scale",
       "file": "src/lib.rs",
@@ -310,10 +310,52 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 24,
-        "line": 22
+        "end_line": 30,
+        "line": 28
       },
       "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 11,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "main",
+      "file": "src/main.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "main",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "ledger_version",
+      "file": "src/main.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "ledger_version",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 10,
+        "line": 8
+      },
+      "visibility": "public"
     },
     {
       "body": {

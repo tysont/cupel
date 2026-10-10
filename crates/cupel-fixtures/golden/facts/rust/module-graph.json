@@ -102,6 +102,16 @@
           }
         },
         {
+          "from": "src/main.rs",
+          "line": 1,
+          "relative": false,
+          "specifier": "ledger::balance",
+          "target": {
+            "kind": "file",
+            "path": "src/lib.rs"
+          }
+        },
+        {
           "from": "src/pricing.rs",
           "line": 33,
           "relative": false,

@@ -1804,7 +1804,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 14
+        "line": 20
       }
     },
     {
@@ -1838,7 +1838,7 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 18
+        "line": 24
       }
     },
     {
@@ -1912,7 +1912,134 @@
       "symbol": {
         "col": 1,
         "file": "src/lib.rs",
-        "line": 22
+        "line": 28
+      }
+    },
+    {
+      "hash": "sh_f209a63764bb19c6",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "println"
+                      },
+                      {
+                        "children": [],
+                        "label": "!"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "&"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "token_tree"
+                              }
+                            ],
+                            "label": "token_tree"
+                          }
+                        ],
+                        "label": "token_tree"
+                      }
+                    ],
+                    "label": "macro_invocation"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/main.rs",
+        "line": 3
+      }
+    },
+    {
+      "hash": "sh_687e6f9576655b98",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$lit"
+                  }
+                ],
+                "label": "extern_modifier"
+              }
+            ],
+            "label": "function_modifiers"
+          },
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [],
+            "label": "->"
+          },
+          {
+            "children": [],
+            "label": "primitive_type"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$lit"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/main.rs",
+        "line": 8
       }
     },
     {

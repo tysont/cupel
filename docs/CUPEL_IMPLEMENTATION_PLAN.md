@@ -505,7 +505,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.8 Facts: `ApiSurface` and `Roots`
 
-**Status:** not started
+**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-029](adr/CUPEL_DECISION_029.md)
 
 - `QueryApi` over `api.scm` → exported/`pub`/capitalized/`__all__` items with normalized signatures.
 - `QueryRoots` over roots rules in `tables.toml` plus `api.scm` → symbols live by convention: `main`, exported items, test functions, framework hooks (`init()`, `__init__`, default exports, `#[no_mangle]`, Go `TestMain`).

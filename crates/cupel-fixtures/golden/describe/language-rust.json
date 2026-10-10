@@ -71,6 +71,26 @@
         ]
       },
       {
+        "kind": "api-surface",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "roots",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
         "kind": "test-conventions",
         "producers": [
           {
