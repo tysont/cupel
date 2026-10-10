@@ -1,0 +1,5 @@
+# ABOUTME: Pins the Rust toolchain so local builds and CI compile with the same compiler.
+# ABOUTME: rustup reads this file automatically; components cover `make lint`.
+[toolchain]
+channel = "1.92.0"
+components = ["rustfmt", "clippy"]

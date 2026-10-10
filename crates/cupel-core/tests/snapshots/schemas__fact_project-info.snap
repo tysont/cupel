@@ -1,0 +1,90 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/project-info.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProjectInfo",
+  "description": "Project roots, their build files, default commands, and directories to skip.",
+  "type": "object",
+  "properties": {
+    "roots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ProjectRoot"
+      }
+    }
+  },
+  "required": [
+    "roots"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "DefaultCommands": {
+      "type": "object",
+      "properties": {
+        "bench": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "coverage": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "test": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "bench",
+        "coverage",
+        "test"
+      ]
+    },
+    "LangId": {
+      "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
+      "type": "string"
+    },
+    "ProjectRoot": {
+      "type": "object",
+      "properties": {
+        "build_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "commands": {
+          "$ref": "#/$defs/DefaultCommands"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "path": {
+          "type": "string"
+        },
+        "skip_dirs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "build_files",
+        "commands",
+        "lang",
+        "path",
+        "skip_dirs"
+      ]
+    }
+  }
+}

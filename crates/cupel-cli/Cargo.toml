@@ -1,0 +1,32 @@
+# ABOUTME: Manifest for the `cupel` binary: argument parsing, rendering, and exit codes.
+# ABOUTME: The only crate allowed to depend on every other Cupel crate.
+[package]
+name = "cupel-cli"
+description = "The cupel command-line interface."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "cupel"
+path = "src/main.rs"
+
+[dependencies]
+cupel-core.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+semver.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+assert_cmd.workspace = true
+predicates.workspace = true
+insta.workspace = true
+tempfile.workspace = true
+proptest.workspace = true
+
+[lints]
+workspace = true

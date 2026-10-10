@@ -1,0 +1,11 @@
+[package]
+name = "engine"
+version = "0.1.0"
+edition = "2024"
+
+[dev-dependencies]
+criterion = "0.7"
+
+[[bench]]
+name = "throughput"
+harness = false

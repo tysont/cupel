@@ -1,0 +1,9 @@
+---
+source: crates/cupel-core/tests/config_file.rs
+expression: "error_message(\"[gate.changed]\\n\\\"tests.mutation.score\\\" = \\\">= 0.8\\\"\\n\\\"tests.mutation\\\" = \\\"> 1\\\"\\n\")"
+---
+invalid configuration in `/repo/cupel.toml`: TOML parse error at line 1, column 1
+  |
+1 | [gate.changed]
+  | ^^^^^^^^^^^^^^
+invalid gate rule `"tests.mutation" = "> 1"`: `>` needs a metric: write `<check-id>.<metric>`

@@ -1,0 +1,104 @@
+---
+source: crates/cupel-cli/src/render.rs
+expression: "text::render(&fixture::envelope(), false)"
+---
+cupel check: fail (exit 1)
+
+cupel baseline · Manage named baselines. · experimental · pending P2.2
+  arguments
+    --against TARGET  What to compare with.
+                      one of baseline, head · default baseline · env CUPEL_AGAINST · required · repeatable · conflicts with --since-baseline · stable · pending P2.2
+  examples
+    $ cupel baseline show  # Show the baseline. (exit 2)
+  sub-verbs
+    cupel baseline set · Record the current run as the baseline. · stable
+      arguments
+        <FILE>  Where to write.
+                path · experimental
+      examples
+        $ cupel baseline set FILE  # Set it. (exit 0)
+
+plan      est 140900 ms
+would run
+  static.crap     11 targets · est 900 ms · needs coverage(cached)
+  tests.mutation  34 targets · est 140000 ms · needs coverage(fresh), per-test-map
+                  19/34 sites cached as killed; 15 will execute
+would skip
+  conc.dst  unconfigured (lang rust, see `cupel describe conc.dst`)
+would install
+  cargo-llvm-cov  $ cargo install cargo-llvm-cov
+would write
+  .cupel/runs/run_01JA2B3C4D5E6F7G8H9J0KMNPQ.json
+  cupel.toml
+    --- a/cupel.toml
+    +++ b/cupel.toml
+    @@ -1 +1 @@
+    -depth = "quick"
+    +depth = "deep"
+
+gate      fail (gate.changed)
+  fail  tests.mutation.score >= 0.80  actual 0.71
+  pass  tests.weakening none
+
+summary   3 findings · fail 6 · warn 9 · info 22 · new 4 · resolved 2 · suppressed 1
+
+checks
+  tests.mutation  fail     tier 3 · standard · score 0.71 killed_ratio (n 34) · delta -0.12 vs baseline · 2 findings · 41000 ms · oracle pg
+  perf.bench      skipped  tier 5 · exhaustive · 0 findings · 0 ms · skipped: unavailable (fact symbols, lang go, tool cargo-criterion, see `cupel doctor`)
+
+fail (2)
+  tests.mutation
+    Mutant survived: `<=` → `<` at planner.rs:142
+      fnd_7c2e1a · mutant.survived · tier 3 · confidence 0.95 · new
+      at src/rewrite/planner.rs:142:21-144:23 in exonym::rewrite::Planner::push_limit_0 (rust, sh_4b1d00)
+      No test distinguishes limit == offset from limit < offset.
+      Second detail line.
+      evidence: covering_tests [1] · flaky false · mutation {3} · note "a long evidence string that is far longe…" · tests_run 118 (full: cupel explain fnd_7c2e1a)
+      action write_test (priority 1): Add a test where limit == offset asserting the boundary.
+        covering_tests: ["pushes_through_sort"]
+        nearest_test_file: tests/rewrite/limit_tests.rs
+      repro: cupel check --only tests.mutation --symbols sh_4b1d00 --seed 42
+      suppress: cupel suppress fnd_7c2e1a --reason '…'
+    Mutant survived: `<=` → `<` at planner.rs:144
+      fnd_7c2e1c · mutant.timeout · tier 3 · confidence 0.95 · new · suppressed
+      at src/rewrite/planner.rs:144:21-146:23 in exonym::rewrite::Planner::push_limit_2 (rust, sh_4b1d02)
+      No test distinguishes limit == offset from limit < offset.
+      Second detail line.
+      evidence: covering_tests [1] · flaky false · mutation {3} · note "a long evidence string that is far longe…" · tests_run 118 (full: cupel explain fnd_7c2e1c)
+      action write_test (priority 3): Add a test where limit == offset asserting the boundary.
+        covering_tests: ["pushes_through_sort"]
+        nearest_test_file: tests/rewrite/limit_tests.rs
+      repro: cupel check --only tests.mutation --symbols sh_4b1d02 --seed 42
+      suppress: cupel suppress fnd_7c2e1c --reason '…'
+
+warn (1)
+  static.crap
+    Mutant survived: `<=` → `<` at planner.rs:143
+      fnd_7c2e1b · crap.high · tier 3 · confidence 0.95
+      at src/rewrite/planner.rs:143:21-145:23 in exonym::rewrite::Planner::push_limit_1 (rust, sh_4b1d01)
+      No test distinguishes limit == offset from limit < offset.
+      Second detail line.
+      evidence: covering_tests [1] · flaky false · mutation {3} · note "a long evidence string that is far longe…" · tests_run 118 (full: cupel explain fnd_7c2e1b)
+      action write_test (priority 2): Add a test where limit == offset asserting the boundary.
+        covering_tests: ["pushes_through_sort"]
+        nearest_test_file: tests/rewrite/limit_tests.rs
+      repro: cupel check --only static.crap --symbols sh_4b1d01 --seed 42
+      suppress: cupel suppress fnd_7c2e1b --reason '…'
+
+run       run_01JA2B3C4D5E6F7G8H9J0KMNPQ · started 2026-10-10T16:31:04Z · 48211 ms · seed 42
+git       9f1c2d3 · branch feat/limit-pushdown · base a81e4f5 · dirty
+scope     changed · 4 files · 11 symbols · roots ., web · languages rust, typescript
+depth     deep · budget 20000 ms
+baseline  default (run_01J9ZZZZZZZZZZZZZZZZZZZZZZ)
+toolchain cargo-llvm-cov 0.6.12 · rust 1.93.0
+config    from flags, profile, cupel.toml
+          budget: 20s
+          checks: {"static.clones":{"threshold":0.82}}
+          depth: deep
+          profile: ci
+cupel     9.8.7 · https://cupel.dev/schema/v1/run.json
+
+next actions
+  1. write_test: Add a boundary test for push_limit. (finding fnd_7c2e1a)
+  2. rerun: Run differential vs oracle 'pg'
+     $ cupel check --changed --depth deep --only gen.differential

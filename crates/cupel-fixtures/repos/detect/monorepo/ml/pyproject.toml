@@ -1,0 +1,9 @@
+[project]
+name = "ml"
+version = "0.1.0"
+
+[tool.poetry]
+name = "ml"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

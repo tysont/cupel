@@ -1,0 +1,111 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/decisions.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Decisions",
+  "description": "Decision points per symbol, with the weights the language's tables assign.",
+  "type": "object",
+  "properties": {
+    "symbols": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SymbolDecisions"
+      }
+    }
+  },
+  "required": [
+    "symbols"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "Decision": {
+      "type": "object",
+      "properties": {
+        "cognitive": {
+          "description": "Base weight toward cognitive complexity, before nesting.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "cyclomatic": {
+          "description": "Weight toward cyclomatic complexity.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "kind": {
+          "$ref": "#/$defs/DecisionKind"
+        },
+        "nesting": {
+          "description": "Depth of enclosing decisions, 0 at the top of the body.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "cognitive",
+        "cyclomatic",
+        "kind",
+        "nesting"
+      ]
+    },
+    "DecisionKind": {
+      "type": "string",
+      "enum": [
+        "branch",
+        "loop",
+        "boolean-op",
+        "case",
+        "catch",
+        "early-return",
+        "ternary"
+      ]
+    },
+    "SymbolDecisions": {
+      "type": "object",
+      "properties": {
+        "decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Decision"
+          }
+        },
+        "symbol": {
+          "$ref": "#/$defs/SymbolKey"
+        }
+      },
+      "required": [
+        "decisions",
+        "symbol"
+      ]
+    },
+    "SymbolKey": {
+      "description": "Identifies a symbol within one run by where it starts. Not stable across edits; anything\npersisted across runs uses `SymbolHash` (ADR-014).",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "file",
+        "line"
+      ]
+    }
+  }
+}

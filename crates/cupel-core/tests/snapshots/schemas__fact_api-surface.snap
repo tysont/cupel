@@ -1,0 +1,106 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/api-surface.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ApiSurface",
+  "description": "Public items and their normalized signatures.",
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ApiItem"
+      }
+    }
+  },
+  "required": [
+    "items"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "ApiItem": {
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/ApiItemKind"
+        },
+        "path": {
+          "description": "Fully qualified path of the item.",
+          "type": "string"
+        },
+        "signature": {
+          "description": "Signature with local names and formatting normalized away.",
+          "type": "string"
+        },
+        "span": {
+          "$ref": "#/$defs/Span"
+        }
+      },
+      "required": [
+        "file",
+        "kind",
+        "path",
+        "signature",
+        "span"
+      ]
+    },
+    "ApiItemKind": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "function",
+            "method",
+            "type",
+            "constant",
+            "variable",
+            "module"
+          ]
+        },
+        {
+          "description": "Traits, interfaces, and protocols.",
+          "type": "string",
+          "const": "interface"
+        }
+      ]
+    },
+    "Span": {
+      "description": "A 1-based range within one file.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "line"
+      ]
+    }
+  }
+}

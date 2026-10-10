@@ -1,0 +1,84 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "findings": [],
+  "next_actions": [
+    {
+      "command": "cupel init --write",
+      "finding": null,
+      "kind": "configure",
+      "priority": 1,
+      "summary": "Nothing was written; run `cupel init --write` to write these files."
+    }
+  ],
+  "plan": {
+    "est_total_ms": 0,
+    "would_install": [],
+    "would_run": [],
+    "would_skip": [],
+    "would_write": [
+      {
+        "diff": "--- /dev/null\n+++ b/cupel.toml\n@@ -0,0 +1,2 @@\n+# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents every key.\n+depth = \"standard\"\n",
+        "path": "cupel.toml"
+      },
+      {
+        "diff": "--- /dev/null\n+++ b/.cupel/.gitignore\n@@ -0,0 +1,2 @@\n+*\n+!suppressions.toml\n",
+        "path": ".cupel/.gitignore"
+      }
+    ]
+  },
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "init"
+  },
+  "status": "plan",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}
