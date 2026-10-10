@@ -1,0 +1,392 @@
+{
+  "files": [
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 32,
+                "end_line": 12,
+                "line": 12
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_deposit_adds_to_the_balance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 32,
+            "end_line": 12,
+            "line": 10
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 5,
+                "end_col": 31,
+                "end_line": 16,
+                "line": 16
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "test_statements_mention_the_owner",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 31,
+            "end_line": 16,
+            "line": 15
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 42,
+                "end_line": 20,
+                "line": 20
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_parsing_garbage_gives_nothing",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 42,
+            "end_line": 20,
+            "line": 19
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "not-null",
+              "span": {
+                "col": 5,
+                "end_col": 46,
+                "end_line": 24,
+                "line": 24
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "test_an_opening_account_exists",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 46,
+            "end_line": 24,
+            "line": 23
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 10,
+                "end_col": 35,
+                "end_line": 28,
+                "line": 28
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_negative_deposits_are_rejected",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 29,
+            "end_line": 29,
+            "line": 27
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 70,
+                "end_line": 33,
+                "line": 33
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_rounding_is_close",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 70,
+            "end_line": 33,
+            "line": 32
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 47,
+                "end_line": 38,
+                "line": 38
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "test_statement_is_published",
+          "skip": {
+            "reason": "talks to the network",
+            "span": {
+              "col": 1,
+              "end_col": 49,
+              "end_line": 36,
+              "line": 36
+            }
+          },
+          "span": {
+            "col": 1,
+            "end_col": 47,
+            "end_line": 38,
+            "line": 37
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "snapshot",
+              "span": {
+                "col": 5,
+                "end_col": 36,
+                "end_line": 42,
+                "line": 42
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_report_matches_snapshot",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 36,
+            "end_line": 42,
+            "line": 41
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "custom",
+              "span": {
+                "col": 5,
+                "end_col": 39,
+                "end_line": 48,
+                "line": 48
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 1,
+                "end_col": 40,
+                "end_line": 45,
+                "line": 45
+              },
+              "target": "ledger.report.format.requests"
+            }
+          ],
+          "name": "test_publish_posts_once",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 39,
+            "end_line": 48,
+            "line": 46
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 28,
+                "end_line": 53,
+                "line": 53
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 5,
+                "end_col": 74,
+                "end_line": 52,
+                "line": 52
+              },
+              "target": "ledger.report.format.render"
+            }
+          ],
+          "name": "test_rendering_can_be_replaced",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 28,
+            "end_line": 53,
+            "line": 51
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "test_opening_an_account_does_not_raise",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 19,
+            "end_line": 57,
+            "line": 56
+          }
+        }
+      ],
+      "file": "tests/test_ledger.py",
+      "framework": "pytest",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 36,
+                "end_line": 13,
+                "line": 13
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 9,
+                "end_col": 35,
+                "end_line": 14,
+                "line": 14
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "test_tally_reports_overdraft",
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 35,
+            "end_line": 14,
+            "line": 11
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 56,
+                "end_line": 18,
+                "line": 18
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "test_members_get_a_discount",
+          "skip": {
+            "reason": "pricing tables are being revised",
+            "span": {
+              "col": 5,
+              "end_col": 55,
+              "end_line": 16,
+              "line": 16
+            }
+          },
+          "span": {
+            "col": 5,
+            "end_col": 56,
+            "end_line": 18,
+            "line": 17
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "custom",
+              "span": {
+                "col": 9,
+                "end_col": 45,
+                "end_line": 23,
+                "line": 23
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 5,
+                "end_col": 44,
+                "end_line": 20,
+                "line": 20
+              },
+              "target": "ledger.pricing.log_total"
+            }
+          ],
+          "name": "test_tally_logs_once",
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 45,
+            "end_line": 23,
+            "line": 21
+          }
+        }
+      ],
+      "file": "tests/test_pricing.py",
+      "framework": "unittest",
+      "setup": [
+        {
+          "col": 5,
+          "end_col": 32,
+          "end_line": 9,
+          "line": 8
+        }
+      ]
+    }
+  ]
+}

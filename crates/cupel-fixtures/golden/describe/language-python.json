@@ -19,6 +19,86 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "decisions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "norm-tree",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "mutation-sites",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-frames",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "module-graph",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "api-surface",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "roots",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-conventions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "python",
