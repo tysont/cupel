@@ -326,11 +326,13 @@ ADRs: [017](adr/CUPEL_DECISION_017.md) (layered settings, gate-key grammar, sour
 
 #### P0.6 Fixture and golden-envelope harness
 
-**Status:** not started
+**Status:** in progress (2026-10-10)
 
 - `crates/cupel-fixtures` with `repos/` (populated per language from P1), `golden/`, and a library offering `run_cupel(args, fixture) -> Envelope` and `assert_golden(name, envelope)`.
 - Redaction of volatile fields (`run.id`, `run.started`, all `duration_ms`, `toolchain` versions, absolute paths, `git.sha`) before comparison. `UPDATE_GOLDENS=1 make test` rewrites goldens; CI never sets it. Golden diffs are printed as unified diffs.
 - Write **ADR-003**.
+
+ADRs: [003](adr/CUPEL_DECISION_003.md) (volatile fields and placeholders, golden storage, `UPDATE_GOLDENS`, diff reporting).
 
 *Tests first:* the harness tests itself — a trivial `describe` envelope round-trips through redaction; an intentionally changed field produces a readable diff.
 
