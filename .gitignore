@@ -1,0 +1,12 @@
+# Rust
+/target/
+
+# Cupel's own working directory (suppressions are committable)
+/.cupel/*
+!/.cupel/suppressions.toml
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
