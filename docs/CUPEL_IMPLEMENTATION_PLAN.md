@@ -354,10 +354,12 @@ ADRs: [020](adr/CUPEL_DECISION_020.md) (the `Writer` and `.cupel/` layout, run r
 
 #### P0.8 `init` and `doctor`
 
-**Status:** not started
+**Status:** in progress (2026-10-10)
 
 - `init`: detects project roots and languages (Cargo workspace, `go.work`/`go.mod`, npm/pnpm/yarn workspaces, uv/poetry/pip, Maven/Gradle, `deps.edn`) and the default test/coverage/bench commands per language (the detection table lives in `cupel-lang` once P1 lands; in P0 it is a standalone detection module that P1.7 moves). Writes `cupel.toml` and `.cupel/.gitignore` only with `--write`; `--dry-run` shows the file as a diff; refuses to overwrite without `--force`.
 - `doctor`: binary version vs `required_version`; config validity; write access to `.cupel/`; one finding per problem with `action.kind: configure | install_tool`; exit 3 if anything required is missing, else 0. Tool checks are added as tool producers land (P3+). `--fix --install` is wired but has nothing to install until P3.
+
+ADRs: [021](adr/CUPEL_DECISION_021.md) (detection, generated `cupel.toml`, preview without `--write`), [022](adr/CUPEL_DECISION_022.md) (`doctor` checks, findings, exit 3).
 
 *Tests first:* `init --dry-run` golden per fixture repo type (minimal Cargo, npm, pyproject, Go module fixtures under `cupel-fixtures/repos/detect/`); `init` without `--write` writes nothing (assert tree unchanged); `--force` semantics; `doctor` on a repo with bad `required_version` → exit 3.
 
