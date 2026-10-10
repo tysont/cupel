@@ -99,7 +99,7 @@
       {
         "conflicts": [],
         "default": "standard",
-        "env": null,
+        "env": "CUPEL_DEPTH",
         "name": "--depth",
         "pending_step": "P2.1",
         "positional": false,
@@ -119,7 +119,7 @@
       {
         "conflicts": [],
         "default": null,
-        "env": null,
+        "env": "CUPEL_BUDGET",
         "name": "--budget",
         "pending_step": "P4.3",
         "positional": false,
@@ -277,10 +277,28 @@
     "baseline": null,
     "budget_ms": null,
     "config": {
-      "effective": {},
-      "sources": []
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
     },
-    "depth": null,
+    "depth": "standard",
     "duration_ms": "<duration-ms>",
     "git": null,
     "id": "<run-id>",

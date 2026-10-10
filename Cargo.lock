@@ -247,7 +247,10 @@ dependencies = [
  "cupel-core",
  "insta",
  "predicates",
+ "proptest",
+ "serde",
  "serde_json",
+ "tempfile",
  "thiserror",
 ]
 

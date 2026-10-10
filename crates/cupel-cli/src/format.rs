@@ -1,46 +1,36 @@
-// ABOUTME: Chooses the output format: `--format`, then `CUPEL_FORMAT`, then JSON for a pipe and text
-// ABOUTME: for a terminal; also recovers the choice from raw arguments when parsing failed.
+// ABOUTME: Chooses the output format: the configured one (`--format` > `CUPEL_FORMAT` > profile > file),
+// ABOUTME: else JSON for a pipe and text for a terminal; also recovers the choice when parsing failed.
 use std::ffi::OsString;
 
-use clap::ValueEnum;
+use cupel_core::config::Format;
 
-use crate::cli::Format;
+use crate::cli::format_named;
 use crate::error::CupelError;
 
 /// The renderers that exist. Formats without one are reported as not implemented.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Rendering {
     Json,
+    Jsonl,
     Text,
 }
 
-impl Format {
-    /// The format used when neither `--format` nor `CUPEL_FORMAT` chose one.
-    pub fn default_for(stdout_is_terminal: bool) -> Self {
-        if stdout_is_terminal {
-            Self::Text
-        } else {
-            Self::Json
-        }
+/// The format used when no configuration layer chose one.
+pub fn default_for(stdout_is_terminal: bool) -> Format {
+    if stdout_is_terminal {
+        Format::Text
+    } else {
+        Format::Json
     }
+}
 
-    pub fn name(self) -> &'static str {
-        match self {
-            Self::Json => "json",
-            Self::Jsonl => "jsonl",
-            Self::Text => "text",
-            Self::Sarif => "sarif",
-        }
-    }
-
-    /// The renderer for this format, or the plan step that builds it.
-    pub fn rendering(self) -> Result<Rendering, CupelError> {
-        match self {
-            Self::Json => Ok(Rendering::Json),
-            Self::Text => Ok(Rendering::Text),
-            Self::Jsonl => Err(CupelError::pending_format(self.name(), "P0.5")),
-            Self::Sarif => Err(CupelError::pending_format(self.name(), "P6.1")),
-        }
+/// The renderer for `format`, or the plan step that builds it.
+pub fn rendering(format: Format) -> Result<Rendering, CupelError> {
+    match format {
+        Format::Json => Ok(Rendering::Json),
+        Format::Text => Ok(Rendering::Text),
+        Format::Jsonl => Ok(Rendering::Jsonl),
+        Format::Sarif => Err(CupelError::pending_format(format.as_str(), "P6.1")),
     }
 }
 
@@ -50,9 +40,10 @@ pub struct Recovered {
     pub format: Format,
     pub quiet: bool,
     pub describe: bool,
+    pub no_color: bool,
 }
 
-/// Scans the arguments before any `--` for `--format`, `--quiet`, and `--describe`. The format
+/// Scans the arguments before any `--` for `--format`, `--quiet`, `--describe`, and `--no-color`. The format
 /// falls back to `CUPEL_FORMAT` and then the terminal rule; a source naming an invalid format
 /// falls straight back to the terminal rule.
 pub fn recover(args: &[OsString], variable: Option<&str>, stdout_is_terminal: bool) -> Recovered {
@@ -71,12 +62,13 @@ pub fn recover(args: &[OsString], variable: Option<&str>, stdout_is_terminal: bo
     let format = flag
         .as_deref()
         .or(variable)
-        .and_then(|name| Format::from_str(name, false).ok())
-        .unwrap_or_else(|| Format::default_for(stdout_is_terminal));
+        .and_then(format_named)
+        .unwrap_or_else(|| default_for(stdout_is_terminal));
     Recovered {
         format,
         quiet: args.iter().any(|arg| arg == "--quiet"),
         describe: args.iter().any(|arg| arg == "--describe"),
+        no_color: args.iter().any(|arg| arg == "--no-color"),
     }
 }
 
@@ -90,19 +82,18 @@ mod tests {
 
     #[test]
     fn default_is_json_for_a_pipe_and_text_for_a_terminal() {
-        assert_eq!(Format::default_for(false), Format::Json);
-        assert_eq!(Format::default_for(true), Format::Text);
+        assert_eq!(default_for(false), Format::Json);
+        assert_eq!(default_for(true), Format::Text);
     }
 
     #[test]
-    fn json_and_text_render_and_the_rest_name_their_step() {
-        assert_eq!(Format::Json.rendering(), Ok(Rendering::Json));
-        assert_eq!(Format::Text.rendering(), Ok(Rendering::Text));
-        for (format, step) in [(Format::Jsonl, "P0.5"), (Format::Sarif, "P6.1")] {
-            match format.rendering() {
-                Err(CupelError::NotImplemented(pending)) => assert_eq!(pending.step, step),
-                other => panic!("{format:?}: {other:?}"),
-            }
+    fn json_jsonl_and_text_render_and_sarif_names_its_step() {
+        assert_eq!(rendering(Format::Json), Ok(Rendering::Json));
+        assert_eq!(rendering(Format::Jsonl), Ok(Rendering::Jsonl));
+        assert_eq!(rendering(Format::Text), Ok(Rendering::Text));
+        match rendering(Format::Sarif) {
+            Err(CupelError::NotImplemented(pending)) => assert_eq!(pending.step, "P6.1"),
+            other => panic!("sarif: {other:?}"),
         }
     }
 
@@ -138,10 +129,18 @@ mod tests {
     }
 
     #[test]
-    fn recover_reads_quiet_and_describe_but_not_after_a_double_dash() {
-        let found = recover(&args(&["--quiet", "x", "--describe"]), None, false);
-        assert!(found.quiet && found.describe);
-        let after = recover(&args(&["x", "--", "--quiet", "--describe"]), None, false);
-        assert!(!after.quiet && !after.describe);
+    fn recover_reads_quiet_describe_and_no_color_but_not_after_a_double_dash() {
+        let found = recover(
+            &args(&["--quiet", "x", "--describe", "--no-color"]),
+            None,
+            false,
+        );
+        assert!(found.quiet && found.describe && found.no_color);
+        let after = recover(
+            &args(&["x", "--", "--quiet", "--describe", "--no-color"]),
+            None,
+            false,
+        );
+        assert!(!after.quiet && !after.describe && !after.no_color);
     }
 }

@@ -1,52 +1,87 @@
 ---
 source: crates/cupel-cli/tests/format.rs
-expression: outcome.stdout
+expression: "support::redacted_text(&outcome.stdout)"
 ---
 cupel describe: pass (exit 0)
-Cupel grades what a coding agent produced.
 
-Verbs:
-  init       Detect languages, project roots, and test commands; write cupel.toml. [pending P0.8]
-  doctor     Verify the toolchain, tool producers, oracles, and configuration. [pending P0.8]
-  describe   Describe the CLI, a verb, a check, a finding kind, or a schema.
-  check      Run checks over a scope at a depth and evaluate the gate. [pending P2.1]
-  survey     Rank a whole tree without a baseline: hot spots, weak tests, clones. [pending P2.9]
-  explain    Give full context and remediation for one finding or check result. [pending P2.2]
-  baseline   Set, show, diff, export, or import the baseline runs are compared with. [pending P2.2]
-  oracle     Add, list, remove, or verify the oracles differential checks compare with. [pending P5.2]
-  tests      List the tests that cover a scope, with a command to run them. [pending P3.3]
-  suppress   Suppress a finding, with a reason and an optional expiry. [pending P2.2]
-  serve      Run the daemon and MCP server with warm caches and event streaming. [pending P4.2]
-Global flags:
-  --format FORMAT              Output format; json when stdout is not a terminal, text when it is.
-  --dry-run                    Preview what would run or be written; change nothing. [pending P0.7]
-  --describe                   Describe this verb instead of running it, and exit 0.
-  --config PATH                The cupel.toml to use instead of the nearest one. [pending P0.4]
-  --profile NAME               Apply [profile.NAME] from cupel.toml. [pending P0.4]
-  --cwd PATH                   The repository root; defaults to the current directory.
-  --quiet                      Write no diagnostics to stderr.
-  --verbose                    Write extra diagnostics to stderr.
-  --events PATH|stderr         Stream progress events as JSON lines. [pending P0.7]
-  --timeout DURATION           Stop after this long, keeping partial results. [pending P0.7]
-  --seed N                     Seed for generative checks; recorded in the envelope. [pending P0.7]
-  --limit N                    Return at most N findings. [pending P0.5]
-  --offset N                   Skip the first N findings. [pending P0.5]
-  --no-color                   Render text without color. [pending P0.5]
-  --no-install                 Never install tools; the default unless stdout is a terminal. [pending P3.1]
-  --install                    Install missing tools that producers need. [pending P3.1]
-  --write                      Permit writes outside .cupel/. [pending P0.7]
-  --help                       Print help and exit.
-Exit codes:
-  0 pass         Ran fully; gate passed or no gate.
-  1 fail         Ran fully; gate failed.
-  2 usage        Bad flags or config; the envelope names the fix.
-  3 environment  Missing tool, oracle, or toolchain; doctor findings attached.
-  4 unevaluable  Baseline test suite fails or build broken; scoring refused.
-  5 partial      Timeout or budget hit; the envelope has valid partial results.
-  6 internal     Cupel bug; the envelope includes a bug-report payload.
-Schemas:
+cupel [version] · Cupel grades what a coding agent produced. · experimental
+
+verbs
+  init      Detect languages, project roots, and test commands; write cupel.toml. · pending P0.8
+  doctor    Verify the toolchain, tool producers, oracles, and configuration. · pending P0.8
+  describe  Describe the CLI, a verb, a check, a finding kind, or a schema.
+  check     Run checks over a scope at a depth and evaluate the gate. · pending P2.1
+  survey    Rank a whole tree without a baseline: hot spots, weak tests, clones. · pending P2.9
+  explain   Give full context and remediation for one finding or check result. · pending P2.2
+  baseline  Set, show, diff, export, or import the baseline runs are compared with. · pending P2.2
+  oracle    Add, list, remove, or verify the oracles differential checks compare with. · pending P5.2
+  tests     List the tests that cover a scope, with a command to run them. · pending P3.3
+  suppress  Suppress a finding, with a reason and an optional expiry. · pending P2.2
+  serve     Run the daemon and MCP server with warm caches and event streaming. · pending P4.2
+
+global flags
+  --format FORMAT       Output format; json when stdout is not a terminal, text when it is.
+                        one of json, jsonl, text, sarif · env CUPEL_FORMAT
+  --dry-run             Preview what would run or be written; change nothing.
+                        pending P0.7
+  --describe            Describe this verb instead of running it, and exit 0.
+  --config PATH         The cupel.toml to use instead of the nearest one.
+                        path
+  --profile NAME        Apply [profile.NAME] from cupel.toml.
+                        env CUPEL_PROFILE
+  --cwd PATH            The repository root; defaults to the current directory.
+                        path
+  --quiet               Write no diagnostics to stderr.
+                        conflicts with --verbose
+  --verbose             Write extra diagnostics to stderr.
+                        conflicts with --quiet
+  --events PATH|stderr  Stream progress events as JSON lines.
+                        pending P0.7
+  --timeout DURATION    Stop after this long, keeping partial results.
+                        duration · pending P0.7
+  --seed N              Seed for generative checks; recorded in the envelope.
+                        integer · pending P0.7
+  --limit N             Return at most N findings.
+                        integer
+  --offset N            Skip the first N findings.
+                        integer
+  --no-color            Render text without color.
+                        env NO_COLOR
+  --no-install          Never install tools; the default unless stdout is a terminal.
+                        conflicts with --install · pending P3.1
+  --install             Install missing tools that producers need.
+                        conflicts with --no-install · pending P3.1
+  --write               Permit writes outside .cupel/.
+                        pending P0.7
+  --help                Print help and exit.
+
+flags without a verb
+  --version  Print the version and exit.
+
+exit codes
+  0  pass         Ran fully; gate passed or no gate. · stable
+  1  fail         Ran fully; gate failed. · stable
+  2  usage        Bad flags or config; the envelope names the fix. · stable
+  3  environment  Missing tool, oracle, or toolchain; doctor findings attached. · stable
+  4  unevaluable  Baseline test suite fails or build broken; scoring refused. · stable
+  5  partial      Timeout or budget hit; the envelope has valid partial results. · stable
+  6  internal     Cupel bug; the envelope includes a bug-report payload. · stable
+
+schemas
   run      https://cupel.dev/schema/v1/run.json
   finding  https://cupel.dev/schema/v1/finding.json
   events   https://cupel.dev/schema/v1/events.json
   config   https://cupel.dev/schema/v1/config.json
   plugin   https://cupel.dev/schema/v1/plugin.json
+
+configuration precedence
+  flags > env > profile > cupel.toml > defaults
+
+summary   0 findings · fail 0 · warn 0 · info 0 · new 0 · resolved 0 · suppressed 0
+
+run       [run id, start, duration, seed]
+depth     standard
+config    from flags, defaults
+          depth: standard
+          format: text
+cupel     [version] · https://cupel.dev/schema/v1/run.json

@@ -53,8 +53,9 @@ pub struct RunInfo {
     pub git: Option<GitInfo>,
     /// Null for verbs that do not resolve a scope.
     pub scope: Option<ScopeInfo>,
-    /// Null for verbs that do not run checks.
+    /// The effective depth from configuration; null only when configuration did not load.
     pub depth: Option<CostClass>,
+    /// The effective budget in milliseconds; null when no layer set one.
     pub budget_ms: Option<u64>,
     pub seed: u64,
     pub toolchain: ToolchainInfo,

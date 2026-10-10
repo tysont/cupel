@@ -87,6 +87,22 @@ pub fn redacted(mut envelope: Value) -> Value {
     envelope
 }
 
+/// Text output with run-specific values replaced, for snapshots: the `run` line (ID, start time,
+/// duration) and the version.
+pub fn redacted_text(text: &str) -> String {
+    text.lines()
+        .map(|line| {
+            if line.starts_with("run       run_") {
+                "run       [run id, start, duration, seed]".to_owned()
+            } else {
+                line.replace(env!("CARGO_PKG_VERSION"), "[version]")
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n"
+}
+
 /// The ID ADR-016 assigns a CLI finding about `subject`.
 pub fn cli_finding_id(kind: &str, subject: &str) -> String {
     FindingId::for_subject(&CheckId::from("cli"), kind, subject).to_string()

@@ -3,8 +3,8 @@
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::{
-    ConfigEcho, CupelInfo, Description, Envelope, ExitCode, Finding, RunId, RunInfo, Severity,
-    SeverityCounts, Status, Summary, ToolchainInfo, Verb, schema,
+    ConfigEcho, CostClass, CupelInfo, Description, Envelope, ExitCode, Finding, RunId, RunInfo,
+    Severity, SeverityCounts, Status, Summary, ToolchainInfo, Verb, schema,
 };
 
 use crate::error::CupelError;
@@ -18,6 +18,12 @@ pub struct Run {
     pub seed: u64,
     /// The command line after `cupel`, for repro strings.
     pub args: Vec<String>,
+    /// The effective configuration; empty until configuration loads.
+    pub config: ConfigEcho,
+    /// The effective depth; null until configuration loads.
+    pub depth: Option<CostClass>,
+    /// The effective budget in milliseconds, when one is set.
+    pub budget_ms: Option<u64>,
 }
 
 impl Run {
@@ -29,6 +35,9 @@ impl Run {
             verb: None,
             seed: 0,
             args,
+            config: ConfigEcho::default(),
+            depth: None,
+            budget_ms: None,
         }
     }
 
@@ -79,12 +88,11 @@ impl Run {
                 duration_ms: u64::try_from(self.clock.elapsed().as_millis()).unwrap_or(u64::MAX),
                 git: None,
                 scope: None,
-                depth: None,
-                budget_ms: None,
+                depth: self.depth,
+                budget_ms: self.budget_ms,
                 seed: self.seed,
                 toolchain: ToolchainInfo::default(),
-                // The effective configuration is echoed once P0.4 loads it.
-                config: ConfigEcho::default(),
+                config: self.config.clone(),
                 baseline: None,
             },
             status,

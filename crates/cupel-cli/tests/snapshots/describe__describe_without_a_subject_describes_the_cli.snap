@@ -1,6 +1,5 @@
 ---
 source: crates/cupel-cli/tests/describe.rs
-assertion_line: 31
 expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
 ---
 {
@@ -134,7 +133,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "default": null,
         "env": null,
         "name": "--config",
-        "pending_step": "P0.4",
+        "pending_step": null,
         "positional": false,
         "repeated": false,
         "required": false,
@@ -147,9 +146,9 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       {
         "conflicts": [],
         "default": null,
-        "env": null,
+        "env": "CUPEL_PROFILE",
         "name": "--profile",
-        "pending_step": "P0.4",
+        "pending_step": null,
         "positional": false,
         "repeated": false,
         "required": false,
@@ -258,7 +257,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "default": null,
         "env": null,
         "name": "--limit",
-        "pending_step": "P0.5",
+        "pending_step": null,
         "positional": false,
         "repeated": false,
         "required": false,
@@ -273,7 +272,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "default": null,
         "env": null,
         "name": "--offset",
-        "pending_step": "P0.5",
+        "pending_step": null,
         "positional": false,
         "repeated": false,
         "required": false,
@@ -286,9 +285,9 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       {
         "conflicts": [],
         "default": null,
-        "env": null,
+        "env": "NO_COLOR",
         "name": "--no-color",
-        "pending_step": "P0.5",
+        "pending_step": null,
         "positional": false,
         "repeated": false,
         "required": false,
@@ -471,10 +470,27 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "baseline": null,
     "budget_ms": null,
     "config": {
-      "effective": {},
-      "sources": []
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": null,
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "defaults"
+      ]
     },
-    "depth": null,
+    "depth": "standard",
     "duration_ms": 0,
     "git": null,
     "id": "[run id]",

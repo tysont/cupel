@@ -103,7 +103,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       {
         "conflicts": [],
         "default": "standard",
-        "env": null,
+        "env": "CUPEL_DEPTH",
         "name": "--depth",
         "pending_step": "P2.1",
         "positional": false,
@@ -123,7 +123,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       {
         "conflicts": [],
         "default": null,
-        "env": null,
+        "env": "CUPEL_BUDGET",
         "name": "--budget",
         "pending_step": "P4.3",
         "positional": false,
@@ -281,10 +281,27 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "baseline": null,
     "budget_ms": null,
     "config": {
-      "effective": {},
-      "sources": []
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": null,
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "defaults"
+      ]
     },
-    "depth": null,
+    "depth": "standard",
     "duration_ms": 0,
     "git": null,
     "id": "[run id]",

@@ -2,8 +2,10 @@
 // ABOUTME: Holds no human text; help and descriptions come from the registry (ADR-018).
 use std::path::PathBuf;
 
+use clap::builder::{PossibleValuesParser, TypedValueParser};
 use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
-use cupel_core::Verb;
+use cupel_core::config::{Format, TimeLimit};
+use cupel_core::{CostClass, Verb};
 
 #[derive(Debug, Parser)]
 #[command(
@@ -31,17 +33,16 @@ pub struct Cli {
     reason = "each bool is an independent command-line switch"
 )]
 pub struct GlobalArgs {
-    #[arg(long, global = true, value_name = "FORMAT", env = "CUPEL_FORMAT")]
+    // `CUPEL_FORMAT` is read by configuration, not clap, so `run.config` can report its layer.
+    #[arg(long, global = true, value_name = "FORMAT", value_parser = format_parser())]
     pub format: Option<Format>,
     // Parsed now; the plan envelope arrives with P0.7.
     #[arg(long, global = true)]
     pub dry_run: bool,
     #[arg(long, global = true)]
     pub describe: bool,
-    // Parsed now; configuration discovery and loading are P0.4.
     #[arg(long, global = true, value_name = "PATH")]
     pub config: Option<PathBuf>,
-    // Parsed now; profiles are P0.4.
     #[arg(long, global = true, value_name = "NAME")]
     pub profile: Option<String>,
     #[arg(long, global = true, value_name = "PATH")]
@@ -58,13 +59,10 @@ pub struct GlobalArgs {
     pub timeout: Option<String>,
     #[arg(long, global = true, value_name = "N")]
     pub seed: Option<u64>,
-    // Parsed now; paging is P0.5.
     #[arg(long, global = true, value_name = "N")]
     pub limit: Option<u64>,
-    // Parsed now; paging is P0.5.
     #[arg(long, global = true, value_name = "N")]
     pub offset: Option<u64>,
-    // Parsed now; the text renderer has no color until P0.5.
     #[arg(long, global = true)]
     pub no_color: bool,
     // Parsed now; tool installation arrives with the first tool producers in P3.1.
@@ -80,13 +78,48 @@ pub struct GlobalArgs {
     pub help: Option<bool>,
 }
 
-/// Output formats (design §6.3).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
-pub enum Format {
-    Json,
-    Jsonl,
-    Text,
-    Sarif,
+/// Parses `--format` into the configuration model's `Format`, offering its names as the values.
+fn format_parser() -> impl TypedValueParser<Value = Format> {
+    PossibleValuesParser::new(Format::ALL.map(Format::as_str))
+        .map(|name| format_named(&name).expect("the parser accepts only format names"))
+}
+
+/// The format spelled `name`, exactly as `--format` and `cupel.toml` spell it.
+pub fn format_named(name: &str) -> Option<Format> {
+    Format::ALL
+        .into_iter()
+        .find(|format| format.as_str() == name)
+}
+
+/// Parses `--depth` into the cost class that names it (design §5.8).
+fn depth_parser() -> impl TypedValueParser<Value = CostClass> {
+    const DEPTHS: [CostClass; 4] = [
+        CostClass::Quick,
+        CostClass::Standard,
+        CostClass::Deep,
+        CostClass::Exhaustive,
+    ];
+    PossibleValuesParser::new(DEPTHS.map(depth_name)).map(|name| {
+        DEPTHS
+            .into_iter()
+            .find(|depth| depth_name(*depth) == name)
+            .expect("the parser accepts only depth names")
+    })
+}
+
+fn depth_name(depth: CostClass) -> &'static str {
+    match depth {
+        CostClass::Quick => "quick",
+        CostClass::Standard => "standard",
+        CostClass::Deep => "deep",
+        CostClass::Exhaustive => "exhaustive",
+    }
+}
+
+fn time_limit(value: &str) -> Result<TimeLimit, String> {
+    value
+        .parse()
+        .map_err(|error: cupel_core::Error| error.to_string())
 }
 
 /// Scope, depth, and selection flags shared by the analysis verbs (design §6.4). They parse now
@@ -110,10 +143,10 @@ pub struct ScopeArgs {
     pub symbols: Vec<String>,
     #[arg(long)]
     pub since_baseline: bool,
-    #[arg(long, value_name = "DEPTH")]
-    pub depth: Option<Depth>,
-    #[arg(long, value_name = "DURATION")]
-    pub budget: Option<String>,
+    #[arg(long, value_name = "DEPTH", value_parser = depth_parser())]
+    pub depth: Option<CostClass>,
+    #[arg(long, value_name = "DURATION", value_parser = time_limit)]
+    pub budget: Option<TimeLimit>,
     #[arg(long, value_name = "ID", num_args = 1..)]
     pub only: Vec<String>,
     #[arg(long, value_name = "ID", num_args = 1..)]
@@ -130,15 +163,6 @@ pub struct ScopeArgs {
     pub oracle: Option<String>,
     #[arg(long, value_name = "N")]
     pub cases: Option<u64>,
-}
-
-/// Run depth; the names are the cost classes (design §5.8).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
-pub enum Depth {
-    Quick,
-    Standard,
-    Deep,
-    Exhaustive,
 }
 
 /// The verbs of design §6.2. The analysis verbs carry `ScopeArgs` for parsing even though their
@@ -216,6 +240,17 @@ impl VerbArgs {
             Self::Tests { .. } => Verb::Tests,
             Self::Suppress { .. } => Verb::Suppress,
             Self::Serve { .. } => Verb::Serve,
+        }
+    }
+
+    /// The scope, depth, and selection flags, for the verbs that take them.
+    pub fn scope(&self) -> Option<&ScopeArgs> {
+        match self {
+            Self::Check { scope }
+            | Self::Survey { scope }
+            | Self::Explain { scope, .. }
+            | Self::Tests { scope, .. } => Some(scope),
+            _ => None,
         }
     }
 
