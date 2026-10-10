@@ -302,7 +302,7 @@ ADRs: [011](adr/CUPEL_DECISION_011.md) (language identity in core), [012](adr/CU
 
 #### P0.4 Configuration
 
-**Status:** not started
+**Status:** in progress (2026-10-10)
 
 - `cupel.toml` model per §6.7 with `serde` + `toml`; unknown keys at any level are usage errors (exit 2) listing valid keys.
 - Discovery: `--config PATH`, else nearest `cupel.toml` walking up from `--cwd` (default: current dir); `--cwd` establishes repo root — **never** rely on process cwd elsewhere.
