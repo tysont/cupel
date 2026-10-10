@@ -31,6 +31,8 @@
           "mutation-sites",
           "test-frames",
           "module-graph",
+          "api-surface",
+          "roots",
           "test-conventions"
         ],
         "family": "ecma",
@@ -81,6 +83,8 @@
           "mutation-sites",
           "test-frames",
           "module-graph",
+          "api-surface",
+          "roots",
           "test-conventions"
         ],
         "family": "ecma",

@@ -1,0 +1,380 @@
+{
+  "roots": [
+    {
+      "reason": "entry-point",
+      "symbol": {
+        "col": 1,
+        "file": "bin/cli.js",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "packages/shapes/lib/square.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.js",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.js",
+        "line": 19
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/decide.js",
+        "line": 30
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/format.cjs",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/inline.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 17,
+        "file": "src/inline.js",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/ledger.js",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/math.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/math.js",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/money/cents.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 16,
+        "file": "src/plugin.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 16,
+        "file": "src/plugin.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/pricing.js",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/report.cjs",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.js",
+        "line": 2
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.js",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/shapes/geometry.js",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 14,
+        "file": "src/shapes/geometry.js",
+        "line": 19
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 16
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 25
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 30
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/twins.js",
+        "line": 38
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 39,
+        "file": "test/decide.test.js",
+        "line": 5
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 45,
+        "file": "test/decide.test.js",
+        "line": 9
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "test/decide.test.js",
+        "line": 13
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 37,
+        "file": "test/decide.test.js",
+        "line": 18
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 28,
+        "file": "test/format.spec.js",
+        "line": 6
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 35,
+        "file": "test/format.spec.js",
+        "line": 10
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 26,
+        "file": "test/math.test.js",
+        "line": 14
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 37,
+        "file": "test/math.test.js",
+        "line": 18
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 33,
+        "file": "test/math.test.js",
+        "line": 22
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 30,
+        "file": "test/math.test.js",
+        "line": 26
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 35,
+        "file": "test/math.test.js",
+        "line": 30
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 40,
+        "file": "test/math.test.js",
+        "line": 34
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "test/math.test.js",
+        "line": 40
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 27,
+        "file": "test/math.test.js",
+        "line": 44
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 36,
+        "file": "test/math.test.js",
+        "line": 48
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 32,
+        "file": "test/math.test.js",
+        "line": 52
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 34,
+        "file": "test/report.test.js",
+        "line": 5
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 35,
+        "file": "test/report.test.js",
+        "line": 9
+      }
+    }
+  ]
+}

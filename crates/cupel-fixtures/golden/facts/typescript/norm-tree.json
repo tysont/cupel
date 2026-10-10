@@ -1,6 +1,129 @@
 {
   "symbols": [
     {
+      "hash": "sh_26e147c2e6b3fe48",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "log"
+                          }
+                        ],
+                        "label": "member_expression"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "add"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "Number"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "$lit"
+                                              }
+                                            ],
+                                            "label": "subscript_expression"
+                                          }
+                                        ],
+                                        "label": "arguments"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "Number"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "$lit"
+                                              }
+                                            ],
+                                            "label": "subscript_expression"
+                                          }
+                                        ],
+                                        "label": "arguments"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  }
+                                ],
+                                "label": "arguments"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "bin/cli.ts",
+        "line": 4
+      }
+    },
+    {
       "hash": "sh_b8a9d7f6fbed4c61",
       "root": {
         "children": [

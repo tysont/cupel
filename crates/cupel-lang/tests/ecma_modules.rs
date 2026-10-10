@@ -62,6 +62,13 @@ fn under(root: &str, edges: &[Edge]) -> Vec<Row> {
 const JAVASCRIPT_EDGES: &[Edge] = &[
     ("bin/cli.js", 2, "../src/math.js", "src/math.js", true),
     (
+        "src/index.js",
+        1,
+        "./shapes/geometry.js",
+        "src/shapes/geometry.js",
+        true,
+    ),
+    (
         "src/ledger.js",
         1,
         "node:fs/promises",
@@ -158,6 +165,7 @@ const JAVASCRIPT_SHAPES_EDGES: &[Edge] = &[(
 )];
 
 const TYPESCRIPT_EDGES: &[Edge] = &[
+    ("bin/cli.ts", 2, "../src/math", "src/math.ts", true),
     (
         "src/__tests__/pricing.test.ts",
         1,
@@ -170,6 +178,13 @@ const TYPESCRIPT_EDGES: &[Edge] = &[
         2,
         "../pricing",
         "src/pricing.ts",
+        true,
+    ),
+    (
+        "src/index.ts",
+        1,
+        "./shapes/geometry",
+        "src/shapes/geometry.ts",
         true,
     ),
     ("src/ledger.ts", 1, "node:fs", "external:node:fs", false),

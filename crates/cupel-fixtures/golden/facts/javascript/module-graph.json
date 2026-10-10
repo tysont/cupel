@@ -13,6 +13,16 @@
           }
         },
         {
+          "from": "src/index.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "./shapes/geometry.js",
+          "target": {
+            "kind": "file",
+            "path": "src/shapes/geometry.js"
+          }
+        },
+        {
           "from": "src/ledger.js",
           "line": 1,
           "relative": false,

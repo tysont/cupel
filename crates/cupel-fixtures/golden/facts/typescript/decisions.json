@@ -3,6 +3,14 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 1,
+        "file": "bin/cli.ts",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 8,
         "file": "packages/shapes/src/index.ts",
         "line": 1

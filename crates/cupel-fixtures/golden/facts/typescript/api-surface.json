@@ -1,0 +1,472 @@
+{
+  "items": [
+    {
+      "file": "packages/shapes/src/index.ts",
+      "kind": "function",
+      "path": "square",
+      "signature": "(_: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/decide.ts",
+      "kind": "interface",
+      "path": "decide.Entry",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/decide.ts",
+      "kind": "function",
+      "path": "decide.classify",
+      "signature": "(_: number, _: number): string",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/decide.ts",
+      "kind": "function",
+      "path": "decide.firstOverdraft",
+      "signature": "(_: Entry[]): Entry | null",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 14
+      }
+    },
+    {
+      "file": "src/decide.ts",
+      "kind": "function",
+      "path": "decide.label",
+      "signature": "(_: \" deposit \" | \" withdrawal \" | string): string",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 23
+      }
+    },
+    {
+      "file": "src/decide.ts",
+      "kind": "function",
+      "path": "decide.parseCents",
+      "signature": "(_: string | undefined): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 34
+      }
+    },
+    {
+      "file": "src/index.ts",
+      "kind": "module",
+      "path": "geometry",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 1,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/index.ts",
+      "kind": "constant",
+      "path": "MAX_ENTRIES",
+      "signature": "number",
+      "span": {
+        "col": 14,
+        "end_col": 39,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/index.ts",
+      "kind": "variable",
+      "path": "currency",
+      "signature": "string",
+      "span": {
+        "col": 12,
+        "end_col": 36,
+        "end_line": 5,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/index.ts",
+      "kind": "type",
+      "path": "Cents",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 28,
+        "end_line": 7,
+        "line": 7
+      }
+    },
+    {
+      "file": "src/index.ts",
+      "kind": "type",
+      "path": "Currency",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/inline.ts",
+      "kind": "function",
+      "path": "inline.double",
+      "signature": "(_: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/ledger.ts",
+      "kind": "function",
+      "path": "ledger.load",
+      "signature": "(_: string, _: Registry): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 13
+      }
+    },
+    {
+      "file": "src/legacy.ts",
+      "kind": "function",
+      "path": "legacy.Legacy.round",
+      "signature": "(_: number): number",
+      "span": {
+        "col": 10,
+        "end_col": 4,
+        "end_line": 4,
+        "line": 2
+      }
+    },
+    {
+      "file": "src/legacy.ts",
+      "kind": "module",
+      "path": "legacy.Legacy",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 7,
+        "line": 7
+      }
+    },
+    {
+      "file": "src/math.ts",
+      "kind": "function",
+      "path": "math.add",
+      "signature": "(_: number, _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/math.ts",
+      "kind": "function",
+      "path": "math.range",
+      "signature": "(_: number, _: number): Generator<number>",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/plugin.ts",
+      "kind": "interface",
+      "path": "plugin.Registry",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/plugin.ts",
+      "kind": "method",
+      "path": "plugin.Registry.register",
+      "signature": "(_: string, _: { version: number }): void",
+      "span": {
+        "col": 3,
+        "end_col": 61,
+        "end_line": 2,
+        "line": 2
+      }
+    },
+    {
+      "file": "src/plugin.ts",
+      "kind": "function",
+      "path": "plugin.default",
+      "signature": "(_: Registry): void",
+      "span": {
+        "col": 16,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/pricing.ts",
+      "kind": "function",
+      "path": "pricing.discounted",
+      "signature": "(_: number, _: boolean): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/pricing.ts",
+      "kind": "function",
+      "path": "pricing.tally",
+      "signature": "(_: number[]): { total: number; overdrawn: boolean }",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/shapes/geometry.ts",
+      "kind": "type",
+      "path": "shapes.geometry.Shape",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "path": "shapes.geometry.Shape.area",
+      "signature": "(): number",
+      "span": {
+        "col": 3,
+        "end_col": 26,
+        "end_line": 2,
+        "line": 2
+      }
+    },
+    {
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "path": "shapes.geometry.Shape.describe",
+      "signature": "(): string",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 6,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/shapes/geometry.ts",
+      "kind": "type",
+      "path": "shapes.geometry.Circle",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "path": "shapes.geometry.Circle.constructor",
+      "signature": "(readonly _: number)",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "path": "shapes.geometry.Circle.area",
+      "signature": "(): number",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 16,
+        "line": 14
+      }
+    },
+    {
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "path": "shapes.geometry.Circle.unit",
+      "signature": "(): Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 20,
+        "line": 18
+      }
+    },
+    {
+      "file": "src/shapes/geometry.ts",
+      "kind": "function",
+      "path": "shapes.geometry.scale",
+      "signature": "(_: Circle, _: number): Circle",
+      "span": {
+        "col": 14,
+        "end_col": 37,
+        "end_line": 30,
+        "line": 29
+      }
+    },
+    {
+      "file": "src/shapes/index.ts",
+      "kind": "module",
+      "path": "shapes.math",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 33,
+        "end_line": 2,
+        "line": 2
+      }
+    },
+    {
+      "file": "src/twins.ts",
+      "kind": "function",
+      "path": "twins.netTotal",
+      "signature": "(_: number[], _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/twins.ts",
+      "kind": "function",
+      "path": "twins.sumAfterCharge",
+      "signature": "(_: readonly number[], _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/twins.ts",
+      "kind": "function",
+      "path": "twins.netTotalFloor",
+      "signature": "(_: number[], _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 11
+      }
+    },
+    {
+      "file": "src/twins.ts",
+      "kind": "function",
+      "path": "twins.netTotalLaidOut",
+      "signature": "(_: number[], _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 16
+      }
+    },
+    {
+      "file": "src/twins.ts",
+      "kind": "function",
+      "path": "twins.netTotalPlus",
+      "signature": "(_: number[], _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 28
+      }
+    },
+    {
+      "file": "src/twins.ts",
+      "kind": "function",
+      "path": "twins.netTotalCapped",
+      "signature": "(_: number[], _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 33
+      }
+    },
+    {
+      "file": "src/twins.ts",
+      "kind": "function",
+      "path": "twins.netTotalProduct",
+      "signature": "(_: number[], _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 41
+      }
+    },
+    {
+      "file": "src/widget.tsx",
+      "kind": "function",
+      "path": "widget.Badge",
+      "signature": "(_: { label: string; count: number })",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    }
+  ]
+}

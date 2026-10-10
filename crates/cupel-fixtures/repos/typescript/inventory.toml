@@ -251,3 +251,49 @@ expect = { target = { package = "node:fs" } }
 [module-graph.unresolved]
 file = "src/ledger.ts"
 name = "./generated"
+
+[api-surface.function]
+file = "src/math.ts"
+name = "math.add"
+expect = { signature = "(_: number, _: number): number" }
+
+[api-surface.method]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.Circle.area"
+
+[api-surface.type]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.Circle"
+
+[api-surface.interface]
+file = "src/plugin.ts"
+name = "plugin.Registry"
+
+[api-surface.constant]
+file = "src/index.ts"
+name = "MAX_ENTRIES"
+expect = { signature = "number" }
+
+[api-surface.variable]
+file = "src/index.ts"
+name = "currency"
+
+[api-surface.module]
+file = "src/index.ts"
+name = "geometry"
+
+[roots.entry-point]
+file = "bin/cli.ts"
+name = "bin.cli.main"
+
+[roots.export]
+file = "src/math.ts"
+name = "math.add"
+
+[roots.test]
+file = "src/math.test.ts"
+name = "math.add.adds two numbers"
+
+[roots.hook]
+file = "src/plugin.ts"
+name = "plugin.default"

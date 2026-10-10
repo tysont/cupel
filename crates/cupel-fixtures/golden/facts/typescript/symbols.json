@@ -2,6 +2,27 @@
   "symbols": [
     {
       "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "display": "bin.cli.main",
+      "file": "bin/cli.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "main",
+      "namespace": "bin.cli",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 46,
         "end_col": 2,
         "end_line": 3,

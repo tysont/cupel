@@ -3,6 +3,16 @@
     {
       "edges": [
         {
+          "from": "bin/cli.ts",
+          "line": 2,
+          "relative": true,
+          "specifier": "../src/math",
+          "target": {
+            "kind": "file",
+            "path": "src/math.ts"
+          }
+        },
+        {
           "from": "src/__tests__/pricing.test.ts",
           "line": 1,
           "relative": false,
@@ -20,6 +30,16 @@
           "target": {
             "kind": "file",
             "path": "src/pricing.ts"
+          }
+        },
+        {
+          "from": "src/index.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "./shapes/geometry",
+          "target": {
+            "kind": "file",
+            "path": "src/shapes/geometry.ts"
           }
         },
         {

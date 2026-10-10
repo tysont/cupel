@@ -16,8 +16,8 @@
 //! └── tables.toml   # data the generic producers read (see `Tables`)
 //! ```
 //!
-//! `javascript` and `typescript` share `langs/ecma/`; TypeScript appends the files under
-//! `langs/ecma/queries/typescript/` to the shared queries of the same name (ADR-023). Every
+//! `javascript` and `typescript` share `langs/ecma/`; each places the files under
+//! `langs/ecma/queries/<id>/` before the shared queries of the same name (ADR-023). Every
 //! `.scm` file must be listed in its language's `include_str!` table; a test fails otherwise.
 //!
 //! A generic producer is registered for a language exactly when the language has the query

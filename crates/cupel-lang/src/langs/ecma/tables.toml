@@ -208,3 +208,8 @@ template = "{base}test/{module}.spec{ext}"
 [[conventions.tests_for]]
 template = "{path}"
 contains = "import.meta.vitest"
+
+# Node scripts conventionally call a `main` function; default exports are framework hooks,
+# captured in api.scm.
+[roots]
+entry_points = ["main"]

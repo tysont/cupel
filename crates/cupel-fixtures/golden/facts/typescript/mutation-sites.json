@@ -3,6 +3,60 @@
     {
       "sites": [
         {
+          "from": "console.log(add(Number(argv[2]), Number(argv[3])));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "c000cc3d3cf43389",
+          "span": {
+            "col": 3,
+            "end_col": 54,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e8f011c37640bb63",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a98370d225df6d09",
+          "span": {
+            "col": 48,
+            "end_col": 49,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "bin/cli.ts",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "side * side",
           "operator": "return-value",
           "set": "extended",

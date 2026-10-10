@@ -13,6 +13,8 @@ facts
   mutation-sites    lang.typescript (quick)
   test-frames       lang.typescript (quick)
   module-graph      lang.typescript (quick)
+  api-surface       lang.typescript (quick)
+  roots             lang.typescript (quick)
   test-conventions  lang.typescript (quick)
 
 checks
