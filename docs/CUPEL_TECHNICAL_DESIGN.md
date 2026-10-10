@@ -21,7 +21,7 @@ Cupel is inspired by Robert C. Martin's `crapper`, `dryer`, `mutator`, `scrap`, 
 - Every verb, check, flag, finding kind, exit code, and schema is self-described by the binary.
 - `--dry-run` on every verb; nothing written outside `.cupel/` without `--write`.
 - Diff-scoped by default, differential against a baseline, cached by content hash.
-- Modular: new techniques plug in as native checks or external-process plugins without touching the core; new languages plug in as a declarative adapter (tree-sitter queries + tables) validated by a shared conformance suite (§8.3).
+- Modular along three independent axes — techniques, languages, external tools — joined through a small vocabulary of language-neutral facts (§8.3). A new check works for every language that already produces the facts it needs; a new language lights up every check whose facts it can produce; a new tool is one producer. The support matrix is computed and self-described, never hand-maintained.
 - Launch languages: JavaScript/TypeScript, Rust, Go, Python — every check that applies to a language works for all four from the first release.
 - Fast enough to live in an agent's inner loop: static checks in seconds, diff-scoped mutation in minutes.
 
@@ -59,8 +59,10 @@ All three share one architecture: a Python CLI that walks a tree, auto-detects s
 | **Tier** | Evidence grade of a check, 0–6. Higher tiers are stronger evidence of correctness. |
 | **Oracle** | Something to compare against: an old ref, a reference implementation, a formal spec. Registered and verified via `cupel oracle`. |
 | **Baseline** | A named prior run. Deltas (`new_since_baseline`, `summary.new/resolved`) are computed against it. |
-| **Language adapter** | Everything Cupel knows about one language: grammar(s), symbol/decision/mutation/test/import extraction, normalization rules, ecosystem conventions, and a capability declaration. Mostly declarative (tree-sitter queries + tables). Languages in the same **family** (JavaScript + TypeScript) are comparable for clone detection. |
-| **Adapter** | Wrapper over an external tool that produces a shared intermediate (coverage map, test results, benchmark samples). Checks consume adapters; adapters are DAG prerequisites. Registered per language in a toolchain table. |
+| **Fact** | A typed, versioned, language-neutral intermediate (`Symbols`, `Decisions`, `TestFrames`, `CoverageMap`, `MutationOutcomes`, …). Facts encode semantics, not syntax. Every check consumes only facts; every language, tool, and engine only produces them. The fact vocabulary is the one slow-changing contract that keeps checks × languages × tools from multiplying (§8.3). |
+| **Producer** | Anything that makes a fact: a **language producer** (from the syntax tree, mostly declarative), a **tool producer** (from an external tool's output), or an **engine** (from executing something, e.g. the mutation engine). Declares which languages it serves and which facts it needs. |
+| **Language** | Grammar(s), a declarative `LanguageSpec` (tree-sitter queries + tables), and the producers it registers. Languages in the same **family** (JavaScript + TypeScript) are comparable for clone detection. |
+| **Support matrix** | The computed table of (check, language) → `supported \| unsupported(fact) \| unavailable(tool)`, derived from check needs and registered producers. Rendered by `describe matrix`; enforced by the test suite. |
 | **Plugin** | A check implemented outside the core binary, speaking the plugin protocol over stdio (or WASM later). |
 | **Gate** | A policy in `cupel.toml` evaluated at the end of a run to produce pass/fail. |
 | **Envelope** | The single JSON output shape every verb returns. |
@@ -88,7 +90,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 | ID | Measures | Finding kinds | Build/wrap |
 |---|---|---|---|
 | `static.complexity` | Cyclomatic, cognitive (nesting-weighted), nesting depth, param count, length per symbol | `complexity.high`, `nesting.deep`, `params.many`, `function.long` | build |
-| `static.crap` | `CC² × (1 − coverage)³ + CC`; requires `tests.coverage` adapter or `--no-coverage` (CC only) | `crap.high` (≥30), `crap.watch` (5–30) | build |
+| `static.crap` | `CC² × (1 − coverage)³ + CC`; wants `CoverageMap`; `--no-coverage` forces (CC only) | `crap.high` (≥30), `crap.watch` (5–30) | build |
 | `static.clones` | Type 1/2/3 clones via normalized-AST subtree fingerprints + Jaccard; MinHash bucketing before pairwise | `clone.pair`, `clone.cluster` | build |
 | `static.deps` | Module graph: afferent/efferent coupling, instability, abstractness, distance from main sequence, cycles, layering-rule violations from config | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | build |
 | `static.api-surface` | Public API diff vs base: removed/changed signatures, visibility changes | `api.breaking`, `api.widened` | build + wrap (`cargo-semver-checks`, `api-extractor` where present) |
@@ -99,11 +101,11 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 
 | ID | Measures | Finding kinds | Cost | Build/wrap |
 |---|---|---|---|---|
-| `tests.coverage` | Line/branch coverage; MC/DC where tooling supports; **per-test coverage map** when available | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | standard | wrap (adapters) |
+| `tests.coverage` | Line/branch coverage; MC/DC where tooling supports; **per-test coverage map** when available | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | standard | wrap (coverage producers) |
 | `tests.mutation` | Killed / (killed + survived) over covered sites; coverage-gated; differential; per-test selection; schemata for compiled langs | `mutant.survived`, `mutant.timeout`, `mutant.uncovered`, `mutant.equivalent?` (low confidence) | standard (changed symbols) / deep (touched files) / exhaustive (tree) | build (Py, Go, Rust, TS) + wrap (PIT for JVM, Stryker optional) |
 | `tests.quality` | SCRAP-style: assertion density, weak assertions, mock density, logic in tests, duplicated setup | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | quick | build |
 | `tests.weakening` | **Diff of the test suite itself** vs base: removed assertions, skipped/disabled tests, loosened matchers, rewritten snapshots, widened `any`-style matchers | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | quick | build |
-| `tests.flaky` | Rerun impacted tests N times with shuffled order, varied seeds, parallelism | `test.flaky`, `test.order-dependent` | standard | build over runner adapters |
+| `tests.flaky` | Rerun impacted tests N times with shuffled order, varied seeds, parallelism | `test.flaky`, `test.order-dependent` | standard | build over runner producers |
 
 `tests.weakening` findings default to `severity: fail`. Agents routinely make tests pass by making tests weaker; this check watches the agent's own tail.
 
@@ -179,7 +181,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 
 ```
 cupel init        detect languages, project roots, test/coverage commands; write cupel.toml
-cupel doctor      verify toolchain, adapters, oracles, config; emit install_tool/configure actions
+cupel doctor      verify toolchain, tool producers, oracles, config; emit install_tool/configure actions
 cupel describe    self-description of CLI, verb, check, finding kind, or schema
 cupel check       run checks over a scope at a depth; evaluate gate
 cupel survey      rank a whole tree without a baseline: hot spots, weakest-tested, clone clusters
@@ -210,7 +212,7 @@ Deliberately absent: `fix` (agent fixes), `report` (envelope is the report; `--f
 --seed N                           # for generative checks; recorded in envelope
 --limit N --offset N               # findings paging
 --no-color
---no-install | --install           # auto-install adapter tooling (default: --no-install unless TTY)
+--no-install | --install           # auto-install producer tooling (default: --no-install unless TTY)
 --write                            # permit writes outside .cupel/
 ```
 
@@ -243,7 +245,7 @@ Scope resolution: `--symbols` ⊂ `--paths` ⊂ `--changed`/range ⊂ tree. Mult
 
 **`init`** — Detects project roots (Cargo workspace, go.work, npm/pnpm/yarn workspaces, uv/poetry/pip, Maven/Gradle, deps.edn), languages, test command, coverage command, benchmark command. Writes `cupel.toml` and `.cupel/.gitignore` only with `--write`. `--dry-run` shows the file. Never overwrites an existing `cupel.toml` without `--force`.
 
-**`doctor`** — Checks binary version vs `required_version`, every adapter tool's presence and version, oracle reachability (`oracle verify --all`), config validity, write access to `.cupel/`. Each problem is a finding with `action.kind: install_tool | configure`. Exit 3 if anything required for the configured checks is missing; 0 otherwise. `--fix --install` attempts installs.
+**`doctor`** — Checks binary version vs `required_version`, every selected tool producer's presence and version, oracle reachability (`oracle verify --all`), config validity, write access to `.cupel/`. Each problem is a finding with `action.kind: install_tool | configure`. Exit 3 if anything required for the configured checks is missing; 0 otherwise. `--fix --install` attempts installs.
 
 **`describe`**
 
@@ -253,9 +255,11 @@ cupel describe <verb>                   # flags with types/defaults/enums, examp
 cupel describe <check-id>               # what it measures, tier, cost, languages, prereqs, operators/params,
                                         #   finding kinds + how to act on each, known limitations, stability
 cupel describe finding <kind>           # fields, evidence shape, action kinds it produces
-cupel describe language <id>            # extensions, family, capabilities, which checks apply and which are
+cupel describe language <id>            # extensions, family, facts it produces, which checks apply and which are
                                         #   unsupported and why, known runners/coverage/bench tools, stability
 cupel describe languages                # all languages, one line each
+cupel describe fact <kind>              # schema, version, producers per language, checks that consume it
+cupel describe matrix                   # checks × languages: supported | unsupported(fact) | unavailable(tool)
 cupel describe schema run|finding|events|config|plugin   # JSON Schema (draft 2020-12)
 cupel describe --agent                  # ~60 lines markdown for CLAUDE.md / AGENTS.md
 cupel describe --all                    # everything, one JSON document
@@ -329,6 +333,12 @@ map   = { domain = "src/domain/**", app = "src/app/**", infra = "src/infra/**" }
 timeout_factor = 10
 exclude_tags   = ["no-mutate"]
 
+[checks."tests.mutation".lang.python]    # per-language override of any check setting
+operators = "extended"
+
+[checks."static.complexity".lang.go]
+cyclomatic_max = 15
+
 [oracles.pg]
 kind = "command"
 cmd  = "psql -X -A -t -c {input}"
@@ -353,6 +363,8 @@ budget = "20s"
 ```
 
 Gate rule keys are `<check-id>.<metric>` or `<check-id>` (presence); operators `>= > <= < == none no-breaking`. Unknown keys are a usage error (exit 2) with the list of valid keys.
+
+Configuration follows the three axes: `[checks."<id>"]` is language-neutral, `[checks."<id>".lang.<lang>]` overrides it for one language, and `[lang.<lang>]` chooses tools and producers for that language (`coverage = "coverage.py"` pins a producer when several exist). A check never reads `[lang.*]`; a producer never reads `[checks.*]`.
 
 ### 6.8 Dry run
 
@@ -522,79 +534,157 @@ Go is a defensible second choice. Python is ruled out (startup, venvs, the thing
 
 ```
 cupel-cli        clap (derive) arg parsing; format rendering; exit codes; daemon auto-connect
-cupel-core       scope resolution; task DAG + scheduler; budget; cache keys; Envelope/Finding types (schemars)
-cupel-lang       LanguageAdapter trait; one directory per language holding tree-sitter queries (.scm) and
-                 tables (.toml) plus thin Rust glue; grammars compiled in; conformance suite
+cupel-core       fact types + Fact/Producer/Check traits + registries + support matrix; scope resolution;
+                 fact DAG + scheduler; budget; cache keys; Envelope/Finding types (schemars)
+cupel-lang       Language trait; generic query-driven producers; one directory per language holding
+                 tree-sitter queries (.scm) and tables (.toml) plus thin Rust glue; grammars compiled in
 cupel-store      SQLite fact store (rusqlite, WAL); migrations; queries
-cupel-plugin     plugin protocol types; external-process host; manifest validation
-cupel-adapt-*    coverage parsers (lcov, cobertura, jacoco-xml, go-coverprofile, istanbul-json),
-                 runner adapters (nextest, cargo test, go test -json, pytest, vitest/jest, mvn/gradle, clj),
-                 bench adapters (criterion, benchstat, hyperfine)
-cupel-check-*    one crate per native check
+cupel-plugin     plugin protocol types; external-process host for check and producer plugins
+cupel-adapt      tool producers: coverage parsers (lcov, cobertura, jacoco-xml, go-coverprofile, istanbul-json),
+                 runners (nextest, cargo test, go test -json, pytest, vitest/jest, mvn/gradle, clj),
+                 bench (criterion, benchstat, hyperfine); the per-language toolchain table
+cupel-mutate     mutation engine: a producer of MutationOutcomes (overlays, schemata, gating, selection)
+cupel-checks     native checks, one module per check; depends on cupel-core only
 cupel-serve      daemon, Unix socket protocol, MCP server, file watcher
-cupel-fixtures   per-language fixture repos keyed to a shared construct inventory + golden envelopes (dev-dependency)
+cupel-fixtures   per-language fixture repos keyed to per-fact conformance inventories + golden envelopes
+                 (dev-dependency)
 ```
 
-Cargo workspace; the CLI binary links all native checks. `cupel-core` owns the types; JSON Schemas are generated from them with `schemars` at build time and embedded, so `describe schema` and the serializer cannot drift.
+Cargo workspace; the CLI binary links all native checks and producers. `cupel-core` owns the types; JSON Schemas are generated from them with `schemars` at build time and embedded, so `describe schema` and the serializer cannot drift.
 
-### 8.3 Language layer
+The dependency graph enforces the extension model: `cupel-checks` depends on `cupel-core` and nothing else — it cannot name tree-sitter, a language, or a process. `cupel-lang`, `cupel-adapt`, and `cupel-mutate` depend on `cupel-core` and never on `cupel-checks` or each other. Only `cupel-cli` sees everything.
 
-The language layer is Cupel's primary extension point. It is designed so that adding a language is mostly **writing data** — tree-sitter queries and tables — against a **shared conformance suite**, with Rust code only where a language is genuinely idiosyncratic (module resolution, normalization quirks, schemata).
+### 8.3 Extension model: facts, producers, checks
 
-#### 8.3.1 The trait
+Cupel extends along three axes that multiply: verification techniques (checks), languages, and external tools. If any check knew about any language or tool, N checks × M languages × T tools would be the implementation cost, and every addition on one axis would mean work on the others. The architecture collapses the product into a sum by routing everything through a small, slow-changing vocabulary of **facts**.
+
+#### 8.3.1 The rule
+
+- **Checks consume facts.** A check is a pure function from facts and configuration to findings and a score. It never sees a syntax tree, a language, a file system, or a process. `cupel-checks` cannot compile against anything language-specific (§8.2).
+- **Producers make facts.** Three kinds: *language producers* (syntactic facts from the CST, mostly declarative), *tool producers* (facts from an external tool's output), and *engines* (facts from executing something — the mutation engine, the flake re-runner). Producers may need other facts.
+- **Facts are semantic, typed, versioned, language-tagged, content-addressed, and cached.** A fact encodes what a construct *means*, not how it is spelled: `TestFrames` says `Assertion { kind: Equality, strength: Weak }`, not `assert.equal`. The producer owns the idiom-to-semantics mapping; the check owns what the semantics mean for quality.
+
+Consequences:
+
+| Adding a… | Work | Touches |
+|---|---|---|
+| check over existing facts | one module in `cupel-checks` + goldens | nothing language- or tool-specific; works for every language that produces its facts |
+| language | producers for the facts it can provide + fixtures | `cupel-lang/langs/<id>/`, `cupel-fixtures/repos/<id>/`, one toolchain-table row |
+| tool | one producer | `cupel-adapt`, one toolchain-table cell |
+| **fact kind** | type + schema + conformance inventory + producers for each language that can supply it | the vocabulary — this is the only operation that costs across axes, and it requires an ADR |
+
+A language that lacks a producer for some fact simply does not support the checks that need it, and the support matrix says so. Nothing breaks; coverage gaps are visible, not silent.
+
+#### 8.3.2 Fact catalog (v1)
+
+Syntactic facts come from language producers and are keyed by file content hash and producer version. Execution facts come from tools and engines and are keyed by their input facts and the toolchain hash.
+
+| Fact | Content (semantic) | Produced by | Consumed by |
+|---|---|---|---|
+| `Symbols` | functions/methods: display name, namespace, visibility, span, body ref, `lang` | language | everything |
+| `Decisions` | per symbol: `Decision { kind: Branch \| Loop \| BooleanOp \| Case \| Catch \| EarlyReturn \| Ternary, nesting }` | language | `static.complexity`, `static.crap` |
+| `NormTree` | normalized AST per symbol; yields `symbol.hash` | language | identity everywhere, `static.clones` |
+| `MutationSites` | per symbol: `Site { operator: Relational \| Arith \| Boolean \| Literal \| …, set: Default \| Extended, from, to[], site_hash }` | language | mutation engine |
+| `TestFrames` | test cases: `Assertion { kind: Equality \| Truthiness \| NotNull \| Throws \| Snapshot \| Custom, strength }`, mocks, skip markers, setup blocks, framework | language | `tests.quality`, `tests.weakening`, `tests.flaky` |
+| `ModuleGraph` | resolved import edges per root: `File \| External \| Unresolved`, with relative-import flags | language | `static.deps`, `static.dead-code`, impact fallback, overlays |
+| `ApiSurface` | public items with normalized signatures | language | `static.api-surface` |
+| `Roots` | symbols live by convention (entry points, exports, tests, framework hooks) | language | `static.dead-code` |
+| `TestConventions` | test files for a source file; is-test predicate | language | `write_test` hints, scope |
+| `ProjectInfo` | roots, build files, default commands, dirs to skip | language | `init`, `doctor`, toolchain selection |
+| `TestResults` | per test: outcome, duration | runner tool | baseline/exit 4, `tests.flaky`, mutation engine |
+| `CoverageMap` | line + optional branch hits; `branches: Option<_>` says whether the producer measures branches | coverage tool | `tests.coverage`, `static.crap`, mutation engine |
+| `PerTestMap` | `test_id → lines` | coverage tool | `tests --impacted`, mutation engine |
+| `MutationOutcomes` | per site: killed/survived/timeout/uncovered, killing tests, duration | mutation engine · PIT/Stryker tool | `tests.mutation` |
+| `BenchSamples` | per benchmark: samples, unit | bench tool | `perf.bench` |
+| `PropertyResults` | per property: passed/falsified, minimized counterexample, seed | property tool | `gen.property` |
+| `FuzzResults` | crashes with reproducers, coverage reached | fuzz tool | `gen.fuzz` |
+| `RaceReports` | races/UB with stacks | race tool | `conc.race` |
+| `AnalyzerReport` | SARIF-normalized results | linter/type-checker tool | `static.analyze` |
+| `DivergenceResults` | per generated input: both outputs, minimized | differential engine | `gen.differential`, `gen.metamorphic` |
+
+P7 adds `Traces`, `Histories`, `ProofResults`, `ContractViolations` under the same rules. Facts carry completeness flags rather than languages carrying capability flags: a `CoverageMap` with `branches: None` makes `tests.coverage` skip branch findings with that reason; whether a language has a per-test map is simply whether a `PerTestMap` producer is registered for it.
+
+#### 8.3.3 Producer contract
 
 ```rust
-pub trait LanguageAdapter: Send + Sync {
-    // ── Identity ────────────────────────────────────────────────────────────
-    fn id(&self) -> LangId;                       // "javascript" | "typescript" | "rust" | "go" | "python" | …
-    fn family(&self) -> LangFamily;               // clone comparability across languages (javascript+typescript = Ecma)
-    fn extensions(&self) -> &[&str];
-    fn grammar(&self, path: &Path) -> tree_sitter::Language;   // one adapter may own several grammars (js/jsx, ts, tsx)
-    fn capabilities(&self) -> &Capabilities;      // what this language supports; see 8.3.2
-    fn spec(&self) -> &LanguageSpec;              // the queries + tables that drive the default implementations
+pub trait Fact: Serialize + DeserializeOwned + JsonSchema + Send + Sync {
+    const KIND: FactKind;
+    const VERSION: u32;                       // bump on incompatible shape change; invalidates downstream cache
+}
 
-    // ── Analysis (default implementations are query-driven from `spec()`; override only when needed) ──
-    /// Functions/methods: display name, namespace, visibility, span, body node.
-    fn symbols(&self, tree: &Tree, src: &[u8]) -> Vec<Symbol>;
-    /// Decision points for cyclomatic and cognitive complexity.
-    fn decision_points(&self, body: Node, src: &[u8]) -> Vec<Decision>;
-    /// Normalized tree: locals/fields/literals/keywords → generic markers; call names, operators, shape kept.
-    fn normalize(&self, body: Node, src: &[u8]) -> NormTree;
-    /// Mutation sites with operator id, operator set (default|extended), replacement text(s), and site_hash.
-    fn mutation_sites(&self, body: Node, src: &[u8]) -> Vec<Site>;
-    /// Test cases with assertions, mocks, skip markers, setup blocks (tests.quality / tests.weakening / tests.flaky).
-    fn test_frames(&self, tree: &Tree, src: &[u8]) -> Vec<TestCase>;
-    /// Import/use/require edges with the raw specifier (static.deps, impact fallback, dead-code, overlays).
-    fn imports(&self, tree: &Tree, src: &[u8]) -> Vec<Import>;
-    /// Public API items with signatures (static.api-surface).
-    fn public_api(&self, tree: &Tree, src: &[u8]) -> Vec<ApiItem>;
-    /// Symbols that are live by convention: entry points, exports, test functions, framework hooks (static.dead-code roots).
-    fn roots(&self, tree: &Tree, src: &[u8], path: &Path) -> Vec<SymbolRef>;
-
-    // ── Ecosystem (always Rust code; these are where languages differ) ──────
-    /// Resolve an import specifier to a file in the tree, or mark it external/unresolved.
-    fn resolve_import(&self, from: &Path, import: &Import, root: &Path) -> Resolution;
-    /// Files that must be copied alongside a mutated file in a file-copy overlay (e.g. Node relative imports).
-    fn overlay_deps(&self, file: &Path, root: &Path) -> Vec<PathBuf>;
-    /// Where tests for this source file live by convention; used for `write_test` hints and nearest_test_file.
-    fn test_files_for(&self, source: &Path, root: &Path) -> Vec<PathBuf>;
-    fn is_test_file(&self, path: &Path) -> bool;
-    /// Project detection: build file, roots, default test/coverage/bench commands, dirs to skip.
-    fn project(&self, root: &Path) -> Option<ProjectInfo>;
-    /// Schemata rewrite for compiled languages (None → file-copy strategy).
-    fn schemata(&self, body: Node, src: &[u8], sites: &[Site]) -> Option<SchemataRewrite>;
+pub trait Producer<F: Fact>: Send + Sync {
+    fn id(&self) -> ProducerId;               // "lang.go", "tool.pytest-cov", "engine.mutation"
+    fn languages(&self) -> Langs;             // Any | Only(&[LangId]) | Family(LangFamily)
+    fn needs(&self) -> &[FactKind];           // the mutation engine needs MutationSites, CoverageMap, TestResults
+    fn cost(&self) -> CostClass;
+    fn availability(&self, ctx: &Ctx) -> Availability;   // Ready | MissingTool { name, install } | Unconfigured { key }
+    fn produce(&self, ctx: &ProduceCtx, scope: &Scope, sink: &mut dyn EventSink) -> Result<F>;
 }
 ```
 
+The registry maps `(FactKind, LangId) → ordered producers`. Selection order: a config pin in `[lang.<lang>]` > toolchain-table default order > first `Ready`. `doctor` reports every `(fact, lang)` pair required by the configured checks that has no `Ready` producer, with the install or configure action.
+
+#### 8.3.4 Check contract
+
+The check `Manifest` declares `needs: &[FactKind]` (required) and `wants: &[FactKind]` (used for enrichment when present — `tests.mutation` wants `TestConventions` for the nearest-test-file hint). The check's `run` receives a `Facts` accessor that serves exactly the declared kinds; requesting anything else is an error that the matrix test catches by running every check with only its declared facts. `CheckCtx` offers config, a scratch dir, a cancellation token, and read access to the store for history — and no API to spawn a process or read source outside the facts. A check's language applicability is never declared; it is derived (§8.3.5).
+
+#### 8.3.5 Support matrix
+
+For every `(check, lang)`:
+
+- `supported` — every fact in `needs` has at least one registered producer for `lang`.
+- `unsupported(fact)` — some needed fact has no producer for `lang`. Permanent until someone writes one.
+- `unavailable(tool)` — supported, but the selected producer's tool is missing here. `doctor` fixes this.
+
+`cupel describe matrix` renders the table with reasons; the README's support matrix is generated from it. In an envelope, a check that did not run for a language records `skipped: { reason: "unsupported" | "unavailable" | "budget" | …, fact, lang, see: "cupel describe matrix" }`. Multi-language scopes run each check once per language present, except where the fact is cross-language by nature (`NormTree` comparisons within a family; `ModuleGraph` per root).
+
+#### 8.3.6 Versioning and caching
+
+Fact cache key: `(kind, fact version, producer id + version, input hashes, toolchain_hash, config slice hash)`. Check result cache key: `(check id + version, hashes of consumed facts, config slice hash)`. Bumping a fact's `VERSION` invalidates exactly its downstream. Finding IDs (§7.2) depend on none of these and survive every upgrade.
+
+#### 8.3.7 Conformance per fact kind
+
+Each fact kind owns a conformance inventory `cupel-fixtures/conformance/<fact>.toml` listing the constructs a producer must recognize (`decisions`: `if`, `loop`, `boolean-op`, `early-return`, `case`, `ternary`, `catch`; `mutation-sites`: `relational`, `equality`, `arith-add-sub`, `arith-mul-div`, `boolean-op`, `boolean-literal`, `zero-one`; `test-frames`: `case`, `assertion-equality`, `assertion-truthiness`, `no-assertion`, `skip`, `mock`, `setup`; and so on). A language producer is admitted for fact `F` only when every construct in `F`'s inventory is mapped in the language's `inventory.toml` to code that exhibits it — or to `not-applicable = "<reason>"` — and the producer detects each one.
+
+The **matrix test** enumerates the registries rather than any hand-written list: for every `supported (check, lang)` a golden `golden/<check>/<lang>.json` must exist and pass; for every `unsupported` pair a test asserts the envelope's `skipped` reason. Adding a producer that flips a pair to `supported` therefore fails the build until its golden exists — which is the point.
+
+#### 8.3.8 Plugins across the axes
+
+External processes can be checks (consume facts, emit findings) or producers (emit a fact — a PIT wrapper producing `MutationOutcomes` for Java is a producer plugin, and `tests.mutation` never learns it exists). Both declare the same manifests as native code and enter the same registries; §8.6.
+
+### 8.4 Language layer
+
+A language is a grammar, a declarative `LanguageSpec`, and the set of producers it registers. Adding a language is mostly **writing data** — tree-sitter queries and tables — that generic producers interpret, with Rust code only where a language is genuinely idiosyncratic (module resolution, project detection, normalization quirks, schemata).
+
+#### 8.4.1 The trait
+
+```rust
+pub trait Language: Send + Sync {
+    fn id(&self) -> LangId;                       // "javascript" | "typescript" | "rust" | "go" | "python" | …
+    fn family(&self) -> LangFamily;               // clone comparability across languages (javascript+typescript = ecma)
+    fn extensions(&self) -> &[&str];
+    fn grammar(&self, path: &Path) -> tree_sitter::Language;   // one language may own several grammars (js/jsx, ts, tsx)
+    fn spec(&self) -> &LanguageSpec;              // queries + tables consumed by the generic producers
+    fn stability(&self) -> Stability;
+    /// Register this language's producers. The generic query-driven producers cover most syntactic facts;
+    /// a language registers a hand-written producer only where queries cannot express the fact.
+    fn register(&self, reg: &mut ProducerRegistry);
+}
+```
+
+The trait is deliberately small and closed. Language knowledge that checks need does not arrive as new trait methods; it arrives as new facts with new producers (§8.3.1), so the trait does not grow with the check catalog.
+
+Generic producers in `cupel-lang`, each driven entirely by `LanguageSpec`: `QuerySymbols → Symbols`, `QueryDecisions → Decisions`, `TableNormalize → NormTree`, `QueryMutationSites → MutationSites`, `QueryTestFrames → TestFrames`, `QueryImports` (raw edges feeding `ModuleGraph`), `QueryApi → ApiSurface`, `QueryRoots → Roots`, `GlobTestConventions → TestConventions`. Hand-written per language: `ModuleGraph` resolution (Node resolution with `package.json` `exports` and `tsconfig` `paths`; Rust `mod` tree and workspace members; Go module paths; Python packages), `ProjectInfo`, and a schemata strategy registered with the mutation engine for compiled languages.
+
 `Symbol.hash` = `blake3(lang ∥ serialize(NormTree))`. This is the join key for metrics, coverage, mutants, baselines, and finding IDs. `NormTree` serialization is language-independent so that symbols in the same family can be compared.
 
-#### 8.3.2 Declarative core: `LanguageSpec` and `Capabilities`
+#### 8.4.2 Declarative core: `LanguageSpec`
 
 Each language lives in `cupel-lang/src/langs/<id>/`:
 
 ```
 langs/go/
-├── mod.rs              # LanguageAdapter impl: identity, ecosystem methods, any overrides
+├── mod.rs              # Language impl: identity, register(), hand-written producers (ModuleGraph, ProjectInfo)
 ├── queries/
 │   ├── symbols.scm     # captures: @symbol.name @symbol.body @symbol.ns @symbol.visibility
 │   ├── decisions.scm   # captures: @decision.<kind> — kinds map to weights in tables.toml
@@ -606,26 +696,11 @@ langs/go/
                         # normalize rules (node kinds to erase/mark), weak-assertion patterns, test-file globs
 ```
 
-Queries are embedded with `include_str!` and compiled against the grammar in a test, so a query that no longer matches a grammar version fails at `make test`, not at runtime. The default trait implementations walk captures and apply tables; an adapter overrides a method only when a construct cannot be expressed as a query (Python's implicit `self` scoping in normalization, Rust macro bodies, Go's method receivers).
+Queries are embedded with `include_str!` and compiled against the grammar in a test, so a query that no longer matches a grammar version fails at `make test`, not at runtime. Capture names are the contract between a query and its generic producer: `decisions.scm` must capture `@decision.branch`, `@decision.loop`, … and `tables.toml` gives each kind its cyclomatic and cognitive weights. A language replaces a generic producer with a hand-written one only when a construct cannot be expressed as a query (Python's implicit `self` scoping in normalization, Rust macro bodies, Go's method receivers), and the replacement must still pass the same conformance inventory.
 
-`Capabilities` is a plain struct that every check consults before planning. A check that needs a capability the language lacks reports `skipped: "<lang> does not support <capability>"` with the describe link, never an error:
+There is no per-language capability struct. What a language supports is exactly the set of facts it has producers for, plus the completeness flags inside the facts those producers emit (§8.3.2). `cupel describe language <id>` renders identity, the facts it produces and by which producer, the checks that are therefore supported or unsupported, and the toolchain-table row (§8.7). The envelope's `scope.languages` lists which languages were active in a run.
 
-```rust
-pub struct Capabilities {
-    pub branch_coverage: bool,
-    pub per_test_coverage: PerTestCoverage,     // Native | ByNarrowing | None
-    pub schemata: bool,
-    pub property_frameworks: &'static [&'static str],   // "proptest", "hypothesis", "fast-check", "rapid"
-    pub fuzz_frameworks: &'static [&'static str],       // "cargo-fuzz", "go test -fuzz", "atheris", "jazzer.js"
-    pub race_detector: Option<&'static str>,            // "go -race", "tsan", "miri"
-    pub contracts: ContractSupport,
-    pub stability: Stability,
-}
-```
-
-`cupel describe language <id>` renders the adapter's identity, capabilities, the checks that apply, and the toolchain table entry (§8.6). The envelope's `scope.languages` lists which adapters were active in a run.
-
-#### 8.3.3 Launch languages and family rules
+#### 8.4.3 Launch languages and family rules
 
 | LangId | Family | Grammars | Notes |
 |---|---|---|---|
@@ -635,73 +710,79 @@ pub struct Capabilities {
 | `go` | `go` | tree-sitter-go | Package-level imports; `go.mod`/`go.work`; per-test coverage by `-run` narrowing; native fuzz and `-race` |
 | `python` | `python` | tree-sitter-python | Package resolution via `__init__.py`, `pyproject`/`setup.cfg` roots; pytest-cov contexts for per-test coverage |
 
-A JavaScript project is a root with `package.json` and no `tsconfig.json`; a TypeScript project has both. Mixed trees get both adapters active and clones are detected across them because they share a family. `[lang.javascript]` and `[lang.typescript]` are both valid config sections; where only one is given it applies to the whole `ecma` family.
+A JavaScript project is a root with `package.json` and no `tsconfig.json`; a TypeScript project has both. Mixed trees get both languages active and clones are detected across them because they share a family. `[lang.javascript]` and `[lang.typescript]` are both valid config sections; where only one is given it applies to the whole `ecma` family.
 
-Java and Clojure follow after launch (§12, P6) using the same adapter contract; Java mutation may delegate to PIT via a wrapping plugin where it is stronger than the native path.
+Java and Clojure follow after launch (§12, P6) using the same contract; Java mutation delegates to PIT through a producer plugin for `MutationOutcomes`, which `tests.mutation` consumes without knowing the difference.
 
 Per-language decision-point and mutation-operator tables follow crapper/mutator's definitions (§3) as the default operator set `default`; an `extended` set adds statement deletion, return-value replacement, constant replacement, boundary (`+1/-1`), and negation. `extended` is opt-in because it increases equivalent-mutant rate.
 
-#### 8.3.4 Conformance suite — the contract for adding a language
+#### 8.4.4 Adding a language
 
-A shared construct inventory at `cupel-fixtures/conformance/constructs.toml` names every construct Cupel's checks care about with a stable ID and the check that consumes it, for example `cc.if`, `cc.loop`, `cc.boolean-op`, `cc.early-return`, `mut.relational`, `mut.arith-add-sub`, `mut.boolean-literal`, `clone.type1`, `clone.type2`, `clone.type3`, `test.no-assertion`, `test.weak-assertion`, `test.skipped`, `dep.cycle`, `dep.external`, `api.public-fn`, `dead.unreferenced-private`.
-
-Each language's fixture repo under `cupel-fixtures/repos/<lang>/` carries an `inventory.toml` mapping every construct ID to the file and symbol that exhibits it, or to `not-applicable = "<reason>"` (Go has no ternary; Rust has no `null`). The conformance test iterates every registered adapter × every construct and asserts the adapter detects it; a missing mapping fails the build. Every check golden exists for every language the check applies to.
-
-Adding a language is therefore a fixed checklist:
+Conformance is owned by fact kinds (§8.3.7), so a language's fixture repo under `cupel-fixtures/repos/<lang>/` carries one `inventory.toml` mapping every construct from every fact inventory to the file and symbol that exhibits it, or to `not-applicable = "<reason>"` (Go has no ternary; Rust has no `null`). The checklist:
 
 1. Add the grammar crate to `[workspace.dependencies]`.
-2. Create `langs/<id>/` with queries and `tables.toml`; implement identity, `Capabilities`, and the ecosystem methods; override analysis methods only where queries cannot express the construct.
-3. Create `cupel-fixtures/repos/<id>/` with an `inventory.toml` covering every construct ID.
-4. Add the toolchain table entry (§8.6): runner adapter(s), coverage producer and format, project detection, bench/property/fuzz/race tools.
-5. Register the adapter; run the conformance suite until green; generate goldens for every applicable check and review each one.
-6. `cupel describe language <id>` is now accurate by construction; add the language to the README matrix.
+2. Create `langs/<id>/` with queries and `tables.toml`; implement `Language`; in `register()` attach the generic producers and hand-write `ModuleGraph` and `ProjectInfo`.
+3. Create `cupel-fixtures/repos/<id>/` with an `inventory.toml` covering every construct in every fact inventory the language will produce.
+4. Add the toolchain-table row (§8.7): runner producers, coverage producer and format, bench/property/fuzz/race tools.
+5. Run the conformance suite until green. The support matrix now shows which checks the language supports; the matrix test demands a golden for each — generate and review them.
+6. `cupel describe language <id>` and `describe matrix` are accurate by construction; regenerate the README matrix.
 
-No change to `cupel-core`, any check, or the CLI is required. If adding a language *does* require one, that is a defect in the extension point and gets an ADR and a fix before the language lands.
+No change to `cupel-core`, `cupel-checks`, or the CLI is required. If adding a language *does* require one, that is a defect in the extension model and gets an ADR and a fix before the language lands. Conversely, a language may launch with partial fact coverage (no `ApiSurface` producer yet, say): the checks that need it show `unsupported(ApiSurface)` for that language, and adding the producer later flips them on without touching anything else.
 
 Languages are compiled in. A stdio language plugin is not offered because parsing is per-file and per-keystroke in the daemon, where process round-trips are too slow; dynamically loaded grammars are a possible later addition (§13).
 
-### 8.4 Check trait (native)
+### 8.5 Check trait (native)
 
 ```rust
 pub trait Check: Send + Sync {
-    fn manifest(&self) -> &Manifest;               // id, tier, cost, languages, prereqs, flags,
-                                                   // finding kinds + action mapping, stability, docs
-    fn plan(&self, ctx: &Ctx, scope: &Scope) -> Result<Plan>;     // targets + cost estimate (== --dry-run)
-    fn run(&self, ctx: &Ctx, plan: &Plan, sink: &mut dyn EventSink) -> Result<CheckResult>;
+    fn manifest(&self) -> &Manifest;               // id, version, tier, cost, needs: [FactKind], wants: [FactKind],
+                                                   // flags, finding kinds + action mapping, metrics (gate keys),
+                                                   // stability, docs
+    fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan>;          // targets + cost estimate (== --dry-run)
+    fn run(&self, ctx: &CheckCtx, facts: &Facts, plan: &Plan, sink: &mut dyn EventSink) -> Result<CheckResult>;
 }
 ```
 
-`Ctx` provides: fact store handle, resolved config, adapter outputs by key (`coverage`, `per_test_map`, `test_results`), toolchain info, cancellation token, workspace scratch dir under `.cupel/work/<run>/`. `EventSink` receives findings and progress; the core serializes to `--events` and accumulates the envelope.
+`Facts` serves exactly the kinds declared in `needs` and `wants` (§8.3.4). `CheckCtx` provides: resolved config for this check (with the per-language override already merged), read-only store access for history, cancellation token, scratch dir under `.cupel/work/<run>/`. It has no file-system, process, or language API: a check cannot do anything but compute over facts. `EventSink` receives findings and progress; the core serializes to `--events` and accumulates the envelope.
 
-Checks never spawn test runners directly; they request a runner adapter via `ctx.runner(lang)` so the scheduler can account for cost and the fact store can record per-test outcomes.
+All execution lives in producers. `tests.mutation` does not run mutants — the mutation engine produces `MutationOutcomes` and the check scores them and writes findings. `tests.flaky` does not re-run tests — a flake engine produces repeated `TestResults`. This is what lets a PIT wrapper or a future Stryker wrapper feed the same check, and what keeps the scheduler able to account for every process spawned.
 
-### 8.5 Plugin protocol (external process)
+### 8.6 Plugin protocol (external process)
 
-Discovery: entries under `[plugins]` in `cupel.toml`, plus any `cupel-check-*` executable on `$PATH` (disabled by `--no-path-plugins`).
+Discovery: entries under `[plugins]` in `cupel.toml`, plus any `cupel-check-*` or `cupel-produce-*` executable on `$PATH` (disabled by `--no-path-plugins`).
 
 ```
-<plugin> describe            → stdout: Manifest JSON (same schema as native)
+<plugin> describe            → stdout: Manifest JSON (same schema as native; kind: check | producer)
 <plugin> plan   < RunRequest → stdout: Plan JSON
-<plugin> run    < RunRequest → stdout: JSONL events (same as §7.4) ending with {"ev":"result", …CheckResult…}
+<plugin> run    < RunRequest → stdout: JSONL events (same as §7.4) ending with
+                               {"ev":"result", …CheckResult…}   for a check plugin
+                               {"ev":"fact", kind, version, …}  for a producer plugin
 ```
 
-`RunRequest` carries: protocol version, scope (files + symbols with hashes and spans), depth, budget, seed, resolved check config, paths to adapter outputs (LCOV file, per-test map JSON, test results JSON), scratch dir, toolchain info. Plugins must be side-effect-free outside the scratch dir unless `write: true` is in the request.
+A **check plugin** declares `needs`/`wants` like a native check and receives the facts it declared as JSON files; it is language-agnostic for free. A **producer plugin** declares `provides: FactKind`, `languages`, and `needs`, and must emit a fact validating against that kind's schema at the declared version; it enters the producer registry beside native producers and is selected by the same rules (§8.3.3).
 
-The host validates the manifest against the schema, enforces the budget (SIGTERM then SIGKILL), and rejects findings whose `kind` is not declared in the manifest. A plugin that exits non-zero without a `result` event yields `check.status: error`, never `pass`.
+`RunRequest` carries: protocol version, scope (files + symbols with hashes and spans), depth, budget, seed, resolved config slice, paths to the requested fact files, scratch dir, toolchain info. Plugins must be side-effect-free outside the scratch dir unless `write: true` is in the request.
+
+The host validates the manifest against the schema, enforces the budget (SIGTERM then SIGKILL), rejects findings whose `kind` is not declared in the manifest, and rejects facts that fail schema validation. A plugin that exits non-zero without a `result`/`fact` event yields `status: error`, never `pass`.
 
 Tier 3 (WASM via wasmtime, same protocol over WASI stdio) is reserved for pure-analysis plugins; not v1.
 
-### 8.6 Adapters
+### 8.7 Tool producers and the toolchain table
+
+Tool wrappers are producers (§8.3.3). Each splits into a **format parser** (language-neutral: LCOV is LCOV whoever wrote it) and an **invocation** (how to run the tool for a language and where its report lands), so one parser serves every tool that emits the format:
 
 ```rust
-pub trait CoverageAdapter { fn produce(&self, ctx, scope) -> Result<CoverageMap>; fn parse(&self, path) -> Result<CoverageMap>; }
-pub trait RunnerAdapter   { fn run(&self, ctx, selection: TestSelection, env: Env, timeout) -> Result<TestResults>; fn list(&self, ctx) -> Result<Vec<TestId>>; }
-pub trait BenchAdapter    { fn run(&self, ctx, selection) -> Result<BenchSamples>; }
+pub trait Runner: Producer<TestResults> { fn list(&self, ctx) -> Result<Vec<TestId>>;
+                                          fn run(&self, ctx, selection: TestSelection, env: Env, timeout) -> Result<TestResults>; }
+pub trait Coverage: Producer<CoverageMap> + Producer<PerTestMap> /* when supported */ { fn parse(&self, path) -> Result<CoverageMap>; }
+pub trait Bench: Producer<BenchSamples> {}
 ```
 
-`CoverageMap` is line- and branch-level, optionally per-test (`test_id → lines`). Sources of per-test maps: nextest + llvm-cov profiles per test (Rust), `go test -coverprofile` per package with `-run` narrowing (Go), pytest-cov `--cov-context=test` (Python), JaCoCo per-test via agent sessions (Java). JS/TS lacks a cheap per-test map; fall back to file-level import-graph impact and mark `per_test_map: false` in the envelope.
+Engines use the same contract: `cupel-mutate` is `Producer<MutationOutcomes>` with `needs = [MutationSites, CoverageMap, TestResults]` and `wants = [PerTestMap, ModuleGraph]`, and consumes a `Runner` through the registry rather than spawning anything itself.
 
-Adapters are registered per language in a **toolchain table** in `cupel-adapt`, keyed by `LangId`. Each entry lists the runner adapters Cupel knows for that language (with detection rules: lockfile, config file, dependency name), the coverage producers and the report formats they emit, bench adapters, and the property/fuzz/race tools named in the language's `Capabilities`. `init` consults the table to choose defaults; `doctor` consults it to know what to verify; `describe language` renders it. Launch entries:
+`CoverageMap` is line- and optionally branch-level (`branches: None` when the tool cannot measure them, as for Go's coverprofile). `PerTestMap` is `test_id → lines`. Sources: nextest + llvm-cov profiles per test (Rust), `go test -coverprofile` per package with `-run` narrowing (Go), pytest-cov `--cov-context=test` (Python), JaCoCo per-test via agent sessions (Java). JS/TS has no cheap per-test map, so no `PerTestMap` producer is registered for `ecma`; `tests --impacted` falls back to `ModuleGraph` impact and says so.
+
+Producers are registered per language in a **toolchain table** in `cupel-adapt`, keyed by `LangId`. Each row lists the runners Cupel knows for that language (with detection rules: lockfile, config file, dependency name), the coverage producers and the report formats they emit, bench producers, and the property/fuzz/race tools. The row is the registry's default order for that language. `init` consults the table to choose defaults; `doctor` consults it to know what to verify; `describe language` renders it. Launch rows:
 
 | LangId | Runners | Coverage producer → format | Bench | Per-test map |
 |---|---|---|---|---|
@@ -710,13 +791,14 @@ Adapters are registered per language in a **toolchain table** in `cupel-adapt`, 
 | `go` | go test -json | go test -coverprofile → coverprofile | go test -bench + benchstat | `-run` narrowing per test |
 | `python` | pytest, unittest | pytest-cov / coverage.py → lcov, Cobertura XML | pytest-benchmark, hyperfine | `--cov-context=test` |
 
-Adapters ingest existing reports when fresher than the sources (mtime and content hash), avoiding regeneration.
+Producers ingest existing reports when fresher than the sources (mtime and content hash), avoiding regeneration.
 
-### 8.7 Fact store
+### 8.8 Fact store
 
 SQLite at `.cupel/cupel.db`, WAL, single writer (the daemon when present, else the CLI process holding a lock).
 
 ```
+facts        (kind, version, cache_key PK, producer, lang, run_id, payload JSON/BLOB)   -- every fact, by its §8.3.6 key
 symbols      (hash PK, lang, file, name, ns, visibility, start_line, end_line, last_seen_run)
 metrics      (symbol_hash, check, key, value REAL, run_id)
 coverage     (run_id, file, line, hits, branch_id?, test_id?)
@@ -729,15 +811,17 @@ oracles      (name PK, kind, spec JSON, verified_at, verified_hash)
 suppressions mirrored from .cupel/suppressions.toml
 ```
 
+`facts` is the generic cache for every fact kind, so a new fact kind needs no migration. The typed tables (`symbols`, `coverage`, `mutants`, `test_results`) are query indexes over the facts that `explain`, `survey`, and the differential mutation path read at fine grain; they are populated from the corresponding facts, never written independently.
+
 Cache validity for a mutant outcome: `(symbol_hash, site_hash, suite_hash, toolchain_hash)` unchanged ⇒ reuse. `suite_hash` = hash of the structural hashes of all test symbols that cover the site (or of the test files when no per-test map). Scores are recomputed from the store on every run, so a cached kill contributes without re-execution.
 
 `.cupel/` is gitignored except `suppressions.toml` and any `baseline export` outputs the user commits.
 
-### 8.8 Scheduler
+### 8.9 Scheduler
 
 1. Resolve scope → symbol set.
-2. Select checks (depth, `--only/--skip`, `--tier`, language applicability).
-3. Expand to a task DAG: adapter tasks (coverage, per-test map, baseline test run) are prerequisites; checks declare `needs`.
+2. Select checks (depth, `--only/--skip`, `--tier`) and, per language in scope, drop pairs the support matrix marks `unsupported` or `unavailable`, recording each as `skipped` with its reason.
+3. Expand to a **fact DAG**: each selected (check, lang) needs facts; each fact needs a producer; each producer may need facts. Shared facts are produced once per cache key. Cached facts (§8.3.6) are leaves.
 4. Estimate cost per task from manifest cost class refined by historical durations in the store.
 5. Order by value: `tier × novelty × changed_bonus`, where novelty prefers survivors from the last run and symbols never scored; `--budget` performs a greedy knapsack over the DAG respecting dependencies.
 6. Execute: CPU-bound tasks on rayon; process-spawning tasks on tokio with a concurrency cap (`--jobs`, default cores). Mutants of one file run concurrently; files sequentially (mirrors mutator; avoids overlay conflicts).
@@ -746,7 +830,7 @@ Cache validity for a mutant outcome: `(symbol_hash, site_hash, suite_hash, toolc
 
 Baseline test run happens once, in the real tree, before any mutant; red ⇒ exit 4.
 
-### 8.9 Daemon (`serve`)
+### 8.10 Daemon (`serve`)
 
 Holds parsed trees (content-hash keyed), store connection, coverage map, and the last plan. File watcher (`notify`) triggers incremental tree-sitter reparse and symbol re-hash. CLI connects over `.cupel/serve.sock` and proxies the request; output is byte-identical to a cold run. MCP mode exposes `check`, `survey`, `explain`, `tests_impacted`, `describe` as tools with the envelope as the result and events as progress notifications.
 
@@ -804,6 +888,9 @@ Value per task = `tier_weight[tier] × novelty × (changed ? 2 : 1)`; cost from 
 ## 11. Testing Cupel
 
 - **Fixture repos** per language under `cupel-fixtures/`: known-bad code (high CRAP, clone pairs, surviving mutants, weakened tests, dependency cycles, flaky test) with **golden envelopes**. Tests assert envelope equality modulo `run.id`, timestamps, durations.
+- **Fact conformance**: per fact kind, an inventory of constructs every language producer must detect (§8.3.7); a language is admitted as a producer of a fact only when its inventory is complete.
+- **Matrix test**: enumerates registered checks × languages; every `supported` pair has a passing golden, every `unsupported` pair has a passing skip assertion, every check runs with only its declared facts. No hand-maintained list of what works where.
+- **Isolation**: `cupel-checks` compiles against `cupel-core` alone; `clippy::disallowed_methods` forbids `std::process` and `std::fs` in `cupel-checks`.
 - **Protocol conformance suite** for plugins: a reference plugin in each of Rust/Python/TS exercised by the host; property tests on manifest/request/event round-trips.
 - **Daemon parity test**: every fixture run cold and via daemon must be byte-identical.
 - **Schemata validation**: for each fixture, schemata build output compiled and all mutants executed by both strategies must agree on outcomes.
@@ -817,12 +904,12 @@ Phases are sequential; each ends with the fixture gate green and `cupel check --
 | Phase | Deliverable |
 |---|---|
 | **P0 — Skeleton** | Workspace; `cupel-core` types + schemas; `cli` with `describe`, `init`, `doctor`; envelope/exit codes; text + JSON renderers; fixture harness. |
-| **P1 — Language layer** | `cupel-lang` trait with query-driven defaults; `LanguageSpec`, `Capabilities`, toolchain table; JavaScript, TypeScript, Rust, Go, Python adapters: symbols, decision points, normalize, mutation sites, test frames, imports + resolution, public API, roots, test-file conventions, project detection; structural hashing; parse cache; parallel walk; conformance suite with shared construct inventory. |
+| **P1 — Language layer** | `Language` trait, `LanguageSpec`, generic query-driven producers; JavaScript, TypeScript, Rust, Go, Python each producing every syntactic fact (`Symbols`, `Decisions`, `NormTree`, `MutationSites`, `TestFrames`, `TestConventions`, `ModuleGraph`, `ApiSurface`, `Roots`, `ProjectInfo`); toolchain table; structural hashing; parse cache; parallel walk; per-fact conformance inventories; `describe matrix`. |
 | **P2 — Static checks** | `static.complexity`, `static.crap` (CC-only mode), `static.clones` (MinHash/LSH), `static.deps`, `tests.quality`, `tests.weakening`, `static.dead-code`; `survey`; fact store v1; baselines; `suppress`; `explain` for these kinds. |
-| **P3 — Coverage + mutation** | Coverage adapters (lcov, Istanbul JSON, Cobertura, go coverprofile) and runner adapters (cargo test/nextest, go test -json, pytest, vitest/jest); per-test maps where available; `tests.coverage`, full `static.crap`; `tests.mutation` with coverage-gating, store-based differential reruns, per-test selection, overlays; `tests --impacted`; exit 4 semantics; `tests.flaky`. |
+| **P3 — Coverage + mutation** | `CoverageMap` producers (lcov, Istanbul JSON, Cobertura, go coverprofile) and `TestResults` producers (cargo test/nextest, go test -json, pytest, vitest/jest); per-test maps where available; `tests.coverage`, full `static.crap`; `tests.mutation` with coverage-gating, store-based differential reruns, per-test selection, overlays; `tests --impacted`; exit 4 semantics; `tests.flaky`. |
 | **P4 — Schemata + daemon** | Rust and Go schemata strategy with fallback; `serve` with socket, watcher, parity test; budget scheduler with history-based cost. |
 | **P5 — Plugin protocol + oracles** | `cupel-plugin` host; reference plugins; `oracle` verb with `verify`; `gen.differential`, `gen.property` (wrapping Hypothesis/proptest/fast-check), `gen.metamorphic`; tier capping for unverified oracles. |
-| **P6 — Wrapped tiers** | Adapters/plugins for `gen.fuzz`, `conc.race`, `perf.bench`, `static.analyze`, `static.api-surface`, `perf.footprint`; SARIF output; Java and Clojure adapters via the §8.3.4 checklist (PIT wrapping for Java). |
+| **P6 — Wrapped tiers** | Producers (native or plugin) for `gen.fuzz`, `conc.race`, `perf.bench`, `static.analyze`, `static.api-surface`, `perf.footprint`; SARIF output; Java and Clojure via the §8.4.4 checklist (PIT wrapping for Java). |
 | **P7 — Formal + distributed** | `spec.contracts`, `spec.trace` (TLC/Apalache), `conc.linearizability` (Elle/Porcupine), `conc.dst`, `conc.model-check` (Kani), `spec.prove`; `meta.traceability`; MCP server. |
 | **P8 — Distribution** | Cross-platform builds, installers, wrappers, Homebrew, `cargo-binstall`; `describe --agent`; docs generated from `describe --all`. |
 
@@ -832,7 +919,10 @@ Phases are sequential; each ends with the fixture gate green and `cupel check --
 |---|---|---|
 | Language | Rust | Static binary, tree-sitter, parallelism |
 | Parsing | tree-sitter, grammars compiled in | One CST for all languages; incremental reparse for daemon |
-| Language adapters | Declarative (queries + tables) with Rust glue; shared conformance inventory | Adding a language is data + fixtures, not core changes; the suite proves parity |
+| Extension model | Language-neutral facts between producers and checks | Checks × languages × tools becomes a sum; support matrix is computed; execution lives only in producers |
+| Fact vocabulary growth | Adding a fact kind requires an ADR | It is the one change that costs across every language; make it deliberate |
+| Language capabilities | Derived from registered producers and fact completeness flags, not declared | A declared capability struct drifts; a registry cannot |
+| Languages | Declarative (queries + tables) interpreted by generic producers; per-fact conformance inventories | Adding a language is data + fixtures, not core changes; the suite proves parity |
 | Launch languages | JavaScript, TypeScript, Rust, Go, Python | Covers the ecosystems agents most often work in; Java/Clojure follow via the same checklist |
 | JS and TS | Separate `LangId`s, shared implementation, one `ecma` family | Correct project detection and config; clones still comparable across the pair |
 | Language plugins | Not offered (compiled-in only) | Per-file stdio round-trips are too slow for the daemon; dynamic grammars are a possible later addition |
