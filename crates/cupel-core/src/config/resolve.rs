@@ -60,6 +60,20 @@ pub struct Config {
     pub sources: Vec<ConfigSource>,
 }
 
+/// Merges `over` into `base`: tables merge key by key, any other value replaces.
+fn deep_merge(base: &mut Table, over: &Table) {
+    for (key, value) in over {
+        match (base.get_mut(key), value) {
+            (Some(Value::Object(base_table)), Value::Object(over_table)) => {
+                deep_merge(base_table, over_table);
+            }
+            _ => {
+                base.insert(key.clone(), value.clone());
+            }
+        }
+    }
+}
+
 /// The `--config` path resolved against `root`, or else the nearest `cupel.toml` in `root` or
 /// one of its ancestors. `None` when there is none.
 pub fn discover(root: &Path, explicit: Option<&Path>) -> Result<Option<PathBuf>> {
@@ -151,6 +165,24 @@ impl Config {
             },
             sources,
         })
+    }
+
+    /// A check's configuration for one language: `[checks."<id>"]` with
+    /// `[checks."<id>".lang.<lang>]` deep-merged over it (ADR-017). This is `CheckCtx.config`.
+    pub fn check_config(&self, check: &CheckId, lang: &LangId) -> Table {
+        let Some(config) = self.file.checks.get(check) else {
+            return Table::new();
+        };
+        let mut merged = config.params.clone();
+        if let Some(over) = config.lang.get(lang) {
+            deep_merge(&mut merged, over);
+        }
+        merged
+    }
+
+    /// A language's `[lang.<id>]` table: tool and producer choices, read by producers only.
+    pub fn lang_config(&self, lang: &LangId) -> Table {
+        self.file.lang.get(lang).cloned().unwrap_or_default()
     }
 
     /// The envelope's `run.config`.
