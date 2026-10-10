@@ -340,7 +340,7 @@ ADRs: [003](adr/CUPEL_DECISION_003.md) (volatile fields and placeholders, golden
 
 #### P0.7 Run infrastructure: `.cupel/`, run IDs, events, timeout, dry-run plumbing
 
-**Status:** not started
+**Status:** in progress (2026-10-10)
 
 - `.cupel/` directory conventions: `cupel.db` (P2.2), `runs/<id>.json`, `cache/`, `work/<run>/`, `.gitignore` written by `init`. Nothing is written outside `.cupel/` without `--write`; a central `Writer` type enforces this and is the only way to write files.
 - `--events PATH|stderr` JSONL sink; stdout reserved for the envelope.
