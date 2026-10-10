@@ -160,3 +160,60 @@ expect = { from = "0", to = ["0 + 1", "0 - 1"] }
 file = "pricing.go"
 name = "ledger.discounted"
 expect = { from = "member && cut != 0", to = ["!(member && cut != 0)"] }
+
+[test-frames.case]
+file = "ledger_test.go"
+name = "TestDepositAddsToTheBalance"
+
+[test-frames.assertion-equality]
+file = "ledger_test.go"
+name = "TestDepositAddsToTheBalance"
+
+[test-frames.assertion-truthiness]
+file = "ledger_test.go"
+name = "TestMembersGetADiscount"
+
+[test-frames.assertion-not-null]
+file = "ledger_test.go"
+name = "TestNewAccountsAreRegistered"
+
+[test-frames.assertion-throws]
+file = "pricing_test.go"
+name = "TestParseCentsRejectsBlanks"
+
+[test-frames.assertion-snapshot]
+file = "pricing_test.go"
+name = "TestDiscountSnapshot"
+
+[test-frames.weak-assertion]
+file = "ledger_test.go"
+name = "TestNewAccountsHaveDistinctIDs"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "ledger_test.go"
+name = "TestOpeningAnAccountDoesNotPanic"
+
+[test-frames.skip]
+file = "ledger_test.go"
+name = "TestStatementIsMailed"
+expect = { skip = { reason = "talks to the network" } }
+
+[test-frames.mock]
+file = "pricing_test.go"
+name = "TestMailNotifiesTheOwner"
+expect = { target = "MockNotifier" }
+
+[test-frames.setup]
+file = "ledger_test.go"
+
+[test-frames.framework]
+file = "ledger_test.go"
+expect = { framework = "go-test" }
+
+[test-conventions.separate-test-file]
+file = "ledger.go"
+name = "ledger_test.go"
+
+[test-conventions.inline-tests]
+not-applicable = "The go tool runs only functions in `_test.go` files; a source file cannot contain its own tests."

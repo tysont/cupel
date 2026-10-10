@@ -1,0 +1,20 @@
+{
+  "pairs": [
+    {
+      "source": "ledger.go",
+      "tests": [
+        "ledger_test.go"
+      ]
+    },
+    {
+      "source": "pricing.go",
+      "tests": [
+        "pricing_test.go"
+      ]
+    }
+  ],
+  "test_globs": [
+    "**/*_test.go",
+    "**/testdata/**"
+  ]
+}

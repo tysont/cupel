@@ -49,6 +49,26 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "test-frames",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-conventions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "go",
