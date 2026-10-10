@@ -39,6 +39,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "mutation-sites",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "go",

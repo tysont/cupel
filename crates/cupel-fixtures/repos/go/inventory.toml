@@ -100,3 +100,63 @@ twin = "ledger.netTotalCapped"
 file = "twins.go"
 name = "ledger.netTotal"
 twin = "ledger.netTotalProduct"
+
+[mutation-sites.relational]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "!=", to = ["=="] }
+
+[mutation-sites.arith-add-sub]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "+=", to = ["-="] }
+
+[mutation-sites.arith-mul-div]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "&&", to = ["||"] }
+
+[mutation-sites.boolean-literal]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "false", to = ["true"] }
+
+[mutation-sites.zero-one]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "logTotal(total)", to = [""] }
+
+[mutation-sites.return-value]
+file = "pricing.go"
+name = "ledger.Mail"
+expect = { from = "notifier.Notify(account.Owner, account.Statement())", to = ["nil"] }
+
+[mutation-sites.constant]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "decide.go"
+name = "ledger.classify"
+expect = { from = "0", to = ["0 + 1", "0 - 1"] }
+
+[mutation-sites.negation]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "member && cut != 0", to = ["!(member && cut != 0)"] }
