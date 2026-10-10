@@ -36,3 +36,41 @@ name = "shapes.geometry.Circle.isValid"
 file = "src/shapes/geometry.ts"
 name = "shapes.geometry.perimeter"
 expect = { namespace = "shapes.geometry" }
+
+[decisions.if]
+file = "src/decide.ts"
+name = "decide.classify"
+
+[decisions.else-if]
+file = "src/decide.ts"
+name = "decide.classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "src/decide.ts"
+name = "decide.firstOverdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "src/decide.ts"
+name = "decide.firstOverdraft"
+
+[decisions.boolean-op]
+file = "src/decide.ts"
+name = "decide.classify"
+
+[decisions.early-return]
+file = "src/decide.ts"
+name = "decide.parseCents"
+
+[decisions.case]
+file = "src/decide.ts"
+name = "decide.label"
+
+[decisions.ternary]
+file = "src/decide.ts"
+name = "decide.classify"
+
+[decisions.catch]
+file = "src/decide.ts"
+name = "decide.parseCents"

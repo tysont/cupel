@@ -2,6 +2,90 @@
   "symbols": [
     {
       "body": {
+        "col": 66,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 5
+      },
+      "display": "decide.classify",
+      "file": "src/decide.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "classify",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 64,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 14
+      },
+      "display": "decide.firstOverdraft",
+      "file": "src/decide.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "firstOverdraft",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 14
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 72,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 23
+      },
+      "display": "decide.label",
+      "file": "src/decide.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "label",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 23
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 62,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 34
+      },
+      "display": "decide.parseCents",
+      "file": "src/decide.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "parseCents",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 48,
         "end_col": 4,
         "end_line": 4,

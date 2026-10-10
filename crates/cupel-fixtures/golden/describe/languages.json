@@ -25,7 +25,8 @@
           ".cjs"
         ],
         "facts": [
-          "symbols"
+          "symbols",
+          "decisions"
         ],
         "family": "ecma",
         "id": "javascript",
@@ -69,7 +70,8 @@
           ".tsx"
         ],
         "facts": [
-          "symbols"
+          "symbols",
+          "decisions"
         ],
         "family": "ecma",
         "id": "typescript",

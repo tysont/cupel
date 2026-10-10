@@ -22,6 +22,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "decisions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.typescript",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "ecma",

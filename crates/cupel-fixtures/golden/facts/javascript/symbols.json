@@ -23,6 +23,90 @@
     },
     {
       "body": {
+        "col": 42,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 1
+      },
+      "display": "decide.classify",
+      "file": "src/decide.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "classify",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 2,
+        "end_line": 17,
+        "line": 10
+      },
+      "display": "decide.firstOverdraft",
+      "file": "src/decide.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "firstOverdraft",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 17,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 19
+      },
+      "display": "decide.label",
+      "file": "src/decide.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "label",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 30
+      },
+      "display": "decide.parseCents",
+      "file": "src/decide.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "parseCents",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 30
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 34,
         "end_col": 2,
         "end_line": 3,

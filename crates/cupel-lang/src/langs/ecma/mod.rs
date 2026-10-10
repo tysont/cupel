@@ -12,7 +12,10 @@ use crate::spec::{LanguageSpec, QueryFile};
 const TABLES: &str = include_str!("tables.toml");
 
 /// Queries shared by both languages.
-const SHARED: &[(QueryFile, &str)] = &[(QueryFile::Symbols, include_str!("queries/symbols.scm"))];
+const SHARED: &[(QueryFile, &str)] = &[
+    (QueryFile::Symbols, include_str!("queries/symbols.scm")),
+    (QueryFile::Decisions, include_str!("queries/decisions.scm")),
+];
 
 /// TypeScript-only queries. They are placed before the shared queries of the same file, so
 /// their patterns win where both match one definition.

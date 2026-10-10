@@ -11,3 +11,7 @@ default = "private"
 # TypeScript accessibility modifiers. `protected` members are not callable from outside the
 # class hierarchy, so they count as private.
 modifiers = { "public" = "public", "protected" = "private", "private" = "private" }
+
+# `else if` is an `if_statement` inside the `else_clause` of the branch it continues.
+[decisions]
+chain_parents = ["else_clause"]
