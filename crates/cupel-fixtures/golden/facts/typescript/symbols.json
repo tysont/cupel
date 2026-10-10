@@ -2,6 +2,27 @@
   "symbols": [
     {
       "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "square",
+      "file": "packages/shapes/src/index.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "square",
+      "namespace": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 34,
         "end_col": 4,
         "end_line": 7,
@@ -167,6 +188,27 @@
         "line": 8
       },
       "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 64,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 13
+      },
+      "display": "ledger.load",
+      "file": "src/ledger.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "load",
+      "namespace": "ledger",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 13
+      },
+      "visibility": "public"
     },
     {
       "body": {

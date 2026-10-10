@@ -12,6 +12,7 @@ facts
   norm-tree         lang.typescript (quick)
   mutation-sites    lang.typescript (quick)
   test-frames       lang.typescript (quick)
+  module-graph      lang.typescript (quick)
   test-conventions  lang.typescript (quick)
 
 checks

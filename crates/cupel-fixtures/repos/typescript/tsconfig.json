@@ -1,0 +1,12 @@
+{
+  // Aliases resolve from the project root.
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["src/*"],
+    },
+  },
+  "include": ["src", "test"]
+}

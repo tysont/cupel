@@ -222,3 +222,32 @@ name = "test/math.test.js"
 [test-conventions.inline-tests]
 file = "src/inline.js"
 name = "src/inline.js"
+
+[module-graph.relative]
+file = "src/ledger.js"
+name = "./math.js"
+expect = { target = { path = "src/math.js" } }
+
+[module-graph.absolute]
+file = "src/ledger.js"
+name = "#money/cents"
+expect = { target = { path = "src/money/cents.js" } }
+
+[module-graph.workspace-member]
+file = "src/ledger.js"
+name = "@ledger/shapes"
+expect = { target = { path = "packages/shapes/lib/index.js" } }
+
+[module-graph.external]
+file = "src/ledger.js"
+name = "lodash/fp"
+expect = { target = { package = "lodash" } }
+
+[module-graph.standard-library]
+file = "src/ledger.js"
+name = "node:fs/promises"
+expect = { target = { package = "node:fs" } }
+
+[module-graph.unresolved]
+file = "src/ledger.js"
+name = "./generated.js"

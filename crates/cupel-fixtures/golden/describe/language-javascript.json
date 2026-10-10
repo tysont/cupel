@@ -64,6 +64,16 @@
         ]
       },
       {
+        "kind": "module-graph",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
         "kind": "test-conventions",
         "producers": [
           {

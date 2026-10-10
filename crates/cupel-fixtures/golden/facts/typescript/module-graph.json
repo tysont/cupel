@@ -1,0 +1,212 @@
+{
+  "roots": [
+    {
+      "edges": [
+        {
+          "from": "src/__tests__/pricing.test.ts",
+          "line": 1,
+          "relative": false,
+          "specifier": "@jest/globals",
+          "target": {
+            "kind": "external",
+            "package": "@jest/globals"
+          }
+        },
+        {
+          "from": "src/__tests__/pricing.test.ts",
+          "line": 2,
+          "relative": true,
+          "specifier": "../pricing",
+          "target": {
+            "kind": "file",
+            "path": "src/pricing.ts"
+          }
+        },
+        {
+          "from": "src/ledger.ts",
+          "line": 1,
+          "relative": false,
+          "specifier": "node:fs",
+          "target": {
+            "kind": "external",
+            "package": "node:fs"
+          }
+        },
+        {
+          "from": "src/ledger.ts",
+          "line": 2,
+          "relative": false,
+          "specifier": "zod",
+          "target": {
+            "kind": "external",
+            "package": "zod"
+          }
+        },
+        {
+          "from": "src/ledger.ts",
+          "line": 3,
+          "relative": false,
+          "specifier": "fs",
+          "target": {
+            "kind": "external",
+            "package": "node:fs"
+          }
+        },
+        {
+          "from": "src/ledger.ts",
+          "line": 4,
+          "relative": true,
+          "specifier": "./math",
+          "target": {
+            "kind": "file",
+            "path": "src/math.ts"
+          }
+        },
+        {
+          "from": "src/ledger.ts",
+          "line": 5,
+          "relative": false,
+          "specifier": "@app/shapes/geometry",
+          "target": {
+            "kind": "file",
+            "path": "src/shapes/geometry.ts"
+          }
+        },
+        {
+          "from": "src/ledger.ts",
+          "line": 6,
+          "relative": true,
+          "specifier": "./shapes",
+          "target": {
+            "kind": "file",
+            "path": "src/shapes/index.ts"
+          }
+        },
+        {
+          "from": "src/ledger.ts",
+          "line": 7,
+          "relative": true,
+          "specifier": "./plugin.js",
+          "target": {
+            "kind": "file",
+            "path": "src/plugin.ts"
+          }
+        },
+        {
+          "from": "src/ledger.ts",
+          "line": 8,
+          "relative": false,
+          "specifier": "@ledger/shapes",
+          "target": {
+            "kind": "file",
+            "path": "packages/shapes/src/index.ts"
+          }
+        },
+        {
+          "from": "src/ledger.ts",
+          "line": 9,
+          "relative": true,
+          "specifier": "./generated",
+          "target": {
+            "kind": "unresolved"
+          }
+        },
+        {
+          "from": "src/math.test.ts",
+          "line": 1,
+          "relative": false,
+          "specifier": "vitest",
+          "target": {
+            "kind": "external",
+            "package": "vitest"
+          }
+        },
+        {
+          "from": "src/math.test.ts",
+          "line": 2,
+          "relative": true,
+          "specifier": "./math",
+          "target": {
+            "kind": "file",
+            "path": "src/math.ts"
+          }
+        },
+        {
+          "from": "src/shapes/index.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "./geometry",
+          "target": {
+            "kind": "file",
+            "path": "src/shapes/geometry.ts"
+          }
+        },
+        {
+          "from": "src/shapes/index.ts",
+          "line": 2,
+          "relative": true,
+          "specifier": "../math",
+          "target": {
+            "kind": "file",
+            "path": "src/math.ts"
+          }
+        },
+        {
+          "from": "src/widget.test.tsx",
+          "line": 1,
+          "relative": false,
+          "specifier": "vitest",
+          "target": {
+            "kind": "external",
+            "package": "vitest"
+          }
+        },
+        {
+          "from": "src/widget.test.tsx",
+          "line": 2,
+          "relative": true,
+          "specifier": "./widget",
+          "target": {
+            "kind": "file",
+            "path": "src/widget.tsx"
+          }
+        },
+        {
+          "from": "test/decide.test.ts",
+          "line": 1,
+          "relative": false,
+          "specifier": "node:assert/strict",
+          "target": {
+            "kind": "external",
+            "package": "node:assert"
+          }
+        },
+        {
+          "from": "test/decide.test.ts",
+          "line": 2,
+          "relative": false,
+          "specifier": "node:test",
+          "target": {
+            "kind": "external",
+            "package": "node:test"
+          }
+        },
+        {
+          "from": "test/decide.test.ts",
+          "line": 3,
+          "relative": true,
+          "specifier": "../src/decide",
+          "target": {
+            "kind": "file",
+            "path": "src/decide.ts"
+          }
+        }
+      ],
+      "root": "."
+    },
+    {
+      "edges": [],
+      "root": "packages/shapes"
+    }
+  ]
+}

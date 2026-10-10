@@ -3,6 +3,14 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 8,
+        "file": "packages/shapes/src/index.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 28,
         "file": "src/__tests__/pricing.test.ts",
         "line": 5
@@ -168,6 +176,21 @@
         "col": 17,
         "file": "src/inline.ts",
         "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "ternary",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/ledger.ts",
+        "line": 13
       }
     },
     {

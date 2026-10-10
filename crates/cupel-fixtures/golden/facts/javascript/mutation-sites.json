@@ -57,6 +57,45 @@
     {
       "sites": [
         {
+          "from": "side * side",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "43e7e6c216862855",
+          "span": {
+            "col": 10,
+            "end_col": 21,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d069e4b6538ffe54",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "packages/shapes/lib/square.js",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "balance < 0 && limit > 0",
           "operator": "negation",
           "set": "extended",
@@ -723,6 +762,30 @@
     {
       "sites": [
         {
+          "from": "summary(amounts.map((amount) => toCents(add(amount, square(side(generated))))))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "a82ea8c8aaeef9f9",
+          "span": {
+            "col": 10,
+            "end_col": 89,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/ledger.js",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "a + b",
           "operator": "return-value",
           "set": "extended",
@@ -811,6 +874,60 @@
         "col": 8,
         "file": "src/math.js",
         "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Math.round(amount * 100)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "5ea6c6034cc973eb",
+          "span": {
+            "col": 10,
+            "end_col": 34,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "038249fd897997a4",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "06f261d7d0b24c60",
+          "span": {
+            "col": 30,
+            "end_col": 33,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/money/cents.js",
+        "line": 1
       }
     },
     {

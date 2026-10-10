@@ -23,6 +23,27 @@
     },
     {
       "body": {
+        "col": 30,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "packages.shapes.lib.square.square",
+      "file": "packages/shapes/lib/square.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "square",
+      "namespace": "packages.shapes.lib.square",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 42,
         "end_col": 2,
         "end_line": 8,
@@ -170,6 +191,27 @@
     },
     {
       "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 10
+      },
+      "display": "ledger.load",
+      "file": "src/ledger.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "load",
+      "namespace": "ledger",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 27,
         "end_col": 2,
         "end_line": 3,
@@ -207,6 +249,27 @@
         "end_col": 2,
         "end_line": 9,
         "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "money.cents.toCents",
+      "file": "src/money/cents.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "toCents",
+      "namespace": "money.cents",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
       },
       "visibility": "public"
     },

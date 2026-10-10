@@ -3,6 +3,45 @@
     {
       "sites": [
         {
+          "from": "side * side",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d430bad8a61f4434",
+          "span": {
+            "col": 10,
+            "end_col": 21,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d84ef32e586a5de3",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "packages/shapes/src/index.ts",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "expect(discounted(100, true)).toStrictEqual(85);",
           "operator": "statement-deletion",
           "set": "extended",
@@ -733,6 +772,75 @@
         "col": 17,
         "file": "src/inline.ts",
         "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "registry.register(file, { version: generated });",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "818030787a2f42f1",
+          "span": {
+            "col": 3,
+            "end_col": 51,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "e7b4c55fb0ec246c",
+          "span": {
+            "col": 67,
+            "end_col": 68,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "065218ef68a38b4e",
+          "span": {
+            "col": 72,
+            "end_col": 73,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "square(circle.radius)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "a82ea8c8aaeef9f9",
+          "span": {
+            "col": 10,
+            "end_col": 31,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/ledger.ts",
+        "line": 13
       }
     },
     {

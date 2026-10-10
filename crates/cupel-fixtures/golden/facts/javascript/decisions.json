@@ -9,6 +9,14 @@
       }
     },
     {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "packages/shapes/lib/square.js",
+        "line": 1
+      }
+    },
+    {
       "decisions": [
         {
           "cognitive": 1,
@@ -174,6 +182,14 @@
       "decisions": [],
       "symbol": {
         "col": 8,
+        "file": "src/ledger.js",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
         "file": "src/math.js",
         "line": 1
       }
@@ -191,6 +207,14 @@
         "col": 8,
         "file": "src/math.js",
         "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/money/cents.js",
+        "line": 1
       }
     },
     {
