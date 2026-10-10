@@ -1,6 +1,6 @@
 # CUPEL_DECISION_029: API signatures as normalized token spans, and roots by reason
 
-**Date:** 2026-10-10 · **Status:** accepted · **Phase:** P1.8
+**Date:** 2026-10-10 · **Status:** accepted; last Consequences bullet superseded by [030](CUPEL_DECISION_030.md) (JavaScript and TypeScript test callbacks are symbols and `test` roots) · **Phase:** P1.8
 
 ## Context
 

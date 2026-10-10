@@ -1,6 +1,6 @@
 # CUPEL_DECISION_030: JavaScript and TypeScript symbols: test callbacks, default exports, and CommonJS exports
 
-**Date:** 2026-10-10 · **Status:** accepted · **Phase:** P1.2–P1.8
+**Date:** 2026-10-10 · **Status:** accepted; supersedes the last Consequences bullet of [029](CUPEL_DECISION_029.md) ("a test case that is not a symbol … is not a root") · **Phase:** P1.2–P1.8
 
 ## Context
 
