@@ -16,6 +16,7 @@ const SHARED: &[(QueryFile, &str)] = &[
     (QueryFile::Symbols, include_str!("queries/symbols.scm")),
     (QueryFile::Decisions, include_str!("queries/decisions.scm")),
     (QueryFile::Mutations, include_str!("queries/mutations.scm")),
+    (QueryFile::Tests, include_str!("queries/tests.scm")),
 ];
 
 /// TypeScript-only queries. They are placed before the shared queries of the same file, so

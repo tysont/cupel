@@ -615,6 +615,114 @@
     {
       "sites": [
         {
+          "from": "n * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "43e7e6c216862855",
+          "span": {
+            "col": 10,
+            "end_col": 15,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d069e4b6538ffe54",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f49a25fcb6c323a6",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/inline.js",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(double(2)).toBe(4);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4de66bb456292929",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1bca0de08244165a",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 17,
+        "file": "src/inline.js",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "a + b",
           "operator": "return-value",
           "set": "extended",
@@ -2246,6 +2354,254 @@
     {
       "sites": [
         {
+          "from": "assert.equal(classify(-5, 10), \"overdrawn\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 47,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9a37ef6d9a13d09c",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a1b4027a324216e6",
+          "span": {
+            "col": 29,
+            "end_col": 31,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 39,
+        "file": "test/decide.test.js",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert.notEqual(classify(0, 10), \"rich\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 44,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "38770d8991cfa936",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a1b4027a324216e6",
+          "span": {
+            "col": 31,
+            "end_col": 33,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 45,
+        "file": "test/decide.test.js",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert.ok(describeKind(\"deposit\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "51942f4d91db3ffa",
+          "span": {
+            "col": 3,
+            "end_col": 38,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 31,
+        "file": "test/decide.test.js",
+        "line": 13
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "t.skip(\"needs a ledger server\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 35,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "assert.deepEqual(classify(1, 0), \"rich\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "51942f4d91db3ffa",
+          "span": {
+            "col": 3,
+            "end_col": 44,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4205ea1b56acd94f",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "e6fb70ca93913203",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 37,
+        "file": "test/decide.test.js",
+        "line": 18
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(money(150)).to.equal(\"1.50\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 41,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "150",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2a5a0a6c02173d29",
+          "span": {
+            "col": 18,
+            "end_col": 21,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 28,
+        "file": "test/format.spec.js",
+        "line": 6
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 35,
+        "file": "test/format.spec.js",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "expect(add(1, 2)).toBe(3);",
           "operator": "statement-deletion",
           "set": "extended",
@@ -2253,8 +2609,8 @@
           "span": {
             "col": 5,
             "end_col": 31,
-            "end_line": 6,
-            "line": 6
+            "end_line": 15,
+            "line": 15
           },
           "to": [
             ""
@@ -2268,8 +2624,8 @@
           "span": {
             "col": 16,
             "end_col": 17,
-            "end_line": 6,
-            "line": 6
+            "end_line": 15,
+            "line": 15
           },
           "to": [
             "0"
@@ -2283,8 +2639,8 @@
           "span": {
             "col": 19,
             "end_col": 20,
-            "end_line": 6,
-            "line": 6
+            "end_line": 15,
+            "line": 15
           },
           "to": [
             "0"
@@ -2298,8 +2654,8 @@
           "span": {
             "col": 28,
             "end_col": 29,
-            "end_line": 6,
-            "line": 6
+            "end_line": 15,
+            "line": 15
           },
           "to": [
             "0"
@@ -2309,7 +2665,481 @@
       "symbol": {
         "col": 26,
         "file": "test/math.test.js",
+        "line": 14
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(base, 1)).toBeTruthy();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 39,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "20a97558096eef09",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 37,
+        "file": "test/math.test.js",
+        "line": 18
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(base, base)).toBeDefined();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 43,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 33,
+        "file": "test/math.test.js",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(2, 2)).not.toBe(0);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 35,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2a5a0a6c02173d29",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "584438433d5b688c",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f6d0e3f1b58c05f6",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 30,
+        "file": "test/math.test.js",
+        "line": 26
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(Number.MAX_VALUE, 1)).toBe(Infinity);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 53,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "20a97558096eef09",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 35,
+        "file": "test/math.test.js",
+        "line": 30
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "add(1, 1);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 15,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f6d0e3f1b58c05f6",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "90bc3909765f7892",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 40,
+        "file": "test/math.test.js",
+        "line": 34
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(() => parseCents(\"\")).toThrow(\"empty amount\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 58,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 31,
+        "file": "test/math.test.js",
+        "line": 40
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(() => parseCents()).toThrow();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 42,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 27,
+        "file": "test/math.test.js",
+        "line": 44
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect([...range(0, 3)]).toMatchSnapshot();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 48,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "edbde4e5c31822b5",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "dd8654c648da414c",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 36,
+        "file": "test/math.test.js",
+        "line": 48
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "log(parseCents(\"1.00\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "51942f4d91db3ffa",
+          "span": {
+            "col": 5,
+            "end_col": 29,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "expect(log).toHaveBeenCalledWith(100);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "04bc84b137ebeeba",
+          "span": {
+            "col": 5,
+            "end_col": 43,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ed491e2a002afb71",
+          "span": {
+            "col": 38,
+            "end_col": 41,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 32,
+        "file": "test/math.test.js",
+        "line": 52
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(summary([1, 2])).toEqual(\"1\\n2\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 43,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "5ba6e2ba63c37975",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "159252e3eb4018ba",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 34,
+        "file": "test/report.test.js",
         "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(summary([1])).toMatchInlineSnapshot();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 48,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "5ba6e2ba63c37975",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 35,
+        "file": "test/report.test.js",
+        "line": 9
       }
     }
   ]

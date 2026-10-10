@@ -158,6 +158,22 @@
       "decisions": [],
       "symbol": {
         "col": 8,
+        "file": "src/inline.js",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 17,
+        "file": "src/inline.js",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
         "file": "src/math.js",
         "line": 1
       }
@@ -384,9 +400,145 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 39,
+        "file": "test/decide.test.js",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 45,
+        "file": "test/decide.test.js",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "test/decide.test.js",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 37,
+        "file": "test/decide.test.js",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 28,
+        "file": "test/format.spec.js",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 35,
+        "file": "test/format.spec.js",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 26,
         "file": "test/math.test.js",
+        "line": 14
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 37,
+        "file": "test/math.test.js",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 33,
+        "file": "test/math.test.js",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 30,
+        "file": "test/math.test.js",
+        "line": 26
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 35,
+        "file": "test/math.test.js",
+        "line": 30
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 40,
+        "file": "test/math.test.js",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "test/math.test.js",
+        "line": 40
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 27,
+        "file": "test/math.test.js",
+        "line": 44
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 36,
+        "file": "test/math.test.js",
+        "line": 48
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 32,
+        "file": "test/math.test.js",
+        "line": 52
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 34,
+        "file": "test/report.test.js",
         "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 35,
+        "file": "test/report.test.js",
+        "line": 9
       }
     }
   ]

@@ -3,6 +3,144 @@
     {
       "sites": [
         {
+          "from": "expect(discounted(100, true)).toStrictEqual(85);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 53,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4de66bb456292929",
+          "span": {
+            "col": 23,
+            "end_col": 26,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "d411f2a78617f650",
+          "span": {
+            "col": 28,
+            "end_col": 32,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "85",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1bca0de08244165a",
+          "span": {
+            "col": 49,
+            "end_col": 51,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 28,
+        "file": "src/__tests__/pricing.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(tally([1, -3]).overdrawn).toBeTruthy();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "51942f4d91db3ffa",
+          "span": {
+            "col": 5,
+            "end_col": 51,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f8f3ddfa77151c39",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c07d2d738a697ac1",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "expect(spy).toHaveBeenCalled();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "04bc84b137ebeeba",
+          "span": {
+            "col": 5,
+            "end_col": 36,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 38,
+        "file": "src/__tests__/pricing.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "balance < 0 && limit > 0",
           "operator": "negation",
           "set": "extended",
@@ -492,6 +630,114 @@
     {
       "sites": [
         {
+          "from": "n * 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d430bad8a61f4434",
+          "span": {
+            "col": 10,
+            "end_col": 15,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d84ef32e586a5de3",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b39b88a6b0d53a45",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/inline.ts",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(double(2)).toBe(4);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4de66bb456292929",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1bca0de08244165a",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 17,
+        "file": "src/inline.ts",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "Math.round(cents)",
           "operator": "return-value",
           "set": "extended",
@@ -523,8 +769,8 @@
           "span": {
             "col": 5,
             "end_col": 31,
-            "end_line": 6,
-            "line": 6
+            "end_line": 8,
+            "line": 8
           },
           "to": [
             ""
@@ -538,8 +784,8 @@
           "span": {
             "col": 16,
             "end_col": 17,
-            "end_line": 6,
-            "line": 6
+            "end_line": 8,
+            "line": 8
           },
           "to": [
             "0"
@@ -553,8 +799,8 @@
           "span": {
             "col": 19,
             "end_col": 20,
-            "end_line": 6,
-            "line": 6
+            "end_line": 8,
+            "line": 8
           },
           "to": [
             "0"
@@ -568,8 +814,8 @@
           "span": {
             "col": 28,
             "end_col": 29,
-            "end_line": 6,
-            "line": 6
+            "end_line": 8,
+            "line": 8
           },
           "to": [
             "0"
@@ -579,7 +825,370 @@
       "symbol": {
         "col": 26,
         "file": "src/math.test.ts",
-        "line": 5
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(base, 1)).toBeTruthy();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 39,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "20a97558096eef09",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 37,
+        "file": "src/math.test.ts",
+        "line": 17
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(base, base)).toBeDefined();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 43,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 33,
+        "file": "src/math.test.ts",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(2, 2)).not.toBe(0);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 35,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2a5a0a6c02173d29",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "584438433d5b688c",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f6d0e3f1b58c05f6",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 30,
+        "file": "src/math.test.ts",
+        "line": 25
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect(add(Number.MAX_VALUE, 1)).toBe(Infinity);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 53,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "20a97558096eef09",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 35,
+        "file": "src/math.test.ts",
+        "line": 29
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "add(1, 1);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 15,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f6d0e3f1b58c05f6",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "90bc3909765f7892",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 40,
+        "file": "src/math.test.ts",
+        "line": 33
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect([...range(0, 3)]).toMatchSnapshot();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 48,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "edbde4e5c31822b5",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "dd8654c648da414c",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 30,
+        "file": "src/math.test.ts",
+        "line": 39
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "consume([...range(0, 2)]);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "51942f4d91db3ffa",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f640e5bc6ce14e73",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "48c2e7f905761ad2",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "expect(consume).toHaveBeenCalledTimes(1);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "04bc84b137ebeeba",
+          "span": {
+            "col": 5,
+            "end_col": 46,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "662ed0f4218326ec",
+          "span": {
+            "col": 43,
+            "end_col": 44,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 30,
+        "file": "src/math.test.ts",
+        "line": 43
       }
     },
     {
@@ -2224,6 +2833,60 @@
     {
       "sites": [
         {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "436fdfbbdc4922a5",
+          "span": {
+            "col": 45,
+            "end_col": 46,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "expect(badge.props.count).toBe(2);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "51942f4d91db3ffa",
+          "span": {
+            "col": 3,
+            "end_col": 37,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d96f3b29aa08ee58",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 23,
+        "file": "src/widget.test.tsx",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "<span className=\"badge\">{count > 0 ? `${label} (${count})` : label}</span>",
           "operator": "return-value",
           "set": "extended",
@@ -2289,6 +2952,153 @@
         "col": 8,
         "file": "src/widget.tsx",
         "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert.equal(classify(-5, 10), \"overdrawn\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 47,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9a37ef6d9a13d09c",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a1b4027a324216e6",
+          "span": {
+            "col": 29,
+            "end_col": 31,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 39,
+        "file": "test/decide.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert.throws(() => parseCents(\"\"), /empty amount/);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 55,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 31,
+        "file": "test/decide.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "t.skip(\"needs a ledger server\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 35,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "assert.ok(classify(1, 0));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "51942f4d91db3ffa",
+          "span": {
+            "col": 3,
+            "end_col": 29,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4205ea1b56acd94f",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "e6fb70ca93913203",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 37,
+        "file": "test/decide.test.ts",
+        "line": 13
       }
     }
   ]

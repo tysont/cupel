@@ -2,6 +2,48 @@
   "symbols": [
     {
       "body": {
+        "col": 34,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "__tests__.pricing.discounted.members pay less",
+      "file": "src/__tests__/pricing.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "members pay less",
+      "namespace": "__tests__.pricing.discounted",
+      "span": {
+        "col": 28,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 4,
+        "end_line": 13,
+        "line": 9
+      },
+      "display": "__tests__.pricing.discounted.tallies stay within bounds",
+      "file": "src/__tests__/pricing.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "tallies stay within bounds",
+      "namespace": "__tests__.pricing.discounted",
+      "span": {
+        "col": 38,
+        "end_col": 4,
+        "end_line": 13,
+        "line": 9
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 66,
         "end_col": 2,
         "end_line": 12,
@@ -86,6 +128,48 @@
     },
     {
       "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "inline.double",
+      "file": "src/inline.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "double",
+      "namespace": "inline",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 23,
+        "end_col": 4,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "inline.doubles",
+      "file": "src/inline.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "doubles",
+      "namespace": "inline",
+      "span": {
+        "col": 17,
+        "end_col": 4,
+        "end_line": 10,
+        "line": 8
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 48,
         "end_col": 4,
         "end_line": 4,
@@ -109,8 +193,8 @@
       "body": {
         "col": 32,
         "end_col": 4,
-        "end_line": 7,
-        "line": 5
+        "end_line": 9,
+        "line": 7
       },
       "display": "math.add.adds two numbers",
       "file": "src/math.test.ts",
@@ -121,8 +205,155 @@
       "span": {
         "col": 26,
         "end_col": 4,
-        "end_line": 7,
-        "line": 5
+        "end_line": 9,
+        "line": 7
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 4,
+        "end_line": 19,
+        "line": 17
+      },
+      "display": "math.add.is truthy for non-zero sums",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "is truthy for non-zero sums",
+      "namespace": "math.add",
+      "span": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 19,
+        "line": 17
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 4,
+        "end_line": 23,
+        "line": 21
+      },
+      "display": "math.add.returns a defined value",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "returns a defined value",
+      "namespace": "math.add",
+      "span": {
+        "col": 33,
+        "end_col": 4,
+        "end_line": 23,
+        "line": 21
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 4,
+        "end_line": 27,
+        "line": 25
+      },
+      "display": "math.add.does not return zero",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "does not return zero",
+      "namespace": "math.add",
+      "span": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 27,
+        "line": 25
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 4,
+        "end_line": 31,
+        "line": 29
+      },
+      "display": "math.add.handles huge numbers",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "handles huge numbers",
+      "namespace": "math.add",
+      "span": {
+        "col": 35,
+        "end_col": 4,
+        "end_line": 31,
+        "line": 29
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 4,
+        "end_line": 35,
+        "line": 33
+      },
+      "display": "math.add.can be called without checking",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "can be called without checking",
+      "namespace": "math.add",
+      "span": {
+        "col": 40,
+        "end_col": 4,
+        "end_line": 35,
+        "line": 33
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 4,
+        "end_line": 41,
+        "line": 39
+      },
+      "display": "math.range.matches its snapshot",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "matches its snapshot",
+      "namespace": "math.range",
+      "span": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 41,
+        "line": 39
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 4,
+        "end_line": 47,
+        "line": 43
+      },
+      "display": "math.range.is consumed by a spy",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "is consumed by a spy",
+      "namespace": "math.range",
+      "span": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 47,
+        "line": 43
       },
       "visibility": "private"
     },
@@ -590,6 +821,27 @@
     },
     {
       "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 4
+      },
+      "display": "widget.renders a count",
+      "file": "src/widget.test.tsx",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "renders a count",
+      "namespace": "widget",
+      "span": {
+        "col": 23,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 4
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 75,
         "end_col": 2,
         "end_line": 3,
@@ -608,6 +860,69 @@
         "line": 1
       },
       "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "test.decide.classifies overdrawn balances",
+      "file": "test/decide.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "classifies overdrawn balances",
+      "namespace": "test.decide",
+      "span": {
+        "col": 39,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "test.decide.rejects empty amounts",
+      "file": "test/decide.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "rejects empty amounts",
+      "namespace": "test.decide",
+      "span": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "display": "test.decide.waits for the ledger server",
+      "file": "test/decide.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "waits for the ledger server",
+      "namespace": "test.decide",
+      "span": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "visibility": "private"
     }
   ]
 }

@@ -164,3 +164,61 @@ expect = { from = "0", to = ["0 + 1", "0 - 1"] }
 file = "src/pricing.js"
 name = "pricing.discounted"
 expect = { from = "member && cut !== 0", to = ["!(member && cut !== 0)"] }
+
+[test-frames.case]
+file = "test/math.test.js"
+name = "adds two numbers"
+
+[test-frames.assertion-equality]
+file = "test/math.test.js"
+name = "adds two numbers"
+
+[test-frames.assertion-truthiness]
+file = "test/math.test.js"
+name = "is truthy for non-zero sums"
+
+[test-frames.assertion-not-null]
+file = "test/math.test.js"
+name = "returns a defined value"
+
+[test-frames.assertion-throws]
+file = "test/math.test.js"
+name = "rejects empty amounts"
+
+[test-frames.assertion-snapshot]
+file = "test/math.test.js"
+name = "matches the range snapshot"
+
+[test-frames.weak-assertion]
+file = "test/math.test.js"
+name = "does not return zero"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "test/math.test.js"
+name = "can be called without checking"
+
+[test-frames.skip]
+file = "test/decide.test.js"
+name = "waits for the ledger server"
+expect = { skip = { reason = "needs a ledger server" } }
+
+[test-frames.mock]
+file = "test/math.test.js"
+name = "reports what it parsed"
+expect = { target = "vi.fn" }
+
+[test-frames.setup]
+file = "test/math.test.js"
+
+[test-frames.framework]
+file = "test/math.test.js"
+expect = { framework = "vitest" }
+
+[test-conventions.separate-test-file]
+file = "src/math.js"
+name = "test/math.test.js"
+
+[test-conventions.inline-tests]
+file = "src/inline.js"
+name = "src/inline.js"

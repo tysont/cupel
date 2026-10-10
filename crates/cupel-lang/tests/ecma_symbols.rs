@@ -141,14 +141,40 @@ fn test_callbacks_are_closures_named_by_their_title_inside_their_suite() {
     let javascript: Symbols = produce("javascript", &fixture("javascript"));
     expect(
         &javascript,
-        "test/math.test.js",
-        &[("test.math.add.adds two numbers", Closure, Private, (5, 7))],
+        "test/format.spec.js",
+        &[
+            (
+                "test.format.money.shows two decimals",
+                Closure,
+                Private,
+                (6, 8),
+            ),
+            (
+                "test.format.money.is not called by accident",
+                Closure,
+                Private,
+                (10, 13),
+            ),
+        ],
     );
     let typescript: Symbols = produce("typescript", &fixture("typescript"));
     expect(
         &typescript,
-        "src/math.test.ts",
-        &[("math.add.adds two numbers", Closure, Private, (5, 7))],
+        "src/__tests__/pricing.test.ts",
+        &[
+            (
+                "__tests__.pricing.discounted.members pay less",
+                Closure,
+                Private,
+                (5, 7),
+            ),
+            (
+                "__tests__.pricing.discounted.tallies stay within bounds",
+                Closure,
+                Private,
+                (9, 13),
+            ),
+        ],
     );
 }
 
