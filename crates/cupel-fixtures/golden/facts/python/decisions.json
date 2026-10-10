@@ -1,0 +1,679 @@
+{
+  "symbols": [
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "libs/units/src/units/__init__.py",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/__init__.py",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/__init__.py",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/__init__.py",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 24
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 27
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/ledger/account.py",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/ledger/account.py",
+        "line": 31
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 37
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/cli.py",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/cli.py",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 2
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "catch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 20
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        },
+        {
+          "cognitive": 0,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "ternary",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 44
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 48
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.py",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.py",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.py",
+        "line": 19
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.py",
+        "line": 23
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/report/__init__.py",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/report/format.py",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/report/format.py",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 40
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 49
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/conftest.py",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 19
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 23
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 27
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 37
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 41
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 46
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 51
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 56
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 21
+      }
+    }
+  ]
+}

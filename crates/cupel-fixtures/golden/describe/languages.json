@@ -36,7 +36,8 @@
           ".py"
         ],
         "facts": [
-          "symbols"
+          "symbols",
+          "decisions"
         ],
         "family": "python",
         "id": "python",

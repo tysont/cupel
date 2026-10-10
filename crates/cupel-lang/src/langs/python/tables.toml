@@ -24,3 +24,7 @@ visibility = "private"
 [[visibility.names]]
 prefix = "_"
 visibility = "internal"
+
+# `elif` is an `elif_clause` directly under the `if_statement` whose chain it continues.
+[decisions]
+chain_parents = ["if_statement"]

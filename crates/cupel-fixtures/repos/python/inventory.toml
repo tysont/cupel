@@ -37,3 +37,41 @@ name = "ledger.account.Account.__check"
 file = "src/ledger/report/format.py"
 name = "ledger.report.format.render"
 expect = { namespace = "ledger.report.format" }
+
+[decisions.if]
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
+
+[decisions.else-if]
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "src/ledger/decide.py"
+name = "ledger.decide.first_overdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "src/ledger/decide.py"
+name = "ledger.decide.first_overdraft"
+
+[decisions.boolean-op]
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
+
+[decisions.early-return]
+file = "src/ledger/decide.py"
+name = "ledger.decide.require_positive"
+
+[decisions.case]
+file = "src/ledger/decide.py"
+name = "ledger.decide.describe"
+
+[decisions.ternary]
+file = "src/ledger/decide.py"
+name = "ledger.decide.sign"
+
+[decisions.catch]
+file = "src/ledger/decide.py"
+name = "ledger.decide.parse_cents"
