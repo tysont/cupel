@@ -617,7 +617,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 #### P2.2 Fact store, `explain`, baselines, `suppress`
 
-**Status:** not started
+**Status:** in progress (2026-10-13) · [ADR-045](adr/CUPEL_DECISION_045.md) · [ADR-046](adr/CUPEL_DECISION_046.md) · [ADR-047](adr/CUPEL_DECISION_047.md)
 
 - `cupel-store`: SQLite WAL at `.cupel/cupel.db`; migrations; tables `symbols`, `metrics`, `runs`, `findings`, `baselines`, `suppressions` (remaining tables as their phases land). Single-writer lock.
 - Every `check`/`survey` run persisted (envelope + findings + metrics).
