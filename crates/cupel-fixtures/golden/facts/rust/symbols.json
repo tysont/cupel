@@ -1033,6 +1033,182 @@
         "line": 42
       },
       "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 7
+      },
+      "display": "tests::quality_signals::members_pay_exactly_the_discounted_price",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "members_pay_exactly_the_discounted_price",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 7
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "display": "tests::quality_signals::overflowing_balances_panic",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "overflowing_balances_panic",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "tests::quality_signals::statements_are_not_empty",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "statements_are_not_empty",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 23,
+        "end_col": 2,
+        "end_line": 25,
+        "line": 23
+      },
+      "display": "tests::quality_signals::classifying_runs",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "classifying_runs",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 25,
+        "line": 23
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 28
+      },
+      "display": "tests::quality_signals::tallies_are_logged_and_mailed",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "tallies_are_logged_and_mailed",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 28
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 40,
+        "line": 36
+      },
+      "display": "tests::quality_signals::every_entry_counts_toward_the_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "every_entry_counts_toward_the_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 40,
+        "line": 36
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 43
+      },
+      "display": "tests::quality_signals::display_shows_owner_and_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "display_shows_owner_and_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 43
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 57,
+        "line": 51
+      },
+      "display": "tests::quality_signals::statements_show_the_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "statements_show_the_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 57,
+        "line": 51
+      },
+      "visibility": "private"
     }
   ]
 }

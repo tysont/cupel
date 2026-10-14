@@ -199,7 +199,7 @@ fn conventions_pair_sources_with_integration_and_inline_tests() {
     assert!(!conventions.is_test("src/pricing.rs"));
     assert_eq!(
         conventions.test_files_for("src/lib.rs"),
-        ["tests/ledger.rs"]
+        ["tests/ledger.rs", "tests/quality_signals.rs"]
     );
     assert_eq!(
         conventions.test_files_for("src/pricing.rs"),

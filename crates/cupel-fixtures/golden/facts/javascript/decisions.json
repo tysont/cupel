@@ -620,6 +620,77 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 22,
+        "file": "test/math.quality.test.js",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 27,
+        "file": "test/math.quality.test.js",
+        "line": 14
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 34,
+        "file": "test/math.quality.test.js",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 39,
+        "file": "test/math.quality.test.js",
+        "line": 29
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 35
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 32,
+        "file": "test/math.quality.test.js",
+        "line": 42
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 26,
         "file": "test/math.test.js",
         "line": 14

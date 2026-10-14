@@ -360,6 +360,77 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 22,
+        "file": "src/math.quality.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 33,
+        "file": "src/math.quality.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 27,
+        "file": "src/math.quality.test.ts",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "src/math.quality.test.ts",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 34,
+        "file": "src/math.quality.test.ts",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 39,
+        "file": "src/math.quality.test.ts",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "src/math.quality.test.ts",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 32,
+        "file": "src/math.quality.test.ts",
+        "line": 41
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 26,
         "file": "src/math.test.ts",
         "line": 7

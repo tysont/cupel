@@ -170,6 +170,56 @@
             "kind": "file",
             "path": "src/pricing.rs"
           }
+        },
+        {
+          "from": "tests/quality_signals.rs",
+          "line": 1,
+          "relative": false,
+          "specifier": "ledger::balance",
+          "target": {
+            "kind": "file",
+            "path": "src/lib.rs"
+          }
+        },
+        {
+          "from": "tests/quality_signals.rs",
+          "line": 2,
+          "relative": false,
+          "specifier": "ledger::decide::classify",
+          "target": {
+            "kind": "file",
+            "path": "src/decide.rs"
+          }
+        },
+        {
+          "from": "tests/quality_signals.rs",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger::pricing::discounted",
+          "target": {
+            "kind": "file",
+            "path": "src/pricing.rs"
+          }
+        },
+        {
+          "from": "tests/quality_signals.rs",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger::pricing::tally",
+          "target": {
+            "kind": "file",
+            "path": "src/pricing.rs"
+          }
+        },
+        {
+          "from": "tests/quality_signals.rs",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger::Account",
+          "target": {
+            "kind": "file",
+            "path": "src/lib.rs"
+          }
         }
       ],
       "root": "."

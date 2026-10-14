@@ -54,6 +54,7 @@ fn the_fixture_graph_is_exactly_its_import_edges() {
     );
     let (cli, conftest) = ("src/ledger/cli.py", "tests/conftest.py");
     let (ledger, pricing) = ("tests/test_ledger.py", "tests/test_pricing.py");
+    let quality = "tests/test_quality_signals.py";
     let (decide, units) = ("src/ledger/decide.py", "libs/units/src/units/__init__.py");
     let r = |from: &str, line: u32, specifier: &str, target: &str, relative: bool| {
         row(".", from, line, specifier, target, relative)
@@ -92,6 +93,25 @@ fn the_fixture_graph_is_exactly_its_import_edges() {
             r(
                 pricing,
                 4,
+                "ledger.pricing.tally",
+                "src/ledger/pricing.py",
+                false
+            ),
+            r(quality, 1, "pytest", "external:pytest", false),
+            r(quality, 3, "ledger.Account", init, false),
+            r(quality, 3, "ledger.balance", init, false),
+            r(quality, 4, "ledger.decide.classify", decide, false),
+            r(quality, 4, "ledger.decide.require_positive", decide, false),
+            r(
+                quality,
+                5,
+                "ledger.pricing.discounted",
+                "src/ledger/pricing.py",
+                false
+            ),
+            r(
+                quality,
+                5,
                 "ledger.pricing.tally",
                 "src/ledger/pricing.py",
                 false

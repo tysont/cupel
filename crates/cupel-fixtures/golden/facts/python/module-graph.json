@@ -230,6 +230,76 @@
             "kind": "file",
             "path": "src/ledger/pricing.py"
           }
+        },
+        {
+          "from": "tests/test_quality_signals.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "pytest",
+          "target": {
+            "kind": "external",
+            "package": "pytest"
+          }
+        },
+        {
+          "from": "tests/test_quality_signals.py",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.Account",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "from": "tests/test_quality_signals.py",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.balance",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "from": "tests/test_quality_signals.py",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.decide.classify",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.py"
+          }
+        },
+        {
+          "from": "tests/test_quality_signals.py",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.decide.require_positive",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.py"
+          }
+        },
+        {
+          "from": "tests/test_quality_signals.py",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.pricing.discounted",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.py"
+          }
+        },
+        {
+          "from": "tests/test_quality_signals.py",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.pricing.tally",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.py"
+          }
         }
       ],
       "root": "."

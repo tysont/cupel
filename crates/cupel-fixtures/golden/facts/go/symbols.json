@@ -486,6 +486,182 @@
     },
     {
       "body": {
+        "col": 60,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "ledger.TestMembersPayExactlyTheDiscountedPrice",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestMembersPayExactlyTheDiscountedPrice",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "display": "ledger.TestBlankAmountsAreRejected",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestBlankAmountsAreRejected",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "ledger.TestStatementsAreNotEmpty",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestStatementsAreNotEmpty",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "ledger.TestClassifyingRuns",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestClassifyingRuns",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 53,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 26
+      },
+      "display": "ledger.TestMailGoesThroughEveryNotifier",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestMailGoesThroughEveryNotifier",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 26
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 2,
+        "end_line": 38,
+        "line": 34
+      },
+      "display": "ledger.TestEveryEntryCountsTowardTheBalance",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestEveryEntryCountsTowardTheBalance",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 38,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 45,
+        "line": 40
+      },
+      "display": "ledger.TestDepositsKeepTheOwner",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestDepositsKeepTheOwner",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 45,
+        "line": 40
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 53,
+        "line": 47
+      },
+      "display": "ledger.TestDepositsAccumulate",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestDepositsAccumulate",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 53,
+        "line": 47
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 29,
         "end_col": 2,
         "end_line": 11,

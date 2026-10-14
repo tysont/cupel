@@ -132,6 +132,27 @@ const JAVASCRIPT_EDGES: &[Edge] = &[
         "src/format.cjs",
         true,
     ),
+    (
+        "test/math.quality.test.js",
+        1,
+        "vitest",
+        "external:vitest",
+        false,
+    ),
+    (
+        "test/math.quality.test.js",
+        2,
+        "../src/math.js",
+        "src/math.js",
+        true,
+    ),
+    (
+        "test/math.quality.test.js",
+        3,
+        "../src/decide.js",
+        "src/decide.js",
+        true,
+    ),
     ("test/math.test.js", 1, "vitest", "external:vitest", false),
     (
         "test/math.test.js",
@@ -208,6 +229,14 @@ const TYPESCRIPT_EDGES: &[Edge] = &[
         false,
     ),
     ("src/ledger.ts", 9, "./generated", "unresolved", true),
+    (
+        "src/math.quality.test.ts",
+        1,
+        "vitest",
+        "external:vitest",
+        false,
+    ),
+    ("src/math.quality.test.ts", 2, "./math", "src/math.ts", true),
     ("src/math.test.ts", 1, "vitest", "external:vitest", false),
     ("src/math.test.ts", 2, "./math", "src/math.ts", true),
     (

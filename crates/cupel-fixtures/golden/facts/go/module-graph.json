@@ -162,6 +162,26 @@
           }
         },
         {
+          "from": "ledger_quality_test.go",
+          "line": 4,
+          "relative": false,
+          "specifier": "testing",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "from": "ledger_quality_test.go",
+          "line": 6,
+          "relative": false,
+          "specifier": "github.com/stretchr/testify/assert",
+          "target": {
+            "kind": "external",
+            "package": "github.com/stretchr/testify"
+          }
+        },
+        {
           "from": "ledger_test.go",
           "line": 4,
           "relative": false,

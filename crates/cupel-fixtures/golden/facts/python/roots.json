@@ -591,6 +591,134 @@
         "file": "tests/test_pricing.py",
         "line": 21
       }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 12
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 12
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 17
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 17
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 21
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 25
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 25
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 32
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 32
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 44
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 44
+      }
     }
   ]
 }

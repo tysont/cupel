@@ -155,6 +155,70 @@
     {
       "reason": "test",
       "symbol": {
+        "col": 22,
+        "file": "src/math.quality.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 33,
+        "file": "src/math.quality.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 27,
+        "file": "src/math.quality.test.ts",
+        "line": 13
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "src/math.quality.test.ts",
+        "line": 17
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 34,
+        "file": "src/math.quality.test.ts",
+        "line": 21
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 39,
+        "file": "src/math.quality.test.ts",
+        "line": 28
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "src/math.quality.test.ts",
+        "line": 34
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 32,
+        "file": "src/math.quality.test.ts",
+        "line": 41
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
         "col": 26,
         "file": "src/math.test.ts",
         "line": 7
