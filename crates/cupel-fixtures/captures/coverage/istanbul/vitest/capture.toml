@@ -1,0 +1,6 @@
+# Captured from the real tool on the coverage fixture (P3.2); the other file here is its unedited
+# report. `dir` is where it ran, which parsers' callers strip from absolute paths.
+tool = "vitest 4.1.11, @vitest/coverage-v8 4.1.11"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p3-2/work/ts"
+command = "vitest run --coverage --coverage.reporter=lcov --coverage.reporter=json"
+exit_code = 0

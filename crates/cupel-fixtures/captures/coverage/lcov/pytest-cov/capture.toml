@@ -1,0 +1,6 @@
+# Captured from the real tool on the coverage fixture (P3.2); the other file here is its unedited
+# report. `dir` is where it ran, which parsers' callers strip from absolute paths.
+tool = "pytest 8.4.2, pytest-cov 7.0.0, coverage.py 7.11.0, Python 3.13.1"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p3-2/work/py"
+command = "python3 -m pytest -p no:cacheprovider --cov=. --cov-branch --cov-report=lcov:<report> --cov-report=xml:<xml>"
+exit_code = 0

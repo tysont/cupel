@@ -1,0 +1,67 @@
+SF:grade.py
+DA:4,1
+DA:6,1
+DA:7,1
+DA:8,1
+DA:9,1
+DA:12,1
+DA:14,1
+DA:15,1
+DA:16,1
+DA:17,1
+DA:18,0
+DA:21,1
+DA:23,0
+DA:24,0
+DA:25,0
+DA:26,0
+DA:27,0
+DA:28,0
+DA:29,0
+DA:30,0
+DA:31,0
+LF:21
+LH:11
+FN:4,9,total
+FNDA:1,total
+FN:12,18,classify
+FNDA:1,classify
+FN:21,31,refund
+FNDA:0,refund
+FNF:3
+FNH:2
+BRDA:7,0,jump to line 8,1
+BRDA:7,0,jump to line 9,1
+BRDA:14,0,jump to line 15,1
+BRDA:14,0,jump to line 16,1
+BRDA:16,0,jump to line 17,1
+BRDA:16,0,jump to line 18,0
+BRDA:23,0,jump to line 24,-
+BRDA:23,0,jump to line 25,-
+BRDA:25,0,jump to line 26,-
+BRDA:25,0,jump to line 27,-
+BRDA:27,0,jump to line 28,-
+BRDA:27,0,jump to line 29,-
+BRDA:29,0,jump to line 30,-
+BRDA:29,0,jump to line 31,-
+BRF:14
+BRH:5
+end_of_record
+SF:tests/__init__.py
+end_of_record
+SF:tests/test_grade.py
+DA:2,1
+DA:5,1
+DA:6,1
+DA:9,1
+DA:10,1
+DA:11,1
+LF:6
+LH:6
+FN:5,6,test_totals_a_list
+FNDA:1,test_totals_a_list
+FN:9,11,test_classifies_passing_scores
+FNDA:1,test_classifies_passing_scores
+FNF:2
+FNH:2
+end_of_record

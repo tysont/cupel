@@ -1,0 +1,7 @@
+# Captured from the real tool on the coverage fixture (P3.2); the other file here is its unedited
+# report. The tests were a `node:test` copy of the fixture's `grade.test.js` beside its `grade.js`.
+# `dir` is where it ran, which parsers' callers strip from absolute paths.
+tool = "c8 12.0.0, node v25.2.1"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p3-2/work/c8"
+command = "c8 --reporter=lcov node --test"
+exit_code = 0

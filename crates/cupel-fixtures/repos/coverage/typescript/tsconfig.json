@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "types": ["vitest/globals"]
+  },
+  "include": ["src"]
+}
