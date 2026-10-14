@@ -3,7 +3,8 @@
 mod support;
 
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
-use support::{Skip, case, file, fixture, produce, rows, tree};
+use support::Skip::{Because, Runs, Skipped};
+use support::{assert_framework, assert_test_file, case, file, fixture, produce, rows, tree};
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
 use AssertionStrength::{Strong, Weak};
@@ -14,62 +15,41 @@ fn frames() -> TestFrames {
 
 #[test]
 fn integration_tests_are_cases_with_classified_assertions() {
-    let frames = frames();
-    let ledger = file(&frames, "tests/ledger.rs");
-    assert_eq!(ledger.framework, "rust-test");
-    assert!(ledger.setup.is_empty());
+    let ledger = &assert_test_file("rust", "tests/ledger.rs", "rust-test", &[]);
     assert_eq!(
         rows(ledger),
         [
             case(
                 "deposit_adds_to_the_balance",
                 &[(Equality, Strong)],
-                Skip::Runs,
+                Runs,
                 &[],
                 5
             ),
             case(
                 "members_get_a_discount",
                 &[(Truthiness, Weak)],
-                Skip::Runs,
+                Runs,
                 &[],
                 12
             ),
             case(
                 "statements_mention_the_balance",
                 &[(NotNull, Weak)],
-                Skip::Runs,
+                Runs,
                 &[],
                 17
             ),
-            case(
-                "parsing_garbage_fails",
-                &[(Throws, Weak)],
-                Skip::Runs,
-                &[],
-                22
-            ),
-            case(
-                "huge_deposits_overflow",
-                &[(Throws, Strong)],
-                Skip::Runs,
-                &[],
-                28
-            ),
+            case("parsing_garbage_fails", &[(Throws, Weak)], Runs, &[], 22),
+            case("huge_deposits_overflow", &[(Throws, Strong)], Runs, &[], 28),
             case(
                 "statement_is_mailed",
                 &[(Equality, Weak)],
-                Skip::Because("talks to the network".to_owned()),
+                Because("talks to the network".to_owned()),
                 &[],
                 36,
             ),
-            case(
-                "opening_an_account_does_not_panic",
-                &[],
-                Skip::Runs,
-                &[],
-                42
-            ),
+            case("opening_an_account_does_not_panic", &[], Runs, &[], 42),
         ]
     );
 }
@@ -77,8 +57,7 @@ fn integration_tests_are_cases_with_classified_assertions() {
 #[test]
 fn inline_test_modules_have_fixtures_snapshots_mocks_and_async_tests() {
     let frames = frames();
-    let pricing = file(&frames, "src/pricing.rs");
-    assert_eq!(pricing.framework, "rust-test");
+    let pricing = &assert_framework(&frames, "src/pricing.rs", "rust-test");
     assert_eq!(
         pricing.setup.iter().map(|s| s.line).collect::<Vec<_>>(),
         [38]
@@ -89,18 +68,12 @@ fn inline_test_modules_have_fixtures_snapshots_mocks_and_async_tests() {
             case(
                 "tally_reports_overdraft",
                 &[(Equality, Strong), (Truthiness, Weak)],
-                Skip::Runs,
+                Runs,
                 &[],
                 43
             ),
-            case(
-                "discount_snapshot",
-                &[(Snapshot, Strong)],
-                Skip::Runs,
-                &[],
-                50
-            ),
-            case("the_log_is_written_once", &[], Skip::Runs, &["MockLog"], 55),
+            case("discount_snapshot", &[(Snapshot, Strong)], Runs, &[], 50),
+            case("the_log_is_written_once", &[], Runs, &["MockLog"], 55),
         ]
     );
 }
@@ -108,8 +81,20 @@ fn inline_test_modules_have_fixtures_snapshots_mocks_and_async_tests() {
 #[test]
 fn files_without_test_cases_have_no_frames() {
     let frames = frames();
-    assert!(frames.files.iter().all(|f| !f.cases.is_empty()));
-    assert!(frames.files.iter().all(|f| f.file != "src/lib.rs"));
+    let files: Vec<(&str, bool)> = frames
+        .files
+        .iter()
+        .map(|f| (f.file.as_str(), f.cases.is_empty()))
+        .collect();
+    assert_eq!(
+        files,
+        [
+            ("src/pricing.rs", false),
+            ("tests/ledger.rs", false),
+            ("tests/quality_signals.rs", false),
+        ],
+        "only files with test cases; src/lib.rs has none"
+    );
 }
 
 #[test]
@@ -119,11 +104,10 @@ fn a_file_of_only_tokio_tests_is_a_tokio_file_and_unknown_assertions_are_custom(
         "#[tokio::test]\n#[ignore]\nasync fn reads() {\n    assert_matches!(read().await, Ok(_));\n}\n",
     )]);
     let frames: TestFrames = produce("rust", dir.path());
-    let io = file(&frames, "tests/io.rs");
-    assert_eq!(io.framework, "tokio");
+    let io = &assert_framework(&frames, "tests/io.rs", "tokio");
     assert_eq!(
         rows(io),
-        [case("reads", &[(Custom, Strong)], Skip::Skipped, &[], 3)]
+        [case("reads", &[(Custom, Strong)], Skipped, &[], 3)]
     );
 }
 
@@ -171,45 +155,39 @@ fn assertions_in(body: &str) -> Vec<(AssertionKind, AssertionStrength)> {
     rows(file(&frames, "tests/t.rs"))[0].1.clone()
 }
 
-#[test]
-fn comparisons_and_predicates_true_of_one_value_pin_that_value() {
-    assert_eq!(assertions_in("assert!(total == 3);"), [(Equality, Strong)]);
-    assert_eq!(
-        assertions_in("assert!(found.is_none());"),
-        [(Equality, Strong)]
-    );
-    assert_eq!(
-        assertions_in("assert!(findings.is_empty(), \"{findings:?}\");"),
-        [(Equality, Strong)]
-    );
-    assert_eq!(assertions_in("assert!(a != b);"), [(Equality, Weak)]);
-    assert_eq!(assertions_in("assert!(x.is_some());"), [(NotNull, Weak)]);
-    assert_eq!(assertions_in("assert!(ready(x));"), [(Truthiness, Weak)]);
-    assert_eq!(
-        assertions_in("assert!(items.iter().all(|i| i.len() == 2));"),
-        [(Truthiness, Weak)],
-        "a comparison inside a closure does not pin the asserted value"
-    );
-    assert_eq!(
-        assertions_in("assert!(!list.is_empty());"),
-        [(Truthiness, Weak)],
-        "a negated predicate rules one value out"
-    );
-}
+/// Assertion bodies and how each is classified (ADR-070): comparisons and predicates true of one
+/// value pin it; inequality, presence, and plain truthiness do not; a comparison inside a
+/// closure and a negated predicate stay weak; `assert_…` helpers and `assert_cmd` are custom.
+const ASSERTION_FORMS: &[(&str, &[(AssertionKind, AssertionStrength)])] = &[
+    ("assert!(total == 3);", &[(Equality, Strong)]),
+    ("assert!(found.is_none());", &[(Equality, Strong)]),
+    (
+        "assert!(findings.is_empty(), \"{findings:?}\");",
+        &[(Equality, Strong)],
+    ),
+    ("assert!(a != b);", &[(Equality, Weak)]),
+    ("assert!(x.is_some());", &[(NotNull, Weak)]),
+    ("assert!(ready(x));", &[(Truthiness, Weak)]),
+    (
+        "assert!(items.iter().all(|i| i.len() == 2));",
+        &[(Truthiness, Weak)],
+    ),
+    ("assert!(!list.is_empty());", &[(Truthiness, Weak)]),
+    ("assert_fixture(\"cargo\", &expected);", &[(Custom, Strong)]),
+    (
+        "support::assert_usage(&outcome, \"--paths\");",
+        &[(Custom, Strong)],
+    ),
+    (
+        "cupel().arg(\"--version\").assert().success().stdout(\"x\");",
+        &[(Custom, Strong)],
+    ),
+    ("helper(&outcome);", &[]),
+];
 
 #[test]
-fn assertion_helpers_and_process_assertions_are_assertions() {
-    assert_eq!(
-        assertions_in("assert_fixture(\"cargo\", &expected);"),
-        [(Custom, Strong)]
-    );
-    assert_eq!(
-        assertions_in("support::assert_usage(&outcome, \"--paths\");"),
-        [(Custom, Strong)]
-    );
-    assert_eq!(
-        assertions_in("cupel().arg(\"--version\").assert().success().stdout(\"x\");"),
-        [(Custom, Strong)]
-    );
-    assert_eq!(assertions_in("helper(&outcome);"), []);
+fn each_assertion_form_has_its_kind_and_strength() {
+    for (body, expected) in ASSERTION_FORMS {
+        assert_eq!(assertions_in(body), *expected, "{body}");
+    }
 }

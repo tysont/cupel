@@ -20,9 +20,15 @@ fn parses_cleanly(path: &str, source: &str) -> bool {
 #[test]
 fn the_five_launch_languages_are_registered_with_their_families() {
     let registry = LanguageRegistry::builtin();
-    let languages: Vec<(String, String)> = registry
+    let languages: Vec<(String, String, Stability)> = registry
         .iter()
-        .map(|language| (language.id().to_string(), language.family().to_string()))
+        .map(|language| {
+            (
+                language.id().to_string(),
+                language.family().to_string(),
+                language.stability(),
+            )
+        })
         .collect();
     assert_eq!(
         languages,
@@ -33,11 +39,8 @@ fn the_five_launch_languages_are_registered_with_their_families() {
             ("rust", "rust"),
             ("typescript", "ecma"),
         ]
-        .map(|(id, family)| (id.to_owned(), family.to_owned()))
+        .map(|(id, family)| (id.to_owned(), family.to_owned(), Stability::Experimental))
     );
-    for language in registry.iter() {
-        assert_eq!(language.stability(), Stability::Experimental);
-    }
 }
 
 #[test]
@@ -73,37 +76,49 @@ fn every_extension_maps_to_exactly_one_language() {
     for path in ["README.md", "Makefile", "a.rs.orig", "noext"] {
         assert!(registry.for_path(path).is_none(), "{path}");
     }
-    let mut seen = Vec::new();
-    for language in registry.iter() {
-        for extension in language.extensions() {
-            assert!(extension.starts_with('.'), "{extension}");
-            assert!(!seen.contains(extension), "{extension} is claimed twice");
-            seen.push(*extension);
-        }
-    }
+    let mut extensions: Vec<&str> = registry
+        .iter()
+        .flat_map(|language| language.extensions().iter().copied())
+        .collect();
+    extensions.sort_unstable();
+    assert_eq!(
+        extensions,
+        [
+            ".cjs", ".cts", ".go", ".js", ".jsx", ".mjs", ".mts", ".py", ".rs", ".ts", ".tsx"
+        ],
+        "each extension is claimed once"
+    );
 }
 
-#[test]
-fn jsx_and_tsx_parse_with_the_grammar_that_understands_them() {
-    let jsx = "const App = () => <div className=\"a\">{x}</div>;\n";
-    assert!(parses_cleanly("App.jsx", jsx));
-    assert!(parses_cleanly("App.js", jsx));
-    assert!(parses_cleanly(
-        "App.tsx",
-        "const App = (p: P) => <div>{p.x}</div>;\n"
-    ));
-}
-
-#[test]
-fn ts_files_use_the_typescript_grammar_not_tsx() {
-    // An angle-bracket type assertion is valid TypeScript and invalid TSX.
-    let assertion = "const n = <number>value;\n";
-    assert!(parses_cleanly("a.ts", assertion));
-    assert!(!parses_cleanly("a.tsx", assertion));
-    assert!(parses_cleanly(
+/// Sources and whether they parse cleanly at a path: `.jsx` and `.js` take the JavaScript
+/// grammar, which understands JSX; `.tsx` takes TSX; `.ts` and `.mts` take TypeScript, where an
+/// angle-bracket type assertion is valid and in TSX it is not.
+const PARSES: &[(&str, &str, bool)] = &[
+    (
+        "App.jsx",
+        "const App = () => <div className=\"a\">{x}</div>;\n",
+        true,
+    ),
+    (
+        "App.js",
+        "const App = () => <div className=\"a\">{x}</div>;\n",
+        true,
+    ),
+    ("App.tsx", "const App = (p: P) => <div>{p.x}</div>;\n", true),
+    ("a.ts", "const n = <number>value;\n", true),
+    ("a.tsx", "const n = <number>value;\n", false),
+    (
         "a.mts",
-        "export const f = (x: number): number => x;\n"
-    ));
+        "export const f = (x: number): number => x;\n",
+        true,
+    ),
+];
+
+#[test]
+fn each_file_parses_with_the_grammar_its_extension_selects() {
+    for (path, source, clean) in PARSES {
+        assert_eq!(parses_cleanly(path, source), *clean, "{path}");
+    }
 }
 
 #[test]
@@ -111,10 +126,16 @@ fn registering_producers_never_registers_a_language_twice_for_a_fact() {
     let registry = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
     registry.register_producers(&mut producers);
-    for lang in registry.langs() {
-        for kind in cupel_core::FactKind::ALL {
-            let count = producers.producers_for(kind, &lang).count();
-            assert!(count <= 1, "{kind} for {}: {count} producers", lang.id);
-        }
-    }
+    let langs = registry.langs();
+    let twice: Vec<String> = langs
+        .iter()
+        .flat_map(|lang| {
+            cupel_core::FactKind::ALL
+                .into_iter()
+                .map(move |kind| (lang, kind))
+        })
+        .filter(|(lang, kind)| producers.producers_for(*kind, lang).count() > 1)
+        .map(|(lang, kind)| format!("{kind} for {}", lang.id))
+        .collect();
+    assert_eq!(twice, Vec::<String>::new());
 }

@@ -3,7 +3,8 @@
 mod support;
 
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
-use support::{Skip, case, file, fixture, produce, rows, tree};
+use support::Skip::{Because, Runs, Skipped};
+use support::{assert_framework, assert_test_file, case, fixture, produce, rows, tree};
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
 use AssertionStrength::{Strong, Weak};
@@ -15,8 +16,7 @@ fn frames() -> TestFrames {
 #[test]
 fn standard_library_tests_classify_the_condition_guarding_each_failure() {
     let frames = frames();
-    let ledger = file(&frames, "ledger_test.go");
-    assert_eq!(ledger.framework, "go-test");
+    let ledger = &assert_framework(&frames, "ledger_test.go", "go-test");
     assert_eq!(
         ledger.setup.iter().map(|s| s.line).collect::<Vec<_>>(),
         [8, 15]
@@ -27,99 +27,84 @@ fn standard_library_tests_classify_the_condition_guarding_each_failure() {
             case(
                 "TestDepositAddsToTheBalance",
                 &[(Equality, Strong)],
-                Skip::Runs,
+                Runs,
                 &[],
                 13
             ),
             case(
                 "TestMembersGetADiscount",
                 &[(Truthiness, Weak)],
-                Skip::Runs,
+                Runs,
                 &[],
                 22
             ),
             case(
                 "TestNewAccountsAreRegistered",
                 &[(NotNull, Weak)],
-                Skip::Runs,
+                Runs,
                 &[],
                 28
             ),
-            case(
-                "TestParsingGarbageFails",
-                &[(Throws, Weak)],
-                Skip::Runs,
-                &[],
-                35
-            ),
+            case("TestParsingGarbageFails", &[(Throws, Weak)], Runs, &[], 35),
             case(
                 "TestNewAccountsHaveDistinctIDs",
                 &[(Equality, Weak)],
-                Skip::Runs,
+                Runs,
                 &[],
                 41
             ),
-            case("TestClassify", &[(Equality, Strong)], Skip::Runs, &[], 48),
+            case("TestClassify", &[(Equality, Strong)], Runs, &[], 48),
             case(
                 "TestStatementIsMailed",
                 &[(Equality, Weak)],
-                Skip::Because("talks to the network".to_owned()),
+                Because("talks to the network".to_owned()),
                 &[],
                 66,
             ),
             case(
                 "TestParseCentsTrimsSpaces",
                 &[(NotNull, Weak), (Equality, Strong)],
-                Skip::Runs,
+                Runs,
                 &[],
                 75
             ),
-            case("TestOpeningAnAccountDoesNotPanic", &[], Skip::Runs, &[], 85),
+            case("TestOpeningAnAccountDoesNotPanic", &[], Runs, &[], 85),
         ]
     );
 }
 
 #[test]
 fn testify_files_have_testify_assertions_snapshots_and_mocks() {
-    let frames = frames();
-    let pricing = file(&frames, "pricing_test.go");
-    assert_eq!(pricing.framework, "testify");
-    assert!(pricing.setup.is_empty());
+    let pricing = &assert_test_file("go", "pricing_test.go", "testify", &[]);
     assert_eq!(
         rows(pricing),
         [
             case(
                 "TestTallyReportsOverdraft",
                 &[(Equality, Strong), (Truthiness, Weak)],
-                Skip::Runs,
+                Runs,
                 &[],
                 21
             ),
             case(
                 "TestParseCentsAcceptsDigits",
                 &[(NotNull, Weak), (Equality, Strong)],
-                Skip::Runs,
+                Runs,
                 &[],
                 27
             ),
             case(
                 "TestParseCentsRejectsBlanks",
                 &[(Throws, Strong)],
-                Skip::Runs,
+                Runs,
                 &[],
                 33
             ),
-            case(
-                "TestDiscountSnapshot",
-                &[(Snapshot, Strong)],
-                Skip::Runs,
-                &[],
-                38
-            ),
+            case("TestDiscountSnapshot", &[(Snapshot, Strong)], Runs, &[], 38),
             case(
                 "TestMailNotifiesTheOwner",
                 &[(NotNull, Weak), (Custom, Strong)],
-                Skip::Runs,
+                Runs,
                 &["MockNotifier"],
                 42
             ),
@@ -154,19 +139,18 @@ fn only_test_functions_taking_testing_t_are_cases_and_gomock_doubles_are_mocks()
          func Test(t *testing.T) {\n\tif err.Error() != \"x\" {\n\t\tt.Fatalf(\"got %v\", err)\n\t}\n}\n",
     )]);
     let frames: TestFrames = produce("go", dir.path());
-    let store = file(&frames, "store_test.go");
-    assert_eq!(store.framework, "go-test");
+    let store = &assert_framework(&frames, "store_test.go", "go-test");
     assert_eq!(
         rows(store),
         [
             case(
                 "TestGet",
                 &[(Truthiness, Weak)],
-                Skip::Skipped,
+                Skipped,
                 &["NewMockStore"],
                 15
             ),
-            case("Test", &[(Equality, Strong)], Skip::Runs, &[], 26),
+            case("Test", &[(Equality, Strong)], Runs, &[], 26),
         ]
     );
 }

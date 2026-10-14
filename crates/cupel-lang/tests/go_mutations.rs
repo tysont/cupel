@@ -155,7 +155,7 @@ fn site_hashes_are_sixteen_hex_digits_and_distinct_within_a_symbol() {
 }
 
 /// Every replacement of every site in `root`'s Go files leaves a file that parses cleanly.
-fn every_replacement_parses(root: &Path) {
+fn assert_every_replacement_parses(root: &Path) {
     let sites: MutationSites = produce("go", root);
     let symbols: Symbols = produce("go", root);
     let mut parser = tree_sitter::Parser::new();
@@ -192,7 +192,7 @@ fn every_replacement_parses(root: &Path) {
 
 #[test]
 fn every_replacement_in_the_fixture_repository_parses() {
-    every_replacement_parses(&fixture("go"));
+    assert_every_replacement_parses(&fixture("go"));
 }
 
 /// The fixture's `pricing.go`, reformatted: indentation and blank lines change.
@@ -259,6 +259,6 @@ proptest! {
         expected.sort();
         actual.sort();
         prop_assert_eq!(actual, expected);
-        every_replacement_parses(moved.path());
+        assert_every_replacement_parses(moved.path());
     }
 }

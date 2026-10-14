@@ -255,9 +255,14 @@ fn the_deps_fixtures_are_a_package_cycle_and_a_layered_import() {
 fn every_go_import_is_an_import_edge() {
     let graph = produce::<ModuleGraph>("go", &fixture("go"));
     let edges = kinds(&graph);
-    assert!(!edges.is_empty());
-    assert!(
-        edges.iter().all(|(_, _, kind)| *kind == EdgeKind::Import),
-        "Go has neither module declarations nor re-exports: {edges:?}"
+    let others: Vec<&(String, String, EdgeKind)> = edges
+        .iter()
+        .filter(|(_, _, kind)| *kind != EdgeKind::Import)
+        .collect();
+    assert_eq!(
+        others,
+        Vec::<&(String, String, EdgeKind)>::new(),
+        "Go has neither module declarations nor re-exports"
     );
+    assert_eq!(edges.len(), 34, "every fixture import is listed");
 }

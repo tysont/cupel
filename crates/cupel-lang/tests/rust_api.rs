@@ -2,8 +2,8 @@
 // ABOUTME: differences between two versions, and symbols live by convention (main, exports, tests, hooks).
 mod support;
 
-use cupel_core::syntax::{ApiItemKind, ApiSurface, RootReason, Roots, Symbols, TestFrames};
-use support::{fixture, items, produce, reasons, tree};
+use cupel_core::syntax::{ApiItemKind, ApiSurface, RootReason, Roots, Symbols};
+use support::{assert_every_case_is_a_test_root, fixture, items, produce, reasons, tree};
 
 use ApiItemKind::{Constant, Function, Interface, Method, Module, Type, Variable};
 
@@ -52,36 +52,40 @@ fn types_traits_and_their_methods_have_paths_and_signatures() {
 
 #[test]
 fn signatures_ignore_layout_and_names_and_keep_generics_and_where_clauses() {
-    let compact = tree(&[(
-        "src/lib.rs",
-        "pub fn get<T: Clone>(items: &[T], at: usize) -> Option<&'static str> where T: Copy { None }\n",
-    )]);
-    let spread = tree(&[(
-        "src/lib.rs",
-        "pub fn get<\n    T:Clone,\n>(\n    list: &[T],\n    index: usize, // where\n) -> Option<&'static str>\nwhere\n    T: Copy,\n{\n    None\n}\n",
-    )]);
-    let compact: ApiSurface = produce("rust", compact.path());
-    let spread: ApiSurface = produce("rust", spread.path());
+    let compact = "pub fn get<T: Clone>(items: &[T], at: usize) -> Option<&'static str> where T: Copy { None }\n";
+    let spread = "pub fn get<\n    T:Clone,\n>(\n    list: &[T],\n    index: usize, // where\n) -> Option<&'static str>\nwhere\n    T: Copy,\n{\n    None\n}\n";
+    let signature = "<T: Clone>(_: &[T], _: usize) -> Option<&'static str> where T: Copy";
     assert_eq!(
-        compact.items[0].signature,
-        "<T: Clone>(_: &[T], _: usize) -> Option<&'static str> where T: Copy"
+        public_items(&[compact, spread]),
+        [("get", signature), ("get", signature)]
+            .map(|(path, signature)| vec![(path.to_owned(), signature.to_owned())])
     );
-    assert_eq!(spread.items[0].signature, compact.items[0].signature);
 }
 
 #[test]
 fn removing_a_public_parameter_changes_the_api_surface() {
-    let before = tree(&[(
-        "src/lib.rs",
-        "pub fn pay(cents: i64, memo: &str) {}\nfn hidden(a: i64) {}\n",
-    )]);
-    let after = tree(&[("src/lib.rs", "pub fn pay(cents: i64) {}\nfn hidden() {}\n")]);
-    let before: ApiSurface = produce("rust", before.path());
-    let after: ApiSurface = produce("rust", after.path());
-    assert_eq!(before.items.len(), 1);
-    assert_eq!(before.items[0].path, after.items[0].path);
-    assert_ne!(before.items[0].signature, after.items[0].signature);
-    assert_eq!(after.items[0].signature, "(_: i64)");
+    let before = "pub fn pay(cents: i64, memo: &str) {}\nfn hidden(a: i64) {}\n";
+    let after = "pub fn pay(cents: i64) {}\nfn hidden() {}\n";
+    assert_eq!(
+        public_items(&[before, after]),
+        [("pay", "(_: i64, _: &str)"), ("pay", "(_: i64)")]
+            .map(|(path, signature)| vec![(path.to_owned(), signature.to_owned())])
+    );
+}
+
+/// The (path, signature) of each public item of each `src/lib.rs` source, one crate each.
+fn public_items(sources: &[&str]) -> Vec<Vec<(String, String)>> {
+    sources
+        .iter()
+        .map(|source| {
+            let dir = tree(&[("src/lib.rs", source)]);
+            let api: ApiSurface = produce("rust", dir.path());
+            api.items
+                .iter()
+                .map(|item| (item.path.clone(), item.signature.clone()))
+                .collect()
+        })
+        .collect()
 }
 
 #[test]
@@ -120,30 +124,7 @@ fn main_exports_tests_and_linker_hooks_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixture_is_a_test_root() {
-    let root = fixture("rust");
-    let roots: Roots = produce("rust", &root);
-    let symbols: Symbols = produce("rust", &root);
-    let frames: TestFrames = produce("rust", &root);
-    let mut checked = 0;
-    for file in &frames.files {
-        for case in &file.cases {
-            let symbol = symbols
-                .symbols
-                .iter()
-                .find(|s| s.file == file.file && s.span == case.span)
-                .unwrap_or_else(|| panic!("no symbol for test {}", case.name));
-            assert!(
-                roots
-                    .roots
-                    .iter()
-                    .any(|r| r.symbol == symbol.key() && r.reason == RootReason::Test),
-                "{} is not a test root",
-                case.name
-            );
-            checked += 1;
-        }
-    }
-    assert_eq!(checked, 22);
+    assert_every_case_is_a_test_root("rust", 22);
 }
 
 #[test]

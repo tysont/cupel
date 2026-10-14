@@ -24,11 +24,23 @@ fn a_second_parse_of_an_unchanged_tree_hits_the_cache_for_every_file() {
 
     assert_eq!(first.len(), 3);
     assert_eq!(second.len(), 3);
-    for (a, b) in first.iter().zip(&second) {
-        let (a, b) = (a.as_ref().unwrap(), b.as_ref().unwrap());
-        assert_eq!(a.file, b.file);
-        assert!(std::sync::Arc::ptr_eq(&a.syntax, &b.syntax));
-    }
+    let shared: Vec<(&str, bool)> = first
+        .iter()
+        .zip(&second)
+        .map(|(a, b)| {
+            let (a, b) = (a.as_ref().unwrap(), b.as_ref().unwrap());
+            assert_eq!(a.file, b.file);
+            (
+                a.file.as_str(),
+                std::sync::Arc::ptr_eq(&a.syntax, &b.syntax),
+            )
+        })
+        .collect();
+    assert_eq!(
+        shared,
+        [("c.py", true), ("src/a.rs", true), ("src/b.rs", true)],
+        "each file's second parse is its first tree"
+    );
 }
 
 #[test]

@@ -127,7 +127,7 @@ fn site_hashes_are_sixteen_hex_digits_and_distinct_within_a_symbol() {
 }
 
 /// Every replacement of every site in `root`'s Rust files leaves a file that parses cleanly.
-fn every_replacement_parses(root: &Path) {
+fn assert_every_replacement_parses(root: &Path) {
     let sites: MutationSites = produce("rust", root);
     let symbols: Symbols = produce("rust", root);
     let mut parser = tree_sitter::Parser::new();
@@ -164,7 +164,7 @@ fn every_replacement_parses(root: &Path) {
 
 #[test]
 fn every_replacement_in_the_fixture_repository_parses() {
-    every_replacement_parses(&fixture("rust"));
+    assert_every_replacement_parses(&fixture("rust"));
 }
 
 /// The fixture's `pricing.rs`, reformatted: indentation, blank lines, and line breaks change.
@@ -229,6 +229,6 @@ proptest! {
         expected.sort();
         actual.sort();
         prop_assert_eq!(actual, expected);
-        every_replacement_parses(moved.path());
+        assert_every_replacement_parses(moved.path());
     }
 }

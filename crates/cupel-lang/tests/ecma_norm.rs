@@ -4,7 +4,7 @@ mod support;
 
 use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{fixture, produce, sexp, tree};
+use support::{assert_distinct, fixture, produce, sexp, tree};
 
 /// The normalized tree and hash of the only symbol in `source`, a `lang` file at `path`.
 fn normalize_at(lang: &str, path: &str, source: &str) -> (String, String) {
@@ -124,17 +124,16 @@ fn moving_a_file_keeps_its_hashes() {
 
 #[test]
 fn hashes_change_with_structure() {
-    let base = js("function f(a, b) { if (a > b) { return a - b; } return g(a); }\n").1;
-    for changed in [
+    let sources = [
+        "function f(a, b) { if (a > b) { return a - b; } return g(a); }\n",
         "function f(a, b) { if (a < b) { return a - b; } return g(a); }\n",
         "function f(a, b) { if (a > b) { return a + b; } return g(a); }\n",
         "function f(a, b) { if (a > b) { return a - b; } return h(a); }\n",
         "function f(a, b) { if (a > b) { return a - b; } else if (a === 0) { return 0; } return g(a); }\n",
         "function f(a, b) { if (a > b) { return a - b; } return g?.(a); }\n",
         "function f(a, b) { if (a > b) { return a - b; } return typeof g(a); }\n",
-    ] {
-        assert_ne!(js(changed).1, base, "{changed}");
-    }
+    ];
+    assert_distinct(&sources.map(|source| js(source).1));
 }
 
 /// A function whose names, literals, layout, and annotations are chosen by the caller.
@@ -149,84 +148,85 @@ fn template(names: &[String; 4], literal: u32, space: &str, newline: &str, typed
     )
 }
 
+/// Reserved words and contextual keywords of JavaScript and TypeScript, which are not names.
+const KEYWORDS: &[&str] = &[
+    "as",
+    "do",
+    "if",
+    "in",
+    "is",
+    "of",
+    "for",
+    "let",
+    "new",
+    "try",
+    "var",
+    "case",
+    "else",
+    "enum",
+    "null",
+    "this",
+    "true",
+    "type",
+    "void",
+    "with",
+    "async",
+    "await",
+    "break",
+    "catch",
+    "class",
+    "const",
+    "false",
+    "super",
+    "throw",
+    "while",
+    "yield",
+    "delete",
+    "export",
+    "import",
+    "public",
+    "return",
+    "static",
+    "switch",
+    "typeof",
+    "default",
+    "extends",
+    "finally",
+    "package",
+    "private",
+    "continue",
+    "debugger",
+    "function",
+    "abstract",
+    "readonly",
+    "interface",
+    "protected",
+    "implements",
+    "instanceof",
+    "undefined",
+    "declare",
+    "namespace",
+    "module",
+    "keyof",
+    "infer",
+    "unique",
+    "never",
+    "unknown",
+    "any",
+    "get",
+    "set",
+    "from",
+    "require",
+    "global",
+    "satisfies",
+    "override",
+    "accessor",
+    "asserts",
+    "constructor",
+];
+
 fn identifier() -> impl Strategy<Value = String> {
-    "[a-z][a-z0-9_]{0,8}".prop_filter("not a keyword", |name| {
-        !matches!(
-            name.as_str(),
-            "as" | "do"
-                | "if"
-                | "in"
-                | "is"
-                | "of"
-                | "for"
-                | "let"
-                | "new"
-                | "try"
-                | "var"
-                | "case"
-                | "else"
-                | "enum"
-                | "null"
-                | "this"
-                | "true"
-                | "type"
-                | "void"
-                | "with"
-                | "async"
-                | "await"
-                | "break"
-                | "catch"
-                | "class"
-                | "const"
-                | "false"
-                | "super"
-                | "throw"
-                | "while"
-                | "yield"
-                | "delete"
-                | "export"
-                | "import"
-                | "public"
-                | "return"
-                | "static"
-                | "switch"
-                | "typeof"
-                | "default"
-                | "extends"
-                | "finally"
-                | "package"
-                | "private"
-                | "continue"
-                | "debugger"
-                | "function"
-                | "abstract"
-                | "readonly"
-                | "interface"
-                | "protected"
-                | "implements"
-                | "instanceof"
-                | "undefined"
-                | "declare"
-                | "namespace"
-                | "module"
-                | "keyof"
-                | "infer"
-                | "unique"
-                | "never"
-                | "unknown"
-                | "any"
-                | "get"
-                | "set"
-                | "from"
-                | "require"
-                | "global"
-                | "satisfies"
-                | "override"
-                | "accessor"
-                | "asserts"
-                | "constructor"
-        )
-    })
+    "[a-z][a-z0-9_]{0,8}".prop_filter("not a keyword", |name| !KEYWORDS.contains(&name.as_str()))
 }
 
 proptest! {

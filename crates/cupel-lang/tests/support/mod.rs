@@ -9,7 +9,7 @@ use cupel_core::{
     syntax::{
         ApiItemKind, ApiSurface, AssertionKind, AssertionStrength, DecisionKind, Decisions,
         EdgeKind, ImportTarget, ModuleGraph, NormNode, ProjectInfo, RootReason, Roots, Site, Span,
-        SymbolDef, SymbolKind, Symbols, TestCase, TestFile, TestFrames, Visibility,
+        SymbolDef, SymbolKey, SymbolKind, Symbols, TestCase, TestFile, TestFrames, Visibility,
     },
 };
 use cupel_lang::{LanguageRegistry, walk_excluding};
@@ -336,4 +336,90 @@ pub fn sexp(node: &NormNode) -> String {
 
 pub fn rows(file: &TestFile) -> Vec<CaseRow> {
     file.cases.iter().map(case_row).collect()
+}
+
+/// Asserts that every test case of `lang`'s fixture repository is a `test` root, and that there
+/// are `cases` of them.
+pub fn assert_every_case_is_a_test_root(lang: &str, cases: usize) {
+    let root = fixture(lang);
+    let roots: Roots = produce(lang, &root);
+    let symbols: Symbols = produce(lang, &root);
+    let frames: TestFrames = produce(lang, &root);
+    let test_roots: Vec<SymbolKey> = roots
+        .roots
+        .iter()
+        .filter(|r| r.reason == RootReason::Test)
+        .map(|r| r.symbol.clone())
+        .collect();
+    let all: Vec<(&str, bool)> = frames
+        .files
+        .iter()
+        .flat_map(|file| file.cases.iter().map(move |case| (file, case)))
+        .map(|(file, case)| {
+            let rooted = symbols
+                .symbols
+                .iter()
+                .find(|s| s.file == file.file && s.span == case.span)
+                .is_some_and(|symbol| test_roots.contains(&symbol.key()));
+            (case.name.as_str(), rooted)
+        })
+        .collect();
+    let unrooted: Vec<&str> = all
+        .iter()
+        .filter(|(_, rooted)| !rooted)
+        .map(|(name, _)| *name)
+        .collect();
+    assert_eq!(
+        unrooted,
+        Vec::<&str>::new(),
+        "{lang}: test cases that are not test roots"
+    );
+    assert_eq!(all.len(), cases, "{lang}");
+}
+
+/// Asserts that `hashes` are pairwise distinct.
+pub fn assert_distinct(hashes: &[String]) {
+    let distinct: std::collections::BTreeSet<&String> = hashes.iter().collect();
+    assert_eq!(distinct.len(), hashes.len(), "{hashes:?}");
+}
+
+/// The test file at `path` in the `lang` fixture repository, after asserting its framework and
+/// the lines of its setup blocks.
+pub fn assert_test_file(lang: &str, path: &str, framework: &str, setup: &[u32]) -> TestFile {
+    let found = assert_framework(&produce(lang, &fixture(lang)), path, framework);
+    let lines: Vec<u32> = found.setup.iter().map(|span| span.line).collect();
+    assert_eq!(lines, setup, "{path}");
+    found
+}
+
+/// The test file at `path` in `frames`, after asserting its framework.
+pub fn assert_framework(frames: &TestFrames, path: &str, framework: &str) -> TestFile {
+    let found = file(frames, path).clone();
+    assert_eq!(found.framework, framework, "{path}");
+    found
+}
+
+/// An expected test case: (name, assertions, skip, mock targets, start line), the skip `None` when
+/// the case runs, `Some(None)` when it is skipped without a reason, and `Some(Some(reason))`.
+pub type Expected = (
+    &'static str,
+    &'static [(AssertionKind, AssertionStrength)],
+    Option<Option<&'static str>>,
+    &'static [&'static str],
+    u32,
+);
+
+/// `cases` as rows to compare with `rows`.
+pub fn expected(cases: &[Expected]) -> Vec<CaseRow> {
+    cases
+        .iter()
+        .map(|(name, assertions, skip, mocks, line)| {
+            let skip = match skip {
+                None => Skip::Runs,
+                Some(None) => Skip::Skipped,
+                Some(Some(reason)) => Skip::Because((*reason).to_owned()),
+            };
+            case(name, assertions, skip, mocks, *line)
+        })
+        .collect()
 }

@@ -216,13 +216,20 @@ fn every_language_registers_exactly_one_project_info_producer() {
     let languages = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
     languages.register_producers(&mut producers);
-    for lang in languages.langs() {
-        let ids: Vec<String> = producers
-            .producers_for(FactKind::ProjectInfo, &lang)
-            .map(|producer| producer.id().to_string())
-            .collect();
-        assert_eq!(ids, [format!("lang.{}", lang.id)]);
-    }
+    let ids: Vec<Vec<String>> = languages
+        .langs()
+        .iter()
+        .map(|lang| {
+            producers
+                .producers_for(FactKind::ProjectInfo, lang)
+                .map(|producer| producer.id().to_string())
+                .collect()
+        })
+        .collect();
+    assert_eq!(
+        ids,
+        ["go", "javascript", "python", "rust", "typescript"].map(|id| vec![format!("lang.{id}")])
+    );
 }
 
 #[test]

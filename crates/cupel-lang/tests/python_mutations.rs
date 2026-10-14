@@ -165,7 +165,7 @@ fn site_hashes_are_sixteen_hex_digits_and_distinct_within_a_symbol() {
 }
 
 /// Every replacement of every site in `root`'s Python files leaves a file that parses cleanly.
-fn every_replacement_parses(root: &Path) {
+fn assert_every_replacement_parses(root: &Path) {
     let sites: MutationSites = produce("python", root);
     let symbols: Symbols = produce("python", root);
     let mut parser = tree_sitter::Parser::new();
@@ -202,7 +202,7 @@ fn every_replacement_parses(root: &Path) {
 
 #[test]
 fn every_replacement_in_the_fixture_repository_parses() {
-    every_replacement_parses(&fixture("python"));
+    assert_every_replacement_parses(&fixture("python"));
 }
 
 /// The fixture's `pricing.py`, relaid out: the indentation unit changes and blank lines appear,
@@ -268,6 +268,6 @@ proptest! {
         expected.sort();
         actual.sort();
         prop_assert_eq!(actual, expected);
-        every_replacement_parses(moved.path());
+        assert_every_replacement_parses(moved.path());
     }
 }

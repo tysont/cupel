@@ -2,8 +2,8 @@
 // ABOUTME: normalized signatures, API differences, and roots (main, exports, tests, init, TestMain).
 mod support;
 
-use cupel_core::syntax::{ApiItemKind, ApiSurface, RootReason, Roots, Symbols, TestFrames};
-use support::{fixture, items, produce, reasons, tree};
+use cupel_core::syntax::{ApiItemKind, ApiSurface, RootReason, Roots, Symbols};
+use support::{assert_every_case_is_a_test_root, fixture, items, produce, reasons, tree};
 
 use ApiItemKind::{Constant, Function, Interface, Method, Type, Variable};
 
@@ -161,30 +161,7 @@ fn main_init_test_main_exports_and_tests_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixture_is_a_test_root() {
-    let root = fixture("go");
-    let roots: Roots = produce("go", &root);
-    let symbols: Symbols = produce("go", &root);
-    let frames: TestFrames = produce("go", &root);
-    let mut checked = 0;
-    for file in &frames.files {
-        for case in &file.cases {
-            let symbol = symbols
-                .symbols
-                .iter()
-                .find(|s| s.file == file.file && s.span == case.span)
-                .unwrap_or_else(|| panic!("no symbol for test {}", case.name));
-            assert!(
-                roots
-                    .roots
-                    .iter()
-                    .any(|r| r.symbol == symbol.key() && r.reason == RootReason::Test),
-                "{} is not a test root",
-                case.name
-            );
-            checked += 1;
-        }
-    }
-    assert_eq!(checked, 23);
+    assert_every_case_is_a_test_root("go", 23);
 }
 
 #[test]

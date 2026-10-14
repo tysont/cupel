@@ -7,66 +7,60 @@ use support::{case_continuations, decisions_of, fixture, loop_tables, produce, t
 
 use DecisionKind::{BooleanOp, Branch, Case, Catch, EarlyReturn, Loop, Ternary};
 
-/// Both fixture repositories: the TypeScript `decide.ts` is the JavaScript `decide.js` typed.
-fn both(display: &str) -> [Vec<(DecisionKind, u32, u32, u32)>; 2] {
-    ["javascript", "typescript"].map(|lang| decisions_of(lang, &fixture(lang), display))
+/// Asserts that `display` has `expected` decisions in both fixture repositories: the TypeScript
+/// `decide.ts` is the JavaScript `decide.js` typed.
+fn assert_both(display: &str, expected: &[(DecisionKind, u32, u32, u32)]) {
+    let both = ["javascript", "typescript"].map(|lang| decisions_of(lang, &fixture(lang), display));
+    assert_eq!(both, [expected.to_vec(), expected.to_vec()], "{display}");
 }
 
 #[test]
 fn else_if_chains_are_flat_conditions_do_not_nest_and_final_returns_are_not_early() {
-    for decisions in both("decide.classify") {
-        assert_eq!(
-            decisions,
-            [
-                (Branch, 0, 1, 1),
-                (BooleanOp, 0, 1, 1),
-                (EarlyReturn, 1, 0, 1),
-                (Branch, 0, 1, 1),
-                (EarlyReturn, 1, 0, 1),
-                (Ternary, 0, 1, 1),
-            ]
-        );
-    }
+    assert_both(
+        "decide.classify",
+        &[
+            (Branch, 0, 1, 1),
+            (BooleanOp, 0, 1, 1),
+            (EarlyReturn, 1, 0, 1),
+            (Branch, 0, 1, 1),
+            (EarlyReturn, 1, 0, 1),
+            (Ternary, 0, 1, 1),
+        ],
+    );
 }
 
 #[test]
 fn a_return_inside_a_branch_inside_a_loop_is_nested_twice() {
-    for decisions in both("decide.firstOverdraft") {
-        assert_eq!(
-            decisions,
-            [(Loop, 0, 1, 1), (Branch, 1, 1, 1), (EarlyReturn, 2, 0, 1)]
-        );
-    }
+    assert_both(
+        "decide.firstOverdraft",
+        &[(Loop, 0, 1, 1), (Branch, 1, 1, 1), (EarlyReturn, 2, 0, 1)],
+    );
 }
 
 #[test]
 fn switch_cases_count_once_toward_cognitive_and_default_is_not_a_case() {
-    for decisions in both("decide.label") {
-        assert_eq!(
-            decisions,
-            [
-                (Case, 0, 1, 1),
-                (EarlyReturn, 1, 0, 1),
-                (Case, 0, 1, 0),
-                (EarlyReturn, 1, 0, 1),
-            ]
-        );
-    }
+    assert_both(
+        "decide.label",
+        &[
+            (Case, 0, 1, 1),
+            (EarlyReturn, 1, 0, 1),
+            (Case, 0, 1, 0),
+            (EarlyReturn, 1, 0, 1),
+        ],
+    );
 }
 
 #[test]
 fn throws_are_early_exits_and_catch_clauses_are_decisions() {
-    for decisions in both("decide.parseCents") {
-        assert_eq!(
-            decisions,
-            [
-                (Branch, 0, 1, 1),
-                (EarlyReturn, 1, 0, 1),
-                (EarlyReturn, 0, 0, 1),
-                (Catch, 0, 1, 1),
-            ]
-        );
-    }
+    assert_both(
+        "decide.parseCents",
+        &[
+            (Branch, 0, 1, 1),
+            (EarlyReturn, 1, 0, 1),
+            (EarlyReturn, 0, 0, 1),
+            (Catch, 0, 1, 1),
+        ],
+    );
 }
 
 #[test]

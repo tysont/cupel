@@ -4,7 +4,7 @@ mod support;
 
 use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{produce, sexp, tree};
+use support::{assert_distinct, produce, sexp, tree};
 
 /// The normalized tree and hash of the only symbol in `source`, a Rust file at `path`.
 fn normalize_at(path: &str, source: &str) -> (String, String) {
@@ -49,10 +49,11 @@ fn macro_names_and_path_calls_are_kept_as_call_names() {
         "src/lib.rs",
         "fn f() -> Vec<String> {\n    println!(\"x\");\n    Vec::new()\n}\n",
     );
-    assert!(shape.contains("(macro_invocation println"), "{shape}");
-    assert!(
-        shape.contains("(call_expression (scoped_identifier Vec new)"),
-        "{shape}"
+    assert_eq!(
+        shape,
+        "(function_item parameters -> (generic_type $id (type_arguments < $id >)) (block \
+         (expression_statement (macro_invocation println ! (token_tree $lit))) \
+         (call_expression (scoped_identifier Vec new) arguments)))"
     );
 }
 
@@ -89,16 +90,15 @@ fn moving_a_file_keeps_its_hashes() {
 
 #[test]
 fn hashes_change_with_structure() {
-    let base = hash("fn f(a: i64, b: i64) -> i64 { if a > b { a - b } else { g(a) } }\n");
-    for changed in [
+    let sources = [
+        "fn f(a: i64, b: i64) -> i64 { if a > b { a - b } else { g(a) } }\n",
         "fn f(a: i64, b: i64) -> i64 { if a < b { a - b } else { g(a) } }\n",
         "fn f(a: i64, b: i64) -> i64 { if a > b { a + b } else { g(a) } }\n",
         "fn f(a: i64, b: i64) -> i64 { if a > b { a - b } else { h(a) } }\n",
         "fn f(a: i64, b: i64) -> i64 { if a > b { a - b } else if a == 0 { 0 } else { g(a) } }\n",
         "fn f(a: i64) -> i64 { if a > 0 { a - 1 } else { g(a) } }\n",
-    ] {
-        assert_ne!(hash(changed), base, "{changed}");
-    }
+    ];
+    assert_distinct(&sources.map(hash));
 }
 
 /// A function whose names, literals, and layout are all chosen by the caller.
