@@ -277,6 +277,114 @@
       }
     },
     {
+      "file": "src/deps_cycle/alpha.rs",
+      "kind": "constant",
+      "path": "deps_cycle::alpha::ALPHA",
+      "signature": "u32",
+      "span": {
+        "col": 1,
+        "end_col": 33,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.rs",
+      "kind": "constant",
+      "path": "deps_cycle::beta::BETA",
+      "signature": "u32",
+      "span": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.rs",
+      "kind": "constant",
+      "path": "deps_cycle::beta::BOTH",
+      "signature": "[u32; 2]",
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 4,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/mod.rs",
+      "kind": "module",
+      "path": "deps_layers::domain::money",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 1,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/mod.rs",
+      "kind": "type",
+      "path": "deps_layers::domain::Order",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/money.rs",
+      "kind": "type",
+      "path": "deps_layers::domain::money::Cents",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 27,
+        "end_line": 1,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/infra/mod.rs",
+      "kind": "type",
+      "path": "deps_layers::infra::Store",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/port.rs",
+      "kind": "interface",
+      "path": "deps_layers::port::Port",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/deps_layers/port.rs",
+      "kind": "method",
+      "path": "deps_layers::port::Port::place",
+      "signature": "(&self, _: Order, _: Store, _: Cents)",
+      "span": {
+        "col": 5,
+        "end_col": 63,
+        "end_line": 6,
+        "line": 6
+      }
+    },
+    {
       "file": "src/lib.rs",
       "kind": "module",
       "path": "account",

@@ -145,6 +145,90 @@
       }
     },
     {
+      "file": "deps_cycle/alpha/alpha.go",
+      "kind": "constant",
+      "path": "alpha.Alpha",
+      "signature": "",
+      "span": {
+        "col": 7,
+        "end_col": 28,
+        "end_line": 5,
+        "line": 5
+      }
+    },
+    {
+      "file": "deps_cycle/beta/beta.go",
+      "kind": "constant",
+      "path": "beta.Beta",
+      "signature": "",
+      "span": {
+        "col": 7,
+        "end_col": 15,
+        "end_line": 5,
+        "line": 5
+      }
+    },
+    {
+      "file": "deps_cycle/beta/beta.go",
+      "kind": "variable",
+      "path": "beta.Both",
+      "signature": "",
+      "span": {
+        "col": 5,
+        "end_col": 36,
+        "end_line": 7,
+        "line": 7
+      }
+    },
+    {
+      "file": "deps_layers/domain/order.go",
+      "kind": "type",
+      "path": "domain.Order",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "deps_layers/infra/store.go",
+      "kind": "type",
+      "path": "infra.Store",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      }
+    },
+    {
+      "file": "deps_layers/port/port.go",
+      "kind": "interface",
+      "path": "port.Port",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "deps_layers/port/port.go",
+      "kind": "method",
+      "path": "port.Port.Place",
+      "signature": "(_ domain.Order)",
+      "span": {
+        "col": 2,
+        "end_col": 27,
+        "end_line": 6,
+        "line": 6
+      }
+    },
+    {
       "file": "ledger.go",
       "kind": "constant",
       "path": "ledger.MaxEntries",

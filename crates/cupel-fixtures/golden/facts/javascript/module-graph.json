@@ -13,6 +13,36 @@
           }
         },
         {
+          "from": "src/deps_cycle/alpha.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "./beta.js",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/beta.js"
+          }
+        },
+        {
+          "from": "src/deps_cycle/beta.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "./alpha.js",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/alpha.js"
+          }
+        },
+        {
+          "from": "src/deps_layers/domain/order.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "../infra/store.js",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/infra/store.js"
+          }
+        },
+        {
           "from": "src/index.js",
           "line": 1,
           "relative": true,

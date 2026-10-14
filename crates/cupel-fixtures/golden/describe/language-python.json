@@ -23,6 +23,12 @@
         "support": {
           "status": "supported"
         }
+      },
+      {
+        "check": "static.deps",
+        "support": {
+          "status": "supported"
+        }
       }
     ],
     "extensions": [

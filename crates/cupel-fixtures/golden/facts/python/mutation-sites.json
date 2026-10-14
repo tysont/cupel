@@ -55,6 +55,14 @@
       }
     },
     {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/deps_layers/port.py",
+        "line": 7
+      }
+    },
+    {
       "sites": [
         {
           "from": "sum(entries)",

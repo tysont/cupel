@@ -8,7 +8,7 @@
       "id": "static.crap",
       "oracle": null,
       "score": {
-        "n": 49,
+        "n": 50,
         "unit": "max",
         "value": 132.0
       },
@@ -927,6 +927,18 @@
         "checks": {
           "static.crap": {
             "no_coverage": true
+          },
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
           }
         },
         "default_branch": null,
@@ -953,7 +965,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 16,
+      "files": 25,
       "languages": [
         "python"
       ],
@@ -961,7 +973,7 @@
       "roots": [
         "."
       ],
-      "symbols": 65
+      "symbols": 66
     },
     "seed": "<seed>",
     "started": "<timestamp>",

@@ -217,6 +217,90 @@
       }
     },
     {
+      "file": "src/deps_cycle/alpha.ts",
+      "kind": "constant",
+      "path": "deps_cycle.alpha.ALPHA",
+      "signature": "",
+      "span": {
+        "col": 14,
+        "end_col": 30,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.ts",
+      "kind": "constant",
+      "path": "deps_cycle.beta.BETA",
+      "signature": "",
+      "span": {
+        "col": 14,
+        "end_col": 22,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.ts",
+      "kind": "constant",
+      "path": "deps_cycle.beta.BOTH",
+      "signature": "",
+      "span": {
+        "col": 14,
+        "end_col": 34,
+        "end_line": 4,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/order.ts",
+      "kind": "type",
+      "path": "deps_layers.domain.order.Order",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 38,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_layers/infra/store.ts",
+      "kind": "type",
+      "path": "deps_layers.infra.store.Store",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 38,
+        "end_line": 1,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/port.ts",
+      "kind": "interface",
+      "path": "deps_layers.port.Port",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_layers/port.ts",
+      "kind": "method",
+      "path": "deps_layers.port.Port.place",
+      "signature": "(_: Order): void",
+      "span": {
+        "col": 3,
+        "end_col": 28,
+        "end_line": 4,
+        "line": 4
+      }
+    },
+    {
       "file": "src/index.ts",
       "kind": "module",
       "path": "geometry",

@@ -363,7 +363,8 @@ fn describe_language_shows_identity_facts_and_check_support() {
         json!([
             {"check": "static.complexity", "support": {"status": "supported"}},
             {"check": "static.crap", "support": {"status": "supported"}},
-            {"check": "static.dead-code", "support": {"status": "supported"}}
+            {"check": "static.dead-code", "support": {"status": "supported"}},
+            {"check": "static.deps", "support": {"status": "supported"}}
         ])
     );
 }
@@ -465,7 +466,12 @@ fn describe_matrix_has_every_language_and_a_row_per_check() {
     );
     assert_eq!(
         description["checks"],
-        json!(["static.complexity", "static.crap", "static.dead-code"])
+        json!([
+            "static.complexity",
+            "static.crap",
+            "static.dead-code",
+            "static.deps"
+        ])
     );
     let cells = description["cells"].as_array().unwrap();
     let checks = description["checks"].as_array().unwrap().len();

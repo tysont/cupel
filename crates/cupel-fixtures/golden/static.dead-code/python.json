@@ -4,11 +4,11 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 13,
+      "findings": 14,
       "id": "static.dead-code",
       "oracle": null,
       "score": {
-        "n": 65,
+        "n": 66,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -25,6 +25,46 @@
   "exit_code": 0,
   "explanation": null,
   "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `place` from src/deps_layers/port.py if nothing outside the repository uses it, or import src/deps_layers/port.py where `place` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/deps_layers/port.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `place` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/deps_layers/port.py",
+        "module": "deps_layers.port",
+        "module_files": [
+          "src/deps_layers/port.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_65c408",
+      "kind": "dead.export",
+      "location": {
+        "col": 5,
+        "end_col": 47,
+        "end_line": 7,
+        "file": "src/deps_layers/port.py",
+        "line": 7
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_73645f7457e30d49",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_65c408 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "deps_layers.port.Port.place",
+        "hash": "sh_73645f7457e30d49",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`deps_layers.port.Port.place` is exported but no import resolves to src/deps_layers/port.py"
+    },
     {
       "action": {
         "hints": {},
@@ -556,66 +596,66 @@
     },
     {
       "command": null,
-      "finding": "fnd_92445d",
+      "finding": "fnd_65c408",
       "kind": "review",
       "priority": 2,
+      "summary": "Delete `place` from src/deps_layers/port.py if nothing outside the repository uses it, or import src/deps_layers/port.py where `place` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_92445d",
+      "kind": "review",
+      "priority": 3,
       "summary": "Delete `overdue` from src/ledger/crap_scores.py if nothing outside the repository uses it, or import src/ledger/crap_scores.py where `overdue` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_13315f",
       "kind": "review",
-      "priority": 3,
+      "priority": 4,
       "summary": "Delete `clamp` from src/ledger/crap_scores.py if nothing outside the repository uses it, or import src/ledger/crap_scores.py where `clamp` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_bc039e",
       "kind": "review",
-      "priority": 4,
+      "priority": 5,
       "summary": "Delete `to_cents` from src/ledger/crap_scores.py if nothing outside the repository uses it, or import src/ledger/crap_scores.py where `to_cents` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_31c7aa",
       "kind": "review",
-      "priority": 5,
+      "priority": 6,
       "summary": "Delete `unused_total` from src/ledger/dead_export.py if nothing outside the repository uses it, or import src/ledger/dead_export.py where `unused_total` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_1d35f1",
       "kind": "review",
-      "priority": 6,
+      "priority": 7,
       "summary": "Delete `summary` from src/ledger/report/__init__.py if nothing outside the repository uses it, or import src/ledger/report/__init__.py where `summary` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_ff8e35",
       "kind": "review",
-      "priority": 7,
+      "priority": 8,
       "summary": "Delete `net_total` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_ff8e35",
       "kind": "review",
-      "priority": 8,
+      "priority": 9,
       "summary": "Delete `sum_after_charge` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `sum_after_charge` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_ff8e35",
       "kind": "review",
-      "priority": 9,
-      "summary": "Delete `net_total_floor` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total_floor` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_ff8e35",
-      "kind": "review",
       "priority": 10,
-      "summary": "Delete `net_total_laid_out` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total_laid_out` is meant to be called."
+      "summary": "Delete `net_total_floor` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total_floor` is meant to be called."
     }
   ],
   "plan": null,
@@ -628,6 +668,18 @@
         "checks": {
           "static.crap": {
             "no_coverage": true
+          },
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
           }
         },
         "default_branch": null,
@@ -654,7 +706,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 16,
+      "files": 25,
       "languages": [
         "python"
       ],
@@ -662,7 +714,7 @@
       "roots": [
         "."
       ],
-      "symbols": 65
+      "symbols": 66
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -673,7 +725,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 12,
+      "info": 13,
       "warn": 1
     },
     "gate": null,
@@ -681,6 +733,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 13,
+  "total_findings": 14,
   "truncated": false
 }

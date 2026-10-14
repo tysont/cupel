@@ -22,6 +22,7 @@ checks
   static.complexity  supported
   static.crap        supported
   static.dead-code   supported
+  static.deps        supported
 
 toolchain
   launchers

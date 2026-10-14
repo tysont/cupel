@@ -42,13 +42,24 @@ fn row(root: &str, from: &str, line: u32, specifier: &str, target: &str, relativ
     )
 }
 
+/// Whether an edge starts or ends in the `deps_` fixtures, which `static.deps` reads and
+/// `the_deps_fixtures_are_a_module_cycle_and_a_layered_tree` pins separately.
+fn is_deps(row: &Row) -> bool {
+    row.1.contains("deps_") || row.4.contains("deps_")
+}
+
+/// The fixture's rows outside the `deps_` fixtures.
+fn without_deps(rows: Vec<Row>) -> Vec<Row> {
+    rows.into_iter().filter(|row| !is_deps(row)).collect()
+}
+
 #[test]
 fn the_fixture_graph_is_exactly_its_mod_and_use_edges() {
     let graph: ModuleGraph = produce("rust", &fixture("rust"));
     let roots: Vec<&str> = graph.roots.iter().map(|r| r.root.as_str()).collect();
     assert_eq!(roots, [".", "shapes"]);
     assert_eq!(
-        rows(&graph),
+        without_deps(rows(&graph)),
         [
             row(".", "src/account.rs", 1, "std::fmt", "external:std", false),
             row(
@@ -302,6 +313,47 @@ fn module_names_are_case_sensitive_even_where_the_file_system_is_not() {
         [
             row(".", "src/lib.rs", 1, "Account", "unresolved", true),
             row(".", "src/lib.rs", 2, "ledger", "src/ledger.rs", true),
+        ]
+    );
+}
+
+#[test]
+fn the_deps_fixtures_are_a_module_cycle_and_a_layered_tree() {
+    let graph: ModuleGraph = produce("rust", &fixture("rust"));
+    let deps: Vec<Row> = rows(&graph).into_iter().filter(is_deps).collect();
+    let (cycle, layers) = ("src/deps_cycle", "src/deps_layers");
+    let r = |from: String, line: u32, specifier: &str, target: String| {
+        row(".", &from, line, specifier, &target, true)
+    };
+    let c = |file: &str| format!("{cycle}/{file}");
+    let l = |file: &str| format!("{layers}/{file}");
+    assert_eq!(
+        deps,
+        [
+            r(c("alpha.rs"), 1, "super::beta::BETA", c("beta.rs")),
+            r(c("beta.rs"), 1, "super::alpha::ALPHA", c("alpha.rs")),
+            r(c("mod.rs"), 1, "alpha", c("alpha.rs")),
+            r(c("mod.rs"), 2, "beta", c("beta.rs")),
+            r(l("domain/mod.rs"), 1, "money", l("domain/money.rs")),
+            r(
+                l("domain/mod.rs"),
+                3,
+                "super::infra::Store",
+                l("infra/mod.rs")
+            ),
+            r(l("mod.rs"), 1, "domain", l("domain/mod.rs")),
+            r(l("mod.rs"), 2, "infra", l("infra/mod.rs")),
+            r(l("mod.rs"), 3, "port", l("port.rs")),
+            r(
+                l("port.rs"),
+                1,
+                "super::domain::money::Cents",
+                l("domain/money.rs")
+            ),
+            r(l("port.rs"), 2, "super::domain::Order", l("domain/mod.rs")),
+            r(l("port.rs"), 3, "super::infra::Store", l("infra/mod.rs")),
+            r("src/lib.rs".to_owned(), 32, "deps_cycle", c("mod.rs")),
+            r("src/lib.rs".to_owned(), 33, "deps_layers", l("mod.rs")),
         ]
     );
 }

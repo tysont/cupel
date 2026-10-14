@@ -11,6 +11,14 @@
     {
       "reason": "export",
       "symbol": {
+        "col": 5,
+        "file": "src/deps_layers/port.py",
+        "line": 7
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
         "col": 1,
         "file": "src/ledger/__init__.py",
         "line": 13

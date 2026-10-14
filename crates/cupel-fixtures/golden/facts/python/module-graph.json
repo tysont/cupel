@@ -3,6 +3,56 @@
     {
       "edges": [
         {
+          "from": "src/deps_cycle/alpha.py",
+          "line": 1,
+          "relative": true,
+          "specifier": ".beta.BETA",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/beta.py"
+          }
+        },
+        {
+          "from": "src/deps_cycle/beta.py",
+          "line": 1,
+          "relative": true,
+          "specifier": ".alpha",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/alpha.py"
+          }
+        },
+        {
+          "from": "src/deps_layers/domain/order.py",
+          "line": 1,
+          "relative": true,
+          "specifier": "..infra.store.Store",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/infra/store.py"
+          }
+        },
+        {
+          "from": "src/deps_layers/port.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "typing.Protocol",
+          "target": {
+            "kind": "external",
+            "package": "typing"
+          }
+        },
+        {
+          "from": "src/deps_layers/port.py",
+          "line": 3,
+          "relative": true,
+          "specifier": ".domain.order.Order",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/domain/order.py"
+          }
+        },
+        {
           "from": "src/ledger/__init__.py",
           "line": 5,
           "relative": true,

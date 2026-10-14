@@ -212,6 +212,18 @@
         "checks": {
           "static.crap": {
             "no_coverage": true
+          },
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
           }
         },
         "default_branch": null,
@@ -238,7 +250,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 22,
+      "files": 27,
       "languages": [
         "typescript"
       ],

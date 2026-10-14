@@ -28,3 +28,6 @@ pub(crate) fn audit_limit() -> i64 {
 fn scale(amount: i64, factor: i64) -> i64 {
     amount * factor
 }
+
+mod deps_cycle;
+mod deps_layers;
