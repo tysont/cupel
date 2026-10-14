@@ -650,7 +650,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 #### P2.6 `tests.quality`
 
-**Status:** not started
+**Status:** in progress (2026-10-13) · [ADR-054](adr/CUPEL_DECISION_054.md) · [ADR-055](adr/CUPEL_DECISION_055.md)
 
 - Over `test_frames()`: assertion density, weak assertions (`assert!(true)`, `assertTrue(x is not None)`-style), mock density, logic in tests, duplicated setup. Kinds per §5.2; each finding carries SCRAP-style remediation mode and actionability class in evidence.
 
