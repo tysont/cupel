@@ -2,8 +2,6 @@
 // ABOUTME: which table a scope uses, suppressed findings, rerun actions, and rules on every kind of check.
 mod support;
 
-use std::process::Command;
-
 use serde_json::{Value, json};
 use support::Repo;
 
@@ -112,22 +110,6 @@ fn an_unselected_check_fails_the_gate_with_a_rerun_action() {
     );
 }
 
-fn git(repo: &Repo, args: &[&str]) -> bool {
-    Command::new("git")
-        .args([
-            "-c",
-            "user.name=t",
-            "-c",
-            "user.email=t@example.com",
-            "-c",
-            "commit.gpgsign=false",
-        ])
-        .args(args)
-        .current_dir(repo.root())
-        .output()
-        .is_ok_and(|output| output.status.success())
-}
-
 #[test]
 fn a_changed_scope_uses_gate_changed_and_an_unchanged_one_passes_it() {
     let repo = repo(
@@ -135,12 +117,10 @@ fn a_changed_scope_uses_gate_changed_and_an_unchanged_one_passes_it() {
          [gate.tree]\n\"static.complexity.params_max\" = \"< 10\"\n",
     );
     repo.write(".gitignore", ".cupel/\n");
-    if !git(&repo, &["init", "--quiet", "--initial-branch", "main"]) {
+    if !repo.committed("first") {
         eprintln!("SKIPPED: git not installed");
         return;
     }
-    assert!(git(&repo, &["add", "--all"]));
-    assert!(git(&repo, &["commit", "--quiet", "-m", "first"]));
     let unchanged = repo.run(&["check", "--changed"]);
     assert_eq!(unchanged.code, 0, "{}", unchanged.stdout);
     let envelope = unchanged.envelope();
@@ -247,12 +227,10 @@ fn a_weakening_presence_rule_fails_on_a_weakened_change_and_passes_on_a_strength
     repo.write(".gitignore", ".cupel/\n");
     let suite = "def test_adds():\n    assert 1 + 1 == 2\n    assert 2 + 2 == 4\n";
     repo.write("tests/test_math.py", suite);
-    if !git(&repo, &["init", "--quiet", "--initial-branch", "main"]) {
+    if !repo.committed("suite") {
         eprintln!("SKIPPED: git not installed");
         return;
     }
-    assert!(git(&repo, &["add", "--all"]));
-    assert!(git(&repo, &["commit", "--quiet", "-m", "suite"]));
     repo.write(
         "tests/test_math.py",
         "def test_adds():\n    assert 1 + 1 == 2\n",

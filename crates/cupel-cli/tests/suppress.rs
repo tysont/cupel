@@ -3,11 +3,10 @@
 mod support;
 
 use std::fs;
-use std::process::Command as Process;
 
 use cupel_core::{CheckId, FindingId};
 use serde_json::{Value, json};
-use support::{Outcome, Repo, cupel};
+use support::{Repo, cupel, finding, finding_fields, usage_argument};
 
 const MISSING_RUNNER: &str = "[lang.rust]\ntest = \"cupel-test-no-such-runner --all\"\n";
 
@@ -26,31 +25,6 @@ fn doctored() -> Repo {
     repo.write("cupel.toml", MISSING_RUNNER);
     assert_eq!(repo.run(&["doctor"]).code, 0);
     repo
-}
-
-fn finding<'a>(envelope: &'a Value, id: &str) -> &'a Value {
-    envelope["findings"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|f| f["id"] == json!(id))
-        .unwrap_or_else(|| panic!("no {id} in {envelope}"))
-}
-
-fn kinds(envelope: &Value) -> Vec<String> {
-    envelope["findings"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|f| f["kind"].as_str().unwrap().to_owned())
-        .collect()
-}
-
-fn usage_argument(outcome: &Outcome) -> Value {
-    assert_eq!(outcome.code, 2, "{}", outcome.stdout);
-    let finding = outcome.finding();
-    assert_eq!(finding["kind"], json!("cli.usage"));
-    finding["evidence"]["argument"].clone()
 }
 
 #[test]
@@ -150,7 +124,7 @@ fn an_expired_date_reactivates_the_finding_and_reports_suppression_expired() {
     let reactivated = finding(&doctor, &id);
     assert_eq!(reactivated["suppressed"], json!(false));
     assert_eq!(reactivated["severity"], json!("warn"));
-    assert!(kinds(&doctor).contains(&"suppression.expired".to_owned()));
+    assert!(finding_fields(&doctor, "kind").contains(&"suppression.expired".to_owned()));
     let expiry_id =
         FindingId::for_subject(&CheckId::from("suppress"), "suppression.expired", &id).to_string();
     let expired = finding(&doctor, &expiry_id);
@@ -165,7 +139,7 @@ fn an_expired_date_reactivates_the_finding_and_reports_suppression_expired() {
 fn a_future_date_keeps_the_suppression_active() {
     let (id, doctor) = doctor_after_suppressing("x", "2999-12-31");
     assert_eq!(finding(&doctor, &id)["suppressed"], json!(true));
-    assert!(!kinds(&doctor).contains(&"suppression.expired".to_owned()));
+    assert!(!finding_fields(&doctor, "kind").contains(&"suppression.expired".to_owned()));
 }
 
 #[test]
@@ -202,35 +176,16 @@ fn a_malformed_suppressions_file_is_a_usage_error_naming_it() {
     );
 }
 
-fn git(dir: &std::path::Path, args: &[&str]) -> bool {
-    Process::new("git")
-        .args([
-            "-c",
-            "user.name=t",
-            "-c",
-            "user.email=t@example.com",
-            "-c",
-            "commit.gpgsign=false",
-            "-c",
-            "tag.gpgsign=false",
-        ])
-        .args(args)
-        .current_dir(dir)
-        .output()
-        .is_ok_and(|output| output.status.success())
-}
-
 #[test]
 fn a_ref_expires_the_suppression_once_head_contains_it() {
     let repo = doctored();
-    let root = repo.root();
-    if !git(&root, &["init", "--quiet"]) {
+    if !repo.git(&["init", "--quiet"]) {
         eprintln!("SKIPPED: git not installed");
         return;
     }
-    assert!(git(&root, &["add", "cupel.toml"]));
-    assert!(git(&root, &["commit", "--quiet", "-m", "first"]));
-    assert!(git(&root, &["tag", "v1"]));
+    assert!(repo.git(&["add", "cupel.toml"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "first"]));
+    assert!(repo.git(&["tag", "v1"]));
     let id = runner_id();
 
     repo.run(&["suppress", &id, "--reason", "x", "--until", "v9"]);
@@ -240,5 +195,5 @@ fn a_ref_expires_the_suppression_once_head_contains_it() {
     repo.run(&["suppress", &id, "--reason", "x", "--until", "v1"]);
     let merged = repo.run(&["doctor"]).envelope();
     assert_eq!(finding(&merged, &id)["suppressed"], json!(false));
-    assert!(kinds(&merged).contains(&"suppression.expired".to_owned()));
+    assert!(finding_fields(&merged, "kind").contains(&"suppression.expired".to_owned()));
 }

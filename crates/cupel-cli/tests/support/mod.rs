@@ -153,6 +153,34 @@ pub fn redacted_text(text: &str) -> String {
         + "\n"
 }
 
+/// `field` of every finding in `envelope`, in order.
+pub fn finding_fields(envelope: &Value, field: &str) -> Vec<String> {
+    envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|finding| finding[field].as_str().unwrap().to_owned())
+        .collect()
+}
+
+/// The finding `id` in `envelope`.
+pub fn finding<'a>(envelope: &'a Value, id: &str) -> &'a Value {
+    envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|finding| finding["id"] == json!(id))
+        .unwrap_or_else(|| panic!("no {id} in {envelope}"))
+}
+
+/// The argument a usage error (exit 2, one `cli.usage` finding) names.
+pub fn usage_argument(outcome: &Outcome) -> Value {
+    assert_eq!(outcome.code, 2, "{}", outcome.stdout);
+    let finding = outcome.finding();
+    assert_eq!(finding["kind"], json!("cli.usage"));
+    finding["evidence"]["argument"].clone()
+}
+
 /// The ID ADR-016 assigns a CLI finding about `subject`.
 pub fn cli_finding_id(kind: &str, subject: &str) -> String {
     FindingId::for_subject(&CheckId::from("cli"), kind, subject).to_string()
@@ -183,6 +211,29 @@ impl Repo {
         let path = self.path(relative);
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         fs::write(path, text).unwrap();
+    }
+
+    /// Runs `git <args>` in this repository with a throwaway identity and no signing; whether it
+    /// succeeded (false also when git is not installed).
+    pub fn git(&self, args: &[&str]) -> bool {
+        std::process::Command::new("git")
+            .args(["-c", "user.name=t", "-c", "user.email=t@example.com"])
+            .args(["-c", "commit.gpgsign=false", "-c", "tag.gpgsign=false"])
+            .args(args)
+            .current_dir(self.root())
+            .output()
+            .is_ok_and(|output| output.status.success())
+    }
+
+    /// Makes this repository a git repository on `main` with everything in it committed as
+    /// `message`. False when git is not installed, so the caller can report the skip.
+    pub fn committed(&self, message: &str) -> bool {
+        if !self.git(&["init", "--quiet", "--initial-branch", "main"]) {
+            return false;
+        }
+        assert!(self.git(&["add", "--all"]));
+        assert!(self.git(&["commit", "--quiet", "-m", message]));
+        true
     }
 
     /// Runs cupel with `--cwd` set to this repository.

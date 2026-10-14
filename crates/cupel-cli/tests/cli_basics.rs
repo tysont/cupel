@@ -1,11 +1,9 @@
 // ABOUTME: Integration tests for the most basic `cupel` invocations.
 // ABOUTME: Covers the version string and the usage-error exit code for missing or unknown verbs.
-use assert_cmd::Command;
-use predicates::prelude::*;
+mod support;
 
-fn cupel() -> Command {
-    Command::cargo_bin("cupel").expect("cupel binary is built")
-}
+use predicates::prelude::*;
+use support::cupel;
 
 #[test]
 fn version_prints_name_and_semver() {
