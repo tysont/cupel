@@ -2,14 +2,16 @@
 // ABOUTME: maps where a language has one and by import-graph impact where it does not (ADR-006), with commands.
 mod impact;
 
+use std::collections::BTreeMap;
+
 use cupel_core::config::Config;
 use cupel_core::git::Git;
 use cupel_core::syntax::{ModuleGraph, NormTree, Symbols, TestConventions, TestFrames};
 use cupel_core::{
     Availability, Ctx, Envelope, EventSink, ExitCode, FactKind, ImpactBasis, ImpactedTest, Job,
-    Lang, PerTestMap, ProduceCtx, ProducerId, ProducerRegistry, Production, Scheduler, ScopeInfo,
-    ScopeRequest, Status, Support, SupportMatrix, TestCommand, TestSelection, TestsReport,
-    select_symbols,
+    Lang, LangId, PerTestMap, ProduceCtx, ProducerId, ProducerRegistry, Production, Scheduler,
+    ScopeInfo, ScopeRequest, Status, Support, SupportMatrix, TestCommand, TestSelection,
+    TestsReport, select_symbols,
 };
 
 use self::impact::Regions;
@@ -33,12 +35,7 @@ pub fn verb(
     events: &mut dyn EventSink,
 ) -> Result<Envelope, CupelError> {
     if !impacted {
-        return Err(CupelError::bad_argument(
-            "--impacted",
-            None,
-            "`cupel tests` lists the tests a scope impacts and needs --impacted".to_owned(),
-            "Run `cupel tests --impacted` with a scope, such as --changed.".to_owned(),
-        ));
+        return Err(needs_impacted());
     }
     let config = invocation.config()?;
     let catalog = Catalog::builtin();
@@ -50,83 +47,98 @@ pub fn verb(
         catalog.language_registry(),
     )?;
     let langs = check::languages_of(catalog.language_registry(), scoped.files.files.iter());
-    let mut scope = ScopeInfo {
+    let mut scope = scope_info(&request, &scoped, &langs);
+    let git = check::git_info(invocation.writer.root(), &scoped.files);
+    let mut envelope = if invocation.dry_run {
+        invocation.nothing_planned(events)
+    } else {
+        let job = job(
+            invocation,
+            config,
+            &langs,
+            scoped.tree,
+            request.selectors()?,
+        );
+        let scheduler = Scheduler {
+            checks: catalog.checks(),
+            producers: catalog.producers(),
+        };
+        let mut impact = Impact {
+            production: scheduler.production(&job),
+            producers: catalog.producers(),
+            job: &job,
+            ctx: Ctx {
+                exclude: config.file.scope.exclude.clone(),
+                lang: config.file.lang.clone(),
+                ..Ctx::new(invocation.writer.root().to_path_buf())
+            },
+            config,
+            hunks: changed_lines(invocation.writer.root(), &request, &scoped.files)?,
+            events,
+        };
+        let by_language = files_by_language(&catalog, &scoped.files.files);
+        let (report, symbols) = impact.report(&langs, &by_language);
+        scope.symbols = symbols;
+        impact.envelope(invocation.run, report)
+    };
+    envelope.run.scope = Some(scope);
+    envelope.run.git = git;
+    Ok(envelope)
+}
+
+/// The scope as the envelope reports it, before its symbols are counted.
+fn scope_info(request: &ScopeRequest, scoped: &check::Scoped, langs: &[Lang]) -> ScopeInfo {
+    ScopeInfo {
         mode: request.mode(),
         files: scoped.files.files.len() as u64,
         symbols: 0,
-        roots: check::roots(&scoped.info, &langs),
+        roots: check::roots(&scoped.info, langs),
         languages: langs.iter().map(|lang| lang.id.clone()).collect(),
-    };
-    let git = check::git_info(invocation.writer.root(), &scoped.files);
-    if invocation.dry_run {
-        let mut envelope = invocation.nothing_planned(events);
-        envelope.run.scope = Some(scope);
-        envelope.run.git = git;
-        return Ok(envelope);
     }
-    let run = invocation.run;
-    let job = Job {
-        run: run.id(),
+}
+
+/// The usage error of `tests` without `--impacted`, the one listing it makes.
+fn needs_impacted() -> CupelError {
+    CupelError::bad_argument(
+        "--impacted",
+        None,
+        "`cupel tests` lists the tests a scope impacts and needs --impacted".to_owned(),
+        "Run `cupel tests --impacted` with a scope, such as --changed.".to_owned(),
+    )
+}
+
+/// A scheduler job over the whole walk (`tree`), so the import graph sees every importer, for
+/// the languages in scope.
+fn job<'a>(
+    invocation: &Invocation<'a>,
+    config: &'a Config,
+    langs: &[Lang],
+    tree: Vec<String>,
+    selectors: Vec<cupel_core::SymbolSelector>,
+) -> Job<'a> {
+    Job {
+        run: invocation.run.id(),
         writer: invocation.writer,
-        cancel: run.cancellation().clone(),
+        cancel: invocation.run.cancellation().clone(),
         config,
         selected: Vec::new(),
-        langs: langs.clone(),
-        files: scoped.tree.clone(),
-        selectors: request.selectors()?,
+        langs: langs.to_vec(),
+        files: tree,
+        selectors,
         selectors_must_match: false,
         base: None,
-    };
-    let scheduler = Scheduler {
-        checks: catalog.checks(),
-        producers: catalog.producers(),
-    };
-    let mut impact = Impact {
-        production: scheduler.production(&job),
-        producers: catalog.producers(),
-        job: &job,
-        ctx: Ctx {
-            exclude: config.file.scope.exclude.clone(),
-            lang: config.file.lang.clone(),
-            ..Ctx::new(invocation.writer.root().to_path_buf())
-        },
-        config,
-        hunks: changed_lines(invocation.writer.root(), &request, &scoped.files)?,
-        events,
-    };
-    let mut report = TestsReport {
-        per_test_map: true,
-        impacted: Vec::new(),
-        commands: Vec::new(),
-        languages: Vec::new(),
-    };
-    for lang in &langs {
-        let files: Vec<String> = scoped
-            .files
-            .files
-            .iter()
-            .filter(|file| {
-                catalog
-                    .language_registry()
-                    .for_path(file)
-                    .is_some_and(|language| language.id() == lang.id)
-            })
-            .cloned()
-            .collect();
-        scope.symbols += impact.language(lang, &files, &mut report);
     }
-    report.per_test_map = report.languages.iter().all(|basis| basis.per_test_map);
-    let interrupted = impact.production.interrupted();
-    let findings = impact.production.into_findings();
-    let mut envelope = run.reported(Status::Pass, ExitCode::Pass, findings);
-    envelope.run.scope = Some(scope);
-    envelope.run.git = git;
-    envelope.tests = Some(report);
-    Ok(if interrupted {
-        Run::interrupted(envelope)
-    } else {
-        envelope
-    })
+}
+
+/// The files of `files` each language owns.
+fn files_by_language(catalog: &Catalog, files: &[String]) -> BTreeMap<LangId, Vec<String>> {
+    let mut owned: BTreeMap<LangId, Vec<String>> = BTreeMap::new();
+    for file in files {
+        if let Some(language) = catalog.language_registry().for_path(file) {
+            owned.entry(language.id()).or_default().push(file.clone());
+        }
+    }
+    owned
 }
 
 /// The lines a range scope changed per file; `None` without a range.
@@ -168,6 +180,45 @@ struct Impact<'a, 'e> {
 }
 
 impl Impact<'_, '_> {
+    /// The report of every language in `langs`, given the files in scope `by_language`, and the
+    /// number of symbols the scope's lines touch.
+    fn report(
+        &mut self,
+        langs: &[Lang],
+        by_language: &BTreeMap<LangId, Vec<String>>,
+    ) -> (TestsReport, u64) {
+        let mut report = TestsReport {
+            per_test_map: true,
+            impacted: Vec::new(),
+            commands: Vec::new(),
+            languages: Vec::new(),
+        };
+        let mut symbols = 0;
+        for lang in langs {
+            let files = by_language.get(&lang.id).map_or(&[][..], Vec::as_slice);
+            symbols += self.language(lang, files, &mut report);
+        }
+        report.per_test_map = report.languages.iter().all(|basis| basis.per_test_map);
+        (report, symbols)
+    }
+
+    /// The finished run's envelope: the producers' findings and `report`, partial when the
+    /// timeout cut production short.
+    fn envelope(self, run: &Run, report: TestsReport) -> Envelope {
+        let interrupted = self.production.interrupted();
+        let mut envelope = run.reported(
+            Status::Pass,
+            ExitCode::Pass,
+            self.production.into_findings(),
+        );
+        envelope.tests = Some(report);
+        if interrupted {
+            Run::interrupted(envelope)
+        } else {
+            envelope
+        }
+    }
+
     /// Adds `lang`'s impacted tests, commands, and basis for its `files` in scope to `report`;
     /// the number of symbols the scope's lines touch.
     fn language(&mut self, lang: &Lang, files: &[String], report: &mut TestsReport) -> u64 {

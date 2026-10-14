@@ -62,6 +62,27 @@ pub fn whole_suite(_: &Selected<'_>) -> Option<Vec<String>> {
     None
 }
 
+/// A spec's `select` for runners that take test files as arguments, and no test IDs.
+pub fn files(selected: &Selected<'_>) -> Option<Vec<String>> {
+    match selected {
+        Selected::Files(files) => Some(files.to_vec()),
+        Selected::Tests(_) => None,
+    }
+}
+
+/// The arguments `flag` and `pattern(ids)` for a selection of test IDs; files are not
+/// selectable.
+pub fn tests_flag(
+    selected: &Selected<'_>,
+    flag: &str,
+    pattern: fn(&[String]) -> String,
+) -> Option<Vec<String>> {
+    match selected {
+        Selected::Tests(ids) => Some(vec![flag.to_owned(), pattern(ids)]),
+        Selected::Files(_) => None,
+    }
+}
+
 /// A project root a runner runs in.
 pub struct Root {
     /// Absolute and canonical.
@@ -161,7 +182,7 @@ impl cupel_core::Runner for Runner {
             ids.extend(
                 (lister.parse)(&captured.stdout)
                     .into_iter()
-                    .map(|id| placed_id(&id, &dir)),
+                    .map(|id| under(&dir, &id, ID_SEPARATOR)),
             );
         }
         Ok(ids)
@@ -243,7 +264,7 @@ impl Runner {
             let narrowing = match selection {
                 TestSelection::All => Vec::new(),
                 TestSelection::Tests(ids) => {
-                    let own = owned(ids, &root.0, &dirs, ": ");
+                    let own = owned(ids, &root.0, &dirs, ID_SEPARATOR);
                     if own.is_empty() {
                         continue;
                     }
@@ -451,25 +472,20 @@ pub fn jest_report_command(root: &Root, args: &[&str]) -> Vec<String> {
 
 /// `test`, reported relative to the root at `dir`, made relative to the repository root.
 fn placed(mut test: TestResult, dir: &str) -> TestResult {
-    test.id = placed_id(&test.id, dir);
-    test.file = test.file.map(|file| placed_file(&file, dir));
+    test.id = under(dir, &test.id, ID_SEPARATOR);
+    test.file = test.file.map(|file| under(dir, &file, "/"));
     test
 }
 
-/// A test ID of the root at `dir`, unique across roots (ADR-075).
-pub(crate) fn placed_id(id: &str, dir: &str) -> String {
-    if dir == "." {
-        id.to_owned()
-    } else {
-        format!("{dir}: {id}")
-    }
-}
+/// What separates a root from a test ID of that root (ADR-075).
+pub(crate) const ID_SEPARATOR: &str = ": ";
 
-/// A file relative to the root at `dir`, made relative to the repository root.
-pub(crate) fn placed_file(file: &str, dir: &str) -> String {
+/// `path` (a test ID or file) of the root at `dir`, joined to the root with `separator` so it
+/// is unique across roots; unchanged for the repository root.
+pub(crate) fn under(dir: &str, path: &str, separator: &str) -> String {
     if dir == "." {
-        file.to_owned()
+        path.to_owned()
     } else {
-        format!("{dir}/{file}")
+        format!("{dir}{separator}{path}")
     }
 }

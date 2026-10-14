@@ -25,19 +25,22 @@ fn runner<'a>(registry: &'a ProducerRegistry, id: &str) -> &'a dyn Runner {
     registry.runner(&ProducerId::from(id)).unwrap()
 }
 
+/// The `TestResults` producers of every language that are not registered as runners.
+fn not_runners(registry: &ProducerRegistry) -> Vec<String> {
+    ["rust", "go", "python", "javascript", "typescript"]
+        .into_iter()
+        .flat_map(|lang| {
+            registry.producers_for(cupel_core::FactKind::TestResults, &self::lang(lang))
+        })
+        .map(cupel_core::RegisteredProducer::id)
+        .filter(|id| registry.runner(id).is_none())
+        .map(|id| id.to_string())
+        .collect()
+}
+
 #[test]
 fn every_runner_producer_is_registered_as_a_runner() {
-    let registry = registry();
-    for lang in ["rust", "go", "python", "javascript", "typescript"] {
-        for producer in registry.producers_for(cupel_core::FactKind::TestResults, &self::lang(lang))
-        {
-            assert!(
-                registry.runner(&producer.id()).is_some(),
-                "{}",
-                producer.id()
-            );
-        }
-    }
+    assert_eq!(not_runners(&registry()), Vec::<String>::new());
 }
 
 #[test]
@@ -209,8 +212,8 @@ fn installed(id: &str, repo: &str, lang: &str) -> Option<(tempfile::TempDir, Pro
     Some((dir, ctx))
 }
 
-/// What `id` lists in `per-test/<repo>`, and what running only `selected` reports.
-fn listed_and_selected(id: &str, repo: &str, lang: &str, selected: &str) {
+/// `id` lists two tests in `per-test/<repo>`, `selected` among them, and runs only `selected`.
+fn assert_lists_and_runs_one(id: &str, repo: &str, lang: &str, selected: &str) {
     let Some((_dir, ctx)) = installed(id, repo, lang) else {
         return;
     };
@@ -231,17 +234,17 @@ fn listed_and_selected(id: &str, repo: &str, lang: &str, selected: &str) {
 
 #[test]
 fn cargo_nextest_lists_and_runs_one_test() {
-    listed_and_selected("tool.cargo-nextest", "rust", "rust", "calc tests::adds");
+    assert_lists_and_runs_one("tool.cargo-nextest", "rust", "rust", "calc tests::adds");
 }
 
 #[test]
 fn go_test_lists_and_runs_one_test() {
-    listed_and_selected("tool.go-test", "go", "go", "example.com/calc/TestAdd");
+    assert_lists_and_runs_one("tool.go-test", "go", "go", "example.com/calc/TestAdd");
 }
 
 #[test]
 fn pytest_lists_and_runs_one_test() {
-    listed_and_selected(
+    assert_lists_and_runs_one(
         "tool.pytest",
         "python",
         "python",
@@ -282,5 +285,9 @@ fn a_runner_that_cannot_list_says_which_runners_can() {
     let error = runner(&registry, "tool.jest")
         .list(&produce_ctx(dir.path(), "javascript", Cancellation::new()))
         .unwrap_err();
-    assert!(error.to_string().contains("tool.cargo-nextest"), "{error}");
+    assert_eq!(
+        error.to_string(),
+        "invalid runner `tool.jest`: expected a runner that lists its tests: \
+         tool.cargo-nextest, tool.go-test, tool.pytest"
+    );
 }

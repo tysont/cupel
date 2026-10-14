@@ -202,9 +202,9 @@ fn changed_lines_are_the_new_side_of_each_hunk_and_a_deletion_is_where_it_was() 
     else {
         return;
     };
+    let git = Git::open(&repo.root()).unwrap();
     repo.write("src/a.rs", "1\nTWO\n3\n4\n5\nsix\nseven\n");
     repo.write("b.rs", "x\nz\n");
-    let git = Git::open(&repo.root()).unwrap();
     let lines = git.changed_lines(&base, None).unwrap();
     let as_vec: Vec<(&str, &[(u32, u32)])> = lines
         .iter()

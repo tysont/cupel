@@ -21,7 +21,7 @@ use cupel_core::{
     ToolProbe, find_program, output_tail,
 };
 
-use crate::runner::{placed_file, placed_id, roots};
+use crate::runner::{ID_SEPARATOR, roots, under};
 
 /// One per-test producer: everything that differs between Rust, Go, and Python.
 pub(crate) struct PerTestSpec {
@@ -171,12 +171,12 @@ impl Site<'_> {
     /// `test`, measured relative to this root, made relative to the repository root.
     fn placed(&self, test: TestCoverage) -> TestCoverage {
         TestCoverage::new(
-            &placed_id(&test.id, self.dir),
-            test.file.map(|file| placed_file(&file, self.dir)),
+            &under(self.dir, &test.id, ID_SEPARATOR),
+            test.file.map(|file| under(self.dir, &file, "/")),
             test.covered
                 .into_iter()
                 .map(|covered| CoveredLines {
-                    file: placed_file(&covered.file, self.dir),
+                    file: under(self.dir, &covered.file, "/"),
                     lines: covered.lines,
                 })
                 .collect(),

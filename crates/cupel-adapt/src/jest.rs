@@ -3,7 +3,7 @@
 use cupel_core::{LangFamily, Langs, TestResult};
 
 use crate::report::jest_json;
-use crate::runner::{Ran, Root, Runner, RunnerSpec, Selected, jest_report_command};
+use crate::runner::{Ran, Root, Runner, RunnerSpec, files, jest_report_command};
 
 const ID: &str = "tool.jest";
 
@@ -33,12 +33,4 @@ fn command(root: &Root) -> Vec<String> {
 
 fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
     jest_json::parse(ran.report.as_deref()?, &ran.root.dir)
-}
-
-/// Test files, appended as paths; tests by ID are not selectable.
-fn files(selected: &Selected<'_>) -> Option<Vec<String>> {
-    match selected {
-        Selected::Files(files) => Some(files.to_vec()),
-        Selected::Tests(_) => None,
-    }
 }

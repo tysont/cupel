@@ -31,13 +31,24 @@ pub fn lang(id: &str) -> Lang {
     }
 }
 
+/// The registered `TestResults` producer `id` for `lang`.
 pub fn runner<'a>(
     registry: &'a ProducerRegistry,
     id: &str,
     lang: &str,
 ) -> &'a dyn RegisteredProducer {
+    producer(registry, FactKind::TestResults, id, lang)
+}
+
+/// The registered producer `id` of `kind` for `lang`.
+pub fn producer<'a>(
+    registry: &'a ProducerRegistry,
+    kind: FactKind,
+    id: &str,
+    lang: &str,
+) -> &'a dyn RegisteredProducer {
     registry
-        .producers_for(FactKind::TestResults, &self::lang(lang))
+        .producers_for(kind, &self::lang(lang))
         .find(|producer| producer.id().as_str() == id)
         .unwrap()
 }

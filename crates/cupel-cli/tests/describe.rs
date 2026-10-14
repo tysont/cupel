@@ -116,17 +116,30 @@ fn describe_tests_documents_impacted_and_the_scope_flags() {
     }
 }
 
+/// The languages for which `verb` (a `describe matrix` verb row) is unsupported for lack of
+/// its fact.
+fn unsupported_languages(verb: &Value) -> Vec<String> {
+    let lacking = json!({"status": "unsupported", "fact": verb["fact"]});
+    verb["languages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|language| language["support"] == lacking)
+        .map(|language| language["lang"].as_str().unwrap().to_owned())
+        .collect()
+}
+
 #[test]
 fn describe_matrix_shows_tests_impacted_unsupported_where_no_per_test_map_exists() {
     let verbs = described(&["matrix"])["verbs"].clone();
-    assert_eq!(verbs[0]["verb"], json!("tests --impacted"));
-    assert_eq!(verbs[0]["fact"], json!("per-test-map"));
-    for language in verbs[0]["languages"].as_array().unwrap() {
-        let unsupported =
-            language["support"] == json!({"status": "unsupported", "fact": "per-test-map"});
-        let ecma = matches!(language["lang"].as_str(), Some("javascript" | "typescript"));
-        assert_eq!(unsupported, ecma, "{language}");
-    }
+    assert_eq!(
+        (&verbs[0]["verb"], &verbs[0]["fact"]),
+        (&json!("tests --impacted"), &json!("per-test-map"))
+    );
+    assert_eq!(
+        unsupported_languages(&verbs[0]),
+        ["javascript", "typescript"]
+    );
 }
 
 #[test]

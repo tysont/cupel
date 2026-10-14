@@ -34,7 +34,6 @@ mod producer;
 mod rank;
 mod ranking;
 mod result;
-mod runner;
 mod schedule;
 pub mod schema;
 mod scope;
@@ -85,13 +84,12 @@ pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
     Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
-    SharedFact, ToolProbe, Upstream,
+    Runner, RunnerCommand, SharedFact, TestSelection, ToolProbe, Upstream,
 };
 pub use rank::{
     Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,
 };
 pub use ranking::rankings;
-pub use runner::{Runner, RunnerCommand, TestSelection};
 pub use schedule::{Job, Outcome, Production, Scheduler};
 pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;

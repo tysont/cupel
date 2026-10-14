@@ -83,8 +83,18 @@ pub fn by_coverage(
     lang: &LangId,
 ) -> Vec<ImpactedTest> {
     let index = map.index();
+    let covering = regions.iter().flat_map(|(file, ranges)| {
+        let index = &index;
+        ranges.iter().flat_map(move |(start, end)| {
+            index
+                .covering(file, *start, *end)
+                .into_iter()
+                .map(move |(test, line)| (test, format!("covers {}", place(symbols, file, line))))
+        })
+    });
+    let changed = changed_tests(map, regions, frames);
     let mut found: BTreeMap<String, ImpactedTest> = BTreeMap::new();
-    let mut add = |test: &TestCoverage, reason: String| {
+    for (test, reason) in covering.chain(changed) {
         found
             .entry(test.id.clone())
             .or_insert_with(|| ImpactedTest {
@@ -93,39 +103,44 @@ pub fn by_coverage(
                 reason,
                 lang: lang.clone(),
             });
-    };
-    for (file, ranges) in regions {
-        for (start, end) in ranges {
-            for (test, line) in index.covering(file, *start, *end) {
-                add(test, format!("covers {}", place(symbols, file, line)));
-            }
-        }
     }
+    found.into_values().collect()
+}
+
+/// The tests of `map` whose own definition (a case of `frames`, matched by name) the regions
+/// touch, each with why.
+fn changed_tests<'a>(
+    map: &'a PerTestMap,
+    regions: &Regions,
+    frames: Option<&TestFrames>,
+) -> Vec<(&'a TestCoverage, String)> {
+    let mut changed = Vec::new();
     for test_file in frames.iter().flat_map(|frames| &frames.files) {
         let Some(ranges) = regions.get(&test_file.file) else {
             continue;
         };
-        for case in &test_file.cases {
-            let span = (case.span.line, case.span.end_line);
-            if !ranges.iter().any(|range| overlaps(*range, span)) {
-                continue;
-            }
-            let named = map.tests.iter().filter(|test| {
-                case_name(&test.id) == case.name
-                    && test
-                        .file
-                        .as_ref()
-                        .is_none_or(|file| *file == test_file.file)
-            });
-            for test in named {
-                add(
-                    test,
-                    format!("the test changed ({}:{})", test_file.file, case.span.line),
-                );
-            }
+        let touched = test_file.cases.iter().filter(|case| {
+            ranges
+                .iter()
+                .any(|range| overlaps(*range, (case.span.line, case.span.end_line)))
+        });
+        for case in touched {
+            let reason = format!("the test changed ({}:{})", test_file.file, case.span.line);
+            changed.extend(
+                map.tests
+                    .iter()
+                    .filter(|test| {
+                        case_name(&test.id) == case.name
+                            && test
+                                .file
+                                .as_ref()
+                                .is_none_or(|file| *file == test_file.file)
+                    })
+                    .map(|test| (test, reason.clone())),
+            );
         }
     }
-    found.into_values().collect()
+    changed
 }
 
 /// The test files (`conventions`) that are in `regions` or import a file there, directly or

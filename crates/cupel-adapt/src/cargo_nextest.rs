@@ -3,7 +3,7 @@
 use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::{junit, listing};
-use crate::runner::{Lister, Ran, Root, Runner, RunnerSpec, Selected};
+use crate::runner::{Lister, Ran, Root, Runner, RunnerSpec, tests_flag};
 
 const ID: &str = "tool.cargo-nextest";
 
@@ -17,7 +17,7 @@ pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
     env: &[("CARGO_TERM_COLOR", "never")],
     merged: false,
     read,
-    select,
+    select: |selected| tests_flag(selected, "-E", filterset),
     list: Some(Lister {
         command: list_command,
         parse: listing::nextest,
@@ -63,14 +63,6 @@ fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
     )
     .ok()?;
     junit::nextest(&report)
-}
-
-/// Tests by ID, as a filterset naming each binary and test exactly; files are not selectable.
-fn select(selected: &Selected<'_>) -> Option<Vec<String>> {
-    let Selected::Tests(ids) = selected else {
-        return None;
-    };
-    Some(vec!["-E".to_owned(), filterset(ids)])
 }
 
 /// The filterset that matches exactly the nextest tests `ids` (`<binary-id> <test path>`).

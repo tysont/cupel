@@ -3,7 +3,7 @@
 use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::{listing, test2json};
-use crate::runner::{Lister, Ran, Root, Runner, RunnerSpec, Selected};
+use crate::runner::{Lister, Ran, Root, Runner, RunnerSpec, tests_flag};
 
 const ID: &str = "tool.go-test";
 
@@ -17,7 +17,7 @@ pub(crate) static GO_TEST: RunnerSpec = RunnerSpec {
     env: &[],
     merged: false,
     read,
-    select,
+    select: |selected| tests_flag(selected, "-run", run_pattern),
     list: Some(Lister {
         command: list_command,
         parse: listing::go,
@@ -52,15 +52,6 @@ pub(crate) fn packages(patterns: &[String]) -> Vec<String> {
 )]
 fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
     Some(test2json::parse(&ran.captured.stdout, &ran.captured.stderr))
-}
-
-/// Tests by ID (`<package>/<Test>`), as one `-run` pattern of their top-level names; packages
-/// named by files are not selectable after the root's package patterns.
-fn select(selected: &Selected<'_>) -> Option<Vec<String>> {
-    let Selected::Tests(ids) = selected else {
-        return None;
-    };
-    Some(vec!["-run".to_owned(), run_pattern(ids)])
 }
 
 /// The `-run` pattern matching exactly the top-level tests of `ids`.

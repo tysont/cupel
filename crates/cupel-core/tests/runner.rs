@@ -101,10 +101,17 @@ fn a_registered_runner_is_found_by_id_and_produces_test_results() {
 fn a_child_cancellation_ends_at_its_timeout_without_cancelling_its_parent() {
     let parent = Cancellation::new();
     let child = parent.child(Duration::from_millis(20));
-    assert!(!child.is_cancelled());
-    assert!(!child.wait(Duration::from_secs(5)));
-    assert!(child.is_cancelled());
-    assert!(!parent.is_cancelled());
+    let at_first = child.is_cancelled();
+    let waited_it_out = child.wait(Duration::from_secs(5));
+    assert_eq!(
+        (
+            at_first,
+            waited_it_out,
+            child.is_cancelled(),
+            parent.is_cancelled()
+        ),
+        (false, false, true, false)
+    );
 }
 
 #[test]
@@ -112,5 +119,5 @@ fn a_child_cancellation_ends_with_its_parent() {
     let parent = Cancellation::new();
     let child = parent.child(Duration::from_secs(3600));
     parent.cancel();
-    assert!(child.is_cancelled());
+    assert_eq!((parent.is_cancelled(), child.is_cancelled()), (true, true));
 }
