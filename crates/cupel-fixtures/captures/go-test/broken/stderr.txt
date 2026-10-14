@@ -1,0 +1,2 @@
+# example.com/tally [example.com/tally.test]
+./broken.go:3:28: cannot use "not a number" (untyped string constant) as int value in return statement

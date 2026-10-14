@@ -44,9 +44,9 @@ global flags
   --no-color            Render text without color.
                         env NO_COLOR
   --no-install          Never install tools; the default unless stdout is a terminal.
-                        conflicts with --install · pending P3.1
+                        conflicts with --install · pending P3.7
   --install             Install missing tools that producers need.
-                        conflicts with --no-install · pending P3.1
+                        conflicts with --no-install · pending P3.7
   --write               Permit writes outside .cupel/.
   --help                Print help and exit.
 

@@ -1,11 +1,12 @@
 // ABOUTME: One invocation's run state: ID, start time, verb, seed, and time limit, and its envelopes.
 // ABOUTME: Successful verbs and every error path assemble their envelope here, so all share one shape.
+use std::cell::RefCell;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::{
     Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, Event, EventSink,
-    ExitCode, Finding, RunId, RunInfo, RunPlan, Severity, SeverityCounts, Status, Summary,
-    ToolchainInfo, Verb, Writer, schema,
+    ExitCode, Finding, LangId, RunId, RunInfo, RunPlan, Severity, SeverityCounts, Status, Summary,
+    TestResults, ToolchainInfo, Verb, Writer, schema,
 };
 
 use cupel_core::config::Config;
@@ -29,6 +30,9 @@ pub struct Run {
     pub depth: Option<CostClass>,
     /// The effective budget in milliseconds, when one is set.
     pub budget_ms: Option<u64>,
+    /// The test runs this run made, green or red, until the run record indexes them in the store
+    /// (ADR-076 §7).
+    test_results: RefCell<Vec<(LangId, TestResults)>>,
 }
 
 impl Run {
@@ -44,6 +48,7 @@ impl Run {
             config: ConfigEcho::default(),
             depth: None,
             budget_ms: None,
+            test_results: RefCell::default(),
         }
     }
 
@@ -54,6 +59,16 @@ impl Run {
     /// Cancels this run's work `limit` after the invocation started (`--timeout`).
     pub fn set_timeout(&mut self, limit: Duration) {
         self.cancel = Cancellation::with_deadline(self.clock + limit);
+    }
+
+    /// Keeps `results`, test runs this run made, for the store.
+    pub fn keep_test_results(&self, results: impl IntoIterator<Item = (LangId, TestResults)>) {
+        self.test_results.borrow_mut().extend(results);
+    }
+
+    /// The test runs kept so far, leaving none.
+    pub fn take_test_results(&self) -> Vec<(LangId, TestResults)> {
+        self.test_results.take()
     }
 
     pub fn cancellation(&self) -> &Cancellation {
@@ -124,10 +139,11 @@ impl Run {
         }
     }
 
-    /// The envelope reporting `error` as its one finding.
+    /// The envelope reporting `error` as its findings: one, except for a red baseline, which
+    /// has one per failing test and incomplete run (ADR-076 §6).
     pub fn failed(&self, error: &CupelError) -> Envelope {
-        let finding = error.finding(&self.repro());
-        self.envelope(Status::Error, error.exit_code(), vec![finding], None)
+        let findings = error.findings(&self.repro());
+        self.envelope(Status::Error, error.exit_code(), findings, None)
     }
 
     /// The command line that reproduces this run.

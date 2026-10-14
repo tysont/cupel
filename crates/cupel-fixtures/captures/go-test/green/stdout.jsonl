@@ -1,0 +1,13 @@
+{"Time":"2026-10-14T08:27:06.025028-07:00","Action":"start","Package":"example.com/tally"}
+{"Time":"2026-10-14T08:27:06.300217-07:00","Action":"run","Package":"example.com/tally","Test":"TestTotalsAList"}
+{"Time":"2026-10-14T08:27:06.300332-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAList","Output":"=== RUN   TestTotalsAList\n"}
+{"Time":"2026-10-14T08:27:06.300355-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAList","Output":"--- PASS: TestTotalsAList (0.00s)\n"}
+{"Time":"2026-10-14T08:27:06.300364-07:00","Action":"pass","Package":"example.com/tally","Test":"TestTotalsAList","Elapsed":0}
+{"Time":"2026-10-14T08:27:06.300395-07:00","Action":"run","Package":"example.com/tally","Test":"TestTotalsAHugeList"}
+{"Time":"2026-10-14T08:27:06.300461-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAHugeList","Output":"=== RUN   TestTotalsAHugeList\n"}
+{"Time":"2026-10-14T08:27:06.300476-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAHugeList","Output":"    tally_test.go:12: kept to show a skipped test\n"}
+{"Time":"2026-10-14T08:27:06.300488-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAHugeList","Output":"--- SKIP: TestTotalsAHugeList (0.00s)\n"}
+{"Time":"2026-10-14T08:27:06.300494-07:00","Action":"skip","Package":"example.com/tally","Test":"TestTotalsAHugeList","Elapsed":0}
+{"Time":"2026-10-14T08:27:06.300499-07:00","Action":"output","Package":"example.com/tally","Output":"PASS\n"}
+{"Time":"2026-10-14T08:27:06.300825-07:00","Action":"output","Package":"example.com/tally","Output":"ok  \texample.com/tally\t0.276s\n"}
+{"Time":"2026-10-14T08:27:06.302539-07:00","Action":"pass","Package":"example.com/tally","Elapsed":0.278}

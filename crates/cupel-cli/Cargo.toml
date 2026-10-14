@@ -9,6 +9,9 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 
+[lib]
+path = "src/lib.rs"
+
 [[bin]]
 name = "cupel"
 path = "src/main.rs"
@@ -27,6 +30,7 @@ thiserror.workspace = true
 
 [dev-dependencies]
 cupel-fixtures.workspace = true
+inventory.workspace = true
 assert_cmd.workspace = true
 predicates.workspace = true
 insta.workspace = true

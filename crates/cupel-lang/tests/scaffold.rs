@@ -33,12 +33,7 @@ fn one_symbol_per_file(source: &Source<'_>) -> Symbols {
 
 fn produce_ctx(root: &Path, cancel: Cancellation) -> ProduceCtx {
     let writer = Writer::new(root, false).unwrap().confined();
-    ProduceCtx {
-        ctx: Ctx::new(writer.root().to_path_buf()),
-        config: serde_json::Map::new(),
-        writer,
-        cancel,
-    }
+    ProduceCtx::new(Ctx::new(writer.root().to_path_buf()), writer, cancel)
 }
 
 fn rust_producer(registry: &LanguageRegistry) -> QueryProducer<Symbols> {

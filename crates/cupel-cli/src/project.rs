@@ -17,15 +17,14 @@ pub fn detect(writer: &Writer, exclude: &Exclude) -> ProjectInfo {
     let languages = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
     languages.register_producers(&mut producers);
-    let ctx = ProduceCtx {
-        ctx: Ctx {
-            root: writer.root().to_path_buf(),
+    let ctx = ProduceCtx::new(
+        Ctx {
             exclude: exclude.clone(),
+            ..Ctx::new(writer.root().to_path_buf())
         },
-        config: serde_json::Map::new(),
-        writer: writer.confined(),
-        cancel: Cancellation::new(),
-    };
+        writer.confined(),
+        Cancellation::new(),
+    );
     let mut roots: Vec<ProjectRoot> = languages
         .langs()
         .iter()

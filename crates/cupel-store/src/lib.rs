@@ -19,6 +19,8 @@
 //! - **Facts.** [`Store::put_fact`] and [`Store::fact`] by [`CacheKey::digest`] (design §8.3.6).
 //! - **Symbols.** [`Store::record_symbols`] and [`Store::symbols_new_since`], which answers
 //!   `--since-baseline`.
+//! - **Test results.** [`Store::record_test_results`] indexes a run's `TestResults` per test;
+//!   [`Store::test_results`] reads a run's rows back (ADR-076).
 //! - **Suppressions.** [`Store::replace_suppressions`] mirrors `.cupel/suppressions.toml`
 //!   (ADR-047); [`Store::suppressions`] reads the mirror.
 
@@ -33,7 +35,7 @@ use std::time::Duration;
 use cupel_core::syntax::SymbolDef;
 use cupel_core::{
     CheckId, CheckResult, Envelope, FactKind, Finding, FindingId, LangId, Metric, ProducerId,
-    RunId, Suppression, SymbolHash, Verb, Writer,
+    RunId, Suppression, SymbolHash, TestResults, Verb, Writer,
 };
 use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
 
@@ -52,6 +54,19 @@ pub struct CheckRun {
     /// Check-level metrics (such as its score) first, then per-symbol metrics, each in the order
     /// they were recorded.
     pub metrics: Vec<Metric>,
+}
+
+/// One row of the `test_results` index: a test as one run's baseline reported it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct StoredTestResult {
+    pub lang: LangId,
+    pub runner: ProducerId,
+    /// The test's ID in its `TestResults`.
+    pub test: String,
+    pub file: Option<String>,
+    /// `passed`, `failed`, `skipped`, or `errored`.
+    pub outcome: String,
+    pub duration_ms: Option<u64>,
 }
 
 /// The cache key of a fact (design §8.3.6).
@@ -320,6 +335,57 @@ impl Store {
             }
             Ok(())
         })
+    }
+
+    /// Indexes every test of `results`, which `run` produced for `lang`, in `test_results`.
+    pub fn record_test_results(
+        &self,
+        run: &RunId,
+        lang: &LangId,
+        results: &TestResults,
+    ) -> Result<()> {
+        let run = run.to_string();
+        self.write(|tx| {
+            for test in &results.tests {
+                tx.execute(
+                    "INSERT INTO test_results (run_id, lang, runner, test_id, file, outcome,
+                        duration_ms)
+                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+                    params![
+                        run,
+                        lang.as_str(),
+                        results.runner.as_str(),
+                        test.id,
+                        test.file,
+                        test.outcome.as_str(),
+                        test.duration_ms
+                            .map(|ms| i64::try_from(ms).unwrap_or(i64::MAX)),
+                    ],
+                )?;
+            }
+            Ok(())
+        })
+    }
+
+    /// The `test_results` rows of `run`, by language, then test ID.
+    pub fn test_results(&self, run: &RunId) -> Result<Vec<StoredTestResult>> {
+        let mut statement = self.connection.prepare(
+            "SELECT lang, runner, test_id, file, outcome, duration_ms FROM test_results
+             WHERE run_id = ?1 ORDER BY lang, test_id",
+        )?;
+        let rows = statement.query_map([run.to_string()], |row| {
+            Ok(StoredTestResult {
+                lang: LangId::from(row.get::<_, String>(0)?),
+                runner: ProducerId::from(row.get::<_, String>(1)?),
+                test: row.get(2)?,
+                file: row.get(3)?,
+                outcome: row.get(4)?,
+                duration_ms: row
+                    .get::<_, Option<i64>>(5)?
+                    .and_then(|ms| u64::try_from(ms).ok()),
+            })
+        })?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
     }
 
     /// The stored envelope of `run`.

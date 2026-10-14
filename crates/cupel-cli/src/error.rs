@@ -2,7 +2,7 @@
 // ABOUTME: `cli.*` finding: usage errors and unbuilt features exit 2, internal errors exit 6.
 use clap::error::{ContextKind, ContextValue, ErrorKind};
 use cupel_core::config::ConfigError;
-use cupel_core::{ActionKind, ExitCode, Finding, Severity};
+use cupel_core::{ActionKind, ExitCode, Finding, Severity, Unevaluable};
 use serde_json::json;
 
 use crate::problem::Problem;
@@ -19,6 +19,10 @@ pub enum CupelError {
     /// Cupel has a bug.
     #[error("internal error: {}", .0.message)]
     Internal(BugReport),
+    /// The baseline test suite is red; nothing that depends on test execution is scored
+    /// (exit 4, ADR-076).
+    #[error("the baseline test suite for {} is red", .0.lang)]
+    Unevaluable(Box<Unevaluable>),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -60,6 +64,19 @@ impl CupelError {
         match self {
             Self::Usage(_) | Self::NotImplemented(_) => ExitCode::Usage,
             Self::Internal(_) => ExitCode::Internal,
+            Self::Unevaluable(_) => ExitCode::Unevaluable,
+        }
+    }
+
+    /// The findings that report this error: one per failing test and incomplete run for a red
+    /// baseline, else the one [`finding`](Self::finding). `repro` is the command line.
+    pub fn findings(&self, repro: &str) -> Vec<Finding> {
+        match self {
+            Self::Unevaluable(red) => crate::refusal::findings(red)
+                .into_iter()
+                .map(|problem| problem.finding(repro))
+                .collect(),
+            other => vec![other.finding(repro)],
         }
     }
 
@@ -139,6 +156,7 @@ impl CupelError {
                 action: ActionKind::Review,
                 fix: pending.fix.clone(),
             },
+            Self::Unevaluable(red) => crate::refusal::summary(red),
             Self::Internal(report) => Problem {
                 check: "cli",
                 kind: "cli.internal",

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="1" tests="2" time="0.012" timestamp="2026-10-14T08:27:33.130173-07:00" hostname="Grimlock.local"><testcase classname="tests.test_tally.TotalTest" name="test_totals_a_huge_list" file="tests/test_tally.py" line="10" time="0.001"><skipped type="pytest.skip" message="kept to show a skipped test">/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/work/py-green/tests/test_tally.py:11: kept to show a skipped test</skipped><system-out>--------------------------------- Captured Log ---------------------------------
+
+--------------------------------- Captured Out ---------------------------------
+
+</system-out><system-err>--------------------------------- Captured Err ---------------------------------
+
+</system-err><system-out>--------------------------------- Captured Log ---------------------------------
+
+--------------------------------- Captured Out ---------------------------------
+
+</system-out><system-err>--------------------------------- Captured Err ---------------------------------
+
+</system-err></testcase><testcase classname="tests.test_tally.TotalTest" name="test_totals_a_list" file="tests/test_tally.py" line="7" time="0.001"><system-out>--------------------------------- Captured Log ---------------------------------
+
+--------------------------------- Captured Out ---------------------------------
+
+</system-out><system-err>--------------------------------- Captured Err ---------------------------------
+
+</system-err></testcase></testsuite></testsuites>

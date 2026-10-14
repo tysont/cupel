@@ -180,7 +180,7 @@ fn doctor_verb() -> CommandDescription {
                 "--fix",
                 "Install missing tools; with --install, without asking.",
             )
-            .pending("P3.1"),
+            .pending("P3.7"),
         ],
         examples(&[
             (
@@ -610,10 +610,10 @@ fn run_control_flags() -> Vec<ArgDescription> {
             "--no-install",
             "Never install tools; the default unless stdout is a terminal.",
         )
-        .pending("P3.1")
+        .pending("P3.7")
         .conflicts(&["--install"]),
         switch("--install", "Install missing tools that producers need.")
-            .pending("P3.1")
+            .pending("P3.7")
             .conflicts(&["--no-install"]),
         switch("--write", "Permit writes outside .cupel/."),
         switch("--help", "Print help and exit."),

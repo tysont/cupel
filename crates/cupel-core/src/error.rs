@@ -51,6 +51,9 @@ pub enum Error {
     /// file; a usage error (exit 2) naming the fix.
     #[error("{}", .0.title)]
     Argument(Box<ArgumentError>),
+    /// An external program could not be started.
+    #[error("cannot run `{program}`: {message}")]
+    Process { program: String, message: String },
 }
 
 /// Why a scope or selection flag cannot be honored, and what to do instead.

@@ -6,9 +6,9 @@ use std::path::{Path, PathBuf};
 use cupel_core::syntax::{Span, SymbolDef, SymbolKind, Visibility};
 use cupel_core::{
     CheckId, Envelope, FactKind, FindingId, LangId, Metric, ProducerId, RunId, Suppression,
-    SymbolHash, Writer,
+    SymbolHash, TestOutcome, TestResult, TestResults, Writer,
 };
-use cupel_store::{CacheKey, Store, StoreError, StoredFact};
+use cupel_store::{CacheKey, Store, StoreError, StoredFact, StoredTestResult};
 use serde_json::{Value, json};
 use tempfile::TempDir;
 
@@ -674,4 +674,56 @@ fn concurrent_writers_take_turns() {
         .map(|envelope| envelope.run.id)
         .collect();
     assert_eq!(stored, (1..=8).map(run_id).collect::<Vec<_>>());
+}
+
+fn ran(id: &str, file: Option<&str>, outcome: TestOutcome, duration_ms: Option<u64>) -> TestResult {
+    TestResult {
+        id: id.to_owned(),
+        file: file.map(str::to_owned),
+        name: id.to_owned(),
+        outcome,
+        duration_ms,
+        output: None,
+    }
+}
+
+#[test]
+fn test_results_are_indexed_per_run_and_language() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let results = TestResults::new(
+        ProducerId::from("tool.pytest"),
+        Vec::new(),
+        vec![
+            ran("t::b", Some("t.py"), TestOutcome::Failed, Some(12)),
+            ran("t::a", None, TestOutcome::Skipped, None),
+        ],
+        &repo.root(),
+    );
+    store
+        .record_test_results(&run_id(1), &LangId::from("python"), &results)
+        .unwrap();
+    let row = |test: &str, file: Option<&str>, outcome: &str, duration_ms: Option<u64>| {
+        StoredTestResult {
+            lang: LangId::from("python"),
+            runner: ProducerId::from("tool.pytest"),
+            test: test.to_owned(),
+            file: file.map(str::to_owned),
+            outcome: outcome.to_owned(),
+            duration_ms,
+        }
+    };
+    assert_eq!(
+        (
+            store.test_results(&run_id(1)).unwrap(),
+            store.test_results(&run_id(2)).unwrap()
+        ),
+        (
+            vec![
+                row("t::a", None, "skipped", None),
+                row("t::b", Some("t.py"), "failed", Some(12)),
+            ],
+            vec![]
+        )
+    );
 }

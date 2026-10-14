@@ -1,0 +1,19 @@
+{"Time":"2026-10-14T08:27:06.586197-07:00","Action":"start","Package":"example.com/tally"}
+{"Time":"2026-10-14T08:27:06.851442-07:00","Action":"run","Package":"example.com/tally","Test":"TestReportsAWrongTotal"}
+{"Time":"2026-10-14T08:27:06.851484-07:00","Action":"output","Package":"example.com/tally","Test":"TestReportsAWrongTotal","Output":"=== RUN   TestReportsAWrongTotal\n"}
+{"Time":"2026-10-14T08:27:06.851525-07:00","Action":"output","Package":"example.com/tally","Test":"TestReportsAWrongTotal","Output":"    red_test.go:7: totalling 2 and 2\n"}
+{"Time":"2026-10-14T08:27:06.851533-07:00","Action":"output","Package":"example.com/tally","Test":"TestReportsAWrongTotal","Output":"    red_test.go:9: Total = 4, want 5\n"}
+{"Time":"2026-10-14T08:27:06.851544-07:00","Action":"output","Package":"example.com/tally","Test":"TestReportsAWrongTotal","Output":"--- FAIL: TestReportsAWrongTotal (0.00s)\n"}
+{"Time":"2026-10-14T08:27:06.851556-07:00","Action":"fail","Package":"example.com/tally","Test":"TestReportsAWrongTotal","Elapsed":0}
+{"Time":"2026-10-14T08:27:06.851563-07:00","Action":"run","Package":"example.com/tally","Test":"TestTotalsAList"}
+{"Time":"2026-10-14T08:27:06.851568-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAList","Output":"=== RUN   TestTotalsAList\n"}
+{"Time":"2026-10-14T08:27:06.851577-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAList","Output":"--- PASS: TestTotalsAList (0.00s)\n"}
+{"Time":"2026-10-14T08:27:06.851583-07:00","Action":"pass","Package":"example.com/tally","Test":"TestTotalsAList","Elapsed":0}
+{"Time":"2026-10-14T08:27:06.851588-07:00","Action":"run","Package":"example.com/tally","Test":"TestTotalsAHugeList"}
+{"Time":"2026-10-14T08:27:06.851594-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAHugeList","Output":"=== RUN   TestTotalsAHugeList\n"}
+{"Time":"2026-10-14T08:27:06.8516-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAHugeList","Output":"    tally_test.go:12: kept to show a skipped test\n"}
+{"Time":"2026-10-14T08:27:06.851611-07:00","Action":"output","Package":"example.com/tally","Test":"TestTotalsAHugeList","Output":"--- SKIP: TestTotalsAHugeList (0.00s)\n"}
+{"Time":"2026-10-14T08:27:06.851617-07:00","Action":"skip","Package":"example.com/tally","Test":"TestTotalsAHugeList","Elapsed":0}
+{"Time":"2026-10-14T08:27:06.851622-07:00","Action":"output","Package":"example.com/tally","Output":"FAIL\n"}
+{"Time":"2026-10-14T08:27:06.852072-07:00","Action":"output","Package":"example.com/tally","Output":"FAIL\texample.com/tally\t0.265s\n"}
+{"Time":"2026-10-14T08:27:06.852087-07:00","Action":"fail","Package":"example.com/tally","Elapsed":0.266}

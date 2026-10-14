@@ -11,15 +11,15 @@ use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use cupel_core::config::{Config, ConfigRequest};
+use cupel_core::config::Config;
 use cupel_core::git::{Change, ChangeKind};
 use cupel_core::syntax::{Decisions, Span, SymbolDef, SymbolKind, Symbols, Visibility};
 use cupel_core::{
-    Action, ActionKind, Availability, BaseTree, Cancellation, Check, CheckCtx, CheckId,
-    CheckRegistry, CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence,
-    Fact, FactKind, Facts, Finding, FindingId, Job, LangId, Langs, Location, Manifest, Measurement,
-    Outcome, Plan, ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result, RunId,
-    Scheduler, Scope, Score, Severity, SkipReason, Skipped, SymbolSelector, Target, Tier, Writer,
+    Action, ActionKind, Availability, BaseTree, Check, CheckCtx, CheckId, CheckRegistry,
+    CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence, Fact, FactKind,
+    Facts, Finding, FindingId, Job, LangId, Langs, Location, Manifest, Measurement, Outcome, Plan,
+    ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result, Scheduler, Scope, Score,
+    Severity, SkipReason, Skipped, SymbolSelector, Target, Tier, Writer,
 };
 
 // ---------------------------------------------------------------- fixtures
@@ -232,7 +232,6 @@ impl World {
     /// `Symbols` for rust and go, `Decisions` for rust only; `cupel.toml` holds `toml`.
     fn new(checks: Vec<Box<dyn Check>>, toml: &str) -> Self {
         let dir = tempfile::tempdir().unwrap();
-        std::fs::write(dir.path().join("cupel.toml"), toml).unwrap();
         let symbols_made = Arc::new(AtomicUsize::new(0));
         let mut producers = ProducerRegistry::default();
         producers.register::<Symbols, _>(Counting {
@@ -249,11 +248,7 @@ impl World {
         for check in checks {
             registry.register(check).unwrap();
         }
-        let config = Config::load(&ConfigRequest {
-            root: dir.path().to_path_buf(),
-            ..ConfigRequest::default()
-        })
-        .unwrap();
+        let config = support::config_at(dir.path(), toml);
         Self {
             dir,
             checks: registry,
@@ -286,18 +281,7 @@ impl World {
         dry_run: bool,
     ) -> (Result<Outcome>, Vec<Event>) {
         let writer = Writer::new(self.root(), false).unwrap();
-        let mut job = Job {
-            run: RunId::generate(),
-            writer: &writer,
-            cancel: Cancellation::new(),
-            config: &self.config,
-            selected: self.checks.iter().collect(),
-            langs: langs.iter().map(|id| support::lang(id, id)).collect(),
-            files: vec!["a.x".to_owned(), "b.x".to_owned()],
-            selectors: Vec::new(),
-            selectors_must_match: true,
-            base: None,
-        };
+        let mut job = support::job(&writer, &self.config, &self.checks, langs);
         setup(&mut job);
         let scheduler = Scheduler {
             checks: &self.checks,

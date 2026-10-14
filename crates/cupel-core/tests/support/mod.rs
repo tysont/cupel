@@ -10,9 +10,11 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use cupel_core::config::{Config, ConfigRequest};
 use cupel_core::{
-    Check, CheckCtx, CheckId, CheckResult, CostClass, EventSink, FactKind, Facts, Lang, LangFamily,
-    LangId, Manifest, Plan, Result, Scope, Stability, Tier,
+    Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CostClass, EventSink,
+    FactKind, Facts, Job, Lang, LangFamily, LangId, Manifest, Plan, Result, RunId, Scope,
+    Stability, Tier, Writer,
 };
 
 /// The language `id` as a member of `family`.
@@ -37,6 +39,38 @@ pub fn manifest(id: &str, needs: &[FactKind], wants: &[FactKind]) -> Manifest {
         metrics: vec![],
         stability: Stability::Experimental,
         summary: String::new(),
+    }
+}
+
+/// The configuration of a repository at `root` whose `cupel.toml` holds `toml`.
+pub fn config_at(root: &Path, toml: &str) -> Config {
+    fs::write(root.join("cupel.toml"), toml).unwrap();
+    Config::load(&ConfigRequest {
+        root: root.to_path_buf(),
+        ..ConfigRequest::default()
+    })
+    .unwrap()
+}
+
+/// A tree-scope job selecting every check of `checks`, over the files `a.x` and `b.x` in
+/// `langs` (each its own family).
+pub fn job<'a>(
+    writer: &'a Writer,
+    config: &'a Config,
+    checks: &'a CheckRegistry,
+    langs: &[&str],
+) -> Job<'a> {
+    Job {
+        run: RunId::generate(),
+        writer,
+        cancel: Cancellation::new(),
+        config,
+        selected: checks.iter().collect(),
+        langs: langs.iter().map(|id| lang(id, id)).collect(),
+        files: vec!["a.x".to_owned(), "b.x".to_owned()],
+        selectors: Vec::new(),
+        selectors_must_match: true,
+        base: None,
     }
 }
 

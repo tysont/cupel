@@ -1,0 +1,23 @@
+test_reports_a_wrong_total (tests.test_red.RedTest.test_reports_a_wrong_total) ... FAIL
+test_totals_a_huge_list (tests.test_tally.TotalTest.test_totals_a_huge_list) ... skipped 'kept to show a skipped test'
+test_totals_a_list (tests.test_tally.TotalTest.test_totals_a_list) ... ok
+
+======================================================================
+FAIL: test_reports_a_wrong_total (tests.test_red.RedTest.test_reports_a_wrong_total)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/work/py-red/tests/test_red.py", line 10, in test_reports_a_wrong_total
+    self.assertEqual(total([2, 2]), 5)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+AssertionError: 4 != 5
+
+Stdout:
+totalling 2 and 2
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+FAILED (failures=1, skipped=1)
+
+Stdout:
+totalling 2 and 2

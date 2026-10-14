@@ -197,7 +197,7 @@ fn fix_reports_that_installing_arrives_in_p3_1() {
             .collect();
         assert_eq!(pending.len(), 1, "{args:?}");
         assert_eq!(pending[0]["severity"], json!("info"));
-        assert_eq!(pending[0]["evidence"], json!({"step": "P3.1"}));
+        assert_eq!(pending[0]["evidence"], json!({"step": "P3.7"}));
     }
 }
 
@@ -218,7 +218,7 @@ fn doctor_describes_fix_as_pending_p3_1() {
     let description = &envelope["description"];
     assert_eq!(description["pending_step"], Value::Null);
     assert_eq!(description["arguments"][0]["name"], json!("--fix"));
-    assert_eq!(description["arguments"][0]["pending_step"], json!("P3.1"));
+    assert_eq!(description["arguments"][0]["pending_step"], json!("P3.7"));
 }
 
 #[test]

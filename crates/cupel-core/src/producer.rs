@@ -10,12 +10,13 @@ use std::sync::Arc;
 use serde_json::{Map, Value};
 
 use crate::cancel::Cancellation;
+use crate::config::Table;
 use crate::error::Result;
 use crate::event::EventSink;
 use crate::exclude::Exclude;
 use crate::fact::{Fact, FactKind};
 use crate::grade::CostClass;
-use crate::id::{ProducerId, ToolId};
+use crate::id::{LangId, ProducerId, ToolId};
 use crate::lang::{Lang, Langs};
 use crate::scope::Scope;
 use crate::writer::Writer;
@@ -28,6 +29,8 @@ pub struct Ctx {
     /// Paths the run never considers (`[scope] exclude`, ADR-065); producers that read the
     /// repository rather than the scope (project roots) must not descend into them.
     pub exclude: Exclude,
+    /// The `[lang.<id>]` tables, which pin producers (ADR-076); empty when nothing is configured.
+    pub lang: BTreeMap<LangId, Table>,
 }
 
 impl Ctx {
@@ -36,7 +39,13 @@ impl Ctx {
         Self {
             root,
             exclude: Exclude::default(),
+            lang: BTreeMap::new(),
         }
+    }
+
+    /// The producer name `[lang.<lang>]` pins for `kind`, such as `unittest`.
+    pub fn pin(&self, kind: FactKind, lang: &LangId) -> Option<&str> {
+        self.lang.get(lang)?.get(kind.pin_key()?)?.as_str()
     }
 }
 
@@ -51,6 +60,44 @@ pub struct ProduceCtx {
     pub writer: Writer,
     /// Fires on `--timeout`; poll it between units of work.
     pub cancel: Cancellation,
+    /// The facts the producer's `needs` name, produced first for the same language.
+    pub upstream: Upstream,
+}
+
+impl ProduceCtx {
+    /// The context of producing in `ctx`'s repository with `writer` and `cancel`, with no
+    /// `[lang.*]` configuration and no upstream facts.
+    pub fn new(ctx: Ctx, writer: Writer, cancel: Cancellation) -> Self {
+        Self {
+            ctx,
+            config: Map::new(),
+            writer,
+            cancel,
+            upstream: Upstream::default(),
+        }
+    }
+}
+
+/// The facts a producer needs, as the scheduler produced them for it.
+#[derive(Debug, Clone, Default)]
+pub struct Upstream(BTreeMap<FactKind, SharedFact>);
+
+impl Upstream {
+    pub fn insert(&mut self, fact: SharedFact) {
+        self.0.insert(fact.kind(), fact);
+    }
+
+    /// The fact of type `F`, when it was produced.
+    pub fn get<F: Fact>(&self) -> Option<&F> {
+        self.0.get(&F::KIND)?.downcast_ref()
+    }
+}
+
+/// The program a tool producer runs, and the command that prints its version (for `doctor`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ToolProbe {
+    pub name: ToolId,
+    pub version: Vec<String>,
 }
 
 /// Whether a producer can run in this environment.
@@ -77,6 +124,15 @@ pub trait Producer<F: Fact>: Send + Sync {
     fn needs(&self) -> &[FactKind];
     fn cost(&self) -> CostClass;
     fn availability(&self, ctx: &Ctx) -> Availability;
+    /// Whether the repository shows signs of using this producer (a tool producer's
+    /// toolchain-table detection rules). Detected producers are preferred over the rest (ADR-076).
+    fn detected(&self, _ctx: &Ctx) -> bool {
+        true
+    }
+    /// The program this producer runs, for producers that run one.
+    fn tool(&self, _ctx: &Ctx) -> Option<ToolProbe> {
+        None
+    }
     fn produce(&self, ctx: &ProduceCtx, scope: &Scope, sink: &mut dyn EventSink) -> Result<F>;
 }
 
@@ -182,6 +238,8 @@ pub trait RegisteredProducer: Send + Sync {
     fn needs(&self) -> &[FactKind];
     fn cost(&self) -> CostClass;
     fn availability(&self, ctx: &Ctx) -> Availability;
+    fn detected(&self, ctx: &Ctx) -> bool;
+    fn tool(&self, ctx: &Ctx) -> Option<ToolProbe>;
     /// Runs the producer and returns its fact with the type erased.
     fn produce(
         &self,
@@ -220,6 +278,14 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
 
     fn availability(&self, ctx: &Ctx) -> Availability {
         self.producer.availability(ctx)
+    }
+
+    fn detected(&self, ctx: &Ctx) -> bool {
+        self.producer.detected(ctx)
+    }
+
+    fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
+        self.producer.tool(ctx)
     }
 
     fn produce(
@@ -262,5 +328,37 @@ impl ProducerRegistry {
             .flatten()
             .map(AsRef::as_ref)
             .filter(move |producer| producer.languages().covers(&lang))
+    }
+
+    /// The producers of `kind` for `lang` a run may use, in preference order (ADR-076): only
+    /// the producer `[lang.<lang>]` pins, when it pins one; otherwise the detected producers in
+    /// registration order, then the rest. `Err` holds the pin's configuration key when the pin
+    /// names no producer of `kind` for `lang`.
+    pub fn candidates<'a>(
+        &'a self,
+        kind: FactKind,
+        lang: &Lang,
+        ctx: &Ctx,
+    ) -> std::result::Result<Vec<&'a dyn RegisteredProducer>, String> {
+        let all = self.producers_for(kind, lang);
+        if let Some(pin) = ctx.pin(kind, &lang.id) {
+            let pinned: Vec<_> = all
+                .filter(|producer| {
+                    let id = producer.id();
+                    id.as_str() == pin || id.as_str().strip_prefix("tool.") == Some(pin)
+                })
+                .collect();
+            return if pinned.is_empty() {
+                Err(format!(
+                    "lang.{}.{}",
+                    lang.id,
+                    kind.pin_key().unwrap_or_default()
+                ))
+            } else {
+                Ok(pinned)
+            };
+        }
+        let (detected, rest): (Vec<_>, Vec<_>) = all.partition(|producer| producer.detected(ctx));
+        Ok(detected.into_iter().chain(rest).collect())
     }
 }

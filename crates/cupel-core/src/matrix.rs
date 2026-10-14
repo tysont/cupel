@@ -91,8 +91,12 @@ impl Resolver<'_> {
     }
 
     fn first_runnable(&self, kind: FactKind, visiting: &mut Vec<FactKind>) -> Support {
+        let candidates = match self.producers.candidates(kind, self.lang, self.ctx) {
+            Ok(candidates) => candidates,
+            Err(key) => return Support::Unconfigured(key),
+        };
         let mut first_failure = None;
-        for producer in self.producers.producers_for(kind, self.lang) {
+        for producer in candidates {
             match self.producer(producer, visiting) {
                 Support::Supported => return Support::Supported,
                 failure => {
