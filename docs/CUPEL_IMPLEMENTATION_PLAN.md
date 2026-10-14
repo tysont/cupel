@@ -808,7 +808,7 @@ P3 fans out to parallel worktrees, each adding a check or a producer. Before it 
 
 #### P3.1 Fact: `TestResults` — runner producers and baseline test run (exit 4)
 
-**Status:** in progress (2026-10-14) · [ADR-075](adr/CUPEL_DECISION_075.md) · [ADR-076](adr/CUPEL_DECISION_076.md)
+**Status:** complete (2026-10-14, 53b7405) · [ADR-075](adr/CUPEL_DECISION_075.md) · [ADR-076](adr/CUPEL_DECISION_076.md)
 
 - `Runner: Producer<TestResults>` trait (design §8.7); producers for `cargo test`, `cargo nextest`, `go test -json`, `pytest`, `vitest`, `jest`, registered through the P1.9 toolchain table; `list()` and `run(selection, env, timeout)` → `TestResults` (per-test outcome, duration). Each producer = a format parser (tested on committed real output) + an invocation.
 - Baseline test run executed once in the real tree before any producer that needs it; red baseline → `status: error`, exit 4, no scores produced. `test_results` index table populated from the fact.
