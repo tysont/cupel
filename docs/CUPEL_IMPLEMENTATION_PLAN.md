@@ -792,7 +792,7 @@ External tools used here (`cargo-llvm-cov`, `cargo-nextest`, `go`, `pytest`, `py
 
 #### P3.0 Decentralized registration and registry-derived tests
 
-**Status:** in progress (2026-10-14) · [ADR-074](adr/CUPEL_DECISION_074.md)
+**Status:** complete (2026-10-14, 5b5a13b) · [ADR-074](adr/CUPEL_DECISION_074.md)
 
 P3 fans out to parallel worktrees, each adding a check or a producer. Before it does, remove every line that two such additions would both edit: the `register()` list in `cupel-checks`, the generic-producer table in `cupel-lang`, hand-maintained lists of check IDs, finding kinds, fact kinds, and producers in tests, goldens that render every check at once, and duplicated test helpers. Afterwards, adding a check is literally one module plus goldens (§2.8), and adding a tool producer is one module in `cupel-adapt`.
 
