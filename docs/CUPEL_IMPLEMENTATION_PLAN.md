@@ -453,7 +453,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.2 Fact: `Symbols`
 
-**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending)
+**Status:** complete (2026-10-10, c463b6a)
 
 - `QuerySymbols` generic producer over `symbols.scm` → functions, methods, nested functions, closures assigned to names, with namespace (`module::Type::method`), visibility, span, body ref, `lang`. Language specifics expressed in queries/tables where possible: Go method receivers and package-level namespace; Rust `impl` blocks and trait impls; Python nested `def` and class methods; JS/TS arrow functions assigned to `const`, class methods, exported function expressions.
 
@@ -461,7 +461,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.3 Fact: `Decisions`
 
-**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-024](adr/CUPEL_DECISION_024.md)
+**Status:** complete (2026-10-10, c463b6a) · [ADR-024](adr/CUPEL_DECISION_024.md)
 
 - `QueryDecisions` over `decisions.scm` → `Decision { kind, nesting }` per symbol with the semantic kind enum from design §8.3.2; cyclomatic and cognitive weights per kind in `tables.toml`, following crapper's per-language tables (design §3). The producer emits decisions; *computing* complexity from them is the check's job (P2.1).
 
@@ -469,7 +469,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.4 Fact: `NormTree` and structural hash
 
-**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-025](adr/CUPEL_DECISION_025.md)
+**Status:** complete (2026-10-10, c463b6a) · [ADR-025](adr/CUPEL_DECISION_025.md)
 
 - `TableNormalize` over normalize rules in `tables.toml` → `NormTree`: locals, fields, literals, keywords → generic markers; call names, operators, tree shape preserved (dryer's rules, design §3). Hand-written overrides only for constructs the rules cannot express (Python `self`, Rust macros, Go receivers), each justified by a comment and still passing the same inventory.
 - `NormTree` serialization is language-independent so `ecma`-family symbols compare across JS and TS.
@@ -479,7 +479,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.5 Fact: `MutationSites`
 
-**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-026](adr/CUPEL_DECISION_026.md)
+**Status:** complete (2026-10-10, c463b6a) · [ADR-026](adr/CUPEL_DECISION_026.md)
 
 - `QueryMutationSites` over `mutations.scm` → `Site { operator, set, from, to[], site_hash }` with the semantic operator enum; operator set `default` (boolean flips, relational/equality swaps, `+/-`, `*//`, `&&/||`, `0/1`) and `extended` (statement deletion, return-value replacement, constant replacement, boundary ±1, negation). `site_hash` is the structural position within the symbol, not the line. Replacement spellings live in `tables.toml` (Python `and/or`, Go/Rust/JS `&&/||`; Python `True/False`, others `true/false`).
 
@@ -487,7 +487,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.6 Facts: `TestFrames` and `TestConventions`
 
-**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-027](adr/CUPEL_DECISION_027.md)
+**Status:** complete (2026-10-10, c463b6a) · [ADR-027](adr/CUPEL_DECISION_027.md)
 
 - `QueryTestFrames` over `tests.scm` → test cases with `Assertion { kind, strength }` (semantic kinds from design §8.3.2), mocks, skip markers, setup blocks, and the detected framework, for each language's dominant frameworks: vitest/jest/mocha/`node:test` (JS/TS), Rust `#[test]`/`#[tokio::test]`, Go `testing.T`/testify, pytest/unittest. The idiom→kind mapping (e.g. `assert x is not None` → `NotNull`, `expect(x).toBeTruthy()` → `Truthiness, Weak`) lives in `tables.toml`.
 - `GlobTestConventions` over test-file globs in `tables.toml` → `TestConventions` (`is_test(path)`, `test_files_for(source)`): `*.test.ts`/`__tests__/`, `#[cfg(test)]`/`tests/`, `*_test.go`, `test_*.py`/`tests/`.
@@ -496,7 +496,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.7 Fact: `ModuleGraph`
 
-**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-028](adr/CUPEL_DECISION_028.md)
+**Status:** complete (2026-10-10, c463b6a) · [ADR-028](adr/CUPEL_DECISION_028.md)
 
 - `QueryImports` over `imports.scm` → raw edges with specifiers (ESM/CJS `import`/`require`, Rust `use`/`mod`, Go `import`, Python `import`/`from … import`).
 - Hand-written per-language resolution producing `ModuleGraph` with edges `File(path) | External(name) | Unresolved` and a `relative` flag: Node resolution with `package.json` `exports`/`main` and `tsconfig` `paths`; Rust `mod` tree and workspace members; Go module path → directory via `go.mod`; Python packages via `__init__.py` and project roots. This is the one syntactic fact that is mostly Rust rather than queries, by design.
@@ -505,7 +505,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.8 Facts: `ApiSurface` and `Roots`
 
-**Status:** in progress (2026-10-10; rust complete, javascript/typescript/go/python pending) · [ADR-029](adr/CUPEL_DECISION_029.md)
+**Status:** complete (2026-10-10, c463b6a) · [ADR-029](adr/CUPEL_DECISION_029.md)
 
 - `QueryApi` over `api.scm` → exported/`pub`/capitalized/`__all__` items with normalized signatures.
 - `QueryRoots` over roots rules in `tables.toml` plus `api.scm` → symbols live by convention: `main`, exported items, test functions, framework hooks (`init()`, `__init__`, default exports, `#[no_mangle]`, Go `TestMain`).
@@ -514,7 +514,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 #### P1.9 Fact: `ProjectInfo`; toolchain table
 
-**Status:** not started
+**Status:** complete (2026-10-13, fc06317) · [ADR-036](adr/CUPEL_DECISION_036.md) · [ADR-037](adr/CUPEL_DECISION_037.md) · [ADR-038](adr/CUPEL_DECISION_038.md)
 
 - Move P0.8's detection into each language's hand-written `ProjectInfo` producer (build file, roots, default test/coverage/bench commands, dirs to skip). JS vs TS decided by `tsconfig.json` presence.
 - `cupel-adapt` toolchain table keyed by `LangId` per design §8.7: per-language rows naming runner, coverage, and bench producers with detection rules and default order; property/fuzz/race tool names. The producer implementations land in P3 — in P1 the table holds their IDs and detection rules so `init`, `doctor`, and `describe language` can already read it.
@@ -572,6 +572,13 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 - **P1 — javascript/typescript — tables.** `[normalize]` erases `type_annotation`, `type_parameters`, `type_arguments`, `decorator`, `accessibility_modifier`, `override_modifier` and flattens `required_parameter` and `assignment_pattern`, so a JS function and its annotated TS twin have equal `NormTree`s; their `SymbolHash`es still differ because the language is hashed (ADR-025), which the twin test asserts. Optional parameters (`x?`), non-null assertions (`x!`), and `as` casts are not erased. `[tests].framework = "jest"` (jest needs no import); frameworks come from imports (`vitest`, `@jest/globals`, `node:test`, `mocha`/`chai`) or `vi.`/`jest.` usage. Negated matchers and `assert.not*` are weak; `toThrow(expected)` and `assert.throws(f, expected)` are strong throws, bare `toThrow()` weak.
 - **P1 — javascript/typescript — what was awkward.** Shared queries must compile against three grammars, and node kinds or parent–child pairs that exist in only one fail (`type_parameters` fields in JavaScript, bare-identifier parameters in TypeScript); keep shared patterns to common shapes and push the rest to overlays. Predicates on an absent optional capture pass, which is how `(accessibility_modifier)? @_a (#not-any-of? @_a "private" "protected")` excludes private members. When two patterns match one mock node, the match tree-sitter reports first wins regardless of pattern order, so keep mock patterns disjoint. A return that ends an inline callback (`items.forEach((x) => { …; return; })`) is an early return of the enclosing function unless the callback is itself in final position (ADR-024's structural rule).
 - **P1 — javascript/typescript — tests.** 57 new: `cupel-lang` `ecma_symbols` 10, `ecma_decisions` 8, `ecma_norm` 8 (one property), `ecma_mutations` 8 (one property, re-parsing `.js`, `.ts`, and `.tsx` with their own grammars), `ecma_tests` 8, `ecma_modules` 4, `ecma_api` 7, and 4 unit tests in `langs/ecma/resolve.rs`. Workspace total 518.
+- **P1.9 — the toolchain table** ([ADR-036](adr/CUPEL_DECISION_036.md)) is `crates/cupel-adapt/src/toolchain.toml`, embedded and parsed once; the format is documented in the `cupel-adapt` crate docs. One `[[rows]]` per language (`javascript` and `typescript` share one) lists `launchers` (package-manager prefixes whose `values` fill `<x>`, `<run>`, `<m>` placeholders), `runners`, `coverage` (with `format`), and `bench` in default order, each with `detect` rules (`{ file }`, `{ contains, in }`, `{ mentions, in = [globs] }`, `{ json, path, prefix?, members? }`, `{ all }`; any one selects, none means fallback) and `command` or per-runner `commands`; plus `property`, `fuzz`, `race` tool names and `[probes]` for programs without `--version` (`go version`). `toolchain::for_lang(id)?.select(&Root)` picks a root's tools and `Selection::commands()` fills `<…>` placeholders and `<packages>`; `{out}`, `{name}`, `{id}` stay for producers. The content is exactly P0.8's rules, so the `init` goldens did not move. `describe language <id>` shows the row (JSON `toolchain`; a `toolchain` text section).
+- **P1.9 — dependency direction** ([ADR-037](adr/CUPEL_DECISION_037.md)). `cupel-adapt` depends on `cupel-core` only and `cupel-lang` does not depend on it. `ProjectInfo` is version 2 and reports detected facts only: `ProjectRoot { path, lang, build_files, members, packages, skip_dirs }` (`packages` is Go's `./...` or one `./<dir>/...` per `go.work` `use`; empty elsewhere); `DefaultCommands` is gone. The walk and nesting rule live in `cupel_lang::project`; each language's ecosystem is `langs/<dir>/project.rs` and its `mod.rs` registers `ProjectRoots` (ID `lang.<id>`, reads the repository root, not the scope). `cupel-cli/src/project.rs` runs every language's producer through the registry and joins a root with the table (`project::selection`/`commands`); `init` and `doctor` use it, and `cupel-cli`'s `detect` module is deleted. `cupel_lang::walk(root, languages, &ProjectInfo)` skips, below each root, the directories in its `skip_dirs` (closing the P1.1 open item). A `go.work` that uses `.` now covers `./...`; P0.8 produced `././...`.
+- **P1.9 — Java and Clojure** ([ADR-038](adr/CUPEL_DECISION_038.md)). Maven, Gradle, and `deps.edn` roots are still detected (`cupel_lang::project::unregistered_roots`) but never written to `cupel.toml`; `init` reports each as an `info` finding `init.unsupported-root` (check `init`, subject `<lang>:<path>`, action `review`, evidence `{lang, path, build_files}`), titled "unsupported language root: java at ./svc — supported in a later release", in previews and after `--write`. The only `init` golden that changed is `init/maven.json`, which gains that finding (its planned `cupel.toml` is byte-identical); the other nine are byte-identical. The CLI now calls `Config::validate_languages` with the registered languages on every configuration load (unknown language: exit 2; `doctor` reports `doctor.config-invalid`; `init --force` replaces the file); P2.1 switches to `validate_registered`.
+- **P1.9 — what `doctor` checks.** Besides `git`, the program of every command each language would use: configured `[lang.<id>] test`/`coverage`/`bench`, and for unset keys the table's default for the language's first detected root. Each `&&`-separated part's first word that is not `NAME=value` is probed with `<program> --version` (or `[probes]`); a missing one is `doctor.tool-missing`, `warn`, one per program, `needed_for` listing each use (`[lang.rust] test (tool.cargo-test)`; a configured command names only its key). None is `required` until P3, so tools never make `doctor` exit 3 yet; P3 replaces the probe with the producer's `availability`.
+- **P1.9 — conformance and goldens.** `conformance/project-info.toml` has four constructs (`manifest-root`, `workspace-member`, `generated-dirs`, `packages`), mapped for all five languages (`packages` is `not-applicable` except for Go); `golden/facts/<lang>/project-info.json` exist for all five; `describe/language-<id>.json` and `languages.json` gained the `project-info` producer and the toolchain row; the `project-info` and run schema snapshots changed with the payload.
+- **P1.9 — reconciliation items**, verified in code and tests: (1) one workspace-glob helper `Imports::expand` for Rust, Python, and JS/TS (`e3aaf35`); (2) exact-listing, case-sensitive module probes in every resolver (`986a3e3`); (3) string literals as single signature tokens (`3952745`); (4) ADR-029/030 status lines record the supersession (`5fa4f0b`); (5) Python registers through `generic::register_except` (`c6ff52d`); (6) `Config::validate_languages` for language-only validation (`bed0825`), now called by the CLI (`bf6312b`). ADRs 036–038 were committed with `bed0825`.
+- **P1.9 — tests.** 655 in all (+33 since `bed0825`): `cupel-adapt` 17 (new: table loading and consistency, selection over every detect fixture, launchers, rules, describe), `cupel-lang` `project` 10 (including the four-root `monorepo` test) and `walk` +2, `cupel-cli` `describe` +2, `init` +1, `config` +2, `doctor` +1 and unit +3; `detect.rs`'s seven tests moved to `cupel-lang` and `cupel-adapt`. By crate: `cupel-core` 178, `cupel-lang` 238, `cupel-cli` 184, `cupel-fixtures` 38, `cupel-adapt` 17.
 
 ---
 
