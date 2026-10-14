@@ -644,7 +644,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 #### P2.5 `static.deps`
 
-**Status:** not started
+**Status:** in progress (2026-10-13) · [ADR-052](adr/CUPEL_DECISION_052.md) · [ADR-053](adr/CUPEL_DECISION_053.md)
 
 - Module graph from `imports()` + `resolve_import()` (P1.7); external and unresolved edges excluded from coupling but counted in evidence; afferent/efferent coupling, instability, abstractness, distance from main sequence; Tarjan SCC for cycles; layering rules from `[checks."static.deps".layers]`. Kinds `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract`.
 
