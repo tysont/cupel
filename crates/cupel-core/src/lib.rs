@@ -20,8 +20,10 @@ mod id;
 mod lang;
 mod matrix;
 mod producer;
+mod schedule;
 pub mod schema;
 mod scope;
+mod select;
 pub mod syntax;
 mod writer;
 
@@ -42,7 +44,7 @@ pub use envelope::{
     ExitCode, GateOutcome, GateResult, GateRule, GitInfo, NextAction, RunInfo, ScopeInfo,
     ScopeMode, Score, SeverityCounts, SkipReason, Skipped, Status, Summary, ToolchainInfo, Verb,
 };
-pub use error::{Error, Result};
+pub use error::{ArgumentError, Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
 pub use fact::{Fact, FactKind, Facts};
 pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Symbol};
@@ -53,6 +55,9 @@ pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
 pub use producer::{
     Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
+    SharedFact,
 };
-pub use scope::Scope;
+pub use schedule::{Job, Outcome, Scheduler, next_actions};
+pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
+pub use select::Selection;
 pub use writer::{WriteError, Writer};

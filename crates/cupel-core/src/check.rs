@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::cancel::Cancellation;
-use crate::envelope::CheckResult;
+use crate::envelope::{CheckResult, Score};
 use crate::error::{Error, Result};
 use crate::event::EventSink;
 use crate::fact::{FactKind, Facts};
@@ -66,10 +66,22 @@ pub struct Plan {
     pub est_ms: u64,
 }
 
+impl Plan {
+    /// `targets` units of work estimated from the cost class (ADR-041).
+    pub fn estimate(cost: CostClass, targets: u64) -> Self {
+        Self {
+            targets,
+            est_ms: targets.saturating_mul(cost.est_ms_per_target()),
+        }
+    }
+}
+
 /// What a check can see besides its facts. Grows store access in P2.2. It offers no file-system
 /// or process access beyond a writer confined to the run's scratch directory.
 #[derive(Debug, Clone)]
 pub struct CheckCtx {
+    /// What the run considers for this check's language: the files and the symbols in scope.
+    pub scope: Scope,
     /// This check's resolved configuration, per-language overrides merged.
     pub config: Map<String, Value>,
     /// Writes only inside `.cupel/work/<run>/` (`Writer::scratch`).
@@ -89,6 +101,26 @@ pub trait Check: Send + Sync {
         plan: &Plan,
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult>;
+
+    /// One score from this check's per-language scores, for the envelope's single entry per
+    /// check (ADR-041). The default is the mean weighted by each score's `n`.
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "target counts stay far below 2^52, where f64 is exact"
+    )]
+    fn combine(&self, scores: &[Score]) -> Option<Score> {
+        let first = scores.first()?;
+        let n: u64 = scores.iter().map(|score| score.n).sum();
+        let weighted: f64 = scores
+            .iter()
+            .map(|score| score.value * score.n as f64)
+            .sum();
+        Some(Score {
+            value: if n == 0 { 0.0 } else { weighted / n as f64 },
+            unit: first.unit.clone(),
+            n,
+        })
+    }
 }
 
 /// Every registered check, in registration order, unique by ID.

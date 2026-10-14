@@ -47,6 +47,48 @@ pub enum Error {
     /// A file write was refused or failed (ADR-020).
     #[error(transparent)]
     Write(#[from] WriteError),
+    /// A command-line value cannot be honored, such as a `--paths` pattern that matches no
+    /// file; a usage error (exit 2) naming the fix.
+    #[error("{}", .0.title)]
+    Argument(Box<ArgumentError>),
+}
+
+/// Why a scope or selection flag cannot be honored, and what to do instead.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ArgumentError {
+    /// The flag at fault, such as `--paths`.
+    pub argument: String,
+    /// The value supplied, when there was one.
+    pub value: Option<String>,
+    pub title: String,
+    /// What to do instead.
+    pub fix: String,
+    /// The values that would have been accepted, when they are enumerable.
+    pub valid: Vec<String>,
+}
+
+impl ArgumentError {
+    pub fn new(argument: &str, value: Option<&str>, title: String, fix: String) -> Self {
+        Self {
+            argument: argument.to_owned(),
+            value: value.map(str::to_owned),
+            title,
+            fix,
+            valid: Vec::new(),
+        }
+    }
+
+    #[must_use]
+    pub fn valid(mut self, valid: Vec<String>) -> Self {
+        self.valid = valid;
+        self
+    }
+}
+
+impl From<ArgumentError> for Error {
+    fn from(error: ArgumentError) -> Self {
+        Self::Argument(Box::new(error))
+    }
 }
 
 /// Result type for cupel-core APIs.

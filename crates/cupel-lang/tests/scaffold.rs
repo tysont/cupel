@@ -53,9 +53,7 @@ fn rust_producer(registry: &LanguageRegistry) -> QueryProducer<Symbols> {
 }
 
 fn scope(files: &[&str]) -> Scope {
-    Scope {
-        files: files.iter().map(|f| (*f).to_owned()).collect(),
-    }
+    Scope::of_files(files.iter().map(|f| (*f).to_owned()).collect())
 }
 
 #[test]

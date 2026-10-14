@@ -657,6 +657,7 @@ fn a_check_context_carries_a_scratch_writer_for_its_run() {
     let run = RunId::generate();
     let writer = Writer::new(dir.path(), true).unwrap();
     let ctx = CheckCtx {
+        scope: Scope::default(),
         config: serde_json::Map::new(),
         writer: writer.scratch(&run),
         cancel: Cancellation::new(),
