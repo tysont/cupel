@@ -13,6 +13,7 @@ mod error;
 mod event;
 mod fact;
 mod finding;
+pub mod git;
 mod grade;
 mod hash;
 mod id;

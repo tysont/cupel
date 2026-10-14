@@ -8,7 +8,6 @@ mod doctor;
 mod error;
 mod events;
 mod format;
-mod git;
 mod init;
 mod page;
 mod problem;
