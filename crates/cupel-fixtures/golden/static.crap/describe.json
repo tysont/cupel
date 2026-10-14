@@ -1,0 +1,227 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `crap.high` and `crap.watch`.",
+            "properties": {
+              "coverage": {
+                "description": "The fraction of the symbol's instrumented lines that tests ran.",
+                "format": "double",
+                "type": "number"
+              },
+              "crap": {
+                "description": "`cyclomatic² × (1 − coverage)³ + cyclomatic`.",
+                "format": "double",
+                "type": "number"
+              },
+              "cyclomatic": {
+                "description": "1 plus the cyclomatic weight of every decision.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "high": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "watch": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "crap",
+              "cyclomatic",
+              "coverage",
+              "watch",
+              "high"
+            ],
+            "title": "CrapScore",
+            "type": "object"
+          },
+          "kind": "crap.high",
+          "summary": "CRAP is at least high (default 30): complex code that tests do not cover."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `crap.high` and `crap.watch`.",
+            "properties": {
+              "coverage": {
+                "description": "The fraction of the symbol's instrumented lines that tests ran.",
+                "format": "double",
+                "type": "number"
+              },
+              "crap": {
+                "description": "`cyclomatic² × (1 − coverage)³ + cyclomatic`.",
+                "format": "double",
+                "type": "number"
+              },
+              "cyclomatic": {
+                "description": "1 plus the cyclomatic weight of every decision.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "high": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "watch": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "crap",
+              "cyclomatic",
+              "coverage",
+              "watch",
+              "high"
+            ],
+            "title": "CrapScore",
+            "type": "object"
+          },
+          "kind": "crap.watch",
+          "summary": "CRAP is at least watch (default 5) but below high."
+        }
+      ],
+      "id": "static.crap",
+      "metrics": [
+        {
+          "name": "max",
+          "per": "scope",
+          "summary": "The largest CRAP score in scope."
+        },
+        {
+          "name": "mean",
+          "per": "scope",
+          "summary": "The mean CRAP score over the symbols in scope."
+        },
+        {
+          "name": "crap",
+          "per": "symbol",
+          "summary": "CRAP per function."
+        }
+      ],
+      "needs": [
+        "symbols",
+        "decisions",
+        "norm-tree"
+      ],
+      "stability": "experimental",
+      "summary": "CRAP per function: cyclomatic complexity weighted by missing test coverage. Limitation: CRAP exists only where coverage was measured; without a coverage map (no coverage producer exists until P3.2) the check passes with no score, no metrics, and no findings, and a function with no instrumented line is not scored. `static.complexity` reports cyclomatic complexity alone.",
+      "tier": 0,
+      "version": 2,
+      "wants": [
+        "coverage-map",
+        "test-conventions"
+      ]
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

@@ -1,0 +1,461 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 21,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle src/deps_cycle/alpha.ts → src/deps_cycle/beta.ts → src/deps_cycle/alpha.ts: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "src/deps_cycle/alpha.ts",
+          "src/deps_cycle/beta.ts"
+        ],
+        "modules": [
+          "src/deps_cycle/alpha.ts",
+          "src/deps_cycle/beta.ts"
+        ],
+        "size": 2
+      },
+      "id": "fnd_c89a16",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_cycle/alpha.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c89a16 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: src/deps_cycle/alpha.ts → src/deps_cycle/beta.ts → src/deps_cycle/alpha.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `src/deps_layers/infra/store.ts` from `src/deps_layers/domain/order.ts`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "src/deps_layers/domain/order.ts",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "../infra/store",
+        "to": "src/deps_layers/infra/store.ts",
+        "to_layer": "infra"
+      },
+      "id": "fnd_b397cd",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_layers/domain/order.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b397cd --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/deps_layers/domain/order.ts` (layer domain) imports `src/deps_layers/infra/store.ts` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `src/deps_layers/port.ts`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 0,
+        "distance": 1.0,
+        "distance_max": 0.7,
+        "efferent": 1,
+        "external": 0,
+        "instability": 1.0,
+        "module": "src/deps_layers/port.ts",
+        "unresolved": 0
+      },
+      "id": "fnd_3f3df3",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_layers/port.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3f3df3 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/deps_layers/port.ts` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "typescript",
+          "rank": 1,
+          "target": {
+            "display": "src/deps_layers/infra/store.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/infra/store.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 2,
+          "target": {
+            "display": "src/deps_layers/port.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/port.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 3,
+          "target": {
+            "display": "src/shapes/geometry.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/shapes/geometry.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 4,
+          "target": {
+            "display": "src/deps_layers/domain/order.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/domain/order.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "typescript",
+          "rank": 5,
+          "target": {
+            "display": "src/decide.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/decide.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 6,
+          "target": {
+            "display": "src/index.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/index.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 7,
+          "target": {
+            "display": "src/plugin.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/plugin.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.0
+        }
+      ],
+      "measured": 7,
+      "metric": "distance",
+      "per": "module",
+      "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "typescript",
+          "rank": 1,
+          "target": {
+            "display": "src/ledger.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 5.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 2,
+          "target": {
+            "display": "src/math.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/math.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 5.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 3,
+          "target": {
+            "display": "src/shapes/geometry.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/shapes/geometry.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 4,
+          "target": {
+            "display": "src/shapes/index.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/shapes/index.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 5,
+          "target": {
+            "display": "src/deps_cycle/alpha.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/alpha.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 6,
+          "target": {
+            "display": "src/deps_cycle/beta.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/beta.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 7,
+          "target": {
+            "display": "src/deps_layers/domain/order.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/domain/order.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 8,
+          "target": {
+            "display": "bin/cli.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "bin/cli.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 9,
+          "target": {
+            "display": "packages/shapes/src/index.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "packages/shapes/src/index.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 10,
+          "target": {
+            "display": "src/__tests__/pricing.test.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/__tests__/pricing.test.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        }
+      ],
+      "measured": 21,
+      "metric": "coupling",
+      "per": "module",
+      "summary": "Afferent plus efferent coupling per module."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "typescript",
+          "rank": 1,
+          "target": {
+            "display": "src/deps_cycle/alpha.ts → src/deps_cycle/beta.ts → src/deps_cycle/alpha.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/alpha.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 1,
+      "metric": "cycle_size",
+      "per": "group",
+      "summary": "Modules in each import cycle."
+    }
+  ]
+}

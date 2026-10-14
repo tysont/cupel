@@ -1,0 +1,445 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 21,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle src/deps_cycle/alpha.rs → src/deps_cycle/beta.rs → src/deps_cycle/alpha.rs: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "src/deps_cycle/alpha.rs",
+          "src/deps_cycle/beta.rs"
+        ],
+        "modules": [
+          "src/deps_cycle/alpha.rs",
+          "src/deps_cycle/beta.rs"
+        ],
+        "size": 2
+      },
+      "id": "fnd_eb64e4",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_cycle/alpha.rs",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_eb64e4 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: src/deps_cycle/alpha.rs → src/deps_cycle/beta.rs → src/deps_cycle/alpha.rs"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `src/deps_layers/infra/mod.rs` from `src/deps_layers/domain/mod.rs`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "src/deps_layers/domain/mod.rs",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "super::infra::Store",
+        "to": "src/deps_layers/infra/mod.rs",
+        "to_layer": "infra"
+      },
+      "id": "fnd_487763",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/deps_layers/domain/mod.rs",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_487763 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/deps_layers/domain/mod.rs` (layer domain) imports `src/deps_layers/infra/mod.rs` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `src/deps_layers/port.rs`: its abstractions have 1 importers but it imports 3 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 1,
+        "distance": 0.75,
+        "distance_max": 0.7,
+        "efferent": 3,
+        "external": 0,
+        "instability": 0.75,
+        "module": "src/deps_layers/port.rs",
+        "unresolved": 0
+      },
+      "id": "fnd_0a82ff",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_layers/port.rs",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0a82ff --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/deps_layers/port.rs` is abstract but unstable: distance 0.75 from the main sequence (max 0.70)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "rust",
+          "rank": 1,
+          "target": {
+            "display": "src/deps_layers/domain/money.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/domain/money.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "rust",
+          "rank": 2,
+          "target": {
+            "display": "src/deps_layers/infra/mod.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/infra/mod.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "rust",
+          "rank": 3,
+          "target": {
+            "display": "src/deps_layers/port.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/port.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.75
+        },
+        {
+          "lang": "rust",
+          "rank": 4,
+          "target": {
+            "display": "src/deps_layers/domain/mod.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/domain/mod.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "rust",
+          "rank": 5,
+          "target": {
+            "display": "src/account.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/account.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "rust",
+          "rank": 6,
+          "target": {
+            "display": "src/pricing.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/pricing.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.0
+        }
+      ],
+      "measured": 6,
+      "metric": "distance",
+      "per": "module",
+      "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "rust",
+          "rank": 1,
+          "target": {
+            "display": "src/lib.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/lib.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 11.0
+        },
+        {
+          "lang": "rust",
+          "rank": 2,
+          "target": {
+            "display": "src/deps_layers/domain/mod.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/domain/mod.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "rust",
+          "rank": 3,
+          "target": {
+            "display": "src/deps_layers/mod.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/mod.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "rust",
+          "rank": 4,
+          "target": {
+            "display": "src/deps_layers/port.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/port.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "rust",
+          "rank": 5,
+          "target": {
+            "display": "src/deps_cycle/alpha.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/alpha.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "rust",
+          "rank": 6,
+          "target": {
+            "display": "src/deps_cycle/beta.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/beta.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "rust",
+          "rank": 7,
+          "target": {
+            "display": "src/deps_cycle/mod.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/mod.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "rust",
+          "rank": 8,
+          "target": {
+            "display": "src/deps_layers/infra/mod.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/infra/mod.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "rust",
+          "rank": 9,
+          "target": {
+            "display": "src/deps_tree/mod.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_tree/mod.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "rust",
+          "rank": 10,
+          "target": {
+            "display": "src/pricing.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/pricing.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        }
+      ],
+      "measured": 21,
+      "metric": "coupling",
+      "per": "module",
+      "summary": "Afferent plus efferent coupling per module."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "rust",
+          "rank": 1,
+          "target": {
+            "display": "src/deps_cycle/alpha.rs → src/deps_cycle/beta.rs → src/deps_cycle/alpha.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/alpha.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 1,
+      "metric": "cycle_size",
+      "per": "group",
+      "summary": "Modules in each import cycle."
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 ---
 source: crates/cupel-cli/tests/describe.rs
-expression: "support::redacted_text(&outcome.stdout)"
+expression: "support::redacted_text(&text)"
 ---
 cupel describe: pass (exit 0)
 
@@ -19,13 +19,6 @@ facts
   project-info      lang.typescript (quick)
 
 checks
-  static.clones      supported
-  static.complexity  supported
-  static.crap        supported
-  static.dead-code   supported
-  static.deps        supported
-  tests.quality      supported
-  tests.weakening    supported
 
 toolchain
   launchers

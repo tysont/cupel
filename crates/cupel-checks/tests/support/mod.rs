@@ -1,16 +1,22 @@
-// ABOUTME: Helpers shared by the cupel-checks integration tests: a sink that keeps findings and measurements,
-// ABOUTME: per-language results to combine `scope` metrics over, and a manifest's shape. Each test file includes it with `mod support;`.
+// ABOUTME: Helpers shared by the cupel-checks integration tests: registered checks, running one over facts,
+// ABOUTME: the facts and values tests build, results to combine, and a manifest's shape. Included with `mod support;`.
 #![allow(
     dead_code,
     reason = "each test crate uses a different subset of the helpers"
 )]
 
 use std::collections::BTreeMap;
+use std::sync::OnceLock;
 
+use cupel_core::config::ConfigError;
+use cupel_core::syntax::{
+    Decision, Decisions, ImportTarget, NormNode, NormTree, NormalizedSymbol, SymbolDecisions,
+    SymbolDef, Symbols,
+};
 use cupel_core::{
-    ActionKind, Cancellation, Check, CheckCtx, CheckRegistry, CheckResult, CheckStatus, CostClass,
-    Event, EventSink, FactKind, Finding, Manifest, Measurement, MetricPer, RunId, Scope, Score,
-    Tier, Writer,
+    ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
+    CostClass, Error, Event, EventSink, FactKind, Facts, Finding, Manifest, Measurement, MetricPer,
+    RunId, Scope, Score, SymbolHash, Tier, Writer,
 };
 use serde_json::Value;
 
@@ -120,6 +126,115 @@ pub fn registry() -> CheckRegistry {
     let mut registry = CheckRegistry::default();
     cupel_checks::register(&mut registry);
     registry
+}
+
+/// The registered check `id`.
+pub fn check(id: &str) -> &'static dyn Check {
+    static REGISTRY: OnceLock<CheckRegistry> = OnceLock::new();
+    REGISTRY
+        .get_or_init(registry)
+        .get(&CheckId::from(id))
+        .unwrap_or_else(|| panic!("{id} is registered"))
+}
+
+/// Plans and runs `check` over `facts` in `scope` with `config` (a table); its result and every
+/// finding and measurement it reported.
+pub fn recorded(
+    check: &dyn Check,
+    facts: &Facts,
+    scope: Scope,
+    config: Value,
+) -> cupel_core::Result<(CheckResult, Recorded)> {
+    let (ctx, _dir) = ctx(scope, config);
+    let plan = check.plan(&ctx, &ctx.scope)?;
+    let mut recorded = Recorded::default();
+    let result = check.run(&ctx, facts, &plan, &mut recorded)?;
+    Ok((result, recorded))
+}
+
+/// The setting `check` names, and the settings it lists as valid, when planning with `config`
+/// fails as a configuration error.
+pub fn setting_error(check: &dyn Check, config: Value) -> (String, Vec<String>) {
+    let (ctx, _dir) = ctx(Scope::default(), config);
+    let error = check.plan(&ctx, &Scope::default()).unwrap_err();
+    let Error::Config(ConfigError::CheckSetting { key, valid, .. }) = error else {
+        panic!("expected a check-setting error, got {error:?}")
+    };
+    (key, valid)
+}
+
+/// A score of `value` in `unit` over `n` targets.
+pub fn score(value: f64, unit: &str, n: u64) -> Score {
+    Score {
+        value,
+        unit: unit.to_owned(),
+        n,
+    }
+}
+
+/// A hash unique to a symbol's first line.
+pub fn hash_of_line(line: u32) -> SymbolHash {
+    format!("sh_{line:016x}").parse().unwrap()
+}
+
+/// `Symbols`, `Decisions`, and a one-node `NormTree` (hashed by line) for `symbols`, each with
+/// its decisions, declared as `check` declares them.
+pub fn decided_facts(check: &dyn Check, symbols: &[(SymbolDef, Vec<Decision>)]) -> Facts {
+    let mut facts = Facts::for_manifest(check.manifest());
+    facts
+        .insert(Symbols {
+            symbols: symbols.iter().map(|(s, _)| s.clone()).collect(),
+        })
+        .unwrap();
+    facts
+        .insert(Decisions {
+            symbols: symbols
+                .iter()
+                .map(|(s, d)| SymbolDecisions {
+                    symbol: s.key(),
+                    decisions: d.clone(),
+                })
+                .collect(),
+        })
+        .unwrap();
+    facts
+        .insert(NormTree {
+            symbols: symbols
+                .iter()
+                .map(|(s, _)| NormalizedSymbol {
+                    symbol: s.key(),
+                    hash: hash_of_line(s.span.line),
+                    root: NormNode {
+                        label: "fn".to_owned(),
+                        children: Vec::new(),
+                    },
+                })
+                .collect(),
+        })
+        .unwrap();
+    facts
+}
+
+/// The scope of `symbols`, all in one file.
+pub fn decided_scope(symbols: &[(SymbolDef, Vec<Decision>)]) -> Scope {
+    Scope {
+        files: vec!["f.x".to_owned()],
+        symbols: Some(symbols.iter().map(|(s, _)| s.key()).collect()),
+    }
+}
+
+/// An import of the file at `path`.
+pub fn imported_file(path: &str) -> ImportTarget {
+    ImportTarget::File {
+        path: path.to_owned(),
+    }
+}
+
+/// An import of the external `package`.
+pub fn imported_package(package: &str) -> ImportTarget {
+    ImportTarget::External {
+        package: package.to_owned(),
+    }
 }
 
 /// A check context over `scope` with `config` (a table), writing under a temporary directory

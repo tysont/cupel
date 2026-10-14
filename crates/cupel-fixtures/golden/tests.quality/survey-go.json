@@ -1,0 +1,655 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 11,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 1.0869565217391304,
+        "no_assertion": 2.0,
+        "weak_ratio": 0.4
+      },
+      "oracle": null,
+      "score": {
+        "n": 23,
+        "unit": "assertion_density",
+        "value": 1.0869565217391304
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestStatementsAreNotEmpty` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_3924cf",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "file": "ledger_quality_test.go",
+        "line": 18
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_f9bb326a4f0a9a27",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3924cf --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestStatementsAreNotEmpty",
+        "hash": "sh_f9bb326a4f0a9a27",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestStatementsAreNotEmpty` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `TestClassifyingRuns` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_ec0009",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "file": "ledger_quality_test.go",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_d93be59fc6b954ee",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ec0009 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestClassifyingRuns",
+        "hash": "sh_d93be59fc6b954ee",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestClassifyingRuns` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `TestMailGoesThroughEveryNotifier`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 75,
+        "mock_density_max": 50,
+        "mocks": 3,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "MockNotifier",
+          "MockNotifier",
+          "MockNotifier"
+        ]
+      },
+      "id": "fnd_f0da12",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "ledger_quality_test.go",
+        "line": 26
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_65555fee174f3fa3",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_f0da12 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestMailGoesThroughEveryNotifier",
+        "hash": "sh_65555fee174f3fa3",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestMailGoesThroughEveryNotifier` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `TestComputedEntriesCountTowardTheBalance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 0,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 1,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "id": "fnd_eff639",
+      "kind": "test.logic",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "file": "ledger_quality_test.go",
+        "line": 40
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_b2267047de58b174",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_eff639 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestComputedEntriesCountTowardTheBalance",
+        "hash": "sh_b2267047de58b174",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestComputedEntriesCountTowardTheBalance` contains logic: 1 loop(s) or branch(es) (max 0)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `TestDepositsKeepTheOwner`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          46,
+          53
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 3,
+        "statements": 3,
+        "tests": [
+          "ledger.TestDepositsKeepTheOwner",
+          "ledger.TestDepositsAccumulate"
+        ]
+      },
+      "id": "fnd_31d301",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 51,
+        "file": "ledger_quality_test.go",
+        "line": 46
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_009a1b16914c5764",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_31d301 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestDepositsKeepTheOwner",
+        "hash": "sh_009a1b16914c5764",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestDepositsKeepTheOwner` and 1 other test(s) repeat the same 3 leading statements"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestMembersGetADiscount` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_c9f8d6",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "file": "ledger_test.go",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_53f862293ba6de55",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c9f8d6 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestMembersGetADiscount",
+        "hash": "sh_53f862293ba6de55",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestMembersGetADiscount` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestNewAccountsAreRegistered` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "not-null"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_c72554",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 33,
+        "file": "ledger_test.go",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_b5f1dc3fc6ada671",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c72554 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestNewAccountsAreRegistered",
+        "hash": "sh_b5f1dc3fc6ada671",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestNewAccountsAreRegistered` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestParsingGarbageFails` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_9335ff",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 39,
+        "file": "ledger_test.go",
+        "line": 35
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_91f0f96d75ab198b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_9335ff --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestParsingGarbageFails",
+        "hash": "sh_91f0f96d75ab198b",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestParsingGarbageFails` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestNewAccountsHaveDistinctIDs` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_e4fb17",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 46,
+        "file": "ledger_test.go",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_02914d7263fa737b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e4fb17 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestNewAccountsHaveDistinctIDs",
+        "hash": "sh_02914d7263fa737b",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestNewAccountsHaveDistinctIDs` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestStatementIsMailed` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_e7d0af",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 73,
+        "file": "ledger_test.go",
+        "line": 66
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_91ea22f895f9f0a9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e7d0af --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestStatementIsMailed",
+        "hash": "sh_91ea22f895f9f0a9",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestStatementIsMailed` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `TestOpeningAnAccountDoesNotPanic` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_ce8fb9",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 87,
+        "file": "ledger_test.go",
+        "line": 85
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_8d0bf23821b2d110",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ce8fb9 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestOpeningAnAccountDoesNotPanic",
+        "hash": "sh_8d0bf23821b2d110",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestOpeningAnAccountDoesNotPanic` asserts nothing"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "tests.quality",
+      "entries": [
+        {
+          "lang": "go",
+          "rank": 1,
+          "target": {
+            "display": "ledger.TestMailGoesThroughEveryNotifier",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 32,
+              "file": "ledger_quality_test.go",
+              "line": 26
+            },
+            "symbol": "sh_65555fee174f3fa3"
+          },
+          "value": 75.0
+        },
+        {
+          "lang": "go",
+          "rank": 2,
+          "target": {
+            "display": "ledger.TestMailNotifiesTheOwner",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 47,
+              "file": "pricing_test.go",
+              "line": 42
+            },
+            "symbol": "sh_92d0287ea4174ed9"
+          },
+          "value": 33.0
+        },
+        {
+          "lang": "go",
+          "rank": 3,
+          "target": {
+            "display": "ledger.TestBlankAmountsAreRejected",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 16,
+              "file": "ledger_quality_test.go",
+              "line": 13
+            },
+            "symbol": "sh_1484de0443216190"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "go",
+          "rank": 4,
+          "target": {
+            "display": "ledger.TestClassify",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 64,
+              "file": "ledger_test.go",
+              "line": 48
+            },
+            "symbol": "sh_5f625545c5fc2a8d"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "go",
+          "rank": 5,
+          "target": {
+            "display": "ledger.TestClassifyingRuns",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 24,
+              "file": "ledger_quality_test.go",
+              "line": 22
+            },
+            "symbol": "sh_d93be59fc6b954ee"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "go",
+          "rank": 6,
+          "target": {
+            "display": "ledger.TestComputedEntriesCountTowardTheBalance",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 44,
+              "file": "ledger_quality_test.go",
+              "line": 40
+            },
+            "symbol": "sh_b2267047de58b174"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "go",
+          "rank": 7,
+          "target": {
+            "display": "ledger.TestDepositAddsToTheBalance",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 20,
+              "file": "ledger_test.go",
+              "line": 13
+            },
+            "symbol": "sh_bd5d9bc2c5699215"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "go",
+          "rank": 8,
+          "target": {
+            "display": "ledger.TestDepositsAccumulate",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 59,
+              "file": "ledger_quality_test.go",
+              "line": 53
+            },
+            "symbol": "sh_64f25c365ab1b44d"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "go",
+          "rank": 9,
+          "target": {
+            "display": "ledger.TestDepositsKeepTheOwner",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 51,
+              "file": "ledger_quality_test.go",
+              "line": 46
+            },
+            "symbol": "sh_009a1b16914c5764"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "go",
+          "rank": 10,
+          "target": {
+            "display": "ledger.TestDiscountSnapshot",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 40,
+              "file": "pricing_test.go",
+              "line": 38
+            },
+            "symbol": "sh_ed30b775bf36058f"
+          },
+          "value": 0.0
+        }
+      ],
+      "measured": 23,
+      "metric": "mock_density",
+      "per": "symbol",
+      "summary": "Test doubles per test as a percentage of its doubles plus assertions."
+    }
+  ]
+}

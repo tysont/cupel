@@ -138,6 +138,8 @@ pub struct StaticClones {
     manifest: Manifest,
 }
 
+inventory::submit!(crate::NativeCheck(|| Box::new(StaticClones::new())));
+
 impl StaticClones {
     pub fn new() -> Self {
         Self {

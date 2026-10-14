@@ -1,0 +1,288 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "restore_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `assertion.removed`.",
+            "properties": {
+              "base": {
+                "description": "Assertions the test made at the base commit.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "head": {
+                "description": "Assertions it makes at head.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "test": {
+                "description": "The test's name.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "test",
+              "base",
+              "head"
+            ],
+            "title": "AssertionRemoved",
+            "type": "object"
+          },
+          "kind": "assertion.removed",
+          "summary": "A test makes fewer assertions than at the base commit."
+        },
+        {
+          "action": "restore_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `test.skipped`.",
+            "properties": {
+              "reason": {
+                "description": "The reason the skip marker gives, if any.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test"
+            ],
+            "title": "TestSkipped",
+            "type": "object"
+          },
+          "kind": "test.skipped",
+          "summary": "A test that ran at the base commit is skipped or disabled."
+        },
+        {
+          "action": "restore_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `matcher.loosened`.",
+            "properties": {
+              "strong_base": {
+                "description": "Assertions that pin one value, at the base commit.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "strong_head": {
+                "description": "Assertions that pin one value, at head.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "test": {
+                "type": "string"
+              },
+              "weak_base": {
+                "description": "Assertions that allow many values (truthiness, presence, inequality), at base.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "weak_head": {
+                "description": "Weak assertions at head.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "test",
+              "strong_base",
+              "strong_head",
+              "weak_base",
+              "weak_head"
+            ],
+            "title": "MatcherLoosened",
+            "type": "object"
+          },
+          "kind": "matcher.loosened",
+          "summary": "A test replaced assertions that pin one value with weaker ones (truthiness, presence, inequality)."
+        },
+        {
+          "action": "restore_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `snapshot.rewritten`.",
+            "properties": {
+              "snapshot": {
+                "description": "The snapshot file the range modified.",
+                "type": "string"
+              },
+              "tests": {
+                "description": "The changed tests the snapshot belongs to; empty when no changed test file claims it.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "snapshot",
+              "tests"
+            ],
+            "title": "SnapshotRewritten",
+            "type": "object"
+          },
+          "kind": "snapshot.rewritten",
+          "summary": "A stored snapshot that existed at the base commit was changed."
+        },
+        {
+          "action": "restore_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `test.deleted`.",
+            "properties": {
+              "file": {
+                "description": "Where the test was at the base commit.",
+                "type": "string"
+              },
+              "line": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "test": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "test",
+              "file",
+              "line"
+            ],
+            "title": "TestDeleted",
+            "type": "object"
+          },
+          "kind": "test.deleted",
+          "summary": "A test that existed at the base commit is gone."
+        }
+      ],
+      "id": "tests.weakening",
+      "metrics": [
+        {
+          "name": "weakened",
+          "per": "scope",
+          "summary": "Tests and snapshots the range weakened; the gate key `tests.weakening = \"none\"` requires zero."
+        }
+      ],
+      "needs": [
+        "test-frames"
+      ],
+      "stability": "experimental",
+      "summary": "Diff of the test suite against the range's base: removed and loosened assertions, skipped and deleted tests, rewritten snapshots. Runs only with --changed or --base.",
+      "tier": 2,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

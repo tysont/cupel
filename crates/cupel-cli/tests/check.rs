@@ -3,10 +3,9 @@
 mod support;
 
 use std::fs;
-use std::process::Command;
 
 use serde_json::{Value, json};
-use support::Repo;
+use support::{Repo, finding_fields, usage_argument};
 
 /// A Rust function with seven parameters: one `params.many` finding at the defaults.
 const WIDE: &str = "pub fn wide(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32, g: i32) -> i32 {\n    a + b + c + d + e + f + g\n}\n";
@@ -20,22 +19,6 @@ fn repo_with_code() -> Repo {
     repo
 }
 
-fn kinds(envelope: &Value) -> Vec<String> {
-    envelope["findings"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|finding| finding["kind"].as_str().unwrap().to_owned())
-        .collect()
-}
-
-fn usage_argument(outcome: &support::Outcome) -> Value {
-    assert_eq!(outcome.code, 2, "{}", outcome.stdout);
-    let finding = outcome.finding();
-    assert_eq!(finding["kind"], json!("cli.usage"));
-    finding["evidence"]["argument"].clone()
-}
-
 #[test]
 fn a_tree_run_reports_findings_checks_scope_and_next_actions() {
     let repo = repo_with_code();
@@ -43,7 +26,7 @@ fn a_tree_run_reports_findings_checks_scope_and_next_actions() {
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["status"], json!("pass"));
-    assert_eq!(kinds(&envelope), ["params.many"]);
+    assert_eq!(finding_fields(&envelope, "kind"), ["params.many"]);
     let scope = &envelope["run"]["scope"];
     assert_eq!(scope["mode"], json!("tree"));
     assert_eq!(scope["files"], json!(3));
@@ -91,7 +74,7 @@ fn symbols_select_by_name_or_hash_and_repro_commands_reproduce_findings() {
         ])
         .envelope();
     assert_eq!(by_name["run"]["scope"]["symbols"], json!(1));
-    assert_eq!(kinds(&by_name), ["params.many"]);
+    assert_eq!(finding_fields(&by_name, "kind"), ["params.many"]);
     let command = by_name["findings"][0]["repro"].as_str().unwrap().to_owned();
     let args: Vec<&str> = command.split_whitespace().skip(1).collect();
     let again = repo.run(&args).envelope();
@@ -232,32 +215,16 @@ fn a_dry_run_plans_targets_and_the_run_record_and_writes_nothing() {
 }
 
 /// Runs `git <args>` in `repo`; false when git is not installed.
-fn git(repo: &Repo, args: &[&str]) -> bool {
-    Command::new("git")
-        .args([
-            "-c",
-            "user.name=t",
-            "-c",
-            "user.email=t@example.com",
-            "-c",
-            "commit.gpgsign=false",
-        ])
-        .args(args)
-        .current_dir(repo.root())
-        .output()
-        .is_ok_and(|output| output.status.success())
-}
-
 #[test]
 fn changed_on_a_clean_tree_passes_with_no_symbols_and_then_sees_edits() {
     let repo = repo_with_code();
     repo.write(".gitignore", ".cupel/\n");
-    if !git(&repo, &["init", "--quiet", "--initial-branch", "main"]) {
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
         eprintln!("SKIPPED: git not installed");
         return;
     }
-    assert!(git(&repo, &["add", "--all"]));
-    assert!(git(&repo, &["commit", "--quiet", "-m", "first"]));
+    assert!(repo.git(&["add", "--all"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "first"]));
     let clean = repo.run(&["check", "--only", "static.complexity", "--changed"]);
     assert_eq!(clean.code, 0, "{}", clean.stdout);
     let envelope = clean.envelope();
@@ -272,7 +239,7 @@ fn changed_on_a_clean_tree_passes_with_no_symbols_and_then_sees_edits() {
         .run(&["check", "--only", "static.complexity", "--changed"])
         .envelope();
     assert_eq!(edited["run"]["scope"]["files"], json!(1));
-    assert_eq!(kinds(&edited), ["params.many"]);
+    assert_eq!(finding_fields(&edited, "kind"), ["params.many"]);
     assert_eq!(edited["run"]["git"]["dirty"], json!(true));
 }
 
@@ -298,12 +265,12 @@ fn scope_exclude_keeps_nested_projects_out_of_files_roots_languages_and_ranges()
     assert_eq!(tree["run"]["scope"]["files"], json!(2), "{tree:#}");
     assert_eq!(tree["run"]["scope"]["roots"], json!(["."]));
     assert_eq!(tree["run"]["scope"]["languages"], json!(["rust"]));
-    if !git(&repo, &["init", "--quiet", "--initial-branch", "main"]) {
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
         eprintln!("SKIPPED: git not installed");
         return;
     }
-    assert!(git(&repo, &["add", "--all"]));
-    assert!(git(&repo, &["commit", "--quiet", "-m", "first"]));
+    assert!(repo.git(&["add", "--all"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "first"]));
     repo.write("fixtures/repos/py/app.py", "def g():\n    return 2\n");
     let changed = repo
         .run(&["check", "--only", "static.complexity", "--changed"])

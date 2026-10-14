@@ -1,8 +1,10 @@
 // ABOUTME: Tests for `rankings` (ADR-062): dimensions come from manifests' per-target metrics, entries
 // ABOUTME: are the highest values with deterministic ties, capped at `top`, and scope metrics never rank.
+mod support;
+
 use cupel_core::{
-    CheckId, CostClass, LangId, Location, Manifest, Measured, Measurement, MetricPer, MetricSpec,
-    Stability, Target, Tier, rankings,
+    CheckId, LangId, Location, Manifest, Measured, Measurement, MetricPer, MetricSpec, Target,
+    rankings,
 };
 
 fn metric(name: &str, per: MetricPer) -> MetricSpec {
@@ -15,16 +17,8 @@ fn metric(name: &str, per: MetricPer) -> MetricSpec {
 
 fn manifest(id: &str, metrics: Vec<MetricSpec>) -> Manifest {
     Manifest {
-        id: CheckId::from(id),
-        version: 1,
-        tier: Tier::try_from(0).unwrap(),
-        cost: CostClass::Quick,
-        needs: vec![],
-        wants: vec![],
-        findings: vec![],
         metrics,
-        stability: Stability::Experimental,
-        summary: String::new(),
+        ..support::manifest(id, &[], &[])
     }
 }
 

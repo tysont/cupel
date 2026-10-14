@@ -1,10 +1,11 @@
 // ABOUTME: `QueryRoots`: symbols live by convention: entry points and hooks named in `[roots]` or
 // ABOUTME: captured in api.scm, exported (public) symbols, and test cases from tests.scm.
+use cupel_core::FactKind;
 use cupel_core::syntax::{LiveRoot, RootReason, Roots, SymbolKind, Visibility};
 use tree_sitter::Node;
 
 use crate::contract::capture;
-use crate::producer::Source;
+use crate::producer::{QueryProducer, Source};
 use crate::query::matches;
 use crate::spec::QueryFile;
 use crate::symbols::{Definition, definitions};
@@ -34,6 +35,14 @@ fn captured<'t>(source: &Source<'t>, file: QueryFile, names: &[&str]) -> Vec<(St
         .map(|(name, node)| (name.to_owned(), node))
         .collect()
 }
+
+inventory::submit!(crate::generic::GenericProducer {
+    kind: FactKind::Roots,
+    drives: |spec| spec.has(QueryFile::Symbols) && spec.tables().roots.is_some(),
+    attach: |language, cache, reg| {
+        reg.register::<Roots, _>(QueryProducer::new(language, cache, extract));
+    },
+});
 
 pub fn extract(source: &Source<'_>) -> Roots {
     let parsed = source.parsed;

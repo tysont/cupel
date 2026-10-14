@@ -18,18 +18,26 @@
 use std::collections::HashSet;
 use std::fmt::Write as _;
 
-use cupel_core::SiteHash;
 use cupel_core::syntax::{MutationOperator, MutationSites, OperatorSet, Site, SymbolSites};
+use cupel_core::{FactKind, SiteHash};
 use serde_json::Value;
 use tree_sitter::Node;
 
 use crate::contract::capture;
 use crate::normalize::hex16;
 use crate::parse::Parsed;
-use crate::producer::Source;
+use crate::producer::{QueryProducer, Source};
 use crate::query::{matches, span};
 use crate::spec::QueryFile;
 use crate::symbols::{Definition, definitions};
+
+inventory::submit!(crate::generic::GenericProducer {
+    kind: FactKind::MutationSites,
+    drives: |spec| spec.has(QueryFile::Symbols) && spec.has(QueryFile::Mutations),
+    attach: |language, cache, reg| {
+        reg.register::<MutationSites, _>(QueryProducer::new(language, cache, extract));
+    },
+});
 
 /// The `MutationSites` extractor.
 ///

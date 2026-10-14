@@ -52,6 +52,8 @@ tree-sitter-typescript = "0.23.2"
 ignore = "0.4.33"
 globset = "0.4.20"
 rayon = "1.12.0"
+# Checks and producers register themselves from their own modules (ADR-074).
+inventory = "0.3.25"
 # The fact store (ADR-045); `bundled` compiles SQLite in, so no system library is needed.
 rusqlite = { version = "0.40.2", features = ["bundled"] }
 

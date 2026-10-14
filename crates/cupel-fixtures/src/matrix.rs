@@ -3,6 +3,7 @@
 // ABOUTME: Fixtures run as whole trees, so a check that compares a range's two sides records its skip.
 use std::collections::BTreeSet;
 use std::fs;
+use std::path::Path;
 
 use cupel_core::syntax::{ProjectInfo, SymbolDef, Symbols};
 use cupel_core::{
@@ -32,9 +33,28 @@ impl Pair {
     pub fn golden(&self) -> String {
         format!("{}/{}", self.check, self.lang)
     }
+
+    /// The fixture repository the pair runs on: see [`fixture_repo`].
+    pub fn fixture(&self) -> String {
+        fixture_repo(&repo_path("."), &self.check, &self.lang)
+    }
 }
 
-/// The registries the binary uses: compiled-in languages, their producers, the native checks.
+/// The fixture repository (a name under `repos/`) that `check` runs on for `lang`: the check's
+/// own `<check>/<lang>` when it has one, else the language's shared `<lang>`. Code in a check's
+/// own repository reaches no other check's goldens, the fact goldens, or the language tests, so
+/// a check added in parallel with others keeps its fixtures there (ADR-074).
+pub fn fixture_repo(repos: &Path, check: &CheckId, lang: &LangId) -> String {
+    let own = format!("{check}/{lang}");
+    if repos.join(&own).is_dir() {
+        own
+    } else {
+        lang.to_string()
+    }
+}
+
+/// The registries the binary uses: compiled-in languages, their producers, the tool producers,
+/// and the native checks.
 pub struct Registries {
     pub languages: LanguageRegistry,
     pub producers: ProducerRegistry,
@@ -46,6 +66,7 @@ impl Registries {
         let languages = LanguageRegistry::builtin();
         let mut producers = ProducerRegistry::default();
         languages.register_producers(&mut producers);
+        cupel_adapt::register(&mut producers);
         let mut checks = CheckRegistry::default();
         cupel_checks::register(&mut checks);
         Self {
@@ -105,7 +126,7 @@ fn run_on_fixture(
     pair: &Pair,
 ) -> Result<(Envelope, std::path::PathBuf, tempfile::TempDir), String> {
     let dir = tempfile::tempdir().map_err(|error| error.to_string())?;
-    copy_repo(pair.lang.as_str(), dir.path());
+    copy_repo(&pair.fixture(), dir.path());
     let outcome = run_cupel(
         &["check", "--only", pair.check.as_str(), "--format", "json"],
         dir.path(),
@@ -200,14 +221,23 @@ fn verify_skipped(pair: &Pair) -> Result<(), String> {
     }
 }
 
-/// Goldens under a registered check's directory that no supported pair claims, and check
-/// directories no registered check owns.
+/// Goldens under a registered check's directory that nothing claims, and check directories no
+/// registered check owns. A check's directory holds everything golden about that check alone:
+/// `<lang>` per supported pair (the matrix), `describe` (`describe <check>`), and
+/// `survey-<lang>` per language (its slice of the survey envelope).
 fn stale_goldens(goldens: &Goldens, registries: &Registries, pairs: &[Pair]) -> Vec<String> {
-    let claimed: BTreeSet<String> = pairs
+    let mut claimed: BTreeSet<String> = pairs
         .iter()
         .filter(|pair| pair.support == Support::Supported)
         .map(Pair::golden)
         .collect();
+    for check in registries.checks.iter() {
+        let id = &check.manifest().id;
+        claimed.insert(format!("{id}/describe"));
+        for lang in registries.languages.ids() {
+            claimed.insert(format!("{id}/survey-{lang}"));
+        }
+    }
     let mut problems = Vec::new();
     let Ok(entries) = fs::read_dir(goldens.dir()) else {
         return problems;
@@ -235,7 +265,7 @@ fn stale_goldens(goldens: &Goldens, registries: &Registries, pairs: &[Pair]) -> 
             let claimed_name = format!("{name}/{stem}");
             if !claimed.contains(&claimed_name) {
                 problems.push(format!(
-                    "golden/{claimed_name}.json is stale: the pair is not supported"
+                    "golden/{claimed_name}.json is stale: no supported pair, check, or survey claims it"
                 ));
             }
         }
@@ -256,7 +286,7 @@ pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
         .get(&pair.lang)
         .ok_or_else(|| format!("no language `{}`", pair.lang))?;
     let lang = cupel_lang::lang(language.as_ref());
-    let root = repo_path(pair.lang.as_str());
+    let root = repo_path(&pair.fixture());
     let scratch = tempfile::tempdir().map_err(|error| error.to_string())?;
     let files = walk(&root, &registries.languages, &ProjectInfo::default());
     let produce_ctx = ProduceCtx {

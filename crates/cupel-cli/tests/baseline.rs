@@ -5,7 +5,9 @@ mod support;
 use std::fs;
 
 use serde_json::{Value, json};
-use support::{Outcome, Repo, complexity_check, complexity_finding, envelope, run_id};
+use support::{
+    Outcome, Repo, complexity_check, complexity_finding, envelope, finding_fields, run_id,
+};
 
 /// Asserts `outcome` is a usage error (exit 2, `cli.usage`) and returns its finding.
 fn assert_usage(outcome: &Outcome) -> Value {
@@ -13,15 +15,6 @@ fn assert_usage(outcome: &Outcome) -> Value {
     let finding = outcome.finding();
     assert_eq!(finding["kind"], json!("cli.usage"));
     finding
-}
-
-fn ids(envelope: &Value) -> Vec<String> {
-    envelope["findings"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|f| f["id"].as_str().unwrap().to_owned())
-        .collect()
 }
 
 /// A repository whose store holds `check` runs 1 (findings a, b; score 0.25) and 2 (findings b,
@@ -104,7 +97,10 @@ fn set_write_names_the_latest_result_run_and_show_prints_it() {
         envelope["run"]["baseline"],
         json!({"id": run_id(2), "name": "default"})
     );
-    assert_eq!(ids(&envelope), ["fnd_00000b", "fnd_00000c"]);
+    assert_eq!(
+        finding_fields(&envelope, "id"),
+        ["fnd_00000b", "fnd_00000c"]
+    );
     assert_eq!(envelope["checks"], json!([complexity_check(0.5)]));
 }
 
@@ -160,7 +156,10 @@ fn diff_lists_new_then_resolved_findings_with_counts_and_score_deltas() {
 
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
-    assert_eq!(ids(&envelope), ["fnd_00000c", "fnd_00000a"]);
+    assert_eq!(
+        finding_fields(&envelope, "id"),
+        ["fnd_00000c", "fnd_00000a"]
+    );
     let marks: Vec<bool> = envelope["findings"]
         .as_array()
         .unwrap()
@@ -187,7 +186,10 @@ fn diff_against_a_run_compares_with_that_run() {
     let envelope = repo
         .run(&["baseline", "diff", "--against", &against])
         .envelope();
-    assert_eq!(ids(&envelope), ["fnd_00000c", "fnd_00000a"]);
+    assert_eq!(
+        finding_fields(&envelope, "id"),
+        ["fnd_00000c", "fnd_00000a"]
+    );
     assert_eq!(
         envelope["run"]["baseline"],
         json!({"id": run_id(1), "name": against})
@@ -240,7 +242,7 @@ fn export_and_import_round_trip_a_baseline() {
     assert_eq!(import.code, 0, "{}", import.stdout);
     let show = other.run(&["baseline", "show"]).envelope();
     assert_eq!(show["run"]["baseline"]["id"], json!(run_id(2)));
-    assert_eq!(ids(&show), ["fnd_00000b", "fnd_00000c"]);
+    assert_eq!(finding_fields(&show, "id"), ["fnd_00000b", "fnd_00000c"]);
 }
 
 #[test]

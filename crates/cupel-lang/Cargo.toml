@@ -23,9 +23,11 @@ tree-sitter-javascript.workspace = true
 tree-sitter-typescript.workspace = true
 ignore.workspace = true
 globset.workspace = true
+inventory.workspace = true
 rayon.workspace = true
 
 [dev-dependencies]
+cupel-fixtures.workspace = true
 proptest.workspace = true
 tempfile.workspace = true
 

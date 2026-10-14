@@ -15,6 +15,22 @@
 //! supported (check, language), a `skipped` entry for every other pair, and every check run on
 //! exactly its declared facts. [`evidence`] validates finding evidence against manifest schemas
 //! (ADR-043).
+//!
+//! Everything golden about one check lives in its own directory (ADR-074), so checks added in
+//! parallel never edit the same file:
+//!
+//! ```text
+//! golden/<check-id>/<lang>.json          # the matrix: `check --only <check-id>` on the fixture
+//! golden/<check-id>/describe.json        # `describe <check-id>`
+//! golden/<check-id>/survey-<lang>.json   # the check's results, findings, and rankings in `survey`
+//! repos/<check-id>/<lang>/               # optional: the check's own fixture repository
+//! ```
+//!
+//! A check with its own fixture repository runs on it instead of the shared `repos/<lang>/`
+//! ([`matrix::fixture_repo`]), so its fixture code changes no other check's goldens, the fact
+//! goldens, or the language tests. Goldens that render every check at once (`survey/<lang>`,
+//! `describe/matrix`, `describe/language-<lang>`) keep only what no one check owns; the tests
+//! derive the rest from the registries.
 
 pub mod conformance;
 pub mod evidence;

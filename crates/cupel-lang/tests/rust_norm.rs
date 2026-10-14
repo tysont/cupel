@@ -4,28 +4,17 @@ mod support;
 
 use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{assert_distinct, produce, sexp, tree};
+use support::{assert_distinct, normalize_at, produce, sexp, tree};
 
 /// The normalized tree and hash of the only symbol in `source`, a Rust file at `path`.
-fn normalize_at(path: &str, source: &str) -> (String, String) {
-    let dir = tree(&[(path, source)]);
-    let norm: NormTree = produce("rust", dir.path());
-    let symbols: Symbols = produce("rust", dir.path());
-    assert_eq!(norm.symbols.len(), 1, "{source}");
-    assert_eq!(norm.symbols[0].symbol, symbols.symbols[0].key());
-    (
-        sexp(&norm.symbols[0].root),
-        norm.symbols[0].hash.to_string(),
-    )
-}
-
 fn hash(source: &str) -> String {
-    normalize_at("src/lib.rs", source).1
+    normalize_at("rust", "src/lib.rs", source).1
 }
 
 #[test]
 fn identifiers_and_literals_become_markers_and_operators_and_calls_stay() {
     let (shape, hash) = normalize_at(
+        "rust",
         "src/lib.rs",
         "pub fn f(a: i64) -> i64 {\n    // a comment\n    a.max(1) + 2\n}\n",
     );
@@ -46,6 +35,7 @@ fn identifiers_and_literals_become_markers_and_operators_and_calls_stay() {
 #[test]
 fn macro_names_and_path_calls_are_kept_as_call_names() {
     let (shape, _) = normalize_at(
+        "rust",
         "src/lib.rs",
         "fn f() -> Vec<String> {\n    println!(\"x\");\n    Vec::new()\n}\n",
     );
@@ -83,8 +73,8 @@ fn every_symbol_gets_a_tree_in_symbol_order_and_nested_symbols_stay_in_their_par
 fn moving_a_file_keeps_its_hashes() {
     let source = "pub fn f(a: i64) -> i64 { a * 2 }\n";
     assert_eq!(
-        normalize_at("src/lib.rs", source).1,
-        normalize_at("crates/other/src/deep/place.rs", source).1
+        normalize_at("rust", "src/lib.rs", source).1,
+        normalize_at("rust", "crates/other/src/deep/place.rs", source).1
     );
 }
 

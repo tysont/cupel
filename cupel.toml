@@ -24,14 +24,14 @@ bench = "cargo bench --bench {name} -- --save-baseline {id}"
 "static.dead-code" = "none"
 "tests.quality" = "none"
 
-# The tree still holds 99 clone groups (213 similar pairs), mostly per-language test scaffolding
+# The tree still holds 85 clone groups (168 similar pairs), mostly per-language test scaffolding
 # and same-shape data variants; the tree gate holds them from growing while the changed gate
 # admits no new ones. Lower these as the groups are removed.
 [gate.tree]
 "static.complexity" = "none"
 "static.complexity.cyclomatic_max" = "<= 10"
-"static.clones.pairs" = "<= 213"
-"static.clones.clusters" = "<= 30"
+"static.clones.pairs" = "<= 168"
+"static.clones.clusters" = "<= 19"
 "static.deps" = "none"
 "static.deps.cycles" = "== 0"
 "static.dead-code" = "none"

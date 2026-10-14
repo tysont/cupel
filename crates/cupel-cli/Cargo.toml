@@ -26,6 +26,7 @@ semver.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]
+cupel-fixtures.workspace = true
 assert_cmd.workspace = true
 predicates.workspace = true
 insta.workspace = true

@@ -1,5 +1,5 @@
-// ABOUTME: Helpers shared by the CLI integration tests: invoking the binary and reading envelopes.
-// ABOUTME: Each test file includes this module with `mod support;`.
+// ABOUTME: Helpers shared by the CLI integration tests: invoking the binary, reading envelopes, and the
+// ABOUTME: registries tests derive their expectations from. Each test file includes it with `mod support;`.
 #![allow(
     dead_code,
     reason = "each test crate uses a different subset of the helpers"
@@ -9,7 +9,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use assert_cmd::Command;
-use cupel_core::{CheckId, Envelope, FindingId, Writer};
+use cupel_core::{CheckId, CheckRegistry, Envelope, FindingId, Writer};
 use cupel_store::Store;
 use serde_json::{Value, json};
 use tempfile::TempDir;
@@ -86,6 +86,42 @@ where
     }
 }
 
+/// The `description` of `cupel describe <args>`, which must pass.
+pub fn described(args: &[&str]) -> Value {
+    let outcome = run(["describe"].into_iter().chain(args.iter().copied()));
+    assert_eq!(
+        outcome.code, 0,
+        "cupel describe {args:?}: {}",
+        outcome.stdout
+    );
+    outcome.envelope()["description"].clone()
+}
+
+/// Every native check, registered as the binary registers them. Tests derive the set of checks
+/// from here and assert the binary covers it, so a registered check `describe` leaves out fails.
+pub fn registered_checks() -> CheckRegistry {
+    let mut registry = CheckRegistry::default();
+    cupel_checks::register(&mut registry);
+    registry
+}
+
+/// The registered checks' IDs, in registration (ID) order.
+pub fn check_ids() -> Vec<String> {
+    registered_checks()
+        .iter()
+        .map(|check| check.manifest().id.to_string())
+        .collect()
+}
+
+/// The compiled-in languages' IDs, in the order `describe` lists them.
+pub fn language_ids() -> Vec<String> {
+    cupel_lang::LanguageRegistry::builtin()
+        .ids()
+        .iter()
+        .map(ToString::to_string)
+        .collect()
+}
+
 /// The envelope with run-specific values replaced, for snapshots.
 pub fn redacted(mut envelope: Value) -> Value {
     envelope["run"]["id"] = json!("[run id]");
@@ -115,6 +151,34 @@ pub fn redacted_text(text: &str) -> String {
         .collect::<Vec<_>>()
         .join("\n")
         + "\n"
+}
+
+/// `field` of every finding in `envelope`, in order.
+pub fn finding_fields(envelope: &Value, field: &str) -> Vec<String> {
+    envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|finding| finding[field].as_str().unwrap().to_owned())
+        .collect()
+}
+
+/// The finding `id` in `envelope`.
+pub fn finding<'a>(envelope: &'a Value, id: &str) -> &'a Value {
+    envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|finding| finding["id"] == json!(id))
+        .unwrap_or_else(|| panic!("no {id} in {envelope}"))
+}
+
+/// The argument a usage error (exit 2, one `cli.usage` finding) names.
+pub fn usage_argument(outcome: &Outcome) -> Value {
+    assert_eq!(outcome.code, 2, "{}", outcome.stdout);
+    let finding = outcome.finding();
+    assert_eq!(finding["kind"], json!("cli.usage"));
+    finding["evidence"]["argument"].clone()
 }
 
 /// The ID ADR-016 assigns a CLI finding about `subject`.
@@ -147,6 +211,18 @@ impl Repo {
         let path = self.path(relative);
         fs::create_dir_all(path.parent().unwrap()).unwrap();
         fs::write(path, text).unwrap();
+    }
+
+    /// Runs `git <args>` in this repository with a throwaway identity and no signing; whether it
+    /// succeeded (false also when git is not installed).
+    pub fn git(&self, args: &[&str]) -> bool {
+        std::process::Command::new("git")
+            .args(["-c", "user.name=t", "-c", "user.email=t@example.com"])
+            .args(["-c", "commit.gpgsign=false", "-c", "tag.gpgsign=false"])
+            .args(args)
+            .current_dir(self.root())
+            .output()
+            .is_ok_and(|output| output.status.success())
     }
 
     /// Runs cupel with `--cwd` set to this repository.

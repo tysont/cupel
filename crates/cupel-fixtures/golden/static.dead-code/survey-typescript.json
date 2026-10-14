@@ -1,0 +1,1067 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 26,
+      "id": "static.dead-code",
+      "metrics": {
+        "dead_exports": 25.0,
+        "dead_symbols": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 73,
+        "unit": "dead_symbols",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settleInvoices` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `settleInvoices` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settleInvoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_94d863",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "src/clones_settlement.ts",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_23cb9891c1a627f9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_94d863 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.settleInvoices",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.settleInvoices` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `reconcilePayments` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `reconcilePayments` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcilePayments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_94d863",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "src/clones_settlement.ts",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_23cb9891c1a627f9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_94d863 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.reconcilePayments",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.reconcilePayments` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `orderLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `orderLines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `orderLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_600b6d",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "src/clones_settlement.ts",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_7891e7c5f5b05589",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_600b6d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.orderLines",
+        "hash": "sh_7891e7c5f5b05589",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.orderLines` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `refundLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `refundLines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refundLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_932338",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 65,
+        "file": "src/clones_settlement.ts",
+        "line": 50
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_09c333581982e793",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_932338 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.refundLines",
+        "hash": "sh_09c333581982e793",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.refundLines` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `label` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `label` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `label` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_45aa29",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "src/complexity.ts",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_89983ab5c464c8d1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_45aa29 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.label",
+        "hash": "sh_89983ab5c464c8d1",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.label` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settle` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `settle` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_61fd12",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "file": "src/complexity.ts",
+        "line": 31
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_7b6a36c322da7c7c",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_61fd12 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.settle",
+        "hash": "sh_7b6a36c322da7c7c",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.settle` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `openAccount` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `openAccount` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `openAccount` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_9da0ce",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 56,
+        "file": "src/complexity.ts",
+        "line": 47
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_254ee3901ff330b3",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_9da0ce --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.openAccount",
+        "hash": "sh_254ee3901ff330b3",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.openAccount` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `statementTemplate` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `statementTemplate` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `statementTemplate` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_081666",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 122,
+        "file": "src/complexity.ts",
+        "line": 58
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_4726b12fa399cfed",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_081666 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.statementTemplate",
+        "hash": "sh_4726b12fa399cfed",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.statementTemplate` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `net` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `net` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_fe644a",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 126,
+        "file": "src/complexity.ts",
+        "line": 124
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_3f91460e4ad240b0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_fe644a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.net",
+        "hash": "sh_3f91460e4ad240b0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.net` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `constructor` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `constructor` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `constructor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_21c390",
+      "kind": "dead.export",
+      "location": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 133,
+        "file": "src/complexity.ts",
+        "line": 131
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_a556509481d3a797",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_21c390 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.Statement.constructor",
+        "hash": "sh_a556509481d3a797",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.Statement.constructor` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `line` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `line` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `line` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_7dc904",
+      "kind": "dead.export",
+      "location": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 137,
+        "file": "src/complexity.ts",
+        "line": 135
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_900710fae3dba6bf",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_7dc904 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.Statement.line",
+        "hash": "sh_900710fae3dba6bf",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.Statement.line` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `month` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `month` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `month` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_4119bc",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 170,
+        "file": "src/complexity.ts",
+        "line": 141
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6ecd57017ef786b1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_4119bc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.month",
+        "hash": "sh_6ecd57017ef786b1",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.month` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `overdue` from src/crap_scores.ts if nothing outside the repository uses it, or import src/crap_scores.ts where `overdue` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/crap_scores.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `overdue` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/crap_scores.ts",
+        "module": "crap_scores",
+        "module_files": [
+          "src/crap_scores.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_452a2b",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "file": "src/crap_scores.ts",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_03503e884f786355",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_452a2b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "crap_scores.overdue",
+        "hash": "sh_03503e884f786355",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`crap_scores.overdue` is exported but no import resolves to src/crap_scores.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `clamp` from src/crap_scores.ts if nothing outside the repository uses it, or import src/crap_scores.ts where `clamp` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/crap_scores.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `clamp` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/crap_scores.ts",
+        "module": "crap_scores",
+        "module_files": [
+          "src/crap_scores.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_7f8f65",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "src/crap_scores.ts",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_0de1960babbbb7af",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_7f8f65 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "crap_scores.clamp",
+        "hash": "sh_0de1960babbbb7af",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`crap_scores.clamp` is exported but no import resolves to src/crap_scores.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `toCents` from src/crap_scores.ts if nothing outside the repository uses it, or import src/crap_scores.ts where `toCents` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/crap_scores.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `toCents` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/crap_scores.ts",
+        "module": "crap_scores",
+        "module_files": [
+          "src/crap_scores.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_e2b775",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 34,
+        "file": "src/crap_scores.ts",
+        "line": 32
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_8d7d82f9ae2ba092",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_e2b775 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "crap_scores.toCents",
+        "hash": "sh_8d7d82f9ae2ba092",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`crap_scores.toCents` is exported but no import resolves to src/crap_scores.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `unusedTotal` from src/dead_export.ts if nothing outside the repository uses it, or import src/dead_export.ts where `unusedTotal` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/dead_export.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `unusedTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/dead_export.ts",
+        "module": "dead_export",
+        "module_files": [
+          "src/dead_export.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_7d5bb0",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "file": "src/dead_export.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_61270119006f44bf",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_7d5bb0 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "dead_export.unusedTotal",
+        "hash": "sh_61270119006f44bf",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`dead_export.unusedTotal` is exported but no import resolves to src/dead_export.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `forgottenRate` from src/dead_helpers.ts if nothing outside the repository uses it, or import src/dead_helpers.ts where `forgottenRate` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.8,
+      "detail": "No import in the repository resolves to src/dead_helpers.ts or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `forgottenRate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
+      "evidence": {
+        "file": "src/dead_helpers.ts",
+        "module": "dead_helpers",
+        "module_files": [
+          "src/dead_helpers.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_b6a705",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "file": "src/dead_helpers.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_3826cf6c69142d32",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b6a705 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "dead_helpers.forgottenRate",
+        "hash": "sh_3826cf6c69142d32",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`dead_helpers.forgottenRate` is unreachable: no import resolves to src/dead_helpers.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `load` from src/ledger.ts if nothing outside the repository uses it, or import src/ledger.ts where `load` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `load` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger.ts",
+        "module": "ledger",
+        "module_files": [
+          "src/ledger.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_d12ae1",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "file": "src/ledger.ts",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_a8f97199e3f096db",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_d12ae1 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.load",
+        "hash": "sh_a8f97199e3f096db",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`ledger.load` is exported but no import resolves to src/ledger.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `round` from src/legacy.ts if nothing outside the repository uses it, or import src/legacy.ts where `round` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/legacy.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `round` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/legacy.ts",
+        "module": "legacy.Legacy",
+        "module_files": [
+          "src/legacy.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_611c3c",
+      "kind": "dead.export",
+      "location": {
+        "col": 10,
+        "end_col": 4,
+        "end_line": 4,
+        "file": "src/legacy.ts",
+        "line": 2
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6cecddd04af156d5",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_611c3c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "legacy.Legacy.round",
+        "hash": "sh_6cecddd04af156d5",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`legacy.Legacy.round` is exported but no import resolves to src/legacy.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotal` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotal` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_aeeb14",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "file": "src/twins.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ab23a61c2eab12d0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_aeeb14 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotal",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotal` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `sumAfterCharge` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `sumAfterCharge` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `sumAfterCharge` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_aeeb14",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "file": "src/twins.ts",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ab23a61c2eab12d0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_aeeb14 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.sumAfterCharge",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.sumAfterCharge` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalFloor` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalFloor` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalFloor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_aeeb14",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "file": "src/twins.ts",
+        "line": 11
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ab23a61c2eab12d0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_aeeb14 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalFloor",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalFloor` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalLaidOut` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalLaidOut` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalLaidOut` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_aeeb14",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 26,
+        "file": "src/twins.ts",
+        "line": 16
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ab23a61c2eab12d0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_aeeb14 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalLaidOut",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalLaidOut` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalPlus` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalPlus` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalPlus` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_48dcbc",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 31,
+        "file": "src/twins.ts",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_cd4e336afe5c190c",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_48dcbc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalPlus",
+        "hash": "sh_cd4e336afe5c190c",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalPlus` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalCapped` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalCapped` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalCapped` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_0e778d",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 39,
+        "file": "src/twins.ts",
+        "line": 33
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ff3b0b0009bbd3fa",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_0e778d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalCapped",
+        "hash": "sh_ff3b0b0009bbd3fa",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalCapped` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalProduct` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalProduct` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalProduct` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_48e112",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 44,
+        "file": "src/twins.ts",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_50b9aaca415e3b0a",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_48e112 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalProduct",
+        "hash": "sh_50b9aaca415e3b0a",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalProduct` is exported but no import resolves to src/twins.ts"
+    }
+  ],
+  "rankings": []
+}

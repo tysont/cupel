@@ -83,6 +83,8 @@ pub struct TestsWeakening {
     manifest: Manifest,
 }
 
+inventory::submit!(crate::NativeCheck(|| Box::new(TestsWeakening::new())));
+
 impl TestsWeakening {
     pub fn new() -> Self {
         Self {

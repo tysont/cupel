@@ -1,5 +1,5 @@
-// ABOUTME: The registries every verb reads: compiled-in languages, the producers they register, and
-// ABOUTME: the native checks. Builds the `describe` payloads from them, never from lists.
+// ABOUTME: The registries every verb reads: compiled-in languages, the producers they and the tool layer
+// ABOUTME: register, and the native checks. Builds the `describe` payloads from them, never from lists.
 use std::path::Path;
 
 use cupel_core::{
@@ -19,11 +19,12 @@ pub struct Catalog {
 }
 
 impl Catalog {
-    /// The compiled-in languages, their producers, and the native checks.
+    /// The compiled-in languages, their producers and the tool producers, and the native checks.
     pub fn builtin() -> Self {
         let languages = LanguageRegistry::builtin();
         let mut producers = ProducerRegistry::default();
         languages.register_producers(&mut producers);
+        cupel_adapt::register(&mut producers);
         Self {
             languages,
             producers,
@@ -214,7 +215,7 @@ impl Catalog {
     }
 }
 
-/// The native checks, registered once through `cupel-checks` (ADR-001).
+/// The native checks, registered once through `cupel-checks` (ADR-001, ADR-074).
 pub fn checks() -> CheckRegistry {
     let mut registry = CheckRegistry::default();
     cupel_checks::register(&mut registry);

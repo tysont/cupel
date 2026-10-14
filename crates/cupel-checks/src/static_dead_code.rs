@@ -54,6 +54,8 @@ pub struct StaticDeadCode {
     manifest: Manifest,
 }
 
+inventory::submit!(crate::NativeCheck(|| Box::new(StaticDeadCode::new())));
+
 impl StaticDeadCode {
     pub fn new() -> Self {
         Self {

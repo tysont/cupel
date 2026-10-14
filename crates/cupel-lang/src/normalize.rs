@@ -1,16 +1,25 @@
 // ABOUTME: `TableNormalize`: each symbol's normalized syntax tree under `[normalize]` (locals, fields,
 // ABOUTME: and literals become markers; operators, call names, and shape stay) and its structural hash.
 use cupel_core::syntax::{NormNode, NormTree, NormalizedSymbol};
-use cupel_core::{LangId, SymbolHash};
+use cupel_core::{FactKind, LangId, SymbolHash};
 use tree_sitter::Node;
 
 use crate::parse::Parsed;
-use crate::producer::Source;
+use crate::producer::{QueryProducer, Source};
+use crate::spec::QueryFile;
 use crate::symbols::definitions;
 use crate::tables::NormalizeRules;
 
 /// Characters an anonymous token may consist of to be kept as an operator.
 const OPERATOR_CHARS: &str = "+-*/%=!<>&|^~?";
+
+inventory::submit!(crate::generic::GenericProducer {
+    kind: FactKind::NormTree,
+    drives: |spec| spec.has(QueryFile::Symbols) && spec.tables().normalize.is_some(),
+    attach: |language, cache, reg| {
+        reg.register::<NormTree, _>(QueryProducer::new(language, cache, extract));
+    },
+});
 
 /// The `NormTree` extractor. Registered only for languages with a `[normalize]` table.
 pub fn extract(source: &Source<'_>) -> NormTree {

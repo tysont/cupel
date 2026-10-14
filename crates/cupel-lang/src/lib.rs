@@ -22,7 +22,10 @@
 //! `.scm` file must be listed in its language's `include_str!` table; a test fails otherwise.
 //!
 //! A generic producer is registered for a language exactly when the language has the query
-//! file that drives it, so `describe fact <kind>` lists a language once its query exists.
+//! file that drives it, so `describe fact <kind>` lists a language once its query exists. Each
+//! generic producer submits itself from the module that extracts its fact
+//! (`inventory::submit!(crate::generic::GenericProducer { .. })`, ADR-074); adding one is that
+//! module and its `mod` line here, with no shared table to edit.
 //!
 //! # The capture-name contract
 //!

@@ -12,6 +12,7 @@ repository.workspace = true
 [dependencies]
 cupel-core.workspace = true
 globset.workspace = true
+inventory.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 schemars.workspace = true

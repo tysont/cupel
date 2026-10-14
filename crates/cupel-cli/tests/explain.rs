@@ -3,17 +3,12 @@
 mod support;
 
 use serde_json::{Value, json};
-use support::{Repo, complexity_check, complexity_finding, cupel, envelope, run_id};
+use support::{
+    Repo, complexity_check, complexity_finding, cupel, envelope, run_id, usage_argument,
+};
 
 const SOURCE: &str =
     "// one\n// two\nfn tangled() {\n    if a { b() }\n}\n// six\n// seven\n// eight\n// nine\n";
-
-fn usage_argument(outcome: &support::Outcome) -> Value {
-    assert_eq!(outcome.code, 2, "{}", outcome.stdout);
-    let finding = outcome.finding();
-    assert_eq!(finding["kind"], json!("cli.usage"));
-    finding["evidence"]["argument"].clone()
-}
 
 #[test]
 fn an_unknown_finding_id_is_a_usage_error_about_the_target() {

@@ -15,6 +15,14 @@ use crate::namespace::file_namespace_root;
 use crate::producer::producer_id;
 use crate::tables::ConventionRules;
 
+inventory::submit!(crate::generic::GenericProducer {
+    kind: FactKind::TestConventions,
+    drives: |spec| spec.tables().conventions.is_some(),
+    attach: |language, _, reg| {
+        reg.register::<TestConventions, _>(GlobTestConventions::new(language));
+    },
+});
+
 /// The `TestConventions` producer of one language. Registered only for languages with a
 /// `[conventions]` table.
 pub struct GlobTestConventions {

@@ -48,6 +48,8 @@ pub struct StaticCrap {
     manifest: Manifest,
 }
 
+inventory::submit!(crate::NativeCheck(|| Box::new(StaticCrap::new())));
+
 impl StaticCrap {
     pub fn new() -> Self {
         Self {

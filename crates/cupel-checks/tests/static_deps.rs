@@ -2,31 +2,18 @@
 // ABOUTME: settings validation, finding identity and shape, and the score (ADR-052, ADR-053).
 mod support;
 
-use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, RootImports,
     Span,
 };
 use cupel_core::{
-    ActionKind, Check, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding,
-    FindingId, MetricPer, Plan, Scope, Score, Severity,
+    ActionKind, Check, CheckId, CheckResult, CheckStatus, FactKind, Facts, Finding, FindingId,
+    MetricPer, Plan, Scope, Score, Severity,
 };
 use serde_json::{Value, json};
-use support::{Recorded, combined, language};
+use support::{Recorded, combined, imported_file, imported_package, language};
 
 const ID: &str = "static.deps";
-
-fn file(path: &str) -> ImportTarget {
-    ImportTarget::File {
-        path: path.to_owned(),
-    }
-}
-
-fn external(package: &str) -> ImportTarget {
-    ImportTarget::External {
-        package: package.to_owned(),
-    }
-}
 
 /// A module graph and the public types each module declares.
 #[derive(Default)]
@@ -61,7 +48,7 @@ impl World {
 
     /// `from` imports the module `to` at `line`.
     fn edge(self, from: &str, to: &str, line: u32) -> Self {
-        self.import(from, file(to), line)
+        self.import(from, imported_file(to), line)
     }
 
     /// `module` declares a public item of `kind`.
@@ -108,17 +95,8 @@ fn run(world: &World, config: Value) -> (CheckResult, Vec<Finding>) {
 
 /// Runs the check; its result and every finding and measurement it reported.
 fn recorded(world: &World, config: Value) -> (CheckResult, Recorded) {
-    let registry = support::registry();
-    let check = registry
-        .get(&CheckId::from(ID))
-        .expect("static.deps is registered");
-    let (ctx, _dir) = support::ctx(Scope::default(), config);
-    let plan = check.plan(&ctx, &ctx.scope).unwrap();
-    let mut recorded = Recorded::default();
-    let result = check
-        .run(&ctx, &world.facts(check), &plan, &mut recorded)
-        .unwrap();
-    (result, recorded)
+    let check = support::check(ID);
+    support::recorded(check, &world.facts(check), Scope::default(), config).unwrap()
 }
 
 fn of_kind<'a>(findings: &'a [Finding], kind: &str) -> Vec<&'a Finding> {
@@ -151,8 +129,7 @@ fn layers() -> Value {
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = support::registry();
-    let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
+    let manifest = support::check(ID).manifest();
     assert_eq!(
         support::Shape::of(manifest),
         support::Shape {
@@ -231,13 +208,13 @@ fn a_two_module_cycle_is_one_finding_identified_by_its_members() {
 fn a_child_importing_its_parent_is_no_cycle_because_declarations_are_structure() {
     // Rust: `lib.rs` declares `mod child;`, and `child.rs` uses `crate::Error` from `lib.rs`.
     let world = World::default()
-        .link("lib", file("child"), 1, EdgeKind::Declaration)
+        .link("lib", imported_file("child"), 1, EdgeKind::Declaration)
         .edge("child", "lib", 3);
     let (result, findings) = run(&world, json!({}));
     assert!(of_kind(&findings, "dep.cycle").is_empty(), "{findings:?}");
     assert!(result.metrics["cycles"].abs() < f64::EPSILON);
     let reexporting = World::default()
-        .link("lib", file("child"), 1, EdgeKind::ReExport)
+        .link("lib", imported_file("child"), 1, EdgeKind::ReExport)
         .edge("child", "lib", 3);
     let (_, findings) = run(&reexporting, json!({}));
     assert_eq!(
@@ -300,8 +277,8 @@ fn an_abstract_module_nothing_imports_is_unstable_abstract() {
         .declares("port", ApiItemKind::Interface)
         .edge("port", "model", 1)
         .edge("port", "other", 2)
-        .import("port", external("serde"), 3)
-        .import("port", external("serde"), 4)
+        .import("port", imported_package("serde"), 3)
+        .import("port", imported_package("serde"), 4)
         .import("port", ImportTarget::Unresolved, 5);
     let (_, findings) = run(&world, json!({}));
     let [finding] = findings.as_slice() else {
@@ -462,7 +439,7 @@ fn a_module_takes_the_first_layer_that_matches_and_star_stays_in_a_segment() {
 #[test]
 fn external_and_unresolved_imports_are_never_violations_or_coupling() {
     let world = World::default()
-        .import("src/domain/a.x", external("src/infra/db.x"), 1)
+        .import("src/domain/a.x", imported_package("src/infra/db.x"), 1)
         .import("src/domain/a.x", ImportTarget::Unresolved, 2);
     let (result, findings) = run(&world, layers());
     assert!(findings.is_empty(), "{findings:?}");
@@ -471,8 +448,7 @@ fn external_and_unresolved_imports_are_never_violations_or_coupling() {
 
 #[test]
 fn malformed_settings_are_configuration_errors_naming_the_key() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     for (config, key) in [
         (json!({"layer": {}}), "layer"),
         (json!({"distance_max": 1.5}), "distance_max"),
@@ -509,14 +485,7 @@ fn malformed_settings_are_configuration_errors_naming_the_key() {
             "layers.map.a",
         ),
     ] {
-        let (ctx, _dir) = support::ctx(Scope::default(), config.clone());
-        let error = check.plan(&ctx, &Scope::default()).unwrap_err();
-        let Error::Config(ConfigError::CheckSetting {
-            key: named, valid, ..
-        }) = error
-        else {
-            panic!("expected a check-setting error for {config}, got {error:?}")
-        };
+        let (named, valid) = support::setting_error(check, config.clone());
         assert_eq!(named, key, "{config}");
         assert_eq!(valid, ["distance_max", "layers"], "{config}");
     }
@@ -524,8 +493,7 @@ fn malformed_settings_are_configuration_errors_naming_the_key() {
 
 #[test]
 fn plans_count_the_files_in_scope_at_quick_cost() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let scope = Scope::of_files(vec!["a".to_owned(), "b".to_owned(), "c".to_owned()]);
     let (ctx, _dir) = support::ctx(Scope::default(), json!({}));
     assert_eq!(
@@ -539,13 +507,8 @@ fn plans_count_the_files_in_scope_at_quick_cost() {
 
 #[test]
 fn scores_sum_across_languages() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
-    let score = |value: f64, n: u64| Score {
-        value,
-        unit: "cycles".to_owned(),
-        n,
-    };
+    let check = support::check(ID);
+    let score = |value, n| support::score(value, "cycles", n);
     assert_eq!(
         check.combine(&[score(1.0, 10), score(2.0, 4)]),
         Some(score(3.0, 14))
@@ -614,8 +577,7 @@ fn modules_are_measured_by_coupling_and_distance_and_cycles_by_size() {
 
 #[test]
 fn counts_add_up_across_languages_and_distance_takes_the_largest() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let results = [
         language(
             check,

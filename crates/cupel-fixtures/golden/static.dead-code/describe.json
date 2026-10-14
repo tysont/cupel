@@ -1,0 +1,210 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `dead.symbol` and `dead.export`.",
+            "properties": {
+              "file": {
+                "description": "The file that defines the symbol.",
+                "type": "string"
+              },
+              "module": {
+                "description": "The namespace of the module the file belongs to.",
+                "type": "string"
+              },
+              "module_files": {
+                "description": "Every file of that module; no file outside the module imports any of them.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "suspect_imports": {
+                "description": "Unresolved or external imports whose specifier names this file, which may load it.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "file",
+              "module",
+              "module_files",
+              "suspect_imports"
+            ],
+            "title": "Unreachable",
+            "type": "object"
+          },
+          "kind": "dead.symbol",
+          "summary": "A symbol in a module that nothing imports, that exports nothing, and that holds no entry point, test, or framework hook."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `dead.symbol` and `dead.export`.",
+            "properties": {
+              "file": {
+                "description": "The file that defines the symbol.",
+                "type": "string"
+              },
+              "module": {
+                "description": "The namespace of the module the file belongs to.",
+                "type": "string"
+              },
+              "module_files": {
+                "description": "Every file of that module; no file outside the module imports any of them.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "suspect_imports": {
+                "description": "Unresolved or external imports whose specifier names this file, which may load it.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "file",
+              "module",
+              "module_files",
+              "suspect_imports"
+            ],
+            "title": "Unreachable",
+            "type": "object"
+          },
+          "kind": "dead.export",
+          "summary": "An exported symbol in a module that nothing in the repository imports and that holds no entry point, test, or framework hook (info: it may be a library's public API)."
+        }
+      ],
+      "id": "static.dead-code",
+      "metrics": [
+        {
+          "name": "dead_symbols",
+          "per": "scope",
+          "summary": "The number of dead.symbol findings in scope."
+        },
+        {
+          "name": "dead_exports",
+          "per": "scope",
+          "summary": "The number of dead.export findings in scope."
+        }
+      ],
+      "needs": [
+        "symbols",
+        "norm-tree",
+        "module-graph",
+        "roots"
+      ],
+      "stability": "experimental",
+      "summary": "Symbols and exports in modules that no import reaches and no entry point, test, or framework hook keeps alive. Limitation: no fact carries references, so reachability is decided per module, never per call: an unused function in an imported module is not reported, and an export of an unimported module is only `dead.export` (info, low confidence) (ADR-058; a References fact is a P3 follow-up).",
+      "tier": 0,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

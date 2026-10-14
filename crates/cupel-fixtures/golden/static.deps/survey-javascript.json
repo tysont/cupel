@@ -1,0 +1,326 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 20,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle src/deps_cycle/alpha.js → src/deps_cycle/beta.js → src/deps_cycle/alpha.js: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "src/deps_cycle/alpha.js",
+          "src/deps_cycle/beta.js"
+        ],
+        "modules": [
+          "src/deps_cycle/alpha.js",
+          "src/deps_cycle/beta.js"
+        ],
+        "size": 2
+      },
+      "id": "fnd_74986a",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_cycle/alpha.js",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_74986a --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: src/deps_cycle/alpha.js → src/deps_cycle/beta.js → src/deps_cycle/alpha.js"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `src/deps_layers/infra/store.js` from `src/deps_layers/domain/order.js`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "src/deps_layers/domain/order.js",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "../infra/store.js",
+        "to": "src/deps_layers/infra/store.js",
+        "to_layer": "infra"
+      },
+      "id": "fnd_223ef3",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_layers/domain/order.js",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_223ef3 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/deps_layers/domain/order.js` (layer domain) imports `src/deps_layers/infra/store.js` (layer infra)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "javascript",
+          "rank": 1,
+          "target": {
+            "display": "src/shapes/geometry.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/shapes/geometry.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        }
+      ],
+      "measured": 1,
+      "metric": "distance",
+      "per": "module",
+      "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "javascript",
+          "rank": 1,
+          "target": {
+            "display": "src/ledger.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 5.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 2,
+          "target": {
+            "display": "src/math.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/math.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 3,
+          "target": {
+            "display": "src/decide.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/decide.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 4,
+          "target": {
+            "display": "src/report.cjs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/report.cjs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 5,
+          "target": {
+            "display": "packages/shapes/lib/index.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "packages/shapes/lib/index.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 6,
+          "target": {
+            "display": "packages/shapes/lib/square.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "packages/shapes/lib/square.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 7,
+          "target": {
+            "display": "src/deps_cycle/alpha.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/alpha.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 8,
+          "target": {
+            "display": "src/deps_cycle/beta.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/beta.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 9,
+          "target": {
+            "display": "src/format.cjs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/format.cjs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 10,
+          "target": {
+            "display": "test/math.quality.test.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "test/math.quality.test.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 20,
+      "metric": "coupling",
+      "per": "module",
+      "summary": "Afferent plus efferent coupling per module."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "javascript",
+          "rank": 1,
+          "target": {
+            "display": "src/deps_cycle/alpha.js → src/deps_cycle/beta.js → src/deps_cycle/alpha.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/alpha.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 1,
+      "metric": "cycle_size",
+      "per": "group",
+      "summary": "Modules in each import cycle."
+    }
+  ]
+}

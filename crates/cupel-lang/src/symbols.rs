@@ -36,6 +36,7 @@
 //! function they are defined in.
 use std::collections::{BTreeMap, HashSet};
 
+use cupel_core::FactKind;
 use cupel_core::syntax::{SymbolDef, SymbolKind, Symbols, Visibility};
 use tree_sitter::Node;
 
@@ -43,7 +44,7 @@ use crate::contract::capture;
 use crate::language::Language;
 use crate::namespace::{Namespaces, Scope};
 use crate::parse::Parsed;
-use crate::producer::Source;
+use crate::producer::{QueryProducer, Source};
 use crate::query::{Match, matches, span};
 use crate::spec::QueryFile;
 
@@ -55,6 +56,14 @@ pub struct Definition<'t> {
     pub body: Option<Node<'t>>,
     pub symbol: SymbolDef,
 }
+
+inventory::submit!(crate::generic::GenericProducer {
+    kind: FactKind::Symbols,
+    drives: |spec| spec.has(QueryFile::Symbols),
+    attach: |language, cache, reg| {
+        reg.register::<Symbols, _>(QueryProducer::new(language, cache, extract));
+    },
+});
 
 /// The `Symbols` extractor.
 pub fn extract(source: &Source<'_>) -> Symbols {

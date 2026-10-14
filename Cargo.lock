@@ -268,7 +268,9 @@ name = "cupel-adapt"
 version = "0.1.0"
 dependencies = [
  "cupel-core",
+ "cupel-fixtures",
  "globset",
+ "inventory",
  "serde",
  "serde_json",
  "tempfile",
@@ -281,6 +283,7 @@ version = "0.1.0"
 dependencies = [
  "cupel-core",
  "globset",
+ "inventory",
  "proptest",
  "schemars",
  "serde",
@@ -297,6 +300,7 @@ dependencies = [
  "cupel-adapt",
  "cupel-checks",
  "cupel-core",
+ "cupel-fixtures",
  "cupel-lang",
  "cupel-store",
  "insta",
@@ -332,6 +336,7 @@ name = "cupel-fixtures"
 version = "0.1.0"
 dependencies = [
  "assert_cmd",
+ "cupel-adapt",
  "cupel-checks",
  "cupel-core",
  "cupel-lang",
@@ -349,8 +354,10 @@ version = "0.1.0"
 dependencies = [
  "blake3",
  "cupel-core",
+ "cupel-fixtures",
  "globset",
  "ignore",
+ "inventory",
  "proptest",
  "rayon",
  "serde",
@@ -593,6 +600,15 @@ dependencies = [
  "once_cell",
  "similar",
  "tempfile",
+]
+
+[[package]]
+name = "inventory"
+version = "0.3.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6928282826c822ad91bf1c9a1cb90a30ba1c26770749929b4656cd6be829cd7c"
+dependencies = [
+ "rustversion",
 ]
 
 [[package]]

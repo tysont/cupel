@@ -1,43 +1,16 @@
 // ABOUTME: Tests for validating a parsed config against the check and language registries: unknown
 // ABOUTME: check IDs, gate metrics, and language IDs become usage errors listing what is registered.
+mod support;
+
 use std::path::{Path, PathBuf};
 
 use cupel_core::config::{Config, ConfigError, ConfigFile, ConfigRequest};
-use cupel_core::{
-    Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CostClass, Error, EventSink, Facts,
-    LangId, Manifest, MetricPer, MetricSpec, Plan, Result, Scope, Stability, Tier,
-};
-
-/// A registered check that is never planned or run here; only its manifest matters.
-struct DeclaredCheck(Manifest);
-
-impl Check for DeclaredCheck {
-    fn manifest(&self) -> &Manifest {
-        &self.0
-    }
-
-    fn plan(&self, _: &CheckCtx, _: &Scope) -> Result<Plan> {
-        Ok(Plan {
-            targets: 0,
-            est_ms: 0,
-        })
-    }
-
-    fn run(&self, _: &CheckCtx, _: &Facts, _: &Plan, _: &mut dyn EventSink) -> Result<CheckResult> {
-        panic!("configuration validation never runs a check")
-    }
-}
+use cupel_core::{Check, CheckRegistry, Error, LangId, Manifest, MetricPer, MetricSpec, Result};
+use support::Declared;
 
 /// A check declaring `metrics`; a name ending in `@symbol` is a per-symbol ranking dimension.
 fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
-    Box::new(DeclaredCheck(Manifest {
-        id: CheckId::from(id),
-        version: 1,
-        tier: Tier::try_from(0).unwrap(),
-        cost: CostClass::Quick,
-        needs: vec![],
-        wants: vec![],
-        findings: vec![],
+    Box::new(Declared(Manifest {
         metrics: metrics
             .iter()
             .map(|name| match name.strip_suffix("@symbol") {
@@ -53,8 +26,7 @@ fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
                 },
             })
             .collect(),
-        stability: Stability::Experimental,
-        summary: String::new(),
+        ..support::manifest(id, &[], &[])
     }))
 }
 
