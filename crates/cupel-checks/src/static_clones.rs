@@ -8,15 +8,18 @@ use cupel_core::config::{ConfigError, Table};
 use cupel_core::syntax::{NormNode, NormTree, SymbolDef, SymbolKey, Symbols};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event,
-    EventSink, Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
-    MetricSpec, Plan, Result, Scope, Score, Severity, SiteHash, Stability, Symbol, SymbolHash,
-    Tier,
+    EventSink, Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Measurement,
+    MetricPer, Plan, Result, Scope, Score, Severity, SiteHash, Stability, Symbol, SymbolHash,
+    Target, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
 
 use similarity::{Fingerprints, Similar, combine, mix, search};
+
+use crate::manifest::{evidence, kind, metric, ranked};
+use crate::metrics::{largest, sum};
 
 const ID: &str = "static.clones";
 const PAIR: &str = "clone.pair";
@@ -147,11 +150,13 @@ impl StaticClones {
                 findings: vec![
                     kind::<ClonePair>(
                         PAIR,
+                        ActionKind::RefactorExtract,
                         "Two symbols whose normalized trees are at least `threshold` similar \
                          and similar to no third symbol.",
                     ),
                     kind::<CloneCluster>(
                         CLUSTER,
+                        ActionKind::RefactorExtract,
                         "Three or more symbols connected by pairs at least `threshold` similar.",
                     ),
                 ],
@@ -159,6 +164,11 @@ impl StaticClones {
                     metric("pairs", "Pairs of symbols at least `threshold` similar."),
                     metric("clusters", "Groups of three or more similar symbols."),
                     metric("max_jaccard", "The highest similarity of any pair."),
+                    ranked(
+                        "cluster_size",
+                        MetricPer::Group,
+                        "Symbols in each clone group: 2 for a pair, more for a cluster.",
+                    ),
                 ],
                 stability: Stability::Experimental,
                 summary: "Type 1, 2, and 3 clones: functions whose normalized syntax trees share \
@@ -226,6 +236,7 @@ impl Check for StaticClones {
         };
         let groups = groups(compared.len(), &pairs);
         let mut findings = 0;
+        let mut reported = Reported::default();
         for group in &groups {
             let in_scope = group
                 .members
@@ -234,6 +245,8 @@ impl Check for StaticClones {
             if in_scope {
                 findings += 1;
                 sink.emit(Event::Finding(Box::new(report.finding(group))));
+                sink.measure(report.size(group));
+                reported.include(group);
             }
         }
         Ok(CheckResult {
@@ -250,6 +263,7 @@ impl Check for StaticClones {
                 unit: "pairs".to_owned(),
                 n: compared.len() as u64,
             }),
+            metrics: reported.metrics(),
             delta: None,
             findings,
             duration_ms: 0,
@@ -266,6 +280,14 @@ impl Check for StaticClones {
             unit: first.unit.clone(),
             n: scores.iter().map(|score| score.n).sum(),
         })
+    }
+
+    /// Pairs and clusters add up across families; `max_jaccard` is the largest (ADR-063).
+    fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
+        match name {
+            "max_jaccard" => largest(name, results),
+            _ => sum(name, results),
+        }
     }
 
     /// JavaScript and TypeScript symbols are compared with each other (design §8.4.3).
@@ -341,7 +363,39 @@ fn root(parent: &mut [usize], mut index: usize) -> usize {
     index
 }
 
-/// Turns groups into findings.
+/// The `scope` metrics over the groups reported (ADR-063).
+#[derive(Default)]
+struct Reported {
+    pairs: usize,
+    clusters: usize,
+    max_jaccard: f64,
+}
+
+impl Reported {
+    fn include(&mut self, group: &Group) {
+        self.pairs += group.pairs.len();
+        if group.members.len() > 2 {
+            self.clusters += 1;
+        }
+        for pair in &group.pairs {
+            self.max_jaccard = self.max_jaccard.max(rounded(pair.jaccard));
+        }
+    }
+
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "pair and cluster counts stay far below 2^52, where f64 is exact"
+    )]
+    fn metrics(&self) -> BTreeMap<String, f64> {
+        BTreeMap::from([
+            ("pairs".to_owned(), self.pairs as f64),
+            ("clusters".to_owned(), self.clusters as f64),
+            ("max_jaccard".to_owned(), self.max_jaccard),
+        ])
+    }
+}
+
+/// Turns groups into findings and measurements.
 struct Report<'a> {
     check: &'a StaticClones,
     compared: &'a [Compared<'a>],
@@ -393,6 +447,29 @@ impl Report<'_> {
         }
     }
 
+    /// How many symbols `group` holds, for `survey`'s largest clone clusters (ADR-062).
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "group sizes stay far below 2^52, where f64 is exact"
+    )]
+    fn size(&self, group: &Group) -> Measurement {
+        let first = &self.compared[group.members[0]];
+        let others = group.members.len() - 1;
+        Measurement {
+            metric: "cluster_size".to_owned(),
+            value: group.members.len() as f64,
+            target: Target {
+                display: format!(
+                    "{} and {others} other{}",
+                    first.symbol.display,
+                    if others == 1 { "" } else { "s" }
+                ),
+                symbol: None,
+                location: Some(location(first.symbol)),
+            },
+        }
+    }
+
     fn pair(&self, pair: &Similar) -> (&'static str, String, String, Value) {
         let (left, right) = (&self.compared[pair.left], &self.compared[pair.right]);
         let clone_type = if left.root == right.root { 2 } else { 3 };
@@ -405,7 +482,7 @@ impl Report<'_> {
             "Extract what `{}` and `{}` share into one function and call it from both.",
             left.symbol.name, right.symbol.name
         );
-        let evidence = to_value(&ClonePair {
+        let evidence = evidence(&ClonePair {
             jaccard,
             clone_type,
             threshold: self.settings.threshold,
@@ -432,7 +509,7 @@ impl Report<'_> {
             first.symbol.name,
             group.members.len() - 1
         );
-        let evidence = to_value(&CloneCluster {
+        let evidence = evidence(&CloneCluster {
             members: group
                 .members
                 .iter()
@@ -483,34 +560,9 @@ fn rounded(value: f64) -> f64 {
     (value * 1000.0).round() / 1000.0
 }
 
-fn to_value<T: Serialize>(value: &T) -> Value {
-    serde_json::to_value(value).unwrap_or(Value::Null)
-}
-
 fn object(value: &Value) -> Map<String, Value> {
     match value {
         Value::Object(fields) => fields.clone(),
         _ => Map::new(),
-    }
-}
-
-/// A finding kind mapped to `refactor_extract`, whose evidence is `T`'s JSON Schema (ADR-012).
-fn kind<T: JsonSchema>(kind: &str, summary: &str) -> FindingKindSpec {
-    let schema = match schemars::schema_for!(T).to_value() {
-        Value::Object(schema) => schema,
-        _ => Map::new(),
-    };
-    FindingKindSpec {
-        kind: kind.to_owned(),
-        action: ActionKind::RefactorExtract,
-        summary: summary.to_owned(),
-        evidence: schema,
-    }
-}
-
-fn metric(name: &str, summary: &str) -> MetricSpec {
-    MetricSpec {
-        name: name.to_owned(),
-        summary: summary.to_owned(),
     }
 }

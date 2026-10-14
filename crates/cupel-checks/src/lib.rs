@@ -33,6 +33,7 @@
 //! [`Facts`]: cupel_core::Facts
 
 mod finding;
+mod manifest;
 mod metrics;
 mod settings;
 mod static_clones;

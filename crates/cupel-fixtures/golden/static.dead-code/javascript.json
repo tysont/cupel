@@ -6,6 +6,10 @@
       "duration_ms": "<duration-ms>",
       "findings": 26,
       "id": "static.dead-code",
+      "metrics": {
+        "dead_exports": 25.0,
+        "dead_symbols": 1.0
+      },
       "oracle": null,
       "score": {
         "n": 74,
@@ -1139,6 +1143,7 @@
     }
   ],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

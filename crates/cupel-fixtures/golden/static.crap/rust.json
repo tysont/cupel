@@ -6,6 +6,10 @@
       "duration_ms": "<duration-ms>",
       "findings": 20,
       "id": "static.crap",
+      "metrics": {
+        "max": 132.0,
+        "mean": 8.938775510204081
+      },
       "oracle": null,
       "score": {
         "n": 49,
@@ -879,6 +883,7 @@
     }
   ],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

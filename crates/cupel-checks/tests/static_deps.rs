@@ -1,5 +1,7 @@
 // ABOUTME: static.deps over synthetic module graphs: cycles, Martin's coupling metrics, layering rules,
 // ABOUTME: settings validation, finding identity and shape, and the score (ADR-052, ADR-053).
+mod support;
+
 use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
@@ -7,9 +9,10 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    Error, Event, FactKind, Facts, Finding, FindingId, Plan, Scope, Score, Severity, Writer,
+    Error, FactKind, Facts, Finding, FindingId, MetricPer, Plan, Scope, Score, Severity, Writer,
 };
 use serde_json::{Value, json};
+use support::{Recorded, combined, language};
 
 const ID: &str = "static.deps";
 
@@ -114,24 +117,23 @@ fn ctx(config: Value) -> (CheckCtx, tempfile::TempDir) {
 
 /// Runs the check over `world` with `config`; its result and findings.
 fn run(world: &World, config: Value) -> (CheckResult, Vec<Finding>) {
+    let (result, recorded) = recorded(world, config);
+    (result, recorded.findings)
+}
+
+/// Runs the check; its result and every finding and measurement it reported.
+fn recorded(world: &World, config: Value) -> (CheckResult, Recorded) {
     let registry = registry();
     let check = registry
         .get(&CheckId::from(ID))
         .expect("static.deps is registered");
     let (ctx, _dir) = ctx(config);
     let plan = check.plan(&ctx, &ctx.scope).unwrap();
-    let mut events = Vec::new();
+    let mut recorded = Recorded::default();
     let result = check
-        .run(&ctx, &world.facts(check), &plan, &mut events)
+        .run(&ctx, &world.facts(check), &plan, &mut recorded)
         .unwrap();
-    let findings = events
-        .into_iter()
-        .filter_map(|event| match event {
-            Event::Finding(finding) => Some(*finding),
-            _ => None,
-        })
-        .collect();
-    (result, findings)
+    (result, recorded)
 }
 
 fn of_kind<'a>(findings: &'a [Finding], kind: &str) -> Vec<&'a Finding> {
@@ -186,8 +188,22 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("dep.unstable-abstract", ActionKind::Review),
         ]
     );
-    let metrics: Vec<&str> = manifest.metrics.iter().map(|m| m.name.as_str()).collect();
-    assert_eq!(metrics, ["cycles", "max_distance", "violations"]);
+    let metrics: Vec<(&str, MetricPer)> = manifest
+        .metrics
+        .iter()
+        .map(|m| (m.name.as_str(), m.per))
+        .collect();
+    assert_eq!(
+        metrics,
+        [
+            ("cycles", MetricPer::Scope),
+            ("max_distance", MetricPer::Scope),
+            ("violations", MetricPer::Scope),
+            ("distance", MetricPer::Module),
+            ("coupling", MetricPer::Module),
+            ("cycle_size", MetricPer::Group),
+        ]
+    );
     for spec in &manifest.findings {
         assert_eq!(spec.evidence["type"], json!("object"), "{}", spec.kind);
     }
@@ -546,4 +562,84 @@ fn scores_sum_across_languages() {
         Some(score(3.0, 14))
     );
     assert_eq!(check.combine(&[]), None);
+}
+
+/// `a` and `b` import each other; `m` has D = 0.25 (Ca 1, Ce 3, half its types abstract).
+fn a_cycle_and_a_measured_module() -> World {
+    World::default()
+        .edge("a", "b", 1)
+        .edge("b", "a", 2)
+        .declares("m", ApiItemKind::Interface)
+        .declares("m", ApiItemKind::Type)
+        .edge("u", "m", 1)
+        .edge("m", "x", 1)
+        .edge("m", "y", 2)
+        .edge("m", "z", 3)
+}
+
+#[test]
+fn the_result_reports_cycles_violations_and_the_largest_distance() {
+    let world = a_cycle_and_a_measured_module()
+        .edge("src/domain/order", "src/infra/db", 4)
+        .edge("src/infra/db", "src/app/use", 5);
+    let (result, _) = run(&world, layers());
+    assert_eq!(
+        result.metrics,
+        [
+            ("cycles".to_owned(), 1.0),
+            ("max_distance".to_owned(), 0.25),
+            ("violations".to_owned(), 1.0),
+        ]
+        .into()
+    );
+    let (empty, _) = run(&World::default(), json!({}));
+    assert!(
+        empty.metrics.values().all(|value| *value == 0.0),
+        "{:?}",
+        empty.metrics
+    );
+}
+
+#[test]
+fn modules_are_measured_by_coupling_and_distance_and_cycles_by_size() {
+    let (_, recorded) = recorded(&a_cycle_and_a_measured_module(), json!({}));
+    assert_eq!(
+        recorded.measured(),
+        [
+            ("cycle_size", "a → b → a", 2.0),
+            ("coupling", "a", 2.0),
+            ("coupling", "b", 2.0),
+            ("coupling", "m", 4.0),
+            ("distance", "m", 0.25),
+            ("coupling", "u", 1.0),
+            ("coupling", "x", 1.0),
+            ("coupling", "y", 1.0),
+            ("coupling", "z", 1.0),
+        ]
+    );
+    let module = &recorded.measurements[3].target;
+    assert_eq!(module.symbol, None);
+    let location = module.location.as_ref().unwrap();
+    assert_eq!((location.file.as_str(), location.line), ("m", 1));
+}
+
+#[test]
+fn counts_add_up_across_languages_and_distance_takes_the_largest() {
+    let registry = registry();
+    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let results = [
+        language(
+            check,
+            &[("cycles", 2.0), ("max_distance", 0.25), ("violations", 1.0)],
+            10,
+        ),
+        language(
+            check,
+            &[("cycles", 1.0), ("max_distance", 0.75), ("violations", 0.0)],
+            4,
+        ),
+    ];
+    assert_eq!(combined(check, "cycles", &results), Some(3.0));
+    assert_eq!(combined(check, "violations", &results), Some(1.0));
+    assert_eq!(combined(check, "max_distance", &results), Some(0.75));
 }

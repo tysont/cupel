@@ -22,7 +22,7 @@ expression: pretty(&schema)
       "$ref": "#/$defs/CheckId"
     },
     "metrics": {
-      "description": "Metrics usable as gate keys (`<check-id>.<metric>`).",
+      "description": "What the check measures: `scope` metrics are gate keys (`<check-id>.<metric>`), the others\nare `survey` ranking dimensions (ADR-060, ADR-062).",
       "type": "array",
       "items": {
         "$ref": "#/$defs/MetricSpec"
@@ -166,11 +166,41 @@ expression: pretty(&schema)
         "summary"
       ]
     },
+    "MetricPer": {
+      "description": "What one value of a metric describes: the whole scope, reported in `CheckResult.metrics` and\nusable as a gate key, or one target, reported through `EventSink::measure` and ranked by\n`survey`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "scope"
+          ]
+        },
+        {
+          "description": "A function or method.",
+          "type": "string",
+          "const": "symbol"
+        },
+        {
+          "description": "A file or module.",
+          "type": "string",
+          "const": "module"
+        },
+        {
+          "description": "A set of targets, such as a clone cluster or a dependency cycle.",
+          "type": "string",
+          "const": "group"
+        }
+      ]
+    },
     "MetricSpec": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string"
+        },
+        "per": {
+          "description": "What one value describes (ADR-062).",
+          "$ref": "#/$defs/MetricPer"
         },
         "summary": {
           "type": "string"
@@ -178,6 +208,7 @@ expression: pretty(&schema)
       },
       "required": [
         "name",
+        "per",
         "summary"
       ]
     },

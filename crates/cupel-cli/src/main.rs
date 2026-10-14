@@ -21,6 +21,7 @@ mod registry;
 mod render;
 mod run;
 mod suppress;
+mod survey;
 
 use std::io::Write;
 

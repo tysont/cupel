@@ -6,6 +6,11 @@
       "duration_ms": "<duration-ms>",
       "findings": 12,
       "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 0.9565217391304348,
+        "no_assertion": 2.0,
+        "weak_ratio": 0.3181818181818182
+      },
       "oracle": null,
       "score": {
         "n": 23,
@@ -601,6 +606,7 @@
     }
   ],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

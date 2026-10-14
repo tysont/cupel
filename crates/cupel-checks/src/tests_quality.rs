@@ -8,14 +8,16 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Error, Event,
-    EventSink, FactKind, Facts, Finding, FindingKindSpec, Manifest, MetricSpec, Plan, Result,
-    Scope, Score, Severity, Stability, SymbolHash, Tier,
+    EventSink, FactKind, Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope,
+    Score, Severity, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
 
 use crate::finding::SymbolFinding;
+use crate::manifest::{evidence, kind, metric, ranked};
+use crate::metrics::{scored, sum, symbol_target, weighted_mean};
 use crate::settings::Limits;
 
 const ID: &str = "tests.quality";
@@ -181,6 +183,11 @@ impl TestsQuality {
                         "Weak assertions as a share of all assertions in scope.",
                     ),
                     metric("no_assertion", "Tests in scope that assert nothing."),
+                    ranked(
+                        "mock_density",
+                        MetricPer::Symbol,
+                        "Test doubles per test as a percentage of its doubles plus assertions.",
+                    ),
                 ],
                 stability: Stability::Experimental,
                 summary: "SCRAP-style test quality: assertion density, weak and missing \
@@ -240,11 +247,9 @@ impl Check for TestsQuality {
         };
         let mut tests = 0_u64;
         let mut assertions = 0_u64;
-        let mut findings = 0;
-        let mut emit = |finding: Finding| {
-            findings += 1;
-            sink.emit(Event::Finding(Box::new(finding)));
-        };
+        let mut weak = 0_u64;
+        let mut no_assertion = 0_u64;
+        let mut reported = Vec::new();
         for file in &facts.get::<TestFrames>()?.files {
             let mut candidates = Vec::new();
             for case in &file.cases {
@@ -255,24 +260,34 @@ impl Check for TestsQuality {
                 ctx.cancel.checkpoint()?;
                 tests += 1;
                 assertions += case.assertions.len() as u64;
+                weak +=
+                    u64::from(count(case.assertions.iter().filter(|assertion| {
+                        assertion.strength == AssertionStrength::Weak
+                    })));
+                no_assertion += u64::from(case.assertions.is_empty());
                 // A case without a symbol or structural hash cannot be identified, so it is
                 // measured but not reported; every language's test cases are symbols (ADR-054).
                 let (Some(symbol), Some((hash, root))) = (symbols.get(&key), trees.get(&key))
                 else {
                     continue;
                 };
+                sink.measure(Measurement {
+                    metric: "mock_density".to_owned(),
+                    value: f64::from(mock_density(case)),
+                    target: symbol_target(symbol, Some(hash)),
+                });
                 let subject = Subject { symbol, hash };
                 let logic = decisions.as_ref().map(|by_symbol| {
                     LogicCount::of(case, by_symbol.get(&key).copied().unwrap_or_default())
                 });
-                for finding in self.case_findings(&subject, case, logic.as_ref(), &limits) {
-                    emit(finding);
-                }
+                reported.extend(self.case_findings(&subject, case, logic.as_ref(), &limits));
                 candidates.push((subject, statements(root)));
             }
-            for finding in self.duplicate_setup(&candidates, &limits) {
-                emit(finding);
-            }
+            reported.extend(self.duplicate_setup(&candidates, &limits));
+        }
+        let findings = reported.len() as u64;
+        for finding in reported {
+            sink.emit(Event::Finding(Box::new(finding)));
         }
         Ok(CheckResult {
             id: self.manifest.id.clone(),
@@ -284,20 +299,33 @@ impl Check for TestsQuality {
             tier: self.manifest.tier,
             cost: self.manifest.cost,
             score: Some(Score {
-                value: if tests == 0 {
-                    0.0
-                } else {
-                    assertions as f64 / tests as f64
-                },
+                value: ratio(assertions, tests),
                 unit: "assertion_density".to_owned(),
                 n: tests,
             }),
+            metrics: BTreeMap::from([
+                ("assertion_density".to_owned(), ratio(assertions, tests)),
+                ("weak_ratio".to_owned(), ratio(weak, assertions)),
+                ("no_assertion".to_owned(), no_assertion as f64),
+            ]),
             delta: None,
             findings,
             duration_ms: 0,
             skipped: None,
             oracle: None,
         })
+    }
+
+    /// Ratios over every language's tests together: density weighted by tests, the weak share
+    /// by assertions (density × tests); `no_assertion` adds up (ADR-063).
+    fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
+        match name {
+            "assertion_density" => weighted_mean(name, results, scored),
+            "weak_ratio" => weighted_mean(name, results, |result| {
+                result.metrics.get("assertion_density").unwrap_or(&0.0) * scored(result)
+            }),
+            _ => sum(name, results),
+        }
     }
 }
 
@@ -458,7 +486,7 @@ impl TestsQuality {
     ) -> Option<Finding> {
         let mocks = count(case.mocks.iter());
         let assertions = count(case.assertions.iter());
-        let density = (100 * mocks).checked_div(mocks + assertions).unwrap_or(0);
+        let density = mock_density(case);
         (mocks >= limits.mocks_min && density > limits.mock_density_max).then(|| {
             self.report(
                 subject,
@@ -642,31 +670,26 @@ fn statements(root: &NormNode) -> &[NormNode] {
     }
 }
 
+/// Doubles as a percentage of doubles plus assertions, rounded down; 0 for neither.
+fn mock_density(case: &TestCase) -> u32 {
+    let mocks = count(case.mocks.iter());
+    let assertions = count(case.assertions.iter());
+    (100 * mocks).checked_div(mocks + assertions).unwrap_or(0)
+}
+
+/// `part` over `whole`; 0 when `whole` is.
+#[allow(
+    clippy::cast_precision_loss,
+    reason = "assertion and test counts stay far below 2^52, where f64 is exact"
+)]
+fn ratio(part: u64, whole: u64) -> f64 {
+    if whole == 0 {
+        0.0
+    } else {
+        part as f64 / whole as f64
+    }
+}
+
 fn count<T>(items: impl Iterator<Item = T>) -> u32 {
     u32::try_from(items.count()).unwrap_or(u32::MAX)
-}
-
-fn evidence<T: Serialize>(value: &T) -> Value {
-    serde_json::to_value(value).unwrap_or(Value::Null)
-}
-
-/// A finding kind whose evidence is `T`'s JSON Schema (ADR-012).
-fn kind<T: JsonSchema>(kind: &str, action: ActionKind, summary: &str) -> FindingKindSpec {
-    let schema = match schemars::schema_for!(T).to_value() {
-        Value::Object(schema) => schema,
-        _ => Map::new(),
-    };
-    FindingKindSpec {
-        kind: kind.to_owned(),
-        action,
-        summary: summary.to_owned(),
-        evidence: schema,
-    }
-}
-
-fn metric(name: &str, summary: &str) -> MetricSpec {
-    MetricSpec {
-        name: name.to_owned(),
-        summary: summary.to_owned(),
-    }
 }

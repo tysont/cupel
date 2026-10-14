@@ -296,13 +296,13 @@ fn check_verb() -> CommandDescription {
 fn survey_verb() -> CommandDescription {
     verb(
         "survey",
-        "Rank a whole tree without a baseline: hot spots, weak tests, clones.",
-        Some("P2.9"),
+        "Rank a whole tree without a baseline or gate: the worst targets per metric.",
+        None,
         scope_flags(),
         vec![example(
             "cupel survey --depth quick",
             "Find the worst hot spots quickly.",
-            ExitCode::Usage,
+            ExitCode::Pass,
         )],
     )
 }
@@ -731,13 +731,10 @@ fn scope_which_flags() -> Vec<ArgDescription> {
         ),
         switch(
             "--gate",
-            "Evaluate the gate; the default when the config has one.",
+            "Evaluate the gate for this scope; the default when the config has its table.",
         )
-        .pending("P2.9")
         .conflicts(&["--no-gate"]),
-        switch("--no-gate", "Do not evaluate the gate.")
-            .pending("P2.9")
-            .conflicts(&["--gate"]),
+        switch("--no-gate", "Do not evaluate the gate.").conflicts(&["--gate"]),
         valued(
             "--against",
             ValueType::String,

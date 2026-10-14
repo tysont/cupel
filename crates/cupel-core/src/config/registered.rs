@@ -1,6 +1,6 @@
 // ABOUTME: Validates a resolved config against the check and language registries (ADR-017).
 // ABOUTME: Parsing checks ID syntax only; this is where unknown checks, metrics, and languages are caught.
-use crate::check::{Check, CheckRegistry, Manifest};
+use crate::check::{Check, CheckRegistry, Manifest, MetricPer};
 use crate::config::file::GateSection;
 use crate::config::{Config, ConfigError};
 use crate::error::Result;
@@ -87,15 +87,22 @@ impl<'a> Registries<'a> {
     }
 }
 
-/// Rejects a gate metric the check's manifest does not declare.
+/// Rejects a gate metric the check's manifest does not declare as a `scope` metric: per-target
+/// metrics rank targets and have no one value to compare (ADR-060 §1).
 fn declared_metric(manifest: &Manifest, metric: &str, section: &str) -> Result<()> {
-    if manifest.metrics.iter().any(|spec| spec.name == metric) {
+    let gate_keys = || {
+        manifest
+            .metrics
+            .iter()
+            .filter(|spec| spec.per == MetricPer::Scope)
+    };
+    if gate_keys().any(|spec| spec.name == metric) {
         return Ok(());
     }
     Err(unregistered(
         format!("metric `{metric}` of `{}`", manifest.id),
         section,
-        manifest.metrics.iter().map(|spec| spec.name.clone()),
+        gate_keys().map(|spec| spec.name.clone()),
     ))
 }
 

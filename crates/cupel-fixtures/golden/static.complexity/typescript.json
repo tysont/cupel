@@ -6,6 +6,13 @@
       "duration_ms": "<duration-ms>",
       "findings": 4,
       "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 65.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
       "oracle": null,
       "score": {
         "n": 71,
@@ -203,6 +210,7 @@
     }
   ],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

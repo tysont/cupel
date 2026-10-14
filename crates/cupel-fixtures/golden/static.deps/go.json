@@ -6,6 +6,11 @@
       "duration_ms": "<duration-ms>",
       "findings": 3,
       "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
       "oracle": null,
       "score": {
         "n": 18,
@@ -167,6 +172,7 @@
     }
   ],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

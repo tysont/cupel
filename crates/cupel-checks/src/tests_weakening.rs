@@ -1,18 +1,20 @@
 // ABOUTME: `tests.weakening`: diffs TestFrames between a range's base and head and fails on removed and
 // ABOUTME: loosened assertions, newly skipped and deleted tests, and rewritten snapshots (ADR-056, ADR-057).
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::git::ChangeKind;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, Span, TestCase, TestFrames};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event,
-    EventSink, Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
-    MetricSpec, Plan, Result, Scope, Score, Severity, Stability, Tier,
+    EventSink, Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result,
+    Scope, Score, Severity, Stability, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
 
+use crate::manifest::{evidence, kind, metric};
+use crate::metrics::sum;
 use crate::settings::Limits;
 
 const ID: &str = "tests.weakening";
@@ -93,32 +95,36 @@ impl TestsWeakening {
                 findings: vec![
                     kind::<AssertionRemoved>(
                         "assertion.removed",
+                        ActionKind::RestoreTest,
                         "A test makes fewer assertions than at the base commit.",
                     ),
                     kind::<TestSkipped>(
                         "test.skipped",
+                        ActionKind::RestoreTest,
                         "A test that ran at the base commit is skipped or disabled.",
                     ),
                     kind::<MatcherLoosened>(
                         "matcher.loosened",
+                        ActionKind::RestoreTest,
                         "A test replaced assertions that pin one value with weaker ones \
                          (truthiness, presence, inequality).",
                     ),
                     kind::<SnapshotRewritten>(
                         "snapshot.rewritten",
+                        ActionKind::RestoreTest,
                         "A stored snapshot that existed at the base commit was changed.",
                     ),
                     kind::<TestDeleted>(
                         "test.deleted",
+                        ActionKind::RestoreTest,
                         "A test that existed at the base commit is gone.",
                     ),
                 ],
-                metrics: vec![MetricSpec {
-                    name: "weakened".to_owned(),
-                    summary: "Tests and snapshots the range weakened; the gate key \
-                              `tests.weakening = \"none\"` requires zero."
-                        .to_owned(),
-                }],
+                metrics: vec![metric(
+                    "weakened",
+                    "Tests and snapshots the range weakened; the gate key \
+                     `tests.weakening = \"none\"` requires zero.",
+                )],
                 stability: Stability::Experimental,
                 summary: "Diff of the test suite against the range's base: removed and loosened \
                           assertions, skipped and deleted tests, rewritten snapshots. Runs only \
@@ -198,12 +204,18 @@ impl Check for TestsWeakening {
                 unit: "weakened".to_owned(),
                 n: matched.iter().flatten().count() as u64,
             }),
+            metrics: BTreeMap::from([("weakened".to_owned(), value)]),
             delta: None,
             findings: count,
             duration_ms: 0,
             skipped: None,
             oracle: None,
         })
+    }
+
+    /// Weakenings add up across languages (ADR-063).
+    fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
+        sum(name, results)
     }
 
     /// The total over every language: weakenings add up (ADR-057).
@@ -586,23 +598,5 @@ fn location(file: &str, span: &Span) -> Location {
         col: Some(span.col),
         end_line: span.end_line,
         end_col: Some(span.end_col),
-    }
-}
-
-fn evidence<T: Serialize>(value: &T) -> Value {
-    serde_json::to_value(value).unwrap_or(Value::Null)
-}
-
-/// A `restore_test` finding kind whose evidence is `T`'s JSON Schema (ADR-012).
-fn kind<T: JsonSchema>(kind: &str, summary: &str) -> FindingKindSpec {
-    let schema = match schemars::schema_for!(T).to_value() {
-        Value::Object(schema) => schema,
-        _ => Map::new(),
-    };
-    FindingKindSpec {
-        kind: kind.to_owned(),
-        action: ActionKind::RestoreTest,
-        summary: summary.to_owned(),
-        evidence: schema,
     }
 }

@@ -6,6 +6,11 @@
       "duration_ms": "<duration-ms>",
       "findings": 3,
       "id": "static.clones",
+      "metrics": {
+        "clusters": 1.0,
+        "max_jaccard": 1.0,
+        "pairs": 8.0
+      },
       "oracle": null,
       "score": {
         "n": 27,
@@ -260,6 +265,7 @@
     }
   ],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

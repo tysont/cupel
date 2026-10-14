@@ -7,15 +7,16 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
-    FactKind, Facts, Finding, FindingKindSpec, LangId, Manifest, MetricSpec, Plan, Result, Scope,
-    Score, Severity, SkipReason, Skipped, Stability, SymbolHash, Tier,
+    FactKind, Facts, Finding, LangId, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score,
+    Severity, SkipReason, Skipped, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
-use serde_json::{Map, Value};
+use serde_json::Value;
 
 use crate::finding::SymbolFinding;
-use crate::metrics::cyclomatic;
+use crate::manifest::{kind, metric, ranked};
+use crate::metrics::{cyclomatic, largest, scored, symbol_target, weighted_mean};
 use crate::settings::Limits;
 
 const ID: &str = "static.crap";
@@ -70,6 +71,7 @@ impl StaticCrap {
                 metrics: vec![
                     metric("max", "The largest CRAP score in scope."),
                     metric("mean", "The mean CRAP score over the symbols in scope."),
+                    ranked("crap", MetricPer::Symbol, "CRAP per function."),
                 ],
                 stability: Stability::Experimental,
                 summary: "CRAP per function: cyclomatic complexity weighted by missing test \
@@ -131,6 +133,7 @@ impl Check for StaticCrap {
             .collect();
         let bands = Bands::of(&limits);
         let mut worst: f64 = 0.0;
+        let mut total: f64 = 0.0;
         let mut findings = 0;
         let mut flagged = false;
         for symbol in &in_scope {
@@ -139,6 +142,12 @@ impl Check for StaticCrap {
             let cyclomatic = cyclomatic(decisions.get(&key).copied().unwrap_or_default());
             let crap = crap(cyclomatic, None);
             worst = worst.max(crap);
+            total += crap;
+            sink.measure(Measurement {
+                metric: "crap".to_owned(),
+                value: crap,
+                target: symbol_target(symbol, hashes.get(&key).copied()),
+            });
             // A symbol without a structural hash cannot be identified, so it is scored but not
             // reported; every language producing NormTree hashes every symbol.
             let Some(hash) = hashes.get(&key) else {
@@ -178,6 +187,10 @@ impl Check for StaticCrap {
                 unit: "max".to_owned(),
                 n: in_scope.len() as u64,
             }),
+            metrics: BTreeMap::from([
+                ("max".to_owned(), worst),
+                ("mean".to_owned(), mean(total, in_scope.len())),
+            ]),
             delta: None,
             findings,
             duration_ms: 0,
@@ -194,6 +207,28 @@ impl Check for StaticCrap {
             unit: first.unit.clone(),
             n: scores.iter().map(|score| score.n).sum(),
         })
+    }
+
+    /// `max` is the largest; `mean` is the mean over every language's scored symbols
+    /// (ADR-063).
+    fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
+        match name {
+            "mean" => weighted_mean(name, results, scored),
+            _ => largest(name, results),
+        }
+    }
+}
+
+/// `total` over `count` symbols; 0 for none.
+#[allow(
+    clippy::cast_precision_loss,
+    reason = "symbol counts stay far below 2^52, where f64 is exact"
+)]
+fn mean(total: f64, count: usize) -> f64 {
+    if count == 0 {
+        0.0
+    } else {
+        total / count as f64
     }
 }
 
@@ -236,6 +271,7 @@ impl StaticCrap {
             tier: self.manifest.tier,
             cost: self.manifest.cost,
             score: None,
+            metrics: BTreeMap::new(),
             delta: None,
             findings: 0,
             duration_ms: 0,
@@ -333,25 +369,4 @@ fn coverage_text(coverage: Option<f64>) -> String {
         || "coverage not measured".to_owned(),
         |coverage| format!("{:.0}% coverage", coverage * 100.0),
     )
-}
-
-/// A finding kind whose evidence is `T`'s JSON Schema (ADR-012).
-fn kind<T: JsonSchema>(kind: &str, action: ActionKind, summary: &str) -> FindingKindSpec {
-    let schema = match schemars::schema_for!(T).to_value() {
-        Value::Object(schema) => schema,
-        _ => Map::new(),
-    };
-    FindingKindSpec {
-        kind: kind.to_owned(),
-        action,
-        summary: summary.to_owned(),
-        evidence: schema,
-    }
-}
-
-fn metric(name: &str, summary: &str) -> MetricSpec {
-    MetricSpec {
-        name: name.to_owned(),
-        summary: summary.to_owned(),
-    }
 }

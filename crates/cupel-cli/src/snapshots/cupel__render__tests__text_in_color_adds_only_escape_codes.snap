@@ -64,13 +64,20 @@ cupel check: [1;31mfail[0m (exit 1)
 
 [1mgate      [0m[31mfail[0m (gate.changed)
   [31mfail[0m  tests.mutation.score >= 0.80  actual 0.71
-  [32mpass[0m  tests.weakening none
+  [32mpass[0m  tests.weakening none  actual 0
+  [33mskipped[0m  perf.bench.regression < 5%
 
 [1msummary   [0m3 findings · fail 6 · warn 9 · info 22 · new 4 · resolved 2 · suppressed 1
 
 [1mchecks[0m
-  tests.mutation  fail     tier 3 · standard · score 0.71 killed_ratio (n 34) · delta -0.12 vs baseline · 2 findings · 41000 ms · oracle pg
+  tests.mutation  fail     tier 3 · standard · score 0.71 killed_ratio (n 34) · metrics score 0.71, survivors 10 · delta -0.12 vs baseline · 2 findings · 41000 ms · oracle pg
   perf.bench      skipped  tier 5 · exhaustive · 0 findings · 0 ms · skipped: unavailable (fact symbols, lang go, tool cargo-criterion, see `cupel doctor`)
+
+[1mrankings[0m  top 10 per dimension
+  static.crap.crap  symbol · 11 measured · CRAP score per function.
+     1. 42.5  rewrite::Planner::push_limit  [2mrust · src/rewrite/planner.rs:140:5-171:6 · sh_4b1d9e0c4b1d9e01[0m
+     2. 12  web/limits  [2mtypescript[0m
+  static.deps.coupling  module · 0 measured · Afferent plus efferent coupling per module.
 
 [1;31mfail (2)[0m
   [1mtests.mutation[0m

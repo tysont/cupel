@@ -248,7 +248,7 @@ pub fn complexity_finding(id: &str, line: u32, end_line: u32) -> Value {
 pub fn complexity_check(score: f64) -> Value {
     json!({
         "id": "static.complexity", "status": "pass", "tier": 1, "cost": "quick",
-        "score": {"value": score, "unit": "ratio", "n": 4},
+        "score": {"value": score, "unit": "ratio", "n": 4}, "metrics": {},
         "delta": null, "findings": 1, "duration_ms": 3, "skipped": null, "oracle": null
     })
 }

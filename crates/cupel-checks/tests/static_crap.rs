@@ -1,5 +1,7 @@
 // ABOUTME: static.crap over synthetic facts: CRAP from cyclomatic complexity with coverage counted as zero,
 // ABOUTME: its bands, the skip without `no_coverage`, test-file hints, settings, scope, and the score (ADR-048).
+mod support;
+
 use std::collections::BTreeSet;
 
 use cupel_checks::register;
@@ -10,10 +12,11 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    Error, Event, FactKind, Facts, Finding, FindingId, LangId, Plan, Scope, Score, Severity,
+    Error, FactKind, Facts, Finding, FindingId, LangId, MetricPer, Plan, Scope, Score, Severity,
     SkipReason, SymbolHash, Writer,
 };
 use serde_json::{Map, Value, json};
+use support::{Recorded, combined, language};
 
 const ID: &str = "static.crap";
 
@@ -153,22 +156,21 @@ fn run(world: &World, config: Value) -> (CheckResult, Vec<Finding>) {
 }
 
 fn run_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Vec<Finding>) {
+    let (result, recorded) = recorded_in(world, scope, config);
+    (result, recorded.findings)
+}
+
+/// Runs the check over `world`; its result and every finding and measurement it reported.
+fn recorded_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Recorded) {
     let registry = registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let (ctx, _dir) = ctx(scope, config);
     let plan = check.plan(&ctx, &ctx.scope).unwrap();
-    let mut events = Vec::new();
+    let mut recorded = Recorded::default();
     let result = check
-        .run(&ctx, &world.facts(check), &plan, &mut events)
+        .run(&ctx, &world.facts(check), &plan, &mut recorded)
         .unwrap();
-    let findings = events
-        .into_iter()
-        .filter_map(|event| match event {
-            Event::Finding(finding) => Some(*finding),
-            _ => None,
-        })
-        .collect();
-    (result, findings)
+    (result, recorded)
 }
 
 fn kinds(findings: &[Finding]) -> Vec<(String, String)> {
@@ -203,8 +205,19 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("crap.watch", ActionKind::Review),
         ]
     );
-    let metrics: Vec<&str> = manifest.metrics.iter().map(|m| m.name.as_str()).collect();
-    assert_eq!(metrics, ["max", "mean"]);
+    let metrics: Vec<(&str, MetricPer)> = manifest
+        .metrics
+        .iter()
+        .map(|m| (m.name.as_str(), m.per))
+        .collect();
+    assert_eq!(
+        metrics,
+        [
+            ("max", MetricPer::Scope),
+            ("mean", MetricPer::Scope),
+            ("crap", MetricPer::Symbol),
+        ]
+    );
     for spec in &manifest.findings {
         assert_eq!(spec.evidence["type"], json!("object"), "{}", spec.kind);
     }
@@ -445,4 +458,70 @@ fn scores_combine_by_maximum_across_languages() {
         Some(score(42.0, 11))
     );
     assert_eq!(check.combine(&[]), None);
+}
+
+#[test]
+fn the_result_reports_the_largest_and_mean_crap_of_the_scored_symbols() {
+    let mut test = symbol("test_risky", 30);
+    test.file = "f_test.x".to_owned();
+    let mut world = World::of(vec![
+        (symbol("risky", 1), branches(6)),
+        (symbol("straight", 10), branches(1)),
+        (test, branches(8)),
+    ]);
+    world.conventions = Some(TestConventions {
+        test_globs: vec!["**/*_test.x".to_owned()],
+        pairs: vec![],
+    });
+    let (result, _) = run(&world, cc_only(json!({})));
+    assert_eq!(
+        result.metrics,
+        [("max".to_owned(), 42.0), ("mean".to_owned(), 22.0)].into(),
+        "CRAP 42 and 2; the test file is not scored"
+    );
+    let (empty, _) = run(&World::of(vec![]), cc_only(json!({})));
+    assert_eq!(
+        empty.metrics,
+        [("max".to_owned(), 0.0), ("mean".to_owned(), 0.0)].into()
+    );
+    let (skipped, _) = run(&world, json!({}));
+    assert!(
+        skipped.metrics.is_empty(),
+        "a skipped language measured nothing"
+    );
+}
+
+#[test]
+fn each_scored_symbol_is_measured_for_the_crap_ranking() {
+    let world = World::of(vec![
+        (symbol("risky", 1), branches(6)),
+        (symbol("straight", 10), branches(1)),
+    ]);
+    let (_, recorded) = recorded_in(&world, world.scope(), cc_only(json!({})));
+    assert_eq!(
+        recorded.measured(),
+        [("crap", "m::risky", 42.0), ("crap", "m::straight", 2.0)]
+    );
+    let risky = &recorded.measurements[0].target;
+    assert_eq!(risky.symbol, Some(hash_of(1)));
+    let location = risky.location.as_ref().unwrap();
+    assert_eq!((location.file.as_str(), location.line), ("f.x", 1));
+}
+
+#[test]
+fn max_combines_by_the_largest_and_mean_by_the_mean_over_every_symbol() {
+    let registry = registry();
+    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let results = [
+        language(check, &[("max", 42.0), ("mean", 10.0)], 1),
+        language(check, &[("max", 30.0), ("mean", 40.0)], 3),
+    ];
+    assert_eq!(combined(check, "max", &results), Some(42.0));
+    assert_eq!(
+        combined(check, "mean", &results),
+        Some(32.5),
+        "(10 × 1 + 40 × 3) / 4"
+    );
+    let empty = [language(check, &[("max", 0.0), ("mean", 0.0)], 0)];
+    assert_eq!(combined(check, "mean", &empty), Some(0.0));
 }

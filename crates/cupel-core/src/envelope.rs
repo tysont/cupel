@@ -16,6 +16,7 @@ use crate::finding::{ActionKind, Finding};
 use crate::grade::{CostClass, Tier};
 use crate::hash::FindingId;
 use crate::id::{CheckId, LangId, RunId, ToolId};
+use crate::rank::Rankings;
 
 /// The single output shape of every verb.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -34,6 +35,8 @@ pub struct Envelope {
     pub plan: Option<RunPlan>,
     /// What `explain` adds to the finding or check result it returns; null for every other verb.
     pub explanation: Option<Explanation>,
+    /// What `survey` ranks: the worst targets per dimension; null for every other verb (ADR-062).
+    pub rankings: Option<Rankings>,
     /// True when paging (`--limit`/`--offset`) left findings out.
     pub truncated: bool,
     pub total_findings: u64,
@@ -281,6 +284,10 @@ pub struct CheckResult {
     pub tier: Tier,
     pub cost: CostClass,
     pub score: Option<Score>,
+    /// The value of each `scope` metric the check measured, by metric name; the gate reads
+    /// them as `<check-id>.<metric>` (ADR-060).
+    #[serde(default)]
+    pub metrics: BTreeMap<String, f64>,
     pub delta: Option<Delta>,
     /// Number of findings this check produced.
     pub findings: u64,
@@ -372,9 +379,21 @@ pub struct GateResult {
 pub struct GateRule {
     /// The rule as written, such as `tests.mutation.score >= 0.80`.
     pub rule: String,
-    /// The measured value; null when the metric was not produced.
+    /// The measured value; null when the rule could not be evaluated.
     pub actual: Option<f64>,
-    pub result: GateOutcome,
+    pub result: RuleOutcome,
+}
+
+/// One gate rule's result (ADR-060 §6). Only `pass` passes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum RuleOutcome {
+    Pass,
+    Fail,
+    /// The rule's check did not run to completion here, or did not report the metric.
+    Skipped,
+    /// The rule's operator cannot be evaluated yet (`no-breaking`).
+    Unsupported,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]

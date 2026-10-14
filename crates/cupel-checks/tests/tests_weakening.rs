@@ -1,5 +1,7 @@
 // ABOUTME: tests.weakening over synthetic base and head TestFrames: matching (repeats, moves), the five
 // ABOUTME: kinds and their combinations, snapshot attribution, identity, settings, and the score (ADR-057).
+mod support;
+
 use cupel_checks::register;
 use cupel_core::git::{Change, ChangeKind};
 use cupel_core::syntax::{
@@ -10,6 +12,7 @@ use cupel_core::{
     Facts, Finding, FindingId, Produced, Range, Scope, Score, Writer,
 };
 use serde_json::{Value, json};
+use support::{combined, language};
 
 const ID: &str = "tests.weakening";
 
@@ -162,6 +165,7 @@ fn an_unchanged_suite_reports_nothing_and_scores_zero_over_the_tests_compared() 
     let (result, findings) = run(suite(), suite(), vec![]);
     assert_eq!(findings, []);
     assert_eq!(result.status, CheckStatus::Pass);
+    assert_eq!(result.metrics, [("weakened".to_owned(), 0.0)].into());
     assert_eq!(
         result.score,
         Some(Score {
@@ -246,10 +250,15 @@ fn trading_exact_assertions_for_fewer_weak_ones_is_both_removed_and_loosened() {
         vec![case("t", 1, vec![strong(), strong(), strong()])],
     )]);
     let head = frames(vec![("t.x", vec![case("t", 1, vec![weak(), strong()])])]);
-    let (_, findings) = run(base, head, vec![]);
+    let (result, findings) = run(base, head, vec![]);
     assert_eq!(
         kinds(&findings),
         [("assertion.removed", "t"), ("matcher.loosened", "t")]
+    );
+    assert_eq!(
+        result.metrics,
+        [("weakened".to_owned(), 2.0)].into(),
+        "the gate key counts every weakening"
     );
     assert_eq!(
         Value::Object(findings[1].evidence.0.clone()),
@@ -406,4 +415,9 @@ fn languages_combine_by_summing_weakenings() {
         check.combine(&[score(2.0, 10), score(1.0, 1)]),
         Some(score(3.0, 11))
     );
+    let results = [
+        language(check, &[("weakened", 2.0)], 10),
+        language(check, &[("weakened", 1.0)], 1),
+    ];
+    assert_eq!(combined(check, "weakened", &results), Some(3.0));
 }

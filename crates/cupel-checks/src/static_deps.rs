@@ -6,13 +6,16 @@ use cupel_core::config::{ConfigError, Table};
 use cupel_core::syntax::{ApiItemKind, ApiSurface, ImportTarget, ModuleGraph};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event,
-    EventSink, Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
-    MetricSpec, Plan, Result, Scope, Score, Severity, Stability, Tier,
+    EventSink, Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Measurement,
+    MetricPer, Plan, Result, Scope, Score, Severity, Stability, Target, Tier,
 };
 use globset::{GlobBuilder, GlobMatcher};
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
+
+use crate::manifest::{evidence, kind, metric, ranked};
+use crate::metrics::{largest, sum};
 
 const ID: &str = "static.deps";
 
@@ -114,6 +117,22 @@ impl StaticDeps {
                          declares a type and has a coupling.",
                     ),
                     metric("violations", "Imports that break a layering rule."),
+                    ranked(
+                        "distance",
+                        MetricPer::Module,
+                        "Distance from the main sequence per module that declares a type and \
+                         has a coupling.",
+                    ),
+                    ranked(
+                        "coupling",
+                        MetricPer::Module,
+                        "Afferent plus efferent coupling per module.",
+                    ),
+                    ranked(
+                        "cycle_size",
+                        MetricPer::Group,
+                        "Modules in each import cycle.",
+                    ),
                 ],
                 stability: Stability::Experimental,
                 summary: "Module graph: import cycles, afferent and efferent coupling, \
@@ -149,13 +168,22 @@ impl Check for StaticDeps {
         let mut findings = Vec::new();
         let components = graph.cycles();
         for members in &components {
-            findings.push(self.cycle(&graph, members));
+            let (finding, size) = self.cycle(&graph, members);
+            findings.push(finding);
+            sink.measure(size);
         }
+        let mut violations = 0;
         if let Some(layers) = &settings.layers {
-            findings.extend(self.violations(&graph, layers));
+            let found = self.violations(&graph, layers);
+            violations = found.len();
+            findings.extend(found);
         }
         ctx.cancel.checkpoint()?;
+        let mut max_distance: f64 = 0.0;
         for module in &graph.modules {
+            if let Some(distance) = measure_module(&graph, &types, module, sink) {
+                max_distance = max_distance.max(distance);
+            }
             if let Some(finding) = self.unstable_abstract(&graph, &types, module, &settings) {
                 findings.push(finding);
             }
@@ -178,6 +206,11 @@ impl Check for StaticDeps {
                 unit: "cycles".to_owned(),
                 n: graph.modules.len() as u64,
             }),
+            metrics: BTreeMap::from([
+                ("cycles".to_owned(), as_value(components.len())),
+                ("max_distance".to_owned(), max_distance),
+                ("violations".to_owned(), as_value(violations)),
+            ]),
             delta: None,
             findings: count,
             duration_ms: 0,
@@ -195,10 +228,61 @@ impl Check for StaticDeps {
             n: scores.iter().map(|score| score.n).sum(),
         })
     }
+
+    /// Cycles and violations add up across languages; `max_distance` is the largest (ADR-063).
+    fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
+        match name {
+            "max_distance" => largest(name, results),
+            _ => sum(name, results),
+        }
+    }
+}
+
+/// Reports `module`'s coupling and, where defined, its distance from the main sequence for
+/// `survey`'s rankings (ADR-062); the distance, rounded as in evidence.
+fn measure_module(
+    graph: &Graph,
+    types: &TypeCounts,
+    module: &str,
+    sink: &mut dyn EventSink,
+) -> Option<f64> {
+    let coupling = graph.coupling(module);
+    let target = Target {
+        display: module.to_owned(),
+        symbol: None,
+        location: Some(Location {
+            file: module.to_owned(),
+            line: 1,
+            col: None,
+            end_line: 1,
+            end_col: None,
+        }),
+    };
+    sink.measure(Measurement {
+        metric: "coupling".to_owned(),
+        value: f64::from(coupling.afferent + coupling.efferent),
+        target: target.clone(),
+    });
+    let distance = rounded(Martin::of(&coupling, types.module(module))?.distance);
+    sink.measure(Measurement {
+        metric: "distance".to_owned(),
+        value: distance,
+        target,
+    });
+    Some(distance)
+}
+
+#[allow(
+    clippy::cast_precision_loss,
+    reason = "cycle and violation counts stay far below 2^52, where f64 is exact"
+)]
+fn as_value(n: usize) -> f64 {
+    n as f64
 }
 
 impl StaticDeps {
-    fn cycle(&self, graph: &Graph, members: &[String]) -> Finding {
+    /// The cycle's finding, and its size for `survey`'s rankings (ADR-062).
+    fn cycle(&self, graph: &Graph, members: &[String]) -> (Finding, Measurement) {
         let cycle = graph.shortest_cycle(members);
         let line = graph.line(&cycle[0], &cycle[1 % cycle.len()]);
         let path = cycle
@@ -207,7 +291,7 @@ impl StaticDeps {
             .map(String::as_str)
             .collect::<Vec<_>>()
             .join(" → ");
-        self.report(Report {
+        let finding = self.report(Report {
             kind: "dep.cycle",
             subject: members.join("\n"),
             file: cycle[0].clone(),
@@ -222,7 +306,17 @@ impl StaticDeps {
                 modules: members.to_vec(),
                 cycle,
             }),
-        })
+        });
+        let size = Measurement {
+            metric: "cycle_size".to_owned(),
+            value: as_value(members.len()),
+            target: Target {
+                display: path,
+                symbol: None,
+                location: finding.location.clone(),
+            },
+        };
+        (finding, size)
     }
 
     fn violations(&self, graph: &Graph, layers: &Layers) -> Vec<Finding> {
@@ -751,31 +845,6 @@ impl Layers {
 /// Ratios in evidence are rounded to three decimals, so goldens do not depend on float noise.
 fn rounded(ratio: f64) -> f64 {
     (ratio * 1000.0).round() / 1000.0
-}
-
-fn evidence<T: Serialize>(value: &T) -> Value {
-    serde_json::to_value(value).unwrap_or(Value::Null)
-}
-
-/// A finding kind whose evidence is `T`'s JSON Schema (ADR-012).
-fn kind<T: JsonSchema>(kind: &str, action: ActionKind, summary: &str) -> FindingKindSpec {
-    let schema = match schemars::schema_for!(T).to_value() {
-        Value::Object(schema) => schema,
-        _ => Map::new(),
-    };
-    FindingKindSpec {
-        kind: kind.to_owned(),
-        action,
-        summary: summary.to_owned(),
-        evidence: schema,
-    }
-}
-
-fn metric(name: &str, summary: &str) -> MetricSpec {
-    MetricSpec {
-        name: name.to_owned(),
-        summary: summary.to_owned(),
-    }
 }
 
 #[cfg(test)]

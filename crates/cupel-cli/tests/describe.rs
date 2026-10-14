@@ -72,12 +72,12 @@ fn describe_cli_lists_every_verb_exit_code_and_schema() {
 
 #[test]
 fn describe_verb_describes_its_arguments_and_pending_step() {
-    let outcome = run(["describe", "survey"]);
+    let outcome = run(["describe", "tests"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["description"]["subject"], json!("command"));
-    assert_eq!(envelope["description"]["name"], json!("survey"));
-    assert_eq!(envelope["description"]["pending_step"], json!("P2.9"));
+    assert_eq!(envelope["description"]["name"], json!("tests"));
+    assert_eq!(envelope["description"]["pending_step"], json!("P3.3"));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
 }
 

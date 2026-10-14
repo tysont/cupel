@@ -75,6 +75,10 @@ expression: out
         "unit": "killed_ratio",
         "n": 34
       },
+      "metrics": {
+        "score": 0.71,
+        "survivors": 10.0
+      },
       "delta": {
         "vs": "baseline",
         "value": -0.12
@@ -90,6 +94,7 @@ expression: out
       "tier": 5,
       "cost": "exhaustive",
       "score": null,
+      "metrics": {},
       "delta": null,
       "findings": 0,
       "duration_ms": 0,
@@ -278,8 +283,13 @@ expression: out
         },
         {
           "rule": "tests.weakening none",
-          "actual": null,
+          "actual": 0.0,
           "result": "pass"
+        },
+        {
+          "rule": "perf.bench.regression < 5%",
+          "actual": null,
+          "result": "skipped"
         }
       ]
     }
@@ -457,6 +467,54 @@ expression: out
         "symbol": null,
         "key": "score",
         "value": 0.71
+      }
+    ]
+  },
+  "rankings": {
+    "top": 10,
+    "dimensions": [
+      {
+        "check": "static.crap",
+        "metric": "crap",
+        "per": "symbol",
+        "summary": "CRAP score per function.",
+        "measured": 11,
+        "entries": [
+          {
+            "rank": 1,
+            "value": 42.5,
+            "lang": "rust",
+            "target": {
+              "display": "rewrite::Planner::push_limit",
+              "symbol": "sh_4b1d9e0c4b1d9e01",
+              "location": {
+                "file": "src/rewrite/planner.rs",
+                "line": 140,
+                "col": 5,
+                "end_line": 171,
+                "end_col": 6
+              }
+            }
+          },
+          {
+            "rank": 2,
+            "value": 12.0,
+            "lang": "typescript",
+            "target": {
+              "display": "web/limits",
+              "symbol": null,
+              "location": null
+            }
+          }
+        ]
+      },
+      {
+        "check": "static.deps",
+        "metric": "coupling",
+        "per": "module",
+        "summary": "Afferent plus efferent coupling per module.",
+        "measured": 0,
+        "entries": []
       }
     ]
   },

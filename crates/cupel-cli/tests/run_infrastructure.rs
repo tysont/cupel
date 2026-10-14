@@ -30,7 +30,7 @@ fn names(events: &[Value]) -> Vec<&str> {
 #[test]
 fn a_run_writes_its_envelope_to_the_run_record_equal_to_stdout() {
     let repo = Repo::new();
-    let outcome = repo.run(&["survey"]);
+    let outcome = repo.run(&["tests"]);
     let envelope = outcome.envelope();
     let id = envelope["run"]["id"].as_str().unwrap();
     let record = fs::read_to_string(repo.path(&format!(".cupel/runs/{id}.json"))).unwrap();
@@ -41,7 +41,7 @@ fn a_run_writes_its_envelope_to_the_run_record_equal_to_stdout() {
 #[test]
 fn the_run_record_is_json_whatever_the_format_and_holds_every_finding() {
     let repo = Repo::new();
-    let outcome = repo.run(&["survey", "--format", "text", "--limit", "0"]);
+    let outcome = repo.run(&["tests", "--format", "text", "--limit", "0"]);
     assert!(
         outcome.stdout.contains("error (exit 2)"),
         "{}",
@@ -59,7 +59,7 @@ fn the_run_record_is_json_whatever_the_format_and_holds_every_finding() {
 #[test]
 fn creating_cupel_also_writes_its_gitignore() {
     let repo = Repo::new();
-    repo.run(&["survey"]);
+    repo.run(&["tests"]);
     assert_eq!(
         fs::read_to_string(repo.path(".cupel/.gitignore")).unwrap(),
         "*\n!suppressions.toml\n"
@@ -69,7 +69,7 @@ fn creating_cupel_also_writes_its_gitignore() {
 #[test]
 fn describe_writes_no_run_record() {
     let repo = Repo::new();
-    for args in [&["describe"][..], &["survey", "--describe"][..]] {
+    for args in [&["describe"][..], &["tests", "--describe"][..]] {
         assert_eq!(repo.run(args).code, 0);
     }
     assert!(repo.tree().is_empty(), "{:?}", repo.tree());
@@ -98,7 +98,7 @@ fn a_dry_run_is_a_plan_envelope_and_writes_nothing() {
 #[test]
 fn a_dry_run_of_a_pending_verb_is_still_not_implemented_and_writes_nothing() {
     let repo = Repo::new();
-    let outcome = repo.run(&["survey", "--dry-run"]);
+    let outcome = repo.run(&["tests", "--dry-run"]);
     assert_eq!(outcome.code, 2);
     assert_eq!(outcome.finding()["kind"], json!("cli.not-implemented"));
     assert!(repo.tree().is_empty(), "{:?}", repo.tree());
@@ -134,7 +134,7 @@ fn a_dry_run_streams_plan_then_run_end() {
 #[test]
 fn a_run_streams_run_end_with_the_envelope_status_and_exit_code() {
     let repo = Repo::new();
-    let outcome = repo.run(&["survey", "--events", ".cupel/events.jsonl"]);
+    let outcome = repo.run(&["tests", "--events", ".cupel/events.jsonl"]);
     assert_eq!(outcome.code, 2);
     assert_eq!(
         events(&repo, ".cupel/events.jsonl"),
@@ -202,7 +202,7 @@ fn without_a_seed_a_random_non_zero_seed_is_drawn_per_run() {
 #[test]
 fn the_seed_is_in_the_run_record() {
     let repo = Repo::new();
-    let envelope = repo.run(&["survey", "--seed", "7"]).envelope();
+    let envelope = repo.run(&["tests", "--seed", "7"]).envelope();
     let id = envelope["run"]["id"].as_str().unwrap();
     let record: Value = serde_json::from_str(
         &fs::read_to_string(repo.path(&format!(".cupel/runs/{id}.json"))).unwrap(),

@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::envelope::{CheckStatus, ExitCode, SkipReason, Status};
 use crate::finding::Finding;
 use crate::id::{CheckId, RunId};
+use crate::rank::Measurement;
 
 /// A progress event. Findings stream as they are discovered.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -46,6 +47,10 @@ pub enum Event {
 /// accumulates the envelope.
 pub trait EventSink {
     fn emit(&mut self, event: Event);
+
+    /// Reports one per-target value for `survey`'s rankings (ADR-062). It is not an event and
+    /// never reaches `--events`; sinks other than the scheduler's ignore it.
+    fn measure(&mut self, _measurement: Measurement) {}
 }
 
 /// Collects events in order.

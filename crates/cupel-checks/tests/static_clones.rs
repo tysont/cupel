@@ -1,5 +1,7 @@
 // ABOUTME: static.clones over synthetic facts: pairs, clusters, clone types, settings, scope, family-wide
 // ABOUTME: comparison, finding identity, and deterministic order (ADR-050).
+mod support;
+
 use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
@@ -7,9 +9,10 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Cancellation, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus, Error,
-    Event, FactKind, Facts, Finding, FindingId, LangId, Scope, SiteHash, SymbolHash, Writer,
+    FactKind, Facts, Finding, FindingId, LangId, MetricPer, Scope, SiteHash, SymbolHash, Writer,
 };
 use serde_json::{Value, json};
+use support::{Recorded, combined, language};
 
 const ID: &str = "static.clones";
 
@@ -207,20 +210,23 @@ fn run_with(
     scope: Scope,
     config: Value,
 ) -> cupel_core::Result<(CheckResult, Vec<Finding>)> {
+    let (result, recorded) = recorded_with(facts, scope, config)?;
+    Ok((result, recorded.findings))
+}
+
+/// Runs the check; its result and every finding and measurement it reported.
+fn recorded_with(
+    facts: &Facts,
+    scope: Scope,
+    config: Value,
+) -> cupel_core::Result<(CheckResult, Recorded)> {
     let registry = registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let (ctx, _dir) = ctx(scope, config);
     let plan = check.plan(&ctx, &ctx.scope)?;
-    let mut events = Vec::new();
-    let result = check.run(&ctx, facts, &plan, &mut events)?;
-    let findings = events
-        .into_iter()
-        .filter_map(|event| match event {
-            Event::Finding(finding) => Some(*finding),
-            _ => None,
-        })
-        .collect();
-    Ok((result, findings))
+    let mut recorded = Recorded::default();
+    let result = check.run(&ctx, facts, &plan, &mut recorded)?;
+    Ok((result, recorded))
 }
 
 fn run(defs: &[Def]) -> (CheckResult, Vec<Finding>) {
@@ -270,8 +276,20 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("clone.cluster", ActionKind::RefactorExtract),
         ]
     );
-    let metrics: Vec<&str> = manifest.metrics.iter().map(|m| m.name.as_str()).collect();
-    assert_eq!(metrics, ["pairs", "clusters", "max_jaccard"]);
+    let metrics: Vec<(&str, MetricPer)> = manifest
+        .metrics
+        .iter()
+        .map(|m| (m.name.as_str(), m.per))
+        .collect();
+    assert_eq!(
+        metrics,
+        [
+            ("pairs", MetricPer::Scope),
+            ("clusters", MetricPer::Scope),
+            ("max_jaccard", MetricPer::Scope),
+            ("cluster_size", MetricPer::Group),
+        ]
+    );
     assert!(check.spans_family());
 }
 
@@ -587,4 +605,98 @@ fn findings_do_not_depend_on_the_order_of_the_facts() {
     let ids = |findings: Vec<Finding>| findings.into_iter().map(|f| f.id).collect::<Vec<_>>();
     assert_eq!(ids(run(&defs).1), ids(run(&reversed).1));
     assert_eq!(run(&defs).1.len(), 2);
+}
+
+const OTHER_OPERATORS: [&str; 12] = [
+    "&", "|", "^", "<<", "&", ">>", "|", "^", "&", "<<", ">>", "|",
+];
+
+/// A cluster of three (`one`, `two`, `three`) and, unrelated to it, a pair (`four`, `five`).
+fn a_cluster_and_a_pair() -> [Def; 5] {
+    let mut changed = body(&OPERATORS);
+    changed[0] = statement("<<");
+    [
+        def("a.x", "one", 1, function(body(&OPERATORS))),
+        def("a.x", "two", 20, function(body(&OPERATORS))),
+        def("c.x", "three", 1, function(changed)),
+        def("d.x", "four", 1, function(body(&OTHER_OPERATORS))),
+        def("d.x", "five", 20, function(body(&OTHER_OPERATORS))),
+    ]
+}
+
+#[test]
+fn the_result_counts_pairs_and_clusters_of_the_reported_groups() {
+    let defs = a_cluster_and_a_pair();
+    let facts = facts(&defs, &[]);
+    let (all, findings) = run_with(&facts, every_symbol(&[&defs]), json!({})).unwrap();
+    assert_eq!(findings.len(), 2, "{findings:#?}");
+    assert_eq!(
+        all.metrics,
+        [
+            ("clusters".to_owned(), 1.0),
+            ("max_jaccard".to_owned(), 1.0),
+            ("pairs".to_owned(), 4.0),
+        ]
+        .into(),
+        "three pairs in the cluster and the pair"
+    );
+    let only = |defs: &[&Def]| Scope {
+        files: vec!["a.x".to_owned(), "c.x".to_owned(), "d.x".to_owned()],
+        symbols: Some(defs.iter().map(|def| def.symbol().key()).collect()),
+    };
+    let (pair, _) = run_with(&facts, only(&[&defs[4]]), json!({})).unwrap();
+    assert_eq!(
+        pair.metrics,
+        [
+            ("clusters".to_owned(), 0.0),
+            ("max_jaccard".to_owned(), 1.0),
+            ("pairs".to_owned(), 1.0),
+        ]
+        .into()
+    );
+    let (none, _) = run_with(&facts, only(&[]), json!({})).unwrap();
+    assert!(
+        none.metrics.values().all(|value| *value == 0.0),
+        "{:?}",
+        none.metrics
+    );
+}
+
+#[test]
+fn each_reported_group_is_measured_by_its_members_for_the_cluster_ranking() {
+    let defs = a_cluster_and_a_pair();
+    let (_, recorded) =
+        recorded_with(&facts(&defs, &[]), every_symbol(&[&defs]), json!({})).unwrap();
+    assert_eq!(
+        recorded.measured(),
+        [
+            ("cluster_size", "m::one and 2 others", 3.0),
+            ("cluster_size", "m::four and 1 other", 2.0),
+        ]
+    );
+    let cluster = &recorded.measurements[0].target;
+    assert_eq!(cluster.symbol, None, "a group is not a symbol");
+    let location = cluster.location.as_ref().unwrap();
+    assert_eq!((location.file.as_str(), location.line), ("a.x", 1));
+}
+
+#[test]
+fn counts_add_up_across_families_and_similarity_takes_the_largest() {
+    let registry = registry();
+    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let results = [
+        language(
+            check,
+            &[("pairs", 3.0), ("clusters", 1.0), ("max_jaccard", 0.9)],
+            10,
+        ),
+        language(
+            check,
+            &[("pairs", 2.0), ("clusters", 0.0), ("max_jaccard", 1.0)],
+            5,
+        ),
+    ];
+    assert_eq!(combined(check, "pairs", &results), Some(5.0));
+    assert_eq!(combined(check, "clusters", &results), Some(1.0));
+    assert_eq!(combined(check, "max_jaccard", &results), Some(1.0));
 }

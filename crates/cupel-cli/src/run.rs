@@ -157,6 +157,7 @@ impl Run {
             description,
             plan: None,
             explanation: None,
+            rankings: None,
             truncated: false,
             total_findings,
         }
@@ -164,7 +165,7 @@ impl Run {
 }
 
 /// Quotes an argument for a POSIX shell when it contains anything but safe characters.
-fn shell_quote(arg: &str) -> String {
+pub(crate) fn shell_quote(arg: &str) -> String {
     let safe = !arg.is_empty()
         && arg
             .chars()

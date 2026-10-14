@@ -4,6 +4,7 @@
     clippy::unnecessary_wraps,
     reason = "test checks share the `Check::run` signature, which returns a Result"
 )]
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -15,9 +16,9 @@ use cupel_core::{
     Action, ActionKind, Availability, BaseTree, Cancellation, Check, CheckCtx, CheckId,
     CheckRegistry, CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence,
     Fact, FactKind, Facts, Finding, FindingId, Job, Lang, LangFamily, LangId, Langs, Location,
-    Manifest, Outcome, Plan, ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result,
-    RunId, Scheduler, Scope, Score, Severity, SkipReason, Skipped, Stability, SymbolSelector, Tier,
-    Writer, next_actions,
+    Manifest, Measurement, Outcome, Plan, ProduceCtx, Producer, ProducerId, ProducerRegistry,
+    Range, Result, RunId, Scheduler, Scope, Score, Severity, SkipReason, Skipped, Stability,
+    SymbolSelector, Target, Tier, Writer,
 };
 
 // ---------------------------------------------------------------- fixtures
@@ -141,6 +142,8 @@ struct TestCheck {
     manifest: Manifest,
     body: Body,
     spans_family: bool,
+    /// Combine `scope` metrics by the mean weighted by each language's `score.n`.
+    weighted: bool,
 }
 
 impl Check for TestCheck {
@@ -166,6 +169,26 @@ impl Check for TestCheck {
     fn spans_family(&self) -> bool {
         self.spans_family
     }
+
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "test counts are tiny, where f64 is exact"
+    )]
+    fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
+        if !self.weighted {
+            return results
+                .iter()
+                .map(|result| result.metrics[name])
+                .reduce(f64::max);
+        }
+        let n = |result: &CheckResult| result.score.as_ref().map_or(0, |score| score.n) as f64;
+        let total: f64 = results.iter().map(|result| n(result)).sum();
+        let weighted: f64 = results
+            .iter()
+            .map(|result| result.metrics[name] * n(result))
+            .sum();
+        Some(weighted / total)
+    }
 }
 
 fn manifest(id: &str, needs: &[FactKind]) -> Manifest {
@@ -190,6 +213,7 @@ fn passing(id: &str, score: Option<Score>) -> CheckResult {
         tier: Tier::try_from(0).unwrap(),
         cost: CostClass::Quick,
         score,
+        metrics: BTreeMap::new(),
         delta: None,
         findings: 0,
         duration_ms: 0,
@@ -203,6 +227,7 @@ fn check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
         manifest: manifest(id, needs),
         body,
         spans_family: false,
+        weighted: false,
     })
 }
 
@@ -212,6 +237,7 @@ fn family_check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
         manifest: manifest(id, needs),
         body,
         spans_family: true,
+        weighted: false,
     })
 }
 
@@ -660,6 +686,105 @@ fn per_language_results_combine_into_one_entry_per_check() {
     );
 }
 
+/// Reports `bound` (from config) as a `scope` metric and one `size` measurement per symbol.
+fn measuring(ctx: &CheckCtx, _: &Facts, sink: &mut dyn EventSink) -> Result<CheckResult> {
+    let bound = ctx
+        .config
+        .get("bound")
+        .and_then(serde_json::Value::as_f64)
+        .unwrap_or(0.0);
+    for (n, key) in ctx.scope.symbols.iter().flatten().enumerate() {
+        sink.measure(Measurement {
+            metric: "size".to_owned(),
+            value: f64::from(u8::try_from(n).unwrap()),
+            target: Target {
+                display: format!("{key:?}"),
+                symbol: None,
+                location: None,
+            },
+        });
+    }
+    let mut result = passing("t.measured", None);
+    result.metrics.insert("bound".to_owned(), bound);
+    Ok(result)
+}
+
+#[test]
+fn scope_metrics_combine_across_languages_by_the_largest_value() {
+    let world = World::new(
+        vec![check("t.measured", &[FactKind::Symbols], measuring)],
+        "[checks.\"t.measured\"]\nbound = 3.0\n[checks.\"t.measured\".lang.go]\nbound = 7.0\n",
+    );
+    let (outcome, _) = world.run(&["go", "rust"], |_| {});
+    let checks = outcome.unwrap().checks;
+    assert_eq!(checks.len(), 1);
+    assert_eq!(
+        checks[0].metrics,
+        BTreeMap::from([("bound".to_owned(), 7.0)])
+    );
+}
+
+/// Reports `bound` as a `scope` metric over a score covering `n` targets, both from config.
+fn measuring_over_n(ctx: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+    let setting = |key| ctx.config.get(key).cloned().unwrap_or_default();
+    let mut result = passing(
+        "t.weighted",
+        Some(Score {
+            value: 0.0,
+            unit: "n".to_owned(),
+            n: setting("n").as_u64().unwrap_or(0),
+        }),
+    );
+    result
+        .metrics
+        .insert("bound".to_owned(), setting("bound").as_f64().unwrap_or(0.0));
+    Ok(result)
+}
+
+#[test]
+fn a_check_combines_its_metrics_from_each_languages_whole_result() {
+    let world = World::new(
+        vec![Box::new(TestCheck {
+            manifest: manifest("t.weighted", &[FactKind::Symbols]),
+            body: measuring_over_n,
+            spans_family: false,
+            weighted: true,
+        })],
+        "[checks.\"t.weighted\"]\nbound = 3.0\nn = 1\n\
+         [checks.\"t.weighted\".lang.go]\nbound = 7.0\nn = 3\n",
+    );
+    let (outcome, _) = world.run(&["go", "rust"], |_| {});
+    let checks = outcome.unwrap().checks;
+    assert_eq!(
+        checks[0].metrics,
+        BTreeMap::from([("bound".to_owned(), 6.0)]),
+        "(7 × 3 + 3 × 1) / 4"
+    );
+}
+
+#[test]
+fn measurements_are_kept_with_their_check_and_language_and_never_streamed() {
+    let world = World::new(
+        vec![check("t.measured", &[FactKind::Symbols], measuring)],
+        "",
+    );
+    let (outcome, events) = world.run(&["go", "rust"], |_| {});
+    let measured = outcome.unwrap().measurements;
+    let langs: Vec<String> = measured.iter().map(|m| m.lang.to_string()).collect();
+    assert_eq!(langs, ["go", "go", "rust", "rust"]);
+    assert!(
+        measured
+            .iter()
+            .all(|m| m.check == CheckId::from("t.measured"))
+    );
+    assert!(measured.iter().all(|m| m.measurement.metric == "size"));
+    assert_eq!(
+        events.len(),
+        6,
+        "a parse finding, plan, start, two progress, end: {events:?}"
+    );
+}
+
 #[test]
 fn events_follow_the_plan_skip_start_finding_progress_end_order() {
     fn flagging(_: &CheckCtx, _: &Facts, sink: &mut dyn EventSink) -> Result<CheckResult> {
@@ -829,32 +954,6 @@ fn a_plan_lists_targets_estimates_needs_and_skips_without_running_checks() {
     assert_eq!(plan.would_skip[0].id, CheckId::from("t.deep"));
     assert_eq!(plan.would_skip[0].skipped.fact, Some(FactKind::Decisions));
 }
-
-#[test]
-fn next_actions_rank_by_severity_then_tier() {
-    let findings = vec![
-        finding("c", "info", "a", Severity::Info, 6),
-        finding("c", "warn-low", "b", Severity::Warn, 0),
-        finding("c", "warn-high", "c", Severity::Warn, 3),
-        finding("c", "fail", "d", Severity::Fail, 0),
-    ];
-    let actions = next_actions(&findings);
-    let order: Vec<&str> = actions
-        .iter()
-        .map(|action| {
-            let id = action.finding.as_ref().unwrap();
-            findings.iter().find(|f| f.id == *id).unwrap().kind.as_str()
-        })
-        .collect();
-    assert_eq!(order, ["fail", "warn-high", "warn-low", "info"]);
-    assert_eq!(actions[0].priority, 1);
-    let many: Vec<Finding> = (0..15)
-        .map(|n| finding("c", "k", &format!("f{n}"), Severity::Warn, 0))
-        .collect();
-    assert_eq!(next_actions(&many).len(), 10);
-}
-
-// ---------------------------------------------------------------- base-side facts (ADR-056)
 
 #[test]
 fn a_check_that_reads_the_base_is_skipped_per_language_without_a_range() {

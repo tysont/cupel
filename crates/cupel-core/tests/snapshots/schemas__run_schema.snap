@@ -1,6 +1,5 @@
 ---
 source: crates/cupel-core/tests/schemas.rs
-assertion_line: 24
 expression: pretty(&schema)
 ---
 {
@@ -67,6 +66,17 @@ expression: pretty(&schema)
         }
       ]
     },
+    "rankings": {
+      "description": "What `survey` ranks: the worst targets per dimension; null for every other verb (ADR-062).",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Rankings"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "run": {
       "$ref": "#/$defs/RunInfo"
     },
@@ -95,6 +105,7 @@ expression: pretty(&schema)
     "findings",
     "next_actions",
     "plan",
+    "rankings",
     "run",
     "status",
     "summary",
@@ -343,6 +354,15 @@ expression: pretty(&schema)
         "id": {
           "$ref": "#/$defs/CheckId"
         },
+        "metrics": {
+          "description": "The value of each `scope` metric the check measured, by metric name; the gate reads\nthem as `<check-id>.<metric>` (ADR-060).",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "format": "double"
+          },
+          "default": {}
+        },
         "oracle": {
           "description": "The oracle a differential or trace check compared against.",
           "type": [
@@ -383,6 +403,7 @@ expression: pretty(&schema)
         "duration_ms",
         "findings",
         "id",
+        "metrics",
         "oracle",
         "score",
         "skipped",
@@ -1269,7 +1290,7 @@ expression: pretty(&schema)
       "type": "object",
       "properties": {
         "actual": {
-          "description": "The measured value; null when the metric was not produced.",
+          "description": "The measured value; null when the rule could not be evaluated.",
           "type": [
             "number",
             "null"
@@ -1277,7 +1298,7 @@ expression: pretty(&schema)
           "format": "double"
         },
         "result": {
-          "$ref": "#/$defs/GateOutcome"
+          "$ref": "#/$defs/RuleOutcome"
         },
         "rule": {
           "description": "The rule as written, such as `tests.mutation.score >= 0.80`.",
@@ -1551,7 +1572,7 @@ expression: pretty(&schema)
           "$ref": "#/$defs/CheckId"
         },
         "metrics": {
-          "description": "Metrics usable as gate keys (`<check-id>.<metric>`).",
+          "description": "What the check measures: `scope` metrics are gate keys (`<check-id>.<metric>`), the others\nare `survey` ranking dimensions (ADR-060, ADR-062).",
           "type": "array",
           "items": {
             "$ref": "#/$defs/MetricSpec"
@@ -1679,11 +1700,41 @@ expression: pretty(&schema)
         "value"
       ]
     },
+    "MetricPer": {
+      "description": "What one value of a metric describes: the whole scope, reported in `CheckResult.metrics` and\nusable as a gate key, or one target, reported through `EventSink::measure` and ranked by\n`survey`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "scope"
+          ]
+        },
+        {
+          "description": "A function or method.",
+          "type": "string",
+          "const": "symbol"
+        },
+        {
+          "description": "A file or module.",
+          "type": "string",
+          "const": "module"
+        },
+        {
+          "description": "A set of targets, such as a clone cluster or a dependency cycle.",
+          "type": "string",
+          "const": "group"
+        }
+      ]
+    },
     "MetricSpec": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string"
+        },
+        "per": {
+          "description": "What one value describes (ADR-062).",
+          "$ref": "#/$defs/MetricPer"
         },
         "summary": {
           "type": "string"
@@ -1691,6 +1742,7 @@ expression: pretty(&schema)
       },
       "required": [
         "name",
+        "per",
         "summary"
       ]
     },
@@ -1900,6 +1952,117 @@ expression: pretty(&schema)
     "ProducerId": {
       "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
       "type": "string"
+    },
+    "RankedTarget": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "rank": {
+          "description": "1 is the highest value.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "target": {
+          "$ref": "#/$defs/Target"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "lang",
+        "rank",
+        "target",
+        "value"
+      ]
+    },
+    "RankingDimension": {
+      "description": "One per-target metric of one check, with its worst targets.",
+      "type": "object",
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "entries": {
+          "description": "The highest values first, at most `top`.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RankedTarget"
+          }
+        },
+        "measured": {
+          "description": "How many targets were measured.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "metric": {
+          "type": "string"
+        },
+        "per": {
+          "$ref": "#/$defs/MetricPer"
+        },
+        "summary": {
+          "description": "The metric's summary from the manifest.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check",
+        "entries",
+        "measured",
+        "metric",
+        "per",
+        "summary"
+      ]
+    },
+    "Rankings": {
+      "description": "What `survey` adds to its envelope: the highest values of every ranking dimension.",
+      "type": "object",
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RankingDimension"
+          }
+        },
+        "top": {
+          "description": "The most entries a dimension lists.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "dimensions",
+        "top"
+      ]
+    },
+    "RuleOutcome": {
+      "description": "One gate rule's result (ADR-060 §6). Only `pass` passes.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        {
+          "description": "The rule's check did not run to completion here, or did not report the metric.",
+          "type": "string",
+          "const": "skipped"
+        },
+        {
+          "description": "The rule's operator cannot be evaluated yet (`no-breaking`).",
+          "type": "string",
+          "const": "unsupported"
+        }
+      ]
     },
     "RunId": {
       "description": "A run ID: `run_` followed by a ULID.",
@@ -2435,6 +2598,42 @@ expression: pretty(&schema)
       "description": "`sh_` followed by sixteen lowercase hex digits",
       "type": "string",
       "pattern": "^sh_[0-9a-f]{16}$"
+    },
+    "Target": {
+      "description": "What a measurement is about.",
+      "type": "object",
+      "properties": {
+        "display": {
+          "description": "How people name it: a symbol's display name, a module path, a cluster's description.",
+          "type": "string"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Location"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "symbol": {
+          "description": "The structural hash, when the target is a symbol.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolHash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "display",
+        "location",
+        "symbol"
+      ]
     },
     "Tier": {
       "description": "Evidence tier: 0 structural metric … 6 proof.",

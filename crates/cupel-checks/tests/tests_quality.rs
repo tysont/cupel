@@ -1,5 +1,7 @@
 // ABOUTME: tests.quality over hand-built TestFrames, Symbols, NormTree, and Decisions: each finding kind,
 // ABOUTME: its thresholds and SCRAP evidence, the Throws rule, scope, identity, and the score (ADR-054/055).
+mod support;
+
 use std::collections::BTreeSet;
 
 use cupel_checks::register;
@@ -11,10 +13,11 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Cancellation, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus, Error,
-    Event, FactKind, Facts, Finding, FindingId, Manifest, Plan, Scope, Score, Severity, SymbolHash,
-    Writer,
+    FactKind, Facts, Finding, FindingId, Manifest, MetricPer, Plan, Scope, Score, Severity,
+    SymbolHash, Writer,
 };
 use serde_json::{Value, json};
+use support::{Recorded, combined, language};
 
 const ID: &str = "tests.quality";
 
@@ -315,22 +318,21 @@ impl Run {
     }
 
     fn go(self) -> (CheckResult, Vec<Finding>) {
+        let (result, recorded) = self.recorded();
+        (result, recorded.findings)
+    }
+
+    /// The result and every finding and measurement the check reported.
+    fn recorded(self) -> (CheckResult, Recorded) {
         let registry = registry();
         let check = registry.get(&CheckId::from(ID)).unwrap();
         let scope = self.scope.unwrap_or_else(|| self.world.scope());
         let (ctx, _dir) = ctx(scope, self.config);
         let plan = check.plan(&ctx, &ctx.scope).unwrap();
         let facts = self.world.facts(check.manifest(), self.decisions);
-        let mut events = Vec::new();
-        let result = check.run(&ctx, &facts, &plan, &mut events).unwrap();
-        let findings = events
-            .into_iter()
-            .filter_map(|event| match event {
-                Event::Finding(finding) => Some(*finding),
-                _ => None,
-            })
-            .collect();
-        (result, findings)
+        let mut recorded = Recorded::default();
+        let result = check.run(&ctx, &facts, &plan, &mut recorded).unwrap();
+        (result, recorded)
     }
 }
 
@@ -377,8 +379,20 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("test.duplicate-setup", ActionKind::RefactorExtract),
         ]
     );
-    let metrics: Vec<&str> = manifest.metrics.iter().map(|m| m.name.as_str()).collect();
-    assert_eq!(metrics, ["assertion_density", "weak_ratio", "no_assertion"]);
+    let metrics: Vec<(&str, MetricPer)> = manifest
+        .metrics
+        .iter()
+        .map(|m| (m.name.as_str(), m.per))
+        .collect();
+    assert_eq!(
+        metrics,
+        [
+            ("assertion_density", MetricPer::Scope),
+            ("weak_ratio", MetricPer::Scope),
+            ("no_assertion", MetricPer::Scope),
+            ("mock_density", MetricPer::Symbol),
+        ]
+    );
     for spec in &manifest.findings {
         let schema = Value::Object(spec.evidence.clone());
         assert_eq!(schema["type"], json!("object"), "{}", spec.kind);
@@ -780,4 +794,94 @@ fn plans_count_the_symbols_in_scope_at_quick_cost() {
             est_ms: 2
         }
     );
+}
+
+/// Four tests: five assertions, one of them weak; one test asserts nothing; one has three doubles
+/// for its one assertion.
+fn four_tests() -> Vec<Case> {
+    vec![
+        case("one", 1),
+        case("three", 10).asserting(&[(Equality, Strong), (Truthiness, Weak), (Throws, Strong)]),
+        case("none", 20).asserting(&[]),
+        case("mocky", 30).mocking(3),
+    ]
+}
+
+#[test]
+fn the_result_reports_density_weak_share_and_tests_without_assertions() {
+    let (result, _) = Run::of(four_tests()).go();
+    assert_eq!(
+        result.metrics,
+        [
+            ("assertion_density".to_owned(), 1.25),
+            ("no_assertion".to_owned(), 1.0),
+            ("weak_ratio".to_owned(), 0.2),
+        ]
+        .into()
+    );
+    let (empty, _) = Run::of(vec![]).go();
+    assert!(
+        empty.metrics.values().all(|value| *value == 0.0),
+        "{:?}",
+        empty.metrics
+    );
+}
+
+#[test]
+fn each_test_in_scope_is_measured_by_its_mock_density() {
+    let (_, recorded) = Run::of(four_tests()).recorded();
+    assert_eq!(
+        recorded.measured(),
+        [
+            ("mock_density", "t::one", 0.0),
+            ("mock_density", "t::three", 0.0),
+            ("mock_density", "t::none", 0.0),
+            ("mock_density", "t::mocky", 75.0),
+        ]
+    );
+    let mocky = &recorded.measurements[3].target;
+    assert_eq!(mocky.symbol, Some(hash_of("t.x", 30)));
+}
+
+#[test]
+fn ratios_combine_over_every_languages_tests_and_counts_add_up() {
+    let registry = registry();
+    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let results = [
+        language(
+            check,
+            &[
+                ("assertion_density", 2.0),
+                ("weak_ratio", 0.5),
+                ("no_assertion", 1.0),
+            ],
+            2,
+        ),
+        language(
+            check,
+            &[
+                ("assertion_density", 1.0),
+                ("weak_ratio", 0.0),
+                ("no_assertion", 2.0),
+            ],
+            6,
+        ),
+    ];
+    assert_eq!(
+        combined(check, "assertion_density", &results),
+        Some(1.25),
+        "10 assertions over 8 tests"
+    );
+    assert_eq!(
+        combined(check, "weak_ratio", &results),
+        Some(0.2),
+        "2 weak of 10 assertions"
+    );
+    assert_eq!(combined(check, "no_assertion", &results), Some(3.0));
+    let empty = [language(
+        check,
+        &[("assertion_density", 0.0), ("weak_ratio", 0.0)],
+        0,
+    )];
+    assert_eq!(combined(check, "weak_ratio", &empty), Some(0.0));
 }

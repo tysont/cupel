@@ -6,7 +6,7 @@ use std::fmt::Write as _;
 
 use cupel_core::{
     CheckResult, Envelope, Explanation, Finding, GateOutcome, GateResult, Location, NextAction,
-    RunInfo, RunPlan, Severity, Skipped, Status, Summary,
+    Rankings, RuleOutcome, RunInfo, RunPlan, Severity, Skipped, Status, Summary,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -45,6 +45,11 @@ pub fn render(envelope: &Envelope, color: bool) -> String {
             .unwrap_or_default(),
         summary_line(&envelope.summary, envelope.total_findings, &paint),
         checks_block(&envelope.checks, &paint),
+        envelope
+            .rankings
+            .as_ref()
+            .map(|rankings| rankings_block(rankings, &paint))
+            .unwrap_or_default(),
         findings_block(envelope, &paint),
         run_block(envelope, &paint),
         next_actions_block(&envelope.next_actions, &paint),
@@ -92,6 +97,15 @@ impl Paint {
         let code = match outcome {
             GateOutcome::Pass => "32",
             GateOutcome::Fail => "31",
+        };
+        self.sgr(code, &name(outcome))
+    }
+
+    fn rule(&self, outcome: RuleOutcome) -> String {
+        let code = match outcome {
+            RuleOutcome::Pass => "32",
+            RuleOutcome::Fail => "31",
+            RuleOutcome::Skipped | RuleOutcome::Unsupported => "33",
         };
         self.sgr(code, &name(outcome))
     }
@@ -173,12 +187,7 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
             .actual
             .map(|actual| format!("  actual {actual}"))
             .unwrap_or_default();
-        let _ = writeln!(
-            out,
-            "  {}  {}{actual}",
-            paint.outcome(rule.result),
-            rule.rule
-        );
+        let _ = writeln!(out, "  {}  {}{actual}", paint.rule(rule.result), rule.rule);
     }
     out
 }
@@ -226,6 +235,14 @@ fn checks_block(checks: &[CheckResult], paint: &Paint) -> String {
                 score.value, score.unit, score.n
             ));
         }
+        if !check.metrics.is_empty() {
+            let metrics: Vec<String> = check
+                .metrics
+                .iter()
+                .map(|(metric, value)| format!("{metric} {value}"))
+                .collect();
+            facts.push(format!("metrics {}", metrics.join(", ")));
+        }
         if let Some(delta) = &check.delta {
             facts.push(format!("delta {:+} vs {}", delta.value, delta.vs));
         }
@@ -248,6 +265,44 @@ fn checks_block(checks: &[CheckResult], paint: &Paint) -> String {
             name(check.status),
             facts.join(" · ")
         );
+    }
+    out
+}
+
+/// Each dimension as `check.metric (per, measured)` with its ranked targets beneath (ADR-062).
+fn rankings_block(rankings: &Rankings, paint: &Paint) -> String {
+    let mut out = format!(
+        "{}  top {} per dimension\n",
+        paint.bold("rankings"),
+        rankings.top
+    );
+    for dimension in &rankings.dimensions {
+        let _ = writeln!(
+            out,
+            "  {}.{}  {} · {} measured · {}",
+            dimension.check,
+            dimension.metric,
+            name(dimension.per),
+            dimension.measured,
+            dimension.summary
+        );
+        for entry in &dimension.entries {
+            let mut facts = vec![entry.lang.to_string()];
+            if let Some(at) = &entry.target.location {
+                facts.push(location(at));
+            }
+            if let Some(symbol) = &entry.target.symbol {
+                facts.push(symbol.to_string());
+            }
+            let _ = writeln!(
+                out,
+                "    {:>2}. {}  {}  {}",
+                entry.rank,
+                entry.value,
+                entry.target.display,
+                paint.dim(&facts.join(" · "))
+            );
+        }
     }
     out
 }

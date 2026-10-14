@@ -58,13 +58,21 @@ fn describe_shows_the_check_and_its_finding_kinds_from_the_manifest() {
         manifest["wants"],
         json!(["coverage-map", "test-conventions"])
     );
-    let metrics: Vec<&str> = manifest["metrics"]
+    let metrics: Vec<(&str, &str)> = manifest["metrics"]
         .as_array()
         .unwrap()
         .iter()
-        .map(|metric| metric["name"].as_str().unwrap())
+        .map(|metric| {
+            (
+                metric["name"].as_str().unwrap(),
+                metric["per"].as_str().unwrap(),
+            )
+        })
         .collect();
-    assert_eq!(metrics, ["max", "mean"]);
+    assert_eq!(
+        metrics,
+        [("max", "scope"), ("mean", "scope"), ("crap", "symbol")]
+    );
     let high = json(dir.path(), &["describe", "finding", "crap.high"])["description"].clone();
     assert_eq!(high["check"], json!("static.crap"));
     assert_eq!(high["action"], json!("write_test"));

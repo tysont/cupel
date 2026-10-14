@@ -8,14 +8,15 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
-    FactKind, Facts, Finding, FindingKindSpec, Manifest, MetricSpec, Plan, Result, Scope, Score,
-    Severity, Stability, SymbolHash, Tier,
+    FactKind, Facts, Finding, Manifest, Plan, Result, Scope, Score, Severity, Stability,
+    SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
-use serde_json::{Map, Value};
 
 use crate::finding::SymbolFinding;
+use crate::manifest::{kind, metric};
+use crate::metrics::sum;
 use crate::settings::Limits;
 
 const ID: &str = "static.dead-code";
@@ -68,13 +69,15 @@ impl StaticDeadCode {
                 ],
                 wants: vec![],
                 findings: vec![
-                    kind(
+                    kind::<Unreachable>(
                         "dead.symbol",
+                        ActionKind::Review,
                         "A symbol in a module that nothing imports, that exports nothing, and \
                          that holds no entry point, test, or framework hook.",
                     ),
-                    kind(
+                    kind::<Unreachable>(
                         "dead.export",
+                        ActionKind::Review,
                         "An exported symbol in a module that nothing in the repository imports \
                          and that holds no entry point, test, or framework hook (info: it may \
                          be a library's public API).",
@@ -132,6 +135,7 @@ impl Check for StaticDeadCode {
         );
         let mut in_scope = 0;
         let mut dead_symbols = 0;
+        let mut dead_exports = 0;
         let mut findings = 0;
         let mut ordered: Vec<&SymbolDef> = symbols.symbols.iter().collect();
         ordered.sort_by_key(|symbol| symbol.key());
@@ -150,8 +154,9 @@ impl Check for StaticDeadCode {
             let Some(hash) = hashes.get(&key) else {
                 continue;
             };
-            if verdict.kind == DeadKind::Symbol {
-                dead_symbols += 1;
+            match verdict.kind {
+                DeadKind::Symbol => dead_symbols += 1,
+                DeadKind::Export => dead_exports += 1,
             }
             findings += 1;
             sink.emit(Event::Finding(Box::new(
@@ -172,6 +177,10 @@ impl Check for StaticDeadCode {
                 unit: "dead_symbols".to_owned(),
                 n: in_scope,
             }),
+            metrics: BTreeMap::from([
+                ("dead_symbols".to_owned(), f64::from(dead_symbols)),
+                ("dead_exports".to_owned(), f64::from(dead_exports)),
+            ]),
             delta: None,
             findings,
             duration_ms: 0,
@@ -188,6 +197,11 @@ impl Check for StaticDeadCode {
             unit: first.unit.clone(),
             n: scores.iter().map(|score| score.n).sum(),
         })
+    }
+
+    /// Both metrics are counts, so they add up across languages (ADR-063).
+    fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
+        sum(name, results)
     }
 }
 
@@ -486,25 +500,4 @@ fn nested(symbols: &[SymbolDef]) -> BTreeSet<SymbolKey> {
         }
     }
     nested
-}
-
-/// A finding kind with the `Unreachable` evidence schema (ADR-012).
-fn kind(kind: &str, summary: &str) -> FindingKindSpec {
-    let schema = match schemars::schema_for!(Unreachable).to_value() {
-        Value::Object(schema) => schema,
-        _ => Map::new(),
-    };
-    FindingKindSpec {
-        kind: kind.to_owned(),
-        action: ActionKind::Review,
-        summary: summary.to_owned(),
-        evidence: schema,
-    }
-}
-
-fn metric(name: &str, summary: &str) -> MetricSpec {
-    MetricSpec {
-        name: name.to_owned(),
-        summary: summary.to_owned(),
-    }
 }

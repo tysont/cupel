@@ -1,5 +1,7 @@
 // ABOUTME: static.dead-code over synthetic facts: modules from namespaces, entry by import, roots, the
 // ABOUTME: two finding kinds with their confidence and evidence, scope filtering, and the score (ADR-058/059).
+mod support;
+
 use std::collections::BTreeSet;
 
 use cupel_checks::register;
@@ -10,10 +12,11 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    CostClass, Error, Event, FactKind, Facts, Finding, FindingId, LangId, Plan, Scope, Score,
-    Severity, SymbolHash, Writer,
+    CostClass, Error, Event, FactKind, Facts, Finding, FindingId, LangId, MetricPer, Plan, Scope,
+    Score, Severity, SymbolHash, Writer,
 };
 use serde_json::{Map, Value, json};
+use support::{combined, language};
 
 const ID: &str = "static.dead-code";
 
@@ -264,8 +267,19 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("dead.export", ActionKind::Review)
         ]
     );
-    let metrics: Vec<&str> = manifest.metrics.iter().map(|m| m.name.as_str()).collect();
-    assert_eq!(metrics, ["dead_symbols", "dead_exports"]);
+    let metrics: Vec<(&str, MetricPer)> = manifest
+        .metrics
+        .iter()
+        .map(|m| (m.name.as_str(), m.per))
+        .collect();
+    assert_eq!(
+        metrics,
+        [
+            ("dead_symbols", MetricPer::Scope),
+            ("dead_exports", MetricPer::Scope)
+        ],
+        "a symbol is dead or not: nothing to rank"
+    );
     for spec in &manifest.findings {
         assert_eq!(spec.evidence["type"], json!("object"), "{}", spec.kind);
     }
@@ -539,6 +553,14 @@ fn the_score_counts_dead_symbols_and_combines_by_sum() {
     ]);
     let (result, findings) = run(&world);
     assert_eq!(findings.len(), 3);
+    assert_eq!(
+        result.metrics,
+        [
+            ("dead_exports".to_owned(), 1.0),
+            ("dead_symbols".to_owned(), 2.0)
+        ]
+        .into()
+    );
     let score = result.score.clone().unwrap();
     assert_eq!(
         score,
@@ -559,6 +581,12 @@ fn the_score_counts_dead_symbols_and_combines_by_sum() {
         })
     );
     assert_eq!(check.combine(&[]), None);
+    let results = [
+        language(check, &[("dead_symbols", 2.0), ("dead_exports", 1.0)], 3),
+        language(check, &[("dead_symbols", 0.0), ("dead_exports", 4.0)], 9),
+    ];
+    assert_eq!(combined(check, "dead_symbols", &results), Some(2.0));
+    assert_eq!(combined(check, "dead_exports", &results), Some(5.0));
 }
 
 #[test]

@@ -82,7 +82,13 @@ fn render_check(check: &CheckDescription, paint: &Paint) -> String {
     );
     let width = column(manifest.metrics.iter().map(|m| m.name.len()));
     for metric in &manifest.metrics {
-        let _ = writeln!(out, "  {:<width$}  {}", metric.name, metric.summary);
+        let _ = writeln!(
+            out,
+            "  {:<width$}  {} · {}",
+            metric.name,
+            name(metric.per),
+            metric.summary
+        );
     }
     let _ = writeln!(
         out,

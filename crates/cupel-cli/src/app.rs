@@ -25,7 +25,7 @@ use crate::problem::Problem;
 use crate::run::Run;
 use crate::{
     against, baseline, catalog, check, describe, doctor, explain, init, persist, registry, render,
-    suppress,
+    suppress, survey,
 };
 
 /// Everything an invocation reads from its process. `main` gathers it once; nothing else looks
@@ -359,6 +359,9 @@ fn execute(
             }
         }
         Some(VerbArgs::Check { scope }) => check::verb(run, scope, config, writer, events, dry_run),
+        Some(VerbArgs::Survey { scope }) => {
+            survey::verb(run, scope, config, writer, events, dry_run)
+        }
         Some(VerbArgs::Explain { target, .. }) => {
             if dry_run {
                 // `explain` only reads the store; its plan is empty.
@@ -391,7 +394,7 @@ fn execute(
             Err(CupelError::pending_verb(&words, &step))
         }
     }?;
-    let envelope = graded(envelope, cli, writer)?;
+    let envelope = graded(envelope, cli, writer, config)?;
     Ok(if cut_short {
         Run::interrupted(envelope)
     } else {
@@ -401,8 +404,14 @@ fn execute(
 
 /// A finished run of a verb that grades the repository with the repository's suppressions
 /// applied (ADR-047 §5) and, for `check` and `survey`, deltas against `--against` or the
-/// default baseline (ADR-046 §5). Plans and the bookkeeping verbs pass through unchanged.
-fn graded(mut envelope: Envelope, cli: &Cli, writer: &Writer) -> Result<Envelope, CupelError> {
+/// default baseline (ADR-046 §5), then the gate and `next_actions` (ADR-060, ADR-061). Plans and
+/// the bookkeeping verbs pass through unchanged.
+fn graded(
+    mut envelope: Envelope,
+    cli: &Cli,
+    writer: &Writer,
+    config: Result<&Config, &cupel_core::Error>,
+) -> Result<Envelope, CupelError> {
     if envelope.status == Status::Plan {
         return Ok(envelope);
     }
@@ -413,6 +422,9 @@ fn graded(mut envelope: Envelope, cli: &Cli, writer: &Writer) -> Result<Envelope
         Some(VerbArgs::Check { scope } | VerbArgs::Survey { scope }) => {
             suppress::apply(&mut envelope, writer)?;
             against::compare(&mut envelope, writer, scope.against.as_deref())?;
+            if let (Some(verb), Ok(config)) = (envelope.run.verb, config) {
+                check::grade(&mut envelope, verb, scope, config);
+            }
         }
         _ => {}
     }
@@ -741,7 +753,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         // A file where the `.cupel` directory belongs makes every write under it fail.
         std::fs::write(dir.path().join(".cupel"), "").unwrap();
-        let out = run(&environment(dir.path(), &["survey", "--quiet"]));
+        let out = run(&environment(dir.path(), &["tests", "--quiet"]));
         assert_eq!(out.code, 2);
         assert!(
             out.stderr

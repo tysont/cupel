@@ -1,0 +1,3911 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 1.0,
+        "max_jaccard": 1.0,
+        "pairs": 8.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 27,
+        "unit": "pairs",
+        "value": 8.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 64.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 78,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 25,
+      "id": "static.crap",
+      "metrics": {
+        "max": 132.0,
+        "mean": 8.777777777777779
+      },
+      "oracle": null,
+      "score": {
+        "n": 54,
+        "unit": "max",
+        "value": 132.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 18,
+      "id": "static.dead-code",
+      "metrics": {
+        "dead_exports": 17.0,
+        "dead_symbols": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 78,
+        "unit": "dead_symbols",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 17,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 10,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 0.9545454545454546,
+        "no_assertion": 2.0,
+        "weak_ratio": 0.2857142857142857
+      },
+      "oracle": null,
+      "score": {
+        "n": 22,
+        "unit": "assertion_density",
+        "value": 0.9545454545454546
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.weakening",
+      "metrics": {},
+      "oracle": null,
+      "score": null,
+      "skipped": {
+        "fact": null,
+        "lang": "python",
+        "reason": "needs-range",
+        "see": "cupel check --changed --only tests.weakening",
+        "tool": null
+      },
+      "status": "skipped",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle src/deps_cycle/alpha.py → src/deps_cycle/beta.py → src/deps_cycle/alpha.py: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "src/deps_cycle/alpha.py",
+          "src/deps_cycle/beta.py"
+        ],
+        "modules": [
+          "src/deps_cycle/alpha.py",
+          "src/deps_cycle/beta.py"
+        ],
+        "size": 2
+      },
+      "id": "fnd_74dae6",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_cycle/alpha.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_74dae6 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: src/deps_cycle/alpha.py → src/deps_cycle/beta.py → src/deps_cycle/alpha.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `src/deps_layers/infra/store.py` from `src/deps_layers/domain/order.py`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "src/deps_layers/domain/order.py",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "..infra.store.Store",
+        "to": "src/deps_layers/infra/store.py",
+        "to_layer": "infra"
+      },
+      "id": "fnd_a8c0c3",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_layers/domain/order.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_a8c0c3 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/deps_layers/domain/order.py` (layer domain) imports `src/deps_layers/infra/store.py` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `src/deps_layers/port.py`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 0,
+        "distance": 1.0,
+        "distance_max": 0.7,
+        "efferent": 1,
+        "external": 1,
+        "instability": 1.0,
+        "module": "src/deps_layers/port.py",
+        "unresolved": 0
+      },
+      "id": "fnd_c5270d",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_layers/port.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c5270d --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/deps_layers/port.py` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `place` from src/deps_layers/port.py if nothing outside the repository uses it, or import src/deps_layers/port.py where `place` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/deps_layers/port.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `place` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/deps_layers/port.py",
+        "module": "deps_layers.port",
+        "module_files": [
+          "src/deps_layers/port.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_65c408",
+      "kind": "dead.export",
+      "location": {
+        "col": 5,
+        "end_col": 47,
+        "end_line": 7,
+        "file": "src/deps_layers/port.py",
+        "line": 7
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_73645f7457e30d49",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_65c408 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "deps_layers.port.Port.place",
+        "hash": "sh_73645f7457e30d49",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`deps_layers.port.Port.place` is exported but no import resolves to src/deps_layers/port.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `main` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_3d4af4",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 7,
+        "file": "src/ledger/cli.py",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_abf0b37e682fb117",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_3d4af4 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.cli.main",
+        "hash": "sh_abf0b37e682fb117",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.cli.main` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settle_invoices` and `reconcile_payments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 31,
+          "end_line": 12,
+          "file": "src/ledger/clones_settlement.py",
+          "hash": "sh_46a99291992c7f37",
+          "lang": "python",
+          "line": 4,
+          "lines": 9,
+          "nodes": 55,
+          "symbol": "ledger.clones_settlement.settle_invoices"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 30,
+          "end_line": 23,
+          "file": "src/ledger/clones_settlement.py",
+          "hash": "sh_46a99291992c7f37",
+          "lang": "python",
+          "line": 15,
+          "lines": 9,
+          "nodes": 55,
+          "symbol": "ledger.clones_settlement.reconcile_payments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_388503",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 12,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_46a99291992c7f37",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_388503 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.settle_invoices",
+        "hash": "sh_46a99291992c7f37",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.settle_invoices` and `ledger.clones_settlement.reconcile_payments` (src/ledger/clones_settlement.py:15) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `settle_invoices` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_0dc2a7",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 12,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_46a99291992c7f37",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_0dc2a7 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.settle_invoices",
+        "hash": "sh_46a99291992c7f37",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.settle_invoices` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settle_invoices` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `settle_invoices` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle_invoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/clones_settlement.py",
+        "module": "ledger.clones_settlement",
+        "module_files": [
+          "src/ledger/clones_settlement.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_f60f33",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 12,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_46a99291992c7f37",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_f60f33 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.settle_invoices",
+        "hash": "sh_46a99291992c7f37",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.settle_invoices` is exported but no import resolves to src/ledger/clones_settlement.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `reconcile_payments` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_0dc2a7",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 23,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_46a99291992c7f37",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_0dc2a7 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.reconcile_payments",
+        "hash": "sh_46a99291992c7f37",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.reconcile_payments` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `reconcile_payments` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `reconcile_payments` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcile_payments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/clones_settlement.py",
+        "module": "ledger.clones_settlement",
+        "module_files": [
+          "src/ledger/clones_settlement.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_f60f33",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 23,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_46a99291992c7f37",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_f60f33 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.reconcile_payments",
+        "hash": "sh_46a99291992c7f37",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.reconcile_payments` is exported but no import resolves to src/ledger/clones_settlement.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `order_lines` and `refund_lines` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "jaccard": 0.844,
+        "left": {
+          "col": 1,
+          "end_col": 17,
+          "end_line": 38,
+          "file": "src/ledger/clones_settlement.py",
+          "hash": "sh_b9460912628dfe49",
+          "lang": "python",
+          "line": 26,
+          "lines": 13,
+          "nodes": 88,
+          "symbol": "ledger.clones_settlement.order_lines"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 17,
+          "end_line": 54,
+          "file": "src/ledger/clones_settlement.py",
+          "hash": "sh_1b6aceb19c1d15c1",
+          "lang": "python",
+          "line": 41,
+          "lines": 14,
+          "nodes": 94,
+          "symbol": "ledger.clones_settlement.refund_lines"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_ca0ec3",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 38,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_b9460912628dfe49",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ca0ec3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.order_lines",
+        "hash": "sh_b9460912628dfe49",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.order_lines` and `ledger.clones_settlement.refund_lines` (src/ledger/clones_settlement.py:41) are type-3 clones (jaccard 0.84)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `order_lines` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_da8772",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 38,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_b9460912628dfe49",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_da8772 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.order_lines",
+        "hash": "sh_b9460912628dfe49",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.order_lines` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `order_lines` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `order_lines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `order_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/clones_settlement.py",
+        "module": "ledger.clones_settlement",
+        "module_files": [
+          "src/ledger/clones_settlement.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_e9c8a4",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 38,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_b9460912628dfe49",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_e9c8a4 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.order_lines",
+        "hash": "sh_b9460912628dfe49",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.order_lines` is exported but no import resolves to src/ledger/clones_settlement.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `refund_lines` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_16f79f",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 54,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_1b6aceb19c1d15c1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_16f79f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.refund_lines",
+        "hash": "sh_1b6aceb19c1d15c1",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.refund_lines` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `refund_lines` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `refund_lines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refund_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/clones_settlement.py",
+        "module": "ledger.clones_settlement",
+        "module_files": [
+          "src/ledger/clones_settlement.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_ed3d1f",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 54,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_1b6aceb19c1d15c1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_ed3d1f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.refund_lines",
+        "hash": "sh_1b6aceb19c1d15c1",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.refund_lines` is exported but no import resolves to src/ledger/clones_settlement.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_da1290",
+      "kind": "complexity.high",
+      "location": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 27,
+        "file": "src/ledger/complexity.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_b9016df6df5687e8",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_da1290 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.label",
+        "hash": "sh_b9016df6df5687e8",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write tests that cover every branch of `label` (fully covered, its CRAP is its cyclomatic complexity, 11), or split it until CRAP is below 30."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 132.0,
+        "cyclomatic": 11,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_74303d",
+      "kind": "crap.high",
+      "location": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 27,
+        "file": "src/ledger/complexity.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_b9016df6df5687e8",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_74303d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.label",
+        "hash": "sh_b9016df6df5687e8",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.label` has CRAP 132.0 (high at 30): cyclomatic 11 with coverage not measured"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_1d8c00",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 38,
+        "file": "src/ledger/complexity.py",
+        "line": 30
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_dcb5b60ff46aec47",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1d8c00 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.settle",
+        "hash": "sh_dcb5b60ff46aec47",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write tests that cover every branch of `settle` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 42.0,
+        "cyclomatic": 6,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_9bbf3c",
+      "kind": "crap.high",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 38,
+        "file": "src/ledger/complexity.py",
+        "line": 30
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_dcb5b60ff46aec47",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_9bbf3c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.settle",
+        "hash": "sh_dcb5b60ff46aec47",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.settle` has CRAP 42.0 (high at 30): cyclomatic 6 with coverage not measured"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `open_account` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_41b8e4",
+      "kind": "params.many",
+      "location": {
+        "col": 1,
+        "end_col": 71,
+        "end_line": 42,
+        "file": "src/ledger/complexity.py",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_cd4ed36360bc34e5",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_41b8e4 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.open_account",
+        "hash": "sh_cd4ed36360bc34e5",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.open_account` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `statement_template` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 64
+      },
+      "id": "fnd_e7b427",
+      "kind": "function.long",
+      "location": {
+        "col": 1,
+        "end_col": 6,
+        "end_line": 108,
+        "file": "src/ledger/complexity.py",
+        "line": 45
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_83ff38ce267758aa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e7b427 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.statement_template",
+        "hash": "sh_83ff38ce267758aa",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.statement_template` is 64 lines long (max 60)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write tests that cover every branch of `overdue` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 42.0,
+        "cyclomatic": 6,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_f3fa65",
+      "kind": "crap.high",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 21,
+        "file": "src/ledger/crap_scores.py",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_8ce7b6e87b3b4e5e",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_f3fa65 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.crap_scores.overdue",
+        "hash": "sh_8ce7b6e87b3b4e5e",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.crap_scores.overdue` has CRAP 42.0 (high at 30): cyclomatic 6 with coverage not measured"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `overdue` from src/ledger/crap_scores.py if nothing outside the repository uses it, or import src/ledger/crap_scores.py where `overdue` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/crap_scores.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `overdue` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/crap_scores.py",
+        "module": "ledger.crap_scores",
+        "module_files": [
+          "src/ledger/crap_scores.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_92445d",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 21,
+        "file": "src/ledger/crap_scores.py",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_8ce7b6e87b3b4e5e",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_92445d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.crap_scores.overdue",
+        "hash": "sh_8ce7b6e87b3b4e5e",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.crap_scores.overdue` is exported but no import resolves to src/ledger/crap_scores.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `clamp` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_0d4049",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 30,
+        "file": "src/ledger/crap_scores.py",
+        "line": 24
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_fa1c8e61d92d8a80",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_0d4049 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.crap_scores.clamp",
+        "hash": "sh_fa1c8e61d92d8a80",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.crap_scores.clamp` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `clamp` from src/ledger/crap_scores.py if nothing outside the repository uses it, or import src/ledger/crap_scores.py where `clamp` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/crap_scores.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `clamp` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/crap_scores.py",
+        "module": "ledger.crap_scores",
+        "module_files": [
+          "src/ledger/crap_scores.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_13315f",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 30,
+        "file": "src/ledger/crap_scores.py",
+        "line": 24
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_fa1c8e61d92d8a80",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_13315f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.crap_scores.clamp",
+        "hash": "sh_fa1c8e61d92d8a80",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.crap_scores.clamp` is exported but no import resolves to src/ledger/crap_scores.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `to_cents` from src/ledger/crap_scores.py if nothing outside the repository uses it, or import src/ledger/crap_scores.py where `to_cents` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/crap_scores.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `to_cents` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/crap_scores.py",
+        "module": "ledger.crap_scores",
+        "module_files": [
+          "src/ledger/crap_scores.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_bc039e",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 35,
+        "file": "src/ledger/crap_scores.py",
+        "line": 33
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_2ce1e4c9a3630464",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_bc039e --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.crap_scores.to_cents",
+        "hash": "sh_2ce1e4c9a3630464",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.crap_scores.to_cents` is exported but no import resolves to src/ledger/crap_scores.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `unused_total` from src/ledger/dead_export.py if nothing outside the repository uses it, or import src/ledger/dead_export.py where `unused_total` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/dead_export.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `unused_total` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/dead_export.py",
+        "module": "ledger.dead_export",
+        "module_files": [
+          "src/ledger/dead_export.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_31c7aa",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 2,
+        "file": "src/ledger/dead_export.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ec6af60a92a46155",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_31c7aa --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.dead_export.unused_total",
+        "hash": "sh_ec6af60a92a46155",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.dead_export.unused_total` is exported but no import resolves to src/ledger/dead_export.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `_forgotten_rate` from src/ledger/dead_helpers.py if nothing outside the repository uses it, or import src/ledger/dead_helpers.py where `_forgotten_rate` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.8,
+      "detail": "No import in the repository resolves to src/ledger/dead_helpers.py or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `_forgotten_rate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
+      "evidence": {
+        "file": "src/ledger/dead_helpers.py",
+        "module": "ledger.dead_helpers",
+        "module_files": [
+          "src/ledger/dead_helpers.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_29c1cd",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 2,
+        "file": "src/ledger/dead_helpers.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6d1e647020e2ce0c",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_29c1cd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.dead_helpers._forgotten_rate",
+        "hash": "sh_6d1e647020e2ce0c",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.dead_helpers._forgotten_rate` is unreachable: no import resolves to src/ledger/dead_helpers.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `classify` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 20.0,
+        "cyclomatic": 4,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_f86002",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 8,
+        "file": "src/ledger/decide.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_df63a716d8770847",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_f86002 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.decide.classify",
+        "hash": "sh_df63a716d8770847",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.decide.classify` has CRAP 20.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `first_overdraft` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_e8696a",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 17,
+        "file": "src/ledger/decide.py",
+        "line": 11
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_b47a40a5212589fa",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_e8696a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.decide.first_overdraft",
+        "hash": "sh_b47a40a5212589fa",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.decide.first_overdraft` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `parse_cents` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_21e108",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 25,
+        "file": "src/ledger/decide.py",
+        "line": 20
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_46313d44c86e4fbc",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_21e108 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.decide.parse_cents",
+        "hash": "sh_46313d44c86e4fbc",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.decide.parse_cents` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `require_positive` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_e442f8",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 31,
+        "file": "src/ledger/decide.py",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_90ff03e1aba82910",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_e442f8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.decide.require_positive",
+        "hash": "sh_90ff03e1aba82910",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.decide.require_positive` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `describe` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_0755e0",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 41,
+        "file": "src/ledger/decide.py",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_11bab2571f50aaff",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_0755e0 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.decide.describe",
+        "hash": "sh_11bab2571f50aaff",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.decide.describe` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `sign` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_06e7e3",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 37,
+        "end_line": 45,
+        "file": "src/ledger/decide.py",
+        "line": 44
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_7ea110bf62ac810d",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_06e7e3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.decide.sign",
+        "hash": "sh_7ea110bf62ac810d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.decide.sign` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `positives` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_cccee0",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 53,
+        "end_line": 49,
+        "file": "src/ledger/decide.py",
+        "line": 48
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_1219c9850a0c4998",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_cccee0 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.decide.positives",
+        "hash": "sh_1219c9850a0c4998",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.decide.positives` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `discounted` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_7dec89",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 5,
+        "file": "src/ledger/pricing.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_8fc1bb6040aba10b",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_7dec89 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.pricing.discounted",
+        "hash": "sh_8fc1bb6040aba10b",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.pricing.discounted` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `tally` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_3c23ae",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 16,
+        "file": "src/ledger/pricing.py",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_7b9d638239532168",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_3c23ae --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.pricing.tally",
+        "hash": "sh_7b9d638239532168",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.pricing.tally` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `summary` from src/ledger/report/__init__.py if nothing outside the repository uses it, or import src/ledger/report/__init__.py where `summary` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/report/__init__.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `summary` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/report/__init__.py",
+        "module": "ledger.report",
+        "module_files": [
+          "src/ledger/report/__init__.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_1d35f1",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 40,
+        "end_line": 7,
+        "file": "src/ledger/report/__init__.py",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_8bd52f2f637ab4c7",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_1d35f1 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.report.summary",
+        "hash": "sh_8bd52f2f637ab4c7",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.report.summary` is exported but no import resolves to src/ledger/report/__init__.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `net_total` shares with 3 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 1,
+            "end_col": 13,
+            "end_line": 5,
+            "file": "src/ledger/twins.py",
+            "hash": "sh_16373b1ddd86c11d",
+            "lang": "python",
+            "line": 1,
+            "lines": 5,
+            "nodes": 26,
+            "symbol": "ledger.twins.net_total"
+          },
+          {
+            "col": 1,
+            "end_col": 13,
+            "end_line": 12,
+            "file": "src/ledger/twins.py",
+            "hash": "sh_16373b1ddd86c11d",
+            "lang": "python",
+            "line": 8,
+            "lines": 5,
+            "nodes": 26,
+            "symbol": "ledger.twins.sum_after_charge"
+          },
+          {
+            "col": 1,
+            "end_col": 14,
+            "end_line": 19,
+            "file": "src/ledger/twins.py",
+            "hash": "sh_16373b1ddd86c11d",
+            "lang": "python",
+            "line": 15,
+            "lines": 5,
+            "nodes": 26,
+            "symbol": "ledger.twins.net_total_floor"
+          },
+          {
+            "col": 1,
+            "end_col": 13,
+            "end_line": 30,
+            "file": "src/ledger/twins.py",
+            "hash": "sh_16373b1ddd86c11d",
+            "lang": "python",
+            "line": 22,
+            "lines": 9,
+            "nodes": 26,
+            "symbol": "ledger.twins.net_total_laid_out"
+          }
+        ],
+        "min_jaccard": 1.0,
+        "pairs": 6,
+        "threshold": 0.82
+      },
+      "id": "fnd_715226",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 5,
+        "file": "src/ledger/twins.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_16373b1ddd86c11d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_715226 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `net_total` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_68954f",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 5,
+        "file": "src/ledger/twins.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_16373b1ddd86c11d",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_68954f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `net_total` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/twins.py",
+        "module": "ledger.twins",
+        "module_files": [
+          "src/ledger/twins.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_ff8e35",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 5,
+        "file": "src/ledger/twins.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_16373b1ddd86c11d",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_ff8e35 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total` is exported but no import resolves to src/ledger/twins.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `sum_after_charge` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_68954f",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 12,
+        "file": "src/ledger/twins.py",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_16373b1ddd86c11d",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_68954f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.sum_after_charge",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.sum_after_charge` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `sum_after_charge` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `sum_after_charge` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `sum_after_charge` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/twins.py",
+        "module": "ledger.twins",
+        "module_files": [
+          "src/ledger/twins.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_ff8e35",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 12,
+        "file": "src/ledger/twins.py",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_16373b1ddd86c11d",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_ff8e35 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.sum_after_charge",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.sum_after_charge` is exported but no import resolves to src/ledger/twins.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `net_total_floor` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_68954f",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 14,
+        "end_line": 19,
+        "file": "src/ledger/twins.py",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_16373b1ddd86c11d",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_68954f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_floor",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_floor` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `net_total_floor` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total_floor` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_floor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/twins.py",
+        "module": "ledger.twins",
+        "module_files": [
+          "src/ledger/twins.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_ff8e35",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 14,
+        "end_line": 19,
+        "file": "src/ledger/twins.py",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_16373b1ddd86c11d",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_ff8e35 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_floor",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_floor` is exported but no import resolves to src/ledger/twins.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `net_total_laid_out` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_68954f",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 30,
+        "file": "src/ledger/twins.py",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_16373b1ddd86c11d",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_68954f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_laid_out",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_laid_out` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `net_total_laid_out` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total_laid_out` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_laid_out` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/twins.py",
+        "module": "ledger.twins",
+        "module_files": [
+          "src/ledger/twins.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_ff8e35",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 30,
+        "file": "src/ledger/twins.py",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_16373b1ddd86c11d",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_ff8e35 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_laid_out",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_laid_out` is exported but no import resolves to src/ledger/twins.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `net_total_plus` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_105f29",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 37,
+        "file": "src/ledger/twins.py",
+        "line": 33
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_4ad57d036e8e90c7",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_105f29 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_plus",
+        "hash": "sh_4ad57d036e8e90c7",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_plus` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `net_total_plus` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total_plus` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_plus` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/twins.py",
+        "module": "ledger.twins",
+        "module_files": [
+          "src/ledger/twins.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_290010",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 37,
+        "file": "src/ledger/twins.py",
+        "line": 33
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_4ad57d036e8e90c7",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_290010 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_plus",
+        "hash": "sh_4ad57d036e8e90c7",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_plus` is exported but no import resolves to src/ledger/twins.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `net_total_capped` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_bfd382",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 46,
+        "file": "src/ledger/twins.py",
+        "line": 40
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_960194d5760cea98",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_bfd382 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_capped",
+        "hash": "sh_960194d5760cea98",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_capped` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `net_total_capped` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total_capped` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_capped` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/twins.py",
+        "module": "ledger.twins",
+        "module_files": [
+          "src/ledger/twins.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_382b6d",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 46,
+        "file": "src/ledger/twins.py",
+        "line": 40
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_960194d5760cea98",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_382b6d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_capped",
+        "hash": "sh_960194d5760cea98",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_capped` is exported but no import resolves to src/ledger/twins.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `net_total_product` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_6f277c",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 53,
+        "file": "src/ledger/twins.py",
+        "line": 49
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_39fd464a2305005b",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_6f277c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_product",
+        "hash": "sh_39fd464a2305005b",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_product` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `net_total_product` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total_product` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_product` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/twins.py",
+        "module": "ledger.twins",
+        "module_files": [
+          "src/ledger/twins.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_362db2",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 53,
+        "file": "src/ledger/twins.py",
+        "line": 49
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_39fd464a2305005b",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_362db2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total_product",
+        "hash": "sh_39fd464a2305005b",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total_product` is exported but no import resolves to src/ledger/twins.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_statements_mention_the_owner` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_549f35",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 16,
+        "file": "tests/test_ledger.py",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_84686d9c4e16ec31",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_549f35 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_ledger.test_statements_mention_the_owner",
+        "hash": "sh_84686d9c4e16ec31",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_ledger.test_statements_mention_the_owner` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_an_opening_account_exists` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "not-null"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_6fdd0b",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 46,
+        "end_line": 24,
+        "file": "tests/test_ledger.py",
+        "line": 23
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_db971d577aa0cd88",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_6fdd0b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_ledger.test_an_opening_account_exists",
+        "hash": "sh_db971d577aa0cd88",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_ledger.test_an_opening_account_exists` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_statement_is_published` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_619e04",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 38,
+        "file": "tests/test_ledger.py",
+        "line": 37
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_390999ad4f6fbba9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_619e04 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_ledger.test_statement_is_published",
+        "hash": "sh_390999ad4f6fbba9",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_ledger.test_statement_is_published` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `test_opening_an_account_does_not_raise` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_7ef158",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 57,
+        "file": "tests/test_ledger.py",
+        "line": 56
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_6a7a0cff79f0f6ac",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_7ef158 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_ledger.test_opening_an_account_does_not_raise",
+        "hash": "sh_6a7a0cff79f0f6ac",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_ledger.test_opening_an_account_does_not_raise` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_members_get_a_discount` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_76da2f",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 56,
+        "end_line": 18,
+        "file": "tests/test_pricing.py",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_696931544fae7506",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_76da2f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_pricing.PricingTest.test_members_get_a_discount",
+        "hash": "sh_696931544fae7506",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_pricing.PricingTest.test_members_get_a_discount` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_statements_are_not_empty` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_045970",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 38,
+        "end_line": 18,
+        "file": "tests/test_quality_signals.py",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_d5864a23c59d6394",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_045970 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_statements_are_not_empty",
+        "hash": "sh_d5864a23c59d6394",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_statements_are_not_empty` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `test_classifying_runs` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_70663c",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 22,
+        "file": "tests/test_quality_signals.py",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_8218cb33e54aaeda",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_70663c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_classifying_runs",
+        "hash": "sh_8218cb33e54aaeda",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_classifying_runs` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `test_tallies_are_logged_and_mailed`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 75,
+        "mock_density_max": 50,
+        "mocks": 3,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "ledger.pricing.log_total",
+          "ledger.pricing.mail_total",
+          "ledger.pricing.clock"
+        ]
+      },
+      "id": "fnd_68a758",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 29,
+        "file": "tests/test_quality_signals.py",
+        "line": 25
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_02d9f9a6d6badd2f",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_68a758 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_tallies_are_logged_and_mailed",
+        "hash": "sh_02d9f9a6d6badd2f",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_tallies_are_logged_and_mailed` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `test_every_entry_counts_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 0,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 1,
+        "remediation_mode": "simplify"
+      },
+      "id": "fnd_e515e3",
+      "kind": "test.logic",
+      "location": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 34,
+        "file": "tests/test_quality_signals.py",
+        "line": 32
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_db2bfd5757053b34",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e515e3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_every_entry_counts_toward_the_balance",
+        "hash": "sh_db2bfd5757053b34",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_every_entry_counts_toward_the_balance` contains logic: 1 loop(s) or branch(es) (max 0)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `test_deposits_keep_the_owner`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          37,
+          44
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 3,
+        "statements": 3,
+        "tests": [
+          "tests.test_quality_signals.test_deposits_keep_the_owner",
+          "tests.test_quality_signals.test_deposits_accumulate"
+        ]
+      },
+      "id": "fnd_cc14c6",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 1,
+        "end_col": 34,
+        "end_line": 41,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_7c9a217fc22f1006",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_cc14c6 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_deposits_keep_the_owner",
+        "hash": "sh_7c9a217fc22f1006",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_deposits_keep_the_owner` and 1 other test(s) repeat the same 3 leading statements"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_549f35",
+      "kind": "strengthen_assertion",
+      "priority": 1,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_statements_mention_the_owner` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_6fdd0b",
+      "kind": "strengthen_assertion",
+      "priority": 2,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_an_opening_account_exists` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_619e04",
+      "kind": "strengthen_assertion",
+      "priority": 3,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_statement_is_published` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_7ef158",
+      "kind": "write_test",
+      "priority": 4,
+      "summary": "Add an assertion to `test_opening_an_account_does_not_raise` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_76da2f",
+      "kind": "strengthen_assertion",
+      "priority": 5,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_members_get_a_discount` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_045970",
+      "kind": "strengthen_assertion",
+      "priority": 6,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_statements_are_not_empty` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_70663c",
+      "kind": "write_test",
+      "priority": 7,
+      "summary": "Add an assertion to `test_classifying_runs` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_68a758",
+      "kind": "review",
+      "priority": 8,
+      "summary": "Use real collaborators or simple fakes for some of the doubles in `test_tallies_are_logged_and_mailed`, or split it, so it checks behavior rather than wiring."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e515e3",
+      "kind": "refactor_extract",
+      "priority": 9,
+      "summary": "Split `test_every_entry_counts_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+    },
+    {
+      "command": null,
+      "finding": "fnd_cc14c6",
+      "kind": "refactor_extract",
+      "priority": 10,
+      "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `test_deposits_keep_the_owner`."
+    }
+  ],
+  "plan": null,
+  "rankings": {
+    "dimensions": [
+      {
+        "check": "static.clones",
+        "entries": [
+          {
+            "lang": "python",
+            "rank": 1,
+            "target": {
+              "display": "ledger.twins.net_total and 3 others",
+              "location": {
+                "col": 1,
+                "end_col": 13,
+                "end_line": 5,
+                "file": "src/ledger/twins.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "python",
+            "rank": 2,
+            "target": {
+              "display": "ledger.clones_settlement.order_lines and 1 other",
+              "location": {
+                "col": 1,
+                "end_col": 17,
+                "end_line": 38,
+                "file": "src/ledger/clones_settlement.py",
+                "line": 26
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "python",
+            "rank": 3,
+            "target": {
+              "display": "ledger.clones_settlement.settle_invoices and 1 other",
+              "location": {
+                "col": 1,
+                "end_col": 31,
+                "end_line": 12,
+                "file": "src/ledger/clones_settlement.py",
+                "line": 4
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          }
+        ],
+        "measured": 3,
+        "metric": "cluster_size",
+        "per": "group",
+        "summary": "Symbols in each clone group: 2 for a pair, more for a cluster."
+      },
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "python",
+            "rank": 1,
+            "target": {
+              "display": "ledger.complexity.label",
+              "location": {
+                "col": 1,
+                "end_col": 16,
+                "end_line": 27,
+                "file": "src/ledger/complexity.py",
+                "line": 4
+              },
+              "symbol": "sh_b9016df6df5687e8"
+            },
+            "value": 11.0
+          },
+          {
+            "lang": "python",
+            "rank": 2,
+            "target": {
+              "display": "ledger.complexity.settle",
+              "location": {
+                "col": 1,
+                "end_col": 19,
+                "end_line": 38,
+                "file": "src/ledger/complexity.py",
+                "line": 30
+              },
+              "symbol": "sh_dcb5b60ff46aec47"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "python",
+            "rank": 3,
+            "target": {
+              "display": "ledger.crap_scores.overdue",
+              "location": {
+                "col": 1,
+                "end_col": 17,
+                "end_line": 21,
+                "file": "src/ledger/crap_scores.py",
+                "line": 8
+              },
+              "symbol": "sh_8ce7b6e87b3b4e5e"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "python",
+            "rank": 4,
+            "target": {
+              "display": "ledger.decide.classify",
+              "location": {
+                "col": 1,
+                "end_col": 17,
+                "end_line": 8,
+                "file": "src/ledger/decide.py",
+                "line": 1
+              },
+              "symbol": "sh_df63a716d8770847"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "python",
+            "rank": 5,
+            "target": {
+              "display": "ledger.clones_settlement.reconcile_payments",
+              "location": {
+                "col": 1,
+                "end_col": 30,
+                "end_line": 23,
+                "file": "src/ledger/clones_settlement.py",
+                "line": 15
+              },
+              "symbol": "sh_46a99291992c7f37"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 6,
+            "target": {
+              "display": "ledger.clones_settlement.settle_invoices",
+              "location": {
+                "col": 1,
+                "end_col": 31,
+                "end_line": 12,
+                "file": "src/ledger/clones_settlement.py",
+                "line": 4
+              },
+              "symbol": "sh_46a99291992c7f37"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 7,
+            "target": {
+              "display": "ledger.crap_scores.clamp",
+              "location": {
+                "col": 1,
+                "end_col": 18,
+                "end_line": 30,
+                "file": "src/ledger/crap_scores.py",
+                "line": 24
+              },
+              "symbol": "sh_fa1c8e61d92d8a80"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 8,
+            "target": {
+              "display": "ledger.decide.describe",
+              "location": {
+                "col": 1,
+                "end_col": 29,
+                "end_line": 41,
+                "file": "src/ledger/decide.py",
+                "line": 34
+              },
+              "symbol": "sh_11bab2571f50aaff"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 9,
+            "target": {
+              "display": "ledger.decide.first_overdraft",
+              "location": {
+                "col": 1,
+                "end_col": 16,
+                "end_line": 17,
+                "file": "src/ledger/decide.py",
+                "line": 11
+              },
+              "symbol": "sh_b47a40a5212589fa"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 10,
+            "target": {
+              "display": "ledger.decide.positives",
+              "location": {
+                "col": 1,
+                "end_col": 53,
+                "end_line": 49,
+                "file": "src/ledger/decide.py",
+                "line": 48
+              },
+              "symbol": "sh_1219c9850a0c4998"
+            },
+            "value": 3.0
+          }
+        ],
+        "measured": 78,
+        "metric": "cyclomatic",
+        "per": "symbol",
+        "summary": "Cyclomatic complexity per function."
+      },
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "python",
+            "rank": 1,
+            "target": {
+              "display": "ledger.complexity.settle",
+              "location": {
+                "col": 1,
+                "end_col": 19,
+                "end_line": 38,
+                "file": "src/ledger/complexity.py",
+                "line": 30
+              },
+              "symbol": "sh_dcb5b60ff46aec47"
+            },
+            "value": 15.0
+          },
+          {
+            "lang": "python",
+            "rank": 2,
+            "target": {
+              "display": "ledger.complexity.label",
+              "location": {
+                "col": 1,
+                "end_col": 16,
+                "end_line": 27,
+                "file": "src/ledger/complexity.py",
+                "line": 4
+              },
+              "symbol": "sh_b9016df6df5687e8"
+            },
+            "value": 10.0
+          },
+          {
+            "lang": "python",
+            "rank": 3,
+            "target": {
+              "display": "ledger.crap_scores.overdue",
+              "location": {
+                "col": 1,
+                "end_col": 17,
+                "end_line": 21,
+                "file": "src/ledger/crap_scores.py",
+                "line": 8
+              },
+              "symbol": "sh_8ce7b6e87b3b4e5e"
+            },
+            "value": 8.0
+          },
+          {
+            "lang": "python",
+            "rank": 4,
+            "target": {
+              "display": "ledger.crap_scores.clamp",
+              "location": {
+                "col": 1,
+                "end_col": 18,
+                "end_line": 30,
+                "file": "src/ledger/crap_scores.py",
+                "line": 24
+              },
+              "symbol": "sh_fa1c8e61d92d8a80"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "python",
+            "rank": 5,
+            "target": {
+              "display": "ledger.decide.first_overdraft",
+              "location": {
+                "col": 1,
+                "end_col": 16,
+                "end_line": 17,
+                "file": "src/ledger/decide.py",
+                "line": 11
+              },
+              "symbol": "sh_b47a40a5212589fa"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "python",
+            "rank": 6,
+            "target": {
+              "display": "ledger.twins.net_total_capped",
+              "location": {
+                "col": 1,
+                "end_col": 13,
+                "end_line": 46,
+                "file": "src/ledger/twins.py",
+                "line": 40
+              },
+              "symbol": "sh_960194d5760cea98"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "python",
+            "rank": 7,
+            "target": {
+              "display": "ledger.clones_settlement.reconcile_payments",
+              "location": {
+                "col": 1,
+                "end_col": 30,
+                "end_line": 23,
+                "file": "src/ledger/clones_settlement.py",
+                "line": 15
+              },
+              "symbol": "sh_46a99291992c7f37"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 8,
+            "target": {
+              "display": "ledger.clones_settlement.settle_invoices",
+              "location": {
+                "col": 1,
+                "end_col": 31,
+                "end_line": 12,
+                "file": "src/ledger/clones_settlement.py",
+                "line": 4
+              },
+              "symbol": "sh_46a99291992c7f37"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 9,
+            "target": {
+              "display": "ledger.decide.classify",
+              "location": {
+                "col": 1,
+                "end_col": 17,
+                "end_line": 8,
+                "file": "src/ledger/decide.py",
+                "line": 1
+              },
+              "symbol": "sh_df63a716d8770847"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 10,
+            "target": {
+              "display": "ledger.decide.describe",
+              "location": {
+                "col": 1,
+                "end_col": 29,
+                "end_line": 41,
+                "file": "src/ledger/decide.py",
+                "line": 34
+              },
+              "symbol": "sh_11bab2571f50aaff"
+            },
+            "value": 3.0
+          }
+        ],
+        "measured": 78,
+        "metric": "cognitive",
+        "per": "symbol",
+        "summary": "Cognitive complexity per function."
+      },
+      {
+        "check": "static.crap",
+        "entries": [
+          {
+            "lang": "python",
+            "rank": 1,
+            "target": {
+              "display": "ledger.complexity.label",
+              "location": {
+                "col": 1,
+                "end_col": 16,
+                "end_line": 27,
+                "file": "src/ledger/complexity.py",
+                "line": 4
+              },
+              "symbol": "sh_b9016df6df5687e8"
+            },
+            "value": 132.0
+          },
+          {
+            "lang": "python",
+            "rank": 2,
+            "target": {
+              "display": "ledger.complexity.settle",
+              "location": {
+                "col": 1,
+                "end_col": 19,
+                "end_line": 38,
+                "file": "src/ledger/complexity.py",
+                "line": 30
+              },
+              "symbol": "sh_dcb5b60ff46aec47"
+            },
+            "value": 42.0
+          },
+          {
+            "lang": "python",
+            "rank": 3,
+            "target": {
+              "display": "ledger.crap_scores.overdue",
+              "location": {
+                "col": 1,
+                "end_col": 17,
+                "end_line": 21,
+                "file": "src/ledger/crap_scores.py",
+                "line": 8
+              },
+              "symbol": "sh_8ce7b6e87b3b4e5e"
+            },
+            "value": 42.0
+          },
+          {
+            "lang": "python",
+            "rank": 4,
+            "target": {
+              "display": "ledger.decide.classify",
+              "location": {
+                "col": 1,
+                "end_col": 17,
+                "end_line": 8,
+                "file": "src/ledger/decide.py",
+                "line": 1
+              },
+              "symbol": "sh_df63a716d8770847"
+            },
+            "value": 20.0
+          },
+          {
+            "lang": "python",
+            "rank": 5,
+            "target": {
+              "display": "ledger.clones_settlement.reconcile_payments",
+              "location": {
+                "col": 1,
+                "end_col": 30,
+                "end_line": 23,
+                "file": "src/ledger/clones_settlement.py",
+                "line": 15
+              },
+              "symbol": "sh_46a99291992c7f37"
+            },
+            "value": 12.0
+          },
+          {
+            "lang": "python",
+            "rank": 6,
+            "target": {
+              "display": "ledger.clones_settlement.settle_invoices",
+              "location": {
+                "col": 1,
+                "end_col": 31,
+                "end_line": 12,
+                "file": "src/ledger/clones_settlement.py",
+                "line": 4
+              },
+              "symbol": "sh_46a99291992c7f37"
+            },
+            "value": 12.0
+          },
+          {
+            "lang": "python",
+            "rank": 7,
+            "target": {
+              "display": "ledger.crap_scores.clamp",
+              "location": {
+                "col": 1,
+                "end_col": 18,
+                "end_line": 30,
+                "file": "src/ledger/crap_scores.py",
+                "line": 24
+              },
+              "symbol": "sh_fa1c8e61d92d8a80"
+            },
+            "value": 12.0
+          },
+          {
+            "lang": "python",
+            "rank": 8,
+            "target": {
+              "display": "ledger.decide.describe",
+              "location": {
+                "col": 1,
+                "end_col": 29,
+                "end_line": 41,
+                "file": "src/ledger/decide.py",
+                "line": 34
+              },
+              "symbol": "sh_11bab2571f50aaff"
+            },
+            "value": 12.0
+          },
+          {
+            "lang": "python",
+            "rank": 9,
+            "target": {
+              "display": "ledger.decide.first_overdraft",
+              "location": {
+                "col": 1,
+                "end_col": 16,
+                "end_line": 17,
+                "file": "src/ledger/decide.py",
+                "line": 11
+              },
+              "symbol": "sh_b47a40a5212589fa"
+            },
+            "value": 12.0
+          },
+          {
+            "lang": "python",
+            "rank": 10,
+            "target": {
+              "display": "ledger.decide.positives",
+              "location": {
+                "col": 1,
+                "end_col": 53,
+                "end_line": 49,
+                "file": "src/ledger/decide.py",
+                "line": 48
+              },
+              "symbol": "sh_1219c9850a0c4998"
+            },
+            "value": 12.0
+          }
+        ],
+        "measured": 54,
+        "metric": "crap",
+        "per": "symbol",
+        "summary": "CRAP per function."
+      },
+      {
+        "check": "static.deps",
+        "entries": [
+          {
+            "lang": "python",
+            "rank": 1,
+            "target": {
+              "display": "src/deps_layers/infra/store.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_layers/infra/store.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "python",
+            "rank": 2,
+            "target": {
+              "display": "src/deps_layers/port.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_layers/port.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "python",
+            "rank": 3,
+            "target": {
+              "display": "src/deps_layers/domain/order.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_layers/domain/order.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.5
+          },
+          {
+            "lang": "python",
+            "rank": 4,
+            "target": {
+              "display": "src/ledger/account.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/ledger/account.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "python",
+            "rank": 5,
+            "target": {
+              "display": "tests/test_pricing.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "tests/test_pricing.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.0
+          }
+        ],
+        "measured": 5,
+        "metric": "distance",
+        "per": "module",
+        "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+      },
+      {
+        "check": "static.deps",
+        "entries": [
+          {
+            "lang": "python",
+            "rank": 1,
+            "target": {
+              "display": "src/ledger/__init__.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/ledger/__init__.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 5.0
+          },
+          {
+            "lang": "python",
+            "rank": 2,
+            "target": {
+              "display": "src/ledger/report/format.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/ledger/report/format.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 3,
+            "target": {
+              "display": "tests/test_ledger.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "tests/test_ledger.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 4,
+            "target": {
+              "display": "tests/test_quality_signals.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "tests/test_quality_signals.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 5,
+            "target": {
+              "display": "src/deps_cycle/alpha.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_cycle/alpha.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "python",
+            "rank": 6,
+            "target": {
+              "display": "src/deps_cycle/beta.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_cycle/beta.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "python",
+            "rank": 7,
+            "target": {
+              "display": "src/deps_layers/domain/order.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_layers/domain/order.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "python",
+            "rank": 8,
+            "target": {
+              "display": "src/ledger/account.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/ledger/account.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "python",
+            "rank": 9,
+            "target": {
+              "display": "src/ledger/decide.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/ledger/decide.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "python",
+            "rank": 10,
+            "target": {
+              "display": "src/ledger/pricing.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/ledger/pricing.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          }
+        ],
+        "measured": 17,
+        "metric": "coupling",
+        "per": "module",
+        "summary": "Afferent plus efferent coupling per module."
+      },
+      {
+        "check": "static.deps",
+        "entries": [
+          {
+            "lang": "python",
+            "rank": 1,
+            "target": {
+              "display": "src/deps_cycle/alpha.py → src/deps_cycle/beta.py → src/deps_cycle/alpha.py",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_cycle/alpha.py",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          }
+        ],
+        "measured": 1,
+        "metric": "cycle_size",
+        "per": "group",
+        "summary": "Modules in each import cycle."
+      },
+      {
+        "check": "tests.quality",
+        "entries": [
+          {
+            "lang": "python",
+            "rank": 1,
+            "target": {
+              "display": "tests.test_quality_signals.test_tallies_are_logged_and_mailed",
+              "location": {
+                "col": 1,
+                "end_col": 39,
+                "end_line": 29,
+                "file": "tests/test_quality_signals.py",
+                "line": 25
+              },
+              "symbol": "sh_02d9f9a6d6badd2f"
+            },
+            "value": 75.0
+          },
+          {
+            "lang": "python",
+            "rank": 2,
+            "target": {
+              "display": "tests.test_ledger.test_publish_posts_once",
+              "location": {
+                "col": 1,
+                "end_col": 39,
+                "end_line": 48,
+                "file": "tests/test_ledger.py",
+                "line": 46
+              },
+              "symbol": "sh_8d5a2c2a0edb55cc"
+            },
+            "value": 50.0
+          },
+          {
+            "lang": "python",
+            "rank": 3,
+            "target": {
+              "display": "tests.test_ledger.test_rendering_can_be_replaced",
+              "location": {
+                "col": 1,
+                "end_col": 28,
+                "end_line": 53,
+                "file": "tests/test_ledger.py",
+                "line": 51
+              },
+              "symbol": "sh_1e929366a6964030"
+            },
+            "value": 50.0
+          },
+          {
+            "lang": "python",
+            "rank": 4,
+            "target": {
+              "display": "tests.test_pricing.PricingTest.test_tally_logs_once",
+              "location": {
+                "col": 5,
+                "end_col": 45,
+                "end_line": 23,
+                "file": "tests/test_pricing.py",
+                "line": 21
+              },
+              "symbol": "sh_ece21038b9175d4d"
+            },
+            "value": 50.0
+          },
+          {
+            "lang": "python",
+            "rank": 5,
+            "target": {
+              "display": "tests.test_ledger.test_an_opening_account_exists",
+              "location": {
+                "col": 1,
+                "end_col": 46,
+                "end_line": 24,
+                "file": "tests/test_ledger.py",
+                "line": 23
+              },
+              "symbol": "sh_db971d577aa0cd88"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "python",
+            "rank": 6,
+            "target": {
+              "display": "tests.test_ledger.test_deposit_adds_to_the_balance",
+              "location": {
+                "col": 1,
+                "end_col": 32,
+                "end_line": 12,
+                "file": "tests/test_ledger.py",
+                "line": 10
+              },
+              "symbol": "sh_bb519810f1c431ea"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "python",
+            "rank": 7,
+            "target": {
+              "display": "tests.test_ledger.test_negative_deposits_are_rejected",
+              "location": {
+                "col": 1,
+                "end_col": 29,
+                "end_line": 29,
+                "file": "tests/test_ledger.py",
+                "line": 27
+              },
+              "symbol": "sh_824e79d9a9e3c4bf"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "python",
+            "rank": 8,
+            "target": {
+              "display": "tests.test_ledger.test_opening_an_account_does_not_raise",
+              "location": {
+                "col": 1,
+                "end_col": 19,
+                "end_line": 57,
+                "file": "tests/test_ledger.py",
+                "line": 56
+              },
+              "symbol": "sh_6a7a0cff79f0f6ac"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "python",
+            "rank": 9,
+            "target": {
+              "display": "tests.test_ledger.test_parsing_garbage_gives_nothing",
+              "location": {
+                "col": 1,
+                "end_col": 42,
+                "end_line": 20,
+                "file": "tests/test_ledger.py",
+                "line": 19
+              },
+              "symbol": "sh_3f37ee178bffb2b5"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "python",
+            "rank": 10,
+            "target": {
+              "display": "tests.test_ledger.test_report_matches_snapshot",
+              "location": {
+                "col": 1,
+                "end_col": 36,
+                "end_line": 42,
+                "file": "tests/test_ledger.py",
+                "line": 41
+              },
+              "symbol": "sh_d35a3c1f5e322c1f"
+            },
+            "value": 0.0
+          }
+        ],
+        "measured": 22,
+        "metric": "mock_density",
+        "per": "symbol",
+        "summary": "Test doubles per test as a percentage of its doubles plus assertions."
+      }
+    ],
+    "top": 10
+  },
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.crap": {
+            "no_coverage": true
+          },
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 27,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 78
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "survey"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 39,
+      "warn": 24
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 63,
+  "truncated": false
+}
