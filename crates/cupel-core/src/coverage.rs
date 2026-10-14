@@ -47,6 +47,30 @@ pub struct BranchHits {
     pub hits: u64,
 }
 
+impl FileCoverage {
+    /// The coverage of `file` from `(line, hits)` pairs and, when the producer measured
+    /// branches, `(line, branch, hits)` triples.
+    pub fn from_hits(
+        file: &str,
+        lines: &[(u32, u64)],
+        branches: Option<&[(u32, u32, u64)]>,
+    ) -> Self {
+        Self {
+            file: file.to_owned(),
+            lines: lines
+                .iter()
+                .map(|&(line, hits)| LineHits { line, hits })
+                .collect(),
+            branches: branches.map(|branches| {
+                branches
+                    .iter()
+                    .map(|&(line, branch, hits)| BranchHits { line, branch, hits })
+                    .collect()
+            }),
+        }
+    }
+}
+
 impl CoverageMap {
     /// The map of `records`: records of one file merge, a line's or a branch's hits add up
     /// across them, and a file has branches when any of its records measured them.

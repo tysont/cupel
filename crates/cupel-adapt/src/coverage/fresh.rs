@@ -232,25 +232,19 @@ mod tests {
     fn an_unchanged_tree_is_fresh_and_any_change_to_a_file_or_the_report_is_not() {
         let (dir, sources, written) = recorded();
         let root = dir.path();
-        assert!(sources.fresh(root, &EXCLUDE, written, b"report"));
-        assert!(!sources.fresh(root, &EXCLUDE, written, b"another report"));
+        let fresh = |at: SystemTime, report: &[u8]| sources.fresh(root, &EXCLUDE, at, report);
+        let mut seen = vec![fresh(written, b"report"), fresh(written, b"another report")];
         fs::write(root.join("target/out.o"), "rebuilt").unwrap();
         fs::write(root.join(".hidden"), "y").unwrap();
-        assert!(
-            sources.fresh(root, &EXCLUDE, written, b"report"),
-            "ignored files"
-        );
-
+        seen.push(fresh(written, b"report"));
         fs::write(root.join("tests/a.rs"), "#[test] fn u() {}\n").unwrap();
-        assert!(
-            !sources.fresh(root, &EXCLUDE, written, b"report"),
-            "a changed test"
-        );
-        let later = SystemTime::now() + Duration::from_secs(60);
-        assert!(
-            sources.fresh(root, &EXCLUDE, later, b"report"),
-            "a file older than the record is trusted without rehashing"
-        );
+        seen.push(fresh(written, b"report"));
+        // A file older than the record is trusted without rehashing.
+        seen.push(fresh(
+            SystemTime::now() + Duration::from_secs(60),
+            b"report",
+        ));
+        assert_eq!(seen, [true, false, true, false, true]);
     }
 
     #[test]
@@ -258,22 +252,15 @@ mod tests {
         let (dir, sources, _) = recorded();
         let root = dir.path();
         let before = SystemTime::now() - Duration::from_secs(60);
+        let fresh = || sources.fresh(root, &EXCLUDE, before, b"report");
         fs::write(root.join("src/lib.rs"), "fn a() {}\n").unwrap();
-        assert!(
-            sources.fresh(root, &EXCLUDE, before, b"report"),
-            "rehashed, same content"
-        );
+        let mut seen = vec![fresh()];
         fs::write(root.join("src/new.rs"), "").unwrap();
-        assert!(
-            !sources.fresh(root, &EXCLUDE, before, b"report"),
-            "a new file"
-        );
+        seen.push(fresh());
         fs::remove_file(root.join("src/new.rs")).unwrap();
         fs::remove_file(root.join("tests/a.rs")).unwrap();
-        assert!(
-            !sources.fresh(root, &EXCLUDE, before, b"report"),
-            "a removed file"
-        );
+        seen.push(fresh());
+        assert_eq!(seen, [true, false, false]);
     }
 
     #[test]
@@ -286,9 +273,10 @@ mod tests {
         fs::write(&report, "SF:a\n").unwrap();
         std::thread::sleep(Duration::from_millis(20));
         fs::write(root.join("coverage/index.html"), "").unwrap();
-        assert!(tree(root).is_newest(&report));
+        let mut seen = vec![tree(root).is_newest(&report)];
         fs::write(root.join("src/lib.rs"), "fn b() {}\n").unwrap();
-        assert!(!tree(root).is_newest(&report));
-        assert!(!tree(root).is_newest(&root.join("missing.info")));
+        seen.push(tree(root).is_newest(&report));
+        seen.push(tree(root).is_newest(&root.join("missing.info")));
+        assert_eq!(seen, [true, false, false]);
     }
 }

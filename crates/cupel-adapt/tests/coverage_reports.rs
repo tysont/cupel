@@ -129,23 +129,21 @@ fn cobertura_from_the_same_run_agrees_with_its_lcov_line_for_line() {
 }
 
 #[test]
-fn jest_lcov_and_istanbul_json_of_one_run_agree() {
-    let (capture, json) = report("istanbul", "jest", "coverage-final.json");
-    let istanbul = relative(parse_istanbul(&json).unwrap(), &capture);
-    let (_, lcov) = report("lcov", "jest", "lcov.info");
-    let lcov = parse_lcov(&lcov).unwrap();
-    assert_eq!(summary(&lcov), [row("grade.js", 19, 9, Some(14), 3)]);
-    assert_eq!(istanbul, lcov);
-}
-
-#[test]
-fn vitest_lcov_and_istanbul_json_of_one_run_agree() {
-    let (capture, json) = report("istanbul", "vitest", "coverage-final.json");
-    let istanbul = relative(parse_istanbul(&json).unwrap(), &capture);
-    let (_, lcov) = report("lcov", "vitest", "lcov.info");
-    let lcov = parse_lcov(&lcov).unwrap();
-    assert_eq!(summary(&lcov), [row("src/grade.ts", 18, 8, Some(14), 3)]);
-    assert_eq!(istanbul, lcov);
+fn lcov_and_istanbul_json_of_one_jest_or_vitest_run_agree() {
+    for (tool, file, lines, ran) in [
+        ("jest", "grade.js", 19, 9),
+        ("vitest", "src/grade.ts", 18, 8),
+    ] {
+        let (capture, json) = report("istanbul", tool, "coverage-final.json");
+        let istanbul = relative(parse_istanbul(&json).unwrap(), &capture);
+        let lcov = parse_lcov(&report("lcov", tool, "lcov.info").1).unwrap();
+        assert_eq!(
+            summary(&lcov),
+            [row(file, lines, ran, Some(14), 3)],
+            "{tool}"
+        );
+        assert_eq!(istanbul, lcov, "{tool}");
+    }
 }
 
 #[test]

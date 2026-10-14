@@ -774,20 +774,17 @@ fn noting(ctx: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResul
 
 #[test]
 fn each_languages_notes_reach_the_combined_entry_naming_their_language() {
-    let world = World::new(
-        vec![check("t.noted", &[FactKind::Symbols], noting)],
-        "[checks.\"t.noted\".lang.go]\nnote = \"branches: unavailable\"\n\
-         [checks.\"t.noted\".lang.rust]\nnote = \"branches: unavailable\"\n",
-    );
-    let (outcome, _) = world.run(&["go", "rust"], |_| {});
-    let checks = outcome.unwrap().checks;
+    let notes = |config: &str, langs: &[&str]| -> Vec<String> {
+        let world = World::new(vec![check("t.noted", &[FactKind::Symbols], noting)], config);
+        world.run(langs, |_| {}).0.unwrap().checks[0].notes.clone()
+    };
+    let config = "[checks.\"t.noted\".lang.go]\nnote = \"branches: unavailable\"\n\
+                 [checks.\"t.noted\".lang.rust]\nnote = \"branches: unavailable\"\n";
     assert_eq!(
-        checks[0].notes,
+        notes(config, &["go", "rust"]),
         ["branches: unavailable (go)", "branches: unavailable (rust)"]
     );
-    let quiet = World::new(vec![check("t.noted", &[FactKind::Symbols], noting)], "");
-    let (outcome, _) = quiet.run(&["go"], |_| {});
-    assert!(outcome.unwrap().checks[0].notes.is_empty());
+    assert_eq!(notes("", &["go"]), Vec::<String>::new());
 }
 
 /// Reports `bound` as a `scope` metric over a score covering `n` targets, both from config.

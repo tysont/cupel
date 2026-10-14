@@ -6,7 +6,7 @@ use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage, LineHits};
 use serde::Deserialize;
 use serde_json::Value;
 
-use super::ReportError;
+use super::error::ReportError;
 
 const FORMAT: &str = "Istanbul JSON";
 

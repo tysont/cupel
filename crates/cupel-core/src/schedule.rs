@@ -911,10 +911,7 @@ impl<'a> CheckRun<'a> {
                 .chain(cut.is_some().then_some(CheckStatus::Partial))
                 .max_by_key(|status| rank(*status))
                 .unwrap_or(CheckStatus::Pass);
-            let scores: Vec<_> = ran
-                .iter()
-                .filter_map(|result| result.score.clone())
-                .collect();
+            let scores: Vec<_> = ran.iter().filter_map(|r| r.score.clone()).collect();
             CheckResult {
                 id: manifest.id.clone(),
                 status,

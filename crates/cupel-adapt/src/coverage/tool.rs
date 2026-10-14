@@ -12,8 +12,8 @@ use cupel_core::{
 };
 use serde_json::json;
 
+use super::format::{parse, placed};
 use super::fresh::{REPORT, SOURCES, Sources, Tree, hash};
-use super::{parse, placed};
 use crate::runner::{installed, probe, roots};
 use crate::toolchain;
 
@@ -115,13 +115,10 @@ impl Producer<CoverageMap> for CoverageTool {
         })
     }
 
+    /// The coverage tool, probed as a runner is: it is what `doctor` requires (ADR-077).
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
-        Some(probe(
-            self.0.tool,
-            self.0.node_bin,
-            self.0.version,
-            &ctx.root,
-        ))
+        let spec = self.0;
+        probe(spec.tool, spec.node_bin, spec.version, &ctx.root).into()
     }
 
     fn produce(

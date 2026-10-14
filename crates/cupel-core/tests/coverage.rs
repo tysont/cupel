@@ -1,30 +1,14 @@
 // ABOUTME: The `CoverageMap` payload (ADR-067, ADR-077): building one merges and sorts files, lines, and
 // ABOUTME: branches; symbol line coverage stays in [0, 1]; branch coverage exists only where it was measured.
-use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage, LineHits};
+use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage};
 use proptest::prelude::*;
 
-fn lines(hits: &[(u32, u64)]) -> Vec<LineHits> {
-    hits.iter()
-        .map(|&(line, hits)| LineHits { line, hits })
-        .collect()
+fn file(name: &str, lines: &[(u32, u64)], branches: Option<&[(u32, u32, u64)]>) -> FileCoverage {
+    FileCoverage::from_hits(name, lines, branches)
 }
 
 fn branches(hits: &[(u32, u32, u64)]) -> Vec<BranchHits> {
-    hits.iter()
-        .map(|&(line, branch, hits)| BranchHits { line, branch, hits })
-        .collect()
-}
-
-fn file(
-    name: &str,
-    line_hits: &[(u32, u64)],
-    branch_hits: Option<&[(u32, u32, u64)]>,
-) -> FileCoverage {
-    FileCoverage {
-        file: name.to_owned(),
-        lines: lines(line_hits),
-        branches: branch_hits.map(branches),
-    }
+    file("", &[], Some(hits)).branches.unwrap()
 }
 
 #[test]

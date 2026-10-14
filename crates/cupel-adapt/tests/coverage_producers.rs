@@ -1,34 +1,21 @@
 // ABOUTME: The coverage producers as the registry holds them: table order, availability and detection, ingest of
 // ABOUTME: fresh reports, failed runs, and real runs on the coverage fixture, skipped when a tool is missing.
+mod support;
+
 use std::fs;
 use std::path::Path;
 
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Cancellation, Ctx, Event, FactKind, Lang, LangFamily, LangId, ProduceCtx,
-    Produced, ProducerRegistry, RegisteredProducer, Scope, ToolId, Writer,
+    Availability, Cancellation, Ctx, Event, FactKind, LangId, ProduceCtx, Produced,
+    ProducerRegistry, RegisteredProducer, Scope, ToolId, Writer,
 };
 use cupel_fixtures::{Capture, copy_repo, repo_path};
 use serde_json::{Map, Value, json};
+use support::registry;
 
 const LANGS: [&str; 5] = ["rust", "go", "python", "javascript", "typescript"];
-
-fn coverage_registry() -> ProducerRegistry {
-    let mut registry = ProducerRegistry::default();
-    cupel_adapt::register(&mut registry);
-    registry
-}
-
-fn language(id: &str) -> Lang {
-    Lang {
-        id: LangId::from(id),
-        family: LangFamily::from(match id {
-            "javascript" | "typescript" => "ecma",
-            other => other,
-        }),
-    }
-}
 
 fn producer<'a>(
     registry: &'a ProducerRegistry,
@@ -36,7 +23,7 @@ fn producer<'a>(
     lang: &str,
 ) -> &'a dyn RegisteredProducer {
     registry
-        .producers_for(FactKind::CoverageMap, &language(lang))
+        .producers_for(FactKind::CoverageMap, &support::lang(lang))
         .find(|producer| producer.id().as_str() == id)
         .unwrap_or_else(|| panic!("{id} produces coverage for {lang}"))
 }
@@ -127,10 +114,10 @@ fn shape(map: &CoverageMap, file: &str) -> (String, usize, usize, Option<usize>)
 
 #[test]
 fn coverage_producers_register_for_their_languages_in_toolchain_table_order() {
-    let registry = coverage_registry();
+    let registry = registry();
     let ids = LANGS.map(|lang| {
         registry
-            .producers_for(FactKind::CoverageMap, &language(lang))
+            .producers_for(FactKind::CoverageMap, &support::lang(lang))
             .map(|producer| producer.id().to_string())
             .collect::<Vec<_>>()
     });
@@ -150,7 +137,7 @@ fn coverage_producers_register_for_their_languages_in_toolchain_table_order() {
 
 #[test]
 fn without_a_coverage_command_or_a_fresh_report_a_producer_is_unconfigured() {
-    let registry = coverage_registry();
+    let registry = registry();
     let dir = fixture("go");
     let found = producer(&registry, "tool.go-coverprofile", "go").availability(&ctx(
         dir.path(),
@@ -167,7 +154,7 @@ fn without_a_coverage_command_or_a_fresh_report_a_producer_is_unconfigured() {
 
 #[test]
 fn with_a_coverage_command_a_producer_needs_its_tool() {
-    let registry = coverage_registry();
+    let registry = registry();
     for (id, lang, tool) in [
         ("tool.cargo-llvm-cov", "rust", "cargo-llvm-cov"),
         ("tool.go-coverprofile", "go", "go"),
@@ -195,10 +182,10 @@ fn with_a_coverage_command_a_producer_needs_its_tool() {
 
 #[test]
 fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
-    let registry = coverage_registry();
+    let registry = registry();
     let preferred = |lang: &str, ctx: &Ctx| -> String {
         registry
-            .candidates(FactKind::CoverageMap, &language(lang), ctx)
+            .candidates(FactKind::CoverageMap, &support::lang(lang), ctx)
             .unwrap()[0]
             .id()
             .to_string()
@@ -229,7 +216,7 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
 
 #[test]
 fn a_report_the_tool_left_newer_than_every_source_is_ingested_without_running() {
-    let registry = coverage_registry();
+    let registry = registry();
     let dir = fixture("javascript");
     let report = dir.path().join("coverage/lcov.info");
     fs::create_dir_all(report.parent().unwrap()).unwrap();
@@ -252,7 +239,7 @@ fn a_report_the_tool_left_newer_than_every_source_is_ingested_without_running() 
 
 #[test]
 fn a_failing_coverage_command_reports_why_and_produces_nothing() {
-    let registry = coverage_registry();
+    let registry = registry();
     let dir = fixture("go");
     let mut produce_ctx = produce_ctx(dir.path(), "go", true);
     produce_ctx.config.insert(
@@ -299,7 +286,7 @@ fn assert_covers(expected: &Expected) {
         );
         return;
     }
-    let registry = coverage_registry();
+    let registry = registry();
     let dir = fixture(expected.lang);
     let tool = producer(&registry, expected.producer, expected.lang);
 
@@ -333,57 +320,48 @@ fn assert_covers(expected: &Expected) {
     );
 }
 
-#[test]
-fn cargo_llvm_cov_covers_the_rust_fixture() {
-    assert_covers(&Expected {
+/// Every coverage producer the fixtures configure, with what it must report.
+const EXPECTED: [Expected; 5] = [
+    Expected {
         producer: "tool.cargo-llvm-cov",
         lang: "rust",
         tool: "cargo-llvm-cov",
         source: ("src/lib.rs", 31, 14, None),
         test: "tests/grade.rs",
-    });
-}
-
-#[test]
-fn go_test_covers_the_go_fixture_by_path() {
-    assert_covers(&Expected {
+    },
+    Expected {
         producer: "tool.go-coverprofile",
         lang: "go",
         tool: "go",
         source: ("grade.go", 28, 13, None),
         test: "grade_test.go",
-    });
-}
-
-#[test]
-fn pytest_cov_covers_the_python_fixture_with_branches() {
-    assert_covers(&Expected {
+    },
+    Expected {
         producer: "tool.pytest-cov",
         lang: "python",
         tool: "pytest",
         source: ("grade.py", 21, 11, Some(14)),
         test: "tests/test_grade.py",
-    });
-}
-
-#[test]
-fn jest_covers_the_javascript_fixture_with_branches() {
-    assert_covers(&Expected {
+    },
+    Expected {
         producer: "tool.jest-coverage",
         lang: "javascript",
         tool: "jest",
         source: ("grade.js", 19, 9, Some(14)),
         test: "grade.test.js",
-    });
-}
-
-#[test]
-fn vitest_covers_the_typescript_fixture_with_branches() {
-    assert_covers(&Expected {
+    },
+    Expected {
         producer: "tool.vitest-coverage",
         lang: "typescript",
         tool: "vitest",
         source: ("src/grade.ts", 18, 8, Some(14)),
         test: "src/grade.test.ts",
-    });
+    },
+];
+
+#[test]
+fn every_configured_coverage_tool_covers_its_fixture_and_caches_a_fresh_report() {
+    for expected in &EXPECTED {
+        assert_covers(expected);
+    }
 }

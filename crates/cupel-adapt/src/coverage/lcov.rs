@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage, LineHits};
 
-use super::ReportError;
+use super::error::ReportError;
 
 const FORMAT: &str = "LCOV";
 
@@ -17,44 +17,73 @@ const FORMAT: &str = "LCOV";
 ///
 /// When a `DA` or `BRDA` line is malformed or comes before any `SF`.
 pub fn parse_lcov(text: &str) -> Result<CoverageMap, ReportError> {
-    let mut records = Vec::new();
-    let mut current: Option<Record> = None;
+    let mut reader = Reader::default();
     for (index, line) in text.lines().enumerate() {
-        let line = line.trim();
-        let number = index + 1;
+        reader.read(index + 1, line.trim())?;
+    }
+    reader.close();
+    Ok(CoverageMap::new(reader.records))
+}
+
+/// The records read so far and the one being read.
+#[derive(Default)]
+struct Reader {
+    records: Vec<FileCoverage>,
+    current: Option<Record>,
+}
+
+impl Reader {
+    /// Reads line `number`, `line`; lines other than `SF`, `DA`, `BRDA`, and `end_of_record`
+    /// carry nothing the map holds.
+    fn read(&mut self, number: usize, line: &str) -> Result<(), ReportError> {
         if let Some(path) = line.strip_prefix("SF:") {
-            records.extend(current.take().map(Record::finish));
-            current = Some(Record::new(path));
+            self.close();
+            self.current = Some(Record::new(path));
         } else if line == "end_of_record" {
-            records.extend(current.take().map(Record::finish));
+            self.close();
         } else if let Some(fields) = line.strip_prefix("DA:") {
-            let record = in_record(&mut current, number)?;
             let mut parts = fields.split(',');
             let line = field(parts.next(), number)?;
             let hits = field(parts.next(), number)?;
-            let total = record.lines.entry(line).or_default();
+            let total = self.record(number)?.lines.entry(line).or_default();
             *total = total.saturating_add(hits);
         } else if let Some(fields) = line.strip_prefix("BRDA:") {
-            let record = in_record(&mut current, number)?;
-            let parts: Vec<&str> = fields.split(',').collect();
-            let [line, _, _, taken] = parts[..] else {
-                return Err(ReportError::new(
-                    FORMAT,
-                    format!("line {number}: malformed BRDA"),
-                ));
-            };
-            let line = field(Some(line), number)?;
-            let hits = if taken == "-" {
-                0
-            } else {
-                field(Some(taken), number)?
-            };
-            let on_line = record.branches.entry(line).or_default();
-            on_line.push(hits);
+            let (line, hits) = branch(fields, number)?;
+            self.record(number)?
+                .branches
+                .entry(line)
+                .or_default()
+                .push(hits);
         }
+        Ok(())
     }
-    records.extend(current.map(Record::finish));
-    Ok(CoverageMap::new(records))
+
+    fn close(&mut self) {
+        self.records.extend(self.current.take().map(Record::finish));
+    }
+
+    fn record(&mut self, number: usize) -> Result<&mut Record, ReportError> {
+        self.current.as_mut().ok_or_else(|| {
+            ReportError::new(FORMAT, format!("line {number}: data before any SF line"))
+        })
+    }
+}
+
+/// `(line, hits)` of a `BRDA:<line>,<block>,<branch>,<taken>` line's fields; `-` is 0 hits.
+fn branch(fields: &str, number: usize) -> Result<(u32, u64), ReportError> {
+    let parts: Vec<&str> = fields.split(',').collect();
+    let [line, _, _, taken] = parts[..] else {
+        return Err(ReportError::new(
+            FORMAT,
+            format!("line {number}: malformed BRDA"),
+        ));
+    };
+    let hits = if taken == "-" {
+        0
+    } else {
+        field(Some(taken), number)?
+    };
+    Ok((field(Some(line), number)?, hits))
 }
 
 /// One `SF` record while it is read.
@@ -95,12 +124,6 @@ impl Record {
             }),
         }
     }
-}
-
-fn in_record(current: &mut Option<Record>, number: usize) -> Result<&mut Record, ReportError> {
-    current
-        .as_mut()
-        .ok_or_else(|| ReportError::new(FORMAT, format!("line {number}: data before any SF line")))
 }
 
 fn field<T: std::str::FromStr>(text: Option<&str>, number: usize) -> Result<T, ReportError> {

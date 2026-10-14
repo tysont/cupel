@@ -2,7 +2,7 @@
 // ABOUTME: instructions, and its branches are its covered and missed branch counts (no execution counts).
 use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage, LineHits};
 
-use super::{ReportError, xml_number};
+use super::error::{ReportError, xml_number};
 
 const FORMAT: &str = "JaCoCo XML";
 
@@ -42,30 +42,38 @@ pub fn parse_jacoco(text: &str) -> Result<CoverageMap, ReportError> {
             } else {
                 format!("{prefix}/{name}")
             };
-            let mut lines = Vec::new();
-            let mut branches = Vec::new();
-            for line in source.children().filter(|node| node.has_tag_name("line")) {
-                let number: u32 = xml_number(FORMAT, line, "nr")?;
-                let covered: u64 = xml_number(FORMAT, line, "ci")?;
-                let hit: u32 = xml_number(FORMAT, line, "cb")?;
-                let missed: u32 = xml_number(FORMAT, line, "mb")?;
-                lines.push(LineHits {
-                    line: number,
-                    hits: u64::from(covered > 0),
-                });
-                branches.extend((0..hit + missed).map(|branch| BranchHits {
-                    line: number,
-                    branch,
-                    hits: u64::from(branch < hit),
-                }));
-            }
-            let measured = !branches.is_empty();
-            files.push(FileCoverage {
-                file,
-                lines,
-                branches: measured.then_some(branches),
-            });
+            files.push(source_coverage(source, file)?);
         }
     }
     Ok(CoverageMap::new(files))
+}
+
+/// The lines and branches of one `<sourcefile>`, which is `file`.
+fn source_coverage(
+    source: roxmltree::Node<'_, '_>,
+    file: String,
+) -> Result<FileCoverage, ReportError> {
+    let mut lines = Vec::new();
+    let mut branches = Vec::new();
+    for line in source.children().filter(|node| node.has_tag_name("line")) {
+        let number: u32 = xml_number(FORMAT, line, "nr")?;
+        let covered: u64 = xml_number(FORMAT, line, "ci")?;
+        let hit: u32 = xml_number(FORMAT, line, "cb")?;
+        let missed: u32 = xml_number(FORMAT, line, "mb")?;
+        lines.push(LineHits {
+            line: number,
+            hits: u64::from(covered > 0),
+        });
+        branches.extend((0..hit + missed).map(|branch| BranchHits {
+            line: number,
+            branch,
+            hits: u64::from(branch < hit),
+        }));
+    }
+    let measured = !branches.is_empty();
+    Ok(FileCoverage {
+        file,
+        lines,
+        branches: measured.then_some(branches),
+    })
 }

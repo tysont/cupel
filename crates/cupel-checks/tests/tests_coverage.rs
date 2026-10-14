@@ -2,7 +2,7 @@
 // ABOUTME: branches (else the `branches: unavailable` note), test code and unmeasured symbols, metrics (ADR-077).
 mod support;
 
-use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage, LineHits};
+use cupel_core::coverage::{CoverageMap, FileCoverage};
 use cupel_core::syntax::{
     NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, TestConventions,
     TestPairing, Visibility,
@@ -34,32 +34,6 @@ fn symbol(name: &str, file: &str, line: u32) -> SymbolDef {
         },
         body: None,
         parameters: 0,
-    }
-}
-
-/// Line hits for `lines`, each `(line, hits)`.
-fn lines(hits: &[(u32, u64)]) -> Vec<LineHits> {
-    hits.iter()
-        .map(|&(line, hits)| LineHits { line, hits })
-        .collect()
-}
-
-/// Branch hits for `branches`, each `(line, hits)`, numbered in order on their line.
-fn branches(hits: &[(u32, u64)]) -> Vec<BranchHits> {
-    let mut numbered: Vec<BranchHits> = Vec::new();
-    for &(line, hits) in hits {
-        let branch =
-            u32::try_from(numbered.iter().filter(|seen| seen.line == line).count()).unwrap();
-        numbered.push(BranchHits { line, branch, hits });
-    }
-    numbered
-}
-
-fn file(name: &str, line_hits: &[(u32, u64)], branch_hits: Option<&[(u32, u64)]>) -> FileCoverage {
-    FileCoverage {
-        file: name.to_owned(),
-        lines: lines(line_hits),
-        branches: branch_hits.map(branches),
     }
 }
 
@@ -135,14 +109,14 @@ fn run(world: &World) -> (CheckResult, Vec<Finding>) {
 /// `c` (lines 20–24) ran fully. Each has its declaration line and two body lines instrumented.
 /// Branches are measured when `measured`.
 fn three_symbols(measured: bool) -> World {
-    let branch_hits: &[(u32, u64)] = &[(11, 3), (11, 0), (21, 1), (21, 1)];
+    let branch_hits: &[(u32, u32, u64)] = &[(11, 0, 3), (11, 1, 0), (21, 0, 1), (21, 1, 1)];
     World::new(
         vec![
             symbol("a", "f.x", 1),
             symbol("b", "f.x", 10),
             symbol("c", "f.x", 20),
         ],
-        CoverageMap::new(vec![file(
+        CoverageMap::new(vec![FileCoverage::from_hits(
             "f.x",
             &[
                 (1, 0),
@@ -261,7 +235,11 @@ fn a_declaration_line_that_ran_without_its_body_is_not_coverage() {
     // A Python `def` line runs when the module is imported; the function ran only if its body did.
     let world = World::new(
         vec![symbol("imported", "f.x", 1), symbol("one_line", "f.x", 10)],
-        CoverageMap::new(vec![file("f.x", &[(1, 1), (2, 0), (3, 0), (10, 1)], None)]),
+        CoverageMap::new(vec![FileCoverage::from_hits(
+            "f.x",
+            &[(1, 1), (2, 0), (3, 0), (10, 1)],
+            None,
+        )]),
     );
     let (result, findings) = run(&world);
     assert_eq!(
@@ -284,8 +262,8 @@ fn branch_findings_need_branches_measured_in_the_symbols_own_file() {
     let mut world = World::new(
         vec![symbol("b", "f.x", 10), symbol("g", "g.x", 1)],
         CoverageMap::new(vec![
-            file("f.x", &[(10, 1), (11, 1)], None),
-            file("g.x", &[(1, 1), (2, 1)], Some(&[(2, 1), (2, 0)])),
+            FileCoverage::from_hits("f.x", &[(10, 1), (11, 1)], None),
+            FileCoverage::from_hits("g.x", &[(1, 1), (2, 1)], Some(&[(2, 0, 1), (2, 1, 0)])),
         ]),
     );
     world.symbols[0].span.end_line = 12;
@@ -338,8 +316,8 @@ fn symbols_without_an_instrumented_line_or_in_test_files_are_not_scored() {
             symbol("a_test", "f_test.x", 1),
         ],
         CoverageMap::new(vec![
-            file("f.x", &[(1, 0)], None),
-            file("f_test.x", &[(1, 0)], None),
+            FileCoverage::from_hits("f.x", &[(1, 0)], None),
+            FileCoverage::from_hits("f_test.x", &[(1, 0)], None),
         ]),
     );
     world.conventions = Some(TestConventions {

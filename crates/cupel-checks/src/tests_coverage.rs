@@ -6,8 +6,8 @@ use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{NormTree, SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
-    Facts, Finding, FindingKindSpec, Manifest, Measurement, MetricPer, MetricSpec, Plan, Result,
-    Scope, Score, Severity, Stability, SymbolHash, Tier,
+    Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Plan, Result, Scope, Score,
+    Severity, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -57,41 +57,41 @@ inventory::submit!(crate::NativeCheck(|| Box::new(TestsCoverage::new())));
 impl TestsCoverage {
     pub fn new() -> Self {
         Self {
-            manifest: Manifest {
-                id: CheckId::from(ID),
-                version: 1,
-                tier: Tier::try_from(2).expect("tier 2 exists"),
-                cost: CostClass::Standard,
-                needs: vec![FactKind::Symbols, FactKind::CoverageMap],
-                wants: vec![FactKind::NormTree, FactKind::TestConventions],
-                findings: finding_kinds(),
-                metrics: metrics(),
-                stability: Stability::Experimental,
-                summary: "Line and branch coverage per function, from the coverage tool the \
-                          language's `[lang.<id>] coverage` command runs (or a fresh report it \
-                          left). Branch findings only where the tool measured branches; \
-                          otherwise the result notes `branches: unavailable`. A function with \
-                          no instrumented line is not scored."
-                    .to_owned(),
-            },
+            manifest: manifest(),
         }
     }
 }
 
-/// The finding kinds this check reports, with their actions and evidence.
-fn finding_kinds() -> Vec<FindingKindSpec> {
-    vec![
-        kind::<UncoveredSymbol>(
-            "coverage.uncovered-symbol",
-            ActionKind::WriteTest,
-            "No test ran any instrumented line of the function.",
-        ),
-        kind::<UncoveredBranch>(
-            "coverage.uncovered-branch",
-            ActionKind::WriteTest,
-            "Tests ran the function but never took some of its branches.",
-        ),
-    ]
+/// The manifest: needs, wants, finding kinds with their evidence, and metrics (ADR-077).
+fn manifest() -> Manifest {
+    Manifest {
+        id: CheckId::from(ID),
+        version: 1,
+        tier: Tier::try_from(2).expect("tier 2 exists"),
+        cost: CostClass::Standard,
+        needs: vec![FactKind::Symbols, FactKind::CoverageMap],
+        wants: vec![FactKind::NormTree, FactKind::TestConventions],
+        findings: vec![
+            kind::<UncoveredSymbol>(
+                "coverage.uncovered-symbol",
+                ActionKind::WriteTest,
+                "No test ran any instrumented line of the function.",
+            ),
+            kind::<UncoveredBranch>(
+                "coverage.uncovered-branch",
+                ActionKind::WriteTest,
+                "Tests ran the function but never took some of its branches.",
+            ),
+        ],
+        metrics: metrics(),
+        stability: Stability::Experimental,
+        summary: "Line and branch coverage per function, from the coverage tool the \
+                  language's `[lang.<id>] coverage` command runs (or a fresh report it \
+                  left). Branch findings only where the tool measured branches; \
+                  otherwise the result notes `branches: unavailable`. A function with \
+                  no instrumented line is not scored."
+            .to_owned(),
+    }
 }
 
 /// The metrics this check reports: gate keys, then what `survey` ranks.
@@ -122,8 +122,9 @@ impl Check for TestsCoverage {
     }
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        SETTINGS.read(&self.manifest.id, &ctx.config)?;
-        Ok(outcome::plan_symbols(&self.manifest, scope))
+        SETTINGS
+            .read(&self.manifest.id, &ctx.config)
+            .map(|_| outcome::plan_symbols(&self.manifest, scope))
     }
 
     fn run(
@@ -334,38 +335,51 @@ impl TestsCoverage {
         measured: &Measured,
         conventions: Option<&TestConventions>,
     ) -> Option<Finding> {
-        if measured.covered == 0 {
-            let title = format!(
-                "`{}` never ran under test: none of its {} instrumented lines",
-                symbol.display, measured.lines
-            );
-            let summary = format!("Write a test that calls `{}`.", symbol.name);
-            let evidence = UncoveredSymbol {
-                lines: measured.lines,
-                covered: 0,
-            };
-            let finding = SymbolFinding::new(
-                &self.manifest,
-                "coverage.uncovered-symbol",
-                symbol,
-                hash,
-                evidence,
-            )
-            .described(title, summary)
-            .finding();
-            return Some(with_nearest_test(finding, symbol, conventions));
-        }
-        let branches = measured.branches.as_ref()?;
+        let finding = if measured.covered == 0 {
+            self.uncovered_symbol(symbol, hash, measured.lines)
+        } else {
+            self.uncovered_branch(symbol, hash, measured.branches.as_ref()?)?
+        };
+        Some(with_nearest_test(finding, symbol, conventions))
+    }
+
+    fn uncovered_symbol(&self, symbol: &SymbolDef, hash: &SymbolHash, lines: u32) -> Finding {
+        let title = format!(
+            "`{}` never ran under test: none of its {lines} instrumented lines",
+            symbol.display
+        );
+        let summary = format!("Write a test that calls `{}`.", symbol.name);
+        let evidence = UncoveredSymbol { lines, covered: 0 };
+        SymbolFinding::new(
+            &self.manifest,
+            "coverage.uncovered-symbol",
+            symbol,
+            hash,
+            evidence,
+        )
+        .described(title, summary)
+        .finding()
+    }
+
+    /// The finding about `branches` (`(line, hits)`) of a symbol that ran, when one was never
+    /// taken.
+    fn uncovered_branch(
+        &self,
+        symbol: &SymbolDef,
+        hash: &SymbolHash,
+        branches: &[(u32, u64)],
+    ) -> Option<Finding> {
         let mut lines: Vec<u32> = branches
             .iter()
             .filter(|(_, hits)| *hits == 0)
             .map(|(line, _)| *line)
             .collect();
-        if lines.is_empty() {
+        let uncovered = u32::try_from(lines.len()).unwrap_or(u32::MAX);
+        if uncovered == 0 {
             return None;
         }
-        let uncovered = u32::try_from(lines.len()).unwrap_or(u32::MAX);
         lines.dedup();
+        let named: Vec<String> = lines.iter().map(ToString::to_string).collect();
         let title = format!(
             "`{}` ran, but {uncovered} of its {} branches never did",
             symbol.display,
@@ -374,11 +388,7 @@ impl TestsCoverage {
         let summary = format!(
             "Write a test that takes the untaken branches of `{}` (lines {}).",
             symbol.name,
-            lines
-                .iter()
-                .map(ToString::to_string)
-                .collect::<Vec<_>>()
-                .join(", ")
+            named.join(", ")
         );
         let evidence = UncoveredBranch {
             branches: u32::try_from(branches.len()).unwrap_or(u32::MAX),
@@ -391,10 +401,12 @@ impl TestsCoverage {
             symbol,
             hash,
             evidence,
+        );
+        Some(
+            finding
+                .described(title, summary)
+                .at(Severity::Info)
+                .finding(),
         )
-        .described(title, summary)
-        .at(Severity::Info)
-        .finding();
-        Some(with_nearest_test(finding, symbol, conventions))
     }
 }

@@ -2,7 +2,7 @@
 // ABOUTME: line hits per class file, and branches expanded from each line's `condition-coverage`.
 use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage, LineHits};
 
-use super::{ReportError, xml_number};
+use super::error::{ReportError, xml_number};
 
 const FORMAT: &str = "Cobertura XML";
 
@@ -31,49 +31,59 @@ pub fn parse_cobertura(text: &str) -> Result<CoverageMap, ReportError> {
         .and_then(|node| node.text())
         .map(|text| text.trim().trim_end_matches('/').to_owned())
         .filter(|text| !text.is_empty());
-    let mut files = Vec::new();
-    for class in root.descendants().filter(|node| node.has_tag_name("class")) {
-        let Some(filename) = class.attribute("filename") else {
-            continue;
-        };
-        let file = match &source {
-            Some(source) if !filename.starts_with('/') => format!("{source}/{filename}"),
-            _ => filename.to_owned(),
-        };
-        let mut lines = Vec::new();
-        let mut branches = Vec::new();
-        let mut measured = false;
-        for line in class
-            .children()
-            .filter(|node| node.has_tag_name("lines"))
-            .flat_map(|node| node.children())
-            .filter(|node| node.has_tag_name("line"))
-        {
-            let number: u32 = xml_number(FORMAT, line, "number")?;
-            let hits: u64 = xml_number(FORMAT, line, "hits")?;
-            lines.push(LineHits { line: number, hits });
-            if let Some(conditions) = line.attribute("condition-coverage") {
-                measured = true;
-                let (covered, total) = conditions_of(conditions).ok_or_else(|| {
-                    ReportError::new(
-                        FORMAT,
-                        format!("malformed condition-coverage `{conditions}`"),
-                    )
-                })?;
-                branches.extend((0..total).map(|branch| BranchHits {
+    root.descendants()
+        .filter(|node| node.has_tag_name("class"))
+        .filter_map(|class| {
+            let filename = class.attribute("filename")?;
+            let file = match &source {
+                Some(source) if !filename.starts_with('/') => format!("{source}/{filename}"),
+                _ => filename.to_owned(),
+            };
+            Some(class_coverage(class, file))
+        })
+        .collect::<Result<Vec<_>, _>>()
+        .map(CoverageMap::new)
+}
+
+/// The lines and branches of one `<class>`, which covers `file`.
+fn class_coverage(
+    class: roxmltree::Node<'_, '_>,
+    file: String,
+) -> Result<FileCoverage, ReportError> {
+    let mut lines = Vec::new();
+    let mut branches: Option<Vec<BranchHits>> = None;
+    for line in class
+        .children()
+        .filter(|node| node.has_tag_name("lines"))
+        .flat_map(|node| node.children())
+        .filter(|node| node.has_tag_name("line"))
+    {
+        let number: u32 = xml_number(FORMAT, line, "number")?;
+        lines.push(LineHits {
+            line: number,
+            hits: xml_number(FORMAT, line, "hits")?,
+        });
+        if let Some(conditions) = line.attribute("condition-coverage") {
+            let (covered, total) = conditions_of(conditions).ok_or_else(|| {
+                ReportError::new(
+                    FORMAT,
+                    format!("malformed condition-coverage `{conditions}`"),
+                )
+            })?;
+            branches
+                .get_or_insert_with(Vec::new)
+                .extend((0..total).map(|branch| BranchHits {
                     line: number,
                     branch,
                     hits: u64::from(branch < covered),
                 }));
-            }
         }
-        files.push(FileCoverage {
-            file,
-            lines,
-            branches: measured.then_some(branches),
-        });
     }
-    Ok(CoverageMap::new(files))
+    Ok(FileCoverage {
+        file,
+        lines,
+        branches,
+    })
 }
 
 /// `(covered, total)` from `50% (1/2)`.

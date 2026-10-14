@@ -1,33 +1,18 @@
 // ABOUTME: The runner producers as the registry holds them: table order, detection, pins, and real runs of
 // ABOUTME: each runner on the test-results fixtures, skipped with a reason when the tool is not installed.
+mod support;
+
 use std::path::Path;
 
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Cancellation, Ctx, Error, FactKind, Lang, LangFamily, LangId, ProduceCtx,
-    Produced, ProducerRegistry, RegisteredProducer, Scope, TestOutcome, TestResults, Writer,
+    Availability, Cancellation, Ctx, Error, FactKind, LangId, ProduceCtx, Produced,
+    ProducerRegistry, RegisteredProducer, Scope, TestOutcome, TestResults, Writer,
 };
 use cupel_fixtures::copy_repo;
+use support::{lang, registry};
 
 use TestOutcome::{Passed, Skipped};
-
-fn registry() -> ProducerRegistry {
-    let mut registry = ProducerRegistry::default();
-    cupel_adapt::register(&mut registry);
-    registry
-}
-
-fn lang(id: &str) -> Lang {
-    let family = if matches!(id, "javascript" | "typescript") {
-        "ecma"
-    } else {
-        id
-    };
-    Lang {
-        id: LangId::from(id),
-        family: LangFamily::from(family),
-    }
-}
 
 /// The `TestResults` producers for `lang` at `root` in preference order, under `ctx`'s pins.
 fn preferred(registry: &ProducerRegistry, lang: &str, ctx: &Ctx) -> Vec<String> {

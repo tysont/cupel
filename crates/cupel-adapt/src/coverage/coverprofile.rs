@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use cupel_core::coverage::{CoverageMap, FileCoverage, LineHits};
 
-use super::ReportError;
+use super::error::ReportError;
 
 const FORMAT: &str = "coverprofile";
 
