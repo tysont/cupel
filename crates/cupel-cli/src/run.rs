@@ -308,9 +308,9 @@ mod tests {
     #[test]
     fn a_timeout_counts_from_the_start_of_the_invocation() {
         let mut run = Run::start(Vec::new());
-        assert!(!run.cancellation().is_cancelled());
+        let before = run.cancellation().is_cancelled();
         run.set_timeout(Duration::ZERO);
-        assert!(run.cancellation().is_cancelled());
+        assert_eq!((before, run.cancellation().is_cancelled()), (false, true));
     }
 
     #[test]

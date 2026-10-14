@@ -343,12 +343,12 @@ mod tests {
 
     #[test]
     fn a_probe_that_cannot_run_means_not_installed() {
-        assert!(!installed(&requirement("fake-cov", true)));
         let empty = Requirement {
             probe: Vec::new(),
             ..requirement("fake-cov", true)
         };
-        assert!(!installed(&empty));
+        let found = [requirement("fake-cov", true), empty].map(|tool| installed(&tool));
+        assert_eq!(found, [false, false]);
     }
 
     /// `cupel.toml` holding `text`, loaded from a fresh directory.

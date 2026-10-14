@@ -91,10 +91,10 @@ mod tests {
         assert_eq!(rendering(Format::Json), Ok(Rendering::Json));
         assert_eq!(rendering(Format::Jsonl), Ok(Rendering::Jsonl));
         assert_eq!(rendering(Format::Text), Ok(Rendering::Text));
-        match rendering(Format::Sarif) {
-            Err(CupelError::NotImplemented(pending)) => assert_eq!(pending.step, "P6.1"),
-            other => panic!("sarif: {other:?}"),
-        }
+        assert_eq!(
+            rendering(Format::Sarif),
+            Err(CupelError::pending_format("sarif", "P6.1"))
+        );
     }
 
     #[test]
@@ -135,12 +135,18 @@ mod tests {
             None,
             false,
         );
-        assert!(found.quiet && found.describe && found.no_color);
+        assert_eq!(
+            (found.quiet, found.describe, found.no_color),
+            (true, true, true)
+        );
         let after = recover(
             &args(&["x", "--", "--quiet", "--describe", "--no-color"]),
             None,
             false,
         );
-        assert!(!after.quiet && !after.describe && !after.no_color);
+        assert_eq!(
+            (after.quiet, after.describe, after.no_color),
+            (false, false, false)
+        );
     }
 }

@@ -692,17 +692,19 @@ mod tests {
             environment.no_color_variable = no_color_variable;
             run(&environment).stdout.contains('\u{1b}')
         };
-        assert!(on_terminal(&["check"], false));
-        assert!(!on_terminal(&["check", "--no-color"], false));
-        assert!(!on_terminal(&["check"], true), "NO_COLOR");
-        assert!(!on_terminal(&["check", "--format", "json"], false));
-        assert!(on_terminal(&["check", "--bogus"], false), "rejected");
-        assert!(!on_terminal(&["check", "--bogus", "--no-color"], false));
-        assert!(
-            !run(&environment(&["check", "--format", "text"]))
+        // (arguments, NO_COLOR set) on a terminal; a rejected invocation is colored too.
+        let colored = [
+            on_terminal(&["check"], false),
+            on_terminal(&["check", "--no-color"], false),
+            on_terminal(&["check"], true),
+            on_terminal(&["check", "--format", "json"], false),
+            on_terminal(&["check", "--bogus"], false),
+            on_terminal(&["check", "--bogus", "--no-color"], false),
+            run(&environment(&["check", "--format", "text"]))
                 .stdout
-                .contains('\u{1b}')
-        );
+                .contains('\u{1b}'),
+        ];
+        assert_eq!(colored, [true, false, false, false, true, false, false]);
     }
 
     #[test]

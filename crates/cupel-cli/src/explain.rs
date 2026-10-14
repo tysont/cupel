@@ -141,12 +141,16 @@ mod tests {
         }
     }
 
-    fn numbered(root: &Path, count: u32) {
+    /// A temporary root, and its canonical path, holding `a.rs` of `count` numbered lines.
+    fn numbered(count: u32) -> (tempfile::TempDir, std::path::PathBuf) {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().canonicalize().unwrap();
         let text = (1..=count)
             .map(|n| format!("line {n}"))
             .collect::<Vec<_>>()
             .join("\n");
         std::fs::write(root.join("a.rs"), text).unwrap();
+        (dir, root)
     }
 
     fn shown(excerpt: &Excerpt) -> Vec<(u32, bool)> {
@@ -155,9 +159,7 @@ mod tests {
 
     #[test]
     fn an_excerpt_stops_at_the_start_and_end_of_the_file() {
-        let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
-        numbered(&root, 4);
+        let (_dir, root) = numbered(4);
         let excerpt = excerpt(&root, &location(1, 4)).unwrap();
         assert_eq!(
             shown(&excerpt),
@@ -168,9 +170,7 @@ mod tests {
 
     #[test]
     fn a_location_past_the_end_of_the_file_has_no_excerpt() {
-        let dir = tempfile::tempdir().unwrap();
-        let root = dir.path().canonicalize().unwrap();
-        numbered(&root, 4);
+        let (_dir, root) = numbered(4);
         assert_eq!(excerpt(&root, &location(9, 9)), None);
     }
 }

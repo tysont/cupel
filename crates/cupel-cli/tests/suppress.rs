@@ -120,30 +120,32 @@ fn a_dry_run_shows_the_file_diff_and_writes_nothing() {
     assert_eq!(envelope["status"], json!("plan"));
     let write = &envelope["plan"]["would_write"][0];
     assert_eq!(write["path"], json!(".cupel/suppressions.toml"));
-    assert!(
-        write["diff"]
-            .as_str()
-            .unwrap()
-            .contains(&format!("+finding = \"{}\"", runner_id())),
-        "{write}"
+    let finding_line = write["diff"]
+        .as_str()
+        .unwrap()
+        .lines()
+        .find(|line| line.starts_with("+finding"))
+        .map(str::to_owned);
+    assert_eq!(
+        finding_line,
+        Some(format!("+finding = \"{}\"", runner_id()))
     );
     assert_eq!(repo.tree(), before);
 }
 
-#[test]
-fn an_expired_date_reactivates_the_finding_and_reports_suppression_expired() {
+/// The runner finding's ID and the `cupel doctor` envelope after suppressing that finding with
+/// `reason` until `until`.
+fn doctor_after_suppressing(reason: &str, until: &str) -> (String, Value) {
     let repo = doctored();
     let id = runner_id();
-    repo.run(&[
-        "suppress",
-        &id,
-        "--reason",
-        "until new year",
-        "--until",
-        "2000-01-01",
-    ]);
-
+    repo.run(&["suppress", &id, "--reason", reason, "--until", until]);
     let doctor = repo.run(&["doctor"]).envelope();
+    (id, doctor)
+}
+
+#[test]
+fn an_expired_date_reactivates_the_finding_and_reports_suppression_expired() {
+    let (id, doctor) = doctor_after_suppressing("until new year", "2000-01-01");
 
     let reactivated = finding(&doctor, &id);
     assert_eq!(reactivated["suppressed"], json!(false));
@@ -161,10 +163,7 @@ fn an_expired_date_reactivates_the_finding_and_reports_suppression_expired() {
 
 #[test]
 fn a_future_date_keeps_the_suppression_active() {
-    let repo = doctored();
-    let id = runner_id();
-    repo.run(&["suppress", &id, "--reason", "x", "--until", "2999-12-31"]);
-    let doctor = repo.run(&["doctor"]).envelope();
+    let (id, doctor) = doctor_after_suppressing("x", "2999-12-31");
     assert_eq!(finding(&doctor, &id)["suppressed"], json!(true));
     assert!(!kinds(&doctor).contains(&"suppression.expired".to_owned()));
 }

@@ -39,7 +39,9 @@ fn help_page(words: &[&str]) -> String {
     outcome.stdout
 }
 
-fn check_command(command: &Value, global: &BTreeSet<String>, pages: &mut usize) {
+/// Asserts `command`'s help page and its sub-verbs' pages show exactly their registered flags,
+/// summaries, and sub-verbs; returns how many pages it checked.
+fn assert_help_pages(command: &Value, global: &BTreeSet<String>) -> usize {
     let name = command["name"].as_str().unwrap();
     let words: Vec<&str> = name.split(' ').collect();
     let help = help_page(&words);
@@ -54,11 +56,12 @@ fn check_command(command: &Value, global: &BTreeSet<String>, pages: &mut usize) 
         let summary = argument["summary"].as_str().unwrap();
         assert!(help.contains(summary), "`{name}` help lacks: {summary}");
     }
-    *pages += 1;
+    let mut pages = 1;
     for sub in command["subcommands"].as_array().unwrap() {
         assert!(help.contains(sub["name"].as_str().unwrap().rsplit(' ').next().unwrap()));
-        check_command(sub, global, pages);
+        pages += assert_help_pages(sub, global);
     }
+    pages
 }
 
 #[test]
@@ -70,14 +73,18 @@ fn every_help_page_mentions_exactly_the_registered_flags() {
     let mut expected = global.clone();
     expected.extend(registered(&all["cli"]["flags"]));
     assert_eq!(flags_in(&root), expected, "`cupel --help`:\n{root}");
-    assert!(root.contains(all["cli"]["summary"].as_str().unwrap()));
-    for verb in all["cli"]["verbs"].as_array().unwrap() {
-        assert!(root.contains(verb["summary"].as_str().unwrap()), "{verb}");
-    }
+    let summaries = std::iter::once(&all["cli"]).chain(all["cli"]["verbs"].as_array().unwrap());
+    let missing: Vec<&str> = summaries
+        .map(|described| described["summary"].as_str().unwrap())
+        .filter(|summary| !root.contains(summary))
+        .collect();
+    assert_eq!(missing, Vec::<&str>::new());
 
-    let mut pages = 1;
-    for command in all["commands"].as_array().unwrap() {
-        check_command(command, &global, &mut pages);
-    }
-    assert!(pages >= 20, "{pages} help pages checked");
+    let pages: usize = all["commands"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|command| assert_help_pages(command, &global))
+        .sum();
+    assert!(pages >= 19, "{pages} verb help pages checked");
 }

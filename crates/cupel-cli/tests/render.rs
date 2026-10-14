@@ -74,13 +74,12 @@ fn text_describe_reads_as_sections() {
 
 #[test]
 fn text_without_a_terminal_or_with_no_color_has_no_escape_codes() {
-    for args in [
+    let escaped = [
         &["tests", "--format", "text"][..],
         &["tests", "--format", "text", "--no-color"][..],
-    ] {
-        let outcome = run(args);
-        assert!(!outcome.stdout.contains('\u{1b}'), "{args:?}");
-    }
+    ]
+    .map(|args| run(args).stdout.contains('\u{1b}'));
+    assert_eq!(escaped, [false, false]);
 }
 
 #[test]

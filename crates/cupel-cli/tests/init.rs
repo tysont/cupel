@@ -101,13 +101,20 @@ fn init_write_creates_exactly_the_previewed_files_its_run_record_and_the_store()
             "cupel.toml".to_owned(),
         ]
     );
-    for (path, diff) in preview {
-        assert_eq!(
-            std::fs::read_to_string(repo.path(&path)).unwrap(),
-            added(&diff),
-            "{path}"
-        );
-    }
+    let written: Vec<(&str, String)> = preview
+        .iter()
+        .map(|(path, _)| {
+            (
+                path.as_str(),
+                std::fs::read_to_string(repo.path(path)).unwrap(),
+            )
+        })
+        .collect();
+    let previewed: Vec<(&str, String)> = preview
+        .iter()
+        .map(|(path, diff)| (path.as_str(), added(diff)))
+        .collect();
+    assert_eq!(written, previewed);
 }
 
 /// Asserts `outcome` refused to overwrite `cupel.toml` and named `--force`.
@@ -171,6 +178,14 @@ fn init_force_replaces_a_cupel_toml_that_does_not_load() {
     assert!(!written.contains("colour"), "{written}");
 }
 
+/// The `default_branch` line of a generated `cupel.toml`, if it has one.
+fn default_branch_line(config: &str) -> Option<String> {
+    config
+        .lines()
+        .find(|line| line.starts_with("default_branch"))
+        .map(str::to_owned)
+}
+
 #[test]
 fn init_takes_default_branch_from_git() {
     let repo = cargo_repo();
@@ -183,14 +198,16 @@ fn init_takes_default_branch_from_git() {
         return;
     }
     let writes = would_write(&repo.run(&["init"]));
-    let config = added(&writes[0].1);
-    assert!(config.contains("default_branch = \"trunk\"\n"), "{config}");
+    assert_eq!(
+        default_branch_line(&added(&writes[0].1)),
+        Some("default_branch = \"trunk\"".to_owned())
+    );
 }
 
 #[test]
 fn init_outside_git_writes_no_default_branch() {
     let writes = would_write(&cargo_repo().run(&["init"]));
-    assert!(!added(&writes[0].1).contains("default_branch"));
+    assert_eq!(default_branch_line(&added(&writes[0].1)), None);
 }
 
 #[test]

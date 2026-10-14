@@ -69,7 +69,10 @@ fn format_text_shows_findings_with_their_fix() {
 #[test]
 fn cupel_format_env_selects_the_format() {
     let outcome = run_with(cupel().env("CUPEL_FORMAT", "text"), ["describe"]);
-    assert!(outcome.stdout.starts_with("cupel describe: pass"));
+    assert_eq!(
+        outcome.stdout.lines().next(),
+        Some("cupel describe: pass (exit 0)")
+    );
 }
 
 #[test]
@@ -83,13 +86,10 @@ fn format_flag_overrides_cupel_format_env() {
 
 #[test]
 fn format_flag_may_come_before_or_after_the_verb() {
-    for args in [["--format=text", "describe"], ["describe", "--format=text"]] {
-        let outcome = run(args);
-        assert!(
-            outcome.stdout.starts_with("cupel describe: pass"),
-            "{args:?}"
-        );
-    }
+    let first_lines = [["--format=text", "describe"], ["describe", "--format=text"]]
+        .map(|args| run(args).stdout.lines().next().map(str::to_owned));
+    let expected = Some("cupel describe: pass (exit 0)".to_owned());
+    assert_eq!(first_lines, [expected.clone(), expected]);
 }
 
 #[test]

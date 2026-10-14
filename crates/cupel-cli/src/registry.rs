@@ -1021,6 +1021,13 @@ mod tests {
         }
     }
 
+    /// Asserts each of `specs` agrees with the subcommand of `root` it names.
+    fn assert_commands_agree(root: &Command, specs: &[CommandDescription]) {
+        for spec in specs {
+            assert_command_agrees(root.find_subcommand(&spec.name).unwrap(), spec);
+        }
+    }
+
     #[test]
     fn clap_command_tree_matches_the_registry() {
         let mut root = command();
@@ -1036,9 +1043,7 @@ mod tests {
         let verbs: Vec<&str> = root.get_subcommands().map(Command::get_name).collect();
         let registered: Vec<String> = commands().into_iter().map(|c| c.name).collect();
         assert_eq!(verbs, registered);
-        for spec in commands() {
-            assert_command_agrees(root.find_subcommand(&spec.name).unwrap(), &spec);
-        }
+        assert_commands_agree(&root, &commands());
     }
 
     #[test]
@@ -1052,11 +1057,18 @@ mod tests {
 
     #[test]
     fn every_verb_has_an_example_and_pending_verbs_name_a_plan_step() {
-        for command in commands() {
-            assert!(!command.examples.is_empty(), "{}", command.name);
-            if let Some(step) = &command.pending_step {
-                assert!(step.starts_with('P') && step.contains('.'), "{step}");
-            }
-        }
+        let without_examples: Vec<String> = commands()
+            .into_iter()
+            .filter(|command| command.examples.is_empty())
+            .map(|command| command.name)
+            .collect();
+        assert_eq!(without_examples, Vec::<String>::new());
+        let pending: Vec<(String, String)> = commands()
+            .into_iter()
+            .filter_map(|command| Some((command.name, command.pending_step?)))
+            .collect();
+        let expected = [("oracle", "P5.2"), ("tests", "P3.3"), ("serve", "P4.2")]
+            .map(|(name, step)| (name.to_owned(), step.to_owned()));
+        assert_eq!(pending, expected);
     }
 }

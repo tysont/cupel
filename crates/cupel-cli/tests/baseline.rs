@@ -7,7 +7,8 @@ use std::fs;
 use serde_json::{Value, json};
 use support::{Outcome, Repo, complexity_check, complexity_finding, envelope, run_id};
 
-fn usage(outcome: &Outcome) -> Value {
+/// Asserts `outcome` is a usage error (exit 2, `cli.usage`) and returns its finding.
+fn assert_usage(outcome: &Outcome) -> Value {
     assert_eq!(outcome.code, 2, "{}", outcome.stdout);
     let finding = outcome.finding();
     assert_eq!(finding["kind"], json!("cli.usage"));
@@ -52,13 +53,10 @@ fn two_checks() -> Repo {
 
 #[test]
 fn show_without_a_baseline_says_how_to_set_one() {
-    let finding = usage(&Repo::new().run(&["baseline", "show"]));
-    assert!(
-        finding["action"]["summary"]
-            .as_str()
-            .unwrap()
-            .contains("cupel baseline set --write"),
-        "{finding}"
+    let finding = assert_usage(&Repo::new().run(&["baseline", "show"]));
+    assert_eq!(
+        finding["action"]["summary"],
+        json!("Set one with `cupel baseline set --write`.")
     );
 }
 
@@ -85,7 +83,7 @@ fn set_without_write_previews_the_change_and_sets_nothing() {
     );
     let id = envelope["run"]["id"].as_str().unwrap();
     assert!(!repo.path(&format!(".cupel/runs/{id}.json")).exists());
-    usage(&repo.run(&["baseline", "show"]));
+    assert_usage(&repo.run(&["baseline", "show"]));
 }
 
 #[test]
@@ -121,7 +119,7 @@ fn set_from_names_a_given_run_and_rejects_an_unknown_one() {
         json!(run_id(1))
     );
     for bad in [format!("run:{}", run_id(9)), "yesterday".to_owned()] {
-        let finding = usage(&repo.run(&["baseline", "set", "--from", &bad, "--write"]));
+        let finding = assert_usage(&repo.run(&["baseline", "set", "--from", &bad, "--write"]));
         assert_eq!(finding["evidence"]["argument"], json!("--from"), "{bad}");
     }
 }
@@ -130,7 +128,11 @@ fn set_from_names_a_given_run_and_rejects_an_unknown_one() {
 fn set_with_no_result_run_is_a_usage_error() {
     let repo = Repo::new();
     repo.seed(&[envelope(&run_id(1), "explain", &[], &[])]);
-    usage(&repo.run(&["baseline", "set", "--write"]));
+    let finding = assert_usage(&repo.run(&["baseline", "set", "--write"]));
+    assert_eq!(
+        finding["title"],
+        json!("No stored run can be the baseline yet")
+    );
 }
 
 #[test]
@@ -202,7 +204,7 @@ fn diff_against_something_unknown_is_a_usage_error_about_against() {
         "run:nonsense".to_owned(),
         "no-such-ref".to_owned(),
     ] {
-        let finding = usage(&repo.run(&["baseline", "diff", "--against", &against]));
+        let finding = assert_usage(&repo.run(&["baseline", "diff", "--against", &against]));
         assert_eq!(
             finding["evidence"]["argument"],
             json!("--against"),
@@ -233,7 +235,7 @@ fn export_and_import_round_trip_a_baseline() {
     other.write("baseline.json", &exported);
     let preview = other.run(&["baseline", "import", "baseline.json"]);
     assert_eq!(preview.envelope()["status"], json!("plan"));
-    usage(&other.run(&["baseline", "show"]));
+    assert_usage(&other.run(&["baseline", "show"]));
     let import = other.run(&["baseline", "import", "baseline.json", "--write"]);
     assert_eq!(import.code, 0, "{}", import.stdout);
     let show = other.run(&["baseline", "show"]).envelope();
@@ -245,7 +247,7 @@ fn export_and_import_round_trip_a_baseline() {
 fn export_outside_cupel_needs_write_and_a_dry_run_shows_the_diff() {
     let repo = two_checks();
     repo.run(&["baseline", "set", "--write"]);
-    let refused = usage(&repo.run(&["baseline", "export", "baseline.json"]));
+    let refused = assert_usage(&repo.run(&["baseline", "export", "baseline.json"]));
     assert_eq!(refused["evidence"]["argument"], json!("FILE"));
     assert!(!repo.path("baseline.json").exists());
 
@@ -272,9 +274,9 @@ fn export_outside_cupel_needs_write_and_a_dry_run_shows_the_diff() {
 fn import_of_a_file_that_is_not_an_envelope_is_a_usage_error() {
     let repo = Repo::new();
     repo.write("baseline.json", "{\"not\": \"an envelope\"}\n");
-    let finding = usage(&repo.run(&["baseline", "import", "baseline.json", "--write"]));
+    let finding = assert_usage(&repo.run(&["baseline", "import", "baseline.json", "--write"]));
     assert_eq!(finding["evidence"]["argument"], json!("FILE"));
-    let missing = usage(&repo.run(&["baseline", "import", "missing.json", "--write"]));
+    let missing = assert_usage(&repo.run(&["baseline", "import", "missing.json", "--write"]));
     assert_eq!(missing["evidence"]["argument"], json!("FILE"));
 }
 

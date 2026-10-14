@@ -22,21 +22,27 @@ fn error_envelopes_are_recorded_too() {
     let repo = Repo::new();
     let envelope = repo.run(&["check"]).envelope();
     let id = envelope["run"]["id"].as_str().unwrap();
-    assert!(repo.store().run(&id.parse().unwrap()).unwrap().is_some());
+    let stored = repo.store().run(&id.parse().unwrap()).unwrap();
+    assert_eq!(
+        stored.map(|run| run.run.id.to_string()),
+        Some(id.to_owned())
+    );
 }
 
 #[test]
 fn describe_and_dry_runs_create_no_store() {
     let repo = Repo::new();
-    for args in [
+    let created = [
         &["describe"][..],
         &["doctor", "--dry-run"],
         &["init"],
         &["baseline", "show", "--dry-run"],
-    ] {
+    ]
+    .map(|args| {
         repo.run(args);
-        assert!(!repo.path(".cupel/cupel.db").exists(), "{args:?}");
-    }
+        repo.path(".cupel/cupel.db").exists()
+    });
+    assert_eq!(created, [false; 4]);
 }
 
 #[test]

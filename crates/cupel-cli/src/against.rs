@@ -165,13 +165,19 @@ mod tests {
         assert_eq!(current, before);
     }
 
-    #[test]
-    fn the_default_baseline_is_compared_when_set() {
+    /// A fresh store, its directory and writer, holding the recorded `run`.
+    fn store_with(run: &Envelope) -> (tempfile::TempDir, Writer, Store) {
         let dir = tempfile::tempdir().unwrap();
         let writer = Writer::new(dir.path(), false).unwrap();
         let store = Store::open(&writer).unwrap();
+        store.record_run(run).unwrap();
+        (dir, writer, store)
+    }
+
+    #[test]
+    fn the_default_baseline_is_compared_when_set() {
         let baseline = envelope(&["a", "b"]);
-        store.record_run(&baseline).unwrap();
+        let (_dir, writer, store) = store_with(&baseline);
         store
             .set_baseline(DEFAULT_BASELINE, &baseline.run.id)
             .unwrap();
@@ -198,17 +204,20 @@ mod tests {
 
     #[test]
     fn an_explicit_run_is_compared_and_an_unknown_one_is_a_usage_error() {
-        let dir = tempfile::tempdir().unwrap();
-        let writer = Writer::new(dir.path(), false).unwrap();
-        let store = Store::open(&writer).unwrap();
         let reference = envelope(&["a"]);
-        store.record_run(&reference).unwrap();
+        let (_dir, writer, _store) = store_with(&reference);
         let spec = format!("run:{}", reference.run.id);
         let mut current = envelope(&["a"]);
         compare(&mut current, &writer, Some(&spec)).unwrap();
         assert_eq!(current.run.baseline.map(|b| b.name), Some(spec));
 
         let error = compare(&mut envelope(&[]), &writer, Some("run:nonsense")).unwrap_err();
-        assert_eq!(error.exit_code(), ExitCode::Usage);
+        assert_eq!(
+            (error.exit_code(), error.to_string()),
+            (
+                ExitCode::Usage,
+                "`run:nonsense` does not name a run".to_owned()
+            )
+        );
     }
 }

@@ -667,19 +667,37 @@ mod tests {
             schemas: vec![tiny_schema(&serde_json::json!({}))],
         };
         let out = plain(&Description::All(all));
-        assert!(out.starts_with(&plain(&Description::Cli(cli()))), "{out}");
-        for command in registry::commands() {
-            let mut expected = String::new();
-            render_command(
-                &mut expected,
-                &command,
-                0,
-                Some(Stability::Experimental),
-                &Paint { color: false },
-            );
-            assert!(out.contains(&expected), "{}", command.name);
-        }
-        assert!(out.ends_with("schema tiny · https://cupel.dev/schema/v1/tiny.json\n{}\n"));
+        // Each block's unindented lines, up to the first ` · `.
+        let headings: Vec<&str> = out
+            .lines()
+            .filter(|line| !line.is_empty() && !line.starts_with(' '))
+            .map(|line| line.split(" · ").next().unwrap_or(line))
+            .collect();
+        assert_eq!(
+            headings,
+            [
+                "cupel [version]",
+                "verbs",
+                "global flags",
+                "flags without a verb",
+                "exit codes",
+                "schemas",
+                "configuration precedence",
+                "cupel init",
+                "cupel doctor",
+                "cupel describe",
+                "cupel check",
+                "cupel survey",
+                "cupel explain",
+                "cupel baseline",
+                "cupel oracle",
+                "cupel tests",
+                "cupel suppress",
+                "cupel serve",
+                "schema tiny",
+                "{}"
+            ]
+        );
     }
 
     #[test]

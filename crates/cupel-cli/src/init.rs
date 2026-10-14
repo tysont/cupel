@@ -255,49 +255,56 @@ mod tests {
         .unwrap_or_else(|error| panic!("{error}\n{text}"))
     }
 
-    #[test]
-    fn every_generated_config_loads_with_its_roots_and_language_commands() {
-        for case in [
-            "cargo-single",
-            "cargo-workspace",
-            "go-module",
-            "npm-js",
-            "pnpm-ts-workspace",
-            "python-pyproject",
-            "python-requirements",
-            "monorepo",
-            "maven",
-            "empty",
-        ] {
-            let info = detect(case);
-            let config = load(&config_text(&fixture(case), &info, Some("main")));
-            assert_eq!(
-                config.file.default_branch.as_deref(),
-                Some("main"),
-                "{case}"
-            );
-            let roots: Vec<(String, String)> = config
-                .file
-                .roots
-                .values()
-                .map(|root| (root.path.clone(), root.lang.as_str().to_owned()))
-                .collect();
-            if case == "monorepo" {
-                assert_eq!(roots.len(), 4, "{case}");
-            } else {
-                assert!(roots.is_empty(), "{case}: single root at `.`");
-            }
-            for root in &info.roots {
+    /// A loaded generated config's default branch, its number of named roots, and the languages
+    /// whose `test` command differs from the one detection chose.
+    type Generated = (Option<String>, usize, Vec<String>);
+
+    /// The config `init` generates for fixture `case` on branch `main`, loaded.
+    fn generated(case: &str) -> Generated {
+        let info = detect(case);
+        let config = load(&config_text(&fixture(case), &info, Some("main")));
+        let disagreeing = info
+            .roots
+            .iter()
+            .filter(|root| {
                 let table = config.file.lang.get(&root.lang);
                 let test = table.and_then(|table| table.get("test"));
-                assert_eq!(
-                    test.and_then(|value| value.as_str()),
-                    project::commands(&fixture(case), root).test.as_deref(),
-                    "{case}: {}",
-                    root.lang
-                );
-            }
-        }
+                test.and_then(|value| value.as_str())
+                    != project::commands(&fixture(case), root).test.as_deref()
+            })
+            .map(|root| root.lang.to_string())
+            .collect();
+        (
+            config.file.default_branch.clone(),
+            config.file.roots.len(),
+            disagreeing,
+        )
+    }
+
+    #[test]
+    fn every_generated_config_loads_with_its_roots_and_language_commands() {
+        // A single root at `.` needs no `[roots]`; the monorepo names its four.
+        let cases = [
+            ("cargo-single", 0),
+            ("cargo-workspace", 0),
+            ("go-module", 0),
+            ("npm-js", 0),
+            ("pnpm-ts-workspace", 0),
+            ("python-pyproject", 0),
+            ("python-requirements", 0),
+            ("monorepo", 4),
+            ("maven", 0),
+            ("empty", 0),
+        ];
+        let actual: Vec<(&str, Generated)> = cases
+            .iter()
+            .map(|(case, _)| (*case, generated(case)))
+            .collect();
+        let expected: Vec<(&str, Generated)> = cases
+            .iter()
+            .map(|(case, roots)| (*case, (Some("main".to_owned()), *roots, Vec::new())))
+            .collect();
+        assert_eq!(actual, expected);
     }
 
     #[test]
