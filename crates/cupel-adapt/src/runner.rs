@@ -22,8 +22,12 @@ pub struct RunnerSpec {
     pub node_bin: bool,
     /// The command that prints the tool's version.
     pub version: &'static [&'static str],
-    /// The command for one root.
-    pub command: fn(&Root) -> Process,
+    /// The command line for one root: the program, then its arguments.
+    pub command: fn(&Root) -> Vec<String>,
+    /// Variables added to the runner's environment.
+    pub env: &'static [(&'static str, &'static str)],
+    /// Whether the runner's standard error is merged into its standard output, in order.
+    pub merged: bool,
     /// The tests a finished run reported, relative to its root; `None` when the run left no
     /// readable report.
     pub read: fn(&Ran) -> Option<Vec<TestResult>>,
@@ -108,64 +112,90 @@ impl Producer<TestResults> for Runner {
     }
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<TestResults> {
-        let repo = &ctx.ctx.root;
         let mut invocations = Vec::new();
         let mut tests = Vec::new();
         for (index, (dir, packages)) in roots(ctx).into_iter().enumerate() {
-            let absolute = repo.join(&dir);
-            let absolute = absolute.canonicalize().unwrap_or(absolute);
-            let area = ctx.writer.create_dir(
-                &ctx.writer
-                    .cache_dir()
-                    .join("runners")
-                    .join(self.0.id)
-                    .join(index.to_string()),
-            )?;
-            let root = Root {
-                program: self
-                    .program(&absolute)
-                    .unwrap_or_else(|| self.0.tool.to_owned()),
-                dir: absolute,
-                packages,
-                report: area.join("report"),
-                config: area.join("config.toml"),
-            };
-            let _ = std::fs::remove_file(&root.report);
-            let process = (self.0.command)(&root);
-            let captured = process.run(&ctx.cancel)?;
-            let ran = Ran {
-                root: &root,
-                captured: &captured,
-                report: std::fs::read_to_string(&root.report).ok(),
-            };
-            let found = (self.0.read)(&ran);
-            let completed = found.as_ref().is_some_and(|found| {
-                captured
-                    .exit_code
-                    .is_some_and(|code| self.0.completed_codes.contains(&code))
-                    || found.iter().any(|test| test.outcome.is_failure())
-            });
-            invocations.push(RunnerInvocation {
-                dir: dir.clone(),
-                command: process.command_line(),
-                exit_code: captured.exit_code,
-                completed,
-                output: (!completed)
-                    .then(|| output_tail(&format!("{}\n{}", captured.stdout, captured.stderr)))
-                    .flatten(),
-            });
-            tests.extend(
-                found
-                    .unwrap_or_default()
-                    .into_iter()
-                    .map(|test| placed(test, &dir)),
-            );
+            let (invocation, found) = self.run_root(ctx, index, &dir, packages)?;
+            invocations.push(invocation);
+            tests.extend(found.into_iter().map(|test| placed(test, &dir)));
         }
-        Ok(TestResults::new(self.id(), invocations, tests, repo))
+        Ok(TestResults::new(
+            self.id(),
+            invocations,
+            tests,
+            &ctx.ctx.root,
+        ))
     }
 }
 
 impl Runner {
+    /// Runs the suite in the project root `dir` (the `index`th root) and reads what it reported,
+    /// relative to that root.
+    fn run_root(
+        &self,
+        ctx: &ProduceCtx,
+        index: usize,
+        dir: &str,
+        packages: Vec<String>,
+    ) -> Result<(RunnerInvocation, Vec<TestResult>)> {
+        let absolute = ctx.ctx.root.join(dir);
+        let absolute = absolute.canonicalize().unwrap_or(absolute);
+        let area = ctx.writer.create_dir(
+            &ctx.writer
+                .cache_dir()
+                .join("runners")
+                .join(self.0.id)
+                .join(index.to_string()),
+        )?;
+        let root = Root {
+            program: self
+                .program(&absolute)
+                .unwrap_or_else(|| self.0.tool.to_owned()),
+            dir: absolute,
+            packages,
+            report: area.join("report"),
+            config: area.join("config.toml"),
+        };
+        let _ = std::fs::remove_file(&root.report);
+        let process = self.process(&root);
+        let captured = process.run(&ctx.cancel)?;
+        let found = (self.0.read)(&Ran {
+            root: &root,
+            captured: &captured,
+            report: std::fs::read_to_string(&root.report).ok(),
+        });
+        let completed = found.as_ref().is_some_and(|found| {
+            captured
+                .exit_code
+                .is_some_and(|code| self.0.completed_codes.contains(&code))
+                || found.iter().any(|test| test.outcome.is_failure())
+        });
+        let invocation = RunnerInvocation {
+            dir: dir.to_owned(),
+            command: process.command_line(),
+            exit_code: captured.exit_code,
+            completed,
+            output: (!completed)
+                .then(|| output_tail(&format!("{}\n{}", captured.stdout, captured.stderr)))
+                .flatten(),
+        };
+        Ok((invocation, found.unwrap_or_default()))
+    }
+
+    /// The process that runs the suite in `root`.
+    fn process(&self, root: &Root) -> Process {
+        let command = (self.0.command)(root);
+        let (program, args) = command.split_first().unwrap_or((&root.program, &[]));
+        let mut process = Process::new(program, &root.dir).args(args.iter().cloned());
+        for (key, value) in self.0.env {
+            process = process.env(key, value);
+        }
+        if self.0.merged {
+            process = process.merged();
+        }
+        process
+    }
+
     /// The program to run in `dir`: its `node_modules/.bin` copy when the spec allows one, else
     /// the tool on `PATH`; `None` when neither exists.
     fn program(&self, dir: &Path) -> Option<String> {
@@ -195,6 +225,18 @@ fn roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
     } else {
         roots
     }
+}
+
+/// The command line of a runner that writes the Jest JSON report (`jest`, `vitest`): the root's
+/// program, `args`, then the flags that pass an empty suite and name the report file.
+pub fn jest_report_command(root: &Root, args: &[&str]) -> Vec<String> {
+    std::iter::once(root.program.clone())
+        .chain(args.iter().map(|arg| (*arg).to_owned()))
+        .chain([
+            "--passWithNoTests".to_owned(),
+            format!("--outputFile={}", root.report.display()),
+        ])
+        .collect()
 }
 
 /// `test`, reported relative to the root at `dir`, made relative to the repository root.

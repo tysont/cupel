@@ -71,12 +71,14 @@ fn a_cancelled_token_runs_nothing() {
 
 #[test]
 fn a_program_that_cannot_start_is_a_process_error() {
-    let ran = Process::new("cupel-no-such-program", std::env::temp_dir()).run(&Cancellation::new());
-    let program = match ran {
-        Err(Error::Process { program, .. }) => program,
-        other => panic!("expected a process error, got {other:?}"),
-    };
-    assert_eq!(program, "cupel-no-such-program");
+    let error = Process::new("cupel-no-such-program", std::env::temp_dir())
+        .run(&Cancellation::new())
+        .unwrap_err()
+        .to_string();
+    assert_eq!(
+        error.split(": ").next(),
+        Some("cannot run `cupel-no-such-program`")
+    );
 }
 
 #[test]

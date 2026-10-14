@@ -67,6 +67,8 @@ pub struct Outcome {
     pub plan: Option<RunPlan>,
     /// Every test run the run made (the baseline), by language, for the store's index.
     pub test_results: Vec<(LangId, TestResults)>,
+    /// The red baseline that refused the run: no check ran, so `checks` is empty (ADR-076).
+    pub refused: Option<Unevaluable>,
 }
 
 /// One (check, language) the support matrix allows, with its plan.
@@ -112,22 +114,16 @@ impl Scheduler<'_> {
             base,
             interrupted: false,
         };
-        execution.baseline(self.producers, &prepared.tasks, sink)?;
-        let mut checks = Vec::new();
-        let mut findings = Vec::new();
-        let mut measurements = Vec::new();
-        for check in &job.selected {
-            let (tasks, skips) = prepared.of(*check);
-            // A check runs when some language supports it, or when no language is in scope.
-            if tasks.is_empty() && !skips.is_empty() {
-                checks.push(skipped_entry(*check, skips));
-                continue;
-            }
-            let finished = execution.run_check(*check, &tasks, skips, sink);
-            checks.push(finished.result);
-            findings.extend(finished.findings);
-            measurements.extend(finished.measurements);
+        if let Some(red) = execution.baseline(self.producers, &prepared.tasks, sink) {
+            return Ok(Outcome {
+                findings: execution.store.findings,
+                symbols: prepared.symbols,
+                test_results: execution.store.test_results,
+                refused: Some(red),
+                ..Outcome::default()
+            });
         }
+        let (checks, mut findings, measurements) = execution.run_checks(&prepared, sink);
         let Execution {
             store, interrupted, ..
         } = execution;
@@ -142,6 +138,7 @@ impl Scheduler<'_> {
             interrupted: interrupted || store.interrupted,
             plan: None,
             test_results: store.test_results,
+            refused: None,
         })
     }
 
@@ -199,6 +196,7 @@ impl Scheduler<'_> {
                 ..RunPlan::default()
             }),
             test_results: Vec::new(),
+            refused: None,
         })
     }
 
@@ -247,38 +245,57 @@ struct Execution<'a, 'j> {
 }
 
 impl Execution<'_, '_> {
+    /// Runs every selected check in registry order: each check's one entry, every check's
+    /// findings, and every measurement.
+    fn run_checks(
+        &mut self,
+        prepared: &Prepared<'_>,
+        sink: &mut dyn EventSink,
+    ) -> (Vec<CheckResult>, Vec<Finding>, Vec<Measured>) {
+        let mut checks = Vec::new();
+        let mut findings = Vec::new();
+        let mut measurements = Vec::new();
+        for check in &self.job.selected {
+            let (tasks, skips) = prepared.of(*check);
+            // A check runs when some language supports it, or when no language is in scope.
+            if tasks.is_empty() && !skips.is_empty() {
+                checks.push(skipped_entry(*check, skips));
+                continue;
+            }
+            let finished = self.run_check(*check, &tasks, skips, sink);
+            checks.push(finished.result);
+            findings.extend(finished.findings);
+            measurements.extend(finished.measurements);
+        }
+        (checks, findings, measurements)
+    }
+
     /// The baseline test run (ADR-076 §5): `TestResults` for every language a task's needs reach
-    /// it in, before any check runs. A red suite refuses the run (`Error::Unevaluable`); any
-    /// other failure is left to the checks that need the fact.
+    /// it in, before any check runs. The first red suite refuses the run; any other failure is
+    /// left to the checks that need the fact.
     fn baseline(
         &mut self,
         producers: &ProducerRegistry,
         tasks: &[Task<'_>],
         sink: &mut dyn EventSink,
-    ) -> Result<()> {
+    ) -> Option<Unevaluable> {
         let mut langs: Vec<&Lang> = Vec::new();
         for task in tasks {
+            let needs = &task.check.manifest().needs;
             for lang in std::iter::once(&task.lang).chain(&task.siblings) {
-                if !langs.iter().any(|seen| seen.id == lang.id)
-                    && reaches(
-                        producers,
-                        &task.check.manifest().needs,
-                        lang,
-                        &mut Vec::new(),
-                    )
-                {
+                let seen = langs.iter().any(|seen| seen.id == lang.id);
+                if !seen && reaches(producers, needs, lang, &mut Vec::new()) {
                     langs.push(lang);
                 }
             }
         }
         for lang in langs {
-            if let Err(error @ Error::Unevaluable(_)) =
-                self.store.ensure(FactKind::TestResults, lang, sink)
-            {
-                return Err(error);
+            let _ = self.store.ensure(FactKind::TestResults, lang, sink);
+            if self.store.refused.is_some() {
+                return self.store.refused.take();
             }
         }
-        Ok(())
+        None
     }
 
     /// Runs every task of `check` and combines them with the `skips` into its one entry.
@@ -631,6 +648,8 @@ struct FactStore<'a> {
     interrupted: bool,
     /// Every `TestResults` produced, by language.
     test_results: Vec<(LangId, TestResults)>,
+    /// The first red `TestResults`, which no check may read.
+    refused: Option<Unevaluable>,
 }
 
 impl<'a> FactStore<'a> {
@@ -671,6 +690,7 @@ impl<'a> FactStore<'a> {
             seen: HashSet::new(),
             interrupted: false,
             test_results: Vec::new(),
+            refused: None,
         }
     }
 
@@ -702,8 +722,8 @@ impl<'a> FactStore<'a> {
         made
     }
 
-    /// Keeps a produced `TestResults` for the store and turns a red one into
-    /// `Error::Unevaluable`, so nothing reads a red baseline (ADR-076 §5).
+    /// Keeps a produced `TestResults` for the store and withholds a red one, recording it as
+    /// the refusal, so nothing reads a red baseline (ADR-076 §5).
     fn gate(
         &mut self,
         made: Result<SharedFact>,
@@ -712,13 +732,15 @@ impl<'a> FactStore<'a> {
     ) -> Result<SharedFact> {
         self.test_results.push((lang.id.clone(), results.clone()));
         if results.is_green() {
-            made
-        } else {
-            Err(Error::Unevaluable(Box::new(Unevaluable {
-                lang: lang.id.clone(),
-                results,
-            })))
+            return made;
         }
+        self.refused.get_or_insert(Unevaluable {
+            lang: lang.id.clone(),
+            results,
+        });
+        Err(Error::AbsentFact {
+            kind: FactKind::TestResults,
+        })
     }
 
     fn produce(
@@ -748,18 +770,12 @@ impl<'a> FactStore<'a> {
                 continue;
             }
             self.cancel.checkpoint()?;
-            let mut upstream = Upstream::default();
-            for need in producer.needs() {
-                if let Some(Ok(fact)) = self.made.get(&(*need, lang.id.clone())) {
-                    upstream.insert(fact.clone());
-                }
-            }
             let ctx = ProduceCtx {
                 ctx: self.root.clone(),
                 config: self.config.lang_config(&lang.id),
                 writer: self.writer.clone(),
                 cancel: self.cancel.clone(),
-                upstream,
+                upstream: self.upstream(producer.needs(), lang),
             };
             let mut events = Vec::new();
             let produced =
@@ -770,6 +786,19 @@ impl<'a> FactStore<'a> {
             return produced.map(crate::producer::Produced::share);
         }
         Err(Error::AbsentFact { kind })
+    }
+
+    /// The facts of `needs` already made for `lang`, for a producer that needs them.
+    fn upstream(&self, needs: &[FactKind], lang: &Lang) -> Upstream {
+        let mut upstream = Upstream::default();
+        for fact in needs
+            .iter()
+            .filter_map(|need| self.made.get(&(*need, lang.id.clone())))
+            .filter_map(|made| made.as_ref().ok())
+        {
+            upstream.insert(fact.clone());
+        }
+        upstream
     }
 
     /// Passes a producer's event on, keeping each finding once by ID.

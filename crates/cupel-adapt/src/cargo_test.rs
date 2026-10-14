@@ -1,6 +1,6 @@
 // ABOUTME: The `cargo test` runner producer: `cargo test --workspace --no-fail-fast`, standard error merged into
 // ABOUTME: standard output so each test follows its target's `Running` line, read by the libtest text parser.
-use cupel_core::{LangId, Langs, Process, TestResult, TestResults};
+use cupel_core::{LangId, Langs, TestResult, TestResults};
 
 use crate::report::libtest;
 use crate::runner::{Ran, Root, Runner, RunnerSpec};
@@ -14,6 +14,8 @@ static CARGO_TEST: RunnerSpec = RunnerSpec {
     node_bin: false,
     version: &["cargo", "--version"],
     command,
+    env: &[("CARGO_TERM_COLOR", "never")],
+    merged: true,
     read,
     completed_codes: &[0],
 };
@@ -23,11 +25,15 @@ inventory::submit!(crate::ToolProducer {
     register: |registry| registry.register::<TestResults, _>(Runner(&CARGO_TEST)),
 });
 
-fn command(root: &Root) -> Process {
-    Process::new(&root.program, &root.dir)
-        .args(["test", "--workspace", "--no-fail-fast"])
-        .env("CARGO_TERM_COLOR", "never")
-        .merged()
+fn command(root: &Root) -> Vec<String> {
+    [
+        root.program.as_str(),
+        "test",
+        "--workspace",
+        "--no-fail-fast",
+    ]
+    .map(str::to_owned)
+    .to_vec()
 }
 
 #[allow(

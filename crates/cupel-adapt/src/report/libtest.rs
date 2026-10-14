@@ -7,32 +7,48 @@ use cupel_core::{TestOutcome, TestResult, output_tail};
 /// The tests in `text`, the merged output of `cargo test --no-fail-fast`, with IDs
 /// `<binary>/<file>::<test path>` (ADR-075); libtest measures no durations on stable Rust.
 pub fn parse(text: &str) -> Vec<TestResult> {
-    let mut tests = Vec::new();
-    let mut target: Option<Target> = None;
-    let mut failures: BTreeMap<(String, String), String> = BTreeMap::new();
-    let mut lines = text.lines().peekable();
-    while let Some(line) = lines.next() {
-        if let Some(found) = Target::of(line) {
-            target = Some(found);
-        } else if let (Some(target), Some((name, outcome))) = (&target, result(line)) {
-            tests.push(target.test(name, outcome));
-        } else if let (Some(target), Some(name)) = (&target, failure_header(line)) {
-            let mut output = Vec::new();
-            while let Some(next) = lines.peek() {
-                if failure_header(next).is_some() || *next == "failures:" {
-                    break;
+    sections(text)
+        .into_iter()
+        .flat_map(|(target, lines)| target.tests(&lines))
+        .collect()
+}
+
+/// `text` cut at each target's `Running` (or `Doc-tests`) line: each target with its lines.
+fn sections(text: &str) -> Vec<(Target, Vec<&str>)> {
+    let mut sections: Vec<(Target, Vec<&str>)> = Vec::new();
+    for line in text.lines() {
+        match Target::of(line) {
+            Some(target) => sections.push((target, Vec::new())),
+            None => {
+                if let Some((_, lines)) = sections.last_mut() {
+                    lines.push(line);
                 }
-                output.push(lines.next().unwrap_or_default());
             }
-            failures.insert((target.binary.clone(), name.to_owned()), output.join("\n"));
         }
     }
-    for test in &mut tests {
-        if let Some(output) = failures.get(&(binary_of(&test.id), test.name.clone())) {
-            test.output = output_tail(output);
+    sections
+}
+
+/// The captured output of each failed test in one target's `lines`, by test name: the lines
+/// under its `---- <name> stdout ----` header, up to the next header or `failures:` line.
+fn failure_outputs<'a>(lines: &[&'a str]) -> BTreeMap<&'a str, String> {
+    let mut outputs = BTreeMap::new();
+    let mut current: Option<(&str, Vec<&str>)> = None;
+    for line in lines {
+        let header = failure_header(line);
+        if header.is_some() || *line == "failures:" {
+            if let Some((name, body)) = current.take() {
+                outputs.insert(name, body.join("\n"));
+            }
+            current = header.map(|name| (name, Vec::new()));
+        } else if let Some((_, body)) = current.as_mut() {
+            body.push(line);
         }
     }
-    tests
+    if let Some((name, body)) = current {
+        outputs.insert(name, body.join("\n"));
+    }
+    outputs
 }
 
 /// A test binary libtest is running: its `target/debug/deps` stem and the file it was built from.
@@ -63,6 +79,19 @@ impl Target {
         })
     }
 
+    /// The tests this target's `lines` report, each failure with its captured output.
+    fn tests(&self, lines: &[&str]) -> Vec<TestResult> {
+        let outputs = failure_outputs(lines);
+        lines
+            .iter()
+            .filter_map(|line| result(line))
+            .map(|(name, outcome)| TestResult {
+                output: outputs.get(name).and_then(|output| output_tail(output)),
+                ..self.test(name, outcome)
+            })
+            .collect()
+    }
+
     fn test(&self, name: &str, outcome: TestOutcome) -> TestResult {
         // A doctest names its file itself: `src/lib.rs - total (line 3)`.
         let file = self
@@ -82,13 +111,6 @@ impl Target {
             output: None,
         }
     }
-}
-
-/// The binary part of an ID made by [`Target::test`].
-fn binary_of(id: &str) -> String {
-    id.split_once('/')
-        .map_or(id, |(binary, _)| binary)
-        .to_owned()
 }
 
 /// `test tests::totals_a_list ... ok` → the name and outcome.

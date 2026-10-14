@@ -167,140 +167,176 @@ fn outcomes(results: &TestResults) -> Vec<(String, TestOutcome)> {
         .collect()
 }
 
-/// Runs `id` green and red and checks what it reported: `tests` green, then `red` failing too,
-/// with `line` among the lines of its failure output.
-fn assert_runs(
-    (id, lang, repo): (&str, &str, &str),
-    tests: &[(&str, TestOutcome)],
-    red: &str,
-    line: &str,
-) {
-    let Some(green) = run(id, lang, repo, false) else {
+/// What a runner must report on its fixture: `tests` from the green suite, then the red
+/// overlay's failing test `red`, with `line` among the lines of its failure output.
+struct Expected {
+    runner: &'static str,
+    lang: &'static str,
+    repo: &'static str,
+    tests: &'static [(&'static str, TestOutcome)],
+    red: &'static str,
+    line: &'static str,
+}
+
+/// Runs `expected.runner` green and red and checks what it reported against `expected`.
+fn assert_runs(expected: &Expected) {
+    let Some(green) = run(expected.runner, expected.lang, expected.repo, false) else {
         return;
     };
-    let expected: Vec<(String, TestOutcome)> = tests
+    let tests: Vec<(String, TestOutcome)> = expected
+        .tests
         .iter()
         .map(|(test, outcome)| ((*test).to_owned(), *outcome))
         .collect();
     assert_eq!(
         (green.is_green(), green.runner.as_str(), outcomes(&green)),
-        (true, id, expected),
-        "{id} green"
+        (true, expected.runner, tests),
+        "{} green",
+        expected.runner
     );
-    let red_run = run(id, lang, repo, true).unwrap();
+    let red_run = run(expected.runner, expected.lang, expected.repo, true).unwrap();
     let failing: Vec<(&str, Option<&str>)> = red_run
         .failures()
         .map(|test| {
             let found = test
                 .output
                 .as_deref()
-                .and_then(|output| output.lines().find(|seen| *seen == line));
+                .and_then(|output| output.lines().find(|seen| *seen == expected.line));
             (test.id.as_str(), found)
         })
         .collect();
     assert_eq!(
         (red_run.is_green(), failing),
-        (false, vec![(red, Some(line))]),
-        "{id} red"
+        (false, vec![(expected.red, Some(expected.line))]),
+        "{} red",
+        expected.runner
     );
 }
 
+const CARGO_TEST: Expected = Expected {
+    runner: "tool.cargo-test",
+    lang: "rust",
+    repo: "rust",
+    tests: &[
+        ("tally/src/lib.rs::tests::totals_a_huge_list", Skipped),
+        ("tally/src/lib.rs::tests::totals_a_list", Passed),
+        ("totals/tests/totals.rs::an_empty_list_totals_zero", Passed),
+    ],
+    red: "red/tests/red.rs::reports_a_wrong_total",
+    line: "totalling 2 and 2",
+};
+
+const CARGO_NEXTEST: Expected = Expected {
+    runner: "tool.cargo-nextest",
+    lang: "rust",
+    repo: "rust",
+    tests: &[
+        ("tally tests::totals_a_list", Passed),
+        ("tally::totals an_empty_list_totals_zero", Passed),
+    ],
+    red: "tally::red reports_a_wrong_total",
+    line: "totalling 2 and 2",
+};
+
+const GO_TEST: Expected = Expected {
+    runner: "tool.go-test",
+    lang: "go",
+    repo: "go",
+    tests: &[
+        ("example.com/tally/TestTotalsAHugeList", Skipped),
+        ("example.com/tally/TestTotalsAList", Passed),
+    ],
+    red: "example.com/tally/TestReportsAWrongTotal",
+    line: "    red_test.go:7: totalling 2 and 2",
+};
+
+const PYTEST: Expected = Expected {
+    runner: "tool.pytest",
+    lang: "python",
+    repo: "python",
+    tests: &[
+        (
+            "tests/test_tally.py::TotalTest::test_totals_a_huge_list",
+            Skipped,
+        ),
+        ("tests/test_tally.py::TotalTest::test_totals_a_list", Passed),
+    ],
+    red: "tests/test_red.py::RedTest::test_reports_a_wrong_total",
+    line: "totalling 2 and 2",
+};
+
+const UNITTEST: Expected = Expected {
+    runner: "tool.unittest",
+    lang: "python",
+    repo: "python",
+    tests: &[
+        (
+            "tests.test_tally.TotalTest.test_totals_a_huge_list",
+            Skipped,
+        ),
+        ("tests.test_tally.TotalTest.test_totals_a_list", Passed),
+    ],
+    red: "tests.test_red.RedTest.test_reports_a_wrong_total",
+    line: "totalling 2 and 2",
+};
+
+const JEST: Expected = Expected {
+    runner: "tool.jest",
+    lang: "javascript",
+    repo: "javascript",
+    tests: &[
+        ("tally.test.js > totals a huge list", Skipped),
+        ("tally.test.js > totals a list", Passed),
+    ],
+    red: "red.test.js > reports a wrong total",
+    line: "Error: expect(received).toBe(expected) // Object.is equality",
+};
+
+const VITEST: Expected = Expected {
+    runner: "tool.vitest",
+    lang: "typescript",
+    repo: "typescript",
+    tests: &[
+        ("src/tally.test.ts > total > totals a huge list", Skipped),
+        ("src/tally.test.ts > total > totals a list", Passed),
+    ],
+    red: "src/red.test.ts > reports a wrong total",
+    line: "AssertionError: expected 4 to be 5 // Object.is equality",
+};
+
 #[test]
 fn cargo_test_runs_the_rust_fixture() {
-    assert_runs(
-        ("tool.cargo-test", "rust", "rust"),
-        &[
-            ("tally/src/lib.rs::tests::totals_a_huge_list", Skipped),
-            ("tally/src/lib.rs::tests::totals_a_list", Passed),
-            ("totals/tests/totals.rs::an_empty_list_totals_zero", Passed),
-        ],
-        "red/tests/red.rs::reports_a_wrong_total",
-        "totalling 2 and 2",
-    );
+    assert_runs(&CARGO_TEST);
 }
 
 #[test]
 fn cargo_nextest_runs_the_rust_fixture() {
-    assert_runs(
-        ("tool.cargo-nextest", "rust", "rust"),
-        &[
-            ("tally tests::totals_a_list", Passed),
-            ("tally::totals an_empty_list_totals_zero", Passed),
-        ],
-        "tally::red reports_a_wrong_total",
-        "totalling 2 and 2",
-    );
+    assert_runs(&CARGO_NEXTEST);
 }
 
 #[test]
 fn go_test_runs_the_go_fixture() {
-    assert_runs(
-        ("tool.go-test", "go", "go"),
-        &[
-            ("example.com/tally/TestTotalsAHugeList", Skipped),
-            ("example.com/tally/TestTotalsAList", Passed),
-        ],
-        "example.com/tally/TestReportsAWrongTotal",
-        "    red_test.go:7: totalling 2 and 2",
-    );
+    assert_runs(&GO_TEST);
 }
 
 #[test]
 fn pytest_runs_the_python_fixture() {
-    assert_runs(
-        ("tool.pytest", "python", "python"),
-        &[
-            (
-                "tests/test_tally.py::TotalTest::test_totals_a_huge_list",
-                Skipped,
-            ),
-            ("tests/test_tally.py::TotalTest::test_totals_a_list", Passed),
-        ],
-        "tests/test_red.py::RedTest::test_reports_a_wrong_total",
-        "totalling 2 and 2",
-    );
+    assert_runs(&PYTEST);
 }
 
 #[test]
 fn unittest_runs_the_python_fixture() {
-    assert_runs(
-        ("tool.unittest", "python", "python"),
-        &[
-            (
-                "tests.test_tally.TotalTest.test_totals_a_huge_list",
-                Skipped,
-            ),
-            ("tests.test_tally.TotalTest.test_totals_a_list", Passed),
-        ],
-        "tests.test_red.RedTest.test_reports_a_wrong_total",
-        "totalling 2 and 2",
-    );
+    assert_runs(&UNITTEST);
 }
 
 #[test]
 fn jest_runs_the_javascript_fixture() {
-    assert_runs(
-        ("tool.jest", "javascript", "javascript"),
-        &[
-            ("tally.test.js > totals a huge list", Skipped),
-            ("tally.test.js > totals a list", Passed),
-        ],
-        "red.test.js > reports a wrong total",
-        "Error: expect(received).toBe(expected) // Object.is equality",
-    );
+    assert_runs(&JEST);
 }
 
 #[test]
 fn vitest_runs_the_typescript_fixture() {
-    assert_runs(
-        ("tool.vitest", "typescript", "typescript"),
-        &[
-            ("src/tally.test.ts > total > totals a huge list", Skipped),
-            ("src/tally.test.ts > total > totals a list", Passed),
-        ],
-        "src/red.test.ts > reports a wrong total",
-        "AssertionError: expected 4 to be 5 // Object.is equality",
-    );
+    assert_runs(&VITEST);
 }
 
 #[test]

@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Check, CheckCtx, CheckRegistry, CheckResult, CheckStatus, CostClass, Ctx, Error,
+    Availability, Check, CheckCtx, CheckRegistry, CheckResult, CheckStatus, CostClass, Ctx,
     EventSink, FactKind, Facts, LangId, Langs, Manifest, Outcome, Plan, ProduceCtx, Producer,
     ProducerId, ProducerRegistry, Result, RunnerInvocation, Scheduler, Scope, Score, SkipReason,
     TestOutcome, TestResult, TestResults, ToolId, Unevaluable, Writer,
@@ -303,29 +303,28 @@ fn the_runner_receives_the_project_roots_it_needs() {
 
 #[test]
 fn a_red_baseline_refuses_the_run_before_any_check_runs() {
-    let checks = vec![
-        counts("t.cheap", &[FactKind::ProjectInfo]),
-        counts("t.one", &[FactKind::TestResults]),
-    ];
-    let (outcome, runs) = run(checks, RED, "");
-    let Err(Error::Unevaluable(refused)) = outcome else {
-        panic!("expected an unevaluable run, got {outcome:?}");
-    };
-    let Unevaluable { lang, results } = *refused;
+    let (outcome, runs) = run(
+        vec![
+            counts("t.cheap", &[FactKind::ProjectInfo]),
+            counts("t.one", &[FactKind::TestResults]),
+        ],
+        RED,
+        "",
+    );
+    let outcome = outcome.unwrap();
+    let Unevaluable { lang, results } = outcome.refused.unwrap();
     let failing: Vec<&str> = results.failures().map(|test| test.id.as_str()).collect();
     assert_eq!(
-        (lang.as_str(), failing, runs),
-        ("rust", vec!["tool.alpha crates/app"], 1)
+        (lang.as_str(), failing, runs, outcome.checks.len()),
+        ("rust", vec!["tool.alpha crates/app"], 1, 0)
     );
 }
 
 #[test]
 fn a_check_whose_producer_needs_test_results_triggers_the_baseline() {
     let (outcome, runs) = run(vec![counts("t.engine", &[FactKind::CoverageMap])], RED, "");
-    assert_eq!(
-        (matches!(outcome, Err(Error::Unevaluable(_))), runs),
-        (true, 1)
-    );
+    let refused = outcome.unwrap().refused.map(|red| red.lang.to_string());
+    assert_eq!((refused, runs), (Some("rust".to_owned()), 1));
 }
 
 #[test]

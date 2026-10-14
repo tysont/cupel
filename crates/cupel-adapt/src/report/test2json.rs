@@ -29,45 +29,23 @@ struct Seen {
     output: String,
 }
 
+/// Every test and package the events mention, with what they say about it.
+type Sightings = (BTreeMap<(String, String), Seen>, BTreeMap<String, Seen>);
+
 /// The tests in `stdout`, the events of `go test -json`, with IDs `<package>/<Test>`. A package
 /// that failed without a failing test is one `errored` test named after the package, its output
 /// followed by `stderr` (where `go` reports build errors). Lines that are not events are skipped.
 pub fn parse(stdout: &str, stderr: &str) -> Vec<TestResult> {
-    let mut tests: BTreeMap<(String, String), Seen> = BTreeMap::new();
-    let mut packages: BTreeMap<String, Seen> = BTreeMap::new();
-    for event in stdout
-        .lines()
-        .filter_map(|line| serde_json::from_str::<Event>(line).ok())
-    {
-        let seen = match &event.test {
-            Some(test) => tests
-                .entry((event.package.clone(), test.clone()))
-                .or_default(),
-            None => packages.entry(event.package.clone()).or_default(),
-        };
-        match event.action.as_str() {
-            "pass" => seen.outcome = Some(TestOutcome::Passed),
-            "fail" => seen.outcome = Some(TestOutcome::Failed),
-            "skip" => seen.outcome = Some(TestOutcome::Skipped),
-            "output" => seen
-                .output
-                .push_str(event.output.as_deref().unwrap_or_default()),
-            _ => {}
-        }
-        if event.elapsed.is_some() {
-            seen.elapsed = event.elapsed;
-        }
-    }
+    let (tests, packages) = events(stdout);
     let failing: Vec<&str> = tests
         .iter()
         .filter(|(_, seen)| seen.outcome == Some(TestOutcome::Failed))
         .map(|((package, _), _)| package.as_str())
         .collect();
-    let mut results: Vec<TestResult> = packages
-        .iter()
-        .filter(|(package, seen)| {
-            seen.outcome == Some(TestOutcome::Failed) && !failing.contains(&package.as_str())
-        })
+    let broken = packages.iter().filter(|(package, seen)| {
+        seen.outcome == Some(TestOutcome::Failed) && !failing.contains(&package.as_str())
+    });
+    let mut results: Vec<TestResult> = broken
         .map(|(package, seen)| TestResult {
             id: package.clone(),
             file: None,
@@ -95,4 +73,40 @@ pub fn parse(stdout: &str, stderr: &str) -> Vec<TestResult> {
         }
     }));
     results
+}
+
+/// What the events in `stdout` say about each test and each package.
+fn events(stdout: &str) -> Sightings {
+    let mut tests: BTreeMap<(String, String), Seen> = BTreeMap::new();
+    let mut packages: BTreeMap<String, Seen> = BTreeMap::new();
+    for event in stdout
+        .lines()
+        .filter_map(|line| serde_json::from_str::<Event>(line).ok())
+    {
+        let seen = match &event.test {
+            Some(test) => tests
+                .entry((event.package.clone(), test.clone()))
+                .or_default(),
+            None => packages.entry(event.package.clone()).or_default(),
+        };
+        seen.record(&event);
+    }
+    (tests, packages)
+}
+
+impl Seen {
+    fn record(&mut self, event: &Event) {
+        match event.action.as_str() {
+            "pass" => self.outcome = Some(TestOutcome::Passed),
+            "fail" => self.outcome = Some(TestOutcome::Failed),
+            "skip" => self.outcome = Some(TestOutcome::Skipped),
+            "output" => self
+                .output
+                .push_str(event.output.as_deref().unwrap_or_default()),
+            _ => {}
+        }
+        if event.elapsed.is_some() {
+            self.elapsed = event.elapsed;
+        }
+    }
 }

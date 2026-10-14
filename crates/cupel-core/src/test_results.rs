@@ -78,13 +78,9 @@ pub enum TestOutcome {
 }
 
 impl TestOutcome {
+    /// The outcome's name as it serializes.
     pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Passed => "passed",
-            Self::Failed => "failed",
-            Self::Skipped => "skipped",
-            Self::Errored => "errored",
-        }
+        OUTCOMES[self as usize]
     }
 
     /// Whether this outcome makes the suite red.
@@ -92,6 +88,9 @@ impl TestOutcome {
         matches!(self, Self::Failed | Self::Errored)
     }
 }
+
+/// Each outcome's name, in declaration order (so `OUTCOMES[outcome as usize]` names it).
+const OUTCOMES: [&str; 4] = ["passed", "failed", "skipped", "errored"];
 
 impl fmt::Display for TestOutcome {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -136,8 +135,8 @@ impl TestResults {
     }
 }
 
-/// A red baseline: the tests of `lang` that `results` shows failing (ADR-076). The run is
-/// refused with exit 4.
+/// A red baseline: the test run of `lang` that refused the run (`Outcome::refused`, ADR-076);
+/// the CLI reports it with exit 4.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Unevaluable {
     pub lang: LangId,

@@ -1,6 +1,6 @@
 // ABOUTME: The `cargo nextest` runner producer: `cargo nextest run` with a tool configuration file whose `cupel`
 // ABOUTME: profile writes a JUnit report under the target directory, read by the JUnit parser.
-use cupel_core::{LangId, Langs, Process, TestResult, TestResults};
+use cupel_core::{LangId, Langs, TestResult, TestResults};
 
 use crate::report::junit;
 use crate::runner::{Ran, Root, Runner, RunnerSpec};
@@ -14,6 +14,8 @@ static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
     node_bin: false,
     version: &["cargo", "nextest", "--version"],
     command,
+    env: &[("CARGO_TERM_COLOR", "never")],
+    merged: false,
     read,
     completed_codes: &[0],
 };
@@ -26,23 +28,23 @@ inventory::submit!(crate::ToolProducer {
 /// The `cupel` profile: a `JUnit` report that keeps the output of failures.
 const PROFILE: &str = "[profile.cupel.junit]\npath = \"junit.xml\"\nstore-success-output = false\nstore-failure-output = true\n";
 
-fn command(root: &Root) -> Process {
+fn command(root: &Root) -> Vec<String> {
     // The profile file lives in `.cupel/`; a failure to write it surfaces as nextest's error.
     let _ = std::fs::write(&root.config, PROFILE);
-    Process::new("cargo", &root.dir)
-        .args([
-            "nextest",
-            "run",
-            "--workspace",
-            "--no-fail-fast",
-            "--profile",
-            "cupel",
-        ])
-        .args([
-            "--tool-config-file".to_owned(),
-            format!("cupel:{}", root.config.display()),
-        ])
-        .env("CARGO_TERM_COLOR", "never")
+    let mut command: Vec<String> = [
+        "cargo",
+        "nextest",
+        "run",
+        "--workspace",
+        "--no-fail-fast",
+        "--profile",
+        "cupel",
+        "--tool-config-file",
+    ]
+    .map(str::to_owned)
+    .to_vec();
+    command.push(format!("cupel:{}", root.config.display()));
+    command
 }
 
 fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
