@@ -7,8 +7,8 @@ use cupel_core::syntax::{
     Assertion, AssertionKind, AssertionStrength, SkipMarker, Span, TestCase, TestFile, TestFrames,
 };
 use cupel_core::{
-    Check, CheckId, CheckResult, CheckStatus, Error, Event, Facts, Finding, FindingId, Produced,
-    Range, Scope, Score,
+    Check, CheckId, CheckResult, CheckStatus, Error, Facts, Finding, FindingId, Produced, Range,
+    Scope, Score,
 };
 use serde_json::{Value, json};
 use support::{combined, language};
@@ -85,8 +85,7 @@ fn modified(path: &str) -> Change {
 
 /// Runs the check comparing `base` with `head` over a range with `changes`.
 fn run(base: TestFrames, head: TestFrames, changes: Vec<Change>) -> (CheckResult, Vec<Finding>) {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let mut facts = Facts::for_manifest(check.manifest());
     facts.insert(head).unwrap();
     facts
@@ -96,23 +95,13 @@ fn run(base: TestFrames, head: TestFrames, changes: Vec<Change>) -> (CheckResult
         commit: "c0ffee".to_owned(),
         changes,
     });
-    let (result, findings) = run_with(check, &facts);
-    (result.unwrap(), findings)
+    run_with(check, &facts).unwrap()
 }
 
-fn run_with(check: &dyn Check, facts: &Facts) -> (cupel_core::Result<CheckResult>, Vec<Finding>) {
-    let (ctx, _dir) = support::ctx(Scope::of_files(vec!["t.x".to_owned()]), json!({}));
-    let plan = check.plan(&ctx, &ctx.scope).unwrap();
-    let mut events = Vec::new();
-    let result = check.run(&ctx, facts, &plan, &mut events);
-    let findings = events
-        .into_iter()
-        .filter_map(|event| match event {
-            Event::Finding(finding) => Some(*finding),
-            _ => None,
-        })
-        .collect();
-    (result, findings)
+fn run_with(check: &dyn Check, facts: &Facts) -> cupel_core::Result<(CheckResult, Vec<Finding>)> {
+    let scope = Scope::of_files(vec!["t.x".to_owned()]);
+    let (result, recorded) = support::recorded(check, facts, scope, json!({}))?;
+    Ok((result, recorded.findings))
 }
 
 fn kinds(findings: &[Finding]) -> Vec<(&str, &str)> {
@@ -356,8 +345,7 @@ fn a_snapshot_file_shared_with_a_new_test_only_grew() {
 
 #[test]
 fn the_check_reads_the_base_side_of_test_frames_and_has_no_settings() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     assert_eq!(check.base_needs(), [cupel_core::FactKind::TestFrames]);
     assert_eq!(check.manifest().needs, [cupel_core::FactKind::TestFrames]);
     let (ctx, _dir) = support::ctx(
@@ -370,13 +358,11 @@ fn the_check_reads_the_base_side_of_test_frames_and_has_no_settings() {
 
 #[test]
 fn without_a_base_side_the_check_reports_the_absent_fact() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let mut facts = Facts::for_manifest(check.manifest());
     facts.insert(frames(vec![])).unwrap();
-    let (result, _) = run_with(check, &facts);
     assert_eq!(
-        result.unwrap_err(),
+        run_with(check, &facts).unwrap_err(),
         Error::AbsentFact {
             kind: cupel_core::FactKind::TestFrames
         }
@@ -385,8 +371,7 @@ fn without_a_base_side_the_check_reports_the_absent_fact() {
 
 #[test]
 fn languages_combine_by_summing_weakenings() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let score = |value, n| Score {
         value,
         unit: "weakened".to_owned(),

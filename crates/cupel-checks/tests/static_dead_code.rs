@@ -11,7 +11,7 @@ use cupel_core::syntax::{
     Visibility,
 };
 use cupel_core::{
-    ActionKind, Check, CheckId, CheckResult, CheckStatus, CostClass, Error, Event, FactKind, Facts,
+    ActionKind, Check, CheckId, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts,
     Finding, FindingId, LangId, MetricPer, Plan, Scope, Score, Severity, SymbolHash,
 };
 use serde_json::{Map, Value, json};
@@ -84,12 +84,6 @@ fn edge(from: &str, specifier: &str, target: ImportTarget) -> ImportEdge {
         relative: false,
         line: 1,
         edge_kind: EdgeKind::Import,
-    }
-}
-
-fn file(path: &str) -> ImportTarget {
-    ImportTarget::File {
-        path: path.to_owned(),
     }
 }
 
@@ -197,33 +191,17 @@ fn run(world: &World) -> (CheckResult, Vec<Finding>) {
 }
 
 fn run_in(world: &World, scope: Scope) -> (CheckResult, Vec<Finding>) {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
-    let (ctx, _dir) = support::ctx(scope, json!({}));
-    let plan = check.plan(&ctx, &ctx.scope).unwrap();
-    let mut events = Vec::new();
-    let result = check
-        .run(&ctx, &world.facts(check), &plan, &mut events)
-        .unwrap();
-    let findings = events
-        .into_iter()
-        .filter_map(|event| match event {
-            Event::Finding(finding) => Some(*finding),
-            _ => None,
-        })
-        .collect();
-    (result, findings)
+    let check = support::check(ID);
+    let (result, recorded) =
+        support::recorded(check, &world.facts(check), scope, json!({})).unwrap();
+    (result, recorded.findings)
 }
 
 /// Each finding as (symbol display, kind).
 
 #[test]
 fn the_manifest_states_its_known_limitation() {
-    let registry = support::registry();
-    let manifest = registry
-        .get(&CheckId::from("static.dead-code"))
-        .unwrap()
-        .manifest();
+    let manifest = support::check("static.dead-code").manifest();
     let limitation = manifest
         .summary
         .split_once("Limitation: ")
@@ -241,8 +219,7 @@ fn the_manifest_states_its_known_limitation() {
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = support::registry();
-    let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
+    let manifest = support::check(ID).manifest();
     assert_eq!(
         support::Shape::of(manifest),
         support::Shape {
@@ -279,8 +256,12 @@ fn of_a_root_an_export_an_imported_item_and_an_unreferenced_private_only_the_las
         private("orphan.x", "orphan", "forgotten", 1),
     ])
     .root(0, RootReason::EntryPoint)
-    .import(edge("main.x", "api::open", file("api.x")))
-    .import(edge("main.x", "util::helper", file("util.x")));
+    .import(edge("main.x", "api::open", support::imported_file("api.x")))
+    .import(edge(
+        "main.x",
+        "util::helper",
+        support::imported_file("util.x"),
+    ));
     let (result, findings) = run(&world);
     assert_eq!(
         support::kinds(&findings),
@@ -445,9 +426,9 @@ fn only_imports_from_other_modules_enter_one() {
         symbol("pkg/b.x", "pkg", ".", "two", Visibility::Internal),
         private("used.x", "used", "kept", 1),
     ])
-    .import(edge("self.x", "self", file("self.x")))
-    .import(edge("pkg/a.x", "pkg/b", file("pkg/b.x")))
-    .import(edge("index.x", "./used", file("used.x")));
+    .import(edge("self.x", "self", support::imported_file("self.x")))
+    .import(edge("pkg/a.x", "pkg/b", support::imported_file("pkg/b.x")))
+    .import(edge("index.x", "./used", support::imported_file("used.x")));
     let (_, findings) = run(&world);
     assert_eq!(
         support::kinds(&findings),
@@ -529,7 +510,7 @@ fn only_symbols_in_scope_are_reported_but_every_fact_is_read() {
         private("caller.x", "caller", "main", 1),
     ])
     .root(3, RootReason::EntryPoint)
-    .import(edge("caller.x", "lib", file("lib.x")));
+    .import(edge("caller.x", "lib", support::imported_file("lib.x")));
     let scope = Scope {
         files: vec!["in.x".to_owned(), "lib.x".to_owned()],
         symbols: Some(BTreeSet::from([
@@ -571,8 +552,7 @@ fn the_score_counts_dead_symbols_and_combines_by_sum() {
             n: 3
         }
     );
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     assert_eq!(
         check.combine(&[score.clone(), score]),
         Some(Score {
@@ -592,8 +572,7 @@ fn the_score_counts_dead_symbols_and_combines_by_sum() {
 
 #[test]
 fn the_check_has_no_settings() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let (ctx, _dir) = support::ctx(Scope::default(), json!({"strict": true}));
     let error = check.plan(&ctx, &Scope::default()).unwrap_err();
     let Error::Config(ConfigError::CheckSetting { key, valid, .. }) = error else {
@@ -605,8 +584,7 @@ fn the_check_has_no_settings() {
 
 #[test]
 fn plans_count_the_symbols_in_scope_at_quick_cost() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let scope = World::with(vec![
         private("a.x", "a", "one", 1),
         private("b.x", "b", "two", 1),

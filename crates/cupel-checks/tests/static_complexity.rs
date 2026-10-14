@@ -4,17 +4,14 @@ mod support;
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use cupel_core::config::ConfigError;
-use cupel_core::syntax::{
-    Decision, DecisionKind, Decisions, NormNode, NormTree, NormalizedSymbol, Span, SymbolDecisions,
-    SymbolDef, SymbolKind, Symbols, Visibility,
-};
+use cupel_core::syntax::{Decision, DecisionKind, Span, SymbolDef, SymbolKind, Visibility};
 use cupel_core::{
-    ActionKind, Check, CheckId, CheckResult, CheckStatus, Error, Event, FactKind, Facts, Finding,
-    FindingId, LangId, MetricPer, Plan, Scope, Score, Severity, SymbolHash,
+    ActionKind, Check, CheckId, CheckResult, CheckStatus, FactKind, Facts, Finding, FindingId,
+    LangId, MetricPer, Plan, Scope, Score, Severity,
 };
 use serde_json::{Map, Value, json};
-use support::Recorded;
+
+const ID: &str = "static.complexity";
 
 /// A symbol in `f.x` starting at `line`, spanning `lines` lines, with `parameters`.
 fn symbol(name: &str, line: u32, lines: u32, parameters: u32) -> SymbolDef {
@@ -48,10 +45,6 @@ fn decision(kind: DecisionKind, nesting: u32, cyclomatic: u32, cognitive: u32) -
     }
 }
 
-fn hash_of(line: u32) -> SymbolHash {
-    format!("sh_{line:016x}").parse().unwrap()
-}
-
 /// Facts for `symbols`, each with its decisions.
 struct World {
     symbols: Vec<(SymbolDef, Vec<Decision>)>,
@@ -59,48 +52,11 @@ struct World {
 
 impl World {
     fn facts(&self, check: &dyn Check) -> Facts {
-        let mut facts = Facts::for_manifest(check.manifest());
-        facts
-            .insert(Symbols {
-                symbols: self.symbols.iter().map(|(s, _)| s.clone()).collect(),
-            })
-            .unwrap();
-        facts
-            .insert(Decisions {
-                symbols: self
-                    .symbols
-                    .iter()
-                    .map(|(s, d)| SymbolDecisions {
-                        symbol: s.key(),
-                        decisions: d.clone(),
-                    })
-                    .collect(),
-            })
-            .unwrap();
-        facts
-            .insert(NormTree {
-                symbols: self
-                    .symbols
-                    .iter()
-                    .map(|(s, _)| NormalizedSymbol {
-                        symbol: s.key(),
-                        hash: hash_of(s.span.line),
-                        root: NormNode {
-                            label: "fn".to_owned(),
-                            children: Vec::new(),
-                        },
-                    })
-                    .collect(),
-            })
-            .unwrap();
-        facts
+        support::decided_facts(check, &self.symbols)
     }
 
     fn scope(&self) -> Scope {
-        Scope {
-            files: vec!["f.x".to_owned()],
-            symbols: Some(self.symbols.iter().map(|(s, _)| s.key()).collect()),
-        }
+        support::decided_scope(&self.symbols)
     }
 }
 
@@ -110,31 +66,14 @@ fn run(world: &World, config: Value) -> (CheckResult, Vec<Finding>) {
 }
 
 fn run_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Vec<Finding>) {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from("static.complexity")).unwrap();
-    let (ctx, _dir) = support::ctx(scope, config);
-    let plan = check.plan(&ctx, &ctx.scope).unwrap();
-    let mut events = Vec::new();
-    let result = check
-        .run(&ctx, &world.facts(check), &plan, &mut events)
-        .unwrap();
-    let findings = events
-        .into_iter()
-        .filter_map(|event| match event {
-            Event::Finding(finding) => Some(*finding),
-            _ => None,
-        })
-        .collect();
-    (result, findings)
+    let check = support::check(ID);
+    let (result, recorded) = support::recorded(check, &world.facts(check), scope, config).unwrap();
+    (result, recorded.findings)
 }
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = support::registry();
-    let manifest = registry
-        .get(&CheckId::from("static.complexity"))
-        .unwrap()
-        .manifest();
+    let manifest = support::check("static.complexity").manifest();
     assert_eq!(
         support::Shape::of(manifest),
         support::Shape {
@@ -268,7 +207,7 @@ fn a_finding_is_identified_located_and_reproducible_by_its_symbol_hash() {
     let [finding] = findings.as_slice() else {
         panic!("one finding expected: {findings:?}")
     };
-    let hash = hash_of(7);
+    let hash = support::hash_of_line(7);
     let check = CheckId::from("static.complexity");
     assert_eq!(
         finding.id,
@@ -332,22 +271,14 @@ fn thresholds_come_from_the_configuration_the_context_carries() {
 
 #[test]
 fn unknown_settings_and_bad_values_are_configuration_errors() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from("static.complexity")).unwrap();
+    let check = support::check(ID);
     for (config, key) in [
         (json!({"cyclomatic": 3}), "cyclomatic"),
         (json!({"params_max": -1}), "params_max"),
         (json!({"length_max": "long"}), "length_max"),
         (json!({"nesting_max": 2.5}), "nesting_max"),
     ] {
-        let (ctx, _dir) = support::ctx(Scope::default(), config);
-        let error = check.plan(&ctx, &Scope::default()).unwrap_err();
-        let Error::Config(ConfigError::CheckSetting {
-            key: named, valid, ..
-        }) = error
-        else {
-            panic!("expected a check-setting error, got {error:?}")
-        };
+        let (named, valid) = support::setting_error(check, config);
         assert_eq!(named, key);
         assert!(valid.contains(&"cyclomatic_max".to_owned()));
     }
@@ -355,8 +286,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
 
 #[test]
 fn plans_count_the_symbols_in_scope_at_quick_cost() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from("static.complexity")).unwrap();
+    let check = support::check(ID);
     let scope = Scope {
         files: vec![],
         symbols: Some(BTreeSet::from([
@@ -376,13 +306,8 @@ fn plans_count_the_symbols_in_scope_at_quick_cost() {
 
 #[test]
 fn scores_combine_by_maximum_across_languages() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from("static.complexity")).unwrap();
-    let score = |value: f64, n: u64| Score {
-        value,
-        unit: "cyclomatic_max".to_owned(),
-        n,
-    };
+    let check = support::check(ID);
+    let score = |value, n| support::score(value, "cyclomatic_max", n);
     assert_eq!(
         check.combine(&[score(4.0, 10), score(12.0, 1)]),
         Some(score(12.0, 11))
@@ -430,14 +355,9 @@ fn the_result_reports_each_scope_metric_as_the_largest_value_in_scope() {
 #[test]
 fn each_symbol_in_scope_is_measured_for_cyclomatic_and_cognitive_rankings() {
     let world = two_symbols();
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from("static.complexity")).unwrap();
-    let (ctx, _dir) = support::ctx(world.scope(), json!({}));
-    let plan = check.plan(&ctx, &ctx.scope).unwrap();
-    let mut sink = Recorded::default();
-    check
-        .run(&ctx, &world.facts(check), &plan, &mut sink)
-        .unwrap();
+    let check = support::check(ID);
+    let (_, sink) =
+        support::recorded(check, &world.facts(check), world.scope(), json!({})).unwrap();
     assert_eq!(
         sink.measured(),
         [
@@ -448,7 +368,7 @@ fn each_symbol_in_scope_is_measured_for_cyclomatic_and_cognitive_rankings() {
         ]
     );
     let wide = &sink.measurements[0].target;
-    assert_eq!(wide.symbol, Some(hash_of(1)));
+    assert_eq!(wide.symbol, Some(support::hash_of_line(1)));
     let location = wide.location.as_ref().unwrap();
     assert_eq!(
         (location.file.as_str(), location.line, location.end_line),

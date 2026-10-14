@@ -162,8 +162,7 @@ fn trees(defs: &[&Def]) -> NormTree {
 
 /// Facts for one language's `defs`, plus each sibling language's.
 fn facts(defs: &[Def], siblings: &[&[Def]]) -> Facts {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let mut facts = Facts::for_manifest(check.manifest());
     let own: Vec<&Def> = defs.iter().collect();
     facts.insert(symbols(&own)).unwrap();
@@ -200,13 +199,7 @@ fn recorded_with(
     scope: Scope,
     config: Value,
 ) -> cupel_core::Result<(CheckResult, Recorded)> {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
-    let (ctx, _dir) = support::ctx(scope, config);
-    let plan = check.plan(&ctx, &ctx.scope)?;
-    let mut recorded = Recorded::default();
-    let result = check.run(&ctx, facts, &plan, &mut recorded)?;
-    Ok((result, recorded))
+    support::recorded(support::check(ID), facts, scope, config)
 }
 
 fn run(defs: &[Def]) -> (CheckResult, Vec<Finding>) {
@@ -238,11 +231,7 @@ fn assert_pairs(result: &CheckResult, pairs: u32) {
 
 #[test]
 fn the_manifest_states_its_known_limitation() {
-    let registry = support::registry();
-    let manifest = registry
-        .get(&CheckId::from("static.clones"))
-        .unwrap()
-        .manifest();
+    let manifest = support::check("static.clones").manifest();
     let limitation = manifest
         .summary
         .split_once("Limitation: ")
@@ -259,8 +248,7 @@ fn the_manifest_states_its_known_limitation() {
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let manifest = check.manifest();
     assert_eq!(
         support::Shape::of(manifest),
@@ -679,8 +667,7 @@ fn each_reported_group_is_measured_by_its_members_for_the_cluster_ranking() {
 
 #[test]
 fn counts_add_up_across_families_and_similarity_takes_the_largest() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let results = [
         language(
             check,

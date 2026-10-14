@@ -4,15 +4,13 @@ mod support;
 
 use std::collections::BTreeSet;
 
-use cupel_core::config::ConfigError;
 use cupel_core::coverage::{CoverageMap, FileCoverage, LineHits};
 use cupel_core::syntax::{
-    Decision, DecisionKind, Decisions, NormNode, NormTree, NormalizedSymbol, Span, SymbolDecisions,
-    SymbolDef, SymbolKind, Symbols, TestConventions, TestPairing, Visibility,
+    Decision, DecisionKind, Span, SymbolDef, SymbolKind, TestConventions, TestPairing, Visibility,
 };
 use cupel_core::{
-    ActionKind, Check, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding,
-    FindingId, LangId, MetricPer, Plan, Scope, Score, Severity, SymbolHash,
+    ActionKind, Check, CheckId, CheckResult, CheckStatus, FactKind, Facts, Finding, FindingId,
+    LangId, MetricPer, Plan, Scope, Score, Severity,
 };
 use serde_json::{Map, Value, json};
 use support::{Recorded, combined, language};
@@ -54,10 +52,6 @@ fn branches(cyclomatic: u32) -> Vec<Decision> {
         .collect()
 }
 
-fn hash_of(line: u32) -> SymbolHash {
-    format!("sh_{line:016x}").parse().unwrap()
-}
-
 /// Facts for `symbols`, each with its decisions, optionally the language's test conventions,
 /// and optionally a coverage map.
 struct World {
@@ -79,40 +73,7 @@ impl World {
     }
 
     fn facts(&self, check: &dyn Check) -> Facts {
-        let mut facts = Facts::for_manifest(check.manifest());
-        facts
-            .insert(Symbols {
-                symbols: self.symbols.iter().map(|(s, _)| s.clone()).collect(),
-            })
-            .unwrap();
-        facts
-            .insert(Decisions {
-                symbols: self
-                    .symbols
-                    .iter()
-                    .map(|(s, d)| SymbolDecisions {
-                        symbol: s.key(),
-                        decisions: d.clone(),
-                    })
-                    .collect(),
-            })
-            .unwrap();
-        facts
-            .insert(NormTree {
-                symbols: self
-                    .symbols
-                    .iter()
-                    .map(|(s, _)| NormalizedSymbol {
-                        symbol: s.key(),
-                        hash: hash_of(s.span.line),
-                        root: NormNode {
-                            label: "fn".to_owned(),
-                            children: Vec::new(),
-                        },
-                    })
-                    .collect(),
-            })
-            .unwrap();
+        let mut facts = support::decided_facts(check, &self.symbols);
         if let Some(conventions) = &self.conventions {
             facts.insert(conventions.clone()).unwrap();
         }
@@ -123,10 +84,7 @@ impl World {
     }
 
     fn scope(&self) -> Scope {
-        Scope {
-            files: vec!["f.x".to_owned()],
-            symbols: Some(self.symbols.iter().map(|(s, _)| s.key()).collect()),
-        }
+        support::decided_scope(&self.symbols)
     }
 }
 
@@ -163,21 +121,13 @@ fn run_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Vec<Findi
 
 /// Runs the check over `world`; its result and every finding and measurement it reported.
 fn recorded_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Recorded) {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
-    let (ctx, _dir) = support::ctx(scope, config);
-    let plan = check.plan(&ctx, &ctx.scope).unwrap();
-    let mut recorded = Recorded::default();
-    let result = check
-        .run(&ctx, &world.facts(check), &plan, &mut recorded)
-        .unwrap();
-    (result, recorded)
+    let check = support::check(ID);
+    support::recorded(check, &world.facts(check), scope, config).unwrap()
 }
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = support::registry();
-    let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
+    let manifest = support::check(ID).manifest();
     assert_eq!(
         support::Shape::of(manifest),
         support::Shape {
@@ -307,7 +257,7 @@ fn a_high_finding_is_a_warning_to_write_tests_identified_by_its_symbol_hash() {
     let [finding] = findings.as_slice() else {
         panic!("one finding expected: {findings:?}")
     };
-    let hash = hash_of(7);
+    let hash = support::hash_of_line(7);
     let check = CheckId::from(ID);
     assert_eq!(
         finding.id,
@@ -428,22 +378,14 @@ fn nothing_in_scope_passes_with_no_symbols_scored() {
 
 #[test]
 fn unknown_settings_and_bad_values_are_configuration_errors() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     for (config, key) in [
         (json!({"threshold": 3}), "threshold"),
         (json!({"no_coverage": true}), "no_coverage"),
         (json!({"high": -1}), "high"),
         (json!({"watch": 2.5}), "watch"),
     ] {
-        let (ctx, _dir) = support::ctx(Scope::default(), config);
-        let error = check.plan(&ctx, &Scope::default()).unwrap_err();
-        let Error::Config(ConfigError::CheckSetting {
-            key: named, valid, ..
-        }) = error
-        else {
-            panic!("expected a check-setting error, got {error:?}")
-        };
+        let (named, valid) = support::setting_error(check, config);
         assert_eq!(named, key);
         assert_eq!(valid, ["high", "watch"]);
     }
@@ -451,8 +393,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
 
 #[test]
 fn plans_count_the_symbols_in_scope_at_quick_cost() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let scope = Scope {
         files: vec![],
         symbols: Some(BTreeSet::from([symbol("a", 1).key(), symbol("b", 5).key()])),
@@ -469,13 +410,8 @@ fn plans_count_the_symbols_in_scope_at_quick_cost() {
 
 #[test]
 fn scores_combine_by_maximum_across_languages() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
-    let score = |value: f64, n: u64| Score {
-        value,
-        unit: "max".to_owned(),
-        n,
-    };
+    let check = support::check(ID);
+    let score = |value, n| support::score(value, "max", n);
     assert_eq!(
         check.combine(&[score(42.0, 10), score(6.0, 1)]),
         Some(score(42.0, 11))
@@ -527,15 +463,14 @@ fn each_scored_symbol_is_measured_for_the_crap_ranking() {
         [("crap", "m::risky", 42.0), ("crap", "m::straight", 2.0)]
     );
     let risky = &recorded.measurements[0].target;
-    assert_eq!(risky.symbol, Some(hash_of(1)));
+    assert_eq!(risky.symbol, Some(support::hash_of_line(1)));
     let location = risky.location.as_ref().unwrap();
     assert_eq!((location.file.as_str(), location.line), ("f.x", 1));
 }
 
 #[test]
 fn max_combines_by_the_largest_and_mean_by_the_mean_over_every_symbol() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let results = [
         language(check, &[("max", 42.0), ("mean", 10.0)], 1),
         language(check, &[("max", 30.0), ("mean", 40.0)], 3),

@@ -4,18 +4,17 @@ mod support;
 
 use std::collections::BTreeSet;
 
-use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
     Assertion, AssertionKind, AssertionStrength, Decision, DecisionKind, Decisions, Mock, NormNode,
     NormTree, NormalizedSymbol, SkipMarker, Span, SymbolDecisions, SymbolDef, SymbolKind, Symbols,
     TestCase, TestFile, TestFrames, Visibility,
 };
 use cupel_core::{
-    ActionKind, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding, FindingId,
-    Manifest, MetricPer, Plan, Scope, Score, Severity, SymbolHash,
+    ActionKind, CheckId, CheckResult, CheckStatus, FactKind, Facts, Finding, FindingId, Manifest,
+    MetricPer, Plan, Scope, Score, Severity, SymbolHash,
 };
 use serde_json::{Value, json};
-use support::{Recorded, combined, language};
+use support::{Recorded, combined, language, pairs};
 
 const ID: &str = "tests.quality";
 
@@ -305,23 +304,11 @@ impl Run {
 
     /// The result and every finding and measurement the check reported.
     fn recorded(self) -> (CheckResult, Recorded) {
-        let registry = support::registry();
-        let check = registry.get(&CheckId::from(ID)).unwrap();
+        let check = support::check(ID);
         let scope = self.scope.unwrap_or_else(|| self.world.scope());
-        let (ctx, _dir) = support::ctx(scope, self.config);
-        let plan = check.plan(&ctx, &ctx.scope).unwrap();
         let facts = self.world.facts(check.manifest(), self.decisions);
-        let mut recorded = Recorded::default();
-        let result = check.run(&ctx, &facts, &plan, &mut recorded).unwrap();
-        (result, recorded)
+        support::recorded(check, &facts, scope, self.config).unwrap()
     }
-}
-
-fn pairs(expected: &[(&str, &str)]) -> Vec<(String, String)> {
-    expected
-        .iter()
-        .map(|(symbol, kind)| ((*symbol).to_owned(), (*kind).to_owned()))
-        .collect()
 }
 
 use AssertionKind::{Custom, Equality, NotNull, Throws, Truthiness};
@@ -353,8 +340,7 @@ fn evidence_problems(manifest: &cupel_core::Manifest) -> Vec<String> {
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = support::registry();
-    let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
+    let manifest = support::check(ID).manifest();
     assert_eq!(
         support::Shape::of(manifest),
         support::Shape {
@@ -737,22 +723,14 @@ fn the_score_is_assertions_per_test_and_clean_tests_pass() {
 
 #[test]
 fn unknown_settings_and_bad_values_are_configuration_errors() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     for (config, key) in [
         (json!({"mock_ratio": 3}), "mock_ratio"),
         (json!({"mock_density_max": -1}), "mock_density_max"),
         (json!({"logic_max": "none"}), "logic_max"),
         (json!({"setup_statements_min": 2.5}), "setup_statements_min"),
     ] {
-        let (ctx, _dir) = support::ctx(Scope::default(), config);
-        let error = check.plan(&ctx, &Scope::default()).unwrap_err();
-        let Error::Config(ConfigError::CheckSetting {
-            key: named, valid, ..
-        }) = error
-        else {
-            panic!("expected a check-setting error, got {error:?}")
-        };
+        let (named, valid) = support::setting_error(check, config);
         assert_eq!(named, key);
         assert_eq!(
             valid,
@@ -768,8 +746,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
 
 #[test]
 fn plans_count_the_symbols_in_scope_at_quick_cost() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let scope = World::of(vec![case("a", 1), case("b", 10)]).scope();
     let (ctx, _dir) = support::ctx(scope.clone(), json!({}));
     assert_eq!(
@@ -830,8 +807,7 @@ fn each_test_in_scope_is_measured_by_its_mock_density() {
 
 #[test]
 fn ratios_combine_over_every_languages_tests_and_counts_add_up() {
-    let registry = support::registry();
-    let check = registry.get(&CheckId::from(ID)).unwrap();
+    let check = support::check(ID);
     let results = [
         language(
             check,
