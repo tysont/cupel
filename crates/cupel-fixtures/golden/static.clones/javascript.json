@@ -1,0 +1,322 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.clones",
+      "oracle": null,
+      "score": {
+        "n": 26,
+        "unit": "pairs",
+        "value": 8.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settleInvoices` and `reconcilePayments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 14,
+          "file": "src/clones_settlement.js",
+          "hash": "sh_62494e6c882826e9",
+          "lang": "javascript",
+          "line": 3,
+          "lines": 12,
+          "nodes": 58,
+          "symbol": "clones_settlement.settleInvoices"
+        },
+        "right": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 27,
+          "file": "src/clones_settlement.js",
+          "hash": "sh_62494e6c882826e9",
+          "lang": "javascript",
+          "line": 16,
+          "lines": 12,
+          "nodes": 58,
+          "symbol": "clones_settlement.reconcilePayments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_d0f3dc",
+      "kind": "clone.pair",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "file": "src/clones_settlement.js",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_62494e6c882826e9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d0f3dc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.settleInvoices",
+        "hash": "sh_62494e6c882826e9",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.settleInvoices` and `clones_settlement.reconcilePayments` (src/clones_settlement.js:16) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `orderLines` and `refundLines` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "jaccard": 0.857,
+        "left": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 43,
+          "file": "src/clones_settlement.js",
+          "hash": "sh_12d53eb58fe5b4c7",
+          "lang": "javascript",
+          "line": 29,
+          "lines": 15,
+          "nodes": 93,
+          "symbol": "clones_settlement.orderLines"
+        },
+        "right": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 60,
+          "file": "src/clones_settlement.js",
+          "hash": "sh_14e8af00fe08c7cd",
+          "lang": "javascript",
+          "line": 45,
+          "lines": 16,
+          "nodes": 99,
+          "symbol": "clones_settlement.refundLines"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_e9afd6",
+      "kind": "clone.pair",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 43,
+        "file": "src/clones_settlement.js",
+        "line": 29
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_12d53eb58fe5b4c7",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e9afd6 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.orderLines",
+        "hash": "sh_12d53eb58fe5b4c7",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.orderLines` and `clones_settlement.refundLines` (src/clones_settlement.js:45) are type-3 clones (jaccard 0.86)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `netTotal` shares with 3 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 4,
+            "file": "src/twins.js",
+            "hash": "sh_b60c24325ed51283",
+            "lang": "javascript",
+            "line": 1,
+            "lines": 4,
+            "nodes": 32,
+            "symbol": "twins.netTotal"
+          },
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 9,
+            "file": "src/twins.js",
+            "hash": "sh_b60c24325ed51283",
+            "lang": "javascript",
+            "line": 6,
+            "lines": 4,
+            "nodes": 32,
+            "symbol": "twins.sumAfterCharge"
+          },
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 14,
+            "file": "src/twins.js",
+            "hash": "sh_b60c24325ed51283",
+            "lang": "javascript",
+            "line": 11,
+            "lines": 4,
+            "nodes": 32,
+            "symbol": "twins.netTotalFloor"
+          },
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 23,
+            "file": "src/twins.js",
+            "hash": "sh_b60c24325ed51283",
+            "lang": "javascript",
+            "line": 16,
+            "lines": 8,
+            "nodes": 32,
+            "symbol": "twins.netTotalLaidOut"
+          }
+        ],
+        "min_jaccard": 1.0,
+        "pairs": 6,
+        "threshold": 0.82
+      },
+      "id": "fnd_440243",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "file": "src/twins.js",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_b60c24325ed51283",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_440243 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotal",
+        "hash": "sh_b60c24325ed51283",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotal` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_d0f3dc",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract what `settleInvoices` and `reconcilePayments` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e9afd6",
+      "kind": "refactor_extract",
+      "priority": 2,
+      "summary": "Extract what `orderLines` and `refundLines` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_440243",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Extract the structure `netTotal` shares with 3 other symbols into one function and call it from each."
+    }
+  ],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 21,
+      "languages": [
+        "javascript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 61
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 3
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 3,
+  "truncated": false
+}

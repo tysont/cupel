@@ -130,6 +130,747 @@
     {
       "sites": [
         {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9373a348e4ae3b48",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "04f333404e5e04bc",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "!invoice.paid",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "94b4e5fa296a4160",
+          "span": {
+            "col": 12,
+            "end_col": 25,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "!(!invoice.paid)"
+          ]
+        },
+        {
+          "from": "owed += invoice.amount;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "97b7a7a3ee48d528",
+          "span": {
+            "col": 13,
+            "end_col": 36,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "376d9d4a71cc7d45",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "open += 1;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "64f1ba7a2c5c47fc",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "a89d1b97ecc8df63",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "069eac9a0378feb0",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "37f127681b27e4b7",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d892d803f042926d",
+          "span": {
+            "col": 39,
+            "end_col": 40,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9373a348e4ae3b48",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "04f333404e5e04bc",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "!payment.paid",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "94b4e5fa296a4160",
+          "span": {
+            "col": 12,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "!(!payment.paid)"
+          ]
+        },
+        {
+          "from": "due += payment.amount;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "97b7a7a3ee48d528",
+          "span": {
+            "col": 13,
+            "end_col": 35,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "376d9d4a71cc7d45",
+          "span": {
+            "col": 17,
+            "end_col": 19,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "pending += 1;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "64f1ba7a2c5c47fc",
+          "span": {
+            "col": 13,
+            "end_col": 26,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "a89d1b97ecc8df63",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "069eac9a0378feb0",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "37f127681b27e4b7",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "85e958ac4f595101",
+          "span": {
+            "col": 43,
+            "end_col": 45,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "04f333404e5e04bc",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "ddf9aa8c7bb26028",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "3b74e4920f35b47c",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "f1ca810916d38f23",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "total += cost;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6d84e1d5391a9525",
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "74f6a2cbf1cfd612",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "count += quantity;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "004f2e2d880785d5",
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "88c7d1970127dcde",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"{quantity} x {price} = {cost}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "adbae211a8433d80",
+          "span": {
+            "col": 9,
+            "end_col": 62,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "c8b5da1e6e0cc353",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9589fc89df2259a1",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"total {total}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "492fbd15d8e6b2a0",
+          "span": {
+            "col": 5,
+            "end_col": 42,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"average {average}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b9f3b575f3d4e222",
+          "span": {
+            "col": 5,
+            "end_col": 46,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 34
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "04f333404e5e04bc",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "ddf9aa8c7bb26028",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "3b74e4920f35b47c",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "f1ca810916d38f23",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "total += cost;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6d84e1d5391a9525",
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "74f6a2cbf1cfd612",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "count += quantity;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "004f2e2d880785d5",
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "88c7d1970127dcde",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"{quantity} x {price} = {cost}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "adbae211a8433d80",
+          "span": {
+            "col": 9,
+            "end_col": 62,
+            "end_line": 58,
+            "line": 58
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines.sort();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "5be059db27d2e092",
+          "span": {
+            "col": 5,
+            "end_col": 18,
+            "end_line": 60,
+            "line": 60
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f305137027519407",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "923e3a342e8afb1d",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"total {total}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b9f3b575f3d4e222",
+          "span": {
+            "col": 5,
+            "end_col": 42,
+            "end_line": 62,
+            "line": 62
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"average {average}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6b8bbc3427b4a1e3",
+          "span": {
+            "col": 5,
+            "end_col": 46,
+            "end_line": 63,
+            "line": 63
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 50
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "amount < 0",
           "operator": "negation",
           "set": "extended",

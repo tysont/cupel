@@ -19,6 +19,7 @@ facts
   project-info      lang.typescript (quick)
 
 checks
+  static.clones      supported
   static.complexity  supported
 
 toolchain

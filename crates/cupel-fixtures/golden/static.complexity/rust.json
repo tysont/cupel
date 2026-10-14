@@ -8,7 +8,7 @@
       "id": "static.complexity",
       "oracle": null,
       "score": {
-        "n": 47,
+        "n": 51,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -233,7 +233,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 11,
+      "files": 12,
       "languages": [
         "rust"
       ],
@@ -241,7 +241,7 @@
       "roots": [
         "."
       ],
-      "symbols": 47
+      "symbols": 51
     },
     "seed": "<seed>",
     "started": "<timestamp>",

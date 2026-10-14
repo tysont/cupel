@@ -36,6 +36,38 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 34
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 50
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/complexity.ts",
         "line": 3
       }

@@ -280,6 +280,7 @@ name = "cupel-checks"
 version = "0.1.0"
 dependencies = [
  "cupel-core",
+ "proptest",
  "schemars",
  "serde",
  "serde_json",

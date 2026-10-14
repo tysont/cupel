@@ -46,6 +46,94 @@
     },
     {
       "body": {
+        "col": 50,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 3
+      },
+      "display": "clones_settlement.settleInvoices",
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "settleInvoices",
+      "namespace": "clones_settlement",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 56,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 16
+      },
+      "display": "clones_settlement.reconcilePayments",
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "reconcilePayments",
+      "namespace": "clones_settlement",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 58,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 29
+      },
+      "display": "clones_settlement.orderLines",
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "orderLines",
+      "namespace": "clones_settlement",
+      "parameters": 3,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 29
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 59,
+        "end_col": 2,
+        "end_line": 60,
+        "line": 45
+      },
+      "display": "clones_settlement.refundLines",
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "refundLines",
+      "namespace": "clones_settlement",
+      "parameters": 3,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 60,
+        "line": 45
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 38,
         "end_col": 2,
         "end_line": 29,

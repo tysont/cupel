@@ -140,6 +140,78 @@
         {
           "cognitive": 1,
           "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        },
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 41
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0
         },

@@ -1,6 +1,1877 @@
 {
   "symbols": [
     {
+      "hash": "sh_ed632916472d61d2",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "slice_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "int64"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "range_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "!"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "selector_expression"
+                                      }
+                                    ],
+                                    "label": "unary_expression"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  }
+                                                ],
+                                                "label": "expression_list"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "+="
+                                              },
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [],
+                                                        "label": "$id"
+                                                      },
+                                                      {
+                                                        "children": [],
+                                                        "label": "$id"
+                                                      }
+                                                    ],
+                                                    "label": "selector_expression"
+                                                  }
+                                                ],
+                                                "label": "expression_list"
+                                              }
+                                            ],
+                                            "label": "assignment_statement"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "++"
+                                              }
+                                            ],
+                                            "label": "inc_statement"
+                                          }
+                                        ],
+                                        "label": "statement_list"
+                                      }
+                                    ],
+                                    "label": "block"
+                                  }
+                                ],
+                                "label": "if_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "for_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "max"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "-"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "binary_expression"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 10
+      }
+    },
+    {
+      "hash": "sh_ed632916472d61d2",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "slice_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "int64"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "range_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "!"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "selector_expression"
+                                      }
+                                    ],
+                                    "label": "unary_expression"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  }
+                                                ],
+                                                "label": "expression_list"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "+="
+                                              },
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [],
+                                                        "label": "$id"
+                                                      },
+                                                      {
+                                                        "children": [],
+                                                        "label": "$id"
+                                                      }
+                                                    ],
+                                                    "label": "selector_expression"
+                                                  }
+                                                ],
+                                                "label": "expression_list"
+                                              }
+                                            ],
+                                            "label": "assignment_statement"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "++"
+                                              }
+                                            ],
+                                            "label": "inc_statement"
+                                          }
+                                        ],
+                                        "label": "statement_list"
+                                      }
+                                    ],
+                                    "label": "block"
+                                  }
+                                ],
+                                "label": "if_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "for_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "max"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "-"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "binary_expression"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 23
+      }
+    },
+    {
+      "hash": "sh_7ebe219b8477cdb1",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "slice_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "slice_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "slice_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "make"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "slice_type"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "len"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "argument_list"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "int64"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "int64"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "range_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "*"
+                                              },
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  },
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  }
+                                                ],
+                                                "label": "index_expression"
+                                              }
+                                            ],
+                                            "label": "binary_expression"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "-"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "binary_expression"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "short_var_declaration"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "+="
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "assignment_statement"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "+="
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "assignment_statement"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "append"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              }
+                                            ],
+                                            "label": "argument_list"
+                                          }
+                                        ],
+                                        "label": "call_expression"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "assignment_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "for_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "/"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "max"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "argument_list"
+                                  }
+                                ],
+                                "label": "call_expression"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "append"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "assignment_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "append"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "assignment_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 36
+      }
+    },
+    {
+      "hash": "sh_ca97b0cf7974f0c7",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "slice_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "slice_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "slice_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "make"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "slice_type"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "len"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "argument_list"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "int64"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "int64"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "range_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "*"
+                                              },
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  },
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  }
+                                                ],
+                                                "label": "index_expression"
+                                              }
+                                            ],
+                                            "label": "binary_expression"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "-"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "binary_expression"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "short_var_declaration"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "+="
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "assignment_statement"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "+="
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "assignment_statement"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "append"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              }
+                                            ],
+                                            "label": "argument_list"
+                                          }
+                                        ],
+                                        "label": "call_expression"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "assignment_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "for_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "append"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "assignment_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "/"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "max"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "argument_list"
+                                  }
+                                ],
+                                "label": "call_expression"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "append"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "assignment_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "append"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "assignment_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 52
+      }
+    },
+    {
       "hash": "sh_984cc16609d6109f",
       "root": {
         "children": [
