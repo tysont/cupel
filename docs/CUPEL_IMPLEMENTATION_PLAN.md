@@ -828,7 +828,7 @@ P3 fans out to parallel worktrees, each adding a check or a producer. Before it 
 
 #### P3.3 Fact: `PerTestMap` — per-test coverage and `tests --impacted`
 
-**Status:** in progress (2026-10-14) · [ADR-006](adr/CUPEL_DECISION_006.md) · [ADR-077](adr/CUPEL_DECISION_077.md)
+**Status:** complete (2026-10-14, ab8f054) · [ADR-006](adr/CUPEL_DECISION_006.md) · [ADR-077](adr/CUPEL_DECISION_077.md)
 
 - `PerTestMap` producers: nextest + llvm-cov per-test profiles (Rust), `go test -coverprofile -run '^TestX$'` per test (Go), pytest-cov `--cov-context=test` (Python). None registered for `ecma` — `describe matrix` shows `PerTestMap`-needing behavior as unsupported for JS/TS, and `tests --impacted` falls back to `ModuleGraph` impact with `per_test_map: false` echoed. Write **ADR-006**.
 - Inverted index `line → tests`; `tests --impacted` returns `{id, file, reason}` plus a ready-to-run `command` per runner; says when it fell back.
