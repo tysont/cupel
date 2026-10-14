@@ -8490,6 +8490,166 @@
       }
     },
     {
+      "hash": "sh_2e567cc3cd3ae4b8",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [],
+            "label": "=>"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "array_pattern"
+                  },
+                  {
+                    "children": [],
+                    "label": "of"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "array"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "array"
+                      }
+                    ],
+                    "label": "array"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "expect"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "add"
+                                              },
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  },
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  }
+                                                ],
+                                                "label": "arguments"
+                                              }
+                                            ],
+                                            "label": "call_expression"
+                                          }
+                                        ],
+                                        "label": "arguments"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "toBe"
+                                  }
+                                ],
+                                "label": "member_expression"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "arguments"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      }
+                    ],
+                    "label": "statement_block"
+                  }
+                ],
+                "label": "for_in_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "arrow_function"
+      },
+      "symbol": {
+        "col": 38,
+        "file": "test/math.quality.test.js",
+        "line": 35
+      }
+    },
+    {
       "hash": "sh_ae506c0e3aac27f9",
       "root": {
         "children": [
@@ -8725,7 +8885,7 @@
       "symbol": {
         "col": 31,
         "file": "test/math.quality.test.js",
-        "line": 35
+        "line": 41
       }
     },
     {
@@ -8987,7 +9147,7 @@
       "symbol": {
         "col": 32,
         "file": "test/math.quality.test.js",
-        "line": 42
+        "line": 48
       }
     },
     {

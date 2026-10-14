@@ -37,6 +37,12 @@ func TestEveryEntryCountsTowardTheBalance(t *testing.T) {
 	}
 }
 
+func TestComputedEntriesCountTowardTheBalance(t *testing.T) {
+	for cents := int64(100); cents <= 300; cents += 100 {
+		assert.Equal(t, cents, Balance([]int64{cents}))
+	}
+}
+
 func TestDepositsKeepTheOwner(t *testing.T) {
 	account := NewAccount("kim")
 	account.Deposit(100)

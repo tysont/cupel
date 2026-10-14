@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 50,
+        "n": 51,
         "unit": "pairs",
         "value": 17.0
       },
@@ -36,7 +36,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 74,
+        "n": 75,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -69,7 +69,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 74,
+        "n": 75,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -102,18 +102,18 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 12,
+      "findings": 11,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 1.0909090909090908,
+        "assertion_density": 1.0869565217391304,
         "no_assertion": 2.0,
-        "weak_ratio": 0.4166666666666667
+        "weak_ratio": 0.4
       },
       "oracle": null,
       "score": {
-        "n": 22,
+        "n": 23,
         "unit": "assertion_density",
-        "value": 1.0909090909090908
+        "value": 1.0869565217391304
       },
       "skipped": null,
       "status": "fail",
@@ -803,7 +803,7 @@
         "hints": {},
         "kind": "refactor_extract",
         "priority": 2,
-        "summary": "Split `TestEveryEntryCountsTowardTheBalance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+        "summary": "Split `TestComputedEntriesCountTowardTheBalance` into one test per path, or parametrize it, so the test body neither loops nor branches."
       },
       "check": "tests.quality",
       "confidence": 1.0,
@@ -816,29 +816,30 @@
         "logic": 1,
         "logic_max": 0,
         "loops": 1,
-        "remediation_mode": "simplify"
+        "remediation_mode": "simplify",
+        "tables": 0
       },
-      "id": "fnd_e75000",
+      "id": "fnd_eff639",
       "kind": "test.logic",
       "location": {
         "col": 1,
         "end_col": 2,
-        "end_line": 38,
+        "end_line": 44,
         "file": "ledger_quality_test.go",
-        "line": 34
+        "line": 40
       },
       "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_0ed784f70d12c6ee",
+      "repro": "cupel check --only tests.quality --symbols sh_b2267047de58b174",
       "severity": "warn",
-      "suppress": "cupel suppress fnd_e75000 --reason '…'",
+      "suppress": "cupel suppress fnd_eff639 --reason '…'",
       "suppressed": false,
       "symbol": {
-        "display": "ledger.TestEveryEntryCountsTowardTheBalance",
-        "hash": "sh_0ed784f70d12c6ee",
+        "display": "ledger.TestComputedEntriesCountTowardTheBalance",
+        "hash": "sh_b2267047de58b174",
         "lang": "go"
       },
       "tier": 2,
-      "title": "`ledger.TestEveryEntryCountsTowardTheBalance` contains logic: 1 loop(s) or branch(es) (max 0)"
+      "title": "`ledger.TestComputedEntriesCountTowardTheBalance` contains logic: 1 loop(s) or branch(es) (max 0)"
     },
     {
       "action": {
@@ -853,8 +854,8 @@
       "evidence": {
         "actionability": "mechanical",
         "lines": [
-          40,
-          47
+          46,
+          53
         ],
         "remediation_mode": "extract-fixture",
         "setup_statements_min": 3,
@@ -869,9 +870,9 @@
       "location": {
         "col": 1,
         "end_col": 2,
-        "end_line": 45,
+        "end_line": 51,
         "file": "ledger_quality_test.go",
-        "line": 40
+        "line": 46
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_009a1b16914c5764",
@@ -1049,48 +1050,6 @@
       },
       "tier": 2,
       "title": "`ledger.TestNewAccountsHaveDistinctIDs` asserts only weakly: 1 weak assertion(s), none pinning a value"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "refactor_extract",
-        "priority": 2,
-        "summary": "Split `TestClassify` into one test per path, or parametrize it, so the test body neither loops nor branches."
-      },
-      "check": "tests.quality",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "actionability": "guided",
-        "alternatives": 0,
-        "branches": 1,
-        "guards": 1,
-        "logic": 1,
-        "logic_max": 0,
-        "loops": 1,
-        "remediation_mode": "simplify"
-      },
-      "id": "fnd_8afa88",
-      "kind": "test.logic",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 64,
-        "file": "ledger_test.go",
-        "line": 48
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_5f625545c5fc2a8d",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_8afa88 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "ledger.TestClassify",
-        "hash": "sh_5f625545c5fc2a8d",
-        "lang": "go"
-      },
-      "tier": 2,
-      "title": "`ledger.TestClassify` contains logic: 1 loop(s) or branch(es) (max 0)"
     },
     {
       "action": {
@@ -1308,10 +1267,10 @@
     },
     {
       "command": null,
-      "finding": "fnd_e75000",
+      "finding": "fnd_eff639",
       "kind": "refactor_extract",
       "priority": 4,
-      "summary": "Split `TestEveryEntryCountsTowardTheBalance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      "summary": "Split `TestComputedEntriesCountTowardTheBalance` into one test per path, or parametrize it, so the test body neither loops nor branches."
     },
     {
       "command": null,
@@ -1350,10 +1309,10 @@
     },
     {
       "command": null,
-      "finding": "fnd_8afa88",
-      "kind": "refactor_extract",
+      "finding": "fnd_e7d0af",
+      "kind": "strengthen_assertion",
       "priority": 10,
-      "summary": "Split `TestClassify` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      "summary": "Replace the truthiness, presence, or inequality checks in `TestStatementIsMailed` with an assertion that pins the expected value."
     }
   ],
   "plan": null,
@@ -1596,7 +1555,7 @@
             "value": 3.0
           }
         ],
-        "measured": 74,
+        "measured": 75,
         "metric": "cyclomatic",
         "per": "symbol",
         "summary": "Cyclomatic complexity per function."
@@ -1765,7 +1724,7 @@
             "value": 3.0
           }
         ],
-        "measured": 74,
+        "measured": 75,
         "metric": "cognitive",
         "per": "symbol",
         "summary": "Cognitive complexity per function."
@@ -2196,6 +2155,22 @@
             "lang": "go",
             "rank": 6,
             "target": {
+              "display": "ledger.TestComputedEntriesCountTowardTheBalance",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 44,
+                "file": "ledger_quality_test.go",
+                "line": 40
+              },
+              "symbol": "sh_b2267047de58b174"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "go",
+            "rank": 7,
+            "target": {
               "display": "ledger.TestDepositAddsToTheBalance",
               "location": {
                 "col": 1,
@@ -2210,15 +2185,15 @@
           },
           {
             "lang": "go",
-            "rank": 7,
+            "rank": 8,
             "target": {
               "display": "ledger.TestDepositsAccumulate",
               "location": {
                 "col": 1,
                 "end_col": 2,
-                "end_line": 53,
+                "end_line": 59,
                 "file": "ledger_quality_test.go",
-                "line": 47
+                "line": 53
               },
               "symbol": "sh_64f25c365ab1b44d"
             },
@@ -2226,15 +2201,15 @@
           },
           {
             "lang": "go",
-            "rank": 8,
+            "rank": 9,
             "target": {
               "display": "ledger.TestDepositsKeepTheOwner",
               "location": {
                 "col": 1,
                 "end_col": 2,
-                "end_line": 45,
+                "end_line": 51,
                 "file": "ledger_quality_test.go",
-                "line": 40
+                "line": 46
               },
               "symbol": "sh_009a1b16914c5764"
             },
@@ -2242,7 +2217,7 @@
           },
           {
             "lang": "go",
-            "rank": 9,
+            "rank": 10,
             "target": {
               "display": "ledger.TestDiscountSnapshot",
               "location": {
@@ -2255,25 +2230,9 @@
               "symbol": "sh_ed30b775bf36058f"
             },
             "value": 0.0
-          },
-          {
-            "lang": "go",
-            "rank": 10,
-            "target": {
-              "display": "ledger.TestEveryEntryCountsTowardTheBalance",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 38,
-                "file": "ledger_quality_test.go",
-                "line": 34
-              },
-              "symbol": "sh_0ed784f70d12c6ee"
-            },
-            "value": 0.0
           }
         ],
-        "measured": 22,
+        "measured": 23,
         "metric": "mock_density",
         "per": "symbol",
         "summary": "Test doubles per test as a percentage of its doubles plus assertions."
@@ -2333,7 +2292,7 @@
       "roots": [
         "."
       ],
-      "symbols": 74
+      "symbols": 75
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -2345,13 +2304,13 @@
     "findings": {
       "fail": 0,
       "info": 1,
-      "warn": 24
+      "warn": 23
     },
     "gate": null,
     "new": 0,
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 25,
+  "total_findings": 24,
   "truncated": false
 }

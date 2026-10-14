@@ -34,6 +34,11 @@ def test_every_entry_counts_toward_the_balance():
         assert balance([cents]) == cents
 
 
+def test_computed_entries_count_toward_the_balance():
+    for cents in range(100, 400, 100):
+        assert balance([cents]) == cents
+
+
 def test_deposits_keep_the_owner():
     account = Account("kim")
     account.deposit(100)

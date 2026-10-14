@@ -30,3 +30,17 @@
   (return_statement)
   (raise_statement)
 ] @decision.early-return
+
+; Table-driven loops: over a list or tuple written in place, or over a name assigned one
+; earlier in the same block.
+(for_statement
+  right: [(list) (tuple)]) @loop.table
+
+(_
+  (expression_statement
+    (assignment
+      left: (identifier) @_table
+      right: [(list) (tuple)]))
+  (for_statement
+    right: (identifier) @_cases) @loop.table
+  (#eq? @_table @_cases))

@@ -4562,75 +4562,75 @@
     {
       "sites": [
         {
-          "from": "account.deposit(100);",
-          "operator": "statement-deletion",
-          "set": "extended",
-          "site_hash": "4f2a10b82fd2b1e6",
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "df2d0216781fdeba",
           "span": {
-            "col": 5,
-            "end_col": 26,
-            "end_line": 45,
-            "line": 45
+            "col": 19,
+            "end_col": 20,
+            "end_line": 44,
+            "line": 44
           },
           "to": [
-            ""
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "350cd7ebc2f333c5",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "dc75c192427feaea",
+          "span": {
+            "col": 36,
+            "end_col": 37,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "/"
           ]
         },
         {
           "from": "100",
           "operator": "constant",
           "set": "extended",
-          "site_hash": "08b5bd7ab4eb7e63",
+          "site_hash": "d2d9271750bbfa04",
           "span": {
-            "col": 21,
-            "end_col": 24,
+            "col": 38,
+            "end_col": 41,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assert_eq!(balance(&[cents]), cents);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "47755e7b1ed9ca37",
+          "span": {
+            "col": 9,
+            "end_col": 46,
             "end_line": 45,
             "line": 45
-          },
-          "to": [
-            "0"
-          ]
-        },
-        {
-          "from": "account.deposit(50);",
-          "operator": "statement-deletion",
-          "set": "extended",
-          "site_hash": "e039051e9c004738",
-          "span": {
-            "col": 5,
-            "end_col": 25,
-            "end_line": 46,
-            "line": 46
-          },
-          "to": [
-            ""
-          ]
-        },
-        {
-          "from": "50",
-          "operator": "constant",
-          "set": "extended",
-          "site_hash": "aeef2629462b7562",
-          "span": {
-            "col": 21,
-            "end_col": 23,
-            "end_line": 46,
-            "line": 46
-          },
-          "to": [
-            "0"
-          ]
-        },
-        {
-          "from": "assert_eq!(account.to_string(), \"kim (150)\");",
-          "operator": "statement-deletion",
-          "set": "extended",
-          "site_hash": "4e9ba542371c547e",
-          "span": {
-            "col": 5,
-            "end_col": 50,
-            "end_line": 47,
-            "line": 47
           },
           "to": [
             ""
@@ -4646,6 +4646,90 @@
     {
       "sites": [
         {
+          "from": "account.deposit(100);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4f2a10b82fd2b1e6",
+          "span": {
+            "col": 5,
+            "end_col": 26,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "08b5bd7ab4eb7e63",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "account.deposit(50);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e039051e9c004738",
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "aeef2629462b7562",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assert_eq!(account.to_string(), \"kim (150)\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4e9ba542371c547e",
+          "span": {
+            "col": 5,
+            "end_col": 50,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 50
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "account.deposit(200);",
           "operator": "statement-deletion",
           "set": "extended",
@@ -4653,8 +4737,8 @@
           "span": {
             "col": 5,
             "end_col": 26,
-            "end_line": 53,
-            "line": 53
+            "end_line": 60,
+            "line": 60
           },
           "to": [
             ""
@@ -4668,8 +4752,8 @@
           "span": {
             "col": 21,
             "end_col": 24,
-            "end_line": 53,
-            "line": 53
+            "end_line": 60,
+            "line": 60
           },
           "to": [
             "0"
@@ -4683,8 +4767,8 @@
           "span": {
             "col": 5,
             "end_col": 25,
-            "end_line": 54,
-            "line": 54
+            "end_line": 61,
+            "line": 61
           },
           "to": [
             ""
@@ -4698,8 +4782,8 @@
           "span": {
             "col": 21,
             "end_col": 23,
-            "end_line": 54,
-            "line": 54
+            "end_line": 61,
+            "line": 61
           },
           "to": [
             "0"
@@ -4713,8 +4797,8 @@
           "span": {
             "col": 5,
             "end_col": 59,
-            "end_line": 56,
-            "line": 56
+            "end_line": 63,
+            "line": 63
           },
           "to": [
             ""
@@ -4724,7 +4808,7 @@
       "symbol": {
         "col": 1,
         "file": "tests/quality_signals.rs",
-        "line": 51
+        "line": 58
       }
     }
   ]

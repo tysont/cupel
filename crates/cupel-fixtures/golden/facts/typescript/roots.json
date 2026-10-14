@@ -267,7 +267,7 @@
     {
       "reason": "test",
       "symbol": {
-        "col": 31,
+        "col": 38,
         "file": "src/math.quality.test.ts",
         "line": 34
       }
@@ -275,9 +275,17 @@
     {
       "reason": "test",
       "symbol": {
+        "col": 31,
+        "file": "src/math.quality.test.ts",
+        "line": 40
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
         "col": 32,
         "file": "src/math.quality.test.ts",
-        "line": 41
+        "line": 47
       }
     },
     {

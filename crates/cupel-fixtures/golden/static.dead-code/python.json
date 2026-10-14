@@ -12,7 +12,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 78,
+        "n": 79,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -876,7 +876,7 @@
       "roots": [
         "."
       ],
-      "symbols": 78
+      "symbols": 79
     },
     "seed": "<seed>",
     "started": "<timestamp>",

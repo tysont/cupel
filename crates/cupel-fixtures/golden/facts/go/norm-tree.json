@@ -8064,6 +8064,244 @@
       }
     },
     {
+      "hash": "sh_b2267047de58b174",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "*"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "qualified_type"
+                      }
+                    ],
+                    "label": "pointer_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "expression_list"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "int64"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$lit"
+                                          }
+                                        ],
+                                        "label": "argument_list"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  }
+                                ],
+                                "label": "expression_list"
+                              }
+                            ],
+                            "label": "short_var_declaration"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "<="
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "expression_list"
+                              },
+                              {
+                                "children": [],
+                                "label": "+="
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "expression_list"
+                              }
+                            ],
+                            "label": "assignment_statement"
+                          }
+                        ],
+                        "label": "for_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "Equal"
+                                          }
+                                        ],
+                                        "label": "selector_expression"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "Balance"
+                                              },
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [
+                                                          {
+                                                            "children": [],
+                                                            "label": "$id"
+                                                          }
+                                                        ],
+                                                        "label": "slice_type"
+                                                      },
+                                                      {
+                                                        "children": [
+                                                          {
+                                                            "children": [
+                                                              {
+                                                                "children": [],
+                                                                "label": "$id"
+                                                              }
+                                                            ],
+                                                            "label": "literal_element"
+                                                          }
+                                                        ],
+                                                        "label": "literal_value"
+                                                      }
+                                                    ],
+                                                    "label": "composite_literal"
+                                                  }
+                                                ],
+                                                "label": "argument_list"
+                                              }
+                                            ],
+                                            "label": "call_expression"
+                                          }
+                                        ],
+                                        "label": "argument_list"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  }
+                                ],
+                                "label": "expression_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "for_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 40
+      }
+    },
+    {
       "hash": "sh_009a1b16914c5764",
       "root": {
         "children": [
@@ -8269,7 +8507,7 @@
       "symbol": {
         "col": 1,
         "file": "ledger_quality_test.go",
-        "line": 40
+        "line": 46
       }
     },
     {
@@ -8515,7 +8753,7 @@
       "symbol": {
         "col": 1,
         "file": "ledger_quality_test.go",
-        "line": 47
+        "line": 53
       }
     },
     {

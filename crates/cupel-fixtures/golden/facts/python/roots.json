@@ -781,7 +781,7 @@
       "symbol": {
         "col": 1,
         "file": "tests/test_quality_signals.py",
-        "line": 44
+        "line": 42
       }
     },
     {
@@ -789,7 +789,23 @@
       "symbol": {
         "col": 1,
         "file": "tests/test_quality_signals.py",
-        "line": 44
+        "line": 42
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 49
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 49
       }
     }
   ]

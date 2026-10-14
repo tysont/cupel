@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 32,
+        "n": 33,
         "unit": "pairs",
         "value": 8.0
       },
@@ -36,7 +36,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 74,
+        "n": 75,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -69,7 +69,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 74,
+        "n": 75,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -105,15 +105,15 @@
       "findings": 14,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 0.925925925925926,
+        "assertion_density": 0.9285714285714286,
         "no_assertion": 2.0,
-        "weak_ratio": 0.32
+        "weak_ratio": 0.3076923076923077
       },
       "oracle": null,
       "score": {
-        "n": 27,
+        "n": 28,
         "unit": "assertion_density",
-        "value": 0.925925925925926
+        "value": 0.9285714285714286
       },
       "skipped": null,
       "status": "fail",
@@ -1887,7 +1887,8 @@
         "logic": 1,
         "logic_max": 0,
         "loops": 1,
-        "remediation_mode": "simplify"
+        "remediation_mode": "simplify",
+        "tables": 0
       },
       "id": "fnd_7ea052",
       "kind": "test.logic",
@@ -1924,8 +1925,8 @@
       "evidence": {
         "actionability": "mechanical",
         "lines": [
-          35,
-          42
+          41,
+          48
         ],
         "remediation_mode": "extract-fixture",
         "setup_statements_min": 3,
@@ -1940,9 +1941,9 @@
       "location": {
         "col": 31,
         "end_col": 4,
-        "end_line": 40,
+        "end_line": 46,
         "file": "test/math.quality.test.js",
-        "line": 35
+        "line": 41
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_ae506c0e3aac27f9",
@@ -2501,7 +2502,7 @@
             "value": 3.0
           }
         ],
-        "measured": 74,
+        "measured": 75,
         "metric": "cyclomatic",
         "per": "symbol",
         "summary": "Cyclomatic complexity per function."
@@ -2670,7 +2671,7 @@
             "value": 3.0
           }
         ],
-        "measured": 74,
+        "measured": 75,
         "metric": "cognitive",
         "per": "symbol",
         "summary": "Cognitive complexity per function."
@@ -3066,7 +3067,7 @@
             "value": 50.0
           }
         ],
-        "measured": 27,
+        "measured": 28,
         "metric": "mock_density",
         "per": "symbol",
         "summary": "Test doubles per test as a percentage of its doubles plus assertions."
@@ -3126,7 +3127,7 @@
       "roots": [
         "."
       ],
-      "symbols": 74
+      "symbols": 75
     },
     "seed": "<seed>",
     "started": "<timestamp>",

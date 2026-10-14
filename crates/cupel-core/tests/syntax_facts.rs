@@ -98,12 +98,13 @@ fn decisions_payload_shape() {
                 nesting: 2,
                 cyclomatic: 1,
                 cognitive: 3,
+                table: false,
             }],
         }],
     });
     assert_eq!(
         json["symbols"][0]["decisions"][0],
-        json!({"kind": "early-return", "nesting": 2, "cyclomatic": 1, "cognitive": 3})
+        json!({"kind": "early-return", "nesting": 2, "cyclomatic": 1, "cognitive": 3, "table": false})
     );
 }
 
@@ -375,7 +376,10 @@ fn each_payload_declares_its_own_kind_and_version() {
     assert_eq!(kinds, FactKind::SYNTACTIC.into_iter().collect());
     for (kind, version) in declared {
         let expected = match kind {
-            FactKind::ProjectInfo | FactKind::Symbols | FactKind::ModuleGraph => 2,
+            FactKind::ProjectInfo
+            | FactKind::Symbols
+            | FactKind::ModuleGraph
+            | FactKind::Decisions => 2,
             _ => 1,
         };
         assert_eq!(version, expected, "{kind}");

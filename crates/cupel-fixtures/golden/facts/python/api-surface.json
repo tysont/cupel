@@ -963,13 +963,25 @@
     {
       "file": "tests/test_quality_signals.py",
       "kind": "function",
+      "path": "tests.test_quality_signals.test_computed_entries_count_toward_the_balance",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 39,
+        "line": 37
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
       "path": "tests.test_quality_signals.test_deposits_keep_the_owner",
       "signature": "()",
       "span": {
         "col": 1,
         "end_col": 34,
-        "end_line": 41,
-        "line": 37
+        "end_line": 46,
+        "line": 42
       }
     },
     {
@@ -980,8 +992,8 @@
       "span": {
         "col": 1,
         "end_col": 24,
-        "end_line": 49,
-        "line": 44
+        "end_line": 54,
+        "line": 49
       }
     }
   ]

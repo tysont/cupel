@@ -477,7 +477,15 @@
       "symbol": {
         "col": 1,
         "file": "tests/quality_signals.rs",
-        "line": 51
+        "line": 50
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 58
       }
     }
   ]

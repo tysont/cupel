@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 use cupel_core::{
     Cancellation, Ctx, Event, Exclude, Fact, ProduceCtx, ProducerRegistry, Scope, Writer,
-    syntax::{ProjectInfo, Span},
+    syntax::{DecisionKind, Decisions, ProjectInfo, Span, Symbols},
 };
 use cupel_lang::{LanguageRegistry, walk_excluding};
 
@@ -84,4 +84,27 @@ pub fn tree(files: &[(&str, &str)]) -> tempfile::TempDir {
 /// `(start line, end line)` of a span.
 pub fn lines(span: Span) -> (u32, u32) {
     (span.line, span.end_line)
+}
+
+/// Whether each loop of the `lang` symbol `display` under `root` iterates over a table of cases
+/// written in place, in document order.
+pub fn loop_tables(lang: &str, root: &Path, display: &str) -> Vec<bool> {
+    let symbols: Symbols = produce(lang, root);
+    let decisions: Decisions = produce(lang, root);
+    let key = symbols
+        .symbols
+        .iter()
+        .find(|s| s.display == display)
+        .unwrap_or_else(|| panic!("no symbol {display}"))
+        .key();
+    decisions
+        .symbols
+        .iter()
+        .find(|entry| entry.symbol == key)
+        .unwrap_or_else(|| panic!("no decisions entry for {display}"))
+        .decisions
+        .iter()
+        .filter(|d| d.kind == DecisionKind::Loop)
+        .map(|d| d.table)
+        .collect()
 }

@@ -3,7 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{fixture, produce, tree};
+use support::{fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, Catch, EarlyReturn, Loop, Ternary};
 
@@ -154,5 +154,23 @@ fn while_loops_exception_groups_guards_and_branches_inside_elif() {
             (Branch, 0, 1, 1),
             (Branch, 1, 1, 1),
         ]
+    );
+}
+
+#[test]
+fn loops_over_literal_lists_and_tuples_are_tables_and_others_are_not() {
+    let dir = tree(&[(
+        "t.py",
+        "def cases():\n\
+         \x20   for x in [1, 2]:\n        f(x)\n\
+         \x20   for x in (1, 2):\n        f(x)\n\
+         \x20   table = [(1, 2)]\n\
+         \x20   for a, b in table:\n        f(a + b)\n\
+         \x20   for x in range(3):\n        f(x)\n\
+         \x20   for x in computed():\n        f(x)\n",
+    )]);
+    assert_eq!(
+        loop_tables("python", dir.path(), "t.cases"),
+        [true, true, true, false, false]
     );
 }

@@ -50,6 +50,7 @@ fn branches(cyclomatic: u32) -> Vec<Decision> {
             nesting: 0,
             cyclomatic: 1,
             cognitive: 1,
+            table: false,
         })
         .collect()
 }

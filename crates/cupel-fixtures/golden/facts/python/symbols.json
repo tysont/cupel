@@ -1675,9 +1675,31 @@
     {
       "body": {
         "col": 5,
-        "end_col": 34,
-        "end_line": 41,
+        "end_col": 41,
+        "end_line": 39,
         "line": 38
+      },
+      "display": "tests.test_quality_signals.test_computed_entries_count_toward_the_balance",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_computed_entries_count_toward_the_balance",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 39,
+        "line": 37
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 34,
+        "end_line": 46,
+        "line": 43
       },
       "display": "tests.test_quality_signals.test_deposits_keep_the_owner",
       "file": "tests/test_quality_signals.py",
@@ -1689,8 +1711,8 @@
       "span": {
         "col": 1,
         "end_col": 34,
-        "end_line": 41,
-        "line": 37
+        "end_line": 46,
+        "line": 42
       },
       "visibility": "public"
     },
@@ -1698,8 +1720,8 @@
       "body": {
         "col": 5,
         "end_col": 24,
-        "end_line": 49,
-        "line": 45
+        "end_line": 54,
+        "line": 50
       },
       "display": "tests.test_quality_signals.test_deposits_accumulate",
       "file": "tests/test_quality_signals.py",
@@ -1711,8 +1733,8 @@
       "span": {
         "col": 1,
         "end_col": 24,
-        "end_line": 49,
-        "line": 44
+        "end_line": 54,
+        "line": 49
       },
       "visibility": "public"
     }

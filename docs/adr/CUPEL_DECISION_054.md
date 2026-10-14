@@ -1,6 +1,6 @@
 # CUPEL_DECISION_054: `tests.quality`: facts, finding rules, thresholds, SCRAP evidence, and score
 
-**Date:** 2026-10-13 · **Status:** accepted · **Phase:** P2.6
+**Date:** 2026-10-13 · **Status:** accepted; the consequence that table-driven Go tests are `test.logic` superseded by [069](CUPEL_DECISION_069.md) · **Phase:** P2.6
 
 ## Context
 

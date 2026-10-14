@@ -7,15 +7,15 @@
       "findings": 12,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 0.9565217391304348,
+        "assertion_density": 0.9583333333333334,
         "no_assertion": 2.0,
-        "weak_ratio": 0.3181818181818182
+        "weak_ratio": 0.30434782608695654
       },
       "oracle": null,
       "score": {
-        "n": 23,
+        "n": 24,
         "unit": "assertion_density",
-        "value": 0.9565217391304348
+        "value": 0.9583333333333334
       },
       "skipped": null,
       "status": "fail",
@@ -215,7 +215,8 @@
         "logic": 1,
         "logic_max": 0,
         "loops": 1,
-        "remediation_mode": "simplify"
+        "remediation_mode": "simplify",
+        "tables": 0
       },
       "id": "fnd_efbc18",
       "kind": "test.logic",
@@ -252,8 +253,8 @@
       "evidence": {
         "actionability": "mechanical",
         "lines": [
-          34,
-          41
+          40,
+          47
         ],
         "remediation_mode": "extract-fixture",
         "setup_statements_min": 3,
@@ -268,9 +269,9 @@
       "location": {
         "col": 31,
         "end_col": 4,
-        "end_line": 39,
+        "end_line": 45,
         "file": "src/math.quality.test.ts",
-        "line": 34
+        "line": 40
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_573b7499537d9850",
@@ -659,7 +660,7 @@
       "roots": [
         "."
       ],
-      "symbols": 71
+      "symbols": 72
     },
     "seed": "<seed>",
     "started": "<timestamp>",

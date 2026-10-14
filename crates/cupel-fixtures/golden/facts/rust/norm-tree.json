@@ -10181,6 +10181,172 @@
       }
     },
     {
+      "hash": "sh_94021b48c3f81f84",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "range_expression"
+                                  }
+                                ],
+                                "label": "parenthesized_expression"
+                              },
+                              {
+                                "children": [],
+                                "label": "map"
+                              }
+                            ],
+                            "label": "field_expression"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "|"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "|"
+                                      }
+                                    ],
+                                    "label": "closure_parameters"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "*"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "binary_expression"
+                                  }
+                                ],
+                                "label": "closure_expression"
+                              }
+                            ],
+                            "label": "arguments"
+                          }
+                        ],
+                        "label": "call_expression"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "assert_eq"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "!"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "&"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              }
+                                            ],
+                                            "label": "token_tree"
+                                          }
+                                        ],
+                                        "label": "token_tree"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "token_tree"
+                                  }
+                                ],
+                                "label": "macro_invocation"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "for_expression"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 43
+      }
+    },
+    {
       "hash": "sh_737418a87a261c83",
       "root": {
         "children": [
@@ -10346,7 +10512,7 @@
       "symbol": {
         "col": 1,
         "file": "tests/quality_signals.rs",
-        "line": 43
+        "line": 50
       }
     },
     {
@@ -10542,7 +10708,7 @@
       "symbol": {
         "col": 1,
         "file": "tests/quality_signals.rs",
-        "line": 51
+        "line": 58
       }
     }
   ]

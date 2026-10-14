@@ -98,7 +98,7 @@ pub enum Visibility {
 pub struct Decisions {
     pub symbols: Vec<SymbolDecisions>,
 }
-fact!(Decisions, Decisions);
+fact!(Decisions, Decisions, 2);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct SymbolDecisions {
@@ -115,6 +115,10 @@ pub struct Decision {
     pub cyclomatic: u32,
     /// Base weight toward cognitive complexity, before nesting.
     pub cognitive: u32,
+    /// A loop over a table of cases written in place: a literal array, vector, slice, list, or
+    /// tuple, iterated directly or through a local bound to one in the same body (ADR-069).
+    /// Always false for other kinds.
+    pub table: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]

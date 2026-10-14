@@ -6485,75 +6485,45 @@
     {
       "sites": [
         {
-          "from": "account = Account(\"kim\")",
-          "operator": "statement-deletion",
-          "set": "extended",
-          "site_hash": "ab6d1d18dc681475",
-          "span": {
-            "col": 5,
-            "end_col": 29,
-            "end_line": 38,
-            "line": 38
-          },
-          "to": [
-            "pass"
-          ]
-        },
-        {
-          "from": "account.deposit(100)",
-          "operator": "statement-deletion",
-          "set": "extended",
-          "site_hash": "0ee4a1b2ac315eb9",
-          "span": {
-            "col": 5,
-            "end_col": 25,
-            "end_line": 39,
-            "line": 39
-          },
-          "to": [
-            "pass"
-          ]
-        },
-        {
           "from": "100",
           "operator": "constant",
           "set": "extended",
-          "site_hash": "a2a7535cc5e7a3f0",
+          "site_hash": "d7e1a13f40d3ead9",
           "span": {
-            "col": 21,
-            "end_col": 24,
-            "end_line": 39,
-            "line": 39
+            "col": 24,
+            "end_col": 27,
+            "end_line": 38,
+            "line": 38
           },
           "to": [
             "0"
           ]
         },
         {
-          "from": "account.deposit(50)",
-          "operator": "statement-deletion",
+          "from": "400",
+          "operator": "constant",
           "set": "extended",
-          "site_hash": "d855c1afdc287254",
+          "site_hash": "95e52db4b560ad33",
           "span": {
-            "col": 5,
-            "end_col": 24,
-            "end_line": 40,
-            "line": 40
+            "col": 29,
+            "end_col": 32,
+            "end_line": 38,
+            "line": 38
           },
           "to": [
-            "pass"
+            "0"
           ]
         },
         {
-          "from": "50",
+          "from": "100",
           "operator": "constant",
           "set": "extended",
-          "site_hash": "feaaf40736975740",
+          "site_hash": "b32581b0fc5a7a9c",
           "span": {
-            "col": 21,
-            "end_col": 23,
-            "end_line": 40,
-            "line": 40
+            "col": 34,
+            "end_col": 37,
+            "end_line": 38,
+            "line": 38
           },
           "to": [
             "0"
@@ -6563,12 +6533,12 @@
           "from": "==",
           "operator": "equality",
           "set": "default",
-          "site_hash": "e9c0f845a1f19eaa",
+          "site_hash": "3460c06fb9151ad2",
           "span": {
-            "col": 26,
-            "end_col": 28,
-            "end_line": 41,
-            "line": 41
+            "col": 33,
+            "end_col": 35,
+            "end_line": 39,
+            "line": 39
           },
           "to": [
             "!="
@@ -6584,6 +6554,105 @@
     {
       "sites": [
         {
+          "from": "account = Account(\"kim\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 29,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "account.deposit(100)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a2a7535cc5e7a3f0",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "account.deposit(50)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "feaaf40736975740",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "e9c0f845a1f19eaa",
+          "span": {
+            "col": 26,
+            "end_col": 28,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 42
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "account = Account(\"lee\")",
           "operator": "statement-deletion",
           "set": "extended",
@@ -6591,8 +6660,8 @@
           "span": {
             "col": 5,
             "end_col": 29,
-            "end_line": 45,
-            "line": 45
+            "end_line": 50,
+            "line": 50
           },
           "to": [
             "pass"
@@ -6606,8 +6675,8 @@
           "span": {
             "col": 5,
             "end_col": 25,
-            "end_line": 46,
-            "line": 46
+            "end_line": 51,
+            "line": 51
           },
           "to": [
             "pass"
@@ -6621,8 +6690,8 @@
           "span": {
             "col": 21,
             "end_col": 24,
-            "end_line": 46,
-            "line": 46
+            "end_line": 51,
+            "line": 51
           },
           "to": [
             "0"
@@ -6636,8 +6705,8 @@
           "span": {
             "col": 5,
             "end_col": 24,
-            "end_line": 47,
-            "line": 47
+            "end_line": 52,
+            "line": 52
           },
           "to": [
             "pass"
@@ -6651,8 +6720,8 @@
           "span": {
             "col": 21,
             "end_col": 23,
-            "end_line": 47,
-            "line": 47
+            "end_line": 52,
+            "line": 52
           },
           "to": [
             "0"
@@ -6666,8 +6735,8 @@
           "span": {
             "col": 5,
             "end_col": 26,
-            "end_line": 48,
-            "line": 48
+            "end_line": 53,
+            "line": 53
           },
           "to": [
             "pass"
@@ -6681,8 +6750,8 @@
           "span": {
             "col": 18,
             "end_col": 20,
-            "end_line": 49,
-            "line": 49
+            "end_line": 54,
+            "line": 54
           },
           "to": [
             "!="
@@ -6696,8 +6765,8 @@
           "span": {
             "col": 21,
             "end_col": 24,
-            "end_line": 49,
-            "line": 49
+            "end_line": 54,
+            "line": 54
           },
           "to": [
             "0"
@@ -6707,7 +6776,7 @@
       "symbol": {
         "col": 1,
         "file": "tests/test_quality_signals.py",
-        "line": 44
+        "line": 49
       }
     }
   ]

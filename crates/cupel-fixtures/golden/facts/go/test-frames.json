@@ -162,10 +162,33 @@
             {
               "kind": "equality",
               "span": {
+                "col": 3,
+                "end_col": 50,
+                "end_line": 42,
+                "line": 42
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestComputedEntriesCountTowardTheBalance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 44,
+            "line": 40
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
                 "col": 2,
                 "end_col": 39,
-                "end_line": 44,
-                "line": 44
+                "end_line": 50,
+                "line": 50
               },
               "strength": "strong"
             }
@@ -176,8 +199,8 @@
           "span": {
             "col": 1,
             "end_col": 2,
-            "end_line": 45,
-            "line": 40
+            "end_line": 51,
+            "line": 46
           }
         },
         {
@@ -187,8 +210,8 @@
               "span": {
                 "col": 2,
                 "end_col": 36,
-                "end_line": 52,
-                "line": 52
+                "end_line": 58,
+                "line": 58
               },
               "strength": "strong"
             }
@@ -199,8 +222,8 @@
           "span": {
             "col": 1,
             "end_col": 2,
-            "end_line": 53,
-            "line": 47
+            "end_line": 59,
+            "line": 53
           }
         }
       ],

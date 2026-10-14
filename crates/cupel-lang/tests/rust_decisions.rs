@@ -3,7 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{fixture, produce, tree};
+use support::{fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, EarlyReturn, Loop};
 
@@ -124,6 +124,37 @@ fn while_loop_let_else_and_wildcard_arms() {
             (Loop, 0, 1, 1),
             (Loop, 0, 1, 1),
             (Case, 1, 1, 1),
+        ]
+    );
+}
+
+#[test]
+fn loops_over_literal_arrays_vectors_and_slices_are_tables_and_others_are_not() {
+    let dir = tree(&[
+        ("Cargo.toml", "[package]\nname = \"t\"\n"),
+        (
+            "src/lib.rs",
+            "pub fn cases() {\n\
+             \x20   for x in [1, 2] { f(x); }\n\
+             \x20   for x in &[1, 2] { f(*x); }\n\
+             \x20   for x in vec![1] { f(x); }\n\
+             \x20   for x in [1, 2].iter() { f(*x); }\n\
+             \x20   let table = [(1, 2)];\n\
+             \x20   for (a, b) in table { f(a + b); }\n\
+             \x20   let more = vec![3];\n\
+             \x20   for x in &more { f(*x); }\n\
+             \x20   for x in 0..3 { f(x); }\n\
+             \x20   for x in computed() { f(x); }\n\
+             \x20   while g() { f(1); }\n\
+             \x20   let late = [1];\n\
+             \x20   for x in late.iter() { f(*x) }\n\
+             }\n",
+        ),
+    ]);
+    assert_eq!(
+        loop_tables("rust", dir.path(), "cases"),
+        [
+            true, true, true, true, true, true, false, false, false, true
         ]
     );
 }

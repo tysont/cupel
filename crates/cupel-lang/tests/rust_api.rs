@@ -167,7 +167,7 @@ fn every_test_case_in_the_fixture_is_a_test_root() {
             checked += 1;
         }
     }
-    assert_eq!(checked, 18);
+    assert_eq!(checked, 19);
 }
 
 #[test]

@@ -40,6 +40,13 @@ fn every_entry_counts_toward_the_balance() {
 }
 
 #[test]
+fn computed_entries_count_toward_the_balance() {
+    for cents in (1..=3).map(|n| n * 100) {
+        assert_eq!(balance(&[cents]), cents);
+    }
+}
+
+#[test]
 fn display_shows_owner_and_balance() {
     let mut account = Account::new("kim");
     account.deposit(100);

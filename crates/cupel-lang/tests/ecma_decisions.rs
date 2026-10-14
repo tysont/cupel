@@ -5,7 +5,7 @@ mod support;
 use std::path::Path;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{fixture, produce, tree};
+use support::{fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, Catch, EarlyReturn, Loop, Ternary};
 
@@ -151,5 +151,24 @@ fn test_callbacks_own_the_decisions_inside_them() {
     assert_eq!(
         decisions_of("typescript", dir.path(), "a.renders"),
         [(Loop, 0, 1, 1)]
+    );
+}
+
+#[test]
+fn for_of_over_literal_arrays_is_a_table_and_other_loops_are_not() {
+    let dir = tree(&[(
+        "t.js",
+        "export function cases() {\n\
+         \x20 for (const x of [1, 2]) { f(x); }\n\
+         \x20 const table = [[1, 2]];\n\
+         \x20 for (const [a, b] of table) { f(a + b); }\n\
+         \x20 for (const x of computed()) { f(x); }\n\
+         \x20 for (let i = 0; i < 3; i++) { f(i); }\n\
+         \x20 for (const k in { a: 1 }) { f(k); }\n\
+         }\n",
+    )]);
+    assert_eq!(
+        loop_tables("javascript", dir.path(), "t.cases"),
+        [true, true, false, false, false]
     );
 }

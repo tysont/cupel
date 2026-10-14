@@ -372,10 +372,33 @@
             {
               "kind": "equality",
               "span": {
+                "col": 7,
+                "end_col": 34,
+                "end_line": 37,
+                "line": 37
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "adds every pair in the table",
+          "skip": null,
+          "span": {
+            "col": 38,
+            "end_col": 4,
+            "end_line": 39,
+            "line": 35
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
                 "col": 5,
                 "end_col": 41,
-                "end_line": 39,
-                "line": 39
+                "end_line": 45,
+                "line": 45
               },
               "strength": "strong"
             }
@@ -386,8 +409,8 @@
           "span": {
             "col": 31,
             "end_col": 4,
-            "end_line": 40,
-            "line": 35
+            "end_line": 46,
+            "line": 41
           }
         },
         {
@@ -397,8 +420,8 @@
               "span": {
                 "col": 5,
                 "end_col": 26,
-                "end_line": 47,
-                "line": 47
+                "end_line": 53,
+                "line": 53
               },
               "strength": "strong"
             }
@@ -409,8 +432,8 @@
           "span": {
             "col": 32,
             "end_col": 4,
-            "end_line": 48,
-            "line": 42
+            "end_line": 54,
+            "line": 48
           }
         }
       ],

@@ -3645,75 +3645,121 @@
     {
       "sites": [
         {
-          "from": "account.Deposit(100)",
-          "operator": "statement-deletion",
+          "from": "100",
+          "operator": "constant",
           "set": "extended",
-          "site_hash": "2f2fc6b1b2f61c4f",
+          "site_hash": "ed9067319ef26099",
           "span": {
-            "col": 2,
-            "end_col": 22,
-            "end_line": 42,
-            "line": 42
+            "col": 21,
+            "end_col": 24,
+            "end_line": 41,
+            "line": 41
           },
           "to": [
-            ""
+            "0"
+          ]
+        },
+        {
+          "from": "cents <= 300",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "5731554acf317517",
+          "span": {
+            "col": 27,
+            "end_col": 39,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "!(cents <= 300)"
+          ]
+        },
+        {
+          "from": "<=",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "65266e0f52c49cc6",
+          "span": {
+            "col": 33,
+            "end_col": 35,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "<"
+          ]
+        },
+        {
+          "from": "300",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a1e5f89aeaa352ce",
+          "span": {
+            "col": 36,
+            "end_col": 39,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "300",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "250c06cbc0c1f0f2",
+          "span": {
+            "col": 36,
+            "end_col": 39,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "300 + 1",
+            "300 - 1"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "f014998e6be8d7f5",
+          "span": {
+            "col": 47,
+            "end_col": 49,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "-="
           ]
         },
         {
           "from": "100",
           "operator": "constant",
           "set": "extended",
-          "site_hash": "fddcfe0010f97c29",
+          "site_hash": "88335e7ed7babab5",
           "span": {
-            "col": 18,
-            "end_col": 21,
+            "col": 50,
+            "end_col": 53,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assert.Equal(t, cents, Balance([]int64{cents}))",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0e6a456d394980c9",
+          "span": {
+            "col": 3,
+            "end_col": 50,
             "end_line": 42,
             "line": 42
-          },
-          "to": [
-            "0"
-          ]
-        },
-        {
-          "from": "account.Deposit(50)",
-          "operator": "statement-deletion",
-          "set": "extended",
-          "site_hash": "b6ba769173f86ae3",
-          "span": {
-            "col": 2,
-            "end_col": 21,
-            "end_line": 43,
-            "line": 43
-          },
-          "to": [
-            ""
-          ]
-        },
-        {
-          "from": "50",
-          "operator": "constant",
-          "set": "extended",
-          "site_hash": "358d184b0d9e6d8b",
-          "span": {
-            "col": 18,
-            "end_col": 20,
-            "end_line": 43,
-            "line": 43
-          },
-          "to": [
-            "0"
-          ]
-        },
-        {
-          "from": "assert.Equal(t, \"kim\", account.Owner)",
-          "operator": "statement-deletion",
-          "set": "extended",
-          "site_hash": "350369abf39f2e01",
-          "span": {
-            "col": 2,
-            "end_col": 39,
-            "end_line": 44,
-            "line": 44
           },
           "to": [
             ""
@@ -3729,6 +3775,90 @@
     {
       "sites": [
         {
+          "from": "account.Deposit(100)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "2f2fc6b1b2f61c4f",
+          "span": {
+            "col": 2,
+            "end_col": 22,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "fddcfe0010f97c29",
+          "span": {
+            "col": 18,
+            "end_col": 21,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "account.Deposit(50)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b6ba769173f86ae3",
+          "span": {
+            "col": 2,
+            "end_col": 21,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "358d184b0d9e6d8b",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assert.Equal(t, \"kim\", account.Owner)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "350369abf39f2e01",
+          "span": {
+            "col": 2,
+            "end_col": 39,
+            "end_line": 50,
+            "line": 50
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 46
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "account.Deposit(200)",
           "operator": "statement-deletion",
           "set": "extended",
@@ -3736,8 +3866,8 @@
           "span": {
             "col": 2,
             "end_col": 22,
-            "end_line": 49,
-            "line": 49
+            "end_line": 55,
+            "line": 55
           },
           "to": [
             ""
@@ -3751,8 +3881,8 @@
           "span": {
             "col": 18,
             "end_col": 21,
-            "end_line": 49,
-            "line": 49
+            "end_line": 55,
+            "line": 55
           },
           "to": [
             "0"
@@ -3766,8 +3896,8 @@
           "span": {
             "col": 2,
             "end_col": 21,
-            "end_line": 50,
-            "line": 50
+            "end_line": 56,
+            "line": 56
           },
           "to": [
             ""
@@ -3781,8 +3911,8 @@
           "span": {
             "col": 18,
             "end_col": 20,
-            "end_line": 50,
-            "line": 50
+            "end_line": 56,
+            "line": 56
           },
           "to": [
             "0"
@@ -3796,8 +3926,8 @@
           "span": {
             "col": 2,
             "end_col": 36,
-            "end_line": 52,
-            "line": 52
+            "end_line": 58,
+            "line": 58
           },
           "to": [
             ""
@@ -3811,8 +3941,8 @@
           "span": {
             "col": 24,
             "end_col": 27,
-            "end_line": 52,
-            "line": 52
+            "end_line": 58,
+            "line": 58
           },
           "to": [
             "0"
@@ -3822,7 +3952,7 @@
       "symbol": {
         "col": 1,
         "file": "ledger_quality_test.go",
-        "line": 47
+        "line": 53
       }
     },
     {

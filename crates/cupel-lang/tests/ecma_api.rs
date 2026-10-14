@@ -234,7 +234,7 @@ fn main_exports_tests_and_default_exports_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixtures_is_a_test_root() {
-    for (lang, cases) in [("javascript", 27), ("typescript", 23)] {
+    for (lang, cases) in [("javascript", 28), ("typescript", 24)] {
         let root = fixture(lang);
         let roots: Roots = produce(lang, &root);
         let symbols: Symbols = produce(lang, &root);

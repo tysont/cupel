@@ -103,7 +103,10 @@ struct TestLogic {
     /// Loops, plus alternatives, plus branches beyond the guards.
     logic: u32,
     logic_max: u32,
+    /// Loops other than tables.
     loops: u32,
+    /// Loops over a table of cases written in place: parametrization, not logic (ADR-069).
+    tables: u32,
     /// `if` and `else if` branches.
     branches: u32,
     /// Switch cases, conditional expressions, and exception handlers.
@@ -368,6 +371,7 @@ struct Subject<'a> {
 /// A test's control flow, from its decisions (ADR-054).
 struct LogicCount {
     loops: u32,
+    tables: u32,
     branches: u32,
     alternatives: u32,
     guards: u32,
@@ -382,8 +386,15 @@ impl LogicCount {
                     .filter(|decision| kinds.contains(&decision.kind)),
             )
         };
+        let loops =
+            |table: bool| {
+                count(decisions.iter().filter(|decision| {
+                    decision.kind == DecisionKind::Loop && decision.table == table
+                }))
+            };
         Self {
-            loops: of_kinds(&[DecisionKind::Loop]),
+            loops: loops(false),
+            tables: loops(true),
             branches: of_kinds(&[DecisionKind::Branch]),
             alternatives: of_kinds(&[
                 DecisionKind::Case,
@@ -536,6 +547,7 @@ impl TestsQuality {
                     logic: total,
                     logic_max: limits.logic_max,
                     loops: logic.loops,
+                    tables: logic.tables,
                     branches: logic.branches,
                     alternatives: logic.alternatives,
                     guards: logic.guards,

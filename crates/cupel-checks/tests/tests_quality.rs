@@ -70,6 +70,8 @@ struct Case {
     mocks: u32,
     skipped: bool,
     decisions: Vec<DecisionKind>,
+    /// Loops over tables of cases written in place, after `decisions`.
+    tables: usize,
     body: Vec<NormNode>,
     /// The body's statements sit inside one list node, as Go's do.
     wrapped: bool,
@@ -84,6 +86,7 @@ fn case(name: &'static str, line: u32) -> Case {
         mocks: 0,
         skipped: false,
         decisions: Vec::new(),
+        tables: 0,
         body: Vec::new(),
         wrapped: false,
     }
@@ -107,6 +110,11 @@ impl Case {
 
     fn deciding(mut self, decisions: &[DecisionKind]) -> Self {
         self.decisions = decisions.to_vec();
+        self
+    }
+
+    fn iterating_tables(mut self, tables: usize) -> Self {
+        self.tables = tables;
         self
     }
 
@@ -240,11 +248,14 @@ impl World {
                             decisions: case
                                 .decisions
                                 .iter()
-                                .map(|kind| Decision {
-                                    kind: *kind,
+                                .map(|kind| (*kind, false))
+                                .chain((0..case.tables).map(|_| (DecisionKind::Loop, true)))
+                                .map(|(kind, table)| Decision {
+                                    kind,
                                     nesting: 0,
                                     cyclomatic: 1,
                                     cognitive: 1,
+                                    table,
                                 })
                                 .collect(),
                         })
@@ -555,6 +566,11 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
         case("branches_beyond_guards", 30).deciding(&[Branch, Branch]),
         case("alternatives", 40).deciding(&[Switch, Ternary, Catch]),
         case("operators_and_returns", 50).deciding(&[BooleanOp, EarlyReturn]),
+        // `for (input, want) in [(1, 2), (3, 4)] { assert_eq!(…) }`: a table of cases.
+        case("table_driven", 60).iterating_tables(2),
+        case("table_with_logic", 70)
+            .iterating_tables(1)
+            .deciding(&[Loop]),
     ])
     .go();
     assert_eq!(
@@ -563,6 +579,7 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
             ("t::loops", "test.logic"),
             ("t::branches_beyond_guards", "test.logic"),
             ("t::alternatives", "test.logic"),
+            ("t::table_with_logic", "test.logic"),
         ])
     );
     assert_eq!(
@@ -573,6 +590,7 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
             "logic": 1,
             "logic_max": 0,
             "loops": 0,
+            "tables": 0,
             "branches": 2,
             "alternatives": 0,
             "guards": 1,
@@ -581,6 +599,15 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
         .unwrap()
     );
     assert_eq!(findings[2].evidence.0["logic"], json!(3));
+    assert_eq!(
+        (
+            &findings[3].evidence.0["logic"],
+            &findings[3].evidence.0["loops"],
+            &findings[3].evidence.0["tables"]
+        ),
+        (&json!(1), &json!(1), &json!(1)),
+        "a table loop is not logic; the other loop is"
+    );
     assert_eq!(findings[0].action.kind, ActionKind::RefactorExtract);
 }
 

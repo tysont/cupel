@@ -5578,25 +5578,10 @@
     {
       "sites": [
         {
-          "from": "0",
+          "from": "1",
           "operator": "zero-one",
           "set": "default",
-          "site_hash": "ce078ceb3937f554",
-          "span": {
-            "col": 30,
-            "end_col": 31,
-            "end_line": 36,
-            "line": 36
-          },
-          "to": [
-            "1"
-          ]
-        },
-        {
-          "from": "2",
-          "operator": "constant",
-          "set": "extended",
-          "site_hash": "4ddc900d388524f9",
+          "site_hash": "e211f2bba13fd533",
           "span": {
             "col": 33,
             "end_col": 34,
@@ -5608,30 +5593,30 @@
           ]
         },
         {
-          "from": "values.push(add(1, 2));",
-          "operator": "statement-deletion",
+          "from": "2",
+          "operator": "constant",
           "set": "extended",
-          "site_hash": "51942f4d91db3ffa",
+          "site_hash": "ad925d47d5ba5a5c",
           "span": {
-            "col": 5,
-            "end_col": 28,
-            "end_line": 37,
-            "line": 37
+            "col": 36,
+            "end_col": 37,
+            "end_line": 36,
+            "line": 36
           },
           "to": [
-            ""
+            "0"
           ]
         },
         {
-          "from": "1",
-          "operator": "zero-one",
-          "set": "default",
-          "site_hash": "4205ea1b56acd94f",
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5aae209b159af17c",
           "span": {
-            "col": 21,
-            "end_col": 22,
-            "end_line": 37,
-            "line": 37
+            "col": 39,
+            "end_col": 40,
+            "end_line": 36,
+            "line": 36
           },
           "to": [
             "0"
@@ -5641,42 +5626,27 @@
           "from": "2",
           "operator": "constant",
           "set": "extended",
-          "site_hash": "1e8ba4206f34cc0f",
+          "site_hash": "d9c8cfd2ef88b5b4",
           "span": {
-            "col": 24,
-            "end_col": 25,
-            "end_line": 37,
-            "line": 37
+            "col": 44,
+            "end_col": 45,
+            "end_line": 36,
+            "line": 36
           },
           "to": [
             "0"
           ]
         },
         {
-          "from": "values.push(add(3, 4));",
-          "operator": "statement-deletion",
-          "set": "extended",
-          "site_hash": "04bc84b137ebeeba",
-          "span": {
-            "col": 5,
-            "end_col": 28,
-            "end_line": 38,
-            "line": 38
-          },
-          "to": [
-            ""
-          ]
-        },
-        {
-          "from": "3",
+          "from": "2",
           "operator": "constant",
           "set": "extended",
-          "site_hash": "b5a54a4782ca2cbb",
+          "site_hash": "61a308bf99b44915",
           "span": {
-            "col": 21,
-            "end_col": 22,
-            "end_line": 38,
-            "line": 38
+            "col": 47,
+            "end_col": 48,
+            "end_line": 36,
+            "line": 36
           },
           "to": [
             "0"
@@ -5686,95 +5656,35 @@
           "from": "4",
           "operator": "constant",
           "set": "extended",
-          "site_hash": "2abec5903400ef7c",
+          "site_hash": "7c6c75abee297c69",
           "span": {
-            "col": 24,
-            "end_col": 25,
-            "end_line": 38,
-            "line": 38
+            "col": 50,
+            "end_col": 51,
+            "end_line": 36,
+            "line": 36
           },
           "to": [
             "0"
           ]
         },
         {
-          "from": "expect(values).toEqual([0, 1, 3, 7]);",
+          "from": "expect(add(a, b)).toBe(sum);",
           "operator": "statement-deletion",
           "set": "extended",
-          "site_hash": "d5f5c684124abbc3",
+          "site_hash": "0a047e98903f2649",
           "span": {
-            "col": 5,
-            "end_col": 42,
-            "end_line": 39,
-            "line": 39
+            "col": 7,
+            "end_col": 35,
+            "end_line": 37,
+            "line": 37
           },
           "to": [
             ""
           ]
-        },
-        {
-          "from": "0",
-          "operator": "zero-one",
-          "set": "default",
-          "site_hash": "fa7ca0068b0d55f6",
-          "span": {
-            "col": 29,
-            "end_col": 30,
-            "end_line": 39,
-            "line": 39
-          },
-          "to": [
-            "1"
-          ]
-        },
-        {
-          "from": "1",
-          "operator": "zero-one",
-          "set": "default",
-          "site_hash": "a42d20208dbd5026",
-          "span": {
-            "col": 32,
-            "end_col": 33,
-            "end_line": 39,
-            "line": 39
-          },
-          "to": [
-            "0"
-          ]
-        },
-        {
-          "from": "3",
-          "operator": "constant",
-          "set": "extended",
-          "site_hash": "8e7f3e57f037543e",
-          "span": {
-            "col": 35,
-            "end_col": 36,
-            "end_line": 39,
-            "line": 39
-          },
-          "to": [
-            "0"
-          ]
-        },
-        {
-          "from": "7",
-          "operator": "constant",
-          "set": "extended",
-          "site_hash": "72179f60c913afed",
-          "span": {
-            "col": 38,
-            "end_col": 39,
-            "end_line": 39,
-            "line": 39
-          },
-          "to": [
-            "0"
-          ]
         }
       ],
       "symbol": {
-        "col": 31,
+        "col": 38,
         "file": "test/math.quality.test.js",
         "line": 35
       }
@@ -5789,8 +5699,8 @@
           "span": {
             "col": 30,
             "end_col": 31,
-            "end_line": 43,
-            "line": 43
+            "end_line": 42,
+            "line": 42
           },
           "to": [
             "1"
@@ -5804,8 +5714,212 @@
           "span": {
             "col": 33,
             "end_col": 34,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "values.push(add(1, 2));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "51942f4d91db3ffa",
+          "span": {
+            "col": 5,
+            "end_col": 28,
             "end_line": 43,
             "line": 43
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4205ea1b56acd94f",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1e8ba4206f34cc0f",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "values.push(add(3, 4));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "04bc84b137ebeeba",
+          "span": {
+            "col": 5,
+            "end_col": 28,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b5a54a4782ca2cbb",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2abec5903400ef7c",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "expect(values).toEqual([0, 1, 3, 7]);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d5f5c684124abbc3",
+          "span": {
+            "col": 5,
+            "end_col": 42,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "fa7ca0068b0d55f6",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "a42d20208dbd5026",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "8e7f3e57f037543e",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "7",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "72179f60c913afed",
+          "span": {
+            "col": 38,
+            "end_col": 39,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 41
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "ce078ceb3937f554",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4ddc900d388524f9",
+          "span": {
+            "col": 33,
+            "end_col": 34,
+            "end_line": 49,
+            "line": 49
           },
           "to": [
             "0"
@@ -5819,8 +5933,8 @@
           "span": {
             "col": 5,
             "end_col": 28,
-            "end_line": 44,
-            "line": 44
+            "end_line": 50,
+            "line": 50
           },
           "to": [
             ""
@@ -5834,8 +5948,8 @@
           "span": {
             "col": 21,
             "end_col": 22,
-            "end_line": 44,
-            "line": 44
+            "end_line": 50,
+            "line": 50
           },
           "to": [
             "0"
@@ -5849,8 +5963,8 @@
           "span": {
             "col": 24,
             "end_col": 25,
-            "end_line": 44,
-            "line": 44
+            "end_line": 50,
+            "line": 50
           },
           "to": [
             "0"
@@ -5864,8 +5978,8 @@
           "span": {
             "col": 5,
             "end_col": 28,
-            "end_line": 45,
-            "line": 45
+            "end_line": 51,
+            "line": 51
           },
           "to": [
             ""
@@ -5879,8 +5993,8 @@
           "span": {
             "col": 21,
             "end_col": 22,
-            "end_line": 45,
-            "line": 45
+            "end_line": 51,
+            "line": 51
           },
           "to": [
             "0"
@@ -5894,8 +6008,8 @@
           "span": {
             "col": 24,
             "end_col": 25,
-            "end_line": 45,
-            "line": 45
+            "end_line": 51,
+            "line": 51
           },
           "to": [
             "0"
@@ -5909,8 +6023,8 @@
           "span": {
             "col": 5,
             "end_col": 27,
-            "end_line": 47,
-            "line": 47
+            "end_line": 53,
+            "line": 53
           },
           "to": [
             ""
@@ -5924,8 +6038,8 @@
           "span": {
             "col": 23,
             "end_col": 25,
-            "end_line": 47,
-            "line": 47
+            "end_line": 53,
+            "line": 53
           },
           "to": [
             "0"
@@ -5935,7 +6049,7 @@
       "symbol": {
         "col": 32,
         "file": "test/math.quality.test.js",
-        "line": 42
+        "line": 48
       }
     },
     {

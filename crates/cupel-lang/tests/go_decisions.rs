@@ -3,7 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{fixture, produce, tree};
+use support::{fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, EarlyReturn, Loop};
 
@@ -117,5 +117,34 @@ fn named_function_literals_own_their_decisions_and_inline_literals_do_not() {
     assert_eq!(
         decisions_of(dir.path(), "f.outer.positive"),
         [(BooleanOp, 0, 1, 1)]
+    );
+}
+
+#[test]
+fn ranges_over_composite_literals_are_tables_and_others_are_not() {
+    let dir = tree(&[
+        ("go.mod", "module t\n"),
+        (
+            "t.go",
+            "package t\n\nfunc Cases() {\n\
+             \tfor _, x := range []int{1, 2} {\n\t\tf(x)\n\t}\n\
+             \tcases := []struct{ in, want int }{{1, 2}}\n\
+             \tfor _, c := range cases {\n\t\tf(c.in)\n\t}\n\
+             \tfor i := 0; i < 3; i++ {\n\t\tf(i)\n\t}\n\
+             \tfor _, x := range computed() {\n\t\tf(x)\n\t}\n\
+             }\n\nfunc f(int) {}\n\nfunc computed() []int { return nil }\n",
+        ),
+    ]);
+    assert_eq!(
+        loop_tables("go", dir.path(), "t.Cases"),
+        [true, true, false, false]
+    );
+}
+
+#[test]
+fn the_fixtures_table_driven_test_ranges_over_a_table() {
+    assert_eq!(
+        loop_tables("go", &fixture("go"), "ledger.TestClassify"),
+        [true]
     );
 }

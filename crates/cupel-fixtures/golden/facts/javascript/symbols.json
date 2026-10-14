@@ -1322,10 +1322,32 @@
     },
     {
       "body": {
+        "col": 44,
+        "end_col": 4,
+        "end_line": 39,
+        "line": 35
+      },
+      "display": "test.math.quality.adds every pair in the table",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "adds every pair in the table",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 38,
+        "end_col": 4,
+        "end_line": 39,
+        "line": 35
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 37,
         "end_col": 4,
-        "end_line": 40,
-        "line": 35
+        "end_line": 46,
+        "line": 41
       },
       "display": "test.math.quality.keeps values in order",
       "file": "test/math.quality.test.js",
@@ -1337,8 +1359,8 @@
       "span": {
         "col": 31,
         "end_col": 4,
-        "end_line": 40,
-        "line": 35
+        "end_line": 46,
+        "line": 41
       },
       "visibility": "private"
     },
@@ -1346,8 +1368,8 @@
       "body": {
         "col": 38,
         "end_col": 4,
-        "end_line": 48,
-        "line": 42
+        "end_line": 54,
+        "line": 48
       },
       "display": "test.math.quality.ends with the last sum",
       "file": "test/math.quality.test.js",
@@ -1359,8 +1381,8 @@
       "span": {
         "col": 32,
         "end_col": 4,
-        "end_line": 48,
-        "line": 42
+        "end_line": 54,
+        "line": 48
       },
       "visibility": "private"
     },

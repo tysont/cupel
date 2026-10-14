@@ -7,15 +7,15 @@
       "findings": 11,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 0.8888888888888888,
+        "assertion_density": 0.8947368421052632,
         "no_assertion": 3.0,
-        "weak_ratio": 0.375
+        "weak_ratio": 0.35294117647058826
       },
       "oracle": null,
       "score": {
-        "n": 18,
+        "n": 19,
         "unit": "assertion_density",
-        "value": 0.8888888888888888
+        "value": 0.8947368421052632
       },
       "skipped": null,
       "status": "fail",
@@ -400,7 +400,7 @@
         "hints": {},
         "kind": "refactor_extract",
         "priority": 2,
-        "summary": "Split `every_entry_counts_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+        "summary": "Split `computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
       },
       "check": "tests.quality",
       "confidence": 1.0,
@@ -413,29 +413,30 @@
         "logic": 1,
         "logic_max": 0,
         "loops": 1,
-        "remediation_mode": "simplify"
+        "remediation_mode": "simplify",
+        "tables": 0
       },
-      "id": "fnd_73dbaa",
+      "id": "fnd_d5638e",
       "kind": "test.logic",
       "location": {
         "col": 1,
         "end_col": 2,
-        "end_line": 40,
+        "end_line": 47,
         "file": "tests/quality_signals.rs",
-        "line": 36
+        "line": 43
       },
       "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_4bc3114da72a23bb",
+      "repro": "cupel check --only tests.quality --symbols sh_94021b48c3f81f84",
       "severity": "warn",
-      "suppress": "cupel suppress fnd_73dbaa --reason '…'",
+      "suppress": "cupel suppress fnd_d5638e --reason '…'",
       "suppressed": false,
       "symbol": {
-        "display": "tests::quality_signals::every_entry_counts_toward_the_balance",
-        "hash": "sh_4bc3114da72a23bb",
+        "display": "tests::quality_signals::computed_entries_count_toward_the_balance",
+        "hash": "sh_94021b48c3f81f84",
         "lang": "rust"
       },
       "tier": 2,
-      "title": "`tests::quality_signals::every_entry_counts_toward_the_balance` contains logic: 1 loop(s) or branch(es) (max 0)"
+      "title": "`tests::quality_signals::computed_entries_count_toward_the_balance` contains logic: 1 loop(s) or branch(es) (max 0)"
     },
     {
       "action": {
@@ -450,8 +451,8 @@
       "evidence": {
         "actionability": "mechanical",
         "lines": [
-          43,
-          51
+          50,
+          58
         ],
         "remediation_mode": "extract-fixture",
         "setup_statements_min": 3,
@@ -466,9 +467,9 @@
       "location": {
         "col": 1,
         "end_col": 2,
-        "end_line": 48,
+        "end_line": 55,
         "file": "tests/quality_signals.rs",
-        "line": 43
+        "line": 50
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_737418a87a261c83",
@@ -550,10 +551,10 @@
     },
     {
       "command": null,
-      "finding": "fnd_73dbaa",
+      "finding": "fnd_d5638e",
       "kind": "refactor_extract",
       "priority": 10,
-      "summary": "Split `every_entry_counts_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      "summary": "Split `computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
     }
   ],
   "plan": null,
@@ -610,7 +611,7 @@
       "roots": [
         "."
       ],
-      "symbols": 66
+      "symbols": 67
     },
     "seed": "<seed>",
     "started": "<timestamp>",

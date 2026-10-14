@@ -451,7 +451,7 @@
     {
       "reason": "test",
       "symbol": {
-        "col": 31,
+        "col": 38,
         "file": "test/math.quality.test.js",
         "line": 35
       }
@@ -459,9 +459,17 @@
     {
       "reason": "test",
       "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 41
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
         "col": 32,
         "file": "test/math.quality.test.js",
-        "line": 42
+        "line": 48
       }
     },
     {

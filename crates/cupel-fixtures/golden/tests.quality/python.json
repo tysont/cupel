@@ -7,15 +7,15 @@
       "findings": 10,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 0.9545454545454546,
+        "assertion_density": 0.9565217391304348,
         "no_assertion": 2.0,
-        "weak_ratio": 0.2857142857142857
+        "weak_ratio": 0.2727272727272727
       },
       "oracle": null,
       "score": {
-        "n": 22,
+        "n": 23,
         "unit": "assertion_density",
-        "value": 0.9545454545454546
+        "value": 0.9565217391304348
       },
       "skipped": null,
       "status": "fail",
@@ -362,7 +362,7 @@
         "hints": {},
         "kind": "refactor_extract",
         "priority": 2,
-        "summary": "Split `test_every_entry_counts_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+        "summary": "Split `test_computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
       },
       "check": "tests.quality",
       "confidence": 1.0,
@@ -375,29 +375,30 @@
         "logic": 1,
         "logic_max": 0,
         "loops": 1,
-        "remediation_mode": "simplify"
+        "remediation_mode": "simplify",
+        "tables": 0
       },
-      "id": "fnd_e515e3",
+      "id": "fnd_30b5d7",
       "kind": "test.logic",
       "location": {
         "col": 1,
         "end_col": 41,
-        "end_line": 34,
+        "end_line": 39,
         "file": "tests/test_quality_signals.py",
-        "line": 32
+        "line": 37
       },
       "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_db2bfd5757053b34",
+      "repro": "cupel check --only tests.quality --symbols sh_6d78cfccff75262d",
       "severity": "warn",
-      "suppress": "cupel suppress fnd_e515e3 --reason '…'",
+      "suppress": "cupel suppress fnd_30b5d7 --reason '…'",
       "suppressed": false,
       "symbol": {
-        "display": "tests.test_quality_signals.test_every_entry_counts_toward_the_balance",
-        "hash": "sh_db2bfd5757053b34",
+        "display": "tests.test_quality_signals.test_computed_entries_count_toward_the_balance",
+        "hash": "sh_6d78cfccff75262d",
         "lang": "python"
       },
       "tier": 2,
-      "title": "`tests.test_quality_signals.test_every_entry_counts_toward_the_balance` contains logic: 1 loop(s) or branch(es) (max 0)"
+      "title": "`tests.test_quality_signals.test_computed_entries_count_toward_the_balance` contains logic: 1 loop(s) or branch(es) (max 0)"
     },
     {
       "action": {
@@ -412,8 +413,8 @@
       "evidence": {
         "actionability": "mechanical",
         "lines": [
-          37,
-          44
+          42,
+          49
         ],
         "remediation_mode": "extract-fixture",
         "setup_statements_min": 3,
@@ -428,9 +429,9 @@
       "location": {
         "col": 1,
         "end_col": 34,
-        "end_line": 41,
+        "end_line": 46,
         "file": "tests/test_quality_signals.py",
-        "line": 37
+        "line": 42
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_7c9a217fc22f1006",
@@ -505,10 +506,10 @@
     },
     {
       "command": null,
-      "finding": "fnd_e515e3",
+      "finding": "fnd_30b5d7",
       "kind": "refactor_extract",
       "priority": 9,
-      "summary": "Split `test_every_entry_counts_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      "summary": "Split `test_computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
     },
     {
       "command": null,
@@ -572,7 +573,7 @@
       "roots": [
         "."
       ],
-      "symbols": 78
+      "symbols": 79
     },
     "seed": "<seed>",
     "started": "<timestamp>",

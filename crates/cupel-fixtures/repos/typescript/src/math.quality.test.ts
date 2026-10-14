@@ -31,6 +31,12 @@ describe("quality", () => {
     }
   });
 
+  it("adds every pair in the table", () => {
+    for (const [a, b, sum] of [[1, 2, 3], [2, 2, 4]]) {
+      expect(add(a, b)).toBe(sum);
+    }
+  });
+
   it("keeps values in order", () => {
     const values: number[] = [...range(0, 2)];
     values.push(add(1, 2));

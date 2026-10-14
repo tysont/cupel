@@ -23,3 +23,41 @@
   (return_expression)
   (try_expression)
 ] @decision.early-return
+
+; Table-driven loops: over an array, a slice of one, `vec![…]`, or `.iter()`/`.into_iter()` of
+; one, written in place or bound by `let` earlier in the same block.
+(for_expression
+  value: [
+    (array_expression)
+    (reference_expression value: (array_expression))
+    (macro_invocation macro: (identifier) @_vec (#eq? @_vec "vec"))
+    (call_expression
+      function: (field_expression
+        value: [
+          (array_expression)
+          (reference_expression value: (array_expression))
+        ]
+        field: (field_identifier) @_iter)
+      (#any-of? @_iter "iter" "into_iter"))
+  ]) @loop.table
+
+(_
+  (let_declaration
+    pattern: (identifier) @_table
+    value: [
+      (array_expression)
+      (reference_expression value: (array_expression))
+      (macro_invocation macro: (identifier) @_vec (#eq? @_vec "vec"))
+    ])
+  (expression_statement
+    (for_expression
+      value: [
+        (identifier) @_cases
+        (reference_expression value: (identifier) @_cases)
+        (call_expression
+          function: (field_expression
+            value: (identifier) @_cases
+            field: (field_identifier) @_iter)
+          (#any-of? @_iter "iter" "into_iter"))
+      ]) @loop.table)
+  (#eq? @_table @_cases))

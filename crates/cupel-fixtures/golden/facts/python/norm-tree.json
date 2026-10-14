@@ -8485,6 +8485,113 @@
       }
     },
     {
+      "hash": "sh_6d78cfccff75262d",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "in"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "range"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "balance"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "list"
+                                      }
+                                    ],
+                                    "label": "argument_list"
+                                  }
+                                ],
+                                "label": "call"
+                              },
+                              {
+                                "children": [],
+                                "label": "=="
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "comparison_operator"
+                          }
+                        ],
+                        "label": "assert_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "for_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      }
+    },
+    {
       "hash": "sh_7c9a217fc22f1006",
       "root": {
         "children": [
@@ -8634,7 +8741,7 @@
       "symbol": {
         "col": 1,
         "file": "tests/test_quality_signals.py",
-        "line": 37
+        "line": 42
       }
     },
     {
@@ -8809,7 +8916,7 @@
       "symbol": {
         "col": 1,
         "file": "tests/test_quality_signals.py",
-        "line": 44
+        "line": 49
       }
     }
   ]

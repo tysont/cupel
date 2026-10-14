@@ -816,10 +816,32 @@
     },
     {
       "body": {
+        "col": 61,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 40
+      },
+      "display": "ledger.TestComputedEntriesCountTowardTheBalance",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestComputedEntriesCountTowardTheBalance",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 40
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 45,
         "end_col": 2,
-        "end_line": 45,
-        "line": 40
+        "end_line": 51,
+        "line": 46
       },
       "display": "ledger.TestDepositsKeepTheOwner",
       "file": "ledger_quality_test.go",
@@ -831,8 +853,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 45,
-        "line": 40
+        "end_line": 51,
+        "line": 46
       },
       "visibility": "public"
     },
@@ -840,8 +862,8 @@
       "body": {
         "col": 43,
         "end_col": 2,
-        "end_line": 53,
-        "line": 47
+        "end_line": 59,
+        "line": 53
       },
       "display": "ledger.TestDepositsAccumulate",
       "file": "ledger_quality_test.go",
@@ -853,8 +875,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 53,
-        "line": 47
+        "end_line": 59,
+        "line": 53
       },
       "visibility": "public"
     },
