@@ -157,6 +157,21 @@ pub struct NormNode {
     pub children: Vec<NormNode>,
 }
 
+impl NormNode {
+    /// A node labelled `label` over `children`.
+    pub fn new(label: &str, children: Vec<NormNode>) -> Self {
+        Self {
+            label: label.to_owned(),
+            children,
+        }
+    }
+
+    /// A node labelled `label` without children.
+    pub fn leaf(label: &str) -> Self {
+        Self::new(label, Vec::new())
+    }
+}
+
 /// Places a mutation operator can apply, per symbol.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct MutationSites {

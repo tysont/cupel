@@ -30,23 +30,12 @@ fn span(line: u32, lines: u32) -> Span {
     }
 }
 
-fn leaf(label: &str) -> NormNode {
-    NormNode {
-        label: label.to_owned(),
-        children: Vec::new(),
-    }
-}
-
-fn node(label: &str, children: Vec<NormNode>) -> NormNode {
-    NormNode {
-        label: label.to_owned(),
-        children,
-    }
-}
-
 /// A statement whose structure is named by `shape`: equal shapes are equal statements.
 fn statement(shape: &str) -> NormNode {
-    node("statement", vec![node(shape, vec![leaf("$id")])])
+    NormNode::new(
+        "statement",
+        vec![NormNode::new(shape, vec![NormNode::leaf("$id")])],
+    )
 }
 
 fn statements(shapes: &[&str]) -> Vec<NormNode> {
@@ -181,11 +170,14 @@ impl Case {
 
     fn tree(&self) -> NormNode {
         let body = if self.wrapped {
-            node("body", vec![node("list", self.body.clone())])
+            NormNode::new("body", vec![NormNode::new("list", self.body.clone())])
         } else {
-            node("body", self.body.clone())
+            NormNode::new("body", self.body.clone())
         };
-        node("function", vec![node("parameters", Vec::new()), body])
+        NormNode::new(
+            "function",
+            vec![NormNode::new("parameters", Vec::new()), body],
+        )
     }
 }
 
@@ -670,9 +662,14 @@ fn statements_wrapped_in_one_list_node_are_compared_and_leaf_lists_are_not_state
     let setup = ["open", "deposit", "deposit", "check"];
     let declaration = |value: &str| {
         // `let mut x = call(…)`: one statement, whose parts include leaf tokens.
-        vec![node(
+        vec![NormNode::new(
             "let",
-            vec![leaf("mut"), leaf("$id"), leaf("="), statement(value)],
+            vec![
+                NormNode::leaf("mut"),
+                NormNode::leaf("$id"),
+                NormNode::leaf("="),
+                statement(value),
+            ],
         )]
     };
     let (_, findings) = Run::of(vec![

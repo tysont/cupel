@@ -257,32 +257,28 @@ mod tests {
 
     use super::*;
 
-    fn node(label: &str, children: Vec<NormNode>) -> NormNode {
-        NormNode {
-            label: label.to_owned(),
-            children,
-        }
-    }
-
-    fn leaf(label: &str) -> NormNode {
-        node(label, Vec::new())
-    }
-
     /// `statements` copies of `$id = $id + $lit` in a block under a function.
     fn function(statements: usize) -> NormNode {
-        let statement = node(
+        let statement = NormNode::new(
             "assignment",
             vec![
-                leaf("$id"),
-                leaf("="),
-                node("binary", vec![leaf("$id"), leaf("+"), leaf("$lit")]),
+                NormNode::leaf("$id"),
+                NormNode::leaf("="),
+                NormNode::new(
+                    "binary",
+                    vec![
+                        NormNode::leaf("$id"),
+                        NormNode::leaf("+"),
+                        NormNode::leaf("$lit"),
+                    ],
+                ),
             ],
         );
-        node(
+        NormNode::new(
             "function",
             vec![
-                node("parameters", vec![leaf("$id")]),
-                node("block", vec![statement; statements]),
+                NormNode::new("parameters", vec![NormNode::leaf("$id")]),
+                NormNode::new("block", vec![statement; statements]),
             ],
         )
     }
@@ -312,7 +308,7 @@ mod tests {
             Fingerprints::of(&function(6))
         );
         let mut edited = function(6);
-        edited.children[1].children[5].children[2].children[1] = leaf("-");
+        edited.children[1].children[5].children[2].children[1] = NormNode::leaf("-");
         let (a, b) = (Fingerprints::of(&function(6)), Fingerprints::of(&edited));
         // The binary and its assignment, which see the edited leaf within two levels, change;
         // the block, three levels up, does not.
@@ -322,8 +318,8 @@ mod tests {
 
     #[test]
     fn labels_and_order_both_matter() {
-        let ab = node("call", vec![leaf("a"), leaf("b")]);
-        let ba = node("call", vec![leaf("b"), leaf("a")]);
+        let ab = NormNode::new("call", vec![NormNode::leaf("a"), NormNode::leaf("b")]);
+        let ba = NormNode::new("call", vec![NormNode::leaf("b"), NormNode::leaf("a")]);
         let (ab, ba) = (Fingerprints::of(&ab), Fingerprints::of(&ba));
         // Each tree has one fingerprint, the call's, and the two have none in common.
         let shared = ab.set.iter().filter(|print| ba.set.contains(print)).count();
@@ -466,8 +462,8 @@ mod tests {
         let label = LABELS[rng.below(LABELS.len())];
         let width = if depth == 0 { 0 } else { 1 + rng.below(3) };
         let mut children: Vec<NormNode> = (0..width).map(|_| random_tree(rng, depth - 1)).collect();
-        children.push(leaf(["$id", "$lit", "+", "<"][rng.below(4)]));
-        node(label, children)
+        children.push(NormNode::leaf(["$id", "$lit", "+", "<"][rng.below(4)]));
+        NormNode::new(label, children)
     }
 
     /// Design §9.2's "approximately linear", for plan P2.4's 10k symbols: about 120 nodes
@@ -482,10 +478,10 @@ mod tests {
         for index in 0..count {
             let tree = if index % 100 == 99 {
                 let mut copy = trees[index - 1].clone();
-                copy.children.push(leaf("$id"));
+                copy.children.push(NormNode::leaf("$id"));
                 copy
             } else {
-                node(
+                NormNode::new(
                     "function",
                     (0..4).map(|_| random_tree(&mut rng, 3)).collect(),
                 )

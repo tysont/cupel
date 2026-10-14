@@ -18,47 +18,49 @@ const ID: &str = "static.clones";
 
 // ---------------------------------------------------------------- trees
 
-fn node(label: &str, children: Vec<NormNode>) -> NormNode {
-    NormNode {
-        label: label.to_owned(),
-        children,
-    }
-}
-
-fn leaf(label: &str) -> NormNode {
-    node(label, Vec::new())
-}
-
 /// `$id = $id <operator> $lit`.
 fn statement(operator: &str) -> NormNode {
-    node(
+    NormNode::new(
         "assignment",
         vec![
-            leaf("$id"),
-            leaf("="),
-            node("binary", vec![leaf("$id"), leaf(operator), leaf("$lit")]),
+            NormNode::leaf("$id"),
+            NormNode::leaf("="),
+            NormNode::new(
+                "binary",
+                vec![
+                    NormNode::leaf("$id"),
+                    NormNode::leaf(operator),
+                    NormNode::leaf("$lit"),
+                ],
+            ),
         ],
     )
 }
 
 /// A call statement, `name($id, $lit)`.
 fn call(name: &str) -> NormNode {
-    node(
+    NormNode::new(
         "call",
         vec![
-            leaf(name),
-            node("arguments", vec![leaf("$id"), leaf("$lit")]),
+            NormNode::leaf(name),
+            NormNode::new(
+                "arguments",
+                vec![NormNode::leaf("$id"), NormNode::leaf("$lit")],
+            ),
         ],
     )
 }
 
 /// A function whose block holds `body`.
 fn function(body: Vec<NormNode>) -> NormNode {
-    node(
+    NormNode::new(
         "function",
         vec![
-            node("parameters", vec![leaf("$id"), leaf("$id")]),
-            node("block", body),
+            NormNode::new(
+                "parameters",
+                vec![NormNode::leaf("$id"), NormNode::leaf("$id")],
+            ),
+            NormNode::new("block", body),
         ],
     )
 }
@@ -70,11 +72,11 @@ fn body(operators: &[&str]) -> Vec<NormNode> {
         .enumerate()
         .map(|(index, operator)| {
             if index % 3 == 2 {
-                node(
+                NormNode::new(
                     "loop",
                     vec![
-                        leaf("$id"),
-                        node("block", vec![statement(operator), call("log")]),
+                        NormNode::leaf("$id"),
+                        NormNode::new("block", vec![statement(operator), call("log")]),
                     ],
                 )
             } else {
@@ -407,11 +409,11 @@ fn distinct_functions_produce_no_findings() {
             "a.x",
             "three",
             40,
-            function(vec![node(
+            function(vec![NormNode::new(
                 "loop",
                 vec![
-                    leaf("$id"),
-                    node("block", (0..8).map(|_| statement("^")).collect()),
+                    NormNode::leaf("$id"),
+                    NormNode::new("block", (0..8).map(|_| statement("^")).collect()),
                 ],
             )]),
         ),
@@ -454,7 +456,12 @@ fn symbols_under_min_lines_or_min_nodes_are_not_compared() {
 #[test]
 fn a_symbol_is_never_a_clone_of_a_symbol_inside_it() {
     let inner = function(body(&OPERATORS));
-    let mut outer = def("a.x", "outer", 1, node("function", vec![inner.clone()]));
+    let mut outer = def(
+        "a.x",
+        "outer",
+        1,
+        NormNode::new("function", vec![inner.clone()]),
+    );
     outer.lines = 30;
     let defs = [outer, def("a.x", "inner", 5, inner)];
     let (_, findings) = run(&defs);

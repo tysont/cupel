@@ -83,10 +83,7 @@ impl Normalizer<'_> {
         if nodes.len() == 1 {
             nodes.remove(0)
         } else {
-            NormNode {
-                label: node.kind().to_owned(),
-                children: nodes,
-            }
+            NormNode::new(node.kind(), nodes)
         }
     }
 
@@ -113,10 +110,7 @@ impl Normalizer<'_> {
         if self.rules.flatten.iter().any(|k| k == kind) {
             return children;
         }
-        vec![NormNode {
-            label: kind.to_owned(),
-            children,
-        }]
+        vec![NormNode::new(kind, children)]
     }
 }
 
@@ -134,15 +128,19 @@ impl Normalizer<'_> {
             let text = self.parsed.text(node);
             let operator = !text.is_empty() && text.chars().all(|c| OPERATOR_CHARS.contains(c));
             let kept = operator || self.rules.operators.iter().any(|o| o == text);
-            return Some(if kept { vec![leaf(text)] } else { Vec::new() });
+            return Some(if kept {
+                vec![NormNode::leaf(text)]
+            } else {
+                Vec::new()
+            });
         }
         if has(&self.rules.identifiers) {
             return Some(vec![match mode {
-                Mode::Callee => leaf(self.parsed.text(node)),
-                Mode::Plain => leaf("$id"),
+                Mode::Callee => NormNode::leaf(self.parsed.text(node)),
+                Mode::Plain => NormNode::leaf("$id"),
             }]);
         }
-        has(&self.rules.literals).then(|| vec![leaf("$lit")])
+        has(&self.rules.literals).then(|| vec![NormNode::leaf("$lit")])
     }
 
     /// How the child in `field` of a node normalized in `mode` normalizes, where `callee` is the
@@ -157,12 +155,5 @@ impl Normalizer<'_> {
             (_, _) if callee.is_some() => Mode::Plain,
             (mode, _) => mode,
         }
-    }
-}
-
-fn leaf(label: &str) -> NormNode {
-    NormNode {
-        label: label.to_owned(),
-        children: Vec::new(),
     }
 }
