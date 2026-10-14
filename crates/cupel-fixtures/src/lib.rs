@@ -8,6 +8,9 @@
 //! The volatile fields, placeholders, and file format are fixed by ADR-003. Fixture
 //! repositories live under `repos/`; [`copy_repo`] copies one into a scratch directory to run in.
 //!
+//! [`Capture`] reads real runner output committed under `captures/<runner>/<case>/`, which
+//! the runner producers' parser tests read instead of running the tools.
+//!
 //! [`conformance`] checks each language's producers against the per-fact construct
 //! inventories in `conformance/` (design §8.3.7); its module docs define the inventory format.
 //!
@@ -32,6 +35,7 @@
 //! `describe/matrix`, `describe/language-<lang>`) keep only what no one check owns; the tests
 //! derive the rest from the registries.
 
+mod captures;
 pub mod conformance;
 pub mod evidence;
 mod golden;
@@ -40,6 +44,7 @@ mod redact;
 mod repos;
 mod run;
 
+pub use captures::Capture;
 pub use golden::{GoldenError, GoldenMode, Goldens, assert_golden, canonical_json};
 pub use redact::redact;
 pub use repos::{copy_repo, repo_path};

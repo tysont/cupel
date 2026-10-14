@@ -16,6 +16,7 @@ serde_json.workspace = true
 toml.workspace = true
 globset.workspace = true
 inventory.workspace = true
+roxmltree.workspace = true
 
 [dev-dependencies]
 cupel-fixtures.workspace = true

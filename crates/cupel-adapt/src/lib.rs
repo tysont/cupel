@@ -58,6 +58,7 @@
 //! Beside the module file, it adds its `mod <name>;` line here and edits nothing else in this
 //! file; [`register`], which the CLI and the matrix harness already call, picks it up.
 
+pub mod report;
 mod rules;
 pub mod toolchain;
 
