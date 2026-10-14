@@ -1,0 +1,3 @@
+# Scores static.crap with coverage counted as 0 until a coverage producer exists (ADR-048).
+[checks."static.crap"]
+no_coverage = true

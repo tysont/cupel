@@ -244,6 +244,72 @@
     },
     {
       "body": {
+        "col": 64,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 6
+      },
+      "display": "crap_scores.overdue",
+      "file": "src/crap_scores.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "overdue",
+      "namespace": "crap_scores",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 74,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 21
+      },
+      "display": "crap_scores.clamp",
+      "file": "src/crap_scores.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "clamp",
+      "namespace": "crap_scores",
+      "parameters": 3,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 32
+      },
+      "display": "crap_scores.toCents",
+      "file": "src/crap_scores.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "toCents",
+      "namespace": "crap_scores",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 66,
         "end_col": 2,
         "end_line": 12,

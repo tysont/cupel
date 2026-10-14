@@ -181,6 +181,42 @@
       }
     },
     {
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "path": "crap_scores::overdue",
+      "signature": "(_: &[i64], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 7
+      }
+    },
+    {
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "path": "crap_scores::clamp",
+      "signature": "(_: i64, _: i64, _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 22
+      }
+    },
+    {
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "path": "crap_scores::to_cents",
+      "signature": "(_: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 35,
+        "line": 33
+      }
+    },
+    {
       "file": "src/decide.rs",
       "kind": "function",
       "path": "decide::classify",

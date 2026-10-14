@@ -265,6 +265,42 @@
       }
     },
     {
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "path": "ledger.crap_scores.overdue",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 21,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "path": "ledger.crap_scores.clamp",
+      "signature": "(_, _, _)",
+      "span": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 30,
+        "line": 24
+      }
+    },
+    {
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "path": "ledger.crap_scores.to_cents",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 35,
+        "line": 33
+      }
+    },
+    {
       "file": "src/ledger/decide.py",
       "kind": "function",
       "path": "ledger.decide.classify",

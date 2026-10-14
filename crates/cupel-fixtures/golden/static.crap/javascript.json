@@ -1,0 +1,675 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 13,
+      "id": "static.crap",
+      "oracle": null,
+      "score": {
+        "n": 42,
+        "unit": "max",
+        "value": 132.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write tests that cover every branch of `label` (fully covered, its CRAP is its cyclomatic complexity, 11), or split it until CRAP is below 30."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 132.0,
+        "cyclomatic": 11,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_5af0cc",
+      "kind": "crap.high",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "src/complexity.js",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_ff4a9f8bd6e187aa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_5af0cc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.label",
+        "hash": "sh_ff4a9f8bd6e187aa",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`complexity.label` has CRAP 132.0 (high at 30): cyclomatic 11 with coverage not measured"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write tests that cover every branch of `settle` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 42.0,
+        "cyclomatic": 6,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_9bea01",
+      "kind": "crap.high",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "file": "src/complexity.js",
+        "line": 31
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_03c11579c730bcfc",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_9bea01 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.settle",
+        "hash": "sh_03c11579c730bcfc",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`complexity.settle` has CRAP 42.0 (high at 30): cyclomatic 6 with coverage not measured"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write tests that cover every branch of `overdue` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 42.0,
+        "cyclomatic": 6,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_88fef8",
+      "kind": "crap.high",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "file": "src/crap_scores.js",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_7e0309747defb185",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_88fef8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "crap_scores.overdue",
+        "hash": "sh_7e0309747defb185",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`crap_scores.overdue` has CRAP 42.0 (high at 30): cyclomatic 6 with coverage not measured"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `clamp` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_7a9f2e",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "src/crap_scores.js",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_12067f8f2e53c980",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_7a9f2e --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "crap_scores.clamp",
+        "hash": "sh_12067f8f2e53c980",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`crap_scores.clamp` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "test/decide.test.js"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write tests that cover every branch of `classify` (fully covered, its CRAP is its cyclomatic complexity, 5), or split it until CRAP is below 30."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 30.0,
+        "cyclomatic": 5,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_f0718d",
+      "kind": "crap.high",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 8,
+        "file": "src/decide.js",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_bb22f24ee5a0e580",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_f0718d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "decide.classify",
+        "hash": "sh_bb22f24ee5a0e580",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`decide.classify` has CRAP 30.0 (high at 30): cyclomatic 5 with coverage not measured"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `firstOverdraft` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_011fdf",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 17,
+        "file": "src/decide.js",
+        "line": 10
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_9f89a2ab078cf588",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_011fdf --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "decide.firstOverdraft",
+        "hash": "sh_9f89a2ab078cf588",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`decide.firstOverdraft` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `label` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_020437",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 28,
+        "file": "src/decide.js",
+        "line": 19
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_9a3e5711075267b2",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_020437 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "decide.label",
+        "hash": "sh_9a3e5711075267b2",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`decide.label` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `parseCents` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_2d32f0",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 39,
+        "file": "src/decide.js",
+        "line": 30
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_304d1d882875a850",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_2d32f0 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "decide.parseCents",
+        "hash": "sh_304d1d882875a850",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`decide.parseCents` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `range` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_143f41",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "file": "src/math.js",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_8418a57e35587a04",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_143f41 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.range",
+        "hash": "sh_8418a57e35587a04",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`math.range` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `discounted` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_1ee506",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 7,
+        "file": "src/pricing.js",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_3daaeda67cda1a62",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_1ee506 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "pricing.discounted",
+        "hash": "sh_3daaeda67cda1a62",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`pricing.discounted` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `tally` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_c419b9",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 20,
+        "file": "src/pricing.js",
+        "line": 9
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_51437bc7ed983221",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_c419b9 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "pricing.tally",
+        "hash": "sh_51437bc7ed983221",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`pricing.tally` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `logTotal` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_2a7cb8",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "file": "src/pricing.js",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_6f7628d838084283",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_2a7cb8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "pricing.logTotal",
+        "hash": "sh_6f7628d838084283",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`pricing.logTotal` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `netTotalCapped` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_26425d",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 36,
+        "file": "src/twins.js",
+        "line": 30
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_e21e57bde0186a3b",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_26425d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalCapped",
+        "hash": "sh_e21e57bde0186a3b",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalCapped` has CRAP 6.0 (watch at 5, high at 30)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_5af0cc",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Write tests that cover every branch of `label` (fully covered, its CRAP is its cyclomatic complexity, 11), or split it until CRAP is below 30."
+    },
+    {
+      "command": null,
+      "finding": "fnd_9bea01",
+      "kind": "write_test",
+      "priority": 2,
+      "summary": "Write tests that cover every branch of `settle` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+    },
+    {
+      "command": null,
+      "finding": "fnd_88fef8",
+      "kind": "write_test",
+      "priority": 3,
+      "summary": "Write tests that cover every branch of `overdue` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+    },
+    {
+      "command": null,
+      "finding": "fnd_f0718d",
+      "kind": "write_test",
+      "priority": 4,
+      "summary": "Write tests that cover every branch of `classify` (fully covered, its CRAP is its cyclomatic complexity, 5), or split it until CRAP is below 30."
+    },
+    {
+      "command": null,
+      "finding": "fnd_7a9f2e",
+      "kind": "review",
+      "priority": 5,
+      "summary": "Review `clamp` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_011fdf",
+      "kind": "review",
+      "priority": 6,
+      "summary": "Review `firstOverdraft` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_020437",
+      "kind": "review",
+      "priority": 7,
+      "summary": "Review `label` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_2d32f0",
+      "kind": "review",
+      "priority": 8,
+      "summary": "Review `parseCents` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_143f41",
+      "kind": "review",
+      "priority": 9,
+      "summary": "Review `range` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_1ee506",
+      "kind": "review",
+      "priority": 10,
+      "summary": "Review `discounted` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    }
+  ],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.crap": {
+            "no_coverage": true
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 21,
+      "languages": [
+        "javascript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 60
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 9,
+      "warn": 4
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 13,
+  "truncated": false
+}

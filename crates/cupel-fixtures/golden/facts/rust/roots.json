@@ -100,6 +100,30 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 7
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 22
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 33
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "src/decide.rs",
         "line": 1
       }

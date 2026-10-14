@@ -85,6 +85,42 @@
       }
     },
     {
+      "file": "crap_scores.go",
+      "kind": "function",
+      "path": "ledger.Overdue",
+      "signature": "(_ []int64, _ int64) int",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 8
+      }
+    },
+    {
+      "file": "crap_scores.go",
+      "kind": "function",
+      "path": "ledger.Clamp",
+      "signature": "(_, _, _ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 23
+      }
+    },
+    {
+      "file": "crap_scores.go",
+      "kind": "function",
+      "path": "ledger.ToCents",
+      "signature": "(_ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 34
+      }
+    },
+    {
       "file": "decide.go",
       "kind": "variable",
       "path": "ledger.ErrEmpty",

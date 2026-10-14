@@ -109,6 +109,42 @@
       }
     },
     {
+      "file": "src/crap_scores.js",
+      "kind": "function",
+      "path": "crap_scores.overdue",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/crap_scores.js",
+      "kind": "function",
+      "path": "crap_scores.clamp",
+      "signature": "(_, _, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 21
+      }
+    },
+    {
+      "file": "src/crap_scores.js",
+      "kind": "function",
+      "path": "crap_scores.toCents",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 32
+      }
+    },
+    {
       "file": "src/decide.js",
       "kind": "function",
       "path": "decide.classify",

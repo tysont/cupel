@@ -156,6 +156,72 @@
     },
     {
       "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 8
+      },
+      "display": "ledger.Overdue",
+      "file": "crap_scores.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Overdue",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 23
+      },
+      "display": "ledger.Clamp",
+      "file": "crap_scores.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Clamp",
+      "namespace": "ledger",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 23
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 34
+      },
+      "display": "ledger.ToCents",
+      "file": "crap_scores.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "ToCents",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 43,
         "end_col": 2,
         "end_line": 20,

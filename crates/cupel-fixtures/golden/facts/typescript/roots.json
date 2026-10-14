@@ -92,6 +92,30 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/crap_scores.ts",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.ts",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.ts",
+        "line": 32
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/decide.ts",
         "line": 5
       }

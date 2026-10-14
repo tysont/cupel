@@ -2237,6 +2237,535 @@
       }
     },
     {
+      "hash": "sh_79fbe60bd9ea14a3",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "slice_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "range_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": ">"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$lit"
+                                          }
+                                        ],
+                                        "label": "binary_expression"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "&&"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": ">"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "binary_expression"
+                                      }
+                                    ],
+                                    "label": "binary_expression"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "++"
+                                              }
+                                            ],
+                                            "label": "inc_statement"
+                                          }
+                                        ],
+                                        "label": "statement_list"
+                                      }
+                                    ],
+                                    "label": "block"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "<"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$lit"
+                                          }
+                                        ],
+                                        "label": "binary_expression"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  },
+                                                  {
+                                                    "children": [],
+                                                    "label": "--"
+                                                  }
+                                                ],
+                                                "label": "dec_statement"
+                                              }
+                                            ],
+                                            "label": "statement_list"
+                                          }
+                                        ],
+                                        "label": "block"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "=="
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "$lit"
+                                              }
+                                            ],
+                                            "label": "binary_expression"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [],
+                                                        "label": "$id"
+                                                      },
+                                                      {
+                                                        "children": [],
+                                                        "label": "--"
+                                                      }
+                                                    ],
+                                                    "label": "dec_statement"
+                                                  }
+                                                ],
+                                                "label": "statement_list"
+                                              }
+                                            ],
+                                            "label": "block"
+                                          }
+                                        ],
+                                        "label": "if_statement"
+                                      }
+                                    ],
+                                    "label": "if_statement"
+                                  }
+                                ],
+                                "label": "if_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "for_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 8
+      }
+    },
+    {
+      "hash": "sh_6ce41581baffa13b",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "<"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "if_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "if_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 23
+      }
+    },
+    {
+      "hash": "sh_55a0e89ca4588e0a",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "*"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 34
+      }
+    },
+    {
       "hash": "sh_45c7fad8783a6f24",
       "root": {
         "children": [

@@ -15,6 +15,7 @@ use serde::Serialize;
 use serde_json::{Map, Value};
 
 use crate::finding::SymbolFinding;
+use crate::metrics::cyclomatic;
 use crate::settings::Limits;
 
 const ID: &str = "static.complexity";
@@ -388,7 +389,7 @@ struct Metrics {
 
 impl Metrics {
     fn of(symbol: &SymbolDef, decisions: &[Decision]) -> Self {
-        let cyclomatic = 1 + decisions.iter().map(|d| d.cyclomatic).sum::<u32>();
+        let cyclomatic = cyclomatic(decisions);
         let cognitive = decisions
             .iter()
             .map(|d| {

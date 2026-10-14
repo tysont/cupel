@@ -57,6 +57,30 @@
       }
     },
     {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 23
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 34
+      }
+    },
+    {
       "reason": "framework-hook",
       "symbol": {
         "col": 1,

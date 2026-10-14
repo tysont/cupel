@@ -1608,6 +1608,560 @@
     {
       "sites": [
         {
+          "from": "count = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "92b0eb4caf9054f4",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "day > 30 and day > grace",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "40a78c5a2cb57198",
+          "span": {
+            "col": 12,
+            "end_col": 36,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "not (day > 30 and day > grace)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "e3f19f72b4bbb21d",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "30",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b4f660d00ceeae95",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "30",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "74ed45cd5ab1e038",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "30 + 1",
+            "30 - 1"
+          ]
+        },
+        {
+          "from": "and",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "183dceb1ee498010",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "or"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "469d633391380e52",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "count += 1",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7732d531f50c8af5",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "edf2660819bc0583",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "793529b7a0df4166",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "day < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "68fb440b22b41c46",
+          "span": {
+            "col": 14,
+            "end_col": 21,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "not (day < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "960804d8f1c072dd",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "dde1296166918abd",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "685b9b10c064e4b2",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "count -= 1",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "82bb74bbdaf24fc4",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "-=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d280b0b1929c40f5",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "+="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "deb636aaa65e1ca3",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "day == 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6857f8836fc10741",
+          "span": {
+            "col": 14,
+            "end_col": 22,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "not (day == 0)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "441e9275bfb45da4",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9b8a7b299ec8aafd",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "count -= 1",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ad8deba386ec099c",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "-=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "fa9c166a4a7d8a79",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "+="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d32faf79135ba642",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "count",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 12,
+            "end_col": 17,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < low",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6f609840becc0e07",
+          "span": {
+            "col": 8,
+            "end_col": 20,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "not (amount < low)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "256fef425a8b2e30",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "low",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "5636905745e471e0",
+          "span": {
+            "col": 16,
+            "end_col": 19,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "amount > high",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "1a3b9b0f015447d1",
+          "span": {
+            "col": 8,
+            "end_col": 21,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "not (amount > high)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8149c24ec10c9d56",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "high",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "0e0fd497898ce5e1",
+          "span": {
+            "col": 16,
+            "end_col": 20,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "amount",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 12,
+            "end_col": 18,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 24
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "units * 100",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f61ac90156b17cdc",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f789293da4809c1e",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "16ee083cd1dff643",
+          "span": {
+            "col": 20,
+            "end_col": 23,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 33
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "balance < 0",
           "operator": "negation",
           "set": "extended",

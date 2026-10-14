@@ -11,6 +11,12 @@
         "support": {
           "status": "supported"
         }
+      },
+      {
+        "check": "static.crap",
+        "support": {
+          "status": "supported"
+        }
       }
     ],
     "extensions": [

@@ -310,6 +310,72 @@
     },
     {
       "body": {
+        "col": 49,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 7
+      },
+      "display": "crap_scores::overdue",
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "overdue",
+      "namespace": "crap_scores",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 55,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 22
+      },
+      "display": "crap_scores::clamp",
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "clamp",
+      "namespace": "crap_scores",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 35,
+        "line": 33
+      },
+      "display": "crap_scores::to_cents",
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "to_cents",
+      "namespace": "crap_scores",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 35,
+        "line": 33
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 58,
         "end_col": 2,
         "end_line": 9,

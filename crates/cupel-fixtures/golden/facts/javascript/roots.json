@@ -76,6 +76,30 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/crap_scores.js",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.js",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.js",
+        "line": 32
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/decide.js",
         "line": 1
       }

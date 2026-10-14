@@ -510,6 +510,72 @@
       "body": {
         "col": 5,
         "end_col": 17,
+        "end_line": 21,
+        "line": 9
+      },
+      "display": "ledger.crap_scores.overdue",
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "overdue",
+      "namespace": "ledger.crap_scores",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 21,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 18,
+        "end_line": 30,
+        "line": 25
+      },
+      "display": "ledger.crap_scores.clamp",
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "clamp",
+      "namespace": "ledger.crap_scores",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 30,
+        "line": 24
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 23,
+        "end_line": 35,
+        "line": 34
+      },
+      "display": "ledger.crap_scores.to_cents",
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "to_cents",
+      "namespace": "ledger.crap_scores",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 35,
+        "line": 33
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 17,
         "end_line": 8,
         "line": 2
       },

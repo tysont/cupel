@@ -8,7 +8,7 @@
       "id": "static.complexity",
       "oracle": null,
       "score": {
-        "n": 54,
+        "n": 57,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -209,7 +209,11 @@
     "config": {
       "effective": {
         "budget": null,
-        "checks": {},
+        "checks": {
+          "static.crap": {
+            "no_coverage": true
+          }
+        },
         "default_branch": null,
         "depth": "standard",
         "format": "json",
@@ -225,6 +229,7 @@
       },
       "sources": [
         "flags",
+        "cupel.toml",
         "defaults"
       ]
     },
@@ -233,7 +238,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 19,
+      "files": 20,
       "languages": [
         "typescript"
       ],
@@ -241,7 +246,7 @@
       "roots": [
         "."
       ],
-      "symbols": 54
+      "symbols": 57
     },
     "seed": "<seed>",
     "started": "<timestamp>",

@@ -6,7 +6,8 @@
   },
   "description": {
     "consumers": [
-      "static.complexity"
+      "static.complexity",
+      "static.crap"
     ],
     "kind": "symbols",
     "producers": [
