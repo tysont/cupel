@@ -537,7 +537,7 @@ fn pairs_without_one_cell(matrix: &Value) -> Vec<String> {
 }
 
 #[test]
-fn describe_matrix_has_a_cell_for_every_registered_check_and_language() {
+fn describe_matrix_has_every_language_and_a_row_per_check() {
     let description = assert_described(&["describe", "matrix"], "matrix");
     let (checks, languages) = (check_ids(), language_ids());
     assert!(!checks.is_empty());
@@ -649,7 +649,7 @@ fn matrix_text_rows(text: &str, title: &str) -> Vec<Vec<String>> {
 }
 
 #[test]
-fn describe_matrix_renders_as_text_with_a_row_per_registered_check() {
+fn describe_matrix_renders_as_text() {
     let outcome = run(["describe", "matrix", "--format", "text"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let matrix = described(&["matrix"]);

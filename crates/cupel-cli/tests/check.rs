@@ -219,10 +219,12 @@ fn a_dry_run_plans_targets_and_the_run_record_and_writes_nothing() {
 fn changed_on_a_clean_tree_passes_with_no_symbols_and_then_sees_edits() {
     let repo = repo_with_code();
     repo.write(".gitignore", ".cupel/\n");
-    if !repo.committed("first") {
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
         eprintln!("SKIPPED: git not installed");
         return;
     }
+    assert!(repo.git(&["add", "--all"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "first"]));
     let clean = repo.run(&["check", "--only", "static.complexity", "--changed"]);
     assert_eq!(clean.code, 0, "{}", clean.stdout);
     let envelope = clean.envelope();
@@ -263,10 +265,12 @@ fn scope_exclude_keeps_nested_projects_out_of_files_roots_languages_and_ranges()
     assert_eq!(tree["run"]["scope"]["files"], json!(2), "{tree:#}");
     assert_eq!(tree["run"]["scope"]["roots"], json!(["."]));
     assert_eq!(tree["run"]["scope"]["languages"], json!(["rust"]));
-    if !repo.committed("first") {
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
         eprintln!("SKIPPED: git not installed");
         return;
     }
+    assert!(repo.git(&["add", "--all"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "first"]));
     repo.write("fixtures/repos/py/app.py", "def g():\n    return 2\n");
     let changed = repo
         .run(&["check", "--only", "static.complexity", "--changed"])

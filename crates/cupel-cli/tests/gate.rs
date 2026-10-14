@@ -117,10 +117,12 @@ fn a_changed_scope_uses_gate_changed_and_an_unchanged_one_passes_it() {
          [gate.tree]\n\"static.complexity.params_max\" = \"< 10\"\n",
     );
     repo.write(".gitignore", ".cupel/\n");
-    if !repo.committed("first") {
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
         eprintln!("SKIPPED: git not installed");
         return;
     }
+    assert!(repo.git(&["add", "--all"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "first"]));
     let unchanged = repo.run(&["check", "--changed"]);
     assert_eq!(unchanged.code, 0, "{}", unchanged.stdout);
     let envelope = unchanged.envelope();
@@ -227,10 +229,12 @@ fn a_weakening_presence_rule_fails_on_a_weakened_change_and_passes_on_a_strength
     repo.write(".gitignore", ".cupel/\n");
     let suite = "def test_adds():\n    assert 1 + 1 == 2\n    assert 2 + 2 == 4\n";
     repo.write("tests/test_math.py", suite);
-    if !repo.committed("suite") {
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
         eprintln!("SKIPPED: git not installed");
         return;
     }
+    assert!(repo.git(&["add", "--all"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "suite"]));
     repo.write(
         "tests/test_math.py",
         "def test_adds():\n    assert 1 + 1 == 2\n",

@@ -225,17 +225,6 @@ impl Repo {
             .is_ok_and(|output| output.status.success())
     }
 
-    /// Makes this repository a git repository on `main` with everything in it committed as
-    /// `message`. False when git is not installed, so the caller can report the skip.
-    pub fn committed(&self, message: &str) -> bool {
-        if !self.git(&["init", "--quiet", "--initial-branch", "main"]) {
-            return false;
-        }
-        assert!(self.git(&["add", "--all"]));
-        assert!(self.git(&["commit", "--quiet", "-m", message]));
-        true
-    }
-
     /// Runs cupel with `--cwd` set to this repository.
     pub fn run(&self, args: &[&str]) -> Outcome {
         self.run_with(&mut cupel(), args)
