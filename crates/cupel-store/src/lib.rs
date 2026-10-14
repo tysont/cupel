@@ -25,13 +25,14 @@
 mod lock;
 mod migrations;
 
+use std::fmt::Write as _;
 use std::path::PathBuf;
 use std::time::Duration;
 
 use cupel_core::syntax::SymbolDef;
 use cupel_core::{
     CheckId, CheckResult, Envelope, FactKind, Finding, FindingId, LangId, Metric, ProducerId,
-    RunId, Suppression, SymbolHash, Writer,
+    RunId, Suppression, SymbolHash, Verb, Writer,
 };
 use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
 
@@ -180,9 +181,15 @@ impl Store {
         if !path.is_file() {
             return Ok(None);
         }
+        // `immutable=1` keeps SQLite from creating the WAL and shared-memory files a read-only
+        // WAL connection otherwise leaves behind; a dry run must change nothing on disk. It reads
+        // the database as last checkpointed, which every closed writer leaves it.
+        let uri = format!("file:{}?immutable=1", uri_path(&path));
         let connection = Connection::open_with_flags(
-            &path,
-            OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
+            uri,
+            OpenFlags::SQLITE_OPEN_READ_ONLY
+                | OpenFlags::SQLITE_OPEN_URI
+                | OpenFlags::SQLITE_OPEN_NO_MUTEX,
         )?;
         connection.busy_timeout(Duration::from_secs(5))?;
         let store = Self {
@@ -272,7 +279,8 @@ impl Store {
 
     /// Stores `envelope`: its run row with the whole envelope, its findings (the first of any
     /// repeated ID), its check results, and each scored check's score as a metric. Recording a
-    /// run ID again replaces everything stored for it.
+    /// run ID again replaces everything stored for it. Runs of `explain`, `baseline`, and
+    /// `suppress` store only their envelope, since their findings repeat earlier runs'.
     pub fn record_run(&self, envelope: &Envelope) -> Result<()> {
         let run = envelope.run.id.to_string();
         let json = serde_json::to_string(envelope)?;
@@ -302,6 +310,9 @@ impl Store {
                     json,
                 ],
             )?;
+            if repeats_other_runs(envelope) {
+                return Ok(());
+            }
             for finding in &envelope.findings {
                 tx.execute(
                     "INSERT OR IGNORE INTO findings
@@ -623,6 +634,33 @@ impl Store {
             })
             .collect()
     }
+}
+
+/// `path` for a `file:` URI: the characters URIs give meaning to are percent-encoded.
+fn uri_path(path: &std::path::Path) -> String {
+    let mut encoded = String::new();
+    for character in path.to_string_lossy().chars() {
+        match character {
+            '%' | '?' | '#' | ' ' => {
+                let mut bytes = [0; 4];
+                for byte in character.encode_utf8(&mut bytes).bytes() {
+                    let _ = write!(encoded, "%{byte:02X}");
+                }
+            }
+            other => encoded.push(other),
+        }
+    }
+    encoded
+}
+
+/// Whether `envelope` is from a verb whose findings and checks repeat those of earlier runs
+/// (`explain`, `baseline`, `suppress`). Its envelope is stored, but indexing its findings would
+/// make it the latest run that produced them (ADR-045 §7).
+fn repeats_other_runs(envelope: &Envelope) -> bool {
+    matches!(
+        envelope.run.verb,
+        Some(Verb::Explain | Verb::Baseline | Verb::Suppress)
+    )
 }
 
 fn insert_metric(

@@ -234,15 +234,50 @@ fn open_existing_reads_but_never_writes() {
     repo.store()
         .record_run(&envelope(&run_id(1), "doctor", 0, &[], &[]))
         .unwrap();
+    let before: Vec<(String, Vec<u8>)> = repo
+        .files()
+        .into_iter()
+        .map(|file| {
+            let bytes = fs::read(repo.root().join(&file)).unwrap();
+            (file, bytes)
+        })
+        .collect();
     let store = Store::open_existing(&repo.writer().recording())
         .unwrap()
         .unwrap();
     assert!(store.run(&run_id(1)).unwrap().is_some());
+    drop(store);
+    let after: Vec<(String, Vec<u8>)> = repo
+        .files()
+        .into_iter()
+        .map(|file| {
+            let bytes = fs::read(repo.root().join(&file)).unwrap();
+            (file, bytes)
+        })
+        .collect();
+    assert_eq!(after, before, "reading changed the store's files");
+    let store = Store::open_existing(&repo.writer().recording())
+        .unwrap()
+        .unwrap();
     assert!(
         store
             .record_run(&envelope(&run_id(2), "doctor", 0, &[], &[]))
             .is_err()
     );
+}
+
+#[test]
+fn a_store_under_a_path_with_uri_characters_opens_read_only() {
+    let repo = Repo::new();
+    let odd = repo.root().join("my repo #1 ?100%");
+    fs::create_dir(&odd).unwrap();
+    let writer = Writer::new(&odd, false).unwrap();
+    Store::open(&writer)
+        .unwrap()
+        .record_run(&envelope(&run_id(1), "doctor", 0, &[], &[]))
+        .unwrap();
+    let store = Store::open_existing(&writer.recording()).unwrap().unwrap();
+    assert!(store.run(&run_id(1)).unwrap().is_some());
 }
 
 #[test]
@@ -306,6 +341,43 @@ fn a_finding_is_read_from_its_latest_run() {
     assert_eq!(found.title, "newest");
     assert_eq!(run, run_id(3));
     assert_eq!(store.finding(&"fnd_ffffff".parse().unwrap()).unwrap(), None);
+}
+
+#[test]
+fn bookkeeping_runs_are_stored_but_their_findings_and_checks_are_not_indexed() {
+    let repo = Repo::new();
+    let store = repo.store();
+    store
+        .record_run(&envelope(
+            &run_id(1),
+            "check",
+            0,
+            &[finding("fnd_00000a", "static.complexity", "produced")],
+            &[check("static.complexity", Some(0.5))],
+        ))
+        .unwrap();
+    for (n, verb) in [(2, "explain"), (3, "baseline"), (4, "suppress")] {
+        store
+            .record_run(&envelope(
+                &run_id(n),
+                verb,
+                0,
+                &[finding("fnd_00000a", "static.complexity", "repeated")],
+                &[check("static.complexity", Some(0.9))],
+            ))
+            .unwrap();
+        assert!(store.run(&run_id(n)).unwrap().is_some(), "{verb}");
+    }
+    let (found, run) = store
+        .finding(&"fnd_00000a".parse().unwrap())
+        .unwrap()
+        .unwrap();
+    assert_eq!((found.title.as_str(), run), ("produced", run_id(1)));
+    let last = store
+        .last_run_for_check(&CheckId::from("static.complexity"))
+        .unwrap()
+        .unwrap();
+    assert_eq!(last.run, run_id(1));
 }
 
 #[test]
