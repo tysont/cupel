@@ -2766,6 +2766,170 @@
       }
     },
     {
+      "hash": "sh_539a6449581debc1",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "slice_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "int64"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "len"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "argument_list"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "dead_export/dead_export.go",
+        "line": 3
+      }
+    },
+    {
+      "hash": "sh_22f5962997734db1",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "/"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "dead_helpers/dead_helpers.go",
+        "line": 3
+      }
+    },
+    {
       "hash": "sh_45c7fad8783a6f24",
       "root": {
         "children": [

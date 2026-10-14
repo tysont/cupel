@@ -2779,6 +2779,105 @@
       }
     },
     {
+      "hash": "sh_ec6af60a92a46155",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "len"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_export.py",
+        "line": 1
+      }
+    },
+    {
+      "hash": "sh_6d1e647020e2ce0c",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "//"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "binary_operator"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_helpers.py",
+        "line": 1
+      }
+    },
+    {
       "hash": "sh_df63a716d8770847",
       "root": {
         "children": [

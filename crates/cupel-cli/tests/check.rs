@@ -82,7 +82,13 @@ fn scope_languages_are_exactly_the_languages_that_saw_files() {
 fn symbols_select_by_name_or_hash_and_repro_commands_reproduce_findings() {
     let repo = repo_with_code();
     let by_name = repo
-        .run(&["check", "--symbols", "wide::wide", "--only", "static"])
+        .run(&[
+            "check",
+            "--symbols",
+            "wide::wide",
+            "--only",
+            "static.complexity",
+        ])
         .envelope();
     assert_eq!(by_name["run"]["scope"]["symbols"], json!(1));
     assert_eq!(kinds(&by_name), ["params.many"]);
@@ -153,7 +159,9 @@ fn thresholds_and_per_language_overrides_come_from_the_config() {
         "cupel.toml",
         "[checks.\"static.complexity\"]\nparams_max = 0\n[checks.\"static.complexity\".lang.rust]\nparams_max = 10\n",
     );
-    let envelope = repo.run(&["check"]).envelope();
+    let envelope = repo
+        .run(&["check", "--only", "static.complexity"])
+        .envelope();
     let files: Vec<&str> = envelope["findings"]
         .as_array()
         .unwrap()
@@ -250,7 +258,7 @@ fn changed_on_a_clean_tree_passes_with_no_symbols_and_then_sees_edits() {
     }
     assert!(git(&repo, &["add", "--all"]));
     assert!(git(&repo, &["commit", "--quiet", "-m", "first"]));
-    let clean = repo.run(&["check", "--changed"]);
+    let clean = repo.run(&["check", "--only", "static.complexity", "--changed"]);
     assert_eq!(clean.code, 0, "{}", clean.stdout);
     let envelope = clean.envelope();
     assert_eq!(envelope["status"], json!("pass"));
@@ -260,7 +268,9 @@ fn changed_on_a_clean_tree_passes_with_no_symbols_and_then_sees_edits() {
     assert!(envelope["run"]["git"]["base"].is_string());
 
     repo.write("src/narrow.rs", WIDE.replace("wide", "narrow").as_str());
-    let edited = repo.run(&["check", "--changed"]).envelope();
+    let edited = repo
+        .run(&["check", "--only", "static.complexity", "--changed"])
+        .envelope();
     assert_eq!(edited["run"]["scope"]["files"], json!(1));
     assert_eq!(kinds(&edited), ["params.many"]);
     assert_eq!(edited["run"]["git"]["dirty"], json!(true));

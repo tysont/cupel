@@ -100,6 +100,14 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/dead_export.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/decide.js",
         "line": 1
       }

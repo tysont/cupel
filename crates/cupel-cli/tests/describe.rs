@@ -362,7 +362,8 @@ fn describe_language_shows_identity_facts_and_check_support() {
         description["checks"],
         json!([
             {"check": "static.complexity", "support": {"status": "supported"}},
-            {"check": "static.crap", "support": {"status": "supported"}}
+            {"check": "static.crap", "support": {"status": "supported"}},
+            {"check": "static.dead-code", "support": {"status": "supported"}}
         ])
     );
 }
@@ -430,7 +431,7 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
     assert_eq!(langs, ["go", "javascript", "python", "rust", "typescript"]);
     assert_eq!(
         description["consumers"],
-        json!(["static.complexity", "static.crap"])
+        json!(["static.complexity", "static.crap", "static.dead-code"])
     );
 }
 
@@ -464,10 +465,11 @@ fn describe_matrix_has_every_language_and_a_row_per_check() {
     );
     assert_eq!(
         description["checks"],
-        json!(["static.complexity", "static.crap"])
+        json!(["static.complexity", "static.crap", "static.dead-code"])
     );
     let cells = description["cells"].as_array().unwrap();
-    assert_eq!(cells.len(), 10);
+    let checks = description["checks"].as_array().unwrap().len();
+    assert_eq!(cells.len(), checks * 5, "one cell per check per language");
     assert!(
         cells
             .iter()

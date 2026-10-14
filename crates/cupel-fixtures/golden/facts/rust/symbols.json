@@ -376,6 +376,50 @@
     },
     {
       "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "dead_export::unused_total",
+      "file": "src/dead_export.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "unused_total",
+      "namespace": "dead_export",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "dead_helpers::forgotten_rate",
+      "file": "src/dead_helpers.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "forgotten_rate",
+      "namespace": "dead_helpers",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 58,
         "end_col": 2,
         "end_line": 9,

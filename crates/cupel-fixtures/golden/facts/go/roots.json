@@ -81,6 +81,14 @@
       }
     },
     {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "dead_export/dead_export.go",
+        "line": 3
+      }
+    },
+    {
       "reason": "framework-hook",
       "symbol": {
         "col": 1,

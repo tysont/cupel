@@ -3199,6 +3199,156 @@
       }
     },
     {
+      "hash": "sh_cae71a2033a9188c",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "&"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "primitive_type"
+                          }
+                        ],
+                        "label": "array_type"
+                      }
+                    ],
+                    "label": "reference_type"
+                  }
+                ],
+                "label": "parameter"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [],
+            "label": "->"
+          },
+          {
+            "children": [],
+            "label": "primitive_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "len"
+                          }
+                        ],
+                        "label": "field_expression"
+                      },
+                      {
+                        "children": [],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  },
+                  {
+                    "children": [],
+                    "label": "primitive_type"
+                  }
+                ],
+                "label": "type_cast_expression"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_export.rs",
+        "line": 1
+      }
+    },
+    {
+      "hash": "sh_a9c0bf9aab4c1361",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "primitive_type"
+                  }
+                ],
+                "label": "parameter"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [],
+            "label": "->"
+          },
+          {
+            "children": [],
+            "label": "primitive_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "/"
+                  },
+                  {
+                    "children": [],
+                    "label": "$lit"
+                  }
+                ],
+                "label": "binary_expression"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_helpers.rs",
+        "line": 1
+      }
+    },
+    {
       "hash": "sh_9af72524d406775c",
       "root": {
         "children": [

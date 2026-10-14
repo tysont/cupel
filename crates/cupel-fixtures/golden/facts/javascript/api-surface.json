@@ -145,6 +145,18 @@
       }
     },
     {
+      "file": "src/dead_export.js",
+      "kind": "function",
+      "path": "dead_export.unusedTotal",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
       "file": "src/decide.js",
       "kind": "function",
       "path": "decide.classify",

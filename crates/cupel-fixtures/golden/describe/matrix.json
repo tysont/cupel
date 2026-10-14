@@ -75,11 +75,47 @@
         "support": {
           "status": "supported"
         }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
       }
     ],
     "checks": [
       "static.complexity",
-      "static.crap"
+      "static.crap",
+      "static.dead-code"
     ],
     "languages": [
       "go",

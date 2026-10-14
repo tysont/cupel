@@ -124,6 +124,14 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "src/dead_export.rs",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "src/decide.rs",
         "line": 1
       }

@@ -8,7 +8,7 @@
       "id": "static.crap",
       "oracle": null,
       "score": {
-        "n": 47,
+        "n": 49,
         "unit": "max",
         "value": 132.0
       },
@@ -953,7 +953,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 14,
+      "files": 16,
       "languages": [
         "python"
       ],
@@ -961,7 +961,7 @@
       "roots": [
         "."
       ],
-      "symbols": 63
+      "symbols": 65
     },
     "seed": "<seed>",
     "started": "<timestamp>",

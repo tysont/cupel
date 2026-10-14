@@ -37,6 +37,7 @@ mod metrics;
 mod settings;
 mod static_complexity;
 mod static_crap;
+mod static_dead_code;
 
 use cupel_core::CheckRegistry;
 
@@ -51,5 +52,8 @@ pub fn register(registry: &mut CheckRegistry) {
         .expect("native check IDs are unique");
     registry
         .register(Box::new(static_crap::StaticCrap::new()))
+        .expect("native check IDs are unique");
+    registry
+        .register(Box::new(static_dead_code::StaticDeadCode::new()))
         .expect("native check IDs are unique");
 }

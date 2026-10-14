@@ -7,7 +7,8 @@
   "description": {
     "consumers": [
       "static.complexity",
-      "static.crap"
+      "static.crap",
+      "static.dead-code"
     ],
     "kind": "symbols",
     "producers": [

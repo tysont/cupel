@@ -261,6 +261,22 @@
       }
     },
     {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/dead_export.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_helpers.ts",
+        "line": 1
+      }
+    },
+    {
       "decisions": [
         {
           "cognitive": 1,

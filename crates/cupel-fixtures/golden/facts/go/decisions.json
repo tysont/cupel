@@ -229,6 +229,22 @@
       }
     },
     {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "dead_export/dead_export.go",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "dead_helpers/dead_helpers.go",
+        "line": 3
+      }
+    },
+    {
       "decisions": [
         {
           "cognitive": 1,

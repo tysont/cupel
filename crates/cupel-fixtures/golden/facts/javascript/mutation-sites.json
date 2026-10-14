@@ -1707,6 +1707,84 @@
     {
       "sites": [
         {
+          "from": "entries.length",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "75e5277bf5163e0b",
+          "span": {
+            "col": 10,
+            "end_col": 24,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/dead_export.js",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount / 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "43e7e6c216862855",
+          "span": {
+            "col": 10,
+            "end_col": 20,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "749b7728ddb620ef",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f49a25fcb6c323a6",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_helpers.js",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "balance < 0 && limit > 0",
           "operator": "negation",
           "set": "extended",
