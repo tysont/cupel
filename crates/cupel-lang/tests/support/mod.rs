@@ -423,3 +423,9 @@ pub fn expected(cases: &[Expected]) -> Vec<CaseRow> {
         })
         .collect()
 }
+
+/// The test file of a repository holding only `source` at `path`, after asserting its framework.
+pub fn assert_source_file(lang: &str, path: &str, source: &str, framework: &str) -> TestFile {
+    let dir = tree(&[(path, source)]);
+    assert_framework(&produce(lang, dir.path()), path, framework)
+}

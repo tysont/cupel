@@ -5,7 +5,8 @@ mod support;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs};
 use support::{
-    Expected, assert_framework, assert_test_file, case, expected, fixture, produce, rows, tree,
+    Expected, assert_framework, assert_source_file, assert_test_file, case, expected, fixture,
+    produce, rows, tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -177,7 +178,8 @@ const MISC_CASES: &[Expected] = &[
 
 #[test]
 fn skip_markers_mocks_fixtures_and_more_assertion_idioms() {
-    let dir = tree(&[(
+    let misc = &assert_source_file(
+        "python",
         "tests/test_misc.py",
         "import sys\n\
          import pytest\n\
@@ -204,9 +206,8 @@ fn skip_markers_mocks_fixtures_and_more_assertion_idioms() {
          class TestNested:\n    \
          def setup_method(self):\n        self.x = 1\n\n    \
          def test_raises(self):\n        with pytest.raises(KeyError):\n            {}[1]\n",
-    )]);
-    let frames: TestFrames = produce("python", dir.path());
-    let misc = &assert_framework(&frames, "tests/test_misc.py", "pytest");
+        "pytest",
+    );
     assert_eq!(
         misc.setup.iter().map(|s| s.line).collect::<Vec<_>>(),
         [5, 30]
@@ -216,7 +217,8 @@ fn skip_markers_mocks_fixtures_and_more_assertion_idioms() {
 
 #[test]
 fn unittest_assert_methods_map_to_kinds_and_strengths() {
-    let dir = tree(&[(
+    let methods = &assert_source_file(
+        "python",
         "tests/test_methods.py",
         "import unittest\n\
          from unittest.mock import patch\n\
@@ -231,9 +233,8 @@ fn unittest_assert_methods_map_to_kinds_and_strengths() {
          self.assertAlmostEqual(a, b)\n        \
          with self.assertRaises(ValueError):\n            pass\n        \
          with patch(\"ledger.clock\"):\n            pass\n",
-    )]);
-    let frames: TestFrames = produce("python", dir.path());
-    let methods = &assert_framework(&frames, "tests/test_methods.py", "unittest");
+        "unittest",
+    );
     assert_eq!(
         rows(methods),
         [case(
