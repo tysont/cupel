@@ -375,16 +375,21 @@ fn each_payload_declares_its_own_kind_and_version() {
     ];
     let kinds: BTreeSet<FactKind> = declared.iter().map(|(kind, _)| *kind).collect();
     assert_eq!(kinds, FactKind::SYNTACTIC.into_iter().collect());
-    for (kind, version) in declared {
-        let expected = match kind {
-            FactKind::ProjectInfo
-            | FactKind::Symbols
-            | FactKind::ModuleGraph
-            | FactKind::Decisions => 2,
-            _ => 1,
-        };
-        assert_eq!(version, expected, "{kind}");
-    }
+    assert_eq!(
+        declared,
+        [
+            (FactKind::Symbols, 2),
+            (FactKind::Decisions, 2),
+            (FactKind::NormTree, 1),
+            (FactKind::MutationSites, 1),
+            (FactKind::TestFrames, 1),
+            (FactKind::ModuleGraph, 2),
+            (FactKind::ApiSurface, 1),
+            (FactKind::Roots, 1),
+            (FactKind::TestConventions, 1),
+            (FactKind::ProjectInfo, 2),
+        ]
+    );
 }
 
 #[test]

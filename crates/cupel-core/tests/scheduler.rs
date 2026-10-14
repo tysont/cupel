@@ -866,6 +866,20 @@ fn measurements_are_kept_with_their_check_and_language_and_never_streamed() {
     );
 }
 
+/// An event's tag, telling a producer's finding (from check `lang`) from a check's.
+fn event_name(event: &Event) -> &'static str {
+    match event {
+        Event::Plan { .. } => "plan",
+        Event::Skip { .. } => "skip",
+        Event::CheckStart { .. } => "check.start",
+        Event::Finding(finding) if finding.check.as_str() == "lang" => "producer-finding",
+        Event::Finding(_) => "finding",
+        Event::Progress { .. } => "progress",
+        Event::CheckEnd { .. } => "check.end",
+        Event::RunEnd { .. } => "run.end",
+    }
+}
+
 #[test]
 fn events_follow_the_plan_skip_start_finding_progress_end_order() {
     fn flagging(_: &CheckCtx, _: &Facts, sink: &mut dyn EventSink) -> Result<CheckResult> {
@@ -887,19 +901,7 @@ fn events_follow_the_plan_skip_start_finding_progress_end_order() {
         "",
     );
     let (_, events) = world.run(&["go", "rust"], |_| {});
-    let names: Vec<&str> = events
-        .iter()
-        .map(|event| match event {
-            Event::Plan { .. } => "plan",
-            Event::Skip { .. } => "skip",
-            Event::CheckStart { .. } => "check.start",
-            Event::Finding(finding) if finding.check.as_str() == "lang" => "producer-finding",
-            Event::Finding(_) => "finding",
-            Event::Progress { .. } => "progress",
-            Event::CheckEnd { .. } => "check.end",
-            Event::RunEnd { .. } => "run.end",
-        })
-        .collect();
+    let names: Vec<&str> = events.iter().map(event_name).collect();
     assert_eq!(
         names,
         [

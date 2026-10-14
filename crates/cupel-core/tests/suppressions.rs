@@ -67,9 +67,9 @@ fn until_is_a_date_when_shaped_like_one_and_a_ref_otherwise() {
 #[test]
 fn a_date_is_past_only_after_its_day() {
     let until = Until::Date("2026-10-13".to_owned());
-    assert!(!until.date_passed("2026-10-12"));
-    assert!(!until.date_passed("2026-10-13"));
-    assert!(until.date_passed("2026-10-14"));
+    let passed = ["2026-10-12", "2026-10-13", "2026-10-14"].map(|today| until.date_passed(today));
+    assert_eq!(passed, [false, false, true]);
+    // A ref is never past by date.
     assert!(!Until::Ref("v1".to_owned()).date_passed("2999-01-01"));
 }
 

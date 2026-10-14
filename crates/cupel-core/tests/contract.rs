@@ -249,7 +249,12 @@ fn an_explanation_round_trips_inside_an_envelope() {
 
 #[test]
 fn unknown_event_tag_is_rejected() {
-    assert!(serde_json::from_value::<Event>(json!({"ev": "run.start"})).is_err());
+    let error = serde_json::from_value::<Event>(json!({"ev": "run.start"})).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "unknown variant `run.start`, expected one of `plan`, `check.start`, `finding`, \
+         `progress`, `check.end`, `skip`, `run.end`"
+    );
 }
 
 #[test]
@@ -278,19 +283,36 @@ fn exit_codes_have_the_design_numbers_and_names() {
 
 #[test]
 fn exit_code_outside_0_to_6_is_rejected() {
-    assert!(serde_json::from_value::<ExitCode>(json!(7)).is_err());
-    assert!(serde_json::from_value::<ExitCode>(json!("pass")).is_err());
+    let errors = [json!(7), json!("pass")].map(|value| {
+        serde_json::from_value::<ExitCode>(value)
+            .unwrap_err()
+            .to_string()
+    });
+    assert_eq!(
+        errors,
+        [
+            "invalid exit code `7`: expected 0 to 6",
+            "invalid type: string \"pass\", expected u8"
+        ]
+    );
 }
 
 #[test]
 fn tier_accepts_0_to_6_only() {
-    for n in 0..=6u8 {
-        let tier = Tier::try_from(n).unwrap();
-        assert_eq!(tier.value(), n);
-        assert_eq!(serde_json::to_value(tier).unwrap(), json!(n));
-    }
-    assert!(Tier::try_from(7).is_err());
-    assert!(serde_json::from_value::<Tier>(json!(7)).is_err());
+    let tiers: Vec<(u8, Value)> = (0..=6u8)
+        .map(|n| {
+            let tier = Tier::try_from(n).unwrap();
+            (tier.value(), serde_json::to_value(tier).unwrap())
+        })
+        .collect();
+    let expected: Vec<(u8, Value)> = (0..=6u8).map(|n| (n, json!(n))).collect();
+    assert_eq!(tiers, expected);
+    assert_eq!(
+        Tier::try_from(7).map_err(|err| err.to_string()),
+        Err("invalid tier `7`: expected 0 to 6".to_owned())
+    );
+    let error = serde_json::from_value::<Tier>(json!(7)).unwrap_err();
+    assert_eq!(error.to_string(), "invalid tier `7`: expected 0 to 6");
 }
 
 /// Asserts each value serializes to the given JSON string and back.

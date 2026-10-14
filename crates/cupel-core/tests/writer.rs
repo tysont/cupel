@@ -1,5 +1,7 @@
 // ABOUTME: Tests for `Writer`, the only way Cupel writes files: free under `.cupel/`, elsewhere
 // ABOUTME: only with `--write`, judged after resolving `..` and symlinks; dry runs record diffs instead.
+mod support;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -31,20 +33,7 @@ impl Repo {
 
     /// Every file under the root, relative and sorted.
     fn files(&self) -> Vec<String> {
-        fn walk(dir: &Path, root: &Path, out: &mut Vec<String>) {
-            for entry in fs::read_dir(dir).unwrap() {
-                let path = entry.unwrap().path();
-                if path.is_dir() {
-                    walk(&path, root, out);
-                } else {
-                    out.push(path.strip_prefix(root).unwrap().display().to_string());
-                }
-            }
-        }
-        let mut out = Vec::new();
-        walk(&self.root(), &self.root(), &mut out);
-        out.sort();
-        out
+        support::files_under(&self.root())
     }
 }
 
@@ -138,13 +127,21 @@ fn refuses_a_lookalike_sibling_of_cupel() {
     );
 }
 
+/// A repository whose `.cupel/link` is a symlink to `target` in a second repository, and that
+/// second repository.
 #[cfg(unix)]
-#[test]
-fn refuses_a_symlink_inside_cupel_that_points_elsewhere() {
+fn linked_out(target: &str) -> (Repo, Repo) {
     let repo = Repo::new();
     let elsewhere = Repo::new();
     fs::create_dir_all(repo.path(".cupel")).unwrap();
-    std::os::unix::fs::symlink(elsewhere.root(), repo.path(".cupel/link")).unwrap();
+    std::os::unix::fs::symlink(elsewhere.path(target), repo.path(".cupel/link")).unwrap();
+    (repo, elsewhere)
+}
+
+#[cfg(unix)]
+#[test]
+fn refuses_a_symlink_inside_cupel_that_points_elsewhere() {
+    let (repo, elsewhere) = linked_out("");
     assert_refused(
         repo.writer(false).write(Path::new(".cupel/link/x"), b"x"),
         &elsewhere.path("x"),
@@ -155,14 +152,10 @@ fn refuses_a_symlink_inside_cupel_that_points_elsewhere() {
 #[cfg(unix)]
 #[test]
 fn refuses_a_dangling_symlink_inside_cupel() {
-    let repo = Repo::new();
-    let elsewhere = Repo::new();
-    fs::create_dir_all(repo.path(".cupel")).unwrap();
-    std::os::unix::fs::symlink(elsewhere.path("missing"), repo.path(".cupel/dangling")).unwrap();
-    let result = repo.writer(true).write(Path::new(".cupel/dangling"), b"x");
-    assert!(
-        matches!(result, Err(Error::Write(WriteError::Outside { .. }))),
-        "{result:?}"
+    let (repo, elsewhere) = linked_out("missing");
+    assert_refused(
+        repo.writer(true).write(Path::new(".cupel/link"), b"x"),
+        &repo.path(".cupel/link"),
     );
     assert!(!elsewhere.path("missing").exists());
 }
@@ -203,7 +196,7 @@ fn relative_paths_resolve_against_the_root_not_the_process_directory() {
         .writer(false)
         .write(Path::new(".cupel/a"), b"x")
         .unwrap();
-    assert!(written.starts_with(repo.root()));
+    assert_eq!(written, repo.path(".cupel/a"));
 }
 
 #[test]
@@ -363,10 +356,14 @@ fn streams_open_under_cupel_and_are_refused_elsewhere_without_write() {
 fn a_missing_root_is_an_io_error() {
     let repo = Repo::new();
     let missing = repo.path("missing");
-    assert!(matches!(
-        Writer::new(&missing, false),
-        Err(Error::Write(WriteError::Io { .. }))
-    ));
+    let error = Writer::new(&missing, false).unwrap_err().to_string();
+    assert_eq!(
+        error,
+        format!(
+            "cannot write `{}`: No such file or directory (os error 2)",
+            missing.display()
+        )
+    );
 }
 
 #[test]
@@ -386,12 +383,14 @@ fn a_probe_creates_cupel_and_leaves_only_its_gitignore() {
 fn a_probe_fails_when_cupel_is_not_a_directory() {
     let repo = Repo::new();
     fs::write(repo.path(".cupel"), "").unwrap();
-    match repo.writer(false).probe() {
-        Err(Error::Write(WriteError::Io { path, .. })) => {
-            assert!(path.starts_with(repo.path(".cupel")), "{}", path.display());
-        }
-        other => panic!("expected an I/O error, got {other:?}"),
-    }
+    let error = repo.writer(false).probe().unwrap_err().to_string();
+    assert_eq!(
+        error,
+        format!(
+            "cannot write `{}`: File exists (os error 17)",
+            repo.path(".cupel").display()
+        )
+    );
 }
 
 #[test]
@@ -405,9 +404,12 @@ fn a_recording_probe_touches_nothing() {
 #[test]
 fn only_a_recording_writer_says_it_is_recording() {
     let repo = Repo::new();
-    assert!(!repo.writer(false).is_recording());
-    assert!(repo.writer(false).recording().is_recording());
-    assert!(repo.writer(true).recording().confined().is_recording());
+    let recording = [
+        repo.writer(false).is_recording(),
+        repo.writer(false).recording().is_recording(),
+        repo.writer(true).recording().confined().is_recording(),
+    ];
+    assert_eq!(recording, [false, true, true]);
 }
 
 #[test]

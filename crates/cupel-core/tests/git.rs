@@ -44,11 +44,13 @@ fn head_reports_sha_branch_and_dirtiness() {
 
 #[test]
 fn changed_since_includes_committed_staged_modified_and_untracked_files() {
-    let Some(repo) = GitRepo::new() else { return };
-    repo.write("same.rs", "fn same() {}\n");
-    repo.write("edited.rs", "fn edited() {}\n");
-    repo.write(".gitignore", "ignored.rs\n");
-    let base = repo.commit("base");
+    let Some((repo, base)) = GitRepo::committed(&[
+        ("same.rs", "fn same() {}\n"),
+        ("edited.rs", "fn edited() {}\n"),
+        (".gitignore", "ignored.rs\n"),
+    ]) else {
+        return;
+    };
     repo.git(&["checkout", "--quiet", "-b", "feature"]);
     repo.write("committed.rs", "fn committed() {}\n");
     repo.commit("on the branch");
@@ -69,9 +71,9 @@ fn changed_since_includes_committed_staged_modified_and_untracked_files() {
 
 #[test]
 fn changed_between_lists_only_files_that_differ_between_two_commits() {
-    let Some(repo) = GitRepo::new() else { return };
-    repo.write("a.rs", "fn a() {}\n");
-    let first = repo.commit("first");
+    let Some((repo, first)) = GitRepo::committed(&[("a.rs", "fn a() {}\n")]) else {
+        return;
+    };
     repo.write("b.rs", "fn b() {}\n");
     let second = repo.commit("second");
     repo.write("c.rs", "fn c() {}\n");
@@ -83,10 +85,12 @@ fn changed_between_lists_only_files_that_differ_between_two_commits() {
 
 #[test]
 fn paths_are_relative_to_a_root_below_the_top_of_the_repository() {
-    let Some(repo) = GitRepo::new() else { return };
-    repo.write("outside.rs", "fn o() {}\n");
-    repo.write("sub/inside.rs", "fn i() {}\n");
-    let base = repo.commit("base");
+    let Some((repo, base)) = GitRepo::committed(&[
+        ("outside.rs", "fn o() {}\n"),
+        ("sub/inside.rs", "fn i() {}\n"),
+    ]) else {
+        return;
+    };
     repo.write("outside.rs", "fn o() { 1; }\n");
     repo.write("sub/inside.rs", "fn i() { 1; }\n");
     repo.write("sub/new.rs", "fn n() {}\n");
@@ -97,12 +101,17 @@ fn paths_are_relative_to_a_root_below_the_top_of_the_repository() {
 
 #[test]
 fn an_unknown_revision_is_an_error_naming_it() {
-    let Some(repo) = GitRepo::new() else { return };
-    repo.commit("first");
+    let Some((repo, first)) = GitRepo::committed(&[]) else {
+        return;
+    };
     let git = Git::open(&repo.root()).unwrap();
     let error = git.commit("no-such-ref").unwrap_err();
-    assert!(error.message.contains("`no-such-ref`"), "{error}");
-    assert!(git.commit("HEAD").is_ok());
+    assert_eq!(
+        error.to_string(),
+        "`git rev-parse --verify --quiet no-such-ref^{commit}` failed: `no-such-ref` is not a \
+         commit in this repository"
+    );
+    assert_eq!(git.commit("HEAD").map_err(|err| err.to_string()), Ok(first));
 }
 
 fn change(path: &str, kind: ChangeKind) -> Change {
@@ -114,11 +123,13 @@ fn change(path: &str, kind: ChangeKind) -> Change {
 
 #[test]
 fn changes_say_whether_each_path_was_added_modified_or_deleted() {
-    let Some(repo) = GitRepo::new() else { return };
-    repo.write("kept.rs", "fn kept() {}\n");
-    repo.write("edited.rs", "fn edited() {}\n");
-    repo.write("gone.rs", "fn gone() {}\n");
-    let base = repo.commit("base");
+    let Some((repo, base)) = GitRepo::committed(&[
+        ("kept.rs", "fn kept() {}\n"),
+        ("edited.rs", "fn edited() {}\n"),
+        ("gone.rs", "fn gone() {}\n"),
+    ]) else {
+        return;
+    };
     repo.write("edited.rs", "fn edited() { 1; }\n");
     repo.git(&["rm", "--quiet", "gone.rs"]);
     repo.write("added.rs", "fn added() {}\n");
@@ -147,9 +158,10 @@ fn changes_say_whether_each_path_was_added_modified_or_deleted() {
 
 #[test]
 fn a_rename_is_a_deletion_and_an_addition() {
-    let Some(repo) = GitRepo::new() else { return };
-    repo.write("old.rs", "fn same() { 1; 2; 3; 4; }\n");
-    let base = repo.commit("base");
+    let Some((repo, base)) = GitRepo::committed(&[("old.rs", "fn same() { 1; 2; 3; 4; }\n")])
+    else {
+        return;
+    };
     repo.git(&["mv", "old.rs", "new.rs"]);
     let head = repo.commit("rename");
 
@@ -165,14 +177,20 @@ fn a_rename_is_a_deletion_and_an_addition() {
 
 #[test]
 fn show_reads_a_file_as_it_was_at_a_commit_relative_to_the_root() {
-    let Some(repo) = GitRepo::new() else { return };
-    repo.write("sub/a.rs", "fn a() {}\n");
-    let base = repo.commit("base");
+    let Some((repo, base)) = GitRepo::committed(&[("sub/a.rs", "fn a() {}\n")]) else {
+        return;
+    };
     repo.write("sub/a.rs", "fn a() { 1; }\n");
     repo.commit("edit");
 
     let git = Git::open(&repo.root().join("sub")).unwrap();
     assert_eq!(git.show(&base, "a.rs").unwrap(), b"fn a() {}\n");
     let error = git.show(&base, "missing.rs").unwrap_err();
-    assert!(error.command.contains("missing.rs"), "{error}");
+    assert_eq!(
+        error.to_string(),
+        format!(
+            "`git show {base}:./missing.rs` failed: fatal: path 'sub/missing.rs' does not exist \
+             in '{base}'"
+        )
+    );
 }

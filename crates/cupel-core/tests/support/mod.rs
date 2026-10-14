@@ -1,5 +1,6 @@
 // ABOUTME: Shared test support for cupel-core integration tests: throwaway git repositories built with
 // ABOUTME: the real `git`, so git access and scope resolution are tested against real repositories.
+// ABOUTME: Also lists the files a test left under a directory.
 #![allow(
     dead_code,
     reason = "each test binary uses a different subset of the helpers"
@@ -8,6 +9,24 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+
+/// Every file under `root`, relative to it and sorted.
+pub fn files_under(root: &Path) -> Vec<String> {
+    fn walk(dir: &Path, root: &Path, out: &mut Vec<String>) {
+        for entry in fs::read_dir(dir).unwrap() {
+            let path = entry.unwrap().path();
+            if path.is_dir() {
+                walk(&path, root, out);
+            } else {
+                out.push(path.strip_prefix(root).unwrap().display().to_string());
+            }
+        }
+    }
+    let mut out = Vec::new();
+    walk(root, root, &mut out);
+    out.sort();
+    out
+}
 
 /// A temporary git repository whose default branch is `main`.
 pub struct GitRepo {
@@ -30,6 +49,16 @@ impl GitRepo {
             return None;
         }
         Some(repo)
+    }
+
+    /// A fresh repository holding `files` (path, text) in one commit, with that commit's SHA.
+    pub fn committed(files: &[(&str, &str)]) -> Option<(Self, String)> {
+        let repo = Self::new()?;
+        for (file, text) in files {
+            repo.write(file, text);
+        }
+        let base = repo.commit("base");
+        Some((repo, base))
     }
 
     pub fn path(&self) -> &Path {

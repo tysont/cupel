@@ -55,7 +55,8 @@ fn schema_doc() -> Value {
            "schema": {"type": "object"}})
 }
 
-fn round_trip(example: &Value) -> Value {
+/// Asserts `example` deserializes into an envelope and serializes back unchanged.
+fn assert_round_trip(example: &Value) -> Value {
     let typed: Envelope = serde_json::from_value(example.clone()).expect("example deserializes");
     let output = serde_json::to_value(&typed).unwrap();
     assert_eq!(&output, example);
@@ -72,20 +73,28 @@ fn every_description_subject_round_trips_inside_an_envelope() {
     cli_body.as_object_mut().unwrap().remove("subject");
     let all = json!({"subject": "all", "cli": cli_body, "commands": [command()], "schemas": [schema_doc()]});
     for description in [cli(), command_subject, schema_subject, all] {
-        round_trip(&envelope_with(&json!("describe"), &description));
+        assert_round_trip(&envelope_with(&json!("describe"), &description));
     }
 }
 
 #[test]
 fn description_subject_is_the_tag() {
     let typed: Description = serde_json::from_value(cli()).unwrap();
+    assert_eq!(serde_json::to_value(&typed).unwrap(), cli());
     assert!(matches!(typed, Description::Cli(_)));
-    assert!(serde_json::from_value::<Description>(json!({"subject": "matrix"})).is_err());
+    let error = serde_json::from_value::<Description>(json!({"subject": "galaxy"}))
+        .unwrap_err()
+        .to_string();
+    assert_eq!(
+        error,
+        "unknown variant `galaxy`, expected one of `cli`, `command`, `schema`, `all`, \
+         `language`, `languages`, `fact`, `matrix`, `check`, `finding`"
+    );
 }
 
 #[test]
 fn envelopes_without_a_verb_or_description_use_null() {
-    let output = round_trip(&envelope_with(&Value::Null, &Value::Null));
+    let output = assert_round_trip(&envelope_with(&Value::Null, &Value::Null));
     assert_eq!(output["run"]["verb"], Value::Null);
     assert_eq!(output["description"], Value::Null);
 }
@@ -126,6 +135,40 @@ fn run_schema_requires_the_nullable_verb_and_description() {
     let value = run.as_value();
     let required =
         |def: &Value| -> Vec<String> { serde_json::from_value(def["required"].clone()).unwrap() };
-    assert!(required(value).contains(&"description".to_owned()));
-    assert!(required(&value["$defs"]["RunInfo"]).contains(&"verb".to_owned()));
+    assert_eq!(
+        required(value),
+        [
+            "checks",
+            "cupel",
+            "description",
+            "exit_code",
+            "explanation",
+            "findings",
+            "next_actions",
+            "plan",
+            "rankings",
+            "run",
+            "status",
+            "summary",
+            "total_findings",
+            "truncated"
+        ]
+    );
+    assert_eq!(
+        required(&value["$defs"]["RunInfo"]),
+        [
+            "baseline",
+            "budget_ms",
+            "config",
+            "depth",
+            "duration_ms",
+            "git",
+            "id",
+            "scope",
+            "seed",
+            "started",
+            "toolchain",
+            "verb"
+        ]
+    );
 }
