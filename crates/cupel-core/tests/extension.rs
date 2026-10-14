@@ -65,6 +65,7 @@ impl Check for ReportingCheck {
             duration_ms: 0,
             skipped: None,
             oracle: None,
+            notes: Vec::new(),
         })
     }
 }

@@ -70,6 +70,7 @@ pub fn language(check: &dyn Check, metrics: &[(&str, f64)], n: u64) -> CheckResu
         duration_ms: 0,
         skipped: None,
         oracle: None,
+        notes: Vec::new(),
     }
 }
 

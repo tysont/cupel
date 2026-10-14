@@ -437,6 +437,7 @@ fn unfinished(manifest: &Manifest, status: CheckStatus, skipped: Option<Skipped>
         duration_ms: 0,
         skipped,
         oracle: None,
+        notes: Vec::new(),
     }
 }
 
@@ -860,7 +861,11 @@ impl<'a> CheckRun<'a> {
         }
     }
 
-    fn record(&mut self, task: &Task<'_>, result: CheckResult, sink: &mut dyn EventSink) {
+    fn record(&mut self, task: &Task<'_>, mut result: CheckResult, sink: &mut dyn EventSink) {
+        // Each language's notes say which language they are about once languages combine.
+        for note in &mut result.notes {
+            *note = format!("{note} ({})", task.lang.id);
+        }
         self.done += task.plan.targets;
         sink.emit(Event::Progress {
             id: self.check.manifest().id.clone(),
@@ -922,6 +927,7 @@ impl<'a> CheckRun<'a> {
                 duration_ms,
                 skipped: cut,
                 oracle: None,
+                notes: combined_notes(&ran),
             }
         };
         sink.emit(Event::CheckEnd {
@@ -935,6 +941,12 @@ impl<'a> CheckRun<'a> {
             measurements: self.measurements,
         }
     }
+}
+
+/// Every language's notes, sorted, each once.
+fn combined_notes(ran: &[CheckResult]) -> Vec<String> {
+    let notes: BTreeSet<&String> = ran.iter().flat_map(|result| &result.notes).collect();
+    notes.into_iter().cloned().collect()
 }
 
 /// Each `scope` metric any language reported, combined across languages by the check (ADR-060).
@@ -1033,6 +1045,7 @@ fn skipped_entry(check: &dyn Check, mut skips: Vec<Skipped>) -> CheckResult {
         duration_ms: 0,
         skipped,
         oracle: None,
+        notes: Vec::new(),
     }
 }
 

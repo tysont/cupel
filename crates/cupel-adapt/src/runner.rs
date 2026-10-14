@@ -199,17 +199,23 @@ impl Runner {
     /// The program to run in `dir`: its `node_modules/.bin` copy when the spec allows one, else
     /// the tool on `PATH`; `None` when neither exists.
     fn program(&self, dir: &Path) -> Option<String> {
-        let local = dir.join("node_modules").join(".bin").join(self.0.tool);
-        if self.0.node_bin && local.is_file() {
-            return Some(local.to_string_lossy().into_owned());
-        }
-        find_program(self.0.tool).map(|_| self.0.tool.to_owned())
+        installed(self.0.tool, self.0.node_bin, dir)
     }
+}
+
+/// The program to run for `tool` in `dir`: its `node_modules/.bin` copy when `node_bin` allows
+/// one, else the tool on `PATH`; `None` when neither exists.
+pub(crate) fn installed(tool: &str, node_bin: bool, dir: &Path) -> Option<String> {
+    let local = dir.join("node_modules").join(".bin").join(tool);
+    if node_bin && local.is_file() {
+        return Some(local.to_string_lossy().into_owned());
+    }
+    find_program(tool).map(|_| tool.to_owned())
 }
 
 /// The project roots of the language being produced, each with its packages; the repository
 /// root alone when `ProjectInfo` names none.
-fn roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
+pub(crate) fn roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
     let roots: Vec<(String, Vec<String>)> = ctx
         .upstream
         .get::<ProjectInfo>()

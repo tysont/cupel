@@ -24,6 +24,7 @@ pub fn result(
         duration_ms: 0,
         skipped: None,
         oracle: None,
+        notes: Vec::new(),
     }
 }
 

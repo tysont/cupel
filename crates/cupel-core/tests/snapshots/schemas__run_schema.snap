@@ -363,6 +363,14 @@ expression: pretty(&schema)
           },
           "default": {}
         },
+        "notes": {
+          "description": "What the result could not take into account, such as `branches: unavailable` when the\ncoverage map measured no branches. Absent when empty: the one optional property of an\nemitted type, so results without notes are unchanged (ADR-077).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-cupel-optional": true
+        },
         "oracle": {
           "description": "The oracle a differential or trace check compared against.",
           "type": [

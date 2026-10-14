@@ -241,6 +241,7 @@ fn checks() -> Vec<CheckResult> {
             duration_ms: 41_000,
             skipped: None,
             oracle: Some("pg".to_owned()),
+            notes: Vec::new(),
         },
         CheckResult {
             id: CheckId::from("perf.bench"),
@@ -260,6 +261,7 @@ fn checks() -> Vec<CheckResult> {
                 see: Some("cupel doctor".to_owned()),
             }),
             oracle: None,
+            notes: Vec::new(),
         },
     ]
 }

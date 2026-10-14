@@ -60,6 +60,7 @@
 
 mod cargo_nextest;
 mod cargo_test;
+pub mod coverage;
 mod go_test;
 mod jest;
 mod pytest;
