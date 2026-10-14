@@ -80,7 +80,7 @@ pub use matrix::{Support, SupportMatrix};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
     Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
-    SharedFact,
+    SharedFact, ToolProbe, Upstream,
 };
 pub use rank::{
     Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,

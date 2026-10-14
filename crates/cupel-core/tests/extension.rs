@@ -614,12 +614,7 @@ impl Producer<Symbols> for CachingProducer {
 fn produce_ctx(root: &std::path::Path, cancel: Cancellation) -> ProduceCtx {
     // `--write` was given, yet producers only ever get the confined writer.
     let writer = Writer::new(root, true).unwrap().confined();
-    ProduceCtx {
-        ctx: Ctx::new(writer.root().to_path_buf()),
-        config: serde_json::Map::new(),
-        writer,
-        cancel,
-    }
+    ProduceCtx::new(Ctx::new(writer.root().to_path_buf()), writer, cancel)
 }
 
 #[test]

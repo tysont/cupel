@@ -289,14 +289,13 @@ pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
     let root = repo_path(&pair.fixture());
     let scratch = tempfile::tempdir().map_err(|error| error.to_string())?;
     let files = walk(&root, &registries.languages, &ProjectInfo::default());
-    let produce_ctx = ProduceCtx {
-        ctx: Ctx::new(root.clone()),
-        config: serde_json::Map::new(),
-        writer: Writer::new(scratch.path(), false)
+    let produce_ctx = ProduceCtx::new(
+        Ctx::new(root.clone()),
+        Writer::new(scratch.path(), false)
             .map_err(|error| error.to_string())?
             .confined(),
-        cancel: Cancellation::new(),
-    };
+        Cancellation::new(),
+    );
     let scope = Scope::of_files(files.clone());
     let produce = |kind| {
         let producer = registries.producers.producers_for(kind, &lang).next()?;

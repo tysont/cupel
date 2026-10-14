@@ -46,6 +46,15 @@ impl FactKind {
         NAMES[self as usize]
     }
 
+    /// The `[lang.<id>]` key that pins this kind's producer, such as `runner = "unittest"` for
+    /// `TestResults` (ADR-076); `None` for kinds whose producer cannot be chosen.
+    pub fn pin_key(self) -> Option<&'static str> {
+        match self {
+            Self::TestResults => Some("runner"),
+            _ => None,
+        }
+    }
+
     /// Every kind, in catalog order.
     pub const ALL: [FactKind; 20] = [
         Self::Symbols,

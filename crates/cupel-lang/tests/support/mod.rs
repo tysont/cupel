@@ -49,15 +49,14 @@ fn produce_in<F: Fact>(lang: &str, root: &Path, exclude: &Exclude) -> (F, Vec<Ev
         .next()
         .unwrap_or_else(|| panic!("no {} producer for {lang}", F::KIND));
     let writer = Writer::new(root, false).unwrap().confined();
-    let ctx = ProduceCtx {
-        ctx: Ctx {
-            root: writer.root().to_path_buf(),
+    let ctx = ProduceCtx::new(
+        Ctx {
             exclude: exclude.clone(),
+            ..Ctx::new(writer.root().to_path_buf())
         },
-        config: serde_json::Map::new(),
         writer,
-        cancel: Cancellation::new(),
-    };
+        Cancellation::new(),
+    );
     let scope = Scope::of_files(walk_excluding(
         root,
         &languages,
