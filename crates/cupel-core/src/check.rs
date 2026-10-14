@@ -102,6 +102,13 @@ pub trait Check: Send + Sync {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult>;
 
+    /// Whether the check compares symbols across the languages of a family (design §8.3.5):
+    /// it then runs once per family in scope, and `Facts::family` serves every member
+    /// language's facts (ADR-051). The default is once per language.
+    fn spans_family(&self) -> bool {
+        false
+    }
+
     /// One score from this check's per-language scores, for the envelope's single entry per
     /// check (ADR-041). The default is the mean weighted by each score's `n`.
     #[allow(

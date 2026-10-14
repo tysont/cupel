@@ -125,6 +125,9 @@ pub trait Fact: Serialize + DeserializeOwned + JsonSchema + Send + Sync + 'stati
 pub struct Facts {
     declared: BTreeSet<FactKind>,
     values: HashMap<FactKind, Arc<dyn Any + Send + Sync>>,
+    /// The same kinds for the other languages of the family, for a family-wide check
+    /// (`Check::spans_family`, ADR-051), in language-ID order.
+    siblings: HashMap<FactKind, Vec<Arc<dyn Any + Send + Sync>>>,
 }
 
 impl Facts {
@@ -137,6 +140,7 @@ impl Facts {
                 .copied()
                 .collect(),
             values: HashMap::new(),
+            siblings: HashMap::new(),
         }
     }
 
@@ -153,6 +157,39 @@ impl Facts {
         self.check_declared(fact.kind())?;
         self.values.insert(fact.kind(), fact.value());
         Ok(())
+    }
+
+    /// Adds another family member's fact of a declared kind (ADR-051).
+    pub fn insert_sibling<F: Fact>(&mut self, fact: F) -> Result<()> {
+        self.check_declared(F::KIND)?;
+        self.siblings
+            .entry(F::KIND)
+            .or_default()
+            .push(Arc::new(fact));
+        Ok(())
+    }
+
+    /// Adds another family member's fact the scheduler produced (ADR-051).
+    pub fn insert_shared_sibling(&mut self, fact: &SharedFact) -> Result<()> {
+        self.check_declared(fact.kind())?;
+        self.siblings
+            .entry(fact.kind())
+            .or_default()
+            .push(fact.value());
+        Ok(())
+    }
+
+    /// The fact of type `F` for this language, then each other family member's that was
+    /// added (ADR-051). Errors as `get` does when this language's fact is missing.
+    pub fn family<F: Fact>(&self) -> Result<Vec<&F>> {
+        let own = self.get::<F>()?;
+        let siblings = self
+            .siblings
+            .get(&F::KIND)
+            .into_iter()
+            .flatten()
+            .filter_map(|value| value.downcast_ref::<F>());
+        Ok(std::iter::once(own).chain(siblings).collect())
     }
 
     /// The kinds the manifest declares, in catalog order.
