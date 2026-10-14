@@ -84,7 +84,7 @@ fn validate(text: &str) -> Result<()> {
 
 #[test]
 fn a_config_naming_only_registered_ids_is_valid() {
-    validate(
+    let result = validate(
         r#"
 [roots]
 api = { path = "api", lang = "go" }
@@ -103,7 +103,8 @@ operators = "extended"
 "tests.weakening" = "none"
 "#,
     )
-    .unwrap();
+    .map_err(|err| err.to_string());
+    assert_eq!(result, Ok(()));
 }
 
 #[test]
@@ -165,7 +166,7 @@ fn validate_languages(text: &str) -> Result<()> {
 
 #[test]
 fn language_validation_accepts_check_tables_and_gates_while_no_check_is_registered() {
-    validate_languages(
+    let result = validate_languages(
         r#"
 [roots]
 api = { path = "api", lang = "go" }
@@ -183,7 +184,8 @@ threshold = 0.9
 "tests.mutation.score" = ">= 0.80"
 "#,
     )
-    .unwrap();
+    .map_err(|err| err.to_string());
+    assert_eq!(result, Ok(()));
 }
 
 #[test]
