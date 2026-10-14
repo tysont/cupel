@@ -1,0 +1,409 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "refactor_extract",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `clone.pair`.",
+            "properties": {
+              "clone_type": {
+                "description": "2 when the normalized trees are identical (type 1 and type 2 clones: only names,\nliterals, types, layout, or comments differ); 3 when they differ (statements added,\nremoved, or changed).",
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "jaccard": {
+                "description": "Jaccard similarity of the two symbols' subtree fingerprint sets, to three decimals.",
+                "format": "double",
+                "type": "number"
+              },
+              "left": {
+                "additionalProperties": false,
+                "description": "One side of a clone: the symbol, where it is, and how big it is.",
+                "properties": {
+                  "col": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "end_col": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "end_line": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "file": {
+                    "type": "string"
+                  },
+                  "hash": {
+                    "description": "The symbol's structural hash (`sh_…`).",
+                    "type": "string"
+                  },
+                  "lang": {
+                    "type": "string"
+                  },
+                  "line": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "lines": {
+                    "description": "Lines the symbol spans.",
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "nodes": {
+                    "description": "Nodes of its normalized tree.",
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "symbol": {
+                    "description": "The symbol's display name.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "symbol",
+                  "hash",
+                  "lang",
+                  "file",
+                  "line",
+                  "col",
+                  "end_line",
+                  "end_col",
+                  "lines",
+                  "nodes"
+                ],
+                "type": "object"
+              },
+              "right": {
+                "additionalProperties": false,
+                "description": "One side of a clone: the symbol, where it is, and how big it is.",
+                "properties": {
+                  "col": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "end_col": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "end_line": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "file": {
+                    "type": "string"
+                  },
+                  "hash": {
+                    "description": "The symbol's structural hash (`sh_…`).",
+                    "type": "string"
+                  },
+                  "lang": {
+                    "type": "string"
+                  },
+                  "line": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "lines": {
+                    "description": "Lines the symbol spans.",
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "nodes": {
+                    "description": "Nodes of its normalized tree.",
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "symbol": {
+                    "description": "The symbol's display name.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "symbol",
+                  "hash",
+                  "lang",
+                  "file",
+                  "line",
+                  "col",
+                  "end_line",
+                  "end_col",
+                  "lines",
+                  "nodes"
+                ],
+                "type": "object"
+              },
+              "threshold": {
+                "format": "double",
+                "type": "number"
+              }
+            },
+            "required": [
+              "jaccard",
+              "clone_type",
+              "threshold",
+              "left",
+              "right"
+            ],
+            "title": "ClonePair",
+            "type": "object"
+          },
+          "kind": "clone.pair",
+          "summary": "Two symbols whose normalized trees are at least `threshold` similar and similar to no third symbol."
+        },
+        {
+          "action": "refactor_extract",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `clone.cluster`.",
+            "properties": {
+              "max_jaccard": {
+                "format": "double",
+                "type": "number"
+              },
+              "members": {
+                "description": "Every symbol in the cluster, in file and line order.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One side of a clone: the symbol, where it is, and how big it is.",
+                  "properties": {
+                    "col": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "end_col": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "end_line": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "file": {
+                      "type": "string"
+                    },
+                    "hash": {
+                      "description": "The symbol's structural hash (`sh_…`).",
+                      "type": "string"
+                    },
+                    "lang": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "lines": {
+                      "description": "Lines the symbol spans.",
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "nodes": {
+                      "description": "Nodes of its normalized tree.",
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "symbol": {
+                      "description": "The symbol's display name.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "symbol",
+                    "hash",
+                    "lang",
+                    "file",
+                    "line",
+                    "col",
+                    "end_line",
+                    "end_col",
+                    "lines",
+                    "nodes"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "min_jaccard": {
+                "format": "double",
+                "type": "number"
+              },
+              "pairs": {
+                "description": "Pairs of members at least `threshold` similar; at most n·(n−1)/2.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "threshold": {
+                "format": "double",
+                "type": "number"
+              }
+            },
+            "required": [
+              "members",
+              "pairs",
+              "min_jaccard",
+              "max_jaccard",
+              "threshold"
+            ],
+            "title": "CloneCluster",
+            "type": "object"
+          },
+          "kind": "clone.cluster",
+          "summary": "Three or more symbols connected by pairs at least `threshold` similar."
+        }
+      ],
+      "id": "static.clones",
+      "metrics": [
+        {
+          "name": "pairs",
+          "per": "scope",
+          "summary": "Pairs of symbols at least `threshold` similar."
+        },
+        {
+          "name": "clusters",
+          "per": "scope",
+          "summary": "Groups of three or more similar symbols."
+        },
+        {
+          "name": "max_jaccard",
+          "per": "scope",
+          "summary": "The highest similarity of any pair."
+        },
+        {
+          "name": "cluster_size",
+          "per": "group",
+          "summary": "Symbols in each clone group: 2 for a pair, more for a cluster."
+        }
+      ],
+      "needs": [
+        "symbols",
+        "norm-tree"
+      ],
+      "stability": "experimental",
+      "summary": "Type 1, 2, and 3 clones: functions whose normalized syntax trees share most subtree fingerprints, compared within a language family. Limitation: type 1 is reported as type 2, because NormTree keeps no identifier or literal text, so two functions that differ only in literals (two lookup tables of the same shape) are reported as clones (ADR-050; a raw-token digest is a P3 follow-up).",
+      "tier": 0,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

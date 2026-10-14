@@ -1,0 +1,296 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 1.0,
+        "max_jaccard": 1.0,
+        "pairs": 8.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 37,
+        "unit": "pairs",
+        "value": 8.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settle_invoices` and `reconcile_payments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 19,
+          "file": "src/clones_settlement.rs",
+          "hash": "sh_b8cee6ed2fdf44c6",
+          "lang": "rust",
+          "line": 8,
+          "lines": 12,
+          "nodes": 67,
+          "symbol": "clones_settlement::settle_invoices"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 32,
+          "file": "src/clones_settlement.rs",
+          "hash": "sh_b8cee6ed2fdf44c6",
+          "lang": "rust",
+          "line": 21,
+          "lines": 12,
+          "nodes": 67,
+          "symbol": "clones_settlement::reconcile_payments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_50ff2d",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "src/clones_settlement.rs",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_b8cee6ed2fdf44c6",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_50ff2d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::settle_invoices",
+        "hash": "sh_b8cee6ed2fdf44c6",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::settle_invoices` and `clones_settlement::reconcile_payments` (src/clones_settlement.rs:21) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `order_lines` and `refund_lines` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "jaccard": 0.885,
+        "left": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 48,
+          "file": "src/clones_settlement.rs",
+          "hash": "sh_0e8fd0a2e4ec138c",
+          "lang": "rust",
+          "line": 34,
+          "lines": 15,
+          "nodes": 126,
+          "symbol": "clones_settlement::order_lines"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 65,
+          "file": "src/clones_settlement.rs",
+          "hash": "sh_32c95fbbf1e82a6f",
+          "lang": "rust",
+          "line": 50,
+          "lines": 16,
+          "nodes": 132,
+          "symbol": "clones_settlement::refund_lines"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_2193c2",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "src/clones_settlement.rs",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_0e8fd0a2e4ec138c",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_2193c2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::order_lines",
+        "hash": "sh_0e8fd0a2e4ec138c",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::order_lines` and `clones_settlement::refund_lines` (src/clones_settlement.rs:50) are type-3 clones (jaccard 0.89)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `net_total` shares with 3 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 6,
+            "file": "src/twins.rs",
+            "hash": "sh_78f9041af099be12",
+            "lang": "rust",
+            "line": 3,
+            "lines": 4,
+            "nodes": 41,
+            "symbol": "twins::net_total"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 11,
+            "file": "src/twins.rs",
+            "hash": "sh_78f9041af099be12",
+            "lang": "rust",
+            "line": 8,
+            "lines": 4,
+            "nodes": 41,
+            "symbol": "twins::sum_after_charge"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 16,
+            "file": "src/twins.rs",
+            "hash": "sh_78f9041af099be12",
+            "lang": "rust",
+            "line": 13,
+            "lines": 4,
+            "nodes": 41,
+            "symbol": "twins::net_total_floor"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 28,
+            "file": "src/twins.rs",
+            "hash": "sh_78f9041af099be12",
+            "lang": "rust",
+            "line": 18,
+            "lines": 11,
+            "nodes": 41,
+            "symbol": "twins::net_total_laid_out"
+          }
+        ],
+        "min_jaccard": 1.0,
+        "pairs": 6,
+        "threshold": 0.82
+      },
+      "id": "fnd_dab5bf",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "file": "src/twins.rs",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_78f9041af099be12",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_dab5bf --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins::net_total",
+        "hash": "sh_78f9041af099be12",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`twins::net_total` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "static.clones",
+      "entries": [
+        {
+          "lang": "rust",
+          "rank": 1,
+          "target": {
+            "display": "twins::net_total and 3 others",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 6,
+              "file": "src/twins.rs",
+              "line": 3
+            },
+            "symbol": null
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "rust",
+          "rank": 2,
+          "target": {
+            "display": "clones_settlement::order_lines and 1 other",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 48,
+              "file": "src/clones_settlement.rs",
+              "line": 34
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "rust",
+          "rank": 3,
+          "target": {
+            "display": "clones_settlement::settle_invoices and 1 other",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 19,
+              "file": "src/clones_settlement.rs",
+              "line": 8
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 3,
+      "metric": "cluster_size",
+      "per": "group",
+      "summary": "Symbols in each clone group: 2 for a pair, more for a cluster."
+    }
+  ]
+}

@@ -1,0 +1,301 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "break_cycle",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `dep.cycle`.",
+            "properties": {
+              "cycle": {
+                "description": "The shortest cycle through the component's smallest module, in import order; the last\nmodule imports the first.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "modules": {
+                "description": "Every module of the strongly connected component, sorted.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "size": {
+                "description": "How many modules the component has.",
+                "format": "uint",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "cycle",
+              "modules",
+              "size"
+            ],
+            "title": "ImportCycle",
+            "type": "object"
+          },
+          "kind": "dep.cycle",
+          "summary": "Modules that import each other, directly or through others."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `dep.layer-violation`.",
+            "properties": {
+              "from": {
+                "description": "The importing module.",
+                "type": "string"
+              },
+              "from_layer": {
+                "type": "string"
+              },
+              "order": {
+                "description": "The configured layers, lowest first.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "specifier": {
+                "description": "The first violating import as written.",
+                "type": "string"
+              },
+              "to": {
+                "description": "The imported module, in a higher layer.",
+                "type": "string"
+              },
+              "to_layer": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "from_layer",
+              "to_layer",
+              "specifier",
+              "order"
+            ],
+            "title": "LayerViolation",
+            "type": "object"
+          },
+          "kind": "dep.layer-violation",
+          "summary": "A module imports a module in a higher layer than its own ([checks.\"static.deps\".layers])."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `dep.unstable-abstract`.",
+            "properties": {
+              "abstractness": {
+                "description": "A = interfaces / (types + interfaces) among the module's public items.",
+                "format": "double",
+                "type": "number"
+              },
+              "afferent": {
+                "description": "Ca: modules in the graph that import this one.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "distance": {
+                "description": "D = |A + I − 1|.",
+                "format": "double",
+                "type": "number"
+              },
+              "distance_max": {
+                "format": "double",
+                "type": "number"
+              },
+              "efferent": {
+                "description": "Ce: modules in the graph this one imports.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "external": {
+                "description": "Distinct external packages imported; not part of Ce.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "instability": {
+                "description": "I = Ce / (Ca + Ce).",
+                "format": "double",
+                "type": "number"
+              },
+              "module": {
+                "type": "string"
+              },
+              "unresolved": {
+                "description": "Imports that resolve to nothing; not part of Ce.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "module",
+              "afferent",
+              "efferent",
+              "external",
+              "unresolved",
+              "instability",
+              "abstractness",
+              "distance",
+              "distance_max"
+            ],
+            "title": "UnstableAbstract",
+            "type": "object"
+          },
+          "kind": "dep.unstable-abstract",
+          "summary": "An abstract module that little depends on: A + I − 1 exceeds distance_max."
+        }
+      ],
+      "id": "static.deps",
+      "metrics": [
+        {
+          "name": "cycles",
+          "per": "scope",
+          "summary": "Import cycles (strongly connected components)."
+        },
+        {
+          "name": "max_distance",
+          "per": "scope",
+          "summary": "The largest distance from the main sequence of any module that declares a type and has a coupling."
+        },
+        {
+          "name": "violations",
+          "per": "scope",
+          "summary": "Imports that break a layering rule."
+        },
+        {
+          "name": "distance",
+          "per": "module",
+          "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+        },
+        {
+          "name": "coupling",
+          "per": "module",
+          "summary": "Afferent plus efferent coupling per module."
+        },
+        {
+          "name": "cycle_size",
+          "per": "group",
+          "summary": "Modules in each import cycle."
+        }
+      ],
+      "needs": [
+        "module-graph",
+        "api-surface"
+      ],
+      "stability": "experimental",
+      "summary": "Module graph: import cycles, afferent and efferent coupling, instability, abstractness, distance from the main sequence, and layering rules from configuration.",
+      "tier": 0,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

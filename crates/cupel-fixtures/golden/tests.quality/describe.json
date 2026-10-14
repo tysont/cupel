@@ -1,0 +1,479 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "strengthen_assertion",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `test.weak-assertion`.",
+            "properties": {
+              "actionability": {
+                "description": "How much understanding the fix needs, after SCRAP's actionability classes for an assistant.",
+                "enum": [
+                  "mechanical",
+                  "guided",
+                  "judgment"
+                ],
+                "type": "string"
+              },
+              "assertions": {
+                "description": "Assertions in the test.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "kinds": {
+                "description": "The distinct semantic kinds of its assertions.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "remediation_mode": {
+                "description": "How a finding is fixed, after SCRAP's remediation modes.",
+                "enum": [
+                  "strengthen",
+                  "add-assertion",
+                  "decouple",
+                  "simplify",
+                  "extract-fixture"
+                ],
+                "type": "string"
+              },
+              "weak": {
+                "description": "Of those, the weak ones: every one.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "remediation_mode",
+              "actionability",
+              "assertions",
+              "weak",
+              "kinds"
+            ],
+            "title": "WeakAssertion",
+            "type": "object"
+          },
+          "kind": "test.weak-assertion",
+          "summary": "Every assertion in the test is weak: truthiness, presence, inequality, or a partial match."
+        },
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `test.no-assertion`.",
+            "properties": {
+              "actionability": {
+                "description": "How much understanding the fix needs, after SCRAP's actionability classes for an assistant.",
+                "enum": [
+                  "mechanical",
+                  "guided",
+                  "judgment"
+                ],
+                "type": "string"
+              },
+              "mocks": {
+                "description": "Test doubles in the test.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "remediation_mode": {
+                "description": "How a finding is fixed, after SCRAP's remediation modes.",
+                "enum": [
+                  "strengthen",
+                  "add-assertion",
+                  "decouple",
+                  "simplify",
+                  "extract-fixture"
+                ],
+                "type": "string"
+              },
+              "skipped": {
+                "description": "Whether the test is marked skipped.",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "remediation_mode",
+              "actionability",
+              "mocks",
+              "skipped"
+            ],
+            "title": "NoAssertion",
+            "type": "object"
+          },
+          "kind": "test.no-assertion",
+          "summary": "The test asserts nothing; an expected panic, raise, or throw counts as an assertion."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `test.mock-heavy`.",
+            "properties": {
+              "actionability": {
+                "description": "How much understanding the fix needs, after SCRAP's actionability classes for an assistant.",
+                "enum": [
+                  "mechanical",
+                  "guided",
+                  "judgment"
+                ],
+                "type": "string"
+              },
+              "assertions": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "density": {
+                "description": "Doubles as a percentage of doubles plus assertions, rounded down.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "mock_density_max": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "mocks": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "mocks_min": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "remediation_mode": {
+                "description": "How a finding is fixed, after SCRAP's remediation modes.",
+                "enum": [
+                  "strengthen",
+                  "add-assertion",
+                  "decouple",
+                  "simplify",
+                  "extract-fixture"
+                ],
+                "type": "string"
+              },
+              "targets": {
+                "description": "What each double replaces, as written.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "remediation_mode",
+              "actionability",
+              "mocks",
+              "assertions",
+              "density",
+              "mock_density_max",
+              "mocks_min",
+              "targets"
+            ],
+            "title": "MockHeavy",
+            "type": "object"
+          },
+          "kind": "test.mock-heavy",
+          "summary": "At least mocks_min test doubles, making up more than mock_density_max percent of the test's doubles and assertions."
+        },
+        {
+          "action": "refactor_extract",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `test.logic`.",
+            "properties": {
+              "actionability": {
+                "description": "How much understanding the fix needs, after SCRAP's actionability classes for an assistant.",
+                "enum": [
+                  "mechanical",
+                  "guided",
+                  "judgment"
+                ],
+                "type": "string"
+              },
+              "alternatives": {
+                "description": "Switch cases, conditional expressions, and exception handlers.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "branches": {
+                "description": "`if` and `else if` branches.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "guards": {
+                "description": "Branches that may be guarded failure calls or skips: one per assertion and skip marker.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "logic": {
+                "description": "Loops, plus alternatives, plus branches beyond the guards.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "logic_max": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "loops": {
+                "description": "Loops other than tables.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "remediation_mode": {
+                "description": "How a finding is fixed, after SCRAP's remediation modes.",
+                "enum": [
+                  "strengthen",
+                  "add-assertion",
+                  "decouple",
+                  "simplify",
+                  "extract-fixture"
+                ],
+                "type": "string"
+              },
+              "tables": {
+                "description": "Loops over a table of cases written in place: parametrization, not logic (ADR-069).",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "remediation_mode",
+              "actionability",
+              "logic",
+              "logic_max",
+              "loops",
+              "tables",
+              "branches",
+              "alternatives",
+              "guards"
+            ],
+            "title": "TestLogic",
+            "type": "object"
+          },
+          "kind": "test.logic",
+          "summary": "More than logic_max loops, alternatives, and branches beyond guarded assertions inside a test body."
+        },
+        {
+          "action": "refactor_extract",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `test.duplicate-setup`.",
+            "properties": {
+              "actionability": {
+                "description": "How much understanding the fix needs, after SCRAP's actionability classes for an assistant.",
+                "enum": [
+                  "mechanical",
+                  "guided",
+                  "judgment"
+                ],
+                "type": "string"
+              },
+              "lines": {
+                "description": "The first line of each test in the group.",
+                "items": {
+                  "format": "uint32",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              "remediation_mode": {
+                "description": "How a finding is fixed, after SCRAP's remediation modes.",
+                "enum": [
+                  "strengthen",
+                  "add-assertion",
+                  "decouple",
+                  "simplify",
+                  "extract-fixture"
+                ],
+                "type": "string"
+              },
+              "setup_statements_min": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "statements": {
+                "description": "Leading statements every test in the group repeats.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tests": {
+                "description": "Each test in the group, in file order.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "remediation_mode",
+              "actionability",
+              "statements",
+              "setup_statements_min",
+              "tests",
+              "lines"
+            ],
+            "title": "DuplicateSetup",
+            "type": "object"
+          },
+          "kind": "test.duplicate-setup",
+          "summary": "Tests in one file repeat the same setup_statements_min or more leading statements."
+        }
+      ],
+      "id": "tests.quality",
+      "metrics": [
+        {
+          "name": "assertion_density",
+          "per": "scope",
+          "summary": "Assertions per test in scope; the score."
+        },
+        {
+          "name": "weak_ratio",
+          "per": "scope",
+          "summary": "Weak assertions as a share of all assertions in scope."
+        },
+        {
+          "name": "no_assertion",
+          "per": "scope",
+          "summary": "Tests in scope that assert nothing."
+        },
+        {
+          "name": "mock_density",
+          "per": "symbol",
+          "summary": "Test doubles per test as a percentage of its doubles plus assertions."
+        }
+      ],
+      "needs": [
+        "test-frames",
+        "symbols",
+        "norm-tree"
+      ],
+      "stability": "experimental",
+      "summary": "SCRAP-style test quality: assertion density, weak and missing assertions, mock density, logic in tests, and duplicated setup.",
+      "tier": 2,
+      "version": 1,
+      "wants": [
+        "decisions"
+      ]
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

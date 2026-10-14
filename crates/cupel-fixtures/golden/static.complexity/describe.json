@@ -1,0 +1,279 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "reduce_complexity",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `complexity.high`.",
+            "properties": {
+              "cognitive": {
+                "description": "The cognitive weight of every decision, structural ones increased by their nesting.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "cognitive_max": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "cyclomatic": {
+                "description": "Modified cyclomatic complexity: 1 plus the cyclomatic weight of every decision, a match or\nswitch counting once (ADR-072).",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "cyclomatic_max": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "cyclomatic",
+              "cognitive",
+              "cyclomatic_max",
+              "cognitive_max"
+            ],
+            "title": "ComplexityHigh",
+            "type": "object"
+          },
+          "kind": "complexity.high",
+          "summary": "Cyclomatic or cognitive complexity exceeds its limit (cyclomatic_max, cognitive_max)."
+        },
+        {
+          "action": "reduce_complexity",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `nesting.deep`.",
+            "properties": {
+              "depth": {
+                "description": "The deepest level of nested branches, loops, cases, handlers, and conditionals.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "nesting_max": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "depth",
+              "nesting_max"
+            ],
+            "title": "NestingDeep",
+            "type": "object"
+          },
+          "kind": "nesting.deep",
+          "summary": "Control flow nests deeper than nesting_max."
+        },
+        {
+          "action": "refactor_extract",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `params.many`.",
+            "properties": {
+              "parameters": {
+                "description": "Declared parameters, not counting a receiver.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "params_max": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "parameters",
+              "params_max"
+            ],
+            "title": "ParamsMany",
+            "type": "object"
+          },
+          "kind": "params.many",
+          "summary": "More declared parameters than params_max, not counting a receiver."
+        },
+        {
+          "action": "refactor_extract",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `function.long`.",
+            "properties": {
+              "length_max": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines": {
+                "description": "Lines the symbol spans, from its first line to its last.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "lines",
+              "length_max"
+            ],
+            "title": "FunctionLong",
+            "type": "object"
+          },
+          "kind": "function.long",
+          "summary": "The symbol spans more lines than length_max."
+        }
+      ],
+      "id": "static.complexity",
+      "metrics": [
+        {
+          "name": "cyclomatic_max",
+          "per": "scope",
+          "summary": "The largest modified cyclomatic complexity in scope (a match counts once)."
+        },
+        {
+          "name": "cognitive_max",
+          "per": "scope",
+          "summary": "The largest cognitive complexity in scope."
+        },
+        {
+          "name": "nesting_max",
+          "per": "scope",
+          "summary": "The deepest nesting in scope."
+        },
+        {
+          "name": "params_max",
+          "per": "scope",
+          "summary": "The most parameters any symbol in scope declares."
+        },
+        {
+          "name": "length_max",
+          "per": "scope",
+          "summary": "The most lines any symbol in scope spans."
+        },
+        {
+          "name": "cyclomatic",
+          "per": "symbol",
+          "summary": "Modified cyclomatic complexity per function (a match counts once)."
+        },
+        {
+          "name": "cognitive",
+          "per": "symbol",
+          "summary": "Cognitive complexity per function."
+        }
+      ],
+      "needs": [
+        "symbols",
+        "decisions",
+        "norm-tree"
+      ],
+      "stability": "experimental",
+      "summary": "Cyclomatic and cognitive complexity, nesting depth, parameter count, and length per function, against configurable limits. Cyclomatic complexity is the modified form: a match or switch counts as one decision however many arms it has.",
+      "tier": 0,
+      "version": 2,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

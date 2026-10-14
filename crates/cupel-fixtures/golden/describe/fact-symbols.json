@@ -5,13 +5,6 @@
     "version": "<version>"
   },
   "description": {
-    "consumers": [
-      "static.clones",
-      "static.complexity",
-      "static.crap",
-      "static.dead-code",
-      "tests.quality"
-    ],
     "kind": "symbols",
     "producers": [
       {

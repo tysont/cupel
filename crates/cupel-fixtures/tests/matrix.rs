@@ -1,10 +1,10 @@
 // ABOUTME: The matrix test (design §8.3.7, plan §2.8): enumerates checks × languages from the registries
-// ABOUTME: and requires goldens, skips, valid evidence, and declared-facts-only runs (ADR-043).
+// ABOUTME: and requires goldens, skips, valid evidence, declared-facts-only runs, and each check's fixtures (ADR-043, ADR-074).
 use std::fs;
 use std::path::Path;
 
-use cupel_core::Support;
-use cupel_fixtures::matrix::{Registries, run_with_declared_facts, verify};
+use cupel_core::{CheckId, LangId, Support};
+use cupel_fixtures::matrix::{Registries, fixture_repo, run_with_declared_facts, verify};
 use cupel_fixtures::{GoldenMode, Goldens};
 
 #[test]
@@ -71,4 +71,16 @@ fn deleting_a_golden_fails_the_matrix_and_names_it() {
             .any(|p| p.contains("static.complexity/cobol.json is stale")),
         "{problems:#?}"
     );
+}
+
+#[test]
+fn a_check_runs_on_its_own_fixture_repository_where_it_has_one() {
+    let repos = tempfile::tempdir().unwrap();
+    fs::create_dir_all(repos.path().join("x.own/rust")).unwrap();
+    let (own, other) = (CheckId::from("x.own"), CheckId::from("x.other"));
+    let (rust, go) = (LangId::from("rust"), LangId::from("go"));
+
+    assert_eq!(fixture_repo(repos.path(), &own, &rust), "x.own/rust");
+    assert_eq!(fixture_repo(repos.path(), &own, &go), "go");
+    assert_eq!(fixture_repo(repos.path(), &other, &rust), "rust");
 }

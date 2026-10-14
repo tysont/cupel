@@ -1,0 +1,477 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 18,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle deps_cycle/alpha/alpha.go → deps_cycle/beta/beta.go → deps_cycle/alpha/alpha.go: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "deps_cycle/alpha/alpha.go",
+          "deps_cycle/beta/beta.go"
+        ],
+        "modules": [
+          "deps_cycle/alpha/alpha.go",
+          "deps_cycle/beta/beta.go"
+        ],
+        "size": 2
+      },
+      "id": "fnd_e9613f",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "deps_cycle/alpha/alpha.go",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e9613f --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: deps_cycle/alpha/alpha.go → deps_cycle/beta/beta.go → deps_cycle/alpha/alpha.go"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `deps_layers/infra/store.go` from `deps_layers/domain/order.go`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "deps_layers/domain/order.go",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "example.com/ledger/deps_layers/infra",
+        "to": "deps_layers/infra/store.go",
+        "to_layer": "infra"
+      },
+      "id": "fnd_d6cece",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "deps_layers/domain/order.go",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d6cece --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`deps_layers/domain/order.go` (layer domain) imports `deps_layers/infra/store.go` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `deps_layers/port/port.go`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 0,
+        "distance": 1.0,
+        "distance_max": 0.7,
+        "efferent": 1,
+        "external": 0,
+        "instability": 1.0,
+        "module": "deps_layers/port/port.go",
+        "unresolved": 0
+      },
+      "id": "fnd_0e1166",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "deps_layers/port/port.go",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0e1166 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`deps_layers/port/port.go` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "go",
+          "rank": 1,
+          "target": {
+            "display": "clones_settlement.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "clones_settlement.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 2,
+          "target": {
+            "display": "complexity.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "complexity.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 3,
+          "target": {
+            "display": "deps_layers/infra/store.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "deps_layers/infra/store.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 4,
+          "target": {
+            "display": "deps_layers/port/port.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "deps_layers/port/port.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 5,
+          "target": {
+            "display": "shapes/geometry.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "shapes/geometry.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 6,
+          "target": {
+            "display": "deps_layers/domain/order.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "deps_layers/domain/order.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "go",
+          "rank": 7,
+          "target": {
+            "display": "ledger.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "ledger.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.167
+        },
+        {
+          "lang": "go",
+          "rank": 8,
+          "target": {
+            "display": "pricing.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "pricing.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.0
+        }
+      ],
+      "measured": 8,
+      "metric": "distance",
+      "per": "module",
+      "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "go",
+          "rank": 1,
+          "target": {
+            "display": "cmd/ledger/main.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "cmd/ledger/main.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 7.0
+        },
+        {
+          "lang": "go",
+          "rank": 2,
+          "target": {
+            "display": "ledger.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "ledger.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "go",
+          "rank": 3,
+          "target": {
+            "display": "deps_cycle/alpha/alpha.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "deps_cycle/alpha/alpha.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "go",
+          "rank": 4,
+          "target": {
+            "display": "deps_cycle/beta/beta.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "deps_cycle/beta/beta.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "go",
+          "rank": 5,
+          "target": {
+            "display": "deps_layers/domain/order.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "deps_layers/domain/order.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "go",
+          "rank": 6,
+          "target": {
+            "display": "clones_settlement.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "clones_settlement.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 7,
+          "target": {
+            "display": "complexity.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "complexity.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 8,
+          "target": {
+            "display": "crap_scores.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "crap_scores.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 9,
+          "target": {
+            "display": "decide.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "decide.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 10,
+          "target": {
+            "display": "deps_layers/infra/store.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "deps_layers/infra/store.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        }
+      ],
+      "measured": 18,
+      "metric": "coupling",
+      "per": "module",
+      "summary": "Afferent plus efferent coupling per module."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "go",
+          "rank": 1,
+          "target": {
+            "display": "deps_cycle/alpha/alpha.go → deps_cycle/beta/beta.go → deps_cycle/alpha/alpha.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 3,
+              "file": "deps_cycle/alpha/alpha.go",
+              "line": 3
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 1,
+      "metric": "cycle_size",
+      "per": "group",
+      "summary": "Modules in each import cycle."
+    }
+  ]
+}

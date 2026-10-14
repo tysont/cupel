@@ -1,0 +1,28 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "static.crap",
+      "metrics": {},
+      "oracle": null,
+      "score": null,
+      "skipped": null,
+      "status": "pass",
+      "tier": 0
+    }
+  ],
+  "findings": [],
+  "rankings": [
+    {
+      "check": "static.crap",
+      "entries": [],
+      "measured": 0,
+      "metric": "crap",
+      "per": "symbol",
+      "summary": "CRAP per function."
+    }
+  ]
+}
