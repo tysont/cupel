@@ -52,7 +52,10 @@ fn a_tree_run_reports_findings_checks_scope_and_next_actions() {
 #[test]
 fn scope_languages_are_exactly_the_languages_that_saw_files() {
     let repo = repo_with_code();
-    let envelope = repo.run(&["check", "--paths", "src"]).envelope();
+    // Quick: these repositories have no test suite for `tests.flaky`'s baseline to run.
+    let envelope = repo
+        .run(&["check", "--paths", "src", "--depth", "quick"])
+        .envelope();
     assert_eq!(envelope["run"]["scope"]["languages"], json!(["rust"]));
     assert_eq!(envelope["run"]["scope"]["mode"], json!("paths"));
     let empty = Repo::new();
@@ -126,7 +129,7 @@ fn configuration_naming_unknown_checks_metrics_or_settings_is_a_usage_error() {
     let repo = repo_with_code();
     repo.write(
         "cupel.toml",
-        "[gate.tree]\n\"static.complexity.cyclomatic_max\" = \"< 30\"\n",
+        "depth = \"quick\"\n[gate.tree]\n\"static.complexity.cyclomatic_max\" = \"< 30\"\n",
     );
     assert_eq!(
         repo.run(&["check"]).code,

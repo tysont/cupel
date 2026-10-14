@@ -422,7 +422,7 @@ Every check below exists, runs at `--depth quick`, and is supported in all five 
 | `static.crap` | 0 | quick | `crap.high`, `crap.watch` | `max`, `mean` | `crap` | go, javascript, python, rust, typescript |
 | `static.dead-code` | 0 | quick | `dead.symbol`, `dead.export` | `dead_symbols`, `dead_exports` | — | go, javascript, python, rust, typescript |
 | `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | go, javascript, python, rust, typescript |
-| `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — |  |
+| `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | go, javascript, python, rust, typescript |
 | `tests.quality` | 2 | quick | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | `assertion_density`, `weak_ratio`, `no_assertion` | `mock_density` | go, javascript, python, rust, typescript |
 | `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | go, javascript, python, rust, typescript |
 <!-- end:check-table -->
@@ -453,7 +453,7 @@ The support matrix, from `cupel describe matrix`:
 | `static.crap` | supported | supported | supported | supported | supported |
 | `static.dead-code` | supported | supported | supported | supported | supported |
 | `static.deps` | supported | supported | supported | supported | supported |
-| `tests.flaky` | unsupported | unsupported | unsupported | unsupported | unsupported |
+| `tests.flaky` | supported | supported | supported | supported | supported |
 | `tests.quality` | supported | supported | supported | supported | supported |
 | `tests.weakening` | supported | supported | supported | supported | supported |
 <!-- end:support-matrix -->

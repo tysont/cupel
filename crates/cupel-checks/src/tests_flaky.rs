@@ -39,7 +39,7 @@ struct Flaky {
     /// The test's outcome in each rerun, in rerun order; `absent` where it did not run.
     outcomes: Vec<String>,
     /// Two reruns (by index) that ran the tests in the same order and disagreed.
-    same_order: [usize; 2],
+    same_order: Vec<usize>,
 }
 
 /// Evidence of `test.order-dependent`.
@@ -238,7 +238,7 @@ impl History<'_> {
 }
 
 /// Two decided reruns with one order key whose outcomes differ.
-fn same_order_disagreement(runs: &[TestRerun], decided: &[(usize, bool)]) -> Option<[usize; 2]> {
+fn same_order_disagreement(runs: &[TestRerun], decided: &[(usize, bool)]) -> Option<Vec<usize>> {
     decided
         .iter()
         .enumerate()
@@ -248,7 +248,7 @@ fn same_order_disagreement(runs: &[TestRerun], decided: &[(usize, bool)]) -> Opt
                 .find(|(second, other)| {
                     other != failed && runs[*first].order_key() == runs[*second].order_key()
                 })
-                .map(|(second, _)| [*first, *second])
+                .map(|(second, _)| vec![*first, *second])
         })
 }
 
@@ -363,7 +363,7 @@ fn flaky(
     id: &str,
     history: &History<'_>,
     decided: &[(usize, bool)],
-    same_order: [usize; 2],
+    same_order: Vec<usize>,
 ) -> Said {
     let name = history.name;
     let (count, passed, failed) = tally(decided);

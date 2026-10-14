@@ -13,7 +13,8 @@ fn repo() -> Repo {
     repo.write("web/index.js", "export function one(a) {\n  return a;\n}\n");
     repo.write(
         "cupel.toml",
-        "[gate.tree]\n\"static.complexity.cyclomatic_max\" = \"< 2\"\n",
+        // Quick: the repository has no test suite for `tests.flaky`'s baseline to run.
+        "depth = \"quick\"\n[gate.tree]\n\"static.complexity.cyclomatic_max\" = \"< 2\"\n",
     );
     repo
 }

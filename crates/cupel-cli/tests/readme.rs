@@ -67,7 +67,7 @@ fn supported_languages(matrix: &Value, check: &str) -> Vec<String> {
         .as_array()
         .expect("cells")
         .iter()
-        .filter(|cell| cell["check"] == check && cell["support"]["status"] == "supported")
+        .filter(|cell| cell["check"] == check && status(cell) == "supported")
         .map(|cell| cell["lang"].as_str().expect("lang").to_owned())
         .collect()
 }
@@ -139,10 +139,17 @@ fn cell_status(matrix: &Value, check: &str, lang: &str) -> String {
         .iter()
         .find(|cell| cell["check"] == check && cell["lang"] == lang)
         .expect("one cell per check and language");
-    cell["support"]["status"]
-        .as_str()
-        .expect("status")
-        .to_owned()
+    status(cell)
+}
+
+/// A cell's support as the README states it: `unavailable` (a tool missing on the machine that
+/// generated it) is `supported` wherever the tool is installed, so the README does not depend on
+/// the machine.
+fn status(cell: &Value) -> String {
+    match cell["support"]["status"].as_str().expect("status") {
+        "unavailable" => "supported".to_owned(),
+        status => status.to_owned(),
+    }
 }
 
 fn exit_codes(cli: &Value) -> String {

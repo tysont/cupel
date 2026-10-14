@@ -5,43 +5,6 @@
     "version": "<version>"
   },
   "description": {
-    "languages": [
-      {
-        "lang": "go",
-        "support": {
-          "fact": "test-reruns",
-          "status": "unsupported"
-        }
-      },
-      {
-        "lang": "javascript",
-        "support": {
-          "fact": "test-reruns",
-          "status": "unsupported"
-        }
-      },
-      {
-        "lang": "python",
-        "support": {
-          "fact": "test-reruns",
-          "status": "unsupported"
-        }
-      },
-      {
-        "lang": "rust",
-        "support": {
-          "fact": "test-reruns",
-          "status": "unsupported"
-        }
-      },
-      {
-        "lang": "typescript",
-        "support": {
-          "fact": "test-reruns",
-          "status": "unsupported"
-        }
-      }
-    ],
     "manifest": {
       "cost": "standard",
       "findings": [
@@ -87,8 +50,6 @@
                   "minimum": 0,
                   "type": "integer"
                 },
-                "maxItems": 2,
-                "minItems": 2,
                 "type": "array"
               },
               "test": {
