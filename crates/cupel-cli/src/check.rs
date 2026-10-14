@@ -17,18 +17,15 @@ use crate::catalog::Catalog;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::project;
-use crate::run::{Run, shell_quote};
+use crate::run::{Invocation, Run, shell_quote};
 
 /// `cupel check`: the envelope of running the selected checks, or of planning them.
 pub fn verb(
-    run: &Run,
+    invocation: &Invocation<'_>,
     args: &ScopeArgs,
-    config: Result<&Config, &cupel_core::Error>,
-    writer: &Writer,
     events: &mut dyn EventSink,
-    dry_run: bool,
 ) -> Result<Envelope, CupelError> {
-    let config = config.map_err(|error| CupelError::from(error.clone()))?;
+    let config = invocation.config()?;
     let (table, rules) = gate_for(&config.file.gate, scope_request(args).mode());
     if args.gate && rules.is_none() {
         return Err(CupelError::bad_argument(
@@ -38,8 +35,8 @@ pub fn verb(
             format!("Add `[{table}]` gate rules to cupel.toml, or drop --gate."),
         ));
     }
-    let checked = self::run(run, args, config, writer, events, dry_run)?;
-    Ok(checked.into_envelope(run, writer, events))
+    let checked = self::run(invocation, config, args, events)?;
+    Ok(checked.into_envelope(invocation.run, invocation.writer, events))
 }
 
 /// Grades a finished `check` or `survey` envelope after suppressions and deltas: `check`
@@ -92,23 +89,15 @@ fn scope_request(args: &ScopeArgs) -> ScopeRequest {
 
 /// Runs (or, with `dry_run`, plans) the checks `args` select over the scope it names.
 pub fn run(
-    run: &Run,
-    args: &ScopeArgs,
+    invocation: &Invocation<'_>,
     config: &Config,
-    writer: &Writer,
+    args: &ScopeArgs,
     events: &mut dyn EventSink,
-    dry_run: bool,
 ) -> Result<CheckRun, CupelError> {
+    let (run, writer) = (invocation.run, invocation.writer);
     let catalog = Catalog::builtin();
-    let root = writer.root();
-    let exclude = &config.file.scope.exclude;
-    let info = project::detect(writer, exclude);
-    let tree = cupel_lang::walk_excluding(root, catalog.language_registry(), &info, exclude);
     let request = scope_request(args);
-    let mut resolved = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
-    resolved
-        .changes
-        .retain(|change| !exclude.excludes(&change.path));
+    let (info, resolved) = resolve(writer, config, &request, catalog.language_registry())?;
     let selected = Selection {
         depth: config.effective.depth,
         only: args.only.clone(),
@@ -121,32 +110,23 @@ pub fn run(
         catalog.language_registry(),
         resolved.files.iter().chain(&base_files),
     );
-    let base = base_tree(
-        run,
-        root,
-        writer,
-        &resolved,
-        &base_files,
-        &selected,
-        dry_run,
-    )?;
     let job = Job {
         run: run.id(),
         writer,
         cancel: run.cancellation().clone(),
         config,
+        base: base_tree(invocation, &resolved, &base_files, &selected)?,
         selected,
         langs: langs.clone(),
         files: resolved.files.clone(),
         selectors: request.selectors()?,
         selectors_must_match: !request.has_range(),
-        base,
     };
     let scheduler = Scheduler {
         checks: catalog.checks(),
         producers: catalog.producers(),
     };
-    let outcome = if dry_run {
+    let outcome = if invocation.dry_run {
         scheduler.plan(&job, events)?
     } else {
         scheduler.run(&job, events)?
@@ -160,9 +140,28 @@ pub fn run(
     };
     Ok(CheckRun {
         scope,
-        git: git_info(root, &resolved),
+        git: git_info(writer.root(), &resolved),
         outcome,
     })
+}
+
+/// The project roots outside `[scope] exclude`, and the files and range changes `request`
+/// selects from the walk (ADR-065).
+fn resolve(
+    writer: &Writer,
+    config: &Config,
+    request: &ScopeRequest,
+    languages: &LanguageRegistry,
+) -> Result<(ProjectInfo, ResolvedFiles), CupelError> {
+    let root = writer.root();
+    let exclude = &config.file.scope.exclude;
+    let info = project::detect(writer, exclude);
+    let tree = cupel_lang::walk_excluding(root, languages, &info, exclude);
+    let mut resolved = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
+    resolved
+        .changes
+        .retain(|change| !exclude.excludes(&change.path));
+    Ok((info, resolved))
 }
 
 /// What `check` (or `survey`) found, before it becomes an envelope.
@@ -245,13 +244,10 @@ fn base_files(languages: &LanguageRegistry, resolved: &ResolvedFiles) -> Vec<Str
 /// The base side of a range scope: checked out into the run's scratch directory when a
 /// selected check reads it, else only described (ADR-056). `None` without a range.
 fn base_tree(
-    run: &Run,
-    root: &Path,
-    writer: &Writer,
+    invocation: &Invocation<'_>,
     resolved: &ResolvedFiles,
     files: &[String],
     selected: &[&dyn Check],
-    dry_run: bool,
 ) -> Result<Option<BaseTree>, CupelError> {
     let Some(commit) = &resolved.base else {
         return Ok(None);
@@ -260,9 +256,9 @@ fn base_tree(
         commit: commit.clone(),
         changes: resolved.changes.clone(),
     };
-    let scratch = writer.scratch(&run.id());
+    let scratch = invocation.writer.scratch(&invocation.run.id());
     let reads_base = selected.iter().any(|check| !check.base_needs().is_empty());
-    let git = Git::open(root).filter(|_| reads_base && !dry_run);
+    let git = Git::open(invocation.writer.root()).filter(|_| reads_base && !invocation.dry_run);
     Ok(Some(match git {
         Some(git) => BaseTree::checkout(range, &git, &scratch, |path| {
             files.iter().any(|file| file == path)

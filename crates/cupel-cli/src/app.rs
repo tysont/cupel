@@ -22,7 +22,7 @@ use crate::events::Events;
 use crate::format::{self, Rendering};
 use crate::page::Page;
 use crate::problem::Problem;
-use crate::run::Run;
+use crate::run::{Invocation, Run};
 use crate::{
     against, baseline, catalog, check, describe, doctor, explain, init, persist, registry, render,
     suppress, survey,
@@ -145,20 +145,7 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     };
     let presentation =
         |rendering| Presentation::new(environment, rendering, cli.global.no_color, page);
-    let root = repository_root(
-        environment.current_dir.as_deref(),
-        cli.global.cwd.as_deref(),
-    );
-    let writer = root.and_then(|root| {
-        let writer = Writer::new(&root, cli.global.write)
-            .map_err(|_| not_a_directory(&root.display().to_string()))?;
-        Ok(if cli.plans_only() {
-            writer.recording()
-        } else {
-            writer
-        })
-    });
-    let writer = match writer {
+    let writer = match writer_for(environment, cli) {
         Ok(writer) => writer,
         Err(error) => {
             return output(
@@ -171,8 +158,9 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     let mut stderr = String::new();
     let (envelope, rendering, events) = match Events::open(cli.global.events.as_deref(), &writer) {
         Ok(mut events) => {
-            let (envelope, rendering) =
-                configured(environment, run, cli, &writer, &mut events, &mut stderr);
+            let (envelope, rendering, said) =
+                configured(environment, run, cli, &writer, &mut events);
+            stderr.push_str(&said);
             (envelope, rendering, Some(events))
         }
         Err(error) => (run.failed(&error), recovered_rendering(environment), None),
@@ -187,19 +175,38 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
         }
     }
     if keeps_run_record(run, cli) {
-        if let Err(error) = writer.run_record(&envelope.run.id, &envelope) {
-            let _ = writeln!(stderr, "cupel: could not write the run record: {error}");
-        }
-        if let Err(error) =
-            persist::record(&writer, &envelope, suppress::load(&writer).ok().as_ref())
-        {
-            let _ = writeln!(
-                stderr,
-                "cupel: could not record the run in the fact store: {error}"
-            );
-        }
+        record(&writer, &envelope, &mut stderr);
     }
     output(envelope, &presentation(rendering), stderr)
+}
+
+/// The writer for the repository the invocation names: recording, for a run that only plans.
+fn writer_for(environment: &Environment, cli: &Cli) -> Result<Writer, CupelError> {
+    let root = repository_root(
+        environment.current_dir.as_deref(),
+        cli.global.cwd.as_deref(),
+    )?;
+    let writer = Writer::new(&root, cli.global.write)
+        .map_err(|_| not_a_directory(&root.display().to_string()))?;
+    Ok(if cli.plans_only() {
+        writer.recording()
+    } else {
+        writer
+    })
+}
+
+/// Keeps `envelope` as the run record and in the fact store; a failure is a line on `stderr`
+/// and changes nothing else (ADR-045 §8).
+fn record(writer: &Writer, envelope: &Envelope, stderr: &mut String) {
+    if let Err(error) = writer.run_record(&envelope.run.id, envelope) {
+        let _ = writeln!(stderr, "cupel: could not write the run record: {error}");
+    }
+    if let Err(error) = persist::record(writer, envelope, suppress::load(writer).ok().as_ref()) {
+        let _ = writeln!(
+            stderr,
+            "cupel: could not record the run in the fact store: {error}"
+        );
+    }
 }
 
 /// Every parsed run of a verb other than `describe` keeps its envelope under `.cupel/runs/` and
@@ -209,25 +216,38 @@ fn keeps_run_record(run: &Run, cli: &Cli) -> bool {
     !cli.plans_only() && !cli.global.describe && run.verb.is_some_and(|verb| verb != Verb::Describe)
 }
 
-/// Loads configuration, chooses the format, and runs the verb. Errors before the format is
-/// known render as ADR-018 §5 recovers it.
+/// Loads configuration, chooses the format, and runs the verb, with what to say on stderr.
+/// Errors before the format is known render as ADR-018 §5 recovers it.
 fn configured(
     environment: &Environment,
     run: &mut Run,
     cli: &Cli,
     writer: &Writer,
     events: &mut Events,
-    stderr: &mut String,
-) -> (Envelope, Rendering) {
+) -> (Envelope, Rendering, String) {
+    let mut said = String::new();
+    let stderr = &mut said;
     let config = match load_config(&config_request(environment, cli, writer.root().to_owned())) {
         Ok(config) => config,
         Err(error) if runs_without_configuration(cli) => {
             let envelope = guarded(run, stderr, cli.global.quiet, || {
-                execute(run, cli, environment, writer, events, Err(&error))
+                let invocation = Invocation {
+                    run,
+                    writer,
+                    config: Err(&error),
+                    dry_run: cli.global.dry_run,
+                };
+                execute(&invocation, cli, environment, events)
             });
-            return (envelope, recovered_rendering(environment));
+            return (envelope, recovered_rendering(environment), said);
         }
-        Err(error) => return (run.failed(&error.into()), recovered_rendering(environment)),
+        Err(error) => {
+            return (
+                run.failed(&error.into()),
+                recovered_rendering(environment),
+                said,
+            );
+        }
     };
     run.config = config.echo();
     run.depth = Some(config.effective.depth);
@@ -241,7 +261,7 @@ fn configured(
         .unwrap_or_else(|| format::default_for(environment.stdout_is_terminal));
     let rendering = match format::rendering(format) {
         Ok(rendering) => rendering,
-        Err(error) => return (run.failed(&error), Rendering::Json),
+        Err(error) => return (run.failed(&error), Rendering::Json, said),
     };
     if cli.global.verbose {
         let _ = writeln!(stderr, "cupel: root: {}", writer.root().display());
@@ -251,9 +271,15 @@ fn configured(
         let _ = writeln!(stderr, "cupel: format: {}", format.as_str());
     }
     let envelope = guarded(run, stderr, cli.global.quiet, || {
-        execute(run, cli, environment, writer, events, Ok(&config))
+        let invocation = Invocation {
+            run,
+            writer,
+            config: Ok(&config),
+            dry_run: cli.global.dry_run,
+        };
+        execute(&invocation, cli, environment, events)
     });
-    (envelope, rendering)
+    (envelope, rendering, said)
 }
 
 /// The configuration, rejected when it names a check, gate metric, or language the registries
@@ -307,102 +333,109 @@ fn recovered_rendering(environment: &Environment) -> Rendering {
 /// plans instead; a run whose slow work the timeout cut short reports its results as partial
 /// (ADR-020 §5, §6).
 fn execute(
-    run: &Run,
+    invocation: &Invocation<'_>,
     cli: &Cli,
     environment: &Environment,
-    writer: &Writer,
     events: &mut dyn EventSink,
-    config: Result<&Config, &cupel_core::Error>,
 ) -> Result<Envelope, CupelError> {
     assert!(
         !environment.debug_panic(),
         "CUPEL_DEBUG_PANIC is set; failing deliberately"
     );
+    let run = invocation.run;
     if cli.global.describe {
         let words = cli.verb.as_ref().map(VerbArgs::words).unwrap_or_default();
         return describe::command(run, &words);
     }
-    let dry_run = cli.global.dry_run;
     let cut_short = !cli.plans_only()
         && environment
             .debug_sleep()
             .is_some_and(|duration| !run.cancellation().wait(duration));
     let envelope = match &cli.verb {
         None => Err(CupelError::missing_verb(verb_names())),
-        Some(VerbArgs::Describe(args)) => {
+        Some(verb) => run_verb(invocation, cli, verb, events),
+    }?;
+    let envelope = graded(envelope, cli, invocation.writer, invocation.config)?;
+    Ok(if cut_short {
+        Run::interrupted(envelope)
+    } else {
+        envelope
+    })
+}
+
+/// Runs `verb`. The dry run of a verb that changes nothing is an empty plan.
+fn run_verb(
+    invocation: &Invocation<'_>,
+    cli: &Cli,
+    verb: &VerbArgs,
+    events: &mut dyn EventSink,
+) -> Result<Envelope, CupelError> {
+    let (run, writer, dry_run) = (invocation.run, invocation.writer, invocation.dry_run);
+    match verb {
+        VerbArgs::Describe(args) => {
             let described = describe::run(run, args, writer.root())?;
-            if dry_run {
-                // `describe` runs nothing and writes nothing; its plan is empty.
-                Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()))
+            // `describe` runs nothing and writes nothing; its plan is empty.
+            Ok(if dry_run {
+                invocation.nothing_planned(events)
             } else {
-                Ok(described)
-            }
+                described
+            })
         }
-        Some(VerbArgs::Doctor { fix }) => {
-            if dry_run {
-                // `doctor` writes only its probe and run record; its plan is empty (ADR-022 §6).
-                Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()))
-            } else {
-                Ok(doctor::run(run, config, writer, *fix))
-            }
+        // `doctor` writes only its probe and run record; its plan is empty (ADR-022 §6).
+        VerbArgs::Doctor { .. } | VerbArgs::Explain { .. } if dry_run => {
+            Ok(invocation.nothing_planned(events))
         }
-        Some(VerbArgs::Init { force }) => {
-            if cli.plans_only() {
-                // A preview shows what `--write` would do, so its recording writer may plan
-                // writes outside `.cupel/`; it never writes anything.
-                let preview = Writer::new(writer.root(), true)?.recording();
-                let findings = findings(run, init::write(&preview, *force)?);
-                let mut envelope =
-                    run.plan_envelope(RunPlan::default(), &preview, events, findings);
-                envelope.next_actions.push(init::apply(*force));
-                Ok(envelope)
-            } else {
-                let findings = findings(run, init::write(writer, *force)?);
-                Ok(run.reported(Status::Pass, ExitCode::Pass, findings))
-            }
-        }
-        Some(VerbArgs::Check { scope }) => check::verb(run, scope, config, writer, events, dry_run),
-        Some(VerbArgs::Survey { scope }) => {
-            survey::verb(run, scope, config, writer, events, dry_run)
-        }
-        Some(VerbArgs::Explain { target, .. }) => {
-            if dry_run {
-                // `explain` only reads the store; its plan is empty.
-                Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()))
-            } else {
-                explain::run(run, writer, target)
-            }
-        }
-        Some(VerbArgs::Baseline { name, action }) => {
+        VerbArgs::Doctor { fix } => Ok(doctor::run(run, invocation.config, writer, *fix)),
+        VerbArgs::Init { force } => init_verb(invocation, cli, *force, events),
+        VerbArgs::Check { scope } => check::verb(invocation, scope, events),
+        VerbArgs::Survey { scope } => survey::verb(invocation, scope, events),
+        // `explain` only reads the store.
+        VerbArgs::Explain { target, .. } => explain::run(run, writer, target),
+        VerbArgs::Baseline { name, action } => {
             baseline::run(run, writer, events, name.as_deref(), action)
         }
-        Some(VerbArgs::Suppress {
+        VerbArgs::Suppress {
             finding,
             reason,
             until,
-        }) => {
+        } => {
             let reason = reason.as_deref().unwrap_or_default();
             let envelope = suppress::run(run, writer, finding, reason, until.as_deref())?;
-            if dry_run {
-                Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()))
+            Ok(if dry_run {
+                invocation.nothing_planned(events)
             } else {
-                Ok(envelope)
-            }
+                envelope
+            })
         }
-        Some(verb) => {
+        verb => {
             let words = verb.words();
             let step = registry::find(&words[..1])
                 .and_then(|command| command.pending_step)
                 .expect("every verb without behavior names its plan step in the registry");
             Err(CupelError::pending_verb(&words, &step))
         }
-    }?;
-    let envelope = graded(envelope, cli, writer, config)?;
-    Ok(if cut_short {
-        Run::interrupted(envelope)
-    } else {
-        envelope
-    })
+    }
+}
+
+/// `init`: writes the configuration, or previews what `--write` would write.
+fn init_verb(
+    invocation: &Invocation<'_>,
+    cli: &Cli,
+    force: bool,
+    events: &mut dyn EventSink,
+) -> Result<Envelope, CupelError> {
+    let run = invocation.run;
+    if !cli.plans_only() {
+        let findings = findings(run, init::write(invocation.writer, force)?);
+        return Ok(run.reported(Status::Pass, ExitCode::Pass, findings));
+    }
+    // A preview shows what `--write` would do, so its recording writer may plan writes
+    // outside `.cupel/`; it never writes anything.
+    let preview = Writer::new(invocation.writer.root(), true)?.recording();
+    let findings = findings(run, init::write(&preview, force)?);
+    let mut envelope = run.plan_envelope(RunPlan::default(), &preview, events, findings);
+    envelope.next_actions.push(init::apply(force));
+    Ok(envelope)
 }
 
 /// A finished run of a verb that grades the repository with the repository's suppressions

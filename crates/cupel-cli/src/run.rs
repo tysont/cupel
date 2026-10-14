@@ -8,6 +8,8 @@ use cupel_core::{
     ToolchainInfo, Verb, Writer, schema,
 };
 
+use cupel_core::config::Config;
+
 use crate::error::CupelError;
 
 pub struct Run {
@@ -225,6 +227,28 @@ fn civil_from_days(days: i64) -> (i64, u32, u32) {
     let month = u32::try_from(if mp < 10 { mp + 3 } else { mp - 9 }).unwrap_or(1);
     let year = year_of_era + era * 400 + i64::from(month <= 2);
     (year, month, day)
+}
+
+/// What a verb runs with: this run, the repository's writer, the configuration or why it did not
+/// load, and whether this is a dry run.
+pub struct Invocation<'a> {
+    pub run: &'a Run,
+    pub writer: &'a Writer,
+    pub config: Result<&'a Config, &'a cupel_core::Error>,
+    pub dry_run: bool,
+}
+
+impl Invocation<'_> {
+    /// The configuration, or the usage error it failed to load with.
+    pub fn config(&self) -> Result<&Config, CupelError> {
+        self.config.map_err(|error| CupelError::from(error.clone()))
+    }
+
+    /// A plan that would do nothing: the dry run of a verb that changes nothing.
+    pub fn nothing_planned(&self, events: &mut dyn EventSink) -> Envelope {
+        self.run
+            .plan_envelope(RunPlan::default(), self.writer, events, Vec::new())
+    }
 }
 
 #[cfg(test)]
