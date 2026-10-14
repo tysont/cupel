@@ -9,6 +9,7 @@ use schemars::JsonSchema;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
+use crate::base::Range;
 use crate::check::Manifest;
 use crate::error::{Error, Result};
 use crate::producer::SharedFact;
@@ -121,10 +122,14 @@ pub trait Fact: Serialize + DeserializeOwned + JsonSchema + Send + Sync + 'stati
 }
 
 /// The facts a check may read: exactly the kinds its manifest declares in `needs` and `wants`.
-/// Facts are shared, so one production serves every check that declares the kind.
+/// Facts are shared, so one production serves every check that declares the kind. Under a
+/// range scope, a check that declares `Check::base_needs` also reads those kinds as they were
+/// at the base commit, and the range itself (ADR-056).
 pub struct Facts {
     declared: BTreeSet<FactKind>,
     values: HashMap<FactKind, Arc<dyn Any + Send + Sync>>,
+    base: HashMap<FactKind, Arc<dyn Any + Send + Sync>>,
+    range: Option<Range>,
 }
 
 impl Facts {
@@ -137,6 +142,8 @@ impl Facts {
                 .copied()
                 .collect(),
             values: HashMap::new(),
+            base: HashMap::new(),
+            range: None,
         }
     }
 
@@ -155,6 +162,19 @@ impl Facts {
         Ok(())
     }
 
+    /// Adds a fact produced from the base side of the range. Refuses kinds the manifest does
+    /// not declare.
+    pub fn insert_base_shared(&mut self, fact: &SharedFact) -> Result<()> {
+        self.check_declared(fact.kind())?;
+        self.base.insert(fact.kind(), fact.value());
+        Ok(())
+    }
+
+    /// Records the range the base side comes from.
+    pub fn set_range(&mut self, range: Range) {
+        self.range = Some(range);
+    }
+
     /// The kinds the manifest declares, in catalog order.
     pub fn declared(&self) -> impl Iterator<Item = FactKind> + '_ {
         self.declared.iter().copied()
@@ -167,6 +187,21 @@ impl Facts {
             .get(&F::KIND)
             .and_then(|value| value.downcast_ref::<F>())
             .ok_or(Error::AbsentFact { kind: F::KIND })
+    }
+
+    /// The fact of type `F` as it was at the range's base commit, over the changed files that
+    /// existed there. Errors when `F` is undeclared or no base side was produced.
+    pub fn base<F: Fact>(&self) -> Result<&F> {
+        self.check_declared(F::KIND)?;
+        self.base
+            .get(&F::KIND)
+            .and_then(|value| value.downcast_ref::<F>())
+            .ok_or(Error::AbsentFact { kind: F::KIND })
+    }
+
+    /// The range being compared; `None` outside a range scope.
+    pub fn range(&self) -> Option<&Range> {
+        self.range.as_ref()
     }
 
     fn check_declared(&self, kind: FactKind) -> Result<()> {

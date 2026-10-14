@@ -36,6 +36,31 @@ impl fmt::Display for GitError {
 
 impl std::error::Error for GitError {}
 
+/// One path a range changes, relative to the root, and how.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Change {
+    pub path: String,
+    pub kind: ChangeKind,
+}
+
+/// Whether a path exists only after the change, on both sides, or only before it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ChangeKind {
+    Added,
+    Modified,
+    Deleted,
+}
+
+fn sorted(mut changes: Vec<Change>) -> Vec<Change> {
+    changes.sort();
+    changes.dedup_by(|a, b| a.path == b.path);
+    changes
+}
+
+fn paths(changes: Vec<Change>) -> Vec<String> {
+    changes.into_iter().map(|change| change.path).collect()
+}
+
 impl Git {
     /// The work tree `root` is in; `None` outside one or when `git` cannot run.
     pub fn open(root: &Path) -> Option<Self> {
@@ -103,20 +128,57 @@ impl Git {
     /// Files that differ between `rev` and the working tree, including staged changes and
     /// untracked, non-ignored files; relative to the root, `/`-separated, sorted, unique.
     pub fn changed_since(&self, rev: &str) -> Result<Vec<String>, GitError> {
-        let mut files = self.names(&["diff", "--name-only", "-z", "--relative", rev, "--"])?;
-        files.extend(self.names(&["ls-files", "-z", "--others", "--exclude-standard"])?);
-        files.sort();
-        files.dedup();
-        Ok(files)
+        Ok(paths(self.changes_since(rev)?))
     }
 
     /// Files that differ between the commits `base` and `head`; relative to the root, sorted.
     pub fn changed_between(&self, base: &str, head: &str) -> Result<Vec<String>, GitError> {
-        let mut files =
-            self.names(&["diff", "--name-only", "-z", "--relative", base, head, "--"])?;
-        files.sort();
-        files.dedup();
-        Ok(files)
+        Ok(paths(self.changes_between(base, head)?))
+    }
+
+    /// How each file differs between `rev` and the working tree (staged changes included;
+    /// untracked, non-ignored files are `Added`), sorted by path (ADR-056).
+    pub fn changes_since(&self, rev: &str) -> Result<Vec<Change>, GitError> {
+        let mut changes = self.statuses(&[rev])?;
+        changes.extend(
+            self.names(&["ls-files", "-z", "--others", "--exclude-standard"])?
+                .into_iter()
+                .map(|path| Change {
+                    path,
+                    kind: ChangeKind::Added,
+                }),
+        );
+        Ok(sorted(changes))
+    }
+
+    /// How each file differs between the commits `base` and `head`, sorted by path. Renames
+    /// are a deletion and an addition (ADR-056).
+    pub fn changes_between(&self, base: &str, head: &str) -> Result<Vec<Change>, GitError> {
+        Ok(sorted(self.statuses(&[base, head])?))
+    }
+
+    /// The contents of `path` (relative to the root) at the commit `rev`.
+    pub fn show(&self, rev: &str, path: &str) -> Result<Vec<u8>, GitError> {
+        self.bytes(&["show", &format!("{rev}:./{path}")])
+    }
+
+    /// `git diff --name-status` against `revs`, relative to the root.
+    fn statuses(&self, revs: &[&str]) -> Result<Vec<Change>, GitError> {
+        let mut args = vec!["diff", "--name-status", "--no-renames", "-z", "--relative"];
+        args.extend_from_slice(revs);
+        args.push("--");
+        let fields = self.names(&args)?;
+        Ok(fields
+            .chunks_exact(2)
+            .map(|pair| Change {
+                path: pair[1].clone(),
+                kind: match pair[0].as_str() {
+                    "A" => ChangeKind::Added,
+                    "D" => ChangeKind::Deleted,
+                    _ => ChangeKind::Modified,
+                },
+            })
+            .collect())
     }
 
     /// NUL-separated names printed by `git <args>`.
@@ -141,6 +203,12 @@ impl Git {
 
     /// Standard output of `git <args>` run in the root, failing on a non-zero exit.
     fn output(&self, args: &[&str]) -> Result<String, GitError> {
+        String::from_utf8(self.bytes(args)?)
+            .map_err(|_| failure(args, "printed output that is not UTF-8".to_owned()))
+    }
+
+    /// Raw standard output of `git <args>` run in the root, failing on a non-zero exit.
+    fn bytes(&self, args: &[&str]) -> Result<Vec<u8>, GitError> {
         let output = Command::new("git")
             .args(args)
             .current_dir(&self.root)
@@ -151,8 +219,7 @@ impl Git {
             let message = String::from_utf8_lossy(&output.stderr).trim().to_owned();
             return Err(failure(args, message));
         }
-        String::from_utf8(output.stdout)
-            .map_err(|_| failure(args, "printed output that is not UTF-8".to_owned()))
+        Ok(output.stdout)
     }
 }
 

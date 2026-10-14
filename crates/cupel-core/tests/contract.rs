@@ -417,5 +417,6 @@ fn skip_reasons() {
         (SkipReason::Unconfigured, "unconfigured"),
         (SkipReason::Budget, "budget"),
         (SkipReason::Timeout, "timeout"),
+        (SkipReason::NeedsRange, "needs-range"),
     ]);
 }

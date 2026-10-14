@@ -7,7 +7,7 @@ use globset::{GlobBuilder, GlobMatcher};
 
 use crate::envelope::ScopeMode;
 use crate::error::{ArgumentError, Result};
-use crate::git::Git;
+use crate::git::{Change, Git};
 use crate::hash::SymbolHash;
 use crate::syntax::{NormTree, SymbolDef, SymbolKey, Symbols};
 
@@ -53,6 +53,9 @@ pub struct ResolvedFiles {
     pub files: Vec<String>,
     /// The merge base (`--changed`) or base commit (`--base`), for `run.git.base`.
     pub base: Option<String>,
+    /// Every path the range changes that the paths select, including deleted files and files
+    /// no language owns; empty without a range (ADR-056).
+    pub changes: Vec<Change>,
 }
 
 impl ScopeRequest {
@@ -93,21 +96,31 @@ impl ScopeRequest {
         root: &Path,
         default_branch: Option<&str>,
     ) -> Result<ResolvedFiles> {
-        let mut files = self.paths_filter(tree)?;
+        let patterns = self.patterns(tree)?;
+        let selected = |file: &str| {
+            patterns.is_empty() || patterns.iter().any(|pattern| pattern.matches(file))
+        };
+        let mut files: Vec<String> = tree.iter().filter(|file| selected(file)).cloned().collect();
         let mut base = None;
+        let mut changes = Vec::new();
         if let Some((changed, start)) = self.range(root, default_branch)? {
-            let changed: BTreeSet<String> = changed.into_iter().collect();
-            files.retain(|file| changed.contains(file));
+            let paths: BTreeSet<&str> = changed.iter().map(|change| change.path.as_str()).collect();
+            files.retain(|file| paths.contains(file.as_str()));
+            changes = changed
+                .into_iter()
+                .filter(|change| selected(&change.path))
+                .collect();
             base = Some(start);
         }
-        Ok(ResolvedFiles { files, base })
+        Ok(ResolvedFiles {
+            files,
+            base,
+            changes,
+        })
     }
 
-    /// `tree` limited to the `--paths` patterns; every pattern must match some file.
-    fn paths_filter(&self, tree: &[String]) -> Result<Vec<String>> {
-        if self.paths.is_empty() {
-            return Ok(tree.to_vec());
-        }
+    /// The `--paths` patterns; every pattern must match some file of `tree`.
+    fn patterns(&self, tree: &[String]) -> Result<Vec<PathPattern>> {
         let patterns = self
             .paths
             .iter()
@@ -127,19 +140,15 @@ impl ScopeRequest {
             )
             .into());
         }
-        Ok(tree
-            .iter()
-            .filter(|file| patterns.iter().any(|pattern| pattern.matches(file)))
-            .cloned()
-            .collect())
+        Ok(patterns)
     }
 
-    /// The files the range changed and the commit it starts from; `None` without a range.
+    /// The paths the range changed and the commit it starts from; `None` without a range.
     fn range(
         &self,
         root: &Path,
         default_branch: Option<&str>,
-    ) -> Result<Option<(Vec<String>, String)>> {
+    ) -> Result<Option<(Vec<Change>, String)>> {
         if self.head.is_some() && self.base.is_none() {
             return Err(ArgumentError::new(
                 "--head",
@@ -201,7 +210,7 @@ impl ScopeRequest {
                 .commit(&branch)
                 .and_then(|_| git.merge_base(&branch, "HEAD"))
                 .map_err(git_failure)?;
-            let files = git.changed_since(&start).map_err(git_failure)?;
+            let files = git.changes_since(&start).map_err(git_failure)?;
             return Ok(Some((files, start)));
         }
         let base = self.base.as_deref().unwrap_or_default();
@@ -216,9 +225,9 @@ impl ScopeRequest {
                         format!("Fix the range; git said: {error}"),
                     )
                 })?;
-                git.changed_between(&start, &end)
+                git.changes_between(&start, &end)
             }
-            None => git.changed_since(&start),
+            None => git.changes_since(&start),
         }
         .map_err(git_failure)?;
         Ok(Some((files, start)))

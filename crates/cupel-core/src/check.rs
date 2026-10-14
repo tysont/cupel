@@ -102,6 +102,13 @@ pub trait Check: Send + Sync {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult>;
 
+    /// The kinds this check also reads as they were at a range's base commit, through
+    /// `Facts::base` (ADR-056). Each must also be in `needs`. A check that declares any runs
+    /// only under a range scope and is skipped with `needs-range` otherwise.
+    fn base_needs(&self) -> &[FactKind] {
+        &[]
+    }
+
     /// One score from this check's per-language scores, for the envelope's single entry per
     /// check (ADR-041). The default is the mean weighted by each score's `n`.
     #[allow(

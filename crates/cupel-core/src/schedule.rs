@@ -3,6 +3,7 @@
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::time::Instant;
 
+use crate::base::BaseTree;
 use crate::cancel::Cancellation;
 use crate::check::{Check, CheckCtx, CheckRegistry, Plan};
 use crate::config::Config;
@@ -45,6 +46,8 @@ pub struct Job<'a> {
     pub selectors: Vec<SymbolSelector>,
     /// Whether a selector that matches no symbol is a usage error (no range was given).
     pub selectors_must_match: bool,
+    /// The base side of a range scope; `None` without a range (ADR-056).
+    pub base: Option<BaseTree>,
 }
 
 /// What a run (or a dry run's planning) produced.
@@ -80,6 +83,10 @@ impl Scheduler<'_> {
     /// Runs `job`, streaming events to `sink`.
     pub fn run(&self, job: &Job<'_>, sink: &mut dyn EventSink) -> Result<Outcome> {
         let mut store = FactStore::new(self.producers, job);
+        let mut base = job
+            .base
+            .as_ref()
+            .map(|base| FactStore::at(self.producers, job, base));
         let prepared = self.prepare(job, &mut store, sink)?;
         let est_ms = prepared.tasks.iter().map(|task| task.plan.est_ms).sum();
         sink.emit(Event::Plan {
@@ -111,7 +118,8 @@ impl Scheduler<'_> {
             if !tasks.is_empty() || skips.is_empty() {
                 let mut run = CheckRun::start(*check, &tasks, sink);
                 for task in tasks {
-                    let result = Self::run_task(job, &mut store, task, &mut run.sink(sink));
+                    let result =
+                        Self::run_task(job, &mut store, base.as_mut(), task, &mut run.sink(sink));
                     interrupted |=
                         matches!(result.status, CheckStatus::Partial | CheckStatus::Skipped);
                     run.record(task, result, sink);
@@ -225,6 +233,13 @@ impl Scheduler<'_> {
                     });
                     continue;
                 }
+                if !check.base_needs().is_empty() && job.base.is_none() {
+                    skips.push(Skip {
+                        check: *check,
+                        skipped: needs_range(&manifest.id, &lang.id),
+                    });
+                    continue;
+                }
                 let scope = scopes.get(&lang.id).cloned().unwrap_or_default();
                 let ctx = check_ctx(job, *check, &lang.id, scope.clone());
                 let plan = check.plan(&ctx, &scope)?;
@@ -248,6 +263,7 @@ impl Scheduler<'_> {
     fn run_task(
         job: &Job<'_>,
         store: &mut FactStore<'_>,
+        base: Option<&mut FactStore<'_>>,
         task: &Task<'_>,
         sink: &mut CheckSink<'_>,
     ) -> CheckResult {
@@ -285,6 +301,22 @@ impl Scheduler<'_> {
         for kind in &manifest.wants {
             if let Ok(fact) = store.ensure(*kind, &task.lang, &mut *sink.forward) {
                 let _ = facts.insert_shared(&fact);
+            }
+        }
+        if let Some(tree) = &job.base {
+            facts.set_range(tree.range.clone());
+        }
+        if let Some(base) = base {
+            for kind in task.check.base_needs() {
+                // Base-side producer findings describe code the change replaced: dropped.
+                match base.ensure(*kind, &task.lang, &mut Vec::new()) {
+                    Ok(fact) => {
+                        if let Err(error) = facts.insert_base_shared(&fact) {
+                            return result(status_of(&error), None);
+                        }
+                    }
+                    Err(error) => return result(status_of(&error), None),
+                }
             }
         }
         let ctx = check_ctx(job, task.check, &task.lang.id, task.scope.clone());
@@ -402,16 +434,34 @@ struct FactStore<'a> {
 }
 
 impl<'a> FactStore<'a> {
+    /// The head side: the repository root and the files in scope.
     fn new(producers: &'a ProducerRegistry, job: &Job<'a>) -> Self {
+        Self::over(
+            producers,
+            job,
+            job.writer.root().to_path_buf(),
+            job.files.clone(),
+        )
+    }
+
+    /// The base side of a range: the base versions of the changed files (ADR-056).
+    fn at(producers: &'a ProducerRegistry, job: &Job<'a>, base: &BaseTree) -> Self {
+        Self::over(producers, job, base.root.clone(), base.files.clone())
+    }
+
+    fn over(
+        producers: &'a ProducerRegistry,
+        job: &Job<'a>,
+        root: std::path::PathBuf,
+        files: Vec<String>,
+    ) -> Self {
         Self {
             producers,
-            root: Ctx {
-                root: job.writer.root().to_path_buf(),
-            },
+            root: Ctx { root },
             writer: job.writer.confined(),
             cancel: job.cancel.clone(),
             config: job.config,
-            files: job.files.clone(),
+            files,
             made: HashMap::new(),
             findings: Vec::new(),
             seen: HashSet::new(),
@@ -655,6 +705,17 @@ fn unsupported(support: &Support, lang: &LangId) -> Skipped {
         lang: Some(lang.clone()),
         tool,
         see: Some("cupel describe matrix".to_owned()),
+    }
+}
+
+/// The `skipped` object for a check that compares a range's two sides on a scope without one.
+fn needs_range(id: &crate::id::CheckId, lang: &LangId) -> Skipped {
+    Skipped {
+        reason: SkipReason::NeedsRange,
+        fact: None,
+        lang: Some(lang.clone()),
+        tool: None,
+        see: Some(format!("cupel check --changed --only {id}")),
     }
 }
 

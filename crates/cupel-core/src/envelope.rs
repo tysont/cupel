@@ -339,6 +339,8 @@ pub enum SkipReason {
     Unconfigured,
     Budget,
     Timeout,
+    // The check compares a range's base and head, and the scope has no range (ADR-056).
+    NeedsRange,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
