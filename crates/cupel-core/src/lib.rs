@@ -32,11 +32,12 @@ pub use check::{
     Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,
 };
 pub use describe::{
-    AllDescription, ArgDescription, CheckSupport, CliDescription, CommandDescription,
-    CommandSummary, CommandTemplate, Description, Example, ExitCodeDescription, FactDescription,
-    FactProducers, LanguageDescription, LanguageProducers, LanguageSummary, LanguagesDescription,
-    LauncherDescription, MatrixCell, MatrixDescription, ProducerDescription, SchemaDescription,
-    SchemaRef, SupportDescription, ToolDescription, ToolchainDescription, ValueType,
+    AllDescription, ArgDescription, CheckDescription, CheckSupport, CliDescription,
+    CommandDescription, CommandSummary, CommandTemplate, Description, Example, ExitCodeDescription,
+    FactDescription, FactProducers, FindingDescription, LanguageDescription, LanguageProducers,
+    LanguageSummary, LanguageSupport, LanguagesDescription, LauncherDescription, MatrixCell,
+    MatrixDescription, ProducerDescription, SchemaDescription, SchemaRef, SupportDescription,
+    ToolDescription, ToolchainDescription, ValueType,
 };
 pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPlan};
 pub use envelope::{

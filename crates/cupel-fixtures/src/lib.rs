@@ -10,9 +10,16 @@
 //!
 //! [`conformance`] checks each language's producers against the per-fact construct
 //! inventories in `conformance/` (design §8.3.7); its module docs define the inventory format.
+//!
+//! [`matrix`] is the matrix test's engine: a golden `golden/<check>/<lang>.json` for every
+//! supported (check, language), a `skipped` entry for every other pair, and every check run on
+//! exactly its declared facts. [`evidence`] validates finding evidence against manifest schemas
+//! (ADR-043).
 
 pub mod conformance;
+pub mod evidence;
 mod golden;
+pub mod matrix;
 mod redact;
 mod repos;
 mod run;

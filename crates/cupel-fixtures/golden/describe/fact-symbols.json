@@ -5,7 +5,9 @@
     "version": "<version>"
   },
   "description": {
-    "consumers": [],
+    "consumers": [
+      "static.complexity"
+    ],
     "kind": "symbols",
     "producers": [
       {

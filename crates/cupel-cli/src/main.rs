@@ -2,6 +2,7 @@
 // ABOUTME: Reads the process environment once, runs the invocation, and writes its output and exit code.
 mod app;
 mod catalog;
+mod check;
 mod cli;
 mod describe;
 mod doctor;

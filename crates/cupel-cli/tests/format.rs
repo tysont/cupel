@@ -45,18 +45,18 @@ fn format_text_renders_a_status_line_instead_of_json() {
 
 #[test]
 fn format_text_shows_findings_with_their_fix() {
-    let outcome = run(["check", "--format", "text"]);
+    let outcome = run(["survey", "--format", "text"]);
     assert_eq!(outcome.code, 2);
-    let id = cli_finding_id("cli.not-implemented", "check");
-    assert!(outcome.stdout.starts_with("cupel check: error (exit 2)\n"));
+    let id = cli_finding_id("cli.not-implemented", "survey");
+    assert!(outcome.stdout.starts_with("cupel survey: error (exit 2)\n"));
     let findings = format!(
-        "fail (1)\n  cli\n    `cupel check` is not implemented yet\n      \
+        "fail (1)\n  cli\n    `cupel survey` is not implemented yet\n      \
          {id} · cli.not-implemented · tier 0 · confidence 1\n      \
-         Implemented in plan step P2.1.\n      \
-         evidence: step \"P2.1\" (full: cupel explain {id})\n      \
+         Implemented in plan step P2.9.\n      \
+         evidence: step \"P2.9\" (full: cupel explain {id})\n      \
          action review (priority 1): Use a verb that is implemented; `cupel describe` marks \
          pending ones with pending_step.\n      \
-         repro: cupel check --format text\n      \
+         repro: cupel survey --format text\n      \
          suppress: cupel suppress {id} --reason '…'\n"
     );
     assert!(

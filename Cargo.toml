@@ -4,6 +4,7 @@
 resolver = "3"
 members = [
     "crates/cupel-adapt",
+    "crates/cupel-checks",
     "crates/cupel-cli",
     "crates/cupel-core",
     "crates/cupel-fixtures",
@@ -19,6 +20,7 @@ repository = "https://github.com/tysont/cupel"
 
 [workspace.dependencies]
 cupel-adapt = { path = "crates/cupel-adapt" }
+cupel-checks = { path = "crates/cupel-checks" }
 cupel-core = { path = "crates/cupel-core" }
 cupel-lang = { path = "crates/cupel-lang" }
 cupel-fixtures = { path = "crates/cupel-fixtures" }

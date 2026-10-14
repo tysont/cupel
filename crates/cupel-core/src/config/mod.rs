@@ -71,6 +71,15 @@ pub enum ConfigError {
         defined: Vec<String>,
         file_found: bool,
     },
+    /// A check rejected a setting in its `[checks."<id>"]` table (or a per-language override).
+    #[error("invalid setting `{key}` in `[checks.\"{check}\"]`: {reason}")]
+    CheckSetting {
+        check: String,
+        key: String,
+        reason: String,
+        /// The settings the check accepts.
+        valid: Vec<String>,
+    },
     /// An ID is well formed but no registry knows it (ADR-017).
     #[error(
         "unknown {what} in `{section}`; registered: {}",

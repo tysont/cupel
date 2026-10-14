@@ -23,7 +23,7 @@ use crate::format::{self, Rendering};
 use crate::page::Page;
 use crate::problem::Problem;
 use crate::run::Run;
-use crate::{describe, doctor, init, registry, render};
+use crate::{catalog, check, describe, doctor, init, registry, render};
 
 /// Everything an invocation reads from its process. `main` gathers it once; nothing else looks
 /// at the process environment or working directory.
@@ -244,11 +244,14 @@ fn configured(
     (envelope, rendering)
 }
 
-/// The configuration, rejected when it names a language no registered language has. Check IDs
-/// and gate keys are validated once checks register (P2.1, ADR-038).
+/// The configuration, rejected when it names a check, gate metric, or language the registries
+/// do not have (ADR-017, ADR-038).
 fn load_config(request: &ConfigRequest) -> Result<Config, cupel_core::Error> {
     let config = Config::load(request)?;
-    config.validate_languages(&cupel_lang::LanguageRegistry::builtin().ids())?;
+    config.validate_registered(
+        &catalog::checks(),
+        &cupel_lang::LanguageRegistry::builtin().ids(),
+    )?;
     Ok(config)
 }
 
@@ -345,6 +348,7 @@ fn execute(
                 Ok(run.reported(Status::Pass, ExitCode::Pass, findings))
             }
         }
+        Some(VerbArgs::Check { scope }) => check::verb(run, scope, config, writer, events, dry_run),
         Some(verb) => {
             let words = verb.words();
             let step = registry::find(&words[..1])
@@ -370,7 +374,7 @@ fn findings(run: &Run, problems: Vec<Problem>) -> Vec<Finding> {
 
 /// The plan envelope for a dry run: the verb's plan plus every write its recording writer
 /// recorded, announced by one `plan` event.
-fn plan(
+pub(crate) fn plan(
     run: &Run,
     mut plan: RunPlan,
     writer: &Writer,
@@ -682,7 +686,7 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         // A file where the `.cupel` directory belongs makes every write under it fail.
         std::fs::write(dir.path().join(".cupel"), "").unwrap();
-        let out = run(&environment(dir.path(), &["check", "--quiet"]));
+        let out = run(&environment(dir.path(), &["survey", "--quiet"]));
         assert_eq!(out.code, 2);
         assert!(
             out.stderr

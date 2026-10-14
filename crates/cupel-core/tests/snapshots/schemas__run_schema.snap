@@ -275,6 +275,26 @@ expression: pretty(&schema)
         "name"
       ]
     },
+    "CheckDescription": {
+      "description": "One check: its manifest, and whether it can run for each registered language (design §6.5).",
+      "type": "object",
+      "properties": {
+        "languages": {
+          "description": "Every registered language and whether the check can run there, derived from its needs.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LanguageSupport"
+          }
+        },
+        "manifest": {
+          "$ref": "#/$defs/Manifest"
+        }
+      },
+      "required": [
+        "languages",
+        "manifest"
+      ]
+    },
     "CheckId": {
       "description": "A check's stable namespaced ID, such as `tests.mutation`.",
       "type": "string"
@@ -743,6 +763,34 @@ expression: pretty(&schema)
           "required": [
             "subject"
           ]
+        },
+        {
+          "description": "`cupel describe <check-id>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "check"
+            }
+          },
+          "$ref": "#/$defs/CheckDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe finding <kind>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "finding"
+            }
+          },
+          "$ref": "#/$defs/FindingDescription",
+          "required": [
+            "subject"
+          ]
         }
       ]
     },
@@ -1000,10 +1048,70 @@ expression: pretty(&schema)
         "title"
       ]
     },
+    "FindingDescription": {
+      "description": "One finding kind: the check that emits it, the action it asks for, and the JSON Schema of its\nevidence (ADR-012).",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "evidence": {
+          "description": "JSON Schema of this kind's `evidence` object.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "kind": {
+          "type": "string"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "check",
+        "evidence",
+        "kind",
+        "stability",
+        "summary"
+      ]
+    },
     "FindingId": {
       "description": "`fnd_` followed by six lowercase hex digits",
       "type": "string",
       "pattern": "^fnd_[0-9a-f]{6}$"
+    },
+    "FindingKindSpec": {
+      "description": "A finding kind a check emits, the action it maps to, and its evidence schema (ADR-012).",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "evidence": {
+          "description": "JSON Schema of this kind's `evidence` object.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "kind": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "evidence",
+        "kind",
+        "summary"
+      ]
     },
     "GateOutcome": {
       "type": "string",
@@ -1205,6 +1313,21 @@ expression: pretty(&schema)
         "stability"
       ]
     },
+    "LanguageSupport": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "support": {
+          "$ref": "#/$defs/SupportDescription"
+        }
+      },
+      "required": [
+        "lang",
+        "support"
+      ]
+    },
     "LanguagesDescription": {
       "description": "Every language, one line each.",
       "type": "object",
@@ -1289,6 +1412,72 @@ expression: pretty(&schema)
         "line"
       ]
     },
+    "Manifest": {
+      "description": "Everything Cupel knows about a check without running it. Plugins describe themselves with\nthe same shape. Language applicability is never declared; it is derived (design §8.3.5).",
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/CostClass"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FindingKindSpec"
+          }
+        },
+        "id": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "metrics": {
+          "description": "Metrics usable as gate keys (`<check-id>.<metric>`).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MetricSpec"
+          }
+        },
+        "needs": {
+          "description": "Facts the check cannot run without.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "version": {
+          "description": "Bumped when results change for the same facts; invalidates cached results.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "wants": {
+          "description": "Facts the check uses for enrichment when present.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        }
+      },
+      "required": [
+        "cost",
+        "findings",
+        "id",
+        "metrics",
+        "needs",
+        "stability",
+        "summary",
+        "tier",
+        "version",
+        "wants"
+      ]
+    },
     "MatrixCell": {
       "type": "object",
       "properties": {
@@ -1336,6 +1525,21 @@ expression: pretty(&schema)
         "cells",
         "checks",
         "languages"
+      ]
+    },
+    "MetricSpec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "summary"
       ]
     },
     "NextAction": {

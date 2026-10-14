@@ -222,7 +222,7 @@ fn depth_and_budget_flags_are_the_flags_layer() {
             "5m",
         ],
     );
-    assert_eq!(outcome.code, 2, "check itself is not implemented yet");
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["run"]["depth"], json!("deep"));
     assert_eq!(envelope["run"]["budget_ms"], json!(300_000));

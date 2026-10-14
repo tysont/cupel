@@ -72,12 +72,12 @@ fn describe_cli_lists_every_verb_exit_code_and_schema() {
 
 #[test]
 fn describe_verb_describes_its_arguments_and_pending_step() {
-    let outcome = run(["describe", "check"]);
+    let outcome = run(["describe", "survey"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["description"]["subject"], json!("command"));
-    assert_eq!(envelope["description"]["name"], json!("check"));
-    assert_eq!(envelope["description"]["pending_step"], json!("P2.1"));
+    assert_eq!(envelope["description"]["name"], json!("survey"));
+    assert_eq!(envelope["description"]["pending_step"], json!("P2.9"));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
 }
 
@@ -178,17 +178,68 @@ fn describe_unknown_subject_is_a_usage_error_listing_subjects() {
 
 #[test]
 fn describe_subjects_from_later_steps_are_not_implemented_yet() {
-    for (args, step) in [
-        (vec!["describe", "finding", "mutant.survived"], "P2.1"),
-        (vec!["describe", "static.complexity"], "P2.1"),
-        (vec!["describe", "--agent"], "P8.3"),
+    let outcome = run(["describe", "--agent"]);
+    assert_eq!(outcome.code, 2);
+    let finding = outcome.finding();
+    assert_eq!(finding["kind"], json!("cli.not-implemented"));
+    let detail = finding["detail"].as_str().unwrap();
+    assert!(detail.contains("P8.3"), "{detail}");
+}
+
+#[test]
+fn describe_check_shows_its_manifest_and_support_per_language() {
+    let outcome = run(["describe", "static.complexity"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let description = outcome.envelope()["description"].clone();
+    assert_eq!(description["subject"], json!("check"));
+    assert_eq!(description["manifest"]["id"], json!("static.complexity"));
+    assert_eq!(
+        description["manifest"]["needs"],
+        json!(["symbols", "decisions", "norm-tree"])
+    );
+    let languages = description["languages"].as_array().unwrap();
+    assert_eq!(languages.len(), 5);
+    assert!(
+        languages
+            .iter()
+            .all(|entry| entry["support"]["status"] == json!("supported"))
+    );
+}
+
+#[test]
+fn describe_finding_shows_its_check_action_and_evidence_schema() {
+    let outcome = run(["describe", "finding", "complexity.high"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let description = outcome.envelope()["description"].clone();
+    assert_eq!(description["subject"], json!("finding"));
+    assert_eq!(description["check"], json!("static.complexity"));
+    assert_eq!(description["action"], json!("reduce_complexity"));
+    assert_eq!(
+        description["evidence"]["required"],
+        json!(["cyclomatic", "cognitive", "cyclomatic_max", "cognitive_max"])
+    );
+}
+
+#[test]
+fn unknown_checks_and_finding_kinds_are_usage_errors_listing_the_known_ones() {
+    for (args, valid) in [
+        (vec!["describe", "static.complexty"], "static.complexity"),
+        (
+            vec!["describe", "finding", "mutant.survived"],
+            "complexity.high",
+        ),
     ] {
         let outcome = run(&args);
         assert_eq!(outcome.code, 2, "{args:?}");
         let finding = outcome.finding();
-        assert_eq!(finding["kind"], json!("cli.not-implemented"), "{args:?}");
-        let detail = finding["detail"].as_str().unwrap();
-        assert!(detail.contains(step), "{args:?}: {detail}");
+        assert_eq!(finding["kind"], json!("cli.usage"), "{args:?}");
+        assert!(
+            finding["evidence"]["valid"]
+                .as_array()
+                .unwrap()
+                .contains(&json!(valid)),
+            "{args:?}"
+        );
     }
 }
 
@@ -307,7 +358,10 @@ fn describe_language_shows_identity_facts_and_check_support() {
     assert_eq!(description["family"], json!("rust"));
     assert_eq!(description["extensions"], json!([".rs"]));
     assert!(description["facts"].is_array());
-    assert_eq!(description["checks"], json!([]));
+    assert_eq!(
+        description["checks"],
+        json!([{"check": "static.complexity", "support": {"status": "supported"}}])
+    );
 }
 
 #[test]
@@ -371,7 +425,7 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
         .map(|entry| entry["lang"].as_str().unwrap())
         .collect();
     assert_eq!(langs, ["go", "javascript", "python", "rust", "typescript"]);
-    assert_eq!(description["consumers"], json!([]));
+    assert_eq!(description["consumers"], json!(["static.complexity"]));
 }
 
 #[test]
@@ -393,7 +447,7 @@ fn describe_fact_with_an_unknown_kind_is_a_usage_error_listing_kinds() {
 }
 
 #[test]
-fn describe_matrix_has_every_language_and_no_rows_without_checks() {
+fn describe_matrix_has_every_language_and_a_row_per_check() {
     let outcome = run(["describe", "matrix"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let description = outcome.envelope()["description"].clone();
@@ -402,8 +456,14 @@ fn describe_matrix_has_every_language_and_no_rows_without_checks() {
         description["languages"],
         json!(["go", "javascript", "python", "rust", "typescript"])
     );
-    assert_eq!(description["checks"], json!([]));
-    assert_eq!(description["cells"], json!([]));
+    assert_eq!(description["checks"], json!(["static.complexity"]));
+    let cells = description["cells"].as_array().unwrap();
+    assert_eq!(cells.len(), 5);
+    assert!(
+        cells
+            .iter()
+            .all(|cell| cell["support"]["status"] == json!("supported"))
+    );
 }
 
 #[test]

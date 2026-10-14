@@ -154,7 +154,8 @@ impl CupelError {
 }
 
 impl From<cupel_core::Error> for CupelError {
-    /// Core errors reach the CLI from configuration; every one is a usage error (ADR-017).
+    /// Core errors reach the CLI from configuration and from scope and selection flags; every
+    /// one is a usage error (ADR-017, ADR-040).
     fn from(error: cupel_core::Error) -> Self {
         Usage::from_core(&error).into()
     }
@@ -167,10 +168,20 @@ impl From<Usage> for CupelError {
 }
 
 impl Usage {
-    /// Describes a core error, which reaches the CLI from configuration.
+    /// Describes a core error, which reaches the CLI from configuration or a scope or selection
+    /// flag.
     pub fn from_core(error: &cupel_core::Error) -> Self {
         match error {
             cupel_core::Error::Config(config) => Self::from_config(config),
+            cupel_core::Error::Argument(argument) => Self {
+                subject: argument.argument.clone(),
+                title: argument.title.clone(),
+                fix: argument.fix.clone(),
+                detail: None,
+                argument: Some(argument.argument.clone()),
+                value: argument.value.clone(),
+                valid: argument.valid.clone(),
+            },
             other => Self {
                 subject: "configuration".to_owned(),
                 title: other.to_string(),
@@ -267,6 +278,20 @@ impl Usage {
                     } else {
                         format!("Select one of: {}.", defined.join(", "))
                     },
+                )
+            },
+            ConfigError::CheckSetting {
+                check, key, valid, ..
+            } => Self {
+                value: Some(key.clone()),
+                valid: valid.clone(),
+                ..usage(
+                    &format!("checks.{check}.{key}"),
+                    format!(
+                        "Fix `{key}` under [checks.\"{check}\"] in cupel.toml (or its per-language \
+                         overrides); valid settings: {}.",
+                        valid.join(", ")
+                    ),
                 )
             },
             ConfigError::InvalidGateRule { key, .. } => Self {

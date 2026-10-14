@@ -17,7 +17,7 @@ fn jsonl(stdout: &str) -> (Value, Vec<Value>) {
 
 #[test]
 fn jsonl_writes_the_envelope_header_then_each_finding_on_its_own_line() {
-    let outcome = run(["check", "--format", "jsonl"]);
+    let outcome = run(["survey", "--format", "jsonl"]);
     assert_eq!(outcome.code, 2);
     let (header, findings) = jsonl(&outcome.stdout);
     assert_eq!(header["findings"], json!([]));
@@ -27,14 +27,14 @@ fn jsonl_writes_the_envelope_header_then_each_finding_on_its_own_line() {
     assert_eq!(findings.len(), 1);
     assert_eq!(
         findings[0]["id"],
-        json!(cli_finding_id("cli.not-implemented", "check"))
+        json!(cli_finding_id("cli.not-implemented", "survey"))
     );
 }
 
 #[test]
 fn jsonl_reassembles_into_the_json_envelope() {
-    let (mut header, findings) = jsonl(&run(["check", "--format", "jsonl", "--seed", "1"]).stdout);
-    let mut whole = run(["check", "--format", "json", "--seed", "1"]).envelope();
+    let (mut header, findings) = jsonl(&run(["survey", "--format", "jsonl", "--seed", "1"]).stdout);
+    let mut whole = run(["survey", "--format", "json", "--seed", "1"]).envelope();
     header["findings"] = Value::Array(findings);
     for envelope in [&mut header, &mut whole] {
         envelope["run"]["id"] = json!("[run id]");
@@ -57,12 +57,12 @@ fn jsonl_of_describe_is_a_single_header_line() {
 
 #[test]
 fn text_describe_reads_as_sections() {
-    let outcome = run(["describe", "check", "--format", "text"]);
+    let outcome = run(["describe", "survey", "--format", "text"]);
     assert_eq!(outcome.code, 0);
     let out = &outcome.stdout;
     assert!(out.starts_with("cupel describe: pass (exit 0)\n"), "{out}");
     for section in [
-        "cupel check · ",
+        "cupel survey · ",
         "  arguments\n",
         "  examples\n",
         "summary ",
@@ -75,8 +75,8 @@ fn text_describe_reads_as_sections() {
 #[test]
 fn text_without_a_terminal_or_with_no_color_has_no_escape_codes() {
     for args in [
-        &["check", "--format", "text"][..],
-        &["check", "--format", "text", "--no-color"][..],
+        &["survey", "--format", "text"][..],
+        &["survey", "--format", "text", "--no-color"][..],
     ] {
         let outcome = run(args);
         assert!(!outcome.stdout.contains('\u{1b}'), "{args:?}");
@@ -85,7 +85,7 @@ fn text_without_a_terminal_or_with_no_color_has_no_escape_codes() {
 
 #[test]
 fn limit_zero_keeps_no_findings_but_reports_them() {
-    let outcome = run(["check", "--limit", "0"]);
+    let outcome = run(["survey", "--limit", "0"]);
     assert_eq!(outcome.code, 2, "paging never changes the exit code");
     let envelope = outcome.envelope();
     assert_eq!(envelope["findings"], json!([]));
@@ -96,7 +96,7 @@ fn limit_zero_keeps_no_findings_but_reports_them() {
 
 #[test]
 fn offset_past_the_end_is_an_empty_truncated_page() {
-    let envelope = run(["check", "--offset", "5"]).envelope();
+    let envelope = run(["survey", "--offset", "5"]).envelope();
     assert_eq!(envelope["findings"], json!([]));
     assert_eq!(envelope["total_findings"], json!(1));
     assert_eq!(envelope["truncated"], json!(true));
@@ -104,7 +104,7 @@ fn offset_past_the_end_is_an_empty_truncated_page() {
 
 #[test]
 fn a_page_holding_every_finding_is_not_truncated() {
-    let envelope = run(["check", "--limit", "1", "--offset", "0"]).envelope();
+    let envelope = run(["survey", "--limit", "1", "--offset", "0"]).envelope();
     assert_eq!(envelope["findings"].as_array().unwrap().len(), 1);
     assert_eq!(envelope["total_findings"], json!(1));
     assert_eq!(envelope["truncated"], json!(false));
@@ -112,10 +112,10 @@ fn a_page_holding_every_finding_is_not_truncated() {
 
 #[test]
 fn paging_applies_to_jsonl_and_text_too() {
-    let (header, findings) = jsonl(&run(["check", "--format", "jsonl", "--limit", "0"]).stdout);
+    let (header, findings) = jsonl(&run(["survey", "--format", "jsonl", "--limit", "0"]).stdout);
     assert!(findings.is_empty());
     assert_eq!(header["truncated"], json!(true));
-    let text = run(["check", "--format", "text", "--limit", "0"]).stdout;
+    let text = run(["survey", "--format", "text", "--limit", "0"]).stdout;
     assert!(
         text.contains("showing 0 of 1 findings (truncated)"),
         "{text}"

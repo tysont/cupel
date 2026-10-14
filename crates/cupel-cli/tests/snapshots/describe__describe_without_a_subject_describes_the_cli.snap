@@ -414,7 +414,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       },
       {
         "name": "check",
-        "pending_step": "P2.1",
+        "pending_step": null,
         "stability": "experimental",
         "summary": "Run checks over a scope at a depth and evaluate the gate."
       },
