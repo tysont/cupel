@@ -20,6 +20,7 @@ facts
 
 checks
   static.complexity  supported
+  tests.weakening    supported
 
 toolchain
   launchers

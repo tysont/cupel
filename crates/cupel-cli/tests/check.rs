@@ -170,7 +170,13 @@ fn thresholds_and_per_language_overrides_come_from_the_config() {
 #[test]
 fn a_run_streams_plan_check_events_findings_and_run_end() {
     let repo = repo_with_code();
-    let outcome = repo.run(&["check", "--events", ".cupel/events.jsonl"]);
+    let outcome = repo.run(&[
+        "check",
+        "--only",
+        "static.complexity",
+        "--events",
+        ".cupel/events.jsonl",
+    ]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let text = fs::read_to_string(repo.path(".cupel/events.jsonl")).unwrap();
     let names: Vec<String> = text
@@ -198,7 +204,7 @@ fn a_run_streams_plan_check_events_findings_and_run_end() {
 fn a_dry_run_plans_targets_and_the_run_record_and_writes_nothing() {
     let repo = repo_with_code();
     let before = repo.tree();
-    let outcome = repo.run(&["check", "--dry-run"]);
+    let outcome = repo.run(&["check", "--only", "static.complexity", "--dry-run"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["status"], json!("plan"));
