@@ -1,0 +1,6 @@
+# Captured from the real tool on the tests.flaky fixture (P3.5) as engine.flake runs a reversed rerun;
+# the other files here are its unedited output. `dir` is where it ran.
+tool = "Python 3.13.1"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/cap/unittest-reversed"
+command = "python3 -m unittest -v -b tests.test_settle.SettleTest.test_settles_on_every_other_run tests.test_ledger.LedgerTest.test_deposit_changes_balance tests.test_ledger.LedgerTest.test_balance_starts_at_zero"
+exit_code = 1

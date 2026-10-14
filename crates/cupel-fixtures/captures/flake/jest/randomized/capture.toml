@@ -1,0 +1,6 @@
+# Captured from the real tool on the tests.flaky fixture (P3.5) as engine.flake runs a randomized rerun;
+# the other files here are its unedited output. `dir` is where it ran.
+tool = "jest 30.5.2"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/cap/jest-randomized"
+command = "jest --ci --json --passWithNoTests --outputFile=/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/cap/jest-randomized/report.json --seed=596231002 --randomize --maxWorkers=1"
+exit_code = 1

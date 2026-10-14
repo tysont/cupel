@@ -1,0 +1,6 @@
+# Captured from the real tool on the tests.flaky fixture (P3.5) as engine.flake runs a shuffled rerun
+# (with the settling test's marker present); the other files here are its unedited output.
+tool = "cargo 1.92.0 (344c4567c 2025-10-21)"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/cap/cargo-shuffled"
+command = "cargo test --workspace --no-fail-fast --tests --config \"target.'cfg(all())'.runner = [\\\"env\\\", \\\"RUSTC_BOOTSTRAP=1\\\"]\" -- -Z unstable-options --shuffle-seed 7134611160154358618 --test-threads=1"
+exit_code = 101
