@@ -818,7 +818,7 @@ P3 fans out to parallel worktrees, each adding a check or a producer. Before it 
 
 #### P3.2 Fact: `CoverageMap` — coverage producers, `tests.coverage`, full `static.crap`
 
-**Status:** in progress (2026-10-14) · [ADR-077](adr/CUPEL_DECISION_077.md)
+**Status:** complete (2026-10-14, 575fa0e) · [ADR-077](adr/CUPEL_DECISION_077.md)
 
 - `Coverage: Producer<CoverageMap>` trait; format parsers for LCOV, Cobertura XML, Istanbul JSON, go coverprofile, JaCoCo XML → `CoverageMap` (line + `branches: Option<_>`). Invocations for Rust (`cargo llvm-cov --lcov`), Go (`go test -coverprofile`, `branches: None`), Python (`pytest --cov --cov-report=lcov`), JS/TS (`vitest --coverage`, `jest --coverage`, `c8`). Ingest existing reports when fresher than sources (mtime + content hash).
 - `tests.coverage` check: `needs = [Symbols, CoverageMap]`; `coverage.uncovered-symbol` always; `coverage.uncovered-branch` only when `branches` is present, else the check result notes `branches: unavailable` — it learns this from the fact, not from the language.
