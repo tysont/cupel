@@ -664,7 +664,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 #### P2.8 `static.dead-code`
 
-**Status:** not started
+**Status:** in progress (2026-10-13) · [ADR-058](adr/CUPEL_DECISION_058.md) · [ADR-059](adr/CUPEL_DECISION_059.md)
 
 - Unreferenced symbols and exports using the symbol table, the resolved import graph, and `roots()` (P1.8) as the live set; conservative — anything reachable from a root or exported from a library root is not dead. Kinds `dead.symbol`, `dead.export`. `confidence` reflects uncertainty (dynamic dispatch, reflection, `getattr`).
 
