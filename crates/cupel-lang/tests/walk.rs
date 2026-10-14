@@ -3,9 +3,9 @@
 use std::fs;
 use std::path::Path;
 
-use cupel_core::LangId;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
-use cupel_lang::{LanguageRegistry, walk};
+use cupel_core::{Exclude, LangId};
+use cupel_lang::{LanguageRegistry, walk, walk_excluding};
 
 fn write(root: &Path, path: &str, contents: &str) {
     let path = root.join(path);
@@ -119,5 +119,34 @@ fn a_project_root_at_the_top_skips_its_generated_directories_everywhere() {
     assert_eq!(
         walk(dir.path(), &LanguageRegistry::builtin(), &project),
         ["src/lib.rs"]
+    );
+}
+
+#[test]
+fn excluded_paths_and_always_excluded_directories_are_never_walked() {
+    let dir = tempfile::tempdir().unwrap();
+    for path in [
+        "crates/core/src/lib.rs",
+        "crates/fixtures/src/lib.rs",
+        "crates/fixtures/repos/go/main.go",
+        "tools/vendor/dep/dep.go",
+        "web/node_modules/dep/index.js",
+        "src/generated/types.ts",
+    ] {
+        write(dir.path(), path, "");
+    }
+    let exclude = Exclude::new(vec![
+        "crates/fixtures/**".to_owned(),
+        "generated".to_owned(),
+    ])
+    .unwrap();
+    assert_eq!(
+        walk_excluding(
+            dir.path(),
+            &LanguageRegistry::builtin(),
+            &ProjectInfo::default(),
+            &exclude
+        ),
+        ["crates/core/src/lib.rs"]
     );
 }

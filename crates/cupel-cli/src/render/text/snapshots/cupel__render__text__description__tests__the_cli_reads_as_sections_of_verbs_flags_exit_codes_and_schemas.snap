@@ -8,13 +8,13 @@ verbs
   init      Detect project roots, languages, and test, coverage, and bench commands; write cupel.toml.
   doctor    Verify the binary's version, the configuration, .cupel/ write access, and needed tools.
   describe  Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema.
-  check     Run checks over a scope at a depth and evaluate the gate. · pending P2.1
-  survey    Rank a whole tree without a baseline: hot spots, weak tests, clones. · pending P2.9
-  explain   Give full context and remediation for one finding or check result. · pending P2.2
-  baseline  Set, show, diff, export, or import the baseline runs are compared with. · pending P2.2
+  check     Run checks over a scope at a depth and evaluate the gate.
+  survey    Rank a whole tree without a baseline or gate: the worst targets per metric.
+  explain   Give full context and remediation for one finding or check result.
+  baseline  Set, show, diff, export, or import the baseline runs are compared with.
   oracle    Add, list, remove, or verify the oracles differential checks compare with. · pending P5.2
   tests     List the tests that cover a scope, with a command to run them. · pending P3.3
-  suppress  Suppress a finding, with a reason and an optional expiry. · pending P2.2
+  suppress  Suppress a finding, with a reason and an optional expiry.
   serve     Run the daemon and MCP server with warm caches and event streaming. · pending P4.2
 
 global flags

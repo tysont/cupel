@@ -83,38 +83,16 @@ impl Normalizer<'_> {
         if nodes.len() == 1 {
             nodes.remove(0)
         } else {
-            NormNode {
-                label: node.kind().to_owned(),
-                children: nodes,
-            }
+            NormNode::new(node.kind(), nodes)
         }
     }
 
     /// The normalized form of `node`: none (erased), one node, or several (flattened).
     fn node(&self, node: Node<'_>, mode: Mode) -> Vec<NormNode> {
+        if let Some(terminal) = self.terminal(node, mode) {
+            return terminal;
+        }
         let kind = node.kind();
-        let has = |list: &[String]| list.iter().any(|k| k == kind);
-        if node.id() == self.skip || node.is_extra() || has(&self.rules.erase) {
-            return Vec::new();
-        }
-        if !node.is_named() {
-            let text = self.parsed.text(node);
-            let operator = !text.is_empty() && text.chars().all(|c| OPERATOR_CHARS.contains(c));
-            return if operator || self.rules.operators.iter().any(|o| o == text) {
-                vec![leaf(text)]
-            } else {
-                Vec::new()
-            };
-        }
-        if has(&self.rules.identifiers) {
-            return vec![match mode {
-                Mode::Callee => leaf(self.parsed.text(node)),
-                Mode::Plain => leaf("$id"),
-            }];
-        }
-        if has(&self.rules.literals) {
-            return vec![leaf("$lit")];
-        }
         let callee = self
             .rules
             .calls
@@ -127,30 +105,55 @@ impl Normalizer<'_> {
             let field = u32::try_from(index)
                 .ok()
                 .and_then(|index| node.field_name_for_child(index));
-            let child_mode = match (mode, field) {
-                (_, Some(field)) if callee == Some(field) => Mode::Callee,
-                (Mode::Callee, Some(field)) if self.rules.receivers.iter().any(|r| r == field) => {
-                    Mode::Plain
-                }
-                // Arguments and the other parts of a call normalize as usual.
-                (_, _) if callee.is_some() => Mode::Plain,
-                (mode, _) => mode,
-            };
-            children.extend(self.node(child, child_mode));
+            children.extend(self.node(child, self.child_mode(mode, callee, field)));
         }
-        if has(&self.rules.flatten) {
+        if self.rules.flatten.iter().any(|k| k == kind) {
             return children;
         }
-        vec![NormNode {
-            label: kind.to_owned(),
-            children,
-        }]
+        vec![NormNode::new(kind, children)]
     }
 }
 
-fn leaf(label: &str) -> NormNode {
-    NormNode {
-        label: label.to_owned(),
-        children: Vec::new(),
+impl Normalizer<'_> {
+    /// What `node` normalizes to when its children do not matter: nothing for an erased,
+    /// skipped, or extra node or a non-operator token, a leaf for an operator, identifier, or
+    /// literal; `None` for a node whose children decide.
+    fn terminal(&self, node: Node<'_>, mode: Mode) -> Option<Vec<NormNode>> {
+        let kind = node.kind();
+        let has = |list: &[String]| list.iter().any(|k| k == kind);
+        if node.id() == self.skip || node.is_extra() || has(&self.rules.erase) {
+            return Some(Vec::new());
+        }
+        if !node.is_named() {
+            let text = self.parsed.text(node);
+            let operator = !text.is_empty() && text.chars().all(|c| OPERATOR_CHARS.contains(c));
+            let kept = operator || self.rules.operators.iter().any(|o| o == text);
+            return Some(if kept {
+                vec![NormNode::leaf(text)]
+            } else {
+                Vec::new()
+            });
+        }
+        if has(&self.rules.identifiers) {
+            return Some(vec![match mode {
+                Mode::Callee => NormNode::leaf(self.parsed.text(node)),
+                Mode::Plain => NormNode::leaf("$id"),
+            }]);
+        }
+        has(&self.rules.literals).then(|| vec![NormNode::leaf("$lit")])
+    }
+
+    /// How the child in `field` of a node normalized in `mode` normalizes, where `callee` is the
+    /// field naming the called function when the node is a call.
+    fn child_mode(&self, mode: Mode, callee: Option<&str>, field: Option<&str>) -> Mode {
+        match (mode, field) {
+            (_, Some(field)) if callee == Some(field) => Mode::Callee,
+            (Mode::Callee, Some(field)) if self.rules.receivers.iter().any(|r| r == field) => {
+                Mode::Plain
+            }
+            // Arguments and the other parts of a call normalize as usual.
+            (_, _) if callee.is_some() => Mode::Plain,
+            (mode, _) => mode,
+        }
     }
 }

@@ -9,7 +9,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use assert_cmd::Command;
-use cupel_core::{CheckId, Envelope, FindingId};
+use cupel_core::{CheckId, Envelope, FindingId, Writer};
+use cupel_store::Store;
 use serde_json::{Value, json};
 use tempfile::TempDir;
 
@@ -180,4 +181,74 @@ impl Repo {
         out.sort();
         out
     }
+
+    /// The paths of `tree()` outside `.cupel/`, with their content.
+    pub fn tree_outside_cupel(&self) -> Vec<(String, Vec<u8>)> {
+        self.tree()
+            .into_iter()
+            .filter(|(name, _)| !name.starts_with(".cupel/"))
+            .collect()
+    }
+
+    /// This repository's fact store, opened (and created if needed) as the CLI opens it.
+    pub fn store(&self) -> Store {
+        Store::open(&Writer::new(&self.root(), false).unwrap()).unwrap()
+    }
+
+    /// Records `envelopes` in this repository's fact store, as if those runs had happened.
+    pub fn seed(&self, envelopes: &[Envelope]) {
+        let store = self.store();
+        for envelope in envelopes {
+            store.record_run(envelope).unwrap();
+        }
+    }
+}
+
+/// A run ID whose last two characters are `n`, so higher `n` is a later run.
+pub fn run_id(n: u8) -> String {
+    format!("run_01JA2B3C4D5E6F7G8H9JKMNP{n:02}")
+}
+
+/// A finished `verb` run `run` with `findings` and `checks` (JSON values of the envelope types).
+pub fn envelope(run: &str, verb: &str, findings: &[Value], checks: &[Value]) -> Envelope {
+    serde_json::from_value(json!({
+        "cupel": {"version": "0.1.0", "schema": "https://cupel.dev/schema/v1/run.json"},
+        "run": {
+            "id": run, "verb": verb, "started": "2026-10-13T10:00:00Z", "duration_ms": 1,
+            "git": null, "scope": null, "depth": "standard", "budget_ms": null, "seed": 7,
+            "toolchain": {}, "config": {"effective": {}, "sources": []}, "baseline": null
+        },
+        "status": "pass", "exit_code": 0, "checks": checks,
+        "total_findings": findings.len(), "findings": findings,
+        "summary": {"findings": {"fail": 0, "warn": findings.len(), "info": 0}, "new": 0,
+                    "resolved": 0, "suppressed": 0, "gate": null},
+        "next_actions": [], "truncated": false
+    }))
+    .expect("a valid envelope")
+}
+
+/// A `static.complexity` finding `id` about `src/lib.rs` lines `line..=end_line`, with test hints.
+pub fn complexity_finding(id: &str, line: u32, end_line: u32) -> Value {
+    json!({
+        "id": id, "check": "static.complexity", "kind": "complexity.high",
+        "severity": "warn", "confidence": 1.0, "tier": 1,
+        "symbol": {"display": "lib::tangled", "hash": "sh_00000000000000aa", "lang": "rust"},
+        "location": {"file": "src/lib.rs", "line": line, "col": 1, "end_line": end_line, "end_col": 2},
+        "title": "Cyclomatic complexity 12 exceeds 10", "detail": null,
+        "evidence": {"cyclomatic": 12, "cognitive": 9},
+        "action": {"kind": "reduce_complexity", "priority": 1, "summary": "Split tangled.",
+                   "hints": {"nearest_test_file": "tests/lib.rs", "covering_tests": ["tangled_works"]}},
+        "repro": "cupel check --only static.complexity",
+        "suppress": format!("cupel suppress {id} --reason '…'"),
+        "new_since_baseline": false, "suppressed": false
+    })
+}
+
+/// A `static.complexity` check result scored `score`.
+pub fn complexity_check(score: f64) -> Value {
+    json!({
+        "id": "static.complexity", "status": "pass", "tier": 1, "cost": "quick",
+        "score": {"value": score, "unit": "ratio", "n": 4}, "metrics": {},
+        "delta": null, "findings": 1, "duration_ms": 3, "skipped": null, "oracle": null
+    })
 }

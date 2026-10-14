@@ -1,10 +1,12 @@
 // ABOUTME: Validates a resolved config against the check and language registries (ADR-017).
 // ABOUTME: Parsing checks ID syntax only; this is where unknown checks, metrics, and languages are caught.
 use crate::check::{Check, CheckRegistry, Manifest};
+use crate::config::Config;
+use crate::config::error::ConfigError;
 use crate::config::file::GateSection;
-use crate::config::{Config, ConfigError};
 use crate::error::Result;
 use crate::id::{CheckId, LangId};
+use crate::rank::MetricPer;
 
 impl Config {
     /// Rejects check IDs, gate metrics, and language IDs that the registries do not know. The
@@ -24,6 +26,12 @@ impl Config {
                 .flat_map(GateSection::rules)
                 .try_for_each(|rule| {
                     let manifest = registry.check(&rule.key.check, section)?;
+                    if section == "[gate.tree]" && needs_range(checks, &rule.key.check) {
+                        return Err(ConfigError::TreeGateNeedsRange {
+                            check: rule.key.check.to_string(),
+                        }
+                        .into());
+                    }
                     match &rule.key.metric {
                         Some(metric) => declared_metric(manifest, metric, section),
                         None => Ok(()),
@@ -87,15 +95,29 @@ impl<'a> Registries<'a> {
     }
 }
 
-/// Rejects a gate metric the check's manifest does not declare.
+/// Whether the registered check `id` reads a range's base side (ADR-056).
+fn needs_range(checks: &CheckRegistry, id: &CheckId) -> bool {
+    checks
+        .get(id)
+        .is_some_and(|check| !check.base_needs().is_empty())
+}
+
+/// Rejects a gate metric the check's manifest does not declare as a `scope` metric: per-target
+/// metrics rank targets and have no one value to compare (ADR-060 §1).
 fn declared_metric(manifest: &Manifest, metric: &str, section: &str) -> Result<()> {
-    if manifest.metrics.iter().any(|spec| spec.name == metric) {
+    let gate_keys = || {
+        manifest
+            .metrics
+            .iter()
+            .filter(|spec| spec.per == MetricPer::Scope)
+    };
+    if gate_keys().any(|spec| spec.name == metric) {
         return Ok(());
     }
     Err(unregistered(
         format!("metric `{metric}` of `{}`", manifest.id),
         section,
-        manifest.metrics.iter().map(|spec| spec.name.clone()),
+        gate_keys().map(|spec| spec.name.clone()),
     ))
 }
 

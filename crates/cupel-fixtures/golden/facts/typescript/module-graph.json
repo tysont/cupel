@@ -3,6 +3,7 @@
     {
       "edges": [
         {
+          "edge_kind": "import",
           "from": "bin/cli.ts",
           "line": 2,
           "relative": true,
@@ -13,6 +14,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/__tests__/pricing.test.ts",
           "line": 1,
           "relative": false,
@@ -23,6 +25,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/__tests__/pricing.test.ts",
           "line": 2,
           "relative": true,
@@ -33,6 +36,51 @@
           }
         },
         {
+          "edge_kind": "import",
+          "from": "src/deps_cycle/alpha.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "./beta",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/beta.ts"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/deps_cycle/beta.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "./alpha",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/alpha.ts"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/deps_layers/domain/order.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "../infra/store",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/infra/store.ts"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/deps_layers/port.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "./domain/order",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/domain/order.ts"
+          }
+        },
+        {
+          "edge_kind": "re-export",
           "from": "src/index.ts",
           "line": 1,
           "relative": true,
@@ -43,6 +91,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 1,
           "relative": false,
@@ -53,6 +102,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 2,
           "relative": false,
@@ -63,6 +113,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 3,
           "relative": false,
@@ -73,6 +124,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 4,
           "relative": true,
@@ -83,6 +135,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 5,
           "relative": false,
@@ -93,6 +146,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 6,
           "relative": true,
@@ -103,6 +157,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 7,
           "relative": true,
@@ -113,6 +168,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 8,
           "relative": false,
@@ -123,6 +179,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 9,
           "relative": true,
@@ -132,6 +189,29 @@
           }
         },
         {
+          "edge_kind": "import",
+          "from": "src/math.quality.test.ts",
+          "line": 1,
+          "relative": false,
+          "specifier": "vitest",
+          "target": {
+            "kind": "external",
+            "package": "vitest"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/math.quality.test.ts",
+          "line": 2,
+          "relative": true,
+          "specifier": "./math",
+          "target": {
+            "kind": "file",
+            "path": "src/math.ts"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "src/math.test.ts",
           "line": 1,
           "relative": false,
@@ -142,6 +222,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/math.test.ts",
           "line": 2,
           "relative": true,
@@ -152,6 +233,7 @@
           }
         },
         {
+          "edge_kind": "re-export",
           "from": "src/shapes/index.ts",
           "line": 1,
           "relative": true,
@@ -162,6 +244,7 @@
           }
         },
         {
+          "edge_kind": "re-export",
           "from": "src/shapes/index.ts",
           "line": 2,
           "relative": true,
@@ -172,6 +255,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/widget.test.tsx",
           "line": 1,
           "relative": false,
@@ -182,6 +266,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/widget.test.tsx",
           "line": 2,
           "relative": true,
@@ -192,6 +277,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/decide.test.ts",
           "line": 1,
           "relative": false,
@@ -202,6 +288,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/decide.test.ts",
           "line": 2,
           "relative": false,
@@ -212,6 +299,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/decide.test.ts",
           "line": 3,
           "relative": true,

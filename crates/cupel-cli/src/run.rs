@@ -3,10 +3,12 @@
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::{
-    Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, ExitCode, Finding,
-    RunId, RunInfo, RunPlan, Severity, SeverityCounts, Status, Summary, ToolchainInfo, Verb,
-    schema,
+    Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, Event, EventSink,
+    ExitCode, Finding, RunId, RunInfo, RunPlan, Severity, SeverityCounts, Status, Summary,
+    ToolchainInfo, Verb, Writer, schema,
 };
+
+use cupel_core::config::Config;
 
 use crate::error::CupelError;
 
@@ -71,6 +73,35 @@ impl Run {
         findings: Vec<Finding>,
     ) -> Envelope {
         self.envelope(status, exit_code, findings, None)
+    }
+
+    /// The plan envelope for a dry run: the verb's plan plus every write its recording writer
+    /// recorded, announced by one `plan` event.
+    pub fn plan_envelope(
+        &self,
+        mut plan: RunPlan,
+        writer: &Writer,
+        events: &mut dyn EventSink,
+        findings: Vec<Finding>,
+    ) -> Envelope {
+        plan.would_write.extend(writer.planned());
+        plan.est_total_ms = plan.would_run.iter().map(|check| check.est_ms).sum();
+        events.emit(Event::Plan {
+            run: self.id(),
+            checks: u32::try_from(plan.would_run.len()).unwrap_or(u32::MAX),
+            est_ms: plan.est_total_ms,
+        });
+        self.planned(plan, findings)
+    }
+
+    /// Records the loaded configuration's echo, depth, and budget for the envelope.
+    pub fn configure(&mut self, config: &Config) {
+        self.config = config.echo();
+        self.depth = Some(config.effective.depth);
+        self.budget_ms = config
+            .effective
+            .budget
+            .map(|budget| u64::try_from(budget.as_duration().as_millis()).unwrap_or(u64::MAX));
     }
 
     /// The envelope of a `--dry-run`: the plan, what planning found, and nothing done.
@@ -156,6 +187,8 @@ impl Run {
             next_actions: Vec::new(),
             description,
             plan: None,
+            explanation: None,
+            rankings: None,
             truncated: false,
             total_findings,
         }
@@ -163,7 +196,7 @@ impl Run {
 }
 
 /// Quotes an argument for a POSIX shell when it contains anything but safe characters.
-fn shell_quote(arg: &str) -> String {
+pub(crate) fn shell_quote(arg: &str) -> String {
     let safe = !arg.is_empty()
         && arg
             .chars()
@@ -204,6 +237,28 @@ fn civil_from_days(days: i64) -> (i64, u32, u32) {
     let month = u32::try_from(if mp < 10 { mp + 3 } else { mp - 9 }).unwrap_or(1);
     let year = year_of_era + era * 400 + i64::from(month <= 2);
     (year, month, day)
+}
+
+/// What a verb runs with: this run, the repository's writer, the configuration or why it did not
+/// load, and whether this is a dry run.
+pub struct Invocation<'a> {
+    pub run: &'a Run,
+    pub writer: &'a Writer,
+    pub config: Result<&'a Config, &'a cupel_core::Error>,
+    pub dry_run: bool,
+}
+
+impl Invocation<'_> {
+    /// The configuration, or the usage error it failed to load with.
+    pub fn config(&self) -> Result<&Config, CupelError> {
+        self.config.map_err(|error| CupelError::from(error.clone()))
+    }
+
+    /// A plan that would do nothing: the dry run of a verb that changes nothing.
+    pub fn nothing_planned(&self, events: &mut dyn EventSink) -> Envelope {
+        self.run
+            .plan_envelope(RunPlan::default(), self.writer, events, Vec::new())
+    }
 }
 
 #[cfg(test)]
@@ -253,9 +308,9 @@ mod tests {
     #[test]
     fn a_timeout_counts_from_the_start_of_the_invocation() {
         let mut run = Run::start(Vec::new());
-        assert!(!run.cancellation().is_cancelled());
+        let before = run.cancellation().is_cancelled();
         run.set_timeout(Duration::ZERO);
-        assert!(run.cancellation().is_cancelled());
+        assert_eq!((before, run.cancellation().is_cancelled()), (false, true));
     }
 
     #[test]

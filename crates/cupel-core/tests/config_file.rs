@@ -74,6 +74,20 @@ fn parse(text: &str) -> Result<ConfigFile, Error> {
     ConfigFile::parse(text, Path::new("/repo/cupel.toml"))
 }
 
+/// Asserts that each text is rejected with exactly its problem: the last line of the message,
+/// which locates the problem in the lines before it.
+fn assert_problems(cases: &[(&str, &str)]) {
+    let problems: Vec<String> = cases.iter().map(|(text, _)| problem(text)).collect();
+    let expected: Vec<&str> = cases.iter().map(|(_, problem)| *problem).collect();
+    assert_eq!(problems, expected);
+}
+
+/// The last line of the message `text` is rejected with.
+fn problem(text: &str) -> String {
+    let message = error_message(text);
+    message.lines().last().unwrap_or_default().trim().to_owned()
+}
+
 fn error_message(text: &str) -> String {
     let err = parse(text).expect_err("the file should be rejected");
     assert!(
@@ -84,7 +98,7 @@ fn error_message(text: &str) -> String {
 }
 
 #[test]
-fn parses_the_design_example() {
+fn the_design_examples_settings_roots_languages_checks_and_oracles_parse() {
     let file = parse(DESIGN_EXAMPLE).unwrap();
 
     assert_eq!(file.required_version.as_deref(), Some(">=0.4"));
@@ -117,7 +131,11 @@ fn parses_the_design_example() {
     let pg = &file.oracles["pg"];
     assert_eq!(pg.kind, OracleKind::Command);
     assert_eq!(pg.cmd.as_deref(), Some("psql -X -A -t -c {input}"));
+}
 
+#[test]
+fn the_design_examples_gates_and_profiles_parse() {
+    let file = parse(DESIGN_EXAMPLE).unwrap();
     let changed = file.gate.changed.as_ref().unwrap();
     let rules: Vec<String> = changed.rules().iter().map(ToString::to_string).collect();
     assert_eq!(
@@ -180,30 +198,34 @@ fn unknown_keys_are_rejected_at_every_closed_level() {
         ),
         (
             "[plugins]\nfoo = \"bar\"\n",
-            "unknown field `plugins`, expected one of `required_version`",
+            "unknown field `plugins`, expected one of `required_version`, `default_branch`, `depth`, \
+             `format`, `budget`, `scope`, `roots`, `lang`, `checks`, `oracles`, `gate`, `profile`",
         ),
     ];
-    for (text, expected) in cases {
-        let message = error_message(text);
-        assert!(message.contains(expected), "{text}\n---\n{message}");
-    }
+    assert_problems(&cases);
 }
 
 #[test]
 fn bad_values_are_usage_errors() {
     let cases = [
-        ("depth = \"medium\"\n", "unknown variant `medium`"),
-        ("format = \"xml\"\n", "unknown variant `xml`"),
-        ("budget = \"soon\"\n", "invalid duration `soon`"),
+        (
+            "depth = \"medium\"\n",
+            "unknown variant `medium`, expected one of `quick`, `standard`, `deep`, `exhaustive`",
+        ),
+        (
+            "format = \"xml\"\n",
+            "unknown variant `xml`, expected one of `json`, `jsonl`, `text`, `sarif`",
+        ),
+        (
+            "budget = \"soon\"\n",
+            "invalid duration `soon`: expected a positive whole number followed by `ms`, `s`, `m`, or `h`, such as `20s`",
+        ),
         (
             "[oracles.pg]\nkind = \"sql\"\n",
             "unknown variant `sql`, expected one of `ref`, `command`, `spec`",
         ),
     ];
-    for (text, expected) in cases {
-        let message = error_message(text);
-        assert!(message.contains(expected), "{text}\n---\n{message}");
-    }
+    assert_problems(&cases);
 }
 
 #[test]
@@ -215,39 +237,35 @@ fn check_and_language_ids_are_syntax_checked() {
         ),
         (
             "[checks.\"tests.mutation.score\"]\nx = 1\n",
-            "invalid check ID `tests.mutation.score`",
+            "invalid check ID `tests.mutation.score`: check ID must be `<group>.<name>`",
         ),
         (
             "[lang.Rust]\ntest = \"cargo test\"\n",
-            "invalid language ID `Rust`",
+            "invalid language ID `Rust`: must match `[a-z][a-z0-9_-]*`",
         ),
         (
             "[checks.\"tests.mutation\".lang.\"Py thon\"]\nx = 1\n",
-            "invalid language ID `Py thon`",
+            "invalid language ID `Py thon`: must match `[a-z][a-z0-9_-]*`",
         ),
         (
             "[roots]\nweb = { path = \"web\", lang = \"Type Script\" }\n",
-            "invalid language ID `Type Script`",
+            "invalid language ID `Type Script`: must match `[a-z][a-z0-9_-]*`",
         ),
     ];
-    for (text, expected) in cases {
-        let message = error_message(text);
-        assert!(message.contains(expected), "{text}\n---\n{message}");
-    }
+    assert_problems(&cases);
 }
 
 #[test]
 fn per_language_overrides_must_be_tables() {
-    let message = error_message("[checks.\"tests.mutation\"]\nlang = \"python\"\n");
-    assert!(
-        message.contains("`lang` in a check table holds per-language override tables"),
-        "{message}"
-    );
-    let message = error_message("[checks.\"tests.mutation\".lang]\npython = 3\n");
-    assert!(
-        message.contains("`lang` in a check table holds per-language override tables"),
-        "{message}"
-    );
+    let overrides = "`lang` in a check table holds per-language override tables, such as \
+                     `[checks.\"<id>\".lang.<lang>]`";
+    assert_problems(&[
+        (
+            "[checks.\"tests.mutation\"]\nlang = \"python\"\n",
+            overrides,
+        ),
+        ("[checks.\"tests.mutation\".lang]\npython = 3\n", overrides),
+    ]);
 }
 
 #[test]
@@ -259,15 +277,17 @@ fn malformed_gate_rules_are_rejected_naming_the_rule_and_section() {
 
 #[test]
 fn gate_conditions_must_be_strings() {
-    let message = error_message("[gate.changed]\n\"tests.mutation.score\" = 0.8\n");
-    assert!(message.contains("expected a string"), "{message}");
+    assert_problems(&[(
+        "[gate.changed]\n\"tests.mutation.score\" = 0.8\n",
+        "invalid type: floating point `0.8`, expected a string",
+    )]);
 }
 
 #[test]
 fn toml_syntax_errors_name_the_file() {
     let message = error_message("depth = \n");
-    assert!(
-        message.starts_with("invalid configuration in `/repo/cupel.toml`: "),
-        "{message}"
+    assert_eq!(
+        message.lines().next(),
+        Some("invalid configuration in `/repo/cupel.toml`: TOML parse error at line 1, column 9")
     );
 }

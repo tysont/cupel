@@ -2,20 +2,10 @@
 // ABOUTME: normalized (typed) signatures, API differences, and roots: main, exports, tests, default exports.
 mod support;
 
-use cupel_core::syntax::{
-    ApiItemKind, ApiSurface, RootReason, Roots, SymbolDef, Symbols, TestFrames,
-};
-use support::{fixture, produce, tree};
+use cupel_core::syntax::{ApiItemKind, ApiSurface, RootReason, Roots, Symbols};
+use support::{assert_every_case_is_a_test_root, fixture, items, produce, reasons, tree};
 
 use ApiItemKind::{Constant, Function, Interface, Method, Module, Type, Variable};
-
-fn items(api: &ApiSurface, file: &str) -> Vec<(String, ApiItemKind, String)> {
-    api.items
-        .iter()
-        .filter(|item| item.file == file)
-        .map(|item| (item.path.clone(), item.kind, item.signature.clone()))
-        .collect()
-}
 
 fn item(path: &str, kind: ApiItemKind, signature: &str) -> (String, ApiItemKind, String) {
     (path.to_owned(), kind, signature.to_owned())
@@ -182,20 +172,6 @@ fn removing_a_public_parameter_changes_the_api_surface() {
     }
 }
 
-fn reasons(roots: &Roots, symbols: &Symbols, display: &str) -> Vec<RootReason> {
-    let symbol: &SymbolDef = symbols
-        .symbols
-        .iter()
-        .find(|s| s.display == display)
-        .unwrap_or_else(|| panic!("no symbol {display}"));
-    roots
-        .roots
-        .iter()
-        .filter(|root| root.symbol == symbol.key())
-        .map(|root| root.reason)
-        .collect()
-}
-
 #[test]
 fn main_exports_tests_and_default_exports_are_roots() {
     let root = fixture("javascript");
@@ -234,32 +210,8 @@ fn main_exports_tests_and_default_exports_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixtures_is_a_test_root() {
-    for (lang, cases) in [("javascript", 19), ("typescript", 15)] {
-        let root = fixture(lang);
-        let roots: Roots = produce(lang, &root);
-        let symbols: Symbols = produce(lang, &root);
-        let frames: TestFrames = produce(lang, &root);
-        let mut checked = 0;
-        for file in &frames.files {
-            for case in &file.cases {
-                let symbol = symbols
-                    .symbols
-                    .iter()
-                    .find(|s| s.file == file.file && s.span == case.span)
-                    .unwrap_or_else(|| panic!("no symbol for test {}", case.name));
-                assert!(
-                    roots
-                        .roots
-                        .iter()
-                        .any(|r| r.symbol == symbol.key() && r.reason == RootReason::Test),
-                    "{} is not a test root",
-                    case.name
-                );
-                checked += 1;
-            }
-        }
-        assert_eq!(checked, cases, "{lang}");
-    }
+    assert_every_case_is_a_test_root("javascript", 28);
+    assert_every_case_is_a_test_root("typescript", 24);
 }
 
 #[test]

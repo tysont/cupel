@@ -1,21 +1,27 @@
 // ABOUTME: Entry point of the `cupel` binary.
 // ABOUTME: Reads the process environment once, runs the invocation, and writes its output and exit code.
+mod against;
 mod app;
+mod baseline;
 mod catalog;
+mod check;
 mod cli;
 mod describe;
 mod doctor;
 mod error;
 mod events;
+mod explain;
 mod format;
-mod git;
 mod init;
 mod page;
+mod persist;
 mod problem;
 mod project;
 mod registry;
 mod render;
 mod run;
+mod suppress;
+mod survey;
 
 use std::io::Write;
 

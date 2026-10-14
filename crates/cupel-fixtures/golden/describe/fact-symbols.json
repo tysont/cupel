@@ -5,7 +5,13 @@
     "version": "<version>"
   },
   "description": {
-    "consumers": [],
+    "consumers": [
+      "static.clones",
+      "static.complexity",
+      "static.crap",
+      "static.dead-code",
+      "tests.quality"
+    ],
     "kind": "symbols",
     "producers": [
       {
@@ -131,6 +137,12 @@
               "description": "Enclosing namespace, such as `module::Type`; empty at top level.",
               "type": "string"
             },
+            "parameters": {
+              "description": "Declared parameters, not counting a receiver (`self`, `cls`, `this`, a Go receiver).",
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
             "span": {
               "$ref": "#/$defs/Span"
             },
@@ -146,6 +158,7 @@
             "lang",
             "name",
             "namespace",
+            "parameters",
             "span",
             "visibility"
           ],
@@ -192,16 +205,18 @@
       ],
       "title": "Symbols",
       "type": "object",
-      "x-cupel-fact-version": 1
+      "x-cupel-fact-version": 2
     },
     "subject": "fact",
     "syntactic": true,
-    "version": 1
+    "version": 2
   },
   "exit_code": 0,
+  "explanation": null,
   "findings": [],
   "next_actions": [],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

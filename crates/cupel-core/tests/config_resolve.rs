@@ -36,6 +36,11 @@ fn resolve(file_text: Option<&str>, request: &ConfigRequest) -> Result<Config, E
     }
 }
 
+/// `text` when the layer is `present`, else nothing.
+fn when(present: bool, text: &str) -> &str {
+    if present { text } else { "" }
+}
+
 /// Every combination of layers setting `budget`, each to a distinct value. The highest-precedence
 /// layer that sets it wins: flags > env > profile > cupel.toml > defaults (design §6.7).
 #[test]
@@ -66,19 +71,12 @@ fn precedence_matrix() {
             budget: in_flags.then(|| limit("1s")),
             ..Settings::default()
         };
-        let env: &[(&str, &str)] = if in_env {
-            &[("CUPEL_BUDGET", "2s")]
-        } else {
-            &[]
-        };
-        let mut text = String::new();
-        if in_file {
-            text.push_str("budget = \"4s\"\n");
-        }
-        text.push_str("[profile.p]\n");
-        if in_profile {
-            text.push_str("budget = \"3s\"\n");
-        }
+        let env: &[(&str, &str)] = &[("CUPEL_BUDGET", "2s")][..usize::from(in_env)];
+        let text = format!(
+            "{}[profile.p]\n{}",
+            when(in_file, "budget = \"4s\"\n"),
+            when(in_profile, "budget = \"3s\"\n"),
+        );
         // The profile layer is present exactly when profile `p` is selected.
         let profile = in_profile.then_some("p");
         let config = resolve(Some(&text), &request(flags, env, profile)).unwrap();
@@ -207,13 +205,11 @@ fn invalid_env_values_fail_resolution() {
         &request(Settings::default(), &[("CUPEL_FORMAT", "xml")], None),
     )
     .unwrap_err();
-    assert!(matches!(
-        err,
-        Error::Config(ConfigError::InvalidEnv {
-            var: "CUPEL_FORMAT",
-            ..
-        })
-    ));
+    assert_eq!(
+        err.to_string(),
+        "invalid value `xml` for CUPEL_FORMAT: unknown variant `xml`, expected one of `json`, \
+         `jsonl`, `text`, `sarif`"
+    );
 }
 
 #[test]

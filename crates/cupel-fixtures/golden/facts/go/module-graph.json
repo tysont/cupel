@@ -3,6 +3,7 @@
     {
       "edges": [
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 4,
           "relative": false,
@@ -13,6 +14,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 5,
           "relative": false,
@@ -23,6 +25,40 @@
           }
         },
         {
+          "edge_kind": "import",
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
+            "path": "clones_settlement.go"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
+            "path": "complexity.go"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
+            "path": "crap_scores.go"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -33,6 +69,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -43,6 +80,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -53,6 +91,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -63,6 +102,18 @@
           }
         },
         {
+          "edge_kind": "import",
+          "from": "complexity.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "fmt",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "decide.go",
           "line": 4,
           "relative": false,
@@ -73,6 +124,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "decide.go",
           "line": 5,
           "relative": false,
@@ -83,6 +135,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "decide.go",
           "line": 6,
           "relative": false,
@@ -93,6 +146,51 @@
           }
         },
         {
+          "edge_kind": "import",
+          "from": "deps_cycle/alpha/alpha.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "example.com/ledger/deps_cycle/beta",
+          "target": {
+            "kind": "file",
+            "path": "deps_cycle/beta/beta.go"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "deps_cycle/beta/beta.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "example.com/ledger/deps_cycle/alpha",
+          "target": {
+            "kind": "file",
+            "path": "deps_cycle/alpha/alpha.go"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "deps_layers/domain/order.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "example.com/ledger/deps_layers/infra",
+          "target": {
+            "kind": "file",
+            "path": "deps_layers/infra/store.go"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "deps_layers/port/port.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "example.com/ledger/deps_layers/domain",
+          "target": {
+            "kind": "file",
+            "path": "deps_layers/domain/order.go"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 4,
           "relative": false,
@@ -103,6 +201,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 6,
           "relative": false,
@@ -113,6 +212,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 8,
           "relative": false,
@@ -122,6 +222,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 9,
           "relative": false,
@@ -132,6 +233,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 10,
           "relative": false,
@@ -142,6 +244,29 @@
           }
         },
         {
+          "edge_kind": "import",
+          "from": "ledger_quality_test.go",
+          "line": 4,
+          "relative": false,
+          "specifier": "testing",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "ledger_quality_test.go",
+          "line": 6,
+          "relative": false,
+          "specifier": "github.com/stretchr/testify/assert",
+          "target": {
+            "kind": "external",
+            "package": "github.com/stretchr/testify"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "ledger_test.go",
           "line": 4,
           "relative": false,
@@ -152,6 +277,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger_test.go",
           "line": 5,
           "relative": false,
@@ -162,6 +288,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing.go",
           "line": 3,
           "relative": false,
@@ -172,6 +299,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 4,
           "relative": false,
@@ -182,6 +310,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 6,
           "relative": false,
@@ -192,6 +321,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 7,
           "relative": false,
@@ -202,6 +332,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 8,
           "relative": false,
@@ -212,6 +343,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 9,
           "relative": false,
@@ -222,6 +354,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "report/format.go",
           "line": 3,
           "relative": false,
@@ -237,6 +370,7 @@
     {
       "edges": [
         {
+          "edge_kind": "import",
           "from": "shapes/geometry.go",
           "line": 3,
           "relative": false,

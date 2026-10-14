@@ -69,7 +69,8 @@ fn design_finding() -> Value {
     })
 }
 
-/// The envelope from design §7.1, with elided IDs and the finding filled in.
+/// The envelope from design §7.1, with elided IDs and the finding filled in, and the check's
+/// `metrics` (ADR-060).
 fn design_envelope() -> Value {
     json!({
         "cupel": {"version": "0.4.0", "schema": "https://cupel.dev/schema/v1/run.json"},
@@ -88,6 +89,7 @@ fn design_envelope() -> Value {
         "checks": [
             {"id": "tests.mutation", "status": "fail", "tier": 3, "cost": "standard",
              "score": {"value": 0.71, "unit": "killed_ratio", "n": 34},
+             "metrics": {"score": 0.71},
              "delta": {"vs": "baseline", "value": -0.12},
              "findings": 6, "duration_ms": 41000, "skipped": null, "oracle": null}
         ],
@@ -137,7 +139,7 @@ fn skipped_check_result_carries_reason_fact_lang_and_pointer() {
     let mut example = design_envelope();
     example["checks"][0] = json!({
         "id": "static.complexity", "status": "skipped", "tier": 0, "cost": "quick",
-        "score": null, "delta": null, "findings": 0, "duration_ms": 0,
+        "score": null, "metrics": {}, "delta": null, "findings": 0, "duration_ms": 0,
         "skipped": {"reason": "unsupported", "fact": "decisions", "lang": "go", "tool": null,
                     "see": "cupel describe matrix"},
         "oracle": null
@@ -222,8 +224,37 @@ fn envelopes_without_a_plan_carry_a_null_plan() {
 }
 
 #[test]
+fn envelopes_without_an_explanation_carry_a_null_explanation() {
+    let output = assert_round_trip::<Envelope>(&design_envelope());
+    assert_eq!(output["explanation"], Value::Null);
+}
+
+#[test]
+fn an_explanation_round_trips_inside_an_envelope() {
+    let mut example = design_envelope();
+    example["explanation"] = json!({
+        "subject": "finding", "target": "fnd_7c2e1a", "run": "run_01JA2B3C4D5E6F7G8H9JKMNPQR",
+        "excerpt": {"file": "src/rewrite/planner.rs", "lines": [
+            {"line": 141, "text": "fn push_limit() {", "focus": false},
+            {"line": 142, "text": "    if limit <= offset {", "focus": true}
+        ]},
+        "covering_tests": ["pushes_through_sort"],
+        "nearest_test_file": "tests/rewrite/limit_tests.rs",
+        "metrics": [{"symbol": "sh_4b1d9e0c4b1d9e0c", "key": "cyclomatic", "value": 7.0},
+                    {"symbol": null, "key": "score", "value": 0.5}]
+    });
+    let output = assert_round_trip::<Envelope>(&example);
+    assert_eq!(output["explanation"], example["explanation"]);
+}
+
+#[test]
 fn unknown_event_tag_is_rejected() {
-    assert!(serde_json::from_value::<Event>(json!({"ev": "run.start"})).is_err());
+    let error = serde_json::from_value::<Event>(json!({"ev": "run.start"})).unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "unknown variant `run.start`, expected one of `plan`, `check.start`, `finding`, \
+         `progress`, `check.end`, `skip`, `run.end`"
+    );
 }
 
 #[test]
@@ -252,19 +283,36 @@ fn exit_codes_have_the_design_numbers_and_names() {
 
 #[test]
 fn exit_code_outside_0_to_6_is_rejected() {
-    assert!(serde_json::from_value::<ExitCode>(json!(7)).is_err());
-    assert!(serde_json::from_value::<ExitCode>(json!("pass")).is_err());
+    let errors = [json!(7), json!("pass")].map(|value| {
+        serde_json::from_value::<ExitCode>(value)
+            .unwrap_err()
+            .to_string()
+    });
+    assert_eq!(
+        errors,
+        [
+            "invalid exit code `7`: expected 0 to 6",
+            "invalid type: string \"pass\", expected u8"
+        ]
+    );
 }
 
 #[test]
 fn tier_accepts_0_to_6_only() {
-    for n in 0..=6u8 {
-        let tier = Tier::try_from(n).unwrap();
-        assert_eq!(tier.value(), n);
-        assert_eq!(serde_json::to_value(tier).unwrap(), json!(n));
-    }
-    assert!(Tier::try_from(7).is_err());
-    assert!(serde_json::from_value::<Tier>(json!(7)).is_err());
+    let tiers: Vec<(u8, Value)> = (0..=6u8)
+        .map(|n| {
+            let tier = Tier::try_from(n).unwrap();
+            (tier.value(), serde_json::to_value(tier).unwrap())
+        })
+        .collect();
+    let expected: Vec<(u8, Value)> = (0..=6u8).map(|n| (n, json!(n))).collect();
+    assert_eq!(tiers, expected);
+    assert_eq!(
+        Tier::try_from(7).map_err(|err| err.to_string()),
+        Err("invalid tier `7`: expected 0 to 6".to_owned())
+    );
+    let error = serde_json::from_value::<Tier>(json!(7)).unwrap_err();
+    assert_eq!(error.to_string(), "invalid tier `7`: expected 0 to 6");
 }
 
 /// Asserts each value serializes to the given JSON string and back.
@@ -393,5 +441,6 @@ fn skip_reasons() {
         (SkipReason::Unconfigured, "unconfigured"),
         (SkipReason::Budget, "budget"),
         (SkipReason::Timeout, "timeout"),
+        (SkipReason::NeedsRange, "needs-range"),
     ]);
 }

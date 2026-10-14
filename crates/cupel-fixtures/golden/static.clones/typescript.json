@@ -1,0 +1,342 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 1.0,
+        "max_jaccard": 1.0,
+        "pairs": 8.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 34,
+        "unit": "pairs",
+        "value": 8.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settleInvoices` and `reconcilePayments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 19,
+          "file": "src/clones_settlement.ts",
+          "hash": "sh_23cb9891c1a627f9",
+          "lang": "typescript",
+          "line": 8,
+          "lines": 12,
+          "nodes": 58,
+          "symbol": "clones_settlement.settleInvoices"
+        },
+        "right": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 32,
+          "file": "src/clones_settlement.ts",
+          "hash": "sh_23cb9891c1a627f9",
+          "lang": "typescript",
+          "line": 21,
+          "lines": 12,
+          "nodes": 58,
+          "symbol": "clones_settlement.reconcilePayments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_9b2bd8",
+      "kind": "clone.pair",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "src/clones_settlement.ts",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_23cb9891c1a627f9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_9b2bd8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.settleInvoices",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.settleInvoices` and `clones_settlement.reconcilePayments` (src/clones_settlement.ts:21) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `orderLines` and `refundLines` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "jaccard": 0.857,
+        "left": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 48,
+          "file": "src/clones_settlement.ts",
+          "hash": "sh_7891e7c5f5b05589",
+          "lang": "typescript",
+          "line": 34,
+          "lines": 15,
+          "nodes": 93,
+          "symbol": "clones_settlement.orderLines"
+        },
+        "right": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 65,
+          "file": "src/clones_settlement.ts",
+          "hash": "sh_09c333581982e793",
+          "lang": "typescript",
+          "line": 50,
+          "lines": 16,
+          "nodes": 99,
+          "symbol": "clones_settlement.refundLines"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_c813c2",
+      "kind": "clone.pair",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "src/clones_settlement.ts",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_7891e7c5f5b05589",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c813c2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.orderLines",
+        "hash": "sh_7891e7c5f5b05589",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.orderLines` and `clones_settlement.refundLines` (src/clones_settlement.ts:50) are type-3 clones (jaccard 0.86)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `netTotal` shares with 3 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 4,
+            "file": "src/twins.ts",
+            "hash": "sh_ab23a61c2eab12d0",
+            "lang": "typescript",
+            "line": 1,
+            "lines": 4,
+            "nodes": 32,
+            "symbol": "twins.netTotal"
+          },
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 9,
+            "file": "src/twins.ts",
+            "hash": "sh_ab23a61c2eab12d0",
+            "lang": "typescript",
+            "line": 6,
+            "lines": 4,
+            "nodes": 32,
+            "symbol": "twins.sumAfterCharge"
+          },
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 14,
+            "file": "src/twins.ts",
+            "hash": "sh_ab23a61c2eab12d0",
+            "lang": "typescript",
+            "line": 11,
+            "lines": 4,
+            "nodes": 32,
+            "symbol": "twins.netTotalFloor"
+          },
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 26,
+            "file": "src/twins.ts",
+            "hash": "sh_ab23a61c2eab12d0",
+            "lang": "typescript",
+            "line": 16,
+            "lines": 11,
+            "nodes": 32,
+            "symbol": "twins.netTotalLaidOut"
+          }
+        ],
+        "min_jaccard": 1.0,
+        "pairs": 6,
+        "threshold": 0.82
+      },
+      "id": "fnd_ba5dbd",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "file": "src/twins.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_ab23a61c2eab12d0",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ba5dbd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotal",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotal` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_9b2bd8",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract what `settleInvoices` and `reconcilePayments` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c813c2",
+      "kind": "refactor_extract",
+      "priority": 2,
+      "summary": "Extract what `orderLines` and `refundLines` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ba5dbd",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Extract the structure `netTotal` shares with 3 other symbols into one function and call it from each."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 29,
+      "languages": [
+        "typescript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 73
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 3
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 3,
+  "truncated": false
+}

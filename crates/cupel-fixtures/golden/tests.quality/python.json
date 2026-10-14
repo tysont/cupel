@@ -1,0 +1,597 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 10,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 0.9565217391304348,
+        "no_assertion": 2.0,
+        "weak_ratio": 0.2727272727272727
+      },
+      "oracle": null,
+      "score": {
+        "n": 23,
+        "unit": "assertion_density",
+        "value": 0.9565217391304348
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_statements_mention_the_owner` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_549f35",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 16,
+        "file": "tests/test_ledger.py",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_84686d9c4e16ec31",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_549f35 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_ledger.test_statements_mention_the_owner",
+        "hash": "sh_84686d9c4e16ec31",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_ledger.test_statements_mention_the_owner` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_an_opening_account_exists` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "not-null"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_6fdd0b",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 46,
+        "end_line": 24,
+        "file": "tests/test_ledger.py",
+        "line": 23
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_db971d577aa0cd88",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_6fdd0b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_ledger.test_an_opening_account_exists",
+        "hash": "sh_db971d577aa0cd88",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_ledger.test_an_opening_account_exists` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_statement_is_published` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_619e04",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 38,
+        "file": "tests/test_ledger.py",
+        "line": 37
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_390999ad4f6fbba9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_619e04 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_ledger.test_statement_is_published",
+        "hash": "sh_390999ad4f6fbba9",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_ledger.test_statement_is_published` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `test_opening_an_account_does_not_raise` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_7ef158",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 57,
+        "file": "tests/test_ledger.py",
+        "line": 56
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_6a7a0cff79f0f6ac",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_7ef158 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_ledger.test_opening_an_account_does_not_raise",
+        "hash": "sh_6a7a0cff79f0f6ac",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_ledger.test_opening_an_account_does_not_raise` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_members_get_a_discount` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_76da2f",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 56,
+        "end_line": 18,
+        "file": "tests/test_pricing.py",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_696931544fae7506",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_76da2f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_pricing.PricingTest.test_members_get_a_discount",
+        "hash": "sh_696931544fae7506",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_pricing.PricingTest.test_members_get_a_discount` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `test_statements_are_not_empty` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_045970",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 38,
+        "end_line": 18,
+        "file": "tests/test_quality_signals.py",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_d5864a23c59d6394",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_045970 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_statements_are_not_empty",
+        "hash": "sh_d5864a23c59d6394",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_statements_are_not_empty` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `test_classifying_runs` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_70663c",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 22,
+        "file": "tests/test_quality_signals.py",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_8218cb33e54aaeda",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_70663c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_classifying_runs",
+        "hash": "sh_8218cb33e54aaeda",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_classifying_runs` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `test_tallies_are_logged_and_mailed`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 75,
+        "mock_density_max": 50,
+        "mocks": 3,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "ledger.pricing.log_total",
+          "ledger.pricing.mail_total",
+          "ledger.pricing.clock"
+        ]
+      },
+      "id": "fnd_68a758",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 29,
+        "file": "tests/test_quality_signals.py",
+        "line": 25
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_02d9f9a6d6badd2f",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_68a758 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_tallies_are_logged_and_mailed",
+        "hash": "sh_02d9f9a6d6badd2f",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_tallies_are_logged_and_mailed` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `test_computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 0,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 1,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "id": "fnd_30b5d7",
+      "kind": "test.logic",
+      "location": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 39,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_6d78cfccff75262d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_30b5d7 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_computed_entries_count_toward_the_balance",
+        "hash": "sh_6d78cfccff75262d",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_computed_entries_count_toward_the_balance` contains logic: 1 loop(s) or branch(es) (max 0)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `test_deposits_keep_the_owner`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          42,
+          49
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 3,
+        "statements": 3,
+        "tests": [
+          "tests.test_quality_signals.test_deposits_keep_the_owner",
+          "tests.test_quality_signals.test_deposits_accumulate"
+        ]
+      },
+      "id": "fnd_cc14c6",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 1,
+        "end_col": 34,
+        "end_line": 46,
+        "file": "tests/test_quality_signals.py",
+        "line": 42
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_7c9a217fc22f1006",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_cc14c6 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_quality_signals.test_deposits_keep_the_owner",
+        "hash": "sh_7c9a217fc22f1006",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_quality_signals.test_deposits_keep_the_owner` and 1 other test(s) repeat the same 3 leading statements"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_549f35",
+      "kind": "strengthen_assertion",
+      "priority": 1,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_statements_mention_the_owner` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_6fdd0b",
+      "kind": "strengthen_assertion",
+      "priority": 2,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_an_opening_account_exists` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_619e04",
+      "kind": "strengthen_assertion",
+      "priority": 3,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_statement_is_published` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_7ef158",
+      "kind": "write_test",
+      "priority": 4,
+      "summary": "Add an assertion to `test_opening_an_account_does_not_raise` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_76da2f",
+      "kind": "strengthen_assertion",
+      "priority": 5,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_members_get_a_discount` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_045970",
+      "kind": "strengthen_assertion",
+      "priority": 6,
+      "summary": "Replace the truthiness, presence, or inequality checks in `test_statements_are_not_empty` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_70663c",
+      "kind": "write_test",
+      "priority": 7,
+      "summary": "Add an assertion to `test_classifying_runs` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_68a758",
+      "kind": "review",
+      "priority": 8,
+      "summary": "Use real collaborators or simple fakes for some of the doubles in `test_tallies_are_logged_and_mailed`, or split it, so it checks behavior rather than wiring."
+    },
+    {
+      "command": null,
+      "finding": "fnd_30b5d7",
+      "kind": "refactor_extract",
+      "priority": 9,
+      "summary": "Split `test_computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+    },
+    {
+      "command": null,
+      "finding": "fnd_cc14c6",
+      "kind": "refactor_extract",
+      "priority": 10,
+      "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `test_deposits_keep_the_owner`."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 27,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 80
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 10
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 10,
+  "truncated": false
+}

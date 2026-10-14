@@ -1,0 +1,3205 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 1.0,
+        "max_jaccard": 1.0,
+        "pairs": 8.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 34,
+        "unit": "pairs",
+        "value": 8.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 65.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 73,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "static.crap",
+      "metrics": {},
+      "oracle": null,
+      "score": null,
+      "skipped": null,
+      "status": "pass",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 26,
+      "id": "static.dead-code",
+      "metrics": {
+        "dead_exports": 25.0,
+        "dead_symbols": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 73,
+        "unit": "dead_symbols",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 21,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 12,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 0.9583333333333334,
+        "no_assertion": 2.0,
+        "weak_ratio": 0.30434782608695654
+      },
+      "oracle": null,
+      "score": {
+        "n": 24,
+        "unit": "assertion_density",
+        "value": 0.9583333333333334
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.weakening",
+      "metrics": {},
+      "oracle": null,
+      "score": null,
+      "skipped": {
+        "fact": null,
+        "lang": "typescript",
+        "reason": "needs-range",
+        "see": "cupel check --changed --only tests.weakening",
+        "tool": null
+      },
+      "status": "skipped",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `tallies stay within bounds` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 2,
+        "kinds": [
+          "custom",
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 2
+      },
+      "id": "fnd_48b390",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 38,
+        "end_col": 4,
+        "end_line": 13,
+        "file": "src/__tests__/pricing.test.ts",
+        "line": 9
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_1e13c9f06bb1fb2d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_48b390 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "__tests__.pricing.discounted.tallies stay within bounds",
+        "hash": "sh_1e13c9f06bb1fb2d",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`__tests__.pricing.discounted.tallies stay within bounds` asserts only weakly: 2 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settleInvoices` and `reconcilePayments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 19,
+          "file": "src/clones_settlement.ts",
+          "hash": "sh_23cb9891c1a627f9",
+          "lang": "typescript",
+          "line": 8,
+          "lines": 12,
+          "nodes": 58,
+          "symbol": "clones_settlement.settleInvoices"
+        },
+        "right": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 32,
+          "file": "src/clones_settlement.ts",
+          "hash": "sh_23cb9891c1a627f9",
+          "lang": "typescript",
+          "line": 21,
+          "lines": 12,
+          "nodes": 58,
+          "symbol": "clones_settlement.reconcilePayments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_9b2bd8",
+      "kind": "clone.pair",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "src/clones_settlement.ts",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_23cb9891c1a627f9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_9b2bd8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.settleInvoices",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.settleInvoices` and `clones_settlement.reconcilePayments` (src/clones_settlement.ts:21) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settleInvoices` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `settleInvoices` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settleInvoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_94d863",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "src/clones_settlement.ts",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_23cb9891c1a627f9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_94d863 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.settleInvoices",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.settleInvoices` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `reconcilePayments` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `reconcilePayments` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcilePayments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_94d863",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "src/clones_settlement.ts",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_23cb9891c1a627f9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_94d863 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.reconcilePayments",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.reconcilePayments` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `orderLines` and `refundLines` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "jaccard": 0.857,
+        "left": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 48,
+          "file": "src/clones_settlement.ts",
+          "hash": "sh_7891e7c5f5b05589",
+          "lang": "typescript",
+          "line": 34,
+          "lines": 15,
+          "nodes": 93,
+          "symbol": "clones_settlement.orderLines"
+        },
+        "right": {
+          "col": 8,
+          "end_col": 2,
+          "end_line": 65,
+          "file": "src/clones_settlement.ts",
+          "hash": "sh_09c333581982e793",
+          "lang": "typescript",
+          "line": 50,
+          "lines": 16,
+          "nodes": 99,
+          "symbol": "clones_settlement.refundLines"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_c813c2",
+      "kind": "clone.pair",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "src/clones_settlement.ts",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_7891e7c5f5b05589",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c813c2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.orderLines",
+        "hash": "sh_7891e7c5f5b05589",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.orderLines` and `clones_settlement.refundLines` (src/clones_settlement.ts:50) are type-3 clones (jaccard 0.86)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `orderLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `orderLines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `orderLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_600b6d",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "src/clones_settlement.ts",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_7891e7c5f5b05589",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_600b6d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.orderLines",
+        "hash": "sh_7891e7c5f5b05589",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.orderLines` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `refundLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `refundLines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refundLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_932338",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 65,
+        "file": "src/clones_settlement.ts",
+        "line": 50
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_09c333581982e793",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_932338 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.refundLines",
+        "hash": "sh_09c333581982e793",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.refundLines` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_01e66c",
+      "kind": "complexity.high",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "src/complexity.ts",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_89983ab5c464c8d1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_01e66c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.label",
+        "hash": "sh_89983ab5c464c8d1",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `label` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `label` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `label` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_45aa29",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "src/complexity.ts",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_89983ab5c464c8d1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_45aa29 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.label",
+        "hash": "sh_89983ab5c464c8d1",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.label` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_b7f885",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "file": "src/complexity.ts",
+        "line": 31
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_7b6a36c322da7c7c",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b7f885 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.settle",
+        "hash": "sh_7b6a36c322da7c7c",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settle` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `settle` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_61fd12",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "file": "src/complexity.ts",
+        "line": 31
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_7b6a36c322da7c7c",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_61fd12 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.settle",
+        "hash": "sh_7b6a36c322da7c7c",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.settle` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `openAccount` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_fa2cc2",
+      "kind": "params.many",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 56,
+        "file": "src/complexity.ts",
+        "line": 47
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_254ee3901ff330b3",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_fa2cc2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.openAccount",
+        "hash": "sh_254ee3901ff330b3",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.openAccount` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `openAccount` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `openAccount` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `openAccount` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_9da0ce",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 56,
+        "file": "src/complexity.ts",
+        "line": 47
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_254ee3901ff330b3",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_9da0ce --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.openAccount",
+        "hash": "sh_254ee3901ff330b3",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.openAccount` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `statementTemplate` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 65
+      },
+      "id": "fnd_d77497",
+      "kind": "function.long",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 122,
+        "file": "src/complexity.ts",
+        "line": 58
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_4726b12fa399cfed",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d77497 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.statementTemplate",
+        "hash": "sh_4726b12fa399cfed",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.statementTemplate` is 65 lines long (max 60)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `statementTemplate` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `statementTemplate` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `statementTemplate` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_081666",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 122,
+        "file": "src/complexity.ts",
+        "line": 58
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_4726b12fa399cfed",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_081666 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.statementTemplate",
+        "hash": "sh_4726b12fa399cfed",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.statementTemplate` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `net` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `net` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_fe644a",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 126,
+        "file": "src/complexity.ts",
+        "line": 124
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_3f91460e4ad240b0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_fe644a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.net",
+        "hash": "sh_3f91460e4ad240b0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.net` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `constructor` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `constructor` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `constructor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_21c390",
+      "kind": "dead.export",
+      "location": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 133,
+        "file": "src/complexity.ts",
+        "line": 131
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_a556509481d3a797",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_21c390 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.Statement.constructor",
+        "hash": "sh_a556509481d3a797",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.Statement.constructor` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `line` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `line` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `line` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_7dc904",
+      "kind": "dead.export",
+      "location": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 137,
+        "file": "src/complexity.ts",
+        "line": 135
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_900710fae3dba6bf",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_7dc904 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.Statement.line",
+        "hash": "sh_900710fae3dba6bf",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.Statement.line` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `month` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `month` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `month` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_4119bc",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 170,
+        "file": "src/complexity.ts",
+        "line": 141
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6ecd57017ef786b1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_4119bc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.month",
+        "hash": "sh_6ecd57017ef786b1",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.month` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `overdue` from src/crap_scores.ts if nothing outside the repository uses it, or import src/crap_scores.ts where `overdue` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/crap_scores.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `overdue` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/crap_scores.ts",
+        "module": "crap_scores",
+        "module_files": [
+          "src/crap_scores.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_452a2b",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "file": "src/crap_scores.ts",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_03503e884f786355",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_452a2b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "crap_scores.overdue",
+        "hash": "sh_03503e884f786355",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`crap_scores.overdue` is exported but no import resolves to src/crap_scores.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `clamp` from src/crap_scores.ts if nothing outside the repository uses it, or import src/crap_scores.ts where `clamp` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/crap_scores.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `clamp` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/crap_scores.ts",
+        "module": "crap_scores",
+        "module_files": [
+          "src/crap_scores.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_7f8f65",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "src/crap_scores.ts",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_0de1960babbbb7af",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_7f8f65 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "crap_scores.clamp",
+        "hash": "sh_0de1960babbbb7af",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`crap_scores.clamp` is exported but no import resolves to src/crap_scores.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `toCents` from src/crap_scores.ts if nothing outside the repository uses it, or import src/crap_scores.ts where `toCents` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/crap_scores.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `toCents` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/crap_scores.ts",
+        "module": "crap_scores",
+        "module_files": [
+          "src/crap_scores.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_e2b775",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 34,
+        "file": "src/crap_scores.ts",
+        "line": 32
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_8d7d82f9ae2ba092",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_e2b775 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "crap_scores.toCents",
+        "hash": "sh_8d7d82f9ae2ba092",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`crap_scores.toCents` is exported but no import resolves to src/crap_scores.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `unusedTotal` from src/dead_export.ts if nothing outside the repository uses it, or import src/dead_export.ts where `unusedTotal` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/dead_export.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `unusedTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/dead_export.ts",
+        "module": "dead_export",
+        "module_files": [
+          "src/dead_export.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_7d5bb0",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "file": "src/dead_export.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_61270119006f44bf",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_7d5bb0 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "dead_export.unusedTotal",
+        "hash": "sh_61270119006f44bf",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`dead_export.unusedTotal` is exported but no import resolves to src/dead_export.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `forgottenRate` from src/dead_helpers.ts if nothing outside the repository uses it, or import src/dead_helpers.ts where `forgottenRate` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.8,
+      "detail": "No import in the repository resolves to src/dead_helpers.ts or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `forgottenRate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
+      "evidence": {
+        "file": "src/dead_helpers.ts",
+        "module": "dead_helpers",
+        "module_files": [
+          "src/dead_helpers.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_b6a705",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "file": "src/dead_helpers.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_3826cf6c69142d32",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b6a705 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "dead_helpers.forgottenRate",
+        "hash": "sh_3826cf6c69142d32",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`dead_helpers.forgottenRate` is unreachable: no import resolves to src/dead_helpers.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle src/deps_cycle/alpha.ts → src/deps_cycle/beta.ts → src/deps_cycle/alpha.ts: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "src/deps_cycle/alpha.ts",
+          "src/deps_cycle/beta.ts"
+        ],
+        "modules": [
+          "src/deps_cycle/alpha.ts",
+          "src/deps_cycle/beta.ts"
+        ],
+        "size": 2
+      },
+      "id": "fnd_c89a16",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_cycle/alpha.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c89a16 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: src/deps_cycle/alpha.ts → src/deps_cycle/beta.ts → src/deps_cycle/alpha.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `src/deps_layers/infra/store.ts` from `src/deps_layers/domain/order.ts`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "src/deps_layers/domain/order.ts",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "../infra/store",
+        "to": "src/deps_layers/infra/store.ts",
+        "to_layer": "infra"
+      },
+      "id": "fnd_b397cd",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_layers/domain/order.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b397cd --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/deps_layers/domain/order.ts` (layer domain) imports `src/deps_layers/infra/store.ts` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `src/deps_layers/port.ts`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 0,
+        "distance": 1.0,
+        "distance_max": 0.7,
+        "efferent": 1,
+        "external": 0,
+        "instability": 1.0,
+        "module": "src/deps_layers/port.ts",
+        "unresolved": 0
+      },
+      "id": "fnd_3f3df3",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/deps_layers/port.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3f3df3 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/deps_layers/port.ts` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `load` from src/ledger.ts if nothing outside the repository uses it, or import src/ledger.ts where `load` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `load` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger.ts",
+        "module": "ledger",
+        "module_files": [
+          "src/ledger.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_d12ae1",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "file": "src/ledger.ts",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_a8f97199e3f096db",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_d12ae1 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.load",
+        "hash": "sh_a8f97199e3f096db",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`ledger.load` is exported but no import resolves to src/ledger.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `round` from src/legacy.ts if nothing outside the repository uses it, or import src/legacy.ts where `round` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/legacy.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `round` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/legacy.ts",
+        "module": "legacy.Legacy",
+        "module_files": [
+          "src/legacy.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_611c3c",
+      "kind": "dead.export",
+      "location": {
+        "col": 10,
+        "end_col": 4,
+        "end_line": 4,
+        "file": "src/legacy.ts",
+        "line": 2
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6cecddd04af156d5",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_611c3c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "legacy.Legacy.round",
+        "hash": "sh_6cecddd04af156d5",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`legacy.Legacy.round` is exported but no import resolves to src/legacy.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `returns something` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_ce66fb",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 27,
+        "end_col": 4,
+        "end_line": 15,
+        "file": "src/math.quality.test.ts",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_b9803ecda343337b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ce66fb --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.quality.returns something",
+        "hash": "sh_b9803ecda343337b",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.quality.returns something` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `runs without checking` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_8273ce",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 19,
+        "file": "src/math.quality.test.ts",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_94c27b48bcd0a5a6",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_8273ce --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.quality.runs without checking",
+        "hash": "sh_94c27b48bcd0a5a6",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.quality.runs without checking` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `logs and mails every sum`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 75,
+        "mock_density_max": 50,
+        "mocks": 3,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "vi.fn",
+          "vi.fn",
+          "vi.fn"
+        ]
+      },
+      "id": "fnd_c0fee6",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 34,
+        "end_col": 4,
+        "end_line": 26,
+        "file": "src/math.quality.test.ts",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_11234d140230bab3",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c0fee6 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.quality.logs and mails every sum",
+        "hash": "sh_11234d140230bab3",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.quality.logs and mails every sum` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `counts every value in a range` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 0,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 1,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "id": "fnd_efbc18",
+      "kind": "test.logic",
+      "location": {
+        "col": 39,
+        "end_col": 4,
+        "end_line": 32,
+        "file": "src/math.quality.test.ts",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_e6e7ff0b853d3f7a",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_efbc18 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.quality.counts every value in a range",
+        "hash": "sh_e6e7ff0b853d3f7a",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.quality.counts every value in a range` contains logic: 1 loop(s) or branch(es) (max 0)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `keeps values in order`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          40,
+          47
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 3,
+        "statements": 3,
+        "tests": [
+          "math.quality.keeps values in order",
+          "math.quality.ends with the last sum"
+        ]
+      },
+      "id": "fnd_1b1a9a",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 45,
+        "file": "src/math.quality.test.ts",
+        "line": 40
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_573b7499537d9850",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1b1a9a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.quality.keeps values in order",
+        "hash": "sh_573b7499537d9850",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.quality.keeps values in order` and 1 other test(s) repeat the same 3 leading statements"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `is truthy for non-zero sums` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_0441b7",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 19,
+        "file": "src/math.test.ts",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_41715ce8ae58f7e5",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0441b7 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.add.is truthy for non-zero sums",
+        "hash": "sh_41715ce8ae58f7e5",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.add.is truthy for non-zero sums` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `returns a defined value` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "not-null"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_c533c7",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 33,
+        "end_col": 4,
+        "end_line": 23,
+        "file": "src/math.test.ts",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_998f329df407a76d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c533c7 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.add.returns a defined value",
+        "hash": "sh_998f329df407a76d",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.add.returns a defined value` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `does not return zero` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_3cf2ea",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 27,
+        "file": "src/math.test.ts",
+        "line": 25
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_529308faeb202e08",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3cf2ea --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.add.does not return zero",
+        "hash": "sh_529308faeb202e08",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.add.does not return zero` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `can be called without checking` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 1,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_8273ce",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 40,
+        "end_col": 4,
+        "end_line": 35,
+        "file": "src/math.test.ts",
+        "line": 33
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_94c27b48bcd0a5a6",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_8273ce --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.add.can be called without checking",
+        "hash": "sh_94c27b48bcd0a5a6",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.add.can be called without checking` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `is consumed by a spy`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 66,
+        "mock_density_max": 50,
+        "mocks": 2,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "./legacy",
+          "vi.fn"
+        ]
+      },
+      "id": "fnd_728588",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 47,
+        "file": "src/math.test.ts",
+        "line": 43
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_81f0fe0e957b356b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_728588 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "math.range.is consumed by a spy",
+        "hash": "sh_81f0fe0e957b356b",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`math.range.is consumed by a spy` is mock-heavy: 2 doubles and 1 assertion(s), 66% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `netTotal` shares with 3 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 4,
+            "file": "src/twins.ts",
+            "hash": "sh_ab23a61c2eab12d0",
+            "lang": "typescript",
+            "line": 1,
+            "lines": 4,
+            "nodes": 32,
+            "symbol": "twins.netTotal"
+          },
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 9,
+            "file": "src/twins.ts",
+            "hash": "sh_ab23a61c2eab12d0",
+            "lang": "typescript",
+            "line": 6,
+            "lines": 4,
+            "nodes": 32,
+            "symbol": "twins.sumAfterCharge"
+          },
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 14,
+            "file": "src/twins.ts",
+            "hash": "sh_ab23a61c2eab12d0",
+            "lang": "typescript",
+            "line": 11,
+            "lines": 4,
+            "nodes": 32,
+            "symbol": "twins.netTotalFloor"
+          },
+          {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 26,
+            "file": "src/twins.ts",
+            "hash": "sh_ab23a61c2eab12d0",
+            "lang": "typescript",
+            "line": 16,
+            "lines": 11,
+            "nodes": 32,
+            "symbol": "twins.netTotalLaidOut"
+          }
+        ],
+        "min_jaccard": 1.0,
+        "pairs": 6,
+        "threshold": 0.82
+      },
+      "id": "fnd_ba5dbd",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "file": "src/twins.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_ab23a61c2eab12d0",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ba5dbd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotal",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotal` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotal` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotal` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_aeeb14",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "file": "src/twins.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ab23a61c2eab12d0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_aeeb14 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotal",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotal` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `sumAfterCharge` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `sumAfterCharge` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `sumAfterCharge` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_aeeb14",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "file": "src/twins.ts",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ab23a61c2eab12d0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_aeeb14 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.sumAfterCharge",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.sumAfterCharge` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalFloor` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalFloor` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalFloor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_aeeb14",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "file": "src/twins.ts",
+        "line": 11
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ab23a61c2eab12d0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_aeeb14 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalFloor",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalFloor` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalLaidOut` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalLaidOut` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalLaidOut` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_aeeb14",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 26,
+        "file": "src/twins.ts",
+        "line": 16
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ab23a61c2eab12d0",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_aeeb14 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalLaidOut",
+        "hash": "sh_ab23a61c2eab12d0",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalLaidOut` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalPlus` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalPlus` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalPlus` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_48dcbc",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 31,
+        "file": "src/twins.ts",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_cd4e336afe5c190c",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_48dcbc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalPlus",
+        "hash": "sh_cd4e336afe5c190c",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalPlus` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalCapped` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalCapped` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalCapped` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_0e778d",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 39,
+        "file": "src/twins.ts",
+        "line": 33
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ff3b0b0009bbd3fa",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_0e778d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalCapped",
+        "hash": "sh_ff3b0b0009bbd3fa",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalCapped` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalProduct` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotalProduct` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalProduct` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/twins.ts",
+        "module": "twins",
+        "module_files": [
+          "src/twins.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_48e112",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 44,
+        "file": "src/twins.ts",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_50b9aaca415e3b0a",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_48e112 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "twins.netTotalProduct",
+        "hash": "sh_50b9aaca415e3b0a",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`twins.netTotalProduct` is exported but no import resolves to src/twins.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `waits for the ledger server` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_6d78b7",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 16,
+        "file": "test/decide.test.ts",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_26948c57862b645b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_6d78b7 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.decide.waits for the ledger server",
+        "hash": "sh_26948c57862b645b",
+        "lang": "typescript"
+      },
+      "tier": 2,
+      "title": "`test.decide.waits for the ledger server` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_48b390",
+      "kind": "strengthen_assertion",
+      "priority": 1,
+      "summary": "Replace the truthiness, presence, or inequality checks in `tallies stay within bounds` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ce66fb",
+      "kind": "strengthen_assertion",
+      "priority": 2,
+      "summary": "Replace the truthiness, presence, or inequality checks in `returns something` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_8273ce",
+      "kind": "write_test",
+      "priority": 3,
+      "summary": "Add an assertion to `runs without checking` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c0fee6",
+      "kind": "review",
+      "priority": 4,
+      "summary": "Use real collaborators or simple fakes for some of the doubles in `logs and mails every sum`, or split it, so it checks behavior rather than wiring."
+    },
+    {
+      "command": null,
+      "finding": "fnd_efbc18",
+      "kind": "refactor_extract",
+      "priority": 5,
+      "summary": "Split `counts every value in a range` into one test per path, or parametrize it, so the test body neither loops nor branches."
+    },
+    {
+      "command": null,
+      "finding": "fnd_1b1a9a",
+      "kind": "refactor_extract",
+      "priority": 6,
+      "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `keeps values in order`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_0441b7",
+      "kind": "strengthen_assertion",
+      "priority": 7,
+      "summary": "Replace the truthiness, presence, or inequality checks in `is truthy for non-zero sums` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c533c7",
+      "kind": "strengthen_assertion",
+      "priority": 8,
+      "summary": "Replace the truthiness, presence, or inequality checks in `returns a defined value` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_3cf2ea",
+      "kind": "strengthen_assertion",
+      "priority": 9,
+      "summary": "Replace the truthiness, presence, or inequality checks in `does not return zero` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_8273ce",
+      "kind": "write_test",
+      "priority": 10,
+      "summary": "Add an assertion to `can be called without checking` that pins the outcome it exercises."
+    }
+  ],
+  "plan": null,
+  "rankings": {
+    "dimensions": [
+      {
+        "check": "static.clones",
+        "entries": [
+          {
+            "lang": "typescript",
+            "rank": 1,
+            "target": {
+              "display": "twins.netTotal and 3 others",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 4,
+                "file": "src/twins.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 2,
+            "target": {
+              "display": "clones_settlement.orderLines and 1 other",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 48,
+                "file": "src/clones_settlement.ts",
+                "line": 34
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 3,
+            "target": {
+              "display": "clones_settlement.settleInvoices and 1 other",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 19,
+                "file": "src/clones_settlement.ts",
+                "line": 8
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          }
+        ],
+        "measured": 3,
+        "metric": "cluster_size",
+        "per": "group",
+        "summary": "Symbols in each clone group: 2 for a pair, more for a cluster."
+      },
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "typescript",
+            "rank": 1,
+            "target": {
+              "display": "complexity.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "src/complexity.ts",
+                "line": 3
+              },
+              "symbol": "sh_89983ab5c464c8d1"
+            },
+            "value": 11.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 2,
+            "target": {
+              "display": "complexity.settle",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 45,
+                "file": "src/complexity.ts",
+                "line": 31
+              },
+              "symbol": "sh_7b6a36c322da7c7c"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 3,
+            "target": {
+              "display": "crap_scores.overdue",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 18,
+                "file": "src/crap_scores.ts",
+                "line": 6
+              },
+              "symbol": "sh_03503e884f786355"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 4,
+            "target": {
+              "display": "decide.classify",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 12,
+                "file": "src/decide.ts",
+                "line": 5
+              },
+              "symbol": "sh_4d82a4cfa0ea00d1"
+            },
+            "value": 5.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 5,
+            "target": {
+              "display": "clones_settlement.reconcilePayments",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 32,
+                "file": "src/clones_settlement.ts",
+                "line": 21
+              },
+              "symbol": "sh_23cb9891c1a627f9"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 6,
+            "target": {
+              "display": "clones_settlement.settleInvoices",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 19,
+                "file": "src/clones_settlement.ts",
+                "line": 8
+              },
+              "symbol": "sh_23cb9891c1a627f9"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 7,
+            "target": {
+              "display": "crap_scores.clamp",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "src/crap_scores.ts",
+                "line": 21
+              },
+              "symbol": "sh_0de1960babbbb7af"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 8,
+            "target": {
+              "display": "decide.firstOverdraft",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 21,
+                "file": "src/decide.ts",
+                "line": 14
+              },
+              "symbol": "sh_f8043581d26d9c0c"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 9,
+            "target": {
+              "display": "decide.parseCents",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 43,
+                "file": "src/decide.ts",
+                "line": 34
+              },
+              "symbol": "sh_a286265a5f4e1c81"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 10,
+            "target": {
+              "display": "pricing.discounted",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 7,
+                "file": "src/pricing.ts",
+                "line": 1
+              },
+              "symbol": "sh_13d81a7dbe1b7234"
+            },
+            "value": 3.0
+          }
+        ],
+        "measured": 73,
+        "metric": "cyclomatic",
+        "per": "symbol",
+        "summary": "Modified cyclomatic complexity per function (a match counts once)."
+      },
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "typescript",
+            "rank": 1,
+            "target": {
+              "display": "complexity.settle",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 45,
+                "file": "src/complexity.ts",
+                "line": 31
+              },
+              "symbol": "sh_7b6a36c322da7c7c"
+            },
+            "value": 15.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 2,
+            "target": {
+              "display": "complexity.month",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 170,
+                "file": "src/complexity.ts",
+                "line": 141
+              },
+              "symbol": "sh_6ecd57017ef786b1"
+            },
+            "value": 13.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 3,
+            "target": {
+              "display": "complexity.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "src/complexity.ts",
+                "line": 3
+              },
+              "symbol": "sh_89983ab5c464c8d1"
+            },
+            "value": 10.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 4,
+            "target": {
+              "display": "crap_scores.overdue",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 18,
+                "file": "src/crap_scores.ts",
+                "line": 6
+              },
+              "symbol": "sh_03503e884f786355"
+            },
+            "value": 8.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 5,
+            "target": {
+              "display": "decide.classify",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 12,
+                "file": "src/decide.ts",
+                "line": 5
+              },
+              "symbol": "sh_4d82a4cfa0ea00d1"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 6,
+            "target": {
+              "display": "crap_scores.clamp",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "src/crap_scores.ts",
+                "line": 21
+              },
+              "symbol": "sh_0de1960babbbb7af"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 7,
+            "target": {
+              "display": "decide.firstOverdraft",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 21,
+                "file": "src/decide.ts",
+                "line": 14
+              },
+              "symbol": "sh_f8043581d26d9c0c"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 8,
+            "target": {
+              "display": "decide.parseCents",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 43,
+                "file": "src/decide.ts",
+                "line": 34
+              },
+              "symbol": "sh_a286265a5f4e1c81"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 9,
+            "target": {
+              "display": "clones_settlement.reconcilePayments",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 32,
+                "file": "src/clones_settlement.ts",
+                "line": 21
+              },
+              "symbol": "sh_23cb9891c1a627f9"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 10,
+            "target": {
+              "display": "clones_settlement.settleInvoices",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 19,
+                "file": "src/clones_settlement.ts",
+                "line": 8
+              },
+              "symbol": "sh_23cb9891c1a627f9"
+            },
+            "value": 3.0
+          }
+        ],
+        "measured": 73,
+        "metric": "cognitive",
+        "per": "symbol",
+        "summary": "Cognitive complexity per function."
+      },
+      {
+        "check": "static.crap",
+        "entries": [],
+        "measured": 0,
+        "metric": "crap",
+        "per": "symbol",
+        "summary": "CRAP per function."
+      },
+      {
+        "check": "static.deps",
+        "entries": [
+          {
+            "lang": "typescript",
+            "rank": 1,
+            "target": {
+              "display": "src/deps_layers/infra/store.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_layers/infra/store.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 2,
+            "target": {
+              "display": "src/deps_layers/port.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_layers/port.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 3,
+            "target": {
+              "display": "src/shapes/geometry.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/shapes/geometry.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 4,
+            "target": {
+              "display": "src/deps_layers/domain/order.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_layers/domain/order.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.5
+          },
+          {
+            "lang": "typescript",
+            "rank": 5,
+            "target": {
+              "display": "src/decide.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/decide.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 6,
+            "target": {
+              "display": "src/index.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/index.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 7,
+            "target": {
+              "display": "src/plugin.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/plugin.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.0
+          }
+        ],
+        "measured": 7,
+        "metric": "distance",
+        "per": "module",
+        "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+      },
+      {
+        "check": "static.deps",
+        "entries": [
+          {
+            "lang": "typescript",
+            "rank": 1,
+            "target": {
+              "display": "src/ledger.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/ledger.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 5.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 2,
+            "target": {
+              "display": "src/math.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/math.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 5.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 3,
+            "target": {
+              "display": "src/shapes/geometry.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/shapes/geometry.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 4,
+            "target": {
+              "display": "src/shapes/index.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/shapes/index.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 5,
+            "target": {
+              "display": "src/deps_cycle/alpha.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_cycle/alpha.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 6,
+            "target": {
+              "display": "src/deps_cycle/beta.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_cycle/beta.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 7,
+            "target": {
+              "display": "src/deps_layers/domain/order.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_layers/domain/order.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 8,
+            "target": {
+              "display": "bin/cli.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "bin/cli.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 9,
+            "target": {
+              "display": "packages/shapes/src/index.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "packages/shapes/src/index.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 10,
+            "target": {
+              "display": "src/__tests__/pricing.test.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/__tests__/pricing.test.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          }
+        ],
+        "measured": 21,
+        "metric": "coupling",
+        "per": "module",
+        "summary": "Afferent plus efferent coupling per module."
+      },
+      {
+        "check": "static.deps",
+        "entries": [
+          {
+            "lang": "typescript",
+            "rank": 1,
+            "target": {
+              "display": "src/deps_cycle/alpha.ts → src/deps_cycle/beta.ts → src/deps_cycle/alpha.ts",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_cycle/alpha.ts",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          }
+        ],
+        "measured": 1,
+        "metric": "cycle_size",
+        "per": "group",
+        "summary": "Modules in each import cycle."
+      },
+      {
+        "check": "tests.quality",
+        "entries": [
+          {
+            "lang": "typescript",
+            "rank": 1,
+            "target": {
+              "display": "math.add.can be called without checking",
+              "location": {
+                "col": 40,
+                "end_col": 4,
+                "end_line": 35,
+                "file": "src/math.test.ts",
+                "line": 33
+              },
+              "symbol": "sh_94c27b48bcd0a5a6"
+            },
+            "value": 100.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 2,
+            "target": {
+              "display": "math.quality.logs and mails every sum",
+              "location": {
+                "col": 34,
+                "end_col": 4,
+                "end_line": 26,
+                "file": "src/math.quality.test.ts",
+                "line": 21
+              },
+              "symbol": "sh_11234d140230bab3"
+            },
+            "value": 75.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 3,
+            "target": {
+              "display": "math.range.is consumed by a spy",
+              "location": {
+                "col": 30,
+                "end_col": 4,
+                "end_line": 47,
+                "file": "src/math.test.ts",
+                "line": 43
+              },
+              "symbol": "sh_81f0fe0e957b356b"
+            },
+            "value": 66.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 4,
+            "target": {
+              "display": "math.add.adds two numbers",
+              "location": {
+                "col": 26,
+                "end_col": 4,
+                "end_line": 9,
+                "file": "src/math.test.ts",
+                "line": 7
+              },
+              "symbol": "sh_ff3f2895b2f0d75a"
+            },
+            "value": 50.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 5,
+            "target": {
+              "display": "math.add.does not return zero",
+              "location": {
+                "col": 30,
+                "end_col": 4,
+                "end_line": 27,
+                "file": "src/math.test.ts",
+                "line": 25
+              },
+              "symbol": "sh_529308faeb202e08"
+            },
+            "value": 50.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 6,
+            "target": {
+              "display": "math.add.handles huge numbers",
+              "location": {
+                "col": 35,
+                "end_col": 4,
+                "end_line": 31,
+                "file": "src/math.test.ts",
+                "line": 29
+              },
+              "symbol": "sh_e61abd1221fe123f"
+            },
+            "value": 50.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 7,
+            "target": {
+              "display": "math.add.is truthy for non-zero sums",
+              "location": {
+                "col": 37,
+                "end_col": 4,
+                "end_line": 19,
+                "file": "src/math.test.ts",
+                "line": 17
+              },
+              "symbol": "sh_41715ce8ae58f7e5"
+            },
+            "value": 50.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 8,
+            "target": {
+              "display": "math.add.returns a defined value",
+              "location": {
+                "col": 33,
+                "end_col": 4,
+                "end_line": 23,
+                "file": "src/math.test.ts",
+                "line": 21
+              },
+              "symbol": "sh_998f329df407a76d"
+            },
+            "value": 50.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 9,
+            "target": {
+              "display": "math.range.matches its snapshot",
+              "location": {
+                "col": 30,
+                "end_col": 4,
+                "end_line": 41,
+                "file": "src/math.test.ts",
+                "line": 39
+              },
+              "symbol": "sh_33f6bf2ba3c8f78e"
+            },
+            "value": 50.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 10,
+            "target": {
+              "display": "__tests__.pricing.discounted.tallies stay within bounds",
+              "location": {
+                "col": 38,
+                "end_col": 4,
+                "end_line": 13,
+                "file": "src/__tests__/pricing.test.ts",
+                "line": 9
+              },
+              "symbol": "sh_1e13c9f06bb1fb2d"
+            },
+            "value": 33.0
+          }
+        ],
+        "measured": 24,
+        "metric": "mock_density",
+        "per": "symbol",
+        "summary": "Test doubles per test as a percentage of its doubles plus assertions."
+      }
+    ],
+    "top": 10
+  },
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 29,
+      "languages": [
+        "typescript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 73
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "survey"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 25,
+      "warn": 23
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 48,
+  "truncated": false
+}

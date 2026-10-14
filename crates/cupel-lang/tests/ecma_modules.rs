@@ -2,65 +2,36 @@
 // ABOUTME: dynamic imports, package `imports`/`exports`/`main`, tsconfig `paths`, builtins, and externals.
 mod support;
 
-use cupel_core::syntax::{ImportTarget, ModuleGraph};
-use support::{fixture, produce, tree};
-
-/// (root, from, line, specifier, target, relative) for every edge.
-type Row = (String, String, u32, String, String, bool);
-
-fn rows(graph: &ModuleGraph) -> Vec<Row> {
-    graph
-        .roots
-        .iter()
-        .flat_map(|root| {
-            root.edges.iter().map(|edge| {
-                (
-                    root.root.clone(),
-                    edge.from.clone(),
-                    edge.line,
-                    edge.specifier.clone(),
-                    match &edge.target {
-                        ImportTarget::File { path } => path.clone(),
-                        ImportTarget::External { package } => format!("external:{package}"),
-                        ImportTarget::Unresolved => "unresolved".to_owned(),
-                    },
-                    edge.relative,
-                )
-            })
-        })
-        .collect()
-}
-
-fn row(root: &str, from: &str, line: u32, specifier: &str, target: &str, relative: bool) -> Row {
-    (
-        root.to_owned(),
-        from.to_owned(),
-        line,
-        specifier.to_owned(),
-        target.to_owned(),
-        relative,
-    )
-}
+use cupel_core::syntax::{EdgeKind, ModuleGraph};
+use support::{Edge, edge_rows, fixture, kind, kinds, produce, tree, under};
 
 fn roots(graph: &ModuleGraph) -> Vec<&str> {
     graph.roots.iter().map(|r| r.root.as_str()).collect()
 }
 
-/// An expected edge: (from, line, specifier, target, relative).
-type Edge = (&'static str, u32, &'static str, &'static str, bool);
-
-/// `edges` as rows of the root `root`.
-fn under(root: &str, edges: &[Edge]) -> Vec<Row> {
-    edges
-        .iter()
-        .map(|(from, line, specifier, target, relative)| {
-            row(root, from, *line, specifier, target, *relative)
-        })
-        .collect()
-}
-
-const JAVASCRIPT_EDGES: &[Edge] = &[
+const JAVASCRIPT_EDGES: &[Edge<'static>] = &[
     ("bin/cli.js", 2, "../src/math.js", "src/math.js", true),
+    (
+        "src/deps_cycle/alpha.js",
+        1,
+        "./beta.js",
+        "src/deps_cycle/beta.js",
+        true,
+    ),
+    (
+        "src/deps_cycle/beta.js",
+        1,
+        "./alpha.js",
+        "src/deps_cycle/alpha.js",
+        true,
+    ),
+    (
+        "src/deps_layers/domain/order.js",
+        1,
+        "../infra/store.js",
+        "src/deps_layers/infra/store.js",
+        true,
+    ),
     (
         "src/index.js",
         1,
@@ -132,6 +103,27 @@ const JAVASCRIPT_EDGES: &[Edge] = &[
         "src/format.cjs",
         true,
     ),
+    (
+        "test/math.quality.test.js",
+        1,
+        "vitest",
+        "external:vitest",
+        false,
+    ),
+    (
+        "test/math.quality.test.js",
+        2,
+        "../src/math.js",
+        "src/math.js",
+        true,
+    ),
+    (
+        "test/math.quality.test.js",
+        3,
+        "../src/decide.js",
+        "src/decide.js",
+        true,
+    ),
     ("test/math.test.js", 1, "vitest", "external:vitest", false),
     (
         "test/math.test.js",
@@ -156,7 +148,7 @@ const JAVASCRIPT_EDGES: &[Edge] = &[
     ),
 ];
 
-const JAVASCRIPT_SHAPES_EDGES: &[Edge] = &[(
+const JAVASCRIPT_SHAPES_EDGES: &[Edge<'static>] = &[(
     "packages/shapes/lib/index.js",
     1,
     "./square.js",
@@ -164,7 +156,7 @@ const JAVASCRIPT_SHAPES_EDGES: &[Edge] = &[(
     true,
 )];
 
-const TYPESCRIPT_EDGES: &[Edge] = &[
+const TYPESCRIPT_EDGES: &[Edge<'static>] = &[
     ("bin/cli.ts", 2, "../src/math", "src/math.ts", true),
     (
         "src/__tests__/pricing.test.ts",
@@ -178,6 +170,34 @@ const TYPESCRIPT_EDGES: &[Edge] = &[
         2,
         "../pricing",
         "src/pricing.ts",
+        true,
+    ),
+    (
+        "src/deps_cycle/alpha.ts",
+        1,
+        "./beta",
+        "src/deps_cycle/beta.ts",
+        true,
+    ),
+    (
+        "src/deps_cycle/beta.ts",
+        1,
+        "./alpha",
+        "src/deps_cycle/alpha.ts",
+        true,
+    ),
+    (
+        "src/deps_layers/domain/order.ts",
+        1,
+        "../infra/store",
+        "src/deps_layers/infra/store.ts",
+        true,
+    ),
+    (
+        "src/deps_layers/port.ts",
+        1,
+        "./domain/order",
+        "src/deps_layers/domain/order.ts",
         true,
     ),
     (
@@ -208,6 +228,14 @@ const TYPESCRIPT_EDGES: &[Edge] = &[
         false,
     ),
     ("src/ledger.ts", 9, "./generated", "unresolved", true),
+    (
+        "src/math.quality.test.ts",
+        1,
+        "vitest",
+        "external:vitest",
+        false,
+    ),
+    ("src/math.quality.test.ts", 2, "./math", "src/math.ts", true),
     ("src/math.test.ts", 1, "vitest", "external:vitest", false),
     ("src/math.test.ts", 2, "./math", "src/math.ts", true),
     (
@@ -249,15 +277,36 @@ fn the_javascript_fixture_graph_is_exactly_its_imports_requires_and_dynamic_impo
     assert_eq!(roots(&graph), [".", "packages/shapes"]);
     let mut expected = under(".", JAVASCRIPT_EDGES);
     expected.extend(under("packages/shapes", JAVASCRIPT_SHAPES_EDGES));
-    assert_eq!(rows(&graph), expected);
+    assert_eq!(edge_rows(&graph), expected);
 }
 
 #[test]
 fn the_typescript_fixture_graph_resolves_paths_aliases_directories_and_js_extensions() {
     let graph: ModuleGraph = produce("typescript", &fixture("typescript"));
     assert_eq!(roots(&graph), [".", "packages/shapes"]);
-    assert_eq!(rows(&graph), under(".", TYPESCRIPT_EDGES));
+    assert_eq!(edge_rows(&graph), under(".", TYPESCRIPT_EDGES));
 }
+
+const PROBED_EDGES: &[Edge<'static>] = &[
+    ("src/main.cjs", 1, "./util", "src/util.cjs", true),
+    ("src/main.cjs", 2, "./lib", "src/lib/index.mjs", true),
+    ("src/main.cjs", 3, "./both", "src/both.js", true),
+    (
+        "src/main.cjs",
+        4,
+        "./vendored",
+        "src/vendored/dist/entry.js",
+        true,
+    ),
+    ("src/main.cjs", 5, "./lib/missing", "unresolved", true),
+    (
+        "src/main.cjs",
+        6,
+        "https://example.com/x.js",
+        "unresolved",
+        false,
+    ),
+];
 
 #[test]
 fn extensions_directories_and_package_main_are_probed_in_node_order() {
@@ -278,31 +327,7 @@ fn extensions_directories_and_package_main_are_probed_in_node_order() {
         ("src/vendored/dist/entry.js", "export default 1;\n"),
     ]);
     let graph: ModuleGraph = produce("javascript", dir.path());
-    assert_eq!(
-        rows(&graph),
-        [
-            row(".", "src/main.cjs", 1, "./util", "src/util.cjs", true),
-            row(".", "src/main.cjs", 2, "./lib", "src/lib/index.mjs", true),
-            row(".", "src/main.cjs", 3, "./both", "src/both.js", true),
-            row(
-                ".",
-                "src/main.cjs",
-                4,
-                "./vendored",
-                "src/vendored/dist/entry.js",
-                true
-            ),
-            row(".", "src/main.cjs", 5, "./lib/missing", "unresolved", true),
-            row(
-                ".",
-                "src/main.cjs",
-                6,
-                "https://example.com/x.js",
-                "unresolved",
-                false
-            ),
-        ]
-    );
+    assert_eq!(edge_rows(&graph), under(".", PROBED_EDGES));
     let typescript = tree(&[
         (
             "src/a.ts",
@@ -314,11 +339,14 @@ fn extensions_directories_and_package_main_are_probed_in_node_order() {
     ]);
     let graph: ModuleGraph = produce("typescript", typescript.path());
     assert_eq!(
-        rows(&graph),
-        [
-            row(".", "src/a.ts", 1, "./both", "src/both.ts", true),
-            row(".", "src/a.ts", 2, "./c.mjs", "src/c.mts", true),
-        ]
+        edge_rows(&graph),
+        under(
+            ".",
+            &[
+                ("src/a.ts", 1, "./both", "src/both.ts", true),
+                ("src/a.ts", 2, "./c.mjs", "src/c.mts", true),
+            ]
+        )
     );
 }
 
@@ -354,30 +382,19 @@ fn base_url_exports_patterns_and_missing_workspace_subpaths() {
     assert_eq!(roots(&graph), [".", "libs/core", "libs/ui"]);
     let page = "apps/web/src/page.tsx";
     assert_eq!(
-        rows(&graph),
-        [
-            row(".", page, 1, "lib/util", "apps/web/src/lib/util.ts", false),
-            row(
-                ".",
-                page,
-                2,
-                "~/lib/other",
-                "apps/web/src/lib/other.ts",
-                false
-            ),
-            row(".", page, 3, "~/nowhere", "unresolved", false),
-            row(
-                ".",
-                page,
-                4,
-                "@acme/ui/button",
-                "libs/ui/src/button.tsx",
-                false
-            ),
-            row(".", page, 5, "@acme/ui/missing", "unresolved", false),
-            row(".", page, 6, "@acme/core", "libs/core/index.ts", false),
-            row(".", page, 7, "react", "external:react", false),
-        ]
+        edge_rows(&graph),
+        under(
+            ".",
+            &[
+                (page, 1, "lib/util", "apps/web/src/lib/util.ts", false),
+                (page, 2, "~/lib/other", "apps/web/src/lib/other.ts", false),
+                (page, 3, "~/nowhere", "unresolved", false),
+                (page, 4, "@acme/ui/button", "libs/ui/src/button.tsx", false),
+                (page, 5, "@acme/ui/missing", "unresolved", false),
+                (page, 6, "@acme/core", "libs/core/index.ts", false),
+                (page, 7, "react", "external:react", false),
+            ]
+        )
     );
 }
 
@@ -395,4 +412,28 @@ fn workspace_patterns_match_one_segment_with_wildcards_and_classes() {
     ]);
     let graph: ModuleGraph = produce("javascript", dir.path());
     assert_eq!(roots(&graph), [".", "libs/core", "tools/cli"]);
+}
+
+#[test]
+fn export_from_statements_are_re_exports_and_imports_are_imports() {
+    let dir = tree(&[
+        ("package.json", "{ \"name\": \"app\" }"),
+        (
+            "src/index.js",
+            "export { a } from \"./a.js\";\nexport * as b from \"./b.js\";\nimport c from \"./c.js\";\nconst d = require(\"./d.js\");\n",
+        ),
+        ("src/a.js", "export const a = 1;\n"),
+        ("src/b.js", "export const b = 1;\n"),
+        ("src/c.js", "export default 1;\n"),
+        ("src/d.js", "module.exports = {};\n"),
+    ]);
+    assert_eq!(
+        kinds(&produce::<ModuleGraph>("javascript", dir.path())),
+        [
+            kind("src/index.js", "./a.js", EdgeKind::ReExport),
+            kind("src/index.js", "./b.js", EdgeKind::ReExport),
+            kind("src/index.js", "./c.js", EdgeKind::Import),
+            kind("src/index.js", "./d.js", EdgeKind::Import),
+        ]
+    );
 }

@@ -5,9 +5,9 @@ mod support;
 use std::path::{Path, PathBuf};
 
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
-use cupel_core::{FactKind, LangId, ProducerRegistry};
+use cupel_core::{Exclude, FactKind, LangId, ProducerRegistry};
 use cupel_lang::LanguageRegistry;
-use support::{produce, tree};
+use support::{produce, produce_excluding, tree};
 
 fn detect_fixture(case: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -123,7 +123,7 @@ fn the_monorepo_yields_four_roots_with_the_right_languages() {
 fn maven_gradle_and_deps_edn_roots_are_unregistered() {
     assert!(all_roots(&detect_fixture("maven")).is_empty());
     assert_eq!(
-        cupel_lang::project::unregistered_roots(&detect_fixture("maven")),
+        cupel_lang::unregistered_roots(&detect_fixture("maven"), &Exclude::default()),
         [plain(
             ".",
             "java",
@@ -132,7 +132,7 @@ fn maven_gradle_and_deps_edn_roots_are_unregistered() {
         )]
     );
     let dir = tree(&[("android/build.gradle.kts", ""), ("tools/deps.edn", "{}\n")]);
-    let roots = cupel_lang::project::unregistered_roots(dir.path());
+    let roots = cupel_lang::unregistered_roots(dir.path(), &Exclude::default());
     let shape: Vec<(&str, &str)> = roots
         .iter()
         .map(|root| (root.path.as_str(), root.lang.as_str()))
@@ -216,11 +216,49 @@ fn every_language_registers_exactly_one_project_info_producer() {
     let languages = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
     languages.register_producers(&mut producers);
-    for lang in languages.langs() {
-        let ids: Vec<String> = producers
-            .producers_for(FactKind::ProjectInfo, &lang)
-            .map(|producer| producer.id().to_string())
-            .collect();
-        assert_eq!(ids, [format!("lang.{}", lang.id)]);
-    }
+    let ids: Vec<Vec<String>> = languages
+        .langs()
+        .iter()
+        .map(|lang| {
+            producers
+                .producers_for(FactKind::ProjectInfo, lang)
+                .map(|producer| producer.id().to_string())
+                .collect()
+        })
+        .collect();
+    assert_eq!(
+        ids,
+        ["go", "javascript", "python", "rust", "typescript"].map(|id| vec![format!("lang.{id}")])
+    );
+}
+
+#[test]
+fn root_detection_does_not_descend_into_excluded_paths() {
+    let dir = tree(&[
+        ("Cargo.toml", "[workspace]\nmembers = [\"crates/*\"]\n"),
+        ("crates/core/Cargo.toml", "[package]\nname = \"core\"\n"),
+        ("crates/fixtures/repos/go/go.mod", "module x\n"),
+        ("crates/fixtures/repos/py/pyproject.toml", ""),
+        ("tools/vendor/dep/package.json", "{}"),
+    ]);
+    let exclude = Exclude::new(vec!["crates/fixtures/**".to_owned()]).unwrap();
+    let roots: Vec<ProjectRoot> = LanguageRegistry::builtin()
+        .ids()
+        .iter()
+        .flat_map(|lang| {
+            produce_excluding::<ProjectInfo>(lang.as_str(), dir.path(), &exclude).roots
+        })
+        .collect();
+    assert_eq!(
+        roots,
+        [ProjectRoot {
+            members: strings(&["crates/core"]),
+            ..plain(
+                ".",
+                "rust",
+                &["Cargo.toml", "crates/core/Cargo.toml"],
+                CARGO_SKIP
+            )
+        }]
+    );
 }

@@ -31,3 +31,13 @@ expect = { target = { kind = "external" } }
 id = "unresolved"
 summary = "An import whose target cannot be found (a generated module, a typo)."
 expect = { target = { kind = "unresolved" } }
+
+[[constructs]]
+id = "declaration"
+summary = "A declaration of a child module (Rust `mod a;`), an edge of kind `declaration`: structure, not use."
+expect = { edge_kind = "declaration" }
+
+[[constructs]]
+id = "re-export"
+summary = "An import whose names the importing module exports again (Rust `pub use`, `export … from`, a Python import of names in `__all__`), an edge of kind `re-export`."
+expect = { edge_kind = "re-export" }

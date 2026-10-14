@@ -37,6 +37,16 @@ file = "src/shapes/geometry.ts"
 name = "shapes.geometry.perimeter"
 expect = { namespace = "shapes.geometry" }
 
+[symbols.parameters]
+file = "src/complexity.ts"
+name = "complexity.openAccount"
+expect = { parameters = 6 }
+
+[symbols.receiver]
+file = "src/complexity.ts"
+name = "complexity.Statement.line"
+expect = { parameters = 1 }
+
 [decisions.if]
 file = "src/decide.ts"
 name = "decide.classify"
@@ -251,6 +261,14 @@ expect = { target = { package = "node:fs" } }
 [module-graph.unresolved]
 file = "src/ledger.ts"
 name = "./generated"
+
+[module-graph.declaration]
+not-applicable = "ECMAScript modules are files; nothing in source declares one (`declare module` describes an ambient module and imports nothing)."
+
+[module-graph.re-export]
+file = "src/shapes/index.ts"
+name = "./geometry"
+expect = { target = { path = "src/shapes/geometry.ts" } }
 
 [api-surface.function]
 file = "src/math.ts"

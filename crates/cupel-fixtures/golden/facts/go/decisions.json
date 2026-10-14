@@ -1,6 +1,90 @@
 {
   "symbols": [
     {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 23
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 36
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 52
+      }
+    },
+    {
       "decisions": [],
       "symbol": {
         "col": 1,
@@ -12,21 +96,512 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 2,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 3,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 4,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 35
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 52
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 57
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 124
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 134
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 139
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "boolean-op",
-          "nesting": 0
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 23
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "dead_export/dead_export.go",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "dead_helpers/dead_helpers.go",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -39,21 +614,27 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 2
+          "nesting": 2,
+          "table": false
         }
       ],
       "symbol": {
@@ -66,15 +647,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -87,27 +672,35 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 0,
+          "continues": true,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -120,27 +713,35 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 0,
+          "continues": true,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -153,21 +754,27 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 0,
+          "continues": true,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -236,9 +843,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -259,6 +868,96 @@
       "decisions": [],
       "symbol": {
         "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 26
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 40
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 46
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 53
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
         "file": "ledger_test.go",
         "line": 8
       }
@@ -267,9 +966,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -282,9 +983,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -297,9 +1000,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -312,9 +1017,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -327,9 +1034,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -342,15 +1051,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": true
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -363,15 +1076,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -384,15 +1101,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -413,21 +1134,27 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "boolean-op",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -440,15 +1167,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -573,15 +1304,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -594,15 +1329,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -615,15 +1354,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -636,15 +1379,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -657,15 +1404,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -678,27 +1429,35 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -711,15 +1470,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -732,9 +1495,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -747,9 +1512,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {

@@ -6,7 +6,7 @@
   source: (string (string_fragment) @import.specifier)) @import
 
 (export_statement
-  source: (string (string_fragment) @import.specifier)) @import
+  source: (string (string_fragment) @import.specifier)) @import @import.reexport
 
 (call_expression
   function: (identifier) @_require

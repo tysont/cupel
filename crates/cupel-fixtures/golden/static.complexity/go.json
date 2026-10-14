@@ -1,0 +1,287 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 65.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 76,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `Label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_130664",
+      "kind": "complexity.high",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "complexity.go",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_1a1f0a9a227f0600",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_130664 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Label",
+        "hash": "sh_1a1f0a9a227f0600",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.Label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `Settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_86f7cd",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "file": "complexity.go",
+        "line": 35
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_e073e3e6ae0851be",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_86f7cd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Settle",
+        "hash": "sh_e073e3e6ae0851be",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.Settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `OpenAccount` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_551c92",
+      "kind": "params.many",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 54,
+        "file": "complexity.go",
+        "line": 52
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_09482ea319cc07e1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_551c92 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.OpenAccount",
+        "hash": "sh_09482ea319cc07e1",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.OpenAccount` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `StatementTemplate` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 65
+      },
+      "id": "fnd_d516cd",
+      "kind": "function.long",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 121,
+        "file": "complexity.go",
+        "line": 57
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_34a2153c8ca08d2d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d516cd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.StatementTemplate",
+        "hash": "sh_34a2153c8ca08d2d",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.StatementTemplate` is 65 lines long (max 60)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_130664",
+      "kind": "reduce_complexity",
+      "priority": 1,
+      "summary": "Split `Label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+    },
+    {
+      "command": null,
+      "finding": "fnd_86f7cd",
+      "kind": "reduce_complexity",
+      "priority": 2,
+      "summary": "Flatten `Settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+    },
+    {
+      "command": null,
+      "finding": "fnd_551c92",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Group related parameters of `OpenAccount` into a type, or split it so each part needs at most 5."
+    },
+    {
+      "command": null,
+      "finding": "fnd_d516cd",
+      "kind": "refactor_extract",
+      "priority": 4,
+      "summary": "Extract cohesive blocks of `StatementTemplate` into named functions until it is at most 60 lines."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 20,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 76
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 4
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 4,
+  "truncated": false
+}

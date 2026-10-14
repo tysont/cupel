@@ -11,7 +11,12 @@
 //! - `@import.name` (optional, repeatable) on each name the statement imports from the module
 //!   (`from pkg import a, b`).
 //! - `@import.module` (optional) marks a declaration of a child module whose file sits next to
-//!   the declaring file (Rust `mod a;`).
+//!   the declaring file (Rust `mod a;`): an edge of kind `declaration`.
+//! - `@import.reexport` (optional) marks a statement that exports what it imports (Rust
+//!   `pub use`, `export … from`): an edge of kind `re-export`.
+//! - `@reexport.name` (any pattern, no `@import` needed) on a name the file exports (an entry of
+//!   Python's `__all__`): an import whose `@import.name` is such a name is a `re-export`.
+//!   Every other import is an `import` edge (ADR-068).
 //! - `@scope` + `@scope.name` (optional) on inline modules, so the resolver knows which module
 //!   an import inside one is written in.
 use std::collections::{BTreeSet, HashMap};
@@ -19,7 +24,7 @@ use std::fs;
 use std::path::Path;
 use std::sync::{Arc, Mutex, PoisonError};
 
-use cupel_core::syntax::ModuleGraph;
+use cupel_core::syntax::{EdgeKind, ModuleGraph};
 use cupel_core::{
     Availability, Cancellation, CostClass, Ctx, EventSink, FactKind, Langs, ProduceCtx, Producer,
     ProducerId, Result, Scope,
@@ -30,7 +35,7 @@ use crate::contract::capture;
 use crate::language::{Language, owns, parse_one};
 use crate::parse::{ParseCache, Parsed};
 use crate::producer::{parse_scope, producer_id};
-use crate::query::{encloses, matches};
+use crate::query::{Match, encloses, matches};
 use crate::spec::QueryFile;
 
 /// One import as written.
@@ -38,8 +43,9 @@ use crate::spec::QueryFile;
 pub struct RawImport {
     pub specifier: String,
     pub names: Vec<String>,
-    /// A child-module declaration (`mod a;`) rather than an import.
-    pub module: bool,
+    /// What the statement does with the module: a use, a child-module declaration (`mod a;`),
+    /// or a re-export.
+    pub kind: EdgeKind,
     /// The inline modules the import is written in, outermost first.
     pub scope: Vec<String>,
     pub line: u32,
@@ -81,18 +87,24 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
             .map(|(_, name)| (*name).to_owned())
             .collect()
     };
+    let reexported: BTreeSet<&str> = found
+        .iter()
+        .flat_map(|m| m.nodes(capture::REEXPORT_NAME))
+        .map(|node| unquote(parsed.text(node)))
+        .collect();
     let mut imports: Vec<RawImport> = found
         .iter()
         .filter_map(|m| {
             let statement = m.node(capture::IMPORT)?;
             let specifier = m.node(capture::IMPORT_SPECIFIER)?;
+            let names: Vec<String> = m
+                .nodes(capture::IMPORT_NAME)
+                .map(|n| parsed.text(n).to_owned())
+                .collect();
             Some(RawImport {
                 specifier: unquote(parsed.text(specifier)).to_owned(),
-                names: m
-                    .nodes(capture::IMPORT_NAME)
-                    .map(|n| parsed.text(n).to_owned())
-                    .collect(),
-                module: m.has(capture::IMPORT_MODULE),
+                kind: edge_kind(m, &names, &reexported),
+                names,
                 scope: path_of(statement),
                 line: crate::query::one_based(statement.start_position().row),
             })
@@ -108,6 +120,20 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
         })
         .collect();
     FileImports { imports, modules }
+}
+
+/// What the import `m` matched does with its module: declares it, re-exports it (by its
+/// statement, or because a name it imports is in `reexported`), or uses it.
+fn edge_kind(m: &Match<'_, '_>, names: &[String], reexported: &BTreeSet<&str>) -> EdgeKind {
+    if m.has(capture::IMPORT_MODULE) {
+        EdgeKind::Declaration
+    } else if m.has(capture::IMPORT_REEXPORT)
+        || names.iter().any(|name| reexported.contains(name.as_str()))
+    {
+        EdgeKind::ReExport
+    } else {
+        EdgeKind::Import
+    }
 }
 
 fn unquote(text: &str) -> &str {

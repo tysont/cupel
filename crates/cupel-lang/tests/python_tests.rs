@@ -2,10 +2,12 @@
 // ABOUTME: skips, mocks, fixtures and setUp, frameworks, and which test files belong to which modules.
 mod support;
 
-use cupel_core::syntax::{
-    AssertionKind, AssertionStrength, TestCase, TestConventions, TestFile, TestFrames,
+use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
+use support::Skip::{Because, Runs};
+use support::{
+    Expected, assert_framework, assert_source_file, assert_test_file, case, expected, fixture,
+    produce, rows, tree,
 };
-use support::{fixture, produce, tree};
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
 use AssertionStrength::{Strong, Weak};
@@ -14,167 +16,94 @@ fn frames() -> TestFrames {
     produce("python", &fixture("python"))
 }
 
-fn file<'a>(frames: &'a TestFrames, path: &str) -> &'a TestFile {
-    frames
-        .files
-        .iter()
-        .find(|f| f.file == path)
-        .unwrap_or_else(|| panic!("no test file {path}"))
+fn because(reason: &str) -> support::Skip {
+    Because(reason.to_owned())
 }
 
-/// Whether a case is skipped, and why.
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum Skip {
-    Runs,
-    Skipped,
-    Because(String),
-}
-
-/// (name, assertions as (kind, strength), skip, mock targets, start line) per case.
-type CaseRow = (
-    String,
-    Vec<(AssertionKind, AssertionStrength)>,
-    Skip,
-    Vec<String>,
-    u32,
-);
-
-fn rows(file: &TestFile) -> Vec<CaseRow> {
-    file.cases.iter().map(row).collect()
-}
-
-fn row(case: &TestCase) -> CaseRow {
+const LEDGER_CASES: &[Expected] = &[
     (
-        case.name.clone(),
-        case.assertions
-            .iter()
-            .map(|a| (a.kind, a.strength))
-            .collect(),
-        match case.skip.as_ref().map(|s| s.reason.clone()) {
-            None => Skip::Runs,
-            Some(None) => Skip::Skipped,
-            Some(Some(reason)) => Skip::Because(reason),
-        },
-        case.mocks.iter().map(|m| m.target.clone()).collect(),
-        case.span.line,
-    )
-}
-
-fn case(
-    name: &str,
-    assertions: &[(AssertionKind, AssertionStrength)],
-    skip: Skip,
-    mocks: &[&str],
-    line: u32,
-) -> CaseRow {
+        "test_deposit_adds_to_the_balance",
+        &[(Equality, Strong)],
+        None,
+        &[],
+        10,
+    ),
     (
-        name.to_owned(),
-        assertions.to_vec(),
-        skip,
-        mocks.iter().map(|m| (*m).to_owned()).collect(),
-        line,
-    )
-}
-
-fn because(reason: &str) -> Skip {
-    Skip::Because(reason.to_owned())
-}
+        "test_statements_mention_the_owner",
+        &[(Truthiness, Weak)],
+        None,
+        &[],
+        15,
+    ),
+    (
+        "test_parsing_garbage_gives_nothing",
+        &[(Equality, Strong)],
+        None,
+        &[],
+        19,
+    ),
+    (
+        "test_an_opening_account_exists",
+        &[(NotNull, Weak)],
+        None,
+        &[],
+        23,
+    ),
+    (
+        "test_negative_deposits_are_rejected",
+        &[(Throws, Strong)],
+        None,
+        &[],
+        27,
+    ),
+    (
+        "test_rounding_is_close",
+        &[(Equality, Strong)],
+        None,
+        &[],
+        32,
+    ),
+    (
+        "test_statement_is_published",
+        &[(Equality, Weak)],
+        Some(Some("talks to the network")),
+        &[],
+        37,
+    ),
+    (
+        "test_report_matches_snapshot",
+        &[(Snapshot, Strong)],
+        None,
+        &[],
+        41,
+    ),
+    (
+        "test_publish_posts_once",
+        &[(Custom, Strong)],
+        None,
+        &["ledger.report.format.requests"],
+        46,
+    ),
+    (
+        "test_rendering_can_be_replaced",
+        &[(Equality, Strong)],
+        None,
+        &["ledger.report.format.render"],
+        51,
+    ),
+    ("test_opening_an_account_does_not_raise", &[], None, &[], 56),
+];
 
 #[test]
 fn pytest_functions_are_cases_with_classified_assert_statements() {
-    let frames = frames();
-    let ledger = file(&frames, "tests/test_ledger.py");
-    assert_eq!(ledger.framework, "pytest");
-    assert!(ledger.setup.is_empty());
-    assert_eq!(
-        rows(ledger),
-        [
-            case(
-                "test_deposit_adds_to_the_balance",
-                &[(Equality, Strong)],
-                Skip::Runs,
-                &[],
-                10
-            ),
-            case(
-                "test_statements_mention_the_owner",
-                &[(Truthiness, Weak)],
-                Skip::Runs,
-                &[],
-                15
-            ),
-            case(
-                "test_parsing_garbage_gives_nothing",
-                &[(Equality, Strong)],
-                Skip::Runs,
-                &[],
-                19
-            ),
-            case(
-                "test_an_opening_account_exists",
-                &[(NotNull, Weak)],
-                Skip::Runs,
-                &[],
-                23
-            ),
-            case(
-                "test_negative_deposits_are_rejected",
-                &[(Throws, Strong)],
-                Skip::Runs,
-                &[],
-                27
-            ),
-            case(
-                "test_rounding_is_close",
-                &[(Equality, Strong)],
-                Skip::Runs,
-                &[],
-                32
-            ),
-            case(
-                "test_statement_is_published",
-                &[(Equality, Weak)],
-                because("talks to the network"),
-                &[],
-                37
-            ),
-            case(
-                "test_report_matches_snapshot",
-                &[(Snapshot, Strong)],
-                Skip::Runs,
-                &[],
-                41
-            ),
-            case(
-                "test_publish_posts_once",
-                &[(Custom, Strong)],
-                Skip::Runs,
-                &["ledger.report.format.requests"],
-                46
-            ),
-            case(
-                "test_rendering_can_be_replaced",
-                &[(Equality, Strong)],
-                Skip::Runs,
-                &["ledger.report.format.render"],
-                51
-            ),
-            case(
-                "test_opening_an_account_does_not_raise",
-                &[],
-                Skip::Runs,
-                &[],
-                56
-            ),
-        ]
-    );
+    let ledger = &assert_test_file("python", "tests/test_ledger.py", "pytest", &[]);
+    assert_eq!(rows(ledger), expected(LEDGER_CASES));
 }
 
 #[test]
 fn unittest_methods_have_set_up_skips_mocks_and_assert_methods() {
     let frames = frames();
-    let pricing = file(&frames, "tests/test_pricing.py");
-    assert_eq!(pricing.framework, "unittest");
+    let pricing = &assert_framework(&frames, "tests/test_pricing.py", "unittest");
     assert_eq!(
         pricing.setup.iter().map(|s| s.line).collect::<Vec<_>>(),
         [8]
@@ -185,7 +114,7 @@ fn unittest_methods_have_set_up_skips_mocks_and_assert_methods() {
             case(
                 "test_tally_reports_overdraft",
                 &[(Equality, Strong), (Truthiness, Weak)],
-                Skip::Runs,
+                Runs,
                 &[],
                 11
             ),
@@ -199,7 +128,7 @@ fn unittest_methods_have_set_up_skips_mocks_and_assert_methods() {
             case(
                 "test_tally_logs_once",
                 &[(Custom, Strong)],
-                Skip::Runs,
+                Runs,
                 &["ledger.pricing.log_total"],
                 21
             ),
@@ -211,12 +140,46 @@ fn unittest_methods_have_set_up_skips_mocks_and_assert_methods() {
 fn files_without_test_cases_have_no_frames() {
     let frames = frames();
     let files: Vec<&str> = frames.files.iter().map(|f| f.file.as_str()).collect();
-    assert_eq!(files, ["tests/test_ledger.py", "tests/test_pricing.py"]);
+    assert_eq!(
+        files,
+        [
+            "tests/test_ledger.py",
+            "tests/test_pricing.py",
+            "tests/test_quality_signals.py"
+        ]
+    );
 }
+
+const MISC_CASES: &[Expected] = &[
+    (
+        "test_paths",
+        &[(Custom, Weak)],
+        Some(Some("posix only")),
+        &[],
+        9,
+    ),
+    ("test_rounding", &[(Custom, Weak)], Some(None), &[], 13),
+    (
+        "test_skipped_inside",
+        &[(Truthiness, Weak)],
+        Some(Some("not today")),
+        &[],
+        16,
+    ),
+    (
+        "test_doubles",
+        &[(Equality, Weak)],
+        None,
+        &["ledger.send", "HOME", "MagicMock"],
+        20,
+    ),
+    ("test_raises", &[(Throws, Strong)], None, &[], 33),
+];
 
 #[test]
 fn skip_markers_mocks_fixtures_and_more_assertion_idioms() {
-    let dir = tree(&[(
+    let misc = &assert_source_file(
+        "python",
         "tests/test_misc.py",
         "import sys\n\
          import pytest\n\
@@ -243,47 +206,19 @@ fn skip_markers_mocks_fixtures_and_more_assertion_idioms() {
          class TestNested:\n    \
          def setup_method(self):\n        self.x = 1\n\n    \
          def test_raises(self):\n        with pytest.raises(KeyError):\n            {}[1]\n",
-    )]);
-    let frames: TestFrames = produce("python", dir.path());
-    let misc = file(&frames, "tests/test_misc.py");
-    assert_eq!(misc.framework, "pytest");
+        "pytest",
+    );
     assert_eq!(
         misc.setup.iter().map(|s| s.line).collect::<Vec<_>>(),
         [5, 30]
     );
-    assert_eq!(
-        rows(misc),
-        [
-            case(
-                "test_paths",
-                &[(Custom, Weak)],
-                because("posix only"),
-                &[],
-                9
-            ),
-            case("test_rounding", &[(Custom, Weak)], Skip::Skipped, &[], 13),
-            case(
-                "test_skipped_inside",
-                &[(Truthiness, Weak)],
-                because("not today"),
-                &[],
-                16
-            ),
-            case(
-                "test_doubles",
-                &[(Equality, Weak)],
-                Skip::Runs,
-                &["ledger.send", "HOME", "MagicMock"],
-                20
-            ),
-            case("test_raises", &[(Throws, Strong)], Skip::Runs, &[], 33),
-        ]
-    );
+    assert_eq!(rows(misc), expected(MISC_CASES));
 }
 
 #[test]
 fn unittest_assert_methods_map_to_kinds_and_strengths() {
-    let dir = tree(&[(
+    let methods = &assert_source_file(
+        "python",
         "tests/test_methods.py",
         "import unittest\n\
          from unittest.mock import patch\n\
@@ -298,10 +233,8 @@ fn unittest_assert_methods_map_to_kinds_and_strengths() {
          self.assertAlmostEqual(a, b)\n        \
          with self.assertRaises(ValueError):\n            pass\n        \
          with patch(\"ledger.clock\"):\n            pass\n",
-    )]);
-    let frames: TestFrames = produce("python", dir.path());
-    let methods = file(&frames, "tests/test_methods.py");
-    assert_eq!(methods.framework, "unittest");
+        "unittest",
+    );
     assert_eq!(
         rows(methods),
         [case(

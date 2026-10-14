@@ -46,7 +46,11 @@ pub fn run(
         }
     }
     problems.extend(cupel_dir(writer));
-    let info = project::detect(writer);
+    let exclude = config
+        .ok()
+        .map(|config| config.file.scope.exclude.clone())
+        .unwrap_or_default();
+    let info = project::detect(writer, &exclude);
     problems.extend(tools(
         &requirements(config.ok(), writer.root(), &info),
         installed,
@@ -143,6 +147,14 @@ fn requirements(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec
 /// would choose for the language's first detected root, named with the toolchain producer it
 /// comes from. One requirement per program, in language order. None is required until P3's
 /// checks run these commands.
+/// Records that `program` is needed for `purpose`, after any purposes already recorded.
+fn need(uses: &mut Vec<(String, Vec<String>)>, program: String, purpose: &str) {
+    match uses.iter_mut().find(|(known, _)| *known == program) {
+        Some((_, needed_for)) => needed_for.push(purpose.to_owned()),
+        None => uses.push((program, vec![purpose.to_owned()])),
+    }
+}
+
 fn toolchain(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec<Requirement> {
     let configured = |lang: &LangId, key: &str| {
         config
@@ -160,21 +172,15 @@ fn toolchain(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec<Re
     let mut uses: Vec<(String, Vec<String>)> = Vec::new();
     for lang in langs {
         let root = info.roots.iter().find(|root| root.lang == *lang);
-        for (key, command, producer) in commands(repo, root) {
-            let (command, purpose) = match configured(lang, key) {
-                Some(command) => (command, format!("[lang.{lang}] {key}")),
-                None => match (command, producer) {
-                    (Some(command), Some(producer)) => {
-                        (command, format!("[lang.{lang}] {key} ({producer})"))
-                    }
-                    _ => continue,
-                },
-            };
+        let purposes = commands(repo, root)
+            .into_iter()
+            .filter_map(|(key, command, producer)| match configured(lang, key) {
+                Some(command) => Some((command, format!("[lang.{lang}] {key}"))),
+                None => Some((command?, format!("[lang.{lang}] {key} ({})", producer?))),
+            });
+        for (command, purpose) in purposes {
             for program in programs(&command) {
-                match uses.iter_mut().find(|(known, _)| *known == program) {
-                    Some((_, needed_for)) => needed_for.push(purpose.clone()),
-                    None => uses.push((program, vec![purpose.clone()])),
-                }
+                need(&mut uses, program, &purpose);
             }
         }
     }
@@ -337,12 +343,12 @@ mod tests {
 
     #[test]
     fn a_probe_that_cannot_run_means_not_installed() {
-        assert!(!installed(&requirement("fake-cov", true)));
         let empty = Requirement {
             probe: Vec::new(),
             ..requirement("fake-cov", true)
         };
-        assert!(!installed(&empty));
+        let found = [requirement("fake-cov", true), empty].map(|tool| installed(&tool));
+        assert_eq!(found, [false, false]);
     }
 
     /// `cupel.toml` holding `text`, loaded from a fresh directory.

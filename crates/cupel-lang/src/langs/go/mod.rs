@@ -75,6 +75,7 @@ impl Language for Go {
         reg.register::<ProjectInfo, _>(ProjectRoots::new(
             Arc::clone(&language),
             &project::ECOSYSTEM,
+            &super::ecosystems::KNOWN,
         ));
         // Module resolution needs go.mod and go.work, which queries cannot see.
         reg.register::<ModuleGraph, _>(ImportGraph::new(

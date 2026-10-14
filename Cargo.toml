@@ -4,10 +4,12 @@
 resolver = "3"
 members = [
     "crates/cupel-adapt",
+    "crates/cupel-checks",
     "crates/cupel-cli",
     "crates/cupel-core",
     "crates/cupel-fixtures",
     "crates/cupel-lang",
+    "crates/cupel-store",
 ]
 
 [workspace.package]
@@ -19,8 +21,10 @@ repository = "https://github.com/tysont/cupel"
 
 [workspace.dependencies]
 cupel-adapt = { path = "crates/cupel-adapt" }
+cupel-checks = { path = "crates/cupel-checks" }
 cupel-core = { path = "crates/cupel-core" }
 cupel-lang = { path = "crates/cupel-lang" }
+cupel-store = { path = "crates/cupel-store" }
 cupel-fixtures = { path = "crates/cupel-fixtures" }
 clap = { version = "4.6.7", features = ["derive", "env"] }
 serde = { version = "1.0.229", features = ["derive"] }
@@ -48,6 +52,8 @@ tree-sitter-typescript = "0.23.2"
 ignore = "0.4.33"
 globset = "0.4.20"
 rayon = "1.12.0"
+# The fact store (ADR-045); `bundled` compiles SQLite in, so no system library is needed.
+rusqlite = { version = "0.40.2", features = ["bundled"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

@@ -414,25 +414,25 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       },
       {
         "name": "check",
-        "pending_step": "P2.1",
+        "pending_step": null,
         "stability": "experimental",
         "summary": "Run checks over a scope at a depth and evaluate the gate."
       },
       {
         "name": "survey",
-        "pending_step": "P2.9",
+        "pending_step": null,
         "stability": "experimental",
-        "summary": "Rank a whole tree without a baseline: hot spots, weak tests, clones."
+        "summary": "Rank a whole tree without a baseline or gate: the worst targets per metric."
       },
       {
         "name": "explain",
-        "pending_step": "P2.2",
+        "pending_step": null,
         "stability": "experimental",
         "summary": "Give full context and remediation for one finding or check result."
       },
       {
         "name": "baseline",
-        "pending_step": "P2.2",
+        "pending_step": null,
         "stability": "experimental",
         "summary": "Set, show, diff, export, or import the baseline runs are compared with."
       },
@@ -450,7 +450,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       },
       {
         "name": "suppress",
-        "pending_step": "P2.2",
+        "pending_step": null,
         "stability": "experimental",
         "summary": "Suppress a finding, with a reason and an optional expiry."
       },
@@ -464,9 +464,11 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "version": "[version]"
   },
   "exit_code": 0,
+  "explanation": null,
   "findings": [],
   "next_actions": [],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

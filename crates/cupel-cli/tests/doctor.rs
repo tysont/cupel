@@ -54,28 +54,42 @@ fn doctor_on_a_healthy_repository_passes() {
     }
 }
 
+/// `cupel doctor`'s outcome in a fresh repository holding `file` with `text`.
+fn doctor_with(file: &str, text: &str) -> Outcome {
+    let repo = Repo::new();
+    repo.write(file, text);
+    repo.run(&["doctor"])
+}
+
+/// The envelope of `cupel doctor` in a fresh repository holding `file` with `text`, asserting
+/// it passes.
+fn passing_doctor_with(file: &str, text: &str) -> Value {
+    let outcome = doctor_with(file, text);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    outcome.envelope()
+}
+
 #[test]
 fn an_unsatisfied_required_version_exits_3_asking_to_install_cupel() {
-    let repo = Repo::new();
-    repo.write("cupel.toml", "required_version = \">=99.0\"\n");
-    let finding = assert_environment(&repo.run(&["doctor"]), "doctor.version-unsatisfied");
+    let finding = assert_environment(
+        &doctor_with("cupel.toml", "required_version = \">=99.0\"\n"),
+        "doctor.version-unsatisfied",
+    );
     assert_eq!(finding["action"]["kind"], json!("install_tool"));
     assert_eq!(finding["evidence"], json!({"required": ">=99.0"}));
     assert_eq!(
         finding["id"],
         doctor_id("doctor.version-unsatisfied", "required_version")
     );
-    let summary = finding["action"]["summary"].as_str().unwrap();
-    assert!(summary.contains(">=99.0"), "{summary}");
+    assert_eq!(
+        finding["action"]["summary"],
+        json!("Install a cupel matching `>=99.0`, or change required_version.")
+    );
 }
 
 #[test]
 fn a_satisfied_required_version_is_not_a_finding() {
-    let repo = Repo::new();
-    repo.write("cupel.toml", "required_version = \">=0.1, <99\"\n");
-    let outcome = repo.run(&["doctor"]);
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let envelope = outcome.envelope();
+    let envelope = passing_doctor_with("cupel.toml", "required_version = \">=0.1, <99\"\n");
     let kinds: Vec<&Value> = envelope["findings"]
         .as_array()
         .unwrap()
@@ -83,14 +97,15 @@ fn a_satisfied_required_version_is_not_a_finding() {
         .map(|finding| &finding["kind"])
         .filter(|kind| kind.as_str().unwrap().starts_with("doctor.version"))
         .collect();
-    assert!(kinds.is_empty(), "{kinds:?}");
+    assert_eq!(kinds, Vec::<&Value>::new());
 }
 
 #[test]
 fn a_malformed_required_version_exits_3_asking_to_fix_the_configuration() {
-    let repo = Repo::new();
-    repo.write("cupel.toml", "required_version = \"soon\"\n");
-    let finding = assert_environment(&repo.run(&["doctor"]), "doctor.version-invalid");
+    let finding = assert_environment(
+        &doctor_with("cupel.toml", "required_version = \"soon\"\n"),
+        "doctor.version-invalid",
+    );
     assert_eq!(finding["action"]["kind"], json!("configure"));
     assert_eq!(
         finding["id"],
@@ -128,9 +143,7 @@ fn an_unknown_profile_is_reported_against_the_profile_flag() {
 
 #[test]
 fn a_cupel_path_that_is_a_file_is_reported_as_unwritable() {
-    let repo = Repo::new();
-    repo.write(".cupel", "");
-    let outcome = repo.run(&["doctor"]);
+    let outcome = doctor_with(".cupel", "");
     let finding = assert_environment(&outcome, "doctor.cupel-unwritable");
     assert_eq!(finding["action"]["kind"], json!("configure"));
     assert_eq!(
@@ -210,20 +223,16 @@ fn doctor_describes_fix_as_pending_p3_1() {
 
 #[test]
 fn a_configured_runner_that_is_not_installed_warns_without_failing() {
-    let repo = Repo::new();
-    repo.write(
+    let envelope = passing_doctor_with(
         "cupel.toml",
         "[lang.rust]\ntest = \"cupel-test-no-such-runner --all\"\n",
     );
-    let outcome = repo.run(&["doctor"]);
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let envelope = outcome.envelope();
     let finding = envelope["findings"]
         .as_array()
         .unwrap()
         .iter()
         .find(|finding| finding["evidence"]["tool"] == json!("cupel-test-no-such-runner"))
-        .unwrap_or_else(|| panic!("{}", outcome.stdout))
+        .unwrap_or_else(|| panic!("{envelope}"))
         .clone();
     assert_eq!(finding["kind"], json!("doctor.tool-missing"));
     assert_eq!(finding["severity"], json!("warn"));

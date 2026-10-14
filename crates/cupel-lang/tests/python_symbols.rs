@@ -3,26 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{SymbolKind, Symbols, Visibility};
-use support::{fixture, lines, produce, tree};
-
-type Row = (&'static str, SymbolKind, Visibility, (u32, u32));
-
-fn rows(symbols: &Symbols, file: &str) -> Vec<(String, SymbolKind, Visibility, (u32, u32))> {
-    symbols
-        .symbols
-        .iter()
-        .filter(|symbol| symbol.file == file)
-        .map(|s| (s.display.clone(), s.kind, s.visibility, lines(s.span)))
-        .collect()
-}
-
-fn expect(symbols: &Symbols, file: &str, expected: &[Row]) {
-    let expected: Vec<(String, SymbolKind, Visibility, (u32, u32))> = expected
-        .iter()
-        .map(|(d, k, v, l)| ((*d).to_owned(), *k, *v, *l))
-        .collect();
-    assert_eq!(rows(symbols, file), expected, "{file}");
-}
+use support::{assert_symbols, fixture, produce, tree};
 
 use SymbolKind::{Closure, Function, Method};
 use Visibility::{Internal, Private, Public};
@@ -30,7 +11,7 @@ use Visibility::{Internal, Private, Public};
 #[test]
 fn a_package_init_with_all_exports_listed_names_and_keeps_the_rest_internal() {
     let symbols: Symbols = produce("python", &fixture("python"));
-    expect(
+    assert_symbols(
         &symbols,
         "src/ledger/__init__.py",
         &[
@@ -44,7 +25,7 @@ fn a_package_init_with_all_exports_listed_names_and_keeps_the_rest_internal() {
 #[test]
 fn class_methods_static_methods_nested_functions_and_lambdas() {
     let symbols: Symbols = produce("python", &fixture("python"));
-    expect(
+    assert_symbols(
         &symbols,
         "src/ledger/account.py",
         &[
@@ -75,7 +56,7 @@ fn class_methods_static_methods_nested_functions_and_lambdas() {
 #[test]
 fn modules_take_their_namespace_from_their_path_below_src() {
     let symbols: Symbols = produce("python", &fixture("python"));
-    expect(
+    assert_symbols(
         &symbols,
         "src/ledger/report/format.py",
         &[
@@ -83,12 +64,12 @@ fn modules_take_their_namespace_from_their_path_below_src() {
             ("ledger.report.format.publish", Function, Public, (8, 9)),
         ],
     );
-    expect(
+    assert_symbols(
         &symbols,
         "libs/units/src/units/__init__.py",
         &[("units.cents", Function, Public, (1, 2))],
     );
-    expect(
+    assert_symbols(
         &symbols,
         "tests/conftest.py",
         &[("tests.conftest.account", Function, Public, (7, 8))],
@@ -104,7 +85,7 @@ fn without_all_every_name_follows_its_underscores() {
          class Box:\n    class Lid:\n        def __mangled(self):\n            pass\n",
     )]);
     let symbols: Symbols = produce("python", dir.path());
-    expect(
+    assert_symbols(
         &symbols,
         "pkg/mod.py",
         &[
@@ -128,7 +109,7 @@ fn a_tuple_all_exports_decorated_functions_and_lambdas_it_lists() {
          def __getattr__(name):\n    pass\n",
     )]);
     let symbols: Symbols = produce("python", dir.path());
-    expect(
+    assert_symbols(
         &symbols,
         "flat.py",
         &[

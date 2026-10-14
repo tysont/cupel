@@ -150,10 +150,9 @@ fn cupel_format_env_outranks_the_profile_format() {
 fn the_config_file_format_applies_when_nothing_else_sets_one() {
     let dir = repo("format = \"text\"\n");
     let outcome = run_with(&mut cupel(), ["describe", "--cwd", &cwd(dir.path())]);
-    assert!(
-        outcome.stdout.starts_with("cupel describe: pass"),
-        "{}",
-        outcome.stdout
+    assert_eq!(
+        outcome.stdout.lines().next(),
+        Some("cupel describe: pass (exit 0)")
     );
 }
 
@@ -222,7 +221,7 @@ fn depth_and_budget_flags_are_the_flags_layer() {
             "5m",
         ],
     );
-    assert_eq!(outcome.code, 2, "check itself is not implemented yet");
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["run"]["depth"], json!("deep"));
     assert_eq!(envelope["run"]["budget_ms"], json!(300_000));

@@ -38,6 +38,16 @@ file = "src/report/format.rs"
 name = "report::format::render"
 expect = { namespace = "report::format" }
 
+[symbols.parameters]
+file = "src/complexity.rs"
+name = "complexity::open_account"
+expect = { parameters = 6 }
+
+[symbols.receiver]
+file = "src/complexity.rs"
+name = "complexity::Statement::line"
+expect = { parameters = 1 }
+
 [decisions.if]
 file = "src/decide.rs"
 name = "decide::classify"
@@ -250,6 +260,16 @@ expect = { target = { package = "std" } }
 [module-graph.unresolved]
 file = "src/lib.rs"
 name = "generated"
+
+[module-graph.declaration]
+file = "src/lib.rs"
+name = "account"
+expect = { target = { path = "src/account.rs" } }
+
+[module-graph.re-export]
+file = "src/lib.rs"
+name = "account::Account"
+expect = { target = { path = "src/account.rs" } }
 
 [api-surface.function]
 file = "src/lib.rs"

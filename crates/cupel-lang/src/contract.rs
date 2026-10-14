@@ -15,6 +15,7 @@ pub mod capture {
     pub const VISIBILITY_INTERNAL: &str = "visibility.internal";
     pub const VISIBILITY_PRIVATE: &str = "visibility.private";
     pub const EXPORT_NAME: &str = "export.name";
+    pub const SYMBOL_PARAMETER: &str = "symbol.parameter";
     // Shared by symbols.scm and api.scm: namespace contributors.
     pub const SCOPE: &str = "scope";
     pub const SCOPE_NAME: &str = "scope.name";
@@ -28,6 +29,7 @@ pub mod capture {
     pub const DECISION_EARLY_RETURN: &str = "decision.early-return";
     pub const DECISION_TERNARY: &str = "decision.ternary";
     pub const DECISION_PREFIX: &str = "decision.";
+    pub const LOOP_TABLE: &str = "loop.table";
     // mutations.scm: `mut.<operator>`, operators spelled as `MutationOperator` serializes.
     pub const MUT_RELATIONAL: &str = "mut.relational";
     pub const MUT_EQUALITY: &str = "mut.equality";
@@ -59,6 +61,8 @@ pub mod capture {
     pub const IMPORT_SPECIFIER: &str = "import.specifier";
     pub const IMPORT_NAME: &str = "import.name";
     pub const IMPORT_MODULE: &str = "import.module";
+    pub const IMPORT_REEXPORT: &str = "import.reexport";
+    pub const REEXPORT_NAME: &str = "reexport.name";
     // api.scm: `api.<kind>`, kinds spelled as `ApiItemKind` serializes.
     pub const API_FUNCTION: &str = "api.function";
     pub const API_METHOD: &str = "api.method";
@@ -132,6 +136,7 @@ const SYMBOLS: Contract = Contract {
     required: &[
         &[c::SYMBOL_FUNCTION, c::SYMBOL_METHOD, c::SYMBOL_CLOSURE],
         &[c::SYMBOL_NAME],
+        &[c::SYMBOL_PARAMETER],
     ],
     optional: &[
         c::SYMBOL_BODY,
@@ -158,7 +163,7 @@ const DECISIONS: Contract = Contract {
         c::DECISION_EARLY_RETURN,
         c::DECISION_TERNARY,
     ]],
-    optional: &[],
+    optional: &[c::LOOP_TABLE],
     open: &[],
 };
 
@@ -200,7 +205,14 @@ const TESTS: Contract = Contract {
 const IMPORTS: Contract = Contract {
     file: QueryFile::Imports,
     required: &[&[c::IMPORT], &[c::IMPORT_SPECIFIER]],
-    optional: &[c::IMPORT_NAME, c::IMPORT_MODULE, c::SCOPE, c::SCOPE_NAME],
+    optional: &[
+        c::IMPORT_NAME,
+        c::IMPORT_MODULE,
+        c::IMPORT_REEXPORT,
+        c::REEXPORT_NAME,
+        c::SCOPE,
+        c::SCOPE_NAME,
+    ],
     open: &[],
 };
 

@@ -64,6 +64,42 @@
       }
     },
     {
+      "hash": "sh_73645f7457e30d49",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$lit"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/deps_layers/port.py",
+        "line": 7
+      }
+    },
+    {
       "hash": "sh_e730f795ba5009c8",
       "root": {
         "children": [
@@ -1052,6 +1088,3562 @@
         "col": 1,
         "file": "src/ledger/cli.py",
         "line": 10
+      }
+    },
+    {
+      "hash": "sh_46a99291992c7f37",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "in"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "not"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "attribute"
+                              }
+                            ],
+                            "label": "not_operator"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "+="
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "attribute"
+                                      }
+                                    ],
+                                    "label": "augmented_assignment"
+                                  }
+                                ],
+                                "label": "expression_statement"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "+="
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "augmented_assignment"
+                                  }
+                                ],
+                                "label": "expression_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "if_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "for_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "max"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "-"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "binary_operator"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "call"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "expression_list"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      }
+    },
+    {
+      "hash": "sh_46a99291992c7f37",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "in"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "not"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "attribute"
+                              }
+                            ],
+                            "label": "not_operator"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "+="
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "attribute"
+                                      }
+                                    ],
+                                    "label": "augmented_assignment"
+                                  }
+                                ],
+                                "label": "expression_statement"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "+="
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "augmented_assignment"
+                                  }
+                                ],
+                                "label": "expression_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "if_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "for_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "max"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "-"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "binary_operator"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "call"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "expression_list"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 15
+      }
+    },
+    {
+      "hash": "sh_b9460912628dfe49",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "list"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "pattern_list"
+                  },
+                  {
+                    "children": [],
+                    "label": "in"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "zip"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "="
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "*"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "binary_operator"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "-"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "binary_operator"
+                              }
+                            ],
+                            "label": "assignment"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "+="
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "augmented_assignment"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "+="
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "augmented_assignment"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "append"
+                                  }
+                                ],
+                                "label": "attribute"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "for_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "/"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "max"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call"
+                          }
+                        ],
+                        "label": "binary_operator"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "append"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "append"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      }
+    },
+    {
+      "hash": "sh_1b6aceb19c1d15c1",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "list"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "pattern_list"
+                  },
+                  {
+                    "children": [],
+                    "label": "in"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "zip"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "="
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "*"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "binary_operator"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "-"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "binary_operator"
+                              }
+                            ],
+                            "label": "assignment"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "+="
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "augmented_assignment"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "+="
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "augmented_assignment"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "append"
+                                  }
+                                ],
+                                "label": "attribute"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "for_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "sort"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "/"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "max"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call"
+                          }
+                        ],
+                        "label": "binary_operator"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "append"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "append"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 41
+      }
+    },
+    {
+      "hash": "sh_b9016df6df5687e8",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "<"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "comparison_operator"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "="
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "assignment"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      }
+                    ],
+                    "label": "block"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "=="
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "comparison_operator"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "elif_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "*"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_operator"
+                          }
+                        ],
+                        "label": "comparison_operator"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "elif_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "*"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_operator"
+                          }
+                        ],
+                        "label": "comparison_operator"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "elif_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "comparison_operator"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "elif_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "=="
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "comparison_operator"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "elif_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "/"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_operator"
+                          }
+                        ],
+                        "label": "comparison_operator"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "elif_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "/"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_operator"
+                          }
+                        ],
+                        "label": "comparison_operator"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "elif_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "/"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_operator"
+                          }
+                        ],
+                        "label": "comparison_operator"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "elif_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "comparison_operator"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "elif_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "assignment"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "else_clause"
+                  }
+                ],
+                "label": "if_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 4
+      }
+    },
+    {
+      "hash": "sh_dcb5b60ff46aec47",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "in"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "in"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": ">"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "$lit"
+                                              }
+                                            ],
+                                            "label": "comparison_operator"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [],
+                                                        "label": "$id"
+                                                      },
+                                                      {
+                                                        "children": [],
+                                                        "label": "<"
+                                                      },
+                                                      {
+                                                        "children": [],
+                                                        "label": "$id"
+                                                      }
+                                                    ],
+                                                    "label": "comparison_operator"
+                                                  },
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [
+                                                          {
+                                                            "children": [
+                                                              {
+                                                                "children": [],
+                                                                "label": "$id"
+                                                              },
+                                                              {
+                                                                "children": [],
+                                                                "label": "+="
+                                                              },
+                                                              {
+                                                                "children": [],
+                                                                "label": "$id"
+                                                              }
+                                                            ],
+                                                            "label": "augmented_assignment"
+                                                          }
+                                                        ],
+                                                        "label": "expression_statement"
+                                                      }
+                                                    ],
+                                                    "label": "block"
+                                                  }
+                                                ],
+                                                "label": "while_statement"
+                                              }
+                                            ],
+                                            "label": "block"
+                                          }
+                                        ],
+                                        "label": "if_statement"
+                                      }
+                                    ],
+                                    "label": "block"
+                                  }
+                                ],
+                                "label": "for_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "if_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "for_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 30
+      }
+    },
+    {
+      "hash": "sh_cd4ed36360bc34e5",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$lit"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 41
+      }
+    },
+    {
+      "hash": "sh_83ff38ce267758aa",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "list"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 45
+      }
+    },
+    {
+      "hash": "sh_90884ac71b24539c",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "-"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "binary_operator"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 111
+      }
+    },
+    {
+      "hash": "sh_506c26cf21b959fd",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/complexity.py",
+        "line": 116
+      }
+    },
+    {
+      "hash": "sh_f694a21c787c93c0",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$lit"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/complexity.py",
+        "line": 119
+      }
+    },
+    {
+      "hash": "sh_d30a5bb4e5e29b4b",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "case_pattern"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "block"
+                          }
+                        ],
+                        "label": "case_clause"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "match_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 123
+      }
+    },
+    {
+      "hash": "sh_8ce7b6e87b3b4e5e",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "in"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": ">"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "comparison_operator"
+                              },
+                              {
+                                "children": [],
+                                "label": "and"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": ">"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "comparison_operator"
+                              }
+                            ],
+                            "label": "boolean_operator"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "+="
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "augmented_assignment"
+                                  }
+                                ],
+                                "label": "expression_statement"
+                              }
+                            ],
+                            "label": "block"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "<"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "comparison_operator"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "-="
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$lit"
+                                          }
+                                        ],
+                                        "label": "augmented_assignment"
+                                      }
+                                    ],
+                                    "label": "expression_statement"
+                                  }
+                                ],
+                                "label": "block"
+                              }
+                            ],
+                            "label": "elif_clause"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "=="
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "comparison_operator"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "-="
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$lit"
+                                          }
+                                        ],
+                                        "label": "augmented_assignment"
+                                      }
+                                    ],
+                                    "label": "expression_statement"
+                                  }
+                                ],
+                                "label": "block"
+                              }
+                            ],
+                            "label": "elif_clause"
+                          }
+                        ],
+                        "label": "if_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "for_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 8
+      }
+    },
+    {
+      "hash": "sh_fa1c8e61d92d8a80",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "<"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "comparison_operator"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "return_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "if_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": ">"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "comparison_operator"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "return_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "if_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 24
+      }
+    },
+    {
+      "hash": "sh_2ce1e4c9a3630464",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "*"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "binary_operator"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 33
+      }
+    },
+    {
+      "hash": "sh_ec6af60a92a46155",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "len"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_export.py",
+        "line": 1
+      }
+    },
+    {
+      "hash": "sh_6d1e647020e2ce0c",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "//"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "binary_operator"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_helpers.py",
+        "line": 1
       }
     },
     {
@@ -4740,6 +8332,991 @@
         "col": 5,
         "file": "tests/test_pricing.py",
         "line": 21
+      }
+    },
+    {
+      "hash": "sh_b89aa2cb6e590462",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "discounted"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "call"
+                      },
+                      {
+                        "children": [],
+                        "label": "=="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "comparison_operator"
+                  }
+                ],
+                "label": "assert_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 8
+      }
+    },
+    {
+      "hash": "sh_824e79d9a9e3c4bf",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "raises"
+                                  }
+                                ],
+                                "label": "attribute"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call"
+                          }
+                        ],
+                        "label": "with_item"
+                      }
+                    ],
+                    "label": "with_clause"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "require_positive"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "-"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "unary_operator"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call"
+                          }
+                        ],
+                        "label": "expression_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "with_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 12
+      }
+    },
+    {
+      "hash": "sh_d5864a23c59d6394",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "Account"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call"
+                          },
+                          {
+                            "children": [],
+                            "label": "statement"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "assert_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 17
+      }
+    },
+    {
+      "hash": "sh_8218cb33e54aaeda",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "classify"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 21
+      }
+    },
+    {
+      "hash": "sh_02d9f9a6d6badd2f",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "patch"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "patch"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "patch"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "tally"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "list"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "call"
+                      },
+                      {
+                        "children": [],
+                        "label": "=="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "tuple"
+                      }
+                    ],
+                    "label": "comparison_operator"
+                  }
+                ],
+                "label": "assert_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 25
+      }
+    },
+    {
+      "hash": "sh_db2bfd5757053b34",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "in"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "tuple"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "balance"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "list"
+                                      }
+                                    ],
+                                    "label": "argument_list"
+                                  }
+                                ],
+                                "label": "call"
+                              },
+                              {
+                                "children": [],
+                                "label": "=="
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "comparison_operator"
+                          }
+                        ],
+                        "label": "assert_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "for_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 32
+      }
+    },
+    {
+      "hash": "sh_6d78cfccff75262d",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "in"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "range"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "balance"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "list"
+                                      }
+                                    ],
+                                    "label": "argument_list"
+                                  }
+                                ],
+                                "label": "call"
+                              },
+                              {
+                                "children": [],
+                                "label": "=="
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "comparison_operator"
+                          }
+                        ],
+                        "label": "assert_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "for_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      }
+    },
+    {
+      "hash": "sh_7c9a217fc22f1006",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "Account"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "call"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "deposit"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "deposit"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [],
+                        "label": "=="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "comparison_operator"
+                  }
+                ],
+                "label": "assert_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 42
+      }
+    },
+    {
+      "hash": "sh_512028dc89f5722f",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "Account"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "call"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "deposit"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "deposit"
+                          }
+                        ],
+                        "label": "attribute"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "attribute"
+                      }
+                    ],
+                    "label": "assignment"
+                  }
+                ],
+                "label": "expression_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "=="
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "comparison_operator"
+                  }
+                ],
+                "label": "assert_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 49
       }
     }
   ]

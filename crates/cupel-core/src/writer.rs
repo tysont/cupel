@@ -4,31 +4,19 @@ use std::fs::{self, File};
 use std::path::{Component, Path, PathBuf};
 use std::sync::{Arc, Mutex, PoisonError};
 
-use similar::TextDiff;
+use serde::Serialize;
 
 use crate::dry_run::PlannedWrite;
-use crate::envelope::Envelope;
+pub use crate::error::WriteError;
 use crate::error::{Error, Result};
 use crate::id::RunId;
 
-/// Why a write was not made.
-#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
-pub enum WriteError {
-    /// The path lands outside the writer's area and `--write` was not given.
-    #[error("`{}` is outside .cupel/; pass --write to permit writing it", .path.display())]
-    Outside { path: PathBuf },
-    /// The file system refused.
-    #[error("cannot write `{}`: {message}", .path.display())]
-    Io { path: PathBuf, message: String },
-}
-
-impl WriteError {
-    fn io(path: &Path, error: &std::io::Error) -> Error {
-        Error::Write(Self::Io {
-            path: path.to_path_buf(),
-            message: error.to_string(),
-        })
-    }
+/// The error for a file-system failure writing `path`.
+fn io_error(path: &Path, error: &std::io::Error) -> Error {
+    Error::Write(WriteError::Io {
+        path: path.to_path_buf(),
+        message: error.to_string(),
+    })
 }
 
 /// Writes files for one run. Cheap to clone; clones share a dry run's recorded writes.
@@ -54,7 +42,7 @@ impl Writer {
     pub fn new(root: &Path, write: bool) -> Result<Self> {
         let root = root
             .canonicalize()
-            .map_err(|error| WriteError::io(root, &error))?;
+            .map_err(|error| io_error(root, &error))?;
         Ok(Self {
             area: root.join(Self::DIR),
             root,
@@ -92,6 +80,11 @@ impl Writer {
         }
     }
 
+    /// Whether this is a dry run's writer, which records writes instead of making them.
+    pub fn is_recording(&self) -> bool {
+        self.recorded.is_some()
+    }
+
     pub fn root(&self) -> &Path {
         &self.root
     }
@@ -117,9 +110,10 @@ impl Writer {
         self.cupel_dir().join("runs").join(format!("{run}.json"))
     }
 
-    /// Writes `envelope` as the run record `.cupel/runs/<id>.json`: pretty JSON and a newline.
-    pub fn run_record(&self, envelope: &Envelope) -> Result<PathBuf> {
-        let path = self.run_record_path(&envelope.run.id);
+    /// Writes the envelope of run `run` as its run record `.cupel/runs/<id>.json`: pretty JSON
+    /// and a newline.
+    pub fn run_record(&self, run: &RunId, envelope: &impl Serialize) -> Result<PathBuf> {
+        let path = self.run_record_path(run);
         let mut json = serde_json::to_string_pretty(envelope).map_err(|error| {
             Error::Write(WriteError::Io {
                 path: path.clone(),
@@ -151,7 +145,7 @@ impl Writer {
             return Ok(target);
         }
         self.create_parent(&target)?;
-        fs::write(&target, contents).map_err(|error| WriteError::io(&target, &error))?;
+        fs::write(&target, contents).map_err(|error| io_error(&target, &error))?;
         Ok(target)
     }
 
@@ -160,7 +154,7 @@ impl Writer {
         let target = self.permitted(path)?;
         if self.recorded.is_none() {
             self.ensure_cupel_dir(&target)?;
-            fs::create_dir_all(&target).map_err(|error| WriteError::io(&target, &error))?;
+            fs::create_dir_all(&target).map_err(|error| io_error(&target, &error))?;
         }
         Ok(target)
     }
@@ -173,8 +167,8 @@ impl Writer {
         }
         let probe = self.area.join(format!(".probe-{}", RunId::generate()));
         self.create_parent(&probe)?;
-        File::create_new(&probe).map_err(|error| WriteError::io(&probe, &error))?;
-        fs::remove_file(&probe).map_err(|error| WriteError::io(&probe, &error))
+        File::create_new(&probe).map_err(|error| io_error(&probe, &error))?;
+        fs::remove_file(&probe).map_err(|error| io_error(&probe, &error))
     }
 
     /// Opens `path` for streaming output, truncating it. A stream is an output channel the user
@@ -182,7 +176,7 @@ impl Writer {
     pub fn stream(&self, path: &Path) -> Result<File> {
         let target = self.permitted(path)?;
         self.create_parent(&target)?;
-        File::create(&target).map_err(|error| WriteError::io(&target, &error))
+        File::create(&target).map_err(|error| io_error(&target, &error))
     }
 
     /// The writes a recording writer has recorded, in order; empty otherwise.
@@ -240,7 +234,7 @@ impl Writer {
     fn create_parent(&self, target: &Path) -> Result<()> {
         self.ensure_cupel_dir(target)?;
         if let Some(parent) = target.parent() {
-            fs::create_dir_all(parent).map_err(|error| WriteError::io(parent, &error))?;
+            fs::create_dir_all(parent).map_err(|error| io_error(parent, &error))?;
         }
         Ok(())
     }
@@ -252,33 +246,17 @@ impl Writer {
         if !target.starts_with(&dir) || dir.exists() {
             return Ok(());
         }
-        fs::create_dir_all(&dir).map_err(|error| WriteError::io(&dir, &error))?;
+        fs::create_dir_all(&dir).map_err(|error| io_error(&dir, &error))?;
         let gitignore = dir.join(".gitignore");
-        fs::write(&gitignore, Self::GITIGNORE).map_err(|error| WriteError::io(&gitignore, &error))
+        fs::write(&gitignore, Self::GITIGNORE).map_err(|error| io_error(&gitignore, &error))
     }
 
     fn planned_write(&self, target: &Path, contents: &[u8]) -> PlannedWrite {
         let shown = target.strip_prefix(&self.root).unwrap_or(target);
         let shown = shown.display().to_string();
         let current = fs::read(target).ok();
-        let old = current
-            .as_deref()
-            .map(String::from_utf8_lossy)
-            .unwrap_or_default();
+        let old = current.as_deref().map(String::from_utf8_lossy);
         let new = String::from_utf8_lossy(contents);
-        let old_header = if current.is_some() {
-            format!("a/{shown}")
-        } else {
-            "/dev/null".to_owned()
-        };
-        let diff = TextDiff::from_lines(old.as_ref(), new.as_ref())
-            .unified_diff()
-            .context_radius(3)
-            .header(&old_header, &format!("b/{shown}"))
-            .to_string();
-        PlannedWrite {
-            path: shown,
-            diff: Some(diff),
-        }
+        PlannedWrite::change(&shown, &shown, old.as_deref(), &new)
     }
 }

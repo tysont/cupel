@@ -2,19 +2,9 @@
 // ABOUTME: `self`/`cls` receivers normalize away; renames, literals, layout, and moves keep the hash.
 mod support;
 
-use cupel_core::syntax::{NormNode, NormTree, Symbols};
+use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{produce, tree};
-
-/// `(label child …)`, or `label` for a leaf.
-fn sexp(node: &NormNode) -> String {
-    if node.children.is_empty() {
-        node.label.clone()
-    } else {
-        let children: Vec<String> = node.children.iter().map(sexp).collect();
-        format!("({} {})", node.label, children.join(" "))
-    }
-}
+use support::{assert_distinct, produce, sexp, tree};
 
 /// (display, normalized tree, hash) of every symbol in `source`, a Python file at `path`.
 fn normalize_all(path: &str, source: &str) -> Vec<(String, String, String)> {
@@ -77,16 +67,12 @@ fn method_names_word_operators_and_f_strings() {
         "m.py",
         "def f(xs, y):\n    xs.items.append(f\"{y!r}\")\n    return y is not None and y not in xs\n",
     );
-    assert!(
-        shape.contains("(call (attribute (attribute $id $id) append) (argument_list $lit))"),
-        "{shape}"
-    );
-    assert!(
-        shape.contains(
-            "(boolean_operator (comparison_operator $id is not $lit) and \
-             (comparison_operator $id not in $id))"
-        ),
-        "{shape}"
+    assert_eq!(
+        shape,
+        "(function_definition (parameters $id $id) (block (expression_statement (call \
+         (attribute (attribute $id $id) append) (argument_list $lit))) (return_statement \
+         (boolean_operator (comparison_operator $id is not $lit) and (comparison_operator \
+         $id not in $id)))))"
     );
 }
 
@@ -134,9 +120,12 @@ fn python_has_one_producer_for_every_syntactic_fact() {
 
 #[test]
 fn a_parameter_called_self_is_kept_outside_a_class() {
-    assert_ne!(
-        hash("def f(self, a):\n    return a\n"),
-        hash("def f(a):\n    return a\n")
+    assert_distinct(
+        &[
+            "def f(self, a):\n    return a\n",
+            "def f(a):\n    return a\n",
+        ]
+        .map(hash),
     );
 }
 
@@ -168,17 +157,16 @@ fn moving_a_file_keeps_its_hashes() {
 
 #[test]
 fn hashes_change_with_structure() {
-    let base = hash("def f(a, b):\n    if a > b:\n        return a - b\n    return g(a)\n");
-    for changed in [
+    let sources = [
+        "def f(a, b):\n    if a > b:\n        return a - b\n    return g(a)\n",
         "def f(a, b):\n    if a < b:\n        return a - b\n    return g(a)\n",
         "def f(a, b):\n    if a > b:\n        return a + b\n    return g(a)\n",
         "def f(a, b):\n    if a > b:\n        return a - b\n    return h(a)\n",
         "def f(a, b):\n    if a > b:\n        return a - b\n    elif a:\n        return 0\n    return g(a)\n",
         "def f(a, b):\n    if a > b and b:\n        return a - b\n    return g(a)\n",
         "def f(a):\n    if a > 0:\n        return a - 1\n    return g(a)\n",
-    ] {
-        assert_ne!(hash(changed), base, "{changed}");
-    }
+    ];
+    assert_distinct(&sources.map(hash));
     assert_ne!(
         hash("def f(a):\n    return a is None\n"),
         hash("def f(a):\n    return a is not None\n")

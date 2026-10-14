@@ -6,7 +6,7 @@ use std::path::Path;
 
 use cupel_core::syntax::{MutationOperator, MutationSites, OperatorSet, Site, Symbols};
 use proptest::prelude::*;
-use support::{fixture, produce, tree};
+use support::{byte_range, fixture, produce, tree};
 
 use MutationOperator::{
     ArithAddSub, ArithMulDiv, BooleanLiteral, BooleanOp, Boundary, Constant, Equality, Negation,
@@ -55,76 +55,73 @@ fn row(operator: MutationOperator, from: &str, to: &[&str], line: u32) -> Row {
     )
 }
 
-/// Both fixture repositories: the TypeScript `pricing.ts` is the JavaScript `pricing.js` typed.
-fn both(display: &str) -> [Vec<Row>; 2] {
-    ["javascript", "typescript"].map(|lang| summary(&sites_of(lang, &fixture(lang), display)))
+/// Asserts that `display` has `expected` sites in both fixture repositories: the TypeScript
+/// `pricing.ts` is the JavaScript `pricing.js` typed.
+fn assert_both(display: &str, expected: &[Row]) {
+    let both =
+        ["javascript", "typescript"].map(|lang| summary(&sites_of(lang, &fixture(lang), display)));
+    assert_eq!(both, [expected.to_vec(), expected.to_vec()], "{display}");
 }
 
 #[test]
 fn discounted_has_arithmetic_boolean_strict_equality_and_extended_sites() {
-    for sites in both("pricing.discounted") {
-        assert_eq!(
-            sites,
-            [
-                row(ArithMulDiv, "*", &["/"], 2),
-                row(Constant, "15", &["0"], 2),
-                row(ArithMulDiv, "/", &["*"], 2),
-                row(Constant, "100", &["0"], 2),
-                row(
-                    Negation,
-                    "member && cut !== 0",
-                    &["!(member && cut !== 0)"],
-                    3
-                ),
-                row(BooleanOp, "&&", &["||"], 3),
-                row(Equality, "!==", &["==="], 3),
-                row(ZeroOne, "0", &["1"], 3),
-                row(ReturnValue, "price - cut", &["undefined"], 4),
-                row(ArithAddSub, "-", &["+"], 4),
-                row(ReturnValue, "price", &["undefined"], 6),
-            ]
-        );
-    }
+    assert_both(
+        "pricing.discounted",
+        &[
+            row(ArithMulDiv, "*", &["/"], 2),
+            row(Constant, "15", &["0"], 2),
+            row(ArithMulDiv, "/", &["*"], 2),
+            row(Constant, "100", &["0"], 2),
+            row(
+                Negation,
+                "member && cut !== 0",
+                &["!(member && cut !== 0)"],
+                3,
+            ),
+            row(BooleanOp, "&&", &["||"], 3),
+            row(Equality, "!==", &["==="], 3),
+            row(ZeroOne, "0", &["1"], 3),
+            row(ReturnValue, "price - cut", &["undefined"], 4),
+            row(ArithAddSub, "-", &["+"], 4),
+            row(ReturnValue, "price", &["undefined"], 6),
+        ],
+    );
 }
 
 #[test]
 fn tally_has_literal_compound_assignment_and_statement_deletion_sites() {
-    for sites in both("pricing.tally") {
-        assert_eq!(
-            sites,
-            [
-                row(ZeroOne, "0", &["1"], 10),
-                row(BooleanLiteral, "false", &["true"], 11),
-                row(StatementDeletion, "total += entry;", &[""], 13),
-                row(ArithAddSub, "+=", &["-="], 13),
-                row(Negation, "total < -1", &["!(total < -1)"], 14),
-                row(Relational, "<", &["<="], 14),
-                row(ZeroOne, "1", &["0"], 14),
-                row(StatementDeletion, "overdrawn = true;", &[""], 15),
-                row(BooleanLiteral, "true", &["false"], 15),
-                row(StatementDeletion, "logTotal(total);", &[""], 18),
-                row(ReturnValue, "{ total, overdrawn }", &["undefined"], 19),
-            ]
-        );
-    }
+    assert_both(
+        "pricing.tally",
+        &[
+            row(ZeroOne, "0", &["1"], 10),
+            row(BooleanLiteral, "false", &["true"], 11),
+            row(StatementDeletion, "total += entry;", &[""], 13),
+            row(ArithAddSub, "+=", &["-="], 13),
+            row(Negation, "total < -1", &["!(total < -1)"], 14),
+            row(Relational, "<", &["<="], 14),
+            row(ZeroOne, "1", &["0"], 14),
+            row(StatementDeletion, "overdrawn = true;", &[""], 15),
+            row(BooleanLiteral, "true", &["false"], 15),
+            row(StatementDeletion, "logTotal(total);", &[""], 18),
+            row(ReturnValue, "{ total, overdrawn }", &["undefined"], 19),
+        ],
+    );
 }
 
 #[test]
 fn loose_equality_is_negated_loosely() {
-    for sites in both("pricing.logTotal") {
-        assert_eq!(
-            sites,
-            [
-                row(
-                    StatementDeletion,
-                    "console.log(total == null ? \"none\" : total);",
-                    &[""],
-                    23
-                ),
-                row(Equality, "==", &["!="], 23),
-            ]
-        );
-    }
+    assert_both(
+        "pricing.logTotal",
+        &[
+            row(
+                StatementDeletion,
+                "console.log(total == null ? \"none\" : total);",
+                &[""],
+                23,
+            ),
+            row(Equality, "==", &["!="], 23),
+        ],
+    );
 }
 
 #[test]
@@ -184,7 +181,7 @@ fn grammar(file: &str) -> tree_sitter::Language {
 
 /// Every replacement of every site in `root`'s `lang` files leaves a file that parses cleanly
 /// with its own grammar; returns how many grammars were exercised.
-fn every_replacement_parses(lang: &str, root: &Path) -> usize {
+fn assert_every_replacement_parses(lang: &str, root: &Path) -> usize {
     let sites: MutationSites = produce(lang, root);
     let symbols: Symbols = produce(lang, root);
     let mut parser = tree_sitter::Parser::new();
@@ -220,27 +217,11 @@ fn every_replacement_parses(lang: &str, root: &Path) -> usize {
     grammars.len()
 }
 
-/// The byte range of a site from its 1-based line and byte columns.
-fn byte_range(source: &str, site: &Site) -> (usize, usize) {
-    let offset = |line: u32, col: u32| {
-        let start: usize = source
-            .split_inclusive('\n')
-            .take(line as usize - 1)
-            .map(str::len)
-            .sum();
-        start + col as usize - 1
-    };
-    (
-        offset(site.span.line, site.span.col),
-        offset(site.span.end_line, site.span.end_col),
-    )
-}
-
 #[test]
 fn every_replacement_in_the_fixture_repositories_parses_in_its_own_grammar() {
-    every_replacement_parses("javascript", &fixture("javascript"));
+    assert_every_replacement_parses("javascript", &fixture("javascript"));
     // .ts and .tsx files each parse with their own grammar.
-    assert!(every_replacement_parses("typescript", &fixture("typescript")) >= 2);
+    assert!(assert_every_replacement_parses("typescript", &fixture("typescript")) >= 2);
 }
 
 /// A fixture file, reformatted: indentation, blank lines, and line breaks change.
@@ -315,6 +296,6 @@ proptest! {
         expected.sort();
         actual.sort();
         prop_assert_eq!(actual, expected);
-        every_replacement_parses(lang, moved.path());
+        assert_every_replacement_parses(lang, moved.path());
     }
 }

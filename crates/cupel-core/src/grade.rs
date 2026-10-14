@@ -68,3 +68,16 @@ pub enum CostClass {
     Deep,
     Exhaustive,
 }
+
+impl CostClass {
+    /// The planning estimate for one target of work of this class, until the store has
+    /// measured durations (ADR-041): 1 ms, 100 ms, 1 s, 10 s.
+    pub fn est_ms_per_target(self) -> u64 {
+        match self {
+            Self::Quick => 1,
+            Self::Standard => 100,
+            Self::Deep => 1_000,
+            Self::Exhaustive => 10_000,
+        }
+    }
+}

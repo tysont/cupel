@@ -2,21 +2,11 @@
 // ABOUTME: normalized signatures, and symbols live by convention (main, `__main__` guards, tests, hooks).
 mod support;
 
-use cupel_core::syntax::{
-    ApiItemKind, ApiSurface, RootReason, Roots, SymbolDef, Symbols, TestFrames,
-};
-use support::{fixture, produce, tree};
+use cupel_core::syntax::{ApiItemKind, ApiSurface, RootReason, Roots, Symbols};
+use support::{assert_every_case_is_a_test_root, fixture, items, produce, reasons, tree};
 
 use ApiItemKind::{Constant, Function, Interface, Method, Type, Variable};
 use RootReason::{EntryPoint, Export, FrameworkHook, Test};
-
-fn items(api: &ApiSurface, file: &str) -> Vec<(String, ApiItemKind, String)> {
-    api.items
-        .iter()
-        .filter(|item| item.file == file)
-        .map(|item| (item.path.clone(), item.kind, item.signature.clone()))
-        .collect()
-}
 
 fn item(path: &str, kind: ApiItemKind, signature: &str) -> (String, ApiItemKind, String) {
     (path.to_owned(), kind, signature.to_owned())
@@ -144,20 +134,6 @@ fn signatures_ignore_layout_and_parameter_names_and_see_removed_parameters() {
     assert_ne!(removed.items[0].signature, compact.items[0].signature);
 }
 
-fn reasons(roots: &Roots, symbols: &Symbols, display: &str) -> Vec<RootReason> {
-    let symbol: &SymbolDef = symbols
-        .symbols
-        .iter()
-        .find(|s| s.display == display)
-        .unwrap_or_else(|| panic!("no symbol {display}"));
-    roots
-        .roots
-        .iter()
-        .filter(|root| root.symbol == symbol.key())
-        .map(|root| root.reason)
-        .collect()
-}
-
 #[test]
 fn main_guards_exports_tests_fixtures_and_dunders_are_roots() {
     let root = fixture("python");
@@ -186,30 +162,7 @@ fn main_guards_exports_tests_fixtures_and_dunders_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixture_is_a_test_root() {
-    let root = fixture("python");
-    let roots: Roots = produce("python", &root);
-    let symbols: Symbols = produce("python", &root);
-    let frames: TestFrames = produce("python", &root);
-    let mut checked = 0;
-    for file in &frames.files {
-        for case in &file.cases {
-            let symbol = symbols
-                .symbols
-                .iter()
-                .find(|s| s.file == file.file && s.span == case.span)
-                .unwrap_or_else(|| panic!("no symbol for test {}", case.name));
-            assert!(
-                roots
-                    .roots
-                    .iter()
-                    .any(|r| r.symbol == symbol.key() && r.reason == Test),
-                "{} is not a test root",
-                case.name
-            );
-            checked += 1;
-        }
-    }
-    assert_eq!(checked, 14);
+    assert_every_case_is_a_test_root("python", 23);
 }
 
 #[test]

@@ -5,10 +5,12 @@ use std::collections::BTreeMap;
 use cupel_core::{
     Action, ActionKind, ArgDescription, BaselineRef, CheckId, CheckResult, CheckStatus,
     CommandDescription, ConfigEcho, ConfigSource, CostClass, CupelInfo, Delta, Description,
-    Envelope, Evidence, Example, ExitCode, FactKind, Finding, GateOutcome, GateResult, GateRule,
-    GitInfo, LangId, Location, NextAction, PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite,
-    RunInfo, RunPlan, ScopeInfo, ScopeMode, Score, Severity, SeverityCounts, SkipReason, Skipped,
-    Stability, Status, Summary, Symbol, Tier, ToolId, ToolchainInfo, ValueType, Verb,
+    Envelope, Evidence, Example, Excerpt, ExcerptLine, ExitCode, ExplainSubject, Explanation,
+    FactKind, Finding, GateOutcome, GateResult, GateRule, GitInfo, LangId, Location, Metric,
+    MetricPer, NextAction, PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RankedTarget,
+    RankingDimension, Rankings, RuleOutcome, RunInfo, RunPlan, ScopeInfo, ScopeMode, Score,
+    Severity, SeverityCounts, SkipReason, Skipped, Stability, Status, Summary, Symbol, Target,
+    Tier, ToolId, ToolchainInfo, ValueType, Verb,
 };
 use serde_json::{Map, Value, json};
 
@@ -137,7 +139,8 @@ fn description() -> Description {
 
 /// The envelope of a failed `check` run with every field filled: three findings across two
 /// severities and two checks (one new, one suppressed), a run check and a skipped check, a gate
-/// with a passing and a failing rule, two next actions, and a plan with every kind of entry.
+/// with a passing, a failing, and a skipped rule, two next actions, rankings with an empty and a
+/// filled dimension, and a plan with every kind of entry.
 pub fn envelope() -> Envelope {
     let findings = vec![
         finding(0, "tests.mutation", "mutant.survived", Severity::Fail),
@@ -158,6 +161,8 @@ pub fn envelope() -> Envelope {
         next_actions: next_actions(),
         description: Some(description()),
         plan: Some(plan()),
+        explanation: Some(explanation()),
+        rankings: Some(rankings()),
         truncated: false,
         total_findings: 3,
     }
@@ -227,6 +232,7 @@ fn checks() -> Vec<CheckResult> {
                 unit: "killed_ratio".to_owned(),
                 n: 34,
             }),
+            metrics: BTreeMap::from([("score".to_owned(), 0.71), ("survivors".to_owned(), 10.0)]),
             delta: Some(Delta {
                 vs: "baseline".to_owned(),
                 value: -0.12,
@@ -242,6 +248,7 @@ fn checks() -> Vec<CheckResult> {
             tier: tier(5),
             cost: CostClass::Exhaustive,
             score: None,
+            metrics: BTreeMap::new(),
             delta: None,
             findings: 0,
             duration_ms: 0,
@@ -274,15 +281,71 @@ fn summary() -> Summary {
                 GateRule {
                     rule: "tests.mutation.score >= 0.80".to_owned(),
                     actual: Some(0.71),
-                    result: GateOutcome::Fail,
+                    result: RuleOutcome::Fail,
                 },
                 GateRule {
                     rule: "tests.weakening none".to_owned(),
+                    actual: Some(0.0),
+                    result: RuleOutcome::Pass,
+                },
+                GateRule {
+                    rule: "perf.bench.regression < 5%".to_owned(),
                     actual: None,
-                    result: GateOutcome::Pass,
+                    result: RuleOutcome::Skipped,
                 },
             ],
         }),
+    }
+}
+
+fn rankings() -> Rankings {
+    Rankings {
+        top: 10,
+        dimensions: vec![
+            RankingDimension {
+                check: CheckId::from("static.crap"),
+                metric: "crap".to_owned(),
+                per: MetricPer::Symbol,
+                summary: "CRAP score per function.".to_owned(),
+                measured: 11,
+                entries: vec![
+                    RankedTarget {
+                        rank: 1,
+                        value: 42.5,
+                        lang: LangId::from("rust"),
+                        target: Target {
+                            display: "rewrite::Planner::push_limit".to_owned(),
+                            symbol: Some("sh_4b1d9e0c4b1d9e01".parse().expect("valid hash")),
+                            location: Some(Location {
+                                file: "src/rewrite/planner.rs".to_owned(),
+                                line: 140,
+                                col: Some(5),
+                                end_line: 171,
+                                end_col: Some(6),
+                            }),
+                        },
+                    },
+                    RankedTarget {
+                        rank: 2,
+                        value: 12.0,
+                        lang: LangId::from("typescript"),
+                        target: Target {
+                            display: "web/limits".to_owned(),
+                            symbol: None,
+                            location: None,
+                        },
+                    },
+                ],
+            },
+            RankingDimension {
+                check: CheckId::from("static.deps"),
+                metric: "coupling".to_owned(),
+                per: MetricPer::Module,
+                summary: "Afferent plus efferent coupling per module.".to_owned(),
+                measured: 0,
+                entries: Vec::new(),
+            },
+        ],
     }
 }
 
@@ -303,6 +366,52 @@ fn next_actions() -> Vec<NextAction> {
             command: Some("cupel check --changed --depth deep --only gen.differential".to_owned()),
         },
     ]
+}
+
+/// An explanation with an excerpt (one focused line), test hints, and two metrics, one of them
+/// for the whole check.
+fn explanation() -> Explanation {
+    Explanation {
+        subject: ExplainSubject::Finding,
+        target: "fnd_7c2e1a".to_owned(),
+        run: "run_01J9ZZZZZZZZZZZZZZZZZZZZZZ"
+            .parse()
+            .expect("valid run ID"),
+        excerpt: Some(Excerpt {
+            file: "src/rewrite/planner.rs".to_owned(),
+            lines: vec![
+                ExcerptLine {
+                    line: 141,
+                    text: "fn push_limit(limit: u64, offset: u64) -> bool {".to_owned(),
+                    focus: false,
+                },
+                ExcerptLine {
+                    line: 142,
+                    text: "    limit <= offset".to_owned(),
+                    focus: true,
+                },
+                ExcerptLine {
+                    line: 143,
+                    text: "}".to_owned(),
+                    focus: false,
+                },
+            ],
+        }),
+        covering_tests: vec!["rewrite::limit_tests::pushes_through_sort".to_owned()],
+        nearest_test_file: Some("tests/rewrite/limit_tests.rs".to_owned()),
+        metrics: vec![
+            Metric {
+                symbol: Some("sh_4b1d9e0c4b1d9e00".parse().expect("valid symbol hash")),
+                key: "cyclomatic".to_owned(),
+                value: 7.0,
+            },
+            Metric {
+                symbol: None,
+                key: "score".to_owned(),
+                value: 0.71,
+            },
+        ],
+    }
 }
 
 /// A plan with two checks to run (one with a note), a skip, an install, and two writes (one

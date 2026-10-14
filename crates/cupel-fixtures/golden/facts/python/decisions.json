@@ -11,6 +11,14 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 5,
+        "file": "src/deps_layers/port.py",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 1,
         "file": "src/ledger/__init__.py",
         "line": 13
@@ -116,9 +124,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -139,21 +149,604 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
-          "kind": "branch",
-          "nesting": 0
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 41
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 2,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 3,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 4,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 30
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 41
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 45
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 111
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/complexity.py",
+        "line": 116
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/complexity.py",
+        "line": 119
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 123
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "boolean-op",
-          "nesting": 0
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 24
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_export.py",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_helpers.py",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -166,21 +759,27 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 2
+          "nesting": 2,
+          "table": false
         }
       ],
       "symbol": {
@@ -193,15 +792,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "catch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -214,15 +817,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -235,27 +842,35 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 0,
+          "continues": true,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -268,9 +883,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "ternary",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -283,15 +900,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -304,21 +925,27 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "boolean-op",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -331,15 +958,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -392,15 +1023,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -413,15 +1048,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -434,15 +1073,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -455,15 +1098,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -476,15 +1123,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -497,27 +1148,35 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -530,15 +1189,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -673,6 +1336,96 @@
         "col": 5,
         "file": "tests/test_pricing.py",
         "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 42
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 49
       }
     }
   ]

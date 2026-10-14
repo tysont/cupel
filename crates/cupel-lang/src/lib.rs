@@ -34,11 +34,11 @@
 //!
 //! | File | Required | Optional |
 //! |---|---|---|
-//! | `symbols.scm` | `@symbol.function` / `@symbol.method` / `@symbol.closure`; `@symbol.name` | `@symbol.body` `@symbol.visibility` `@visibility.public` `@visibility.internal` `@visibility.private` `@export.name` `@scope` `@scope.name` `@namespace.name` |
-//! | `decisions.scm` | one of `@decision.branch` `.loop` `.boolean-op` `.case` `.catch` `.early-return` `.ternary` | |
+//! | `symbols.scm` | `@symbol.function` / `@symbol.method` / `@symbol.closure`; `@symbol.name`; `@symbol.parameter` | `@symbol.body` `@symbol.visibility` `@visibility.public` `@visibility.internal` `@visibility.private` `@export.name` `@scope` `@scope.name` `@namespace.name` |
+//! | `decisions.scm` | one of `@decision.branch` `.loop` `.boolean-op` `.case` `.catch` `.early-return` `.ternary` | `@loop.table` |
 //! | `mutations.scm` | one of `@mut.relational` `.equality` `.arith-add-sub` `.arith-mul-div` `.boolean-op` `.boolean-literal` `.zero-one` `.statement-deletion` `.return-value` `.constant` `.boundary` `.negation` | |
 //! | `tests.scm` | `@test.case`; `@test.name` | `@test.assertion` `@assertion.name` `@assertion.idiom.<key>` `@test.mock` `@mock.target` `@test.skip` `@skip.reason` `@test.setup` `@framework.<name>` |
-//! | `imports.scm` | `@import`; `@import.specifier` | `@import.name` `@import.module` `@scope` `@scope.name` |
+//! | `imports.scm` | `@import`; `@import.specifier` | `@import.name` `@import.module` `@import.reexport` `@reexport.name` `@scope` `@scope.name` |
 //! | `api.scm` | one of `@api.function` `.method` `.type` `.interface` `.constant` `.variable` `.module`; `@api.name` | `@api.signature` `@api.local` `@root.entry-point` `@root.hook` `@scope` `@scope.name` `@namespace.name` |
 //!
 //! The meaning of each capture and the `tables.toml` keys each producer reads are documented
@@ -68,10 +68,11 @@ mod walk;
 
 pub use contract::{Contract, capture, contract};
 pub use conventions::GlobTestConventions;
+pub use langs::ecosystems::unregistered_roots;
 pub use language::{Language, LanguageRegistry, lang, owns};
 pub use parse::{CacheStats, ParseCache, ParseProblem, Parsed, Syntax};
 pub use producer::{Extract, Merge, QueryProducer, Source, parse_scope, producer_id};
 pub use query::{Match, matches, span};
 pub use spec::{LanguageSpec, QueryFile, SpecError};
 pub use tables::{DecisionRules, NameRule, NamespaceRules, Tables, VisibilityRules, Weight};
-pub use walk::walk;
+pub use walk::{walk, walk_excluding};

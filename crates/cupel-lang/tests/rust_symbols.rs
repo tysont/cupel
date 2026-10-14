@@ -3,26 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{SymbolKind, Symbols, Visibility};
-use support::{fixture, lines, produce, tree};
-
-type Row = (&'static str, SymbolKind, Visibility, (u32, u32));
-
-fn rows(symbols: &Symbols, file: &str) -> Vec<(String, SymbolKind, Visibility, (u32, u32))> {
-    symbols
-        .symbols
-        .iter()
-        .filter(|symbol| symbol.file == file)
-        .map(|s| (s.display.clone(), s.kind, s.visibility, lines(s.span)))
-        .collect()
-}
-
-fn expect(symbols: &Symbols, file: &str, expected: &[Row]) {
-    let expected: Vec<(String, SymbolKind, Visibility, (u32, u32))> = expected
-        .iter()
-        .map(|(d, k, v, l)| ((*d).to_owned(), *k, *v, *l))
-        .collect();
-    assert_eq!(rows(symbols, file), expected, "{file}");
-}
+use support::{assert_symbols, fixture, produce, tree};
 
 use SymbolKind::{Closure, Function, Method};
 use Visibility::{Internal, Private, Public};
@@ -47,13 +28,13 @@ fn the_crate_root_has_top_level_functions_of_each_visibility() {
         ("audit_limit", Function, Internal, at("fn audit_limit")),
         ("scale", Function, Private, at("fn scale")),
     ];
-    expect(&symbols, "src/lib.rs", &rows);
+    assert_symbols(&symbols, "src/lib.rs", &rows);
 }
 
 #[test]
 fn impl_blocks_trait_impls_and_trait_defaults_are_methods_on_their_type() {
     let symbols: Symbols = produce("rust", &fixture("rust"));
-    expect(
+    assert_symbols(
         &symbols,
         "src/account.rs",
         &[
@@ -81,7 +62,7 @@ fn impl_blocks_trait_impls_and_trait_defaults_are_methods_on_their_type() {
 #[test]
 fn module_files_take_their_namespace_from_their_path() {
     let symbols: Symbols = produce("rust", &fixture("rust"));
-    expect(
+    assert_symbols(
         &symbols,
         "src/report/mod.rs",
         &[
@@ -89,7 +70,7 @@ fn module_files_take_their_namespace_from_their_path() {
             ("report::floor_area", Function, Public, (9, 11)),
         ],
     );
-    expect(
+    assert_symbols(
         &symbols,
         "src/report/format.rs",
         &[("report::format::render", Function, Public, (1, 3))],
@@ -125,7 +106,7 @@ fn inline_modules_generic_impls_and_restricted_visibility() {
          pub(self) fn hidden() {}\n",
     )]);
     let symbols: Symbols = produce("rust", dir.path());
-    expect(
+    assert_symbols(
         &symbols,
         "src/lib.rs",
         &[
@@ -140,7 +121,7 @@ fn inline_modules_generic_impls_and_restricted_visibility() {
 fn files_outside_src_are_namespaced_by_their_whole_path() {
     let dir = tree(&[("tests/ledger.rs", "fn checks() {}\n")]);
     let symbols: Symbols = produce("rust", dir.path());
-    expect(
+    assert_symbols(
         &symbols,
         "tests/ledger.rs",
         &[("tests::ledger::checks", Function, Private, (1, 1))],

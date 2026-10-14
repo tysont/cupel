@@ -26,27 +26,34 @@ fn a_deadline_cancels_once_it_passes() {
             .checked_sub(Duration::from_millis(1))
             .unwrap(),
     );
-    assert!(past.is_cancelled());
     let future = Cancellation::with_deadline(Instant::now() + Duration::from_secs(3600));
-    assert!(!future.is_cancelled());
+    assert_eq!([past.is_cancelled(), future.is_cancelled()], [true, false]);
 }
 
 #[test]
 fn wait_completes_when_nothing_cancels_it() {
-    assert!(Cancellation::new().wait(Duration::from_millis(5)));
+    let token = Cancellation::new();
+    // (completed, cancelled)
+    assert_eq!(
+        (token.wait(Duration::from_millis(5)), token.is_cancelled()),
+        (true, false)
+    );
 }
 
 #[test]
 fn wait_returns_early_when_the_deadline_passes() {
     let started = Instant::now();
     let token = Cancellation::with_deadline(started + Duration::from_millis(20));
-    assert!(!token.wait(Duration::from_secs(30)));
+    // (completed, cancelled)
+    assert_eq!(
+        (token.wait(Duration::from_secs(30)), token.is_cancelled()),
+        (false, true)
+    );
     assert!(
         started.elapsed() < Duration::from_secs(5),
         "{:?}",
         started.elapsed()
     );
-    assert!(token.is_cancelled());
 }
 
 #[test]
@@ -58,7 +65,11 @@ fn wait_returns_early_when_another_thread_cancels() {
         std::thread::sleep(Duration::from_millis(20));
         canceller.cancel();
     });
-    assert!(!token.wait(Duration::from_secs(30)));
+    // (completed, cancelled)
+    assert_eq!(
+        (token.wait(Duration::from_secs(30)), token.is_cancelled()),
+        (false, true)
+    );
     handle.join().unwrap();
     assert!(started.elapsed() < Duration::from_secs(5));
 }
@@ -101,14 +112,19 @@ fn events() -> Vec<Event> {
     ]
 }
 
+/// Emits every one of `events()` to `sink`, in order.
+fn emit_all(sink: &mut dyn EventSink) {
+    for event in events() {
+        sink.emit(event);
+    }
+}
+
 #[test]
 fn jsonl_sink_writes_one_flushed_line_per_event_in_order() {
     let mut recorder = Recorder::default();
     let mut sink = JsonlSink::new(&mut recorder);
-    for event in events() {
-        sink.emit(event);
-    }
-    assert!(sink.error().is_none());
+    emit_all(&mut sink);
+    assert_eq!(sink.error(), None);
     drop(sink);
     let text = String::from_utf8(recorder.bytes).unwrap();
     let parsed: Vec<Event> = text
@@ -152,10 +168,8 @@ impl Write for &mut Broken {
 fn jsonl_sink_stops_at_the_first_write_error_and_reports_it() {
     let mut broken = Broken { writes: 0 };
     let mut sink = JsonlSink::new(&mut broken);
-    for event in events() {
-        sink.emit(event);
-    }
-    assert!(sink.error().unwrap().contains("disk full"));
+    emit_all(&mut sink);
+    assert_eq!(sink.error(), Some("disk full"));
     drop(sink);
     assert_eq!(broken.writes, 1);
 }

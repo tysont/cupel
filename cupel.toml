@@ -1,0 +1,38 @@
+# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents every key.
+default_branch = "main"
+depth = "standard"
+
+# The fixture crate's repositories are analysis data for Cupel's tests, not Cupel's code
+# (ADR-065); the whole crate is left out so the dogfood grades the six product crates.
+[scope]
+exclude = ["crates/cupel-fixtures/**"]
+
+[lang.rust]
+test = "cargo test --workspace"
+coverage = "cargo llvm-cov --lcov --output-path {out}"
+bench = "cargo bench --bench {name} -- --save-baseline {id}"
+
+# `static.crap` reports nothing until a coverage producer exists (P3.2, ADR-067), so no rule on
+# `static.crap.max` can pass yet; it joins both gates with coverage.
+[gate.changed]
+"tests.weakening" = "none"
+"static.complexity" = "none"
+"static.complexity.cyclomatic_max" = "<= 10"
+"static.clones" = "none"
+"static.deps" = "none"
+"static.deps.cycles" = "== 0"
+"static.dead-code" = "none"
+"tests.quality" = "none"
+
+# The tree still holds 99 clone groups (213 similar pairs), mostly per-language test scaffolding
+# and same-shape data variants; the tree gate holds them from growing while the changed gate
+# admits no new ones. Lower these as the groups are removed.
+[gate.tree]
+"static.complexity" = "none"
+"static.complexity.cyclomatic_max" = "<= 10"
+"static.clones.pairs" = "<= 213"
+"static.clones.clusters" = "<= 30"
+"static.deps" = "none"
+"static.deps.cycles" = "== 0"
+"static.dead-code" = "none"
+"tests.quality" = "none"

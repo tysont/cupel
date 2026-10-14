@@ -13,6 +13,78 @@
       }
     },
     {
+      "file": "src/deps_cycle/alpha.py",
+      "kind": "constant",
+      "path": "deps_cycle.alpha.ALPHA",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.py",
+      "kind": "constant",
+      "path": "deps_cycle.beta.BETA",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 9,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/order.py",
+      "kind": "type",
+      "path": "deps_layers.domain.order.Order",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 5,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/deps_layers/infra/store.py",
+      "kind": "type",
+      "path": "deps_layers.infra.store.Store",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 2,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/port.py",
+      "kind": "interface",
+      "path": "deps_layers.port.Port",
+      "signature": "(Protocol)",
+      "span": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/deps_layers/port.py",
+      "kind": "method",
+      "path": "deps_layers.port.Port.place",
+      "signature": "(self, _: Order) -> None",
+      "span": {
+        "col": 5,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 7
+      }
+    },
+    {
       "file": "src/ledger/__init__.py",
       "kind": "constant",
       "path": "ledger.MAX_ENTRIES",
@@ -166,6 +238,210 @@
         "end_col": 30,
         "end_line": 11,
         "line": 10
+      }
+    },
+    {
+      "file": "src/ledger/clones_settlement.py",
+      "kind": "function",
+      "path": "ledger.clones_settlement.settle_invoices",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 12,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/clones_settlement.py",
+      "kind": "function",
+      "path": "ledger.clones_settlement.reconcile_payments",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 23,
+        "line": 15
+      }
+    },
+    {
+      "file": "src/ledger/clones_settlement.py",
+      "kind": "function",
+      "path": "ledger.clones_settlement.order_lines",
+      "signature": "(_, _, _)",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 38,
+        "line": 26
+      }
+    },
+    {
+      "file": "src/ledger/clones_settlement.py",
+      "kind": "function",
+      "path": "ledger.clones_settlement.refund_lines",
+      "signature": "(_, _, _)",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 54,
+        "line": 41
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.label",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 27,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.settle",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 38,
+        "line": 30
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.open_account",
+      "signature": "(_, _, _, _, _, _)",
+      "span": {
+        "col": 1,
+        "end_col": 71,
+        "end_line": 42,
+        "line": 41
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.statement_template",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 6,
+        "end_line": 108,
+        "line": 45
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.net",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 112,
+        "line": 111
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "type",
+      "path": "ledger.complexity.Statement",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 120,
+        "line": 115
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "method",
+      "path": "ledger.complexity.Statement.__init__",
+      "signature": "(self, _)",
+      "span": {
+        "col": 5,
+        "end_col": 27,
+        "end_line": 117,
+        "line": 116
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "method",
+      "path": "ledger.complexity.Statement.line",
+      "signature": "(self, _)",
+      "span": {
+        "col": 5,
+        "end_col": 41,
+        "end_line": 120,
+        "line": 119
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.month",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 151,
+        "line": 123
+      }
+    },
+    {
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "path": "ledger.crap_scores.overdue",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 21,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "path": "ledger.crap_scores.clamp",
+      "signature": "(_, _, _)",
+      "span": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 30,
+        "line": 24
+      }
+    },
+    {
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "path": "ledger.crap_scores.to_cents",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 35,
+        "line": 33
+      }
+    },
+    {
+      "file": "src/ledger/dead_export.py",
+      "kind": "function",
+      "path": "ledger.dead_export.unused_total",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 2,
+        "line": 1
       }
     },
     {
@@ -622,6 +898,114 @@
         "end_col": 45,
         "end_line": 23,
         "line": 21
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_members_pay_exactly_the_discounted_price",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 9,
+        "line": 8
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_negative_amounts_are_rejected",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 14,
+        "line": 12
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_statements_are_not_empty",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 38,
+        "end_line": 18,
+        "line": 17
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_classifying_runs",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 22,
+        "line": 21
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_tallies_are_logged_and_mailed",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 25
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_every_entry_counts_toward_the_balance",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 34,
+        "line": 32
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_computed_entries_count_toward_the_balance",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 39,
+        "line": 37
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_deposits_keep_the_owner",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 34,
+        "end_line": 46,
+        "line": 42
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_deposits_accumulate",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 54,
+        "line": 49
       }
     }
   ]

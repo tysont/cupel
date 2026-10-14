@@ -2,7 +2,7 @@
 // ABOUTME: Enum spellings match the construct names used by the per-fact conformance inventories.
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, Assertion, AssertionKind, AssertionStrength, Decision,
-    DecisionKind, Decisions, ImportEdge, ImportTarget, LiveRoot, Mock, ModuleGraph,
+    DecisionKind, Decisions, EdgeKind, ImportEdge, ImportTarget, LiveRoot, Mock, ModuleGraph,
     MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol, OperatorSet,
     ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
     SymbolDecisions, SymbolDef, SymbolKey, SymbolKind, SymbolSites, Symbols, TestCase,
@@ -61,6 +61,7 @@ fn symbol_def() -> SymbolDef {
             end_col: 2,
         },
         body: Some(span(11)),
+        parameters: 2,
     }
 }
 
@@ -76,7 +77,8 @@ fn symbols_payload_shape() {
             "display": "rewrite::Planner::push_limit", "kind": "method", "visibility": "public",
             "lang": "rust", "file": "src/lib.rs",
             "span": {"line": 10, "col": 1, "end_line": 30, "end_col": 2},
-            "body": {"line": 11, "col": 1, "end_line": 13, "end_col": 2}
+            "body": {"line": 11, "col": 1, "end_line": 13, "end_col": 2},
+            "parameters": 2
         })
     );
 }
@@ -96,12 +98,14 @@ fn decisions_payload_shape() {
                 nesting: 2,
                 cyclomatic: 1,
                 cognitive: 3,
+                table: false,
+                continues: false,
             }],
         }],
     });
     assert_eq!(
         json["symbols"][0]["decisions"][0],
-        json!({"kind": "early-return", "nesting": 2, "cyclomatic": 1, "cognitive": 3})
+        json!({"kind": "early-return", "nesting": 2, "cyclomatic": 1, "cognitive": 3, "table": false, "continues": false})
     );
 }
 
@@ -239,6 +243,7 @@ fn module_graph_edges_are_tagged_by_target_kind() {
         target,
         relative: true,
         line: 1,
+        edge_kind: EdgeKind::ReExport,
     };
     let json = assert_round_trip(&ModuleGraph {
         roots: vec![RootImports {
@@ -265,6 +270,7 @@ fn module_graph_edges_are_tagged_by_target_kind() {
     );
     assert_eq!(edges[2]["target"], json!({"kind": "unresolved"}));
     assert_eq!(edges[0]["relative"], json!(true));
+    assert_eq!(edges[0]["edge_kind"], json!("re-export"));
 }
 
 #[test]
@@ -369,10 +375,21 @@ fn each_payload_declares_its_own_kind_and_version() {
     ];
     let kinds: BTreeSet<FactKind> = declared.iter().map(|(kind, _)| *kind).collect();
     assert_eq!(kinds, FactKind::SYNTACTIC.into_iter().collect());
-    for (kind, version) in declared {
-        let expected = if kind == FactKind::ProjectInfo { 2 } else { 1 };
-        assert_eq!(version, expected, "{kind}");
-    }
+    assert_eq!(
+        declared,
+        [
+            (FactKind::Symbols, 2),
+            (FactKind::Decisions, 2),
+            (FactKind::NormTree, 1),
+            (FactKind::MutationSites, 1),
+            (FactKind::TestFrames, 1),
+            (FactKind::ModuleGraph, 2),
+            (FactKind::ApiSurface, 1),
+            (FactKind::Roots, 1),
+            (FactKind::TestConventions, 1),
+            (FactKind::ProjectInfo, 2),
+        ]
+    );
 }
 
 #[test]

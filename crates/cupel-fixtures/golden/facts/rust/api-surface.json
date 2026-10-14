@@ -97,6 +97,210 @@
       }
     },
     {
+      "file": "src/clones_settlement.rs",
+      "kind": "type",
+      "path": "clones_settlement::Invoice",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "path": "clones_settlement::settle_invoices",
+      "signature": "(_: &[Invoice], _: i64) ->(i64, usize)",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "path": "clones_settlement::reconcile_payments",
+      "signature": "(_: &[Invoice], _: i64) ->(i64, usize)",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 21
+      }
+    },
+    {
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "path": "clones_settlement::order_lines",
+      "signature": "(_: &[i64], _: &[i64], _: i64) -> Vec<String>",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      }
+    },
+    {
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "path": "clones_settlement::refund_lines",
+      "signature": "(_: &[i64], _: &[i64], _: i64) -> Vec<String>",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 65,
+        "line": 50
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::label",
+      "signature": "(_: i64, _: i64) -> &'static str",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::settle",
+      "signature": "(_: &[Vec<i64>], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::open_account",
+      "signature": "(_: &str, _: &str, _: i64, _: bool, _: u32, _: u64) -> String",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 60,
+        "line": 51
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::statement_template",
+      "signature": "() -> Vec<&'static str>",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 127,
+        "line": 63
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::net",
+      "signature": "(_: i64, _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 132,
+        "line": 130
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "type",
+      "path": "complexity::Statement",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 137,
+        "line": 135
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "method",
+      "path": "complexity::Statement::line",
+      "signature": "(&self, _: i64) -> String",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 143,
+        "line": 141
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::month",
+      "signature": "(_: u32) -> &'static str",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 163,
+        "line": 147
+      }
+    },
+    {
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "path": "crap_scores::overdue",
+      "signature": "(_: &[i64], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 7
+      }
+    },
+    {
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "path": "crap_scores::clamp",
+      "signature": "(_: i64, _: i64, _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 22
+      }
+    },
+    {
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "path": "crap_scores::to_cents",
+      "signature": "(_: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 35,
+        "line": 33
+      }
+    },
+    {
+      "file": "src/dead_export.rs",
+      "kind": "function",
+      "path": "dead_export::unused_total",
+      "signature": "(_: &[i64]) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
       "file": "src/decide.rs",
       "kind": "function",
       "path": "decide::classify",
@@ -142,6 +346,150 @@
         "end_col": 2,
         "end_line": 31,
         "line": 25
+      }
+    },
+    {
+      "file": "src/deps_cycle/alpha.rs",
+      "kind": "constant",
+      "path": "deps_cycle::alpha::ALPHA",
+      "signature": "u32",
+      "span": {
+        "col": 1,
+        "end_col": 33,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.rs",
+      "kind": "constant",
+      "path": "deps_cycle::beta::BETA",
+      "signature": "u32",
+      "span": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.rs",
+      "kind": "constant",
+      "path": "deps_cycle::beta::BOTH",
+      "signature": "[u32; 2]",
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 4,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/mod.rs",
+      "kind": "module",
+      "path": "deps_layers::domain::money",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 1,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/mod.rs",
+      "kind": "type",
+      "path": "deps_layers::domain::Order",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/money.rs",
+      "kind": "type",
+      "path": "deps_layers::domain::money::Cents",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 27,
+        "end_line": 1,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/infra/mod.rs",
+      "kind": "type",
+      "path": "deps_layers::infra::Store",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/port.rs",
+      "kind": "interface",
+      "path": "deps_layers::port::Port",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/deps_layers/port.rs",
+      "kind": "method",
+      "path": "deps_layers::port::Port::place",
+      "signature": "(&self, _: Order, _: Store, _: Cents)",
+      "span": {
+        "col": 5,
+        "end_col": 63,
+        "end_line": 6,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/deps_tree/leaf.rs",
+      "kind": "function",
+      "path": "deps_tree::leaf::cap",
+      "signature": "(_: u32) -> u32",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_tree/mod.rs",
+      "kind": "constant",
+      "path": "deps_tree::LIMIT",
+      "signature": "u32",
+      "span": {
+        "col": 1,
+        "end_col": 27,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_tree/mod.rs",
+      "kind": "function",
+      "path": "deps_tree::capped",
+      "signature": "(_: u32) -> u32",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
       }
     },
     {

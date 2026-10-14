@@ -2,6 +2,94 @@
   "symbols": [
     {
       "body": {
+        "col": 68,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 10
+      },
+      "display": "ledger.settleInvoices",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "settleInvoices",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 10
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 74,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 23
+      },
+      "display": "ledger.reconcilePayments",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "reconcilePayments",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 23
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 77,
+        "end_col": 2,
+        "end_line": 50,
+        "line": 36
+      },
+      "display": "ledger.orderLines",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "orderLines",
+      "namespace": "ledger",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 50,
+        "line": 36
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 78,
+        "end_col": 2,
+        "end_line": 67,
+        "line": 52
+      },
+      "display": "ledger.refundLines",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "refundLines",
+      "namespace": "ledger",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 67,
+        "line": 52
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
         "col": 13,
         "end_col": 2,
         "end_line": 14,
@@ -13,11 +101,276 @@
       "lang": "go",
       "name": "main",
       "namespace": "main",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
         "end_line": 14,
         "line": 10
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 6
+      },
+      "display": "ledger.Label",
+      "file": "complexity.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Label",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 51,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 35
+      },
+      "display": "ledger.Settle",
+      "file": "complexity.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Settle",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 35
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 108,
+        "end_col": 2,
+        "end_line": 54,
+        "line": 52
+      },
+      "display": "ledger.OpenAccount",
+      "file": "complexity.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "OpenAccount",
+      "namespace": "ledger",
+      "parameters": 6,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 54,
+        "line": 52
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 35,
+        "end_col": 2,
+        "end_line": 121,
+        "line": 57
+      },
+      "display": "ledger.StatementTemplate",
+      "file": "complexity.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "StatementTemplate",
+      "namespace": "ledger",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 121,
+        "line": 57
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      },
+      "display": "ledger.Net",
+      "file": "complexity.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Net",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 136,
+        "line": 134
+      },
+      "display": "ledger.Statement.Line",
+      "file": "complexity.go",
+      "kind": "method",
+      "lang": "go",
+      "name": "Line",
+      "namespace": "ledger.Statement",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 136,
+        "line": 134
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      },
+      "display": "ledger.Month",
+      "file": "complexity.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Month",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 8
+      },
+      "display": "ledger.Overdue",
+      "file": "crap_scores.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Overdue",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 23
+      },
+      "display": "ledger.Clamp",
+      "file": "crap_scores.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Clamp",
+      "namespace": "ledger",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 23
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 34
+      },
+      "display": "ledger.ToCents",
+      "file": "crap_scores.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "ToCents",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "deadexport.UnusedTotal",
+      "file": "dead_export/dead_export.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "UnusedTotal",
+      "namespace": "deadexport",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "deadhelpers.forgottenRate",
+      "file": "dead_helpers/dead_helpers.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "forgottenRate",
+      "namespace": "deadhelpers",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
       },
       "visibility": "internal"
     },
@@ -34,6 +387,7 @@
       "lang": "go",
       "name": "classify",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -55,6 +409,7 @@
       "lang": "go",
       "name": "firstOverdraft",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -76,6 +431,7 @@
       "lang": "go",
       "name": "parseCents",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -97,6 +453,7 @@
       "lang": "go",
       "name": "describe",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -118,6 +475,7 @@
       "lang": "go",
       "name": "kindOf",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -139,6 +497,7 @@
       "lang": "go",
       "name": "drain",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -160,6 +519,7 @@
       "lang": "go",
       "name": "init",
       "namespace": "ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -181,6 +541,7 @@
       "lang": "go",
       "name": "NewAccount",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -202,6 +563,7 @@
       "lang": "go",
       "name": "Deposit",
       "namespace": "ledger.Account",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -223,6 +585,7 @@
       "lang": "go",
       "name": "Statement",
       "namespace": "ledger.Account",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -244,6 +607,7 @@
       "lang": "go",
       "name": "header",
       "namespace": "ledger.Account.Statement",
+      "parameters": 0,
       "span": {
         "col": 2,
         "end_col": 3,
@@ -265,6 +629,7 @@
       "lang": "go",
       "name": "audited",
       "namespace": "ledger.Account",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -286,6 +651,7 @@
       "lang": "go",
       "name": "Balance",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -307,6 +673,7 @@
       "lang": "go",
       "name": "scale",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -328,11 +695,210 @@
       "lang": "go",
       "name": "FloorArea",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
         "end_line": 77,
         "line": 75
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 60,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "ledger.TestMembersPayExactlyTheDiscountedPrice",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestMembersPayExactlyTheDiscountedPrice",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "display": "ledger.TestBlankAmountsAreRejected",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestBlankAmountsAreRejected",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "ledger.TestStatementsAreNotEmpty",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestStatementsAreNotEmpty",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "ledger.TestClassifyingRuns",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestClassifyingRuns",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 53,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 26
+      },
+      "display": "ledger.TestMailGoesThroughEveryNotifier",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestMailGoesThroughEveryNotifier",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 26
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 2,
+        "end_line": 38,
+        "line": 34
+      },
+      "display": "ledger.TestEveryEntryCountsTowardTheBalance",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestEveryEntryCountsTowardTheBalance",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 38,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 61,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 40
+      },
+      "display": "ledger.TestComputedEntriesCountTowardTheBalance",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestComputedEntriesCountTowardTheBalance",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 40
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 51,
+        "line": 46
+      },
+      "display": "ledger.TestDepositsKeepTheOwner",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestDepositsKeepTheOwner",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 51,
+        "line": 46
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 59,
+        "line": 53
+      },
+      "display": "ledger.TestDepositsAccumulate",
+      "file": "ledger_quality_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestDepositsAccumulate",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 59,
+        "line": 53
       },
       "visibility": "public"
     },
@@ -349,6 +915,7 @@
       "lang": "go",
       "name": "TestMain",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -370,6 +937,7 @@
       "lang": "go",
       "name": "TestDepositAddsToTheBalance",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -391,6 +959,7 @@
       "lang": "go",
       "name": "TestMembersGetADiscount",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -412,6 +981,7 @@
       "lang": "go",
       "name": "TestNewAccountsAreRegistered",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -433,6 +1003,7 @@
       "lang": "go",
       "name": "TestParsingGarbageFails",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -454,6 +1025,7 @@
       "lang": "go",
       "name": "TestNewAccountsHaveDistinctIDs",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -475,6 +1047,7 @@
       "lang": "go",
       "name": "TestClassify",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -496,6 +1069,7 @@
       "lang": "go",
       "name": "TestStatementIsMailed",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -517,6 +1091,7 @@
       "lang": "go",
       "name": "TestParseCentsTrimsSpaces",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -538,6 +1113,7 @@
       "lang": "go",
       "name": "TestOpeningAnAccountDoesNotPanic",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -559,6 +1135,7 @@
       "lang": "go",
       "name": "discounted",
       "namespace": "ledger",
+      "parameters": 3,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -580,6 +1157,7 @@
       "lang": "go",
       "name": "tally",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -601,6 +1179,7 @@
       "lang": "go",
       "name": "logTotal",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -622,6 +1201,7 @@
       "lang": "go",
       "name": "Mail",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -643,6 +1223,7 @@
       "lang": "go",
       "name": "Notify",
       "namespace": "ledger.MockNotifier",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -664,6 +1245,7 @@
       "lang": "go",
       "name": "TestTallyReportsOverdraft",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -685,6 +1267,7 @@
       "lang": "go",
       "name": "TestParseCentsAcceptsDigits",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -706,6 +1289,7 @@
       "lang": "go",
       "name": "TestParseCentsRejectsBlanks",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -727,6 +1311,7 @@
       "lang": "go",
       "name": "TestDiscountSnapshot",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -748,6 +1333,7 @@
       "lang": "go",
       "name": "TestMailNotifiesTheOwner",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -769,6 +1355,7 @@
       "lang": "go",
       "name": "Render",
       "namespace": "report",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -790,6 +1377,7 @@
       "lang": "go",
       "name": "NewCircle",
       "namespace": "shapes",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -811,6 +1399,7 @@
       "lang": "go",
       "name": "Area",
       "namespace": "shapes.Circle",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -832,6 +1421,7 @@
       "lang": "go",
       "name": "scaled",
       "namespace": "shapes.Circle",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -853,6 +1443,7 @@
       "lang": "go",
       "name": "double",
       "namespace": "shapes.Circle.scaled",
+      "parameters": 1,
       "span": {
         "col": 2,
         "end_col": 3,
@@ -874,6 +1465,7 @@
       "lang": "go",
       "name": "Square",
       "namespace": "shapes",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -895,6 +1487,7 @@
       "lang": "go",
       "name": "netTotal",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -916,6 +1509,7 @@
       "lang": "go",
       "name": "sumAfterCharge",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -937,6 +1531,7 @@
       "lang": "go",
       "name": "netTotalFloor",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -958,6 +1553,7 @@
       "lang": "go",
       "name": "netTotalLaidOut",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -979,6 +1575,7 @@
       "lang": "go",
       "name": "netTotalPlus",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -1000,6 +1597,7 @@
       "lang": "go",
       "name": "netTotalCapped",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -1021,6 +1619,7 @@
       "lang": "go",
       "name": "netTotalProduct",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -1042,6 +1641,7 @@
       "lang": "go",
       "name": "sum",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -1063,6 +1663,7 @@
       "lang": "go",
       "name": "product",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,

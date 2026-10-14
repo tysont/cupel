@@ -5,8 +5,9 @@ mod description;
 use std::fmt::Write as _;
 
 use cupel_core::{
-    CheckResult, Envelope, Finding, GateOutcome, GateResult, Location, NextAction, RunInfo,
-    RunPlan, Severity, Skipped, Status, Summary,
+    CheckResult, Envelope, Excerpt, Explanation, Finding, GateOutcome, GateResult, GitInfo,
+    Location, Metric, NextAction, PlannedCheck, Rankings, RuleOutcome, RunInfo, RunPlan, ScopeInfo,
+    Severity, Skipped, Status, Summary,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -33,6 +34,11 @@ pub fn render(envelope: &Envelope, color: bool) -> String {
             .map(|plan| plan_block(plan, &paint))
             .unwrap_or_default(),
         envelope
+            .explanation
+            .as_ref()
+            .map(|explanation| explanation_block(explanation, &envelope.findings, &paint))
+            .unwrap_or_default(),
+        envelope
             .summary
             .gate
             .as_ref()
@@ -40,6 +46,11 @@ pub fn render(envelope: &Envelope, color: bool) -> String {
             .unwrap_or_default(),
         summary_line(&envelope.summary, envelope.total_findings, &paint),
         checks_block(&envelope.checks, &paint),
+        envelope
+            .rankings
+            .as_ref()
+            .map(|rankings| rankings_block(rankings, &paint))
+            .unwrap_or_default(),
         findings_block(envelope, &paint),
         run_block(envelope, &paint),
         next_actions_block(&envelope.next_actions, &paint),
@@ -87,6 +98,15 @@ impl Paint {
         let code = match outcome {
             GateOutcome::Pass => "32",
             GateOutcome::Fail => "31",
+        };
+        self.sgr(code, &name(outcome))
+    }
+
+    fn rule(&self, outcome: RuleOutcome) -> String {
+        let code = match outcome {
+            RuleOutcome::Pass => "32",
+            RuleOutcome::Fail => "31",
+            RuleOutcome::Skipped | RuleOutcome::Unsupported => "33",
         };
         self.sgr(code, &name(outcome))
     }
@@ -168,12 +188,7 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
             .actual
             .map(|actual| format!("  actual {actual}"))
             .unwrap_or_default();
-        let _ = writeln!(
-            out,
-            "  {}  {}{actual}",
-            paint.outcome(rule.result),
-            rule.rule
-        );
+        let _ = writeln!(out, "  {}  {}{actual}", paint.rule(rule.result), rule.rule);
     }
     out
 }
@@ -221,6 +236,14 @@ fn checks_block(checks: &[CheckResult], paint: &Paint) -> String {
                 score.value, score.unit, score.n
             ));
         }
+        if !check.metrics.is_empty() {
+            let metrics: Vec<String> = check
+                .metrics
+                .iter()
+                .map(|(metric, value)| format!("{metric} {value}"))
+                .collect();
+            facts.push(format!("metrics {}", metrics.join(", ")));
+        }
         if let Some(delta) = &check.delta {
             facts.push(format!("delta {:+} vs {}", delta.value, delta.vs));
         }
@@ -243,6 +266,44 @@ fn checks_block(checks: &[CheckResult], paint: &Paint) -> String {
             name(check.status),
             facts.join(" · ")
         );
+    }
+    out
+}
+
+/// Each dimension as `check.metric (per, measured)` with its ranked targets beneath (ADR-062).
+fn rankings_block(rankings: &Rankings, paint: &Paint) -> String {
+    let mut out = format!(
+        "{}  top {} per dimension\n",
+        paint.bold("rankings"),
+        rankings.top
+    );
+    for dimension in &rankings.dimensions {
+        let _ = writeln!(
+            out,
+            "  {}.{}  {} · {} measured · {}",
+            dimension.check,
+            dimension.metric,
+            name(dimension.per),
+            dimension.measured,
+            dimension.summary
+        );
+        for entry in &dimension.entries {
+            let mut facts = vec![entry.lang.to_string()];
+            if let Some(at) = &entry.target.location {
+                facts.push(location(at));
+            }
+            if let Some(symbol) = &entry.target.symbol {
+                facts.push(symbol.to_string());
+            }
+            let _ = writeln!(
+                out,
+                "    {:>2}. {}  {}  {}",
+                entry.rank,
+                entry.value,
+                entry.target.display,
+                paint.dim(&facts.join(" · "))
+            );
+        }
     }
     out
 }
@@ -278,64 +339,27 @@ fn plan_block(plan: &RunPlan, paint: &Paint) -> String {
         &format!("est {} ms", plan.est_total_ms),
         paint,
     );
-    let rows = |out: &mut String, heading: &str, rows: Vec<(String, String)>| {
-        if rows.is_empty() {
-            return;
-        }
-        let width = rows.iter().map(|(key, _)| key.len()).max().unwrap_or(0);
-        let _ = writeln!(out, "{}", paint.bold(heading));
-        for (key, value) in rows {
-            if value.is_empty() {
-                let _ = writeln!(out, "  {key}");
-            } else {
-                let _ = writeln!(out, "  {key:<width$}  {}", continued(&value, width + 4));
-            }
-        }
-    };
-    rows(
-        &mut out,
-        "would run",
-        plan.would_run
-            .iter()
-            .map(|check| {
-                let mut facts = vec![
-                    format!("{} targets", check.targets),
-                    format!("est {} ms", check.est_ms),
-                ];
-                if !check.needs.is_empty() {
-                    facts.push(format!("needs {}", check.needs.join(", ")));
-                }
-                let mut value = facts.join(" · ");
-                if let Some(note) = &check.note {
-                    let _ = write!(value, "\n{note}");
-                }
-                (check.id.as_str().to_owned(), value)
-            })
-            .collect(),
-    );
-    rows(
-        &mut out,
-        "would skip",
-        plan.would_skip
-            .iter()
-            .map(|skip| (skip.id.as_str().to_owned(), skip_reason(&skip.skipped)))
-            .collect(),
-    );
-    rows(
-        &mut out,
-        "would install",
-        plan.would_install
-            .iter()
-            .map(|install| {
-                let command = install
-                    .command
-                    .as_ref()
-                    .map(|command| format!("$ {command}"))
-                    .unwrap_or_default();
-                (install.tool.to_string(), command)
-            })
-            .collect(),
-    );
+    let run = plan.would_run.iter().map(planned_check).collect();
+    rows(&mut out, "would run", run, paint);
+    let skip = plan
+        .would_skip
+        .iter()
+        .map(|skip| (skip.id.as_str().to_owned(), skip_reason(&skip.skipped)))
+        .collect();
+    rows(&mut out, "would skip", skip, paint);
+    let install = plan
+        .would_install
+        .iter()
+        .map(|install| {
+            let command = install
+                .command
+                .as_ref()
+                .map(|command| format!("$ {command}"))
+                .unwrap_or_default();
+            (install.tool.to_string(), command)
+        })
+        .collect();
+    rows(&mut out, "would install", install, paint);
     if !plan.would_write.is_empty() {
         let _ = writeln!(out, "{}", paint.bold("would write"));
         for write in &plan.would_write {
@@ -346,6 +370,121 @@ fn plan_block(plan: &RunPlan, paint: &Paint) -> String {
         }
     }
     out
+}
+
+/// A planned check as (ID, its targets, estimate, needs, and note).
+fn planned_check(check: &PlannedCheck) -> (String, String) {
+    let mut facts = vec![
+        format!("{} targets", check.targets),
+        format!("est {} ms", check.est_ms),
+    ];
+    if !check.needs.is_empty() {
+        facts.push(format!("needs {}", check.needs.join(", ")));
+    }
+    let mut value = facts.join(" · ");
+    if let Some(note) = &check.note {
+        let _ = write!(value, "\n{note}");
+    }
+    (check.id.as_str().to_owned(), value)
+}
+
+/// A heading and its (key, value) rows with the values aligned; nothing for no rows.
+fn rows(out: &mut String, heading: &str, rows: Vec<(String, String)>, paint: &Paint) {
+    if rows.is_empty() {
+        return;
+    }
+    let width = rows.iter().map(|(key, _)| key.len()).max().unwrap_or(0);
+    let _ = writeln!(out, "{}", paint.bold(heading));
+    for (key, value) in rows {
+        if value.is_empty() {
+            let _ = writeln!(out, "  {key}");
+        } else {
+            let _ = writeln!(out, "  {key:<width$}  {}", continued(&value, width + 4));
+        }
+    }
+}
+
+/// What `explain` adds: where it came from, the source excerpt with the location's lines marked,
+/// the full evidence of the explained finding (the one place evidence bodies are printed),
+/// test hints, and metrics.
+fn explanation_block(explanation: &Explanation, findings: &[Finding], paint: &Paint) -> String {
+    let mut out = String::new();
+    labeled(
+        &mut out,
+        "explain",
+        &format!(
+            "{} {} from {}",
+            name(explanation.subject),
+            explanation.target,
+            explanation.run
+        ),
+        paint,
+    );
+    if let Some(excerpt) = &explanation.excerpt {
+        excerpt_lines(&mut out, excerpt, paint);
+    }
+    let explained = findings
+        .iter()
+        .find(|finding| finding.id.as_str() == explanation.target);
+    if let Some(finding) = explained.filter(|finding| !finding.evidence.0.is_empty()) {
+        let evidence = serde_json::to_string_pretty(&finding.evidence).unwrap_or_default();
+        let _ = writeln!(out, "  {}", paint.bold("evidence"));
+        for line in evidence.lines() {
+            let _ = writeln!(out, "    {line}");
+        }
+    }
+    if !explanation.covering_tests.is_empty() {
+        let _ = writeln!(
+            out,
+            "  {}  {}",
+            paint.bold("covering tests"),
+            explanation.covering_tests.join(", ")
+        );
+    }
+    if let Some(file) = &explanation.nearest_test_file {
+        let _ = writeln!(out, "  {}  {file}", paint.bold("nearest test file"));
+    }
+    metric_lines(&mut out, &explanation.metrics, paint);
+    out
+}
+
+/// The excerpt's file, then its numbered lines, the location's marked with `>`.
+fn excerpt_lines(out: &mut String, excerpt: &Excerpt, paint: &Paint) {
+    let width = excerpt
+        .lines
+        .iter()
+        .map(|line| line.line.to_string().len())
+        .max()
+        .unwrap_or(0);
+    let _ = writeln!(out, "  {}", paint.bold(&excerpt.file));
+    for line in &excerpt.lines {
+        let marker = if line.focus { ">" } else { " " };
+        let _ = writeln!(out, "  {marker} {:>width$} | {}", line.line, line.text);
+    }
+}
+
+/// Each stored metric: its symbol (or `(check)`), name, and value.
+fn metric_lines(out: &mut String, metrics: &[Metric], paint: &Paint) {
+    if metrics.is_empty() {
+        return;
+    }
+    let _ = writeln!(out, "  {}", paint.bold("metrics"));
+    let width = metrics
+        .iter()
+        .map(|metric| metric.key.len())
+        .max()
+        .unwrap_or(0);
+    for metric in metrics {
+        let symbol = metric
+            .symbol
+            .as_ref()
+            .map_or_else(|| "(check)".to_owned(), ToString::to_string);
+        let _ = writeln!(
+            out,
+            "    {symbol:<19}  {:<width$}  {}",
+            metric.key, metric.value
+        );
+    }
 }
 
 fn findings_block(envelope: &Envelope, paint: &Paint) -> String {
@@ -370,22 +509,27 @@ fn findings_block(envelope: &Envelope, paint: &Paint) -> String {
         if !out.is_empty() {
             out.push('\n');
         }
-        let heading = format!("{} ({})", name(severity), group.len());
-        let _ = writeln!(out, "{}", paint.severity(severity, &heading));
-        let mut checks: Vec<&str> = Vec::new();
-        for finding in &group {
-            if !checks.contains(&finding.check.as_str()) {
-                checks.push(finding.check.as_str());
-            }
-        }
-        for check in checks {
-            let _ = writeln!(out, "  {}", paint.bold(check));
-            for finding in group.iter().filter(|f| f.check.as_str() == check) {
-                finding_lines(&mut out, finding, paint);
-            }
-        }
+        severity_group(&mut out, severity, &group, paint);
     }
     out
+}
+
+/// The findings of one severity, grouped by check in envelope order.
+fn severity_group(out: &mut String, severity: Severity, group: &[&Finding], paint: &Paint) {
+    let heading = format!("{} ({})", name(severity), group.len());
+    let _ = writeln!(out, "{}", paint.severity(severity, &heading));
+    let mut checks: Vec<&str> = Vec::new();
+    for finding in group {
+        if !checks.contains(&finding.check.as_str()) {
+            checks.push(finding.check.as_str());
+        }
+    }
+    for check in checks {
+        let _ = writeln!(out, "  {}", paint.bold(check));
+        for finding in group.iter().filter(|f| f.check.as_str() == check) {
+            finding_lines(out, finding, paint);
+        }
+    }
 }
 
 fn finding_lines(out: &mut String, finding: &Finding, paint: &Paint) {
@@ -495,45 +639,75 @@ fn hints(out: &mut String, map: &Map<String, Value>, indent: usize) {
 fn run_block(envelope: &Envelope, paint: &Paint) -> String {
     let run: &RunInfo = &envelope.run;
     let mut out = String::new();
-    labeled(
-        &mut out,
-        "run",
-        &format!(
-            "{} · started {} · {} ms · seed {}",
-            run.id, run.started, run.duration_ms, run.seed
+    let lines = [
+        (
+            "run",
+            Some(format!(
+                "{} · started {} · {} ms · seed {}",
+                run.id, run.started, run.duration_ms, run.seed
+            )),
         ),
-        paint,
-    );
-    if let Some(git) = &run.git {
-        let mut facts = vec![git.sha.clone()];
-        if let Some(branch) = &git.branch {
-            facts.push(format!("branch {branch}"));
+        ("git", run.git.as_ref().map(git_line)),
+        ("scope", run.scope.as_ref().map(scope_line)),
+        ("depth", effort_line(run)),
+        (
+            "baseline",
+            run.baseline
+                .as_ref()
+                .map(|baseline| format!("{} ({})", baseline.name, baseline.id)),
+        ),
+        ("toolchain", toolchain_line(run)),
+        ("config", config_line(run)),
+        (
+            "cupel",
+            Some(format!(
+                "{} · {}",
+                envelope.cupel.version, envelope.cupel.schema
+            )),
+        ),
+    ];
+    for (label, line) in lines {
+        if let Some(line) = line {
+            labeled(&mut out, label, &line, paint);
         }
-        if let Some(base) = &git.base {
-            facts.push(format!("base {base}"));
-        }
-        facts.push(if git.dirty { "dirty" } else { "clean" }.to_owned());
-        labeled(&mut out, "git", &facts.join(" · "), paint);
     }
-    if let Some(scope) = &run.scope {
-        let mut facts = vec![
-            name(scope.mode),
-            format!("{} files", scope.files),
-            format!("{} symbols", scope.symbols),
-        ];
-        if !scope.roots.is_empty() {
-            facts.push(format!("roots {}", scope.roots.join(", ")));
-        }
-        if !scope.languages.is_empty() {
-            let languages: Vec<&str> = scope
-                .languages
-                .iter()
-                .map(cupel_core::LangId::as_str)
-                .collect();
-            facts.push(format!("languages {}", languages.join(", ")));
-        }
-        labeled(&mut out, "scope", &facts.join(" · "), paint);
+    out
+}
+
+fn git_line(git: &GitInfo) -> String {
+    let mut facts = vec![git.sha.clone()];
+    if let Some(branch) = &git.branch {
+        facts.push(format!("branch {branch}"));
     }
+    if let Some(base) = &git.base {
+        facts.push(format!("base {base}"));
+    }
+    facts.push(if git.dirty { "dirty" } else { "clean" }.to_owned());
+    facts.join(" · ")
+}
+
+fn scope_line(scope: &ScopeInfo) -> String {
+    let mut facts = vec![
+        name(scope.mode),
+        format!("{} files", scope.files),
+        format!("{} symbols", scope.symbols),
+    ];
+    if !scope.roots.is_empty() {
+        facts.push(format!("roots {}", scope.roots.join(", ")));
+    }
+    if !scope.languages.is_empty() {
+        let languages: Vec<&str> = scope
+            .languages
+            .iter()
+            .map(cupel_core::LangId::as_str)
+            .collect();
+        facts.push(format!("languages {}", languages.join(", ")));
+    }
+    facts.join(" · ")
+}
+
+/// The depth and budget, when either is known.
+fn effort_line(run: &RunInfo) -> Option<String> {
     let effort = [
         run.depth.map(name),
         run.budget_ms.map(|ms| format!("budget {ms} ms")),
@@ -541,41 +715,30 @@ fn run_block(envelope: &Envelope, paint: &Paint) -> String {
     .into_iter()
     .flatten()
     .collect::<Vec<_>>();
-    if !effort.is_empty() {
-        labeled(&mut out, "depth", &effort.join(" · "), paint);
+    (!effort.is_empty()).then(|| effort.join(" · "))
+}
+
+fn toolchain_line(run: &RunInfo) -> Option<String> {
+    let tools: Vec<String> = run
+        .toolchain
+        .0
+        .iter()
+        .map(|(tool, version)| format!("{tool} {version}"))
+        .collect();
+    (!tools.is_empty()).then(|| tools.join(" · "))
+}
+
+/// The configuration's sources, then each effective setting on its own line.
+fn config_line(run: &RunInfo) -> Option<String> {
+    if run.config.sources.is_empty() && run.config.effective.is_empty() {
+        return None;
     }
-    if let Some(baseline) = &run.baseline {
-        labeled(
-            &mut out,
-            "baseline",
-            &format!("{} ({})", baseline.name, baseline.id),
-            paint,
-        );
+    let sources: Vec<String> = run.config.sources.iter().map(|s| name(*s)).collect();
+    let mut config = format!("from {}", sources.join(", "));
+    for (key, value) in run.config.effective.iter().filter(|(_, v)| present(v)) {
+        let _ = write!(config, "\n{key}: {}", scalar(value));
     }
-    if !run.toolchain.0.is_empty() {
-        let tools: Vec<String> = run
-            .toolchain
-            .0
-            .iter()
-            .map(|(tool, version)| format!("{tool} {version}"))
-            .collect();
-        labeled(&mut out, "toolchain", &tools.join(" · "), paint);
-    }
-    if !run.config.sources.is_empty() || !run.config.effective.is_empty() {
-        let sources: Vec<String> = run.config.sources.iter().map(|s| name(*s)).collect();
-        let mut config = format!("from {}", sources.join(", "));
-        for (key, value) in run.config.effective.iter().filter(|(_, v)| present(v)) {
-            let _ = write!(config, "\n{key}: {}", scalar(value));
-        }
-        labeled(&mut out, "config", &config, paint);
-    }
-    labeled(
-        &mut out,
-        "cupel",
-        &format!("{} · {}", envelope.cupel.version, envelope.cupel.schema),
-        paint,
-    );
-    out
+    Some(config)
 }
 
 fn next_actions_block(actions: &[NextAction], paint: &Paint) -> String {

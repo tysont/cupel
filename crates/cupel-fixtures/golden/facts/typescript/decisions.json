@@ -36,39 +36,610 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
-          "kind": "branch",
-          "nesting": 0
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 50
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 2,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 3,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 4,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 31
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 47
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 58
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 124
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.ts",
+        "line": 131
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.ts",
+        "line": 135
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 141
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "boolean-op",
-          "nesting": 0
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
-          "cyclomatic": 0,
-          "kind": "early-return",
-          "nesting": 1
-        },
-        {
-          "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.ts",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.ts",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.ts",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/dead_export.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_helpers.ts",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "ternary",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -81,21 +652,27 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 2
+          "nesting": 2,
+          "table": false
         }
       ],
       "symbol": {
@@ -108,27 +685,35 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 0,
+          "continues": true,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -141,27 +726,35 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "catch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -190,9 +783,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "ternary",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -207,6 +802,96 @@
         "col": 10,
         "file": "src/legacy.ts",
         "line": 2
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 22,
+        "file": "src/math.quality.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 33,
+        "file": "src/math.quality.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 27,
+        "file": "src/math.quality.test.ts",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "src/math.quality.test.ts",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 34,
+        "file": "src/math.quality.test.ts",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 39,
+        "file": "src/math.quality.test.ts",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 38,
+        "file": "src/math.quality.test.ts",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 31,
+        "file": "src/math.quality.test.ts",
+        "line": 40
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 32,
+        "file": "src/math.quality.test.ts",
+        "line": 47
       }
     },
     {
@@ -285,9 +970,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -308,21 +995,27 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "boolean-op",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -335,15 +1028,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -356,9 +1053,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "ternary",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -483,15 +1182,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -520,9 +1223,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "ternary",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {

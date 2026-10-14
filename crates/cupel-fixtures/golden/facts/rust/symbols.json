@@ -13,6 +13,7 @@
       "lang": "rust",
       "name": "square",
       "namespace": "",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -34,6 +35,7 @@
       "lang": "rust",
       "name": "new",
       "namespace": "account::Account",
+      "parameters": 1,
       "span": {
         "col": 5,
         "end_col": 6,
@@ -55,6 +57,7 @@
       "lang": "rust",
       "name": "deposit",
       "namespace": "account::Account",
+      "parameters": 1,
       "span": {
         "col": 5,
         "end_col": 6,
@@ -76,6 +79,7 @@
       "lang": "rust",
       "name": "statement",
       "namespace": "account::Account",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 6,
@@ -97,6 +101,7 @@
       "lang": "rust",
       "name": "line",
       "namespace": "account::Account::statement",
+      "parameters": 2,
       "span": {
         "col": 9,
         "end_col": 10,
@@ -118,6 +123,7 @@
       "lang": "rust",
       "name": "header",
       "namespace": "account::Account::statement",
+      "parameters": 1,
       "span": {
         "col": 9,
         "end_col": 66,
@@ -139,6 +145,7 @@
       "lang": "rust",
       "name": "fmt",
       "namespace": "account::Account",
+      "parameters": 1,
       "span": {
         "col": 5,
         "end_col": 6,
@@ -160,6 +167,7 @@
       "lang": "rust",
       "name": "is_clean",
       "namespace": "account::Audited",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 6,
@@ -167,6 +175,358 @@
         "line": 43
       },
       "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 75,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 8
+      },
+      "display": "clones_settlement::settle_invoices",
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "settle_invoices",
+      "namespace": "clones_settlement",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 81,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 21
+      },
+      "display": "clones_settlement::reconcile_payments",
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "reconcile_payments",
+      "namespace": "clones_settlement",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 86,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      },
+      "display": "clones_settlement::order_lines",
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "order_lines",
+      "namespace": "clones_settlement",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 87,
+        "end_col": 2,
+        "end_line": 65,
+        "line": 50
+      },
+      "display": "clones_settlement::refund_lines",
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "refund_lines",
+      "namespace": "clones_settlement",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 65,
+        "line": 50
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 55,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 5
+      },
+      "display": "complexity::label",
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "label",
+      "namespace": "complexity",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 56,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      },
+      "display": "complexity::settle",
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "settle",
+      "namespace": "complexity",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 13,
+        "end_col": 2,
+        "end_line": 60,
+        "line": 58
+      },
+      "display": "complexity::open_account",
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "open_account",
+      "namespace": "complexity",
+      "parameters": 6,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 60,
+        "line": 51
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 50,
+        "end_col": 2,
+        "end_line": 127,
+        "line": 63
+      },
+      "display": "complexity::statement_template",
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "statement_template",
+      "namespace": "complexity",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 127,
+        "line": 63
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 132,
+        "line": 130
+      },
+      "display": "complexity::net",
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net",
+      "namespace": "complexity",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 132,
+        "line": 130
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 6,
+        "end_line": 143,
+        "line": 141
+      },
+      "display": "complexity::Statement::line",
+      "file": "src/complexity.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "line",
+      "namespace": "complexity::Statement",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 143,
+        "line": 141
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 163,
+        "line": 147
+      },
+      "display": "complexity::month",
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "month",
+      "namespace": "complexity",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 163,
+        "line": 147
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 49,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 7
+      },
+      "display": "crap_scores::overdue",
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "overdue",
+      "namespace": "crap_scores",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 55,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 22
+      },
+      "display": "crap_scores::clamp",
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "clamp",
+      "namespace": "crap_scores",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 35,
+        "line": 33
+      },
+      "display": "crap_scores::to_cents",
+      "file": "src/crap_scores.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "to_cents",
+      "namespace": "crap_scores",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 35,
+        "line": 33
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "dead_export::unused_total",
+      "file": "src/dead_export.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "unused_total",
+      "namespace": "dead_export",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "dead_helpers::forgotten_rate",
+      "file": "src/dead_helpers.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "forgotten_rate",
+      "namespace": "dead_helpers",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "private"
     },
     {
       "body": {
@@ -181,6 +541,7 @@
       "lang": "rust",
       "name": "classify",
       "namespace": "decide",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -202,6 +563,7 @@
       "lang": "rust",
       "name": "first_overdraft",
       "namespace": "decide",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -223,6 +585,7 @@
       "lang": "rust",
       "name": "parse_cents",
       "namespace": "decide",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -244,11 +607,56 @@
       "lang": "rust",
       "name": "describe",
       "namespace": "decide",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
         "end_line": 31,
         "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "deps_tree::leaf::cap",
+      "file": "src/deps_tree/leaf.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "cap",
+      "namespace": "deps_tree::leaf",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "deps_tree::capped",
+      "file": "src/deps_tree/mod.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "capped",
+      "namespace": "deps_tree",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
       },
       "visibility": "public"
     },
@@ -265,6 +673,7 @@
       "lang": "rust",
       "name": "balance",
       "namespace": "",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -286,6 +695,7 @@
       "lang": "rust",
       "name": "audit_limit",
       "namespace": "",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -307,6 +717,7 @@
       "lang": "rust",
       "name": "scale",
       "namespace": "",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -328,6 +739,7 @@
       "lang": "rust",
       "name": "main",
       "namespace": "",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -349,6 +761,7 @@
       "lang": "rust",
       "name": "ledger_version",
       "namespace": "",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -370,6 +783,7 @@
       "lang": "rust",
       "name": "discounted",
       "namespace": "pricing",
+      "parameters": 3,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -391,6 +805,7 @@
       "lang": "rust",
       "name": "tally",
       "namespace": "pricing",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -412,6 +827,7 @@
       "lang": "rust",
       "name": "log_total",
       "namespace": "pricing",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -433,6 +849,7 @@
       "lang": "rust",
       "name": "entries",
       "namespace": "pricing::tests",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 6,
@@ -454,6 +871,7 @@
       "lang": "rust",
       "name": "tally_reports_overdraft",
       "namespace": "pricing::tests",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 6,
@@ -475,6 +893,7 @@
       "lang": "rust",
       "name": "discount_snapshot",
       "namespace": "pricing::tests",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 6,
@@ -496,6 +915,7 @@
       "lang": "rust",
       "name": "the_log_is_written_once",
       "namespace": "pricing::tests",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 6,
@@ -517,6 +937,7 @@
       "lang": "rust",
       "name": "render",
       "namespace": "report::format",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -538,6 +959,7 @@
       "lang": "rust",
       "name": "summary",
       "namespace": "report",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -559,6 +981,7 @@
       "lang": "rust",
       "name": "floor_area",
       "namespace": "report",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -580,6 +1003,7 @@
       "lang": "rust",
       "name": "net_total",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -601,6 +1025,7 @@
       "lang": "rust",
       "name": "sum_after_charge",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -622,6 +1047,7 @@
       "lang": "rust",
       "name": "net_total_floor",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -643,6 +1069,7 @@
       "lang": "rust",
       "name": "net_total_laid_out",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -664,6 +1091,7 @@
       "lang": "rust",
       "name": "net_total_plus",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -685,6 +1113,7 @@
       "lang": "rust",
       "name": "net_total_capped",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -706,6 +1135,7 @@
       "lang": "rust",
       "name": "net_total_product",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -727,6 +1157,7 @@
       "lang": "rust",
       "name": "deposit_adds_to_the_balance",
       "namespace": "tests::ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -748,6 +1179,7 @@
       "lang": "rust",
       "name": "members_get_a_discount",
       "namespace": "tests::ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -769,6 +1201,7 @@
       "lang": "rust",
       "name": "statements_mention_the_balance",
       "namespace": "tests::ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -790,6 +1223,7 @@
       "lang": "rust",
       "name": "parsing_garbage_fails",
       "namespace": "tests::ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -811,6 +1245,7 @@
       "lang": "rust",
       "name": "huge_deposits_overflow",
       "namespace": "tests::ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -832,6 +1267,7 @@
       "lang": "rust",
       "name": "statement_is_mailed",
       "namespace": "tests::ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -853,11 +1289,342 @@
       "lang": "rust",
       "name": "opening_an_account_does_not_panic",
       "namespace": "tests::ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 2,
         "end_line": 44,
         "line": 42
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 7
+      },
+      "display": "tests::quality_signals::members_pay_exactly_the_discounted_price",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "members_pay_exactly_the_discounted_price",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 7
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "display": "tests::quality_signals::overflowing_balances_panic",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "overflowing_balances_panic",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "tests::quality_signals::statements_are_not_empty",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "statements_are_not_empty",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 23,
+        "end_col": 2,
+        "end_line": 25,
+        "line": 23
+      },
+      "display": "tests::quality_signals::classifying_runs",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "classifying_runs",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 25,
+        "line": 23
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 28
+      },
+      "display": "tests::quality_signals::tallies_are_logged_and_mailed",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "tallies_are_logged_and_mailed",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 28
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 40,
+        "line": 36
+      },
+      "display": "tests::quality_signals::every_entry_counts_toward_the_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "every_entry_counts_toward_the_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 40,
+        "line": 36
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 2,
+        "end_line": 47,
+        "line": 43
+      },
+      "display": "tests::quality_signals::computed_entries_count_toward_the_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "computed_entries_count_toward_the_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 47,
+        "line": 43
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 55,
+        "line": 50
+      },
+      "display": "tests::quality_signals::display_shows_owner_and_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "display_shows_owner_and_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 55,
+        "line": 50
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 64,
+        "line": 58
+      },
+      "display": "tests::quality_signals::statements_show_the_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "statements_show_the_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 64,
+        "line": 58
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 50,
+        "end_col": 2,
+        "end_line": 69,
+        "line": 67
+      },
+      "display": "tests::quality_signals::a_comparison_inside_assert_pins_the_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "a_comparison_inside_assert_pins_the_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 69,
+        "line": 67
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 2,
+        "end_line": 73,
+        "line": 71
+      },
+      "display": "tests::quality_signals::assert_balanced",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "assert_balanced",
+      "namespace": "tests::quality_signals",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 73,
+        "line": 71
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 42,
+        "end_col": 2,
+        "end_line": 78,
+        "line": 76
+      },
+      "display": "tests::quality_signals::an_assertion_helper_is_an_assertion",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "an_assertion_helper_is_an_assertion",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 78,
+        "line": 76
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 51,
+        "end_col": 2,
+        "end_line": 87,
+        "line": 83
+      },
+      "display": "tests::quality_signals::every_listed_entry_counts_toward_the_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "every_listed_entry_counts_toward_the_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 87,
+        "line": 83
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 73,
+        "end_col": 2,
+        "end_line": 92,
+        "line": 89
+      },
+      "display": "tests::quality_signals::assert_balance_of",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "assert_balance_of",
+      "namespace": "tests::quality_signals",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 92,
+        "line": 89
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 66,
+        "end_col": 2,
+        "end_line": 97,
+        "line": 95
+      },
+      "display": "tests::quality_signals::an_assertion_helper_called_with_a_turbofish_is_an_assertion",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "an_assertion_helper_called_with_a_turbofish_is_an_assertion",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 97,
+        "line": 95
       },
       "visibility": "private"
     }

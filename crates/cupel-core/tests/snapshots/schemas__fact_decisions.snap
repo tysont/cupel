@@ -19,7 +19,7 @@ expression: pretty(&schema)
   "required": [
     "symbols"
   ],
-  "x-cupel-fact-version": 1,
+  "x-cupel-fact-version": 2,
   "$defs": {
     "Decision": {
       "type": "object",
@@ -29,6 +29,10 @@ expression: pretty(&schema)
           "type": "integer",
           "format": "uint32",
           "minimum": 0
+        },
+        "continues": {
+          "description": "A `case` arm after the first of its match or switch: the same multiway decision, which\nmodified cyclomatic complexity counts once (ADR-072). Always false for other kinds.",
+          "type": "boolean"
         },
         "cyclomatic": {
           "description": "Weight toward cyclomatic complexity.",
@@ -44,13 +48,19 @@ expression: pretty(&schema)
           "type": "integer",
           "format": "uint32",
           "minimum": 0
+        },
+        "table": {
+          "description": "A loop over a table of cases written in place: a literal array, vector, slice, list, or\ntuple, iterated directly or through a local bound to one in the same body (ADR-069).\nAlways false for other kinds.",
+          "type": "boolean"
         }
       },
       "required": [
         "cognitive",
+        "continues",
         "cyclomatic",
         "kind",
-        "nesting"
+        "nesting",
+        "table"
       ]
     },
     "DecisionKind": {

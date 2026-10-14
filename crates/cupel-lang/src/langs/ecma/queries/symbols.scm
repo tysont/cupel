@@ -145,3 +145,8 @@
 ; Classes namespace their members.
 (class_declaration
   name: (_) @scope.name) @scope
+
+; Parameters: an arrow function's single unparenthesized parameter. Parenthesized parameter
+; lists differ between the grammars, so each language's overlay captures those.
+(arrow_function
+  parameter: (identifier) @symbol.parameter)

@@ -6,6 +6,7 @@
   },
   "description": null,
   "exit_code": 2,
+  "explanation": null,
   "findings": [
     {
       "action": {
@@ -49,6 +50,7 @@
   ],
   "next_actions": [],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

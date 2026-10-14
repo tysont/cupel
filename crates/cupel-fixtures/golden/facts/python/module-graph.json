@@ -3,6 +3,62 @@
     {
       "edges": [
         {
+          "edge_kind": "import",
+          "from": "src/deps_cycle/alpha.py",
+          "line": 1,
+          "relative": true,
+          "specifier": ".beta.BETA",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/beta.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/deps_cycle/beta.py",
+          "line": 1,
+          "relative": true,
+          "specifier": ".alpha",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/alpha.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/deps_layers/domain/order.py",
+          "line": 1,
+          "relative": true,
+          "specifier": "..infra.store.Store",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/infra/store.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/deps_layers/port.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "typing.Protocol",
+          "target": {
+            "kind": "external",
+            "package": "typing"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/deps_layers/port.py",
+          "line": 3,
+          "relative": true,
+          "specifier": ".domain.order.Order",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/domain/order.py"
+          }
+        },
+        {
+          "edge_kind": "re-export",
           "from": "src/ledger/__init__.py",
           "line": 5,
           "relative": true,
@@ -13,6 +69,7 @@
           }
         },
         {
+          "edge_kind": "re-export",
           "from": "src/ledger/__init__.py",
           "line": 5,
           "relative": true,
@@ -23,6 +80,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/__init__.py",
           "line": 6,
           "relative": true,
@@ -32,6 +90,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/account.py",
           "line": 1,
           "relative": false,
@@ -42,6 +101,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/account.py",
           "line": 3,
           "relative": false,
@@ -52,6 +112,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/cli.py",
           "line": 1,
           "relative": false,
@@ -62,6 +123,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/cli.py",
           "line": 3,
           "relative": false,
@@ -72,6 +134,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/report/__init__.py",
           "line": 1,
           "relative": false,
@@ -82,6 +145,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/report/__init__.py",
           "line": 3,
           "relative": true,
@@ -92,6 +156,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/report/format.py",
           "line": 1,
           "relative": false,
@@ -102,6 +167,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/conftest.py",
           "line": 1,
           "relative": false,
@@ -112,6 +178,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/conftest.py",
           "line": 3,
           "relative": false,
@@ -122,6 +189,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 1,
           "relative": false,
@@ -132,6 +200,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 3,
           "relative": false,
@@ -142,6 +211,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 5,
           "relative": false,
@@ -152,6 +222,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 6,
           "relative": false,
@@ -162,6 +233,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 6,
           "relative": false,
@@ -172,6 +244,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 7,
           "relative": false,
@@ -182,6 +255,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 7,
           "relative": false,
@@ -192,6 +266,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_pricing.py",
           "line": 1,
           "relative": false,
@@ -202,6 +277,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_pricing.py",
           "line": 2,
           "relative": false,
@@ -212,6 +288,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_pricing.py",
           "line": 4,
           "relative": false,
@@ -222,8 +299,86 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_pricing.py",
           "line": 4,
+          "relative": false,
+          "specifier": "ledger.pricing.tally",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_quality_signals.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "pytest",
+          "target": {
+            "kind": "external",
+            "package": "pytest"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_quality_signals.py",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.Account",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_quality_signals.py",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.balance",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_quality_signals.py",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.decide.classify",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_quality_signals.py",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.decide.require_positive",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_quality_signals.py",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.pricing.discounted",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_quality_signals.py",
+          "line": 5,
           "relative": false,
           "specifier": "ledger.pricing.tally",
           "target": {

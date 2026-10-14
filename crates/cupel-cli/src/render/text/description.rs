@@ -1,12 +1,12 @@
-// ABOUTME: Text rendering of `describe` payloads: the CLI, one command with its sub-verbs, a schema,
-// ABOUTME: or all of them, laid out as readable sections rather than JSON (ADR-019).
+// ABOUTME: Text rendering of `describe` payloads: the CLI, commands, schemas, languages, facts, checks,
+// ABOUTME: finding kinds, and the matrix, laid out as readable sections rather than JSON (ADR-019).
 use std::fmt::Write as _;
 
 use cupel_core::{
-    AllDescription, ArgDescription, CliDescription, CommandDescription, Description,
-    FactDescription, LanguageDescription, LanguagesDescription, MatrixDescription,
-    ProducerDescription, SchemaDescription, Stability, SupportDescription, ToolDescription,
-    ToolchainDescription, ValueType,
+    AllDescription, ArgDescription, CheckDescription, CliDescription, CommandDescription,
+    Description, FactDescription, FindingDescription, LanguageDescription, LanguagesDescription,
+    MatrixDescription, ProducerDescription, SchemaDescription, Stability, SupportDescription,
+    ToolDescription, ToolchainDescription, ValueType,
 };
 
 use super::{Paint, continued, name};
@@ -28,7 +28,86 @@ pub fn render(description: &Description, paint: &Paint) -> String {
         Description::Languages(languages) => render_languages(languages, paint),
         Description::Fact(fact) => render_fact(fact, paint),
         Description::Matrix(matrix) => render_matrix(matrix, paint),
+        Description::Check(check) => render_check(check, paint),
+        Description::Finding(finding) => render_finding(finding, paint),
     }
+}
+
+fn render_check(check: &CheckDescription, paint: &Paint) -> String {
+    let manifest = &check.manifest;
+    let mut out = format!(
+        "{} · tier {} · cost {} · version {} · {}\n  {}\n",
+        paint.bold(&format!("check {}", manifest.id)),
+        manifest.tier.value(),
+        name(manifest.cost),
+        manifest.version,
+        name(manifest.stability),
+        manifest.summary
+    );
+    let kinds = |list: &[cupel_core::FactKind]| {
+        let names: Vec<String> = list.iter().map(ToString::to_string).collect();
+        none_if_empty(&names.join(", "))
+    };
+    let facts = vec![
+        ("needs".to_owned(), kinds(&manifest.needs)),
+        ("wants".to_owned(), kinds(&manifest.wants)),
+    ];
+    let findings = manifest
+        .findings
+        .iter()
+        .map(|f| {
+            (
+                f.kind.clone(),
+                format!("{} · {}", name(f.action), f.summary),
+            )
+        })
+        .collect();
+    let metrics = manifest
+        .metrics
+        .iter()
+        .map(|m| (m.name.clone(), format!("{} · {}", name(m.per), m.summary)))
+        .collect();
+    let languages = check
+        .languages
+        .iter()
+        .map(|l| (l.lang.as_str().to_owned(), support(&l.support)))
+        .collect();
+    for (heading, rows) in [
+        ("facts", facts),
+        ("findings", findings),
+        ("metrics", metrics),
+        ("languages", languages),
+    ] {
+        section(&mut out, heading, &rows, paint);
+    }
+    out
+}
+
+/// A blank line, a bold heading, and `rows` as aligned `key  value` lines.
+fn section(out: &mut String, heading: &str, rows: &[(String, String)], paint: &Paint) {
+    let _ = writeln!(out, "\n{}", paint.bold(heading));
+    let width = column(rows.iter().map(|(key, _)| key.len()));
+    for (key, value) in rows {
+        let _ = writeln!(out, "  {key:<width$}  {value}");
+    }
+}
+
+fn render_finding(finding: &FindingDescription, paint: &Paint) -> String {
+    let body = serde_json::to_string_pretty(&finding.evidence).unwrap_or_default();
+    format!(
+        "{} · from {} · action {} · {}
+  {}
+
+{}
+{body}
+",
+        paint.bold(&format!("finding {}", finding.kind)),
+        finding.check,
+        name(finding.action),
+        name(finding.stability),
+        finding.summary,
+        paint.bold("evidence")
+    )
 }
 
 fn render_languages(languages: &LanguagesDescription, paint: &Paint) -> String {
@@ -588,19 +667,37 @@ mod tests {
             schemas: vec![tiny_schema(&serde_json::json!({}))],
         };
         let out = plain(&Description::All(all));
-        assert!(out.starts_with(&plain(&Description::Cli(cli()))), "{out}");
-        for command in registry::commands() {
-            let mut expected = String::new();
-            render_command(
-                &mut expected,
-                &command,
-                0,
-                Some(Stability::Experimental),
-                &Paint { color: false },
-            );
-            assert!(out.contains(&expected), "{}", command.name);
-        }
-        assert!(out.ends_with("schema tiny · https://cupel.dev/schema/v1/tiny.json\n{}\n"));
+        // Each block's unindented lines, up to the first ` · `.
+        let headings: Vec<&str> = out
+            .lines()
+            .filter(|line| !line.is_empty() && !line.starts_with(' '))
+            .map(|line| line.split(" · ").next().unwrap_or(line))
+            .collect();
+        assert_eq!(
+            headings,
+            [
+                "cupel [version]",
+                "verbs",
+                "global flags",
+                "flags without a verb",
+                "exit codes",
+                "schemas",
+                "configuration precedence",
+                "cupel init",
+                "cupel doctor",
+                "cupel describe",
+                "cupel check",
+                "cupel survey",
+                "cupel explain",
+                "cupel baseline",
+                "cupel oracle",
+                "cupel tests",
+                "cupel suppress",
+                "cupel serve",
+                "schema tiny",
+                "{}"
+            ]
+        );
     }
 
     #[test]

@@ -31,62 +31,80 @@ fn langs_dir() -> PathBuf {
 #[test]
 fn every_query_compiles_against_every_grammar_of_its_language_with_contract_captures() {
     let registry = LanguageRegistry::builtin();
-    for (id, paths) in GRAMMAR_PATHS {
-        let language = registry.get(&id.into()).unwrap();
-        for file in QueryFile::ALL {
-            if language.spec().source(file).is_none() {
-                continue;
-            }
-            for path in paths {
-                let grammar = language.grammar(Path::new(path));
-                let query = language
-                    .spec()
-                    .query(file, &grammar)
-                    .unwrap_or_else(|error| panic!("{id} {file} ({path}): {error}"));
-                let names: Vec<&str> = query.capture_names().to_vec();
-                if let Err(problems) = contract(file).check(&names) {
-                    panic!("{id} {file}: {}", problems.join("; "));
-                }
-            }
-        }
-    }
+    let problems: Vec<String> = GRAMMAR_PATHS
+        .iter()
+        .flat_map(|(id, paths)| {
+            let language = registry.get(&(*id).into()).unwrap();
+            QueryFile::ALL
+                .into_iter()
+                .filter(|file| language.spec().source(*file).is_some())
+                .flat_map(move |file| paths.iter().map(move |path| (id, file, path)))
+                .filter_map(|(id, file, path)| {
+                    let grammar = language.grammar(Path::new(path));
+                    language
+                        .spec()
+                        .query(file, &grammar)
+                        .map_err(|error| format!("{id} {file} ({path}): {error}"))
+                        .and_then(|query| {
+                            contract(file)
+                                .check(query.capture_names())
+                                .map_err(|problems| format!("{id} {file}: {}", problems.join("; ")))
+                        })
+                        .err()
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect();
+    assert_eq!(problems, Vec::<String>::new());
 }
 
 #[test]
 fn every_scm_file_on_disk_is_embedded_in_the_specs_that_use_its_directory() {
-    let registry = LanguageRegistry::builtin();
-    for (dir, ids) in QUERY_DIRS {
-        let Ok(entries) = fs::read_dir(langs_dir().join(dir)) else {
-            continue;
-        };
-        for entry in entries {
-            let path = entry.unwrap().path();
-            if path.extension().is_none_or(|ext| ext != "scm") {
-                continue;
-            }
-            let name = path.file_name().unwrap().to_str().unwrap();
-            let file = QueryFile::from_file_name(name)
-                .unwrap_or_else(|| panic!("{dir}/{name} is not a known query file"));
-            let text = fs::read_to_string(&path).unwrap();
-            for id in ids {
-                let spec = registry.get(&(*id).into()).unwrap().spec();
-                let embedded = spec.source(file).unwrap_or_default();
-                assert!(
-                    embedded.contains(text.trim()),
-                    "{dir}/{name} is not embedded in the {id} spec"
-                );
-            }
-        }
-    }
+    let registry = &LanguageRegistry::builtin();
+    let missing: Vec<String> = QUERY_DIRS
+        .iter()
+        .flat_map(|(dir, ids)| {
+            query_files(dir).into_iter().flat_map(move |path| {
+                let name = path.file_name().unwrap().to_str().unwrap().to_owned();
+                let file = QueryFile::from_file_name(&name)
+                    .unwrap_or_else(|| panic!("{dir}/{name} is not a known query file"));
+                let text = fs::read_to_string(&path).unwrap();
+                ids.iter()
+                    .filter(move |id| {
+                        let spec = registry.get(&(**id).into()).unwrap().spec();
+                        !spec.source(file).unwrap_or_default().contains(text.trim())
+                    })
+                    .map(move |id| format!("{dir}/{name} is not embedded in the {id} spec"))
+            })
+        })
+        .collect();
+    assert_eq!(missing, Vec::<String>::new());
+}
+
+/// The `.scm` files directly in the query directory `dir`; none when it does not exist.
+fn query_files(dir: &str) -> Vec<PathBuf> {
+    fs::read_dir(langs_dir().join(dir))
+        .map(|entries| {
+            entries
+                .map(|entry| entry.unwrap().path())
+                .filter(|path| path.extension().is_some_and(|ext| ext == "scm"))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 #[test]
 fn every_language_has_tables_that_parse() {
     let registry = LanguageRegistry::builtin();
-    for language in registry.iter() {
-        // Reading the tables forces the one-time parse; a malformed file panics here.
-        let _ = language.spec().tables();
-    }
+    // Reading the tables forces the one-time parse; a malformed file panics here.
+    let frameworks: Vec<&str> = registry
+        .iter()
+        .map(|language| language.spec().tables().tests.framework.as_str())
+        .collect();
+    assert_eq!(
+        frameworks,
+        ["go-test", "jest", "pytest", "rust-test", "jest"]
+    );
 }
 
 #[test]
@@ -94,17 +112,21 @@ fn the_contract_rejects_unknown_and_missing_captures() {
     let problems = contract(QueryFile::Symbols)
         .check(&["symbol.function", "symbol.nmae", "_ignored"])
         .unwrap_err();
-    assert!(
-        problems.iter().any(|p| p.contains("symbol.nmae")),
-        "{problems:?}"
+    assert_eq!(
+        problems,
+        [
+            "@symbol.nmae is not a capture symbols.scm may use",
+            "symbols.scm must capture @symbol.name",
+            "symbols.scm must capture @symbol.parameter",
+        ]
     );
-    assert!(
-        problems.iter().any(|p| p.contains("symbol.name")),
-        "{problems:?}"
-    );
-    assert!(
-        contract(QueryFile::Symbols)
-            .check(&["symbol.method", "symbol.name", "_t"])
-            .is_ok()
+    assert_eq!(
+        contract(QueryFile::Symbols).check(&[
+            "symbol.method",
+            "symbol.name",
+            "symbol.parameter",
+            "_t"
+        ]),
+        Ok(())
     );
 }

@@ -11,6 +11,14 @@
     {
       "reason": "export",
       "symbol": {
+        "col": 5,
+        "file": "src/deps_layers/port.py",
+        "line": 7
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
         "col": 1,
         "file": "src/ledger/__init__.py",
         "line": 13
@@ -102,6 +110,142 @@
         "col": 1,
         "file": "src/ledger/cli.py",
         "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 15
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 41
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 30
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 41
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 45
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 111
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/complexity.py",
+        "line": 116
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/complexity.py",
+        "line": 116
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/complexity.py",
+        "line": 119
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 123
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 24
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 33
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_export.py",
+        "line": 1
       }
     },
     {
@@ -526,6 +670,150 @@
         "col": 5,
         "file": "tests/test_pricing.py",
         "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 12
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 12
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 17
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 17
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 21
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 25
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 25
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 32
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 32
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 42
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 42
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 49
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 49
       }
     }
   ]

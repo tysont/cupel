@@ -12,6 +12,13 @@ fn write(path: &Path, text: &str) {
     fs::write(path, text).unwrap();
 }
 
+/// A temporary directory holding a `cupel.toml` of `text`.
+fn with_config(text: &str) -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    write(&dir.path().join("cupel.toml"), text);
+    dir
+}
+
 fn request(root: &Path, config_path: Option<PathBuf>) -> ConfigRequest {
     ConfigRequest {
         root: root.to_owned(),
@@ -24,8 +31,7 @@ fn request(root: &Path, config_path: Option<PathBuf>) -> ConfigRequest {
 
 #[test]
 fn finds_the_file_in_the_root() {
-    let dir = tempfile::tempdir().unwrap();
-    write(&dir.path().join("cupel.toml"), "");
+    let dir = with_config("");
     assert_eq!(
         config::discover(dir.path(), None).unwrap(),
         Some(dir.path().join("cupel.toml"))
@@ -69,8 +75,7 @@ fn a_directory_named_cupel_toml_is_not_a_config_file() {
 
 #[test]
 fn explicit_path_wins_and_relative_paths_resolve_against_the_root() {
-    let dir = tempfile::tempdir().unwrap();
-    write(&dir.path().join("cupel.toml"), "");
+    let dir = with_config("");
     let custom = dir.path().join("conf/ci.toml");
     write(&custom, "");
 
@@ -86,8 +91,7 @@ fn explicit_path_wins_and_relative_paths_resolve_against_the_root() {
 
 #[test]
 fn missing_explicit_path_is_a_usage_error() {
-    let dir = tempfile::tempdir().unwrap();
-    write(&dir.path().join("cupel.toml"), "");
+    let dir = with_config("");
     let err = config::discover(dir.path(), Some(Path::new("nope.toml"))).unwrap_err();
     let missing = dir.path().join("nope.toml");
     assert_eq!(
@@ -107,8 +111,7 @@ fn missing_explicit_path_is_a_usage_error() {
 
 #[test]
 fn load_reads_and_resolves_the_discovered_file() {
-    let dir = tempfile::tempdir().unwrap();
-    write(&dir.path().join("cupel.toml"), "depth = \"deep\"\n");
+    let dir = with_config("depth = \"deep\"\n");
     let root = dir.path().join("src/module");
     fs::create_dir_all(&root).unwrap();
 

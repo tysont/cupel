@@ -1,6 +1,162 @@
 {
   "items": [
     {
+      "file": "clones_settlement.go",
+      "kind": "type",
+      "path": "ledger.Invoice",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 5
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.Label",
+      "signature": "(_, _ int64) string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 6
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.Settle",
+      "signature": "(_ [][]int64, _ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 35
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.OpenAccount",
+      "signature": "(_, _ string, _ int64, _ bool, _ uint32, _ uint64) string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 54,
+        "line": 52
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.StatementTemplate",
+      "signature": "() []string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 121,
+        "line": 57
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.Net",
+      "signature": "(_, _ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "type",
+      "path": "ledger.Statement",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 131,
+        "line": 129
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "method",
+      "path": "ledger.Statement.Line",
+      "signature": "(_ Statement) Line(_ int64) string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 136,
+        "line": 134
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.Month",
+      "signature": "(_ int) string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      }
+    },
+    {
+      "file": "crap_scores.go",
+      "kind": "function",
+      "path": "ledger.Overdue",
+      "signature": "(_ []int64, _ int64) int",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 8
+      }
+    },
+    {
+      "file": "crap_scores.go",
+      "kind": "function",
+      "path": "ledger.Clamp",
+      "signature": "(_, _, _ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 23
+      }
+    },
+    {
+      "file": "crap_scores.go",
+      "kind": "function",
+      "path": "ledger.ToCents",
+      "signature": "(_ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 34
+      }
+    },
+    {
+      "file": "dead_export/dead_export.go",
+      "kind": "function",
+      "path": "deadexport.UnusedTotal",
+      "signature": "(_ []int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      }
+    },
+    {
       "file": "decide.go",
       "kind": "variable",
       "path": "ledger.ErrEmpty",
@@ -10,6 +166,90 @@
         "end_col": 42,
         "end_line": 10,
         "line": 10
+      }
+    },
+    {
+      "file": "deps_cycle/alpha/alpha.go",
+      "kind": "constant",
+      "path": "alpha.Alpha",
+      "signature": "",
+      "span": {
+        "col": 7,
+        "end_col": 28,
+        "end_line": 5,
+        "line": 5
+      }
+    },
+    {
+      "file": "deps_cycle/beta/beta.go",
+      "kind": "constant",
+      "path": "beta.Beta",
+      "signature": "",
+      "span": {
+        "col": 7,
+        "end_col": 15,
+        "end_line": 5,
+        "line": 5
+      }
+    },
+    {
+      "file": "deps_cycle/beta/beta.go",
+      "kind": "variable",
+      "path": "beta.Both",
+      "signature": "",
+      "span": {
+        "col": 5,
+        "end_col": 36,
+        "end_line": 7,
+        "line": 7
+      }
+    },
+    {
+      "file": "deps_layers/domain/order.go",
+      "kind": "type",
+      "path": "domain.Order",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "deps_layers/infra/store.go",
+      "kind": "type",
+      "path": "infra.Store",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      }
+    },
+    {
+      "file": "deps_layers/port/port.go",
+      "kind": "interface",
+      "path": "port.Port",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "deps_layers/port/port.go",
+      "kind": "method",
+      "path": "port.Port.Place",
+      "signature": "(_ domain.Order)",
+      "span": {
+        "col": 2,
+        "end_col": 27,
+        "end_line": 6,
+        "line": 6
       }
     },
     {

@@ -3,6 +3,7 @@
     {
       "edges": [
         {
+          "edge_kind": "import",
           "from": "bin/cli.js",
           "line": 2,
           "relative": true,
@@ -13,6 +14,40 @@
           }
         },
         {
+          "edge_kind": "import",
+          "from": "src/deps_cycle/alpha.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "./beta.js",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/beta.js"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/deps_cycle/beta.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "./alpha.js",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/alpha.js"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/deps_layers/domain/order.js",
+          "line": 1,
+          "relative": true,
+          "specifier": "../infra/store.js",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/infra/store.js"
+          }
+        },
+        {
+          "edge_kind": "re-export",
           "from": "src/index.js",
           "line": 1,
           "relative": true,
@@ -23,6 +58,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 1,
           "relative": false,
@@ -33,6 +69,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 2,
           "relative": false,
@@ -43,6 +80,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 3,
           "relative": false,
@@ -53,6 +91,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 4,
           "relative": true,
@@ -63,6 +102,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 5,
           "relative": false,
@@ -73,6 +113,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 6,
           "relative": false,
@@ -83,6 +124,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 7,
           "relative": false,
@@ -93,6 +135,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 8,
           "relative": true,
@@ -102,6 +145,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 12,
           "relative": true,
@@ -112,6 +156,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/report.cjs",
           "line": 1,
           "relative": true,
@@ -122,6 +167,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/decide.test.js",
           "line": 1,
           "relative": false,
@@ -132,6 +178,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/decide.test.js",
           "line": 2,
           "relative": false,
@@ -142,6 +189,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/decide.test.js",
           "line": 3,
           "relative": true,
@@ -152,6 +200,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/format.spec.js",
           "line": 1,
           "relative": false,
@@ -162,6 +211,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/format.spec.js",
           "line": 2,
           "relative": false,
@@ -172,6 +222,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/format.spec.js",
           "line": 3,
           "relative": true,
@@ -182,6 +233,40 @@
           }
         },
         {
+          "edge_kind": "import",
+          "from": "test/math.quality.test.js",
+          "line": 1,
+          "relative": false,
+          "specifier": "vitest",
+          "target": {
+            "kind": "external",
+            "package": "vitest"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/math.quality.test.js",
+          "line": 2,
+          "relative": true,
+          "specifier": "../src/math.js",
+          "target": {
+            "kind": "file",
+            "path": "src/math.js"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/math.quality.test.js",
+          "line": 3,
+          "relative": true,
+          "specifier": "../src/decide.js",
+          "target": {
+            "kind": "file",
+            "path": "src/decide.js"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "test/math.test.js",
           "line": 1,
           "relative": false,
@@ -192,6 +277,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/math.test.js",
           "line": 2,
           "relative": true,
@@ -202,6 +288,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/math.test.js",
           "line": 3,
           "relative": true,
@@ -212,6 +299,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "test/report.test.js",
           "line": 1,
           "relative": true,
@@ -227,6 +315,7 @@
     {
       "edges": [
         {
+          "edge_kind": "re-export",
           "from": "packages/shapes/lib/index.js",
           "line": 1,
           "relative": true,

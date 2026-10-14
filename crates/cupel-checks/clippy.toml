@@ -1,0 +1,33 @@
+# ABOUTME: Clippy configuration for cupel-checks: checks compute over facts only, so the file system,
+# ABOUTME: processes, and the environment are off limits (design §8.3.1, ADR-001); `make lint` enforces it.
+disallowed-methods = [
+    { path = "std::process::Command::new", reason = "checks never run processes; producers do (design §8.5)" },
+    { path = "std::process::exit", reason = "checks report through their result, never by exiting" },
+    { path = "std::fs::read", reason = "checks read facts, never files (design §8.3.1)" },
+    { path = "std::fs::read_to_string", reason = "checks read facts, never files (design §8.3.1)" },
+    { path = "std::fs::read_dir", reason = "checks read facts, never files (design §8.3.1)" },
+    { path = "std::fs::write", reason = "checks write only through CheckCtx.writer" },
+    { path = "std::fs::create_dir", reason = "checks write only through CheckCtx.writer" },
+    { path = "std::fs::create_dir_all", reason = "checks write only through CheckCtx.writer" },
+    { path = "std::fs::remove_file", reason = "checks write only through CheckCtx.writer" },
+    { path = "std::fs::remove_dir_all", reason = "checks write only through CheckCtx.writer" },
+    { path = "std::fs::copy", reason = "checks write only through CheckCtx.writer" },
+    { path = "std::fs::rename", reason = "checks write only through CheckCtx.writer" },
+    { path = "std::fs::metadata", reason = "checks read facts, never files (design §8.3.1)" },
+    { path = "std::fs::canonicalize", reason = "checks read facts, never files (design §8.3.1)" },
+    { path = "std::fs::File::open", reason = "checks read facts, never files (design §8.3.1)" },
+    { path = "std::fs::File::create", reason = "checks write only through CheckCtx.writer" },
+    { path = "std::fs::OpenOptions::open", reason = "checks read facts, never files (design §8.3.1)" },
+    { path = "std::env::var", reason = "checks read configuration from CheckCtx.config, never the environment" },
+    { path = "std::env::var_os", reason = "checks read configuration from CheckCtx.config, never the environment" },
+    { path = "std::env::vars", reason = "checks read configuration from CheckCtx.config, never the environment" },
+    { path = "std::env::vars_os", reason = "checks read configuration from CheckCtx.config, never the environment" },
+    { path = "std::env::args", reason = "checks read configuration from CheckCtx.config, never the command line" },
+    { path = "std::env::args_os", reason = "checks read configuration from CheckCtx.config, never the command line" },
+    { path = "std::env::current_dir", reason = "checks see paths only through facts" },
+]
+disallowed-types = [
+    { path = "std::process::Command", reason = "checks never run processes; producers do (design §8.5)" },
+    { path = "std::fs::File", reason = "checks read facts, never files (design §8.3.1)" },
+    { path = "std::fs::OpenOptions", reason = "checks read facts, never files (design §8.3.1)" },
+]

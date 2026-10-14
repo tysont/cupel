@@ -13,6 +13,7 @@
       "lang": "javascript",
       "name": "main",
       "namespace": "bin.cli",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -34,6 +35,7 @@
       "lang": "javascript",
       "name": "square",
       "namespace": "packages.shapes.lib.square",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -41,6 +43,380 @@
         "line": 1
       },
       "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 50,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 3
+      },
+      "display": "clones_settlement.settleInvoices",
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "settleInvoices",
+      "namespace": "clones_settlement",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 56,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 16
+      },
+      "display": "clones_settlement.reconcilePayments",
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "reconcilePayments",
+      "namespace": "clones_settlement",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 58,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 29
+      },
+      "display": "clones_settlement.orderLines",
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "orderLines",
+      "namespace": "clones_settlement",
+      "parameters": 3,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 29
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 59,
+        "end_col": 2,
+        "end_line": 60,
+        "line": 45
+      },
+      "display": "clones_settlement.refundLines",
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "refundLines",
+      "namespace": "clones_settlement",
+      "parameters": 3,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 60,
+        "line": 45
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 3
+      },
+      "display": "complexity.label",
+      "file": "src/complexity.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "label",
+      "namespace": "complexity",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 45,
+        "line": 31
+      },
+      "display": "complexity.settle",
+      "file": "src/complexity.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "settle",
+      "namespace": "complexity",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "line": 31
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 3,
+        "end_col": 2,
+        "end_line": 56,
+        "line": 54
+      },
+      "display": "complexity.openAccount",
+      "file": "src/complexity.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "openAccount",
+      "namespace": "complexity",
+      "parameters": 6,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 56,
+        "line": 47
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 122,
+        "line": 58
+      },
+      "display": "complexity.statementTemplate",
+      "file": "src/complexity.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "statementTemplate",
+      "namespace": "complexity",
+      "parameters": 0,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 122,
+        "line": 58
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      },
+      "display": "complexity.net",
+      "file": "src/complexity.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "net",
+      "namespace": "complexity",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 22,
+        "end_col": 4,
+        "end_line": 131,
+        "line": 129
+      },
+      "display": "complexity.Statement.constructor",
+      "file": "src/complexity.js",
+      "kind": "method",
+      "lang": "javascript",
+      "name": "constructor",
+      "namespace": "complexity.Statement",
+      "parameters": 1,
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 131,
+        "line": 129
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 16,
+        "end_col": 4,
+        "end_line": 135,
+        "line": 133
+      },
+      "display": "complexity.Statement.line",
+      "file": "src/complexity.js",
+      "kind": "method",
+      "lang": "javascript",
+      "name": "line",
+      "namespace": "complexity.Statement",
+      "parameters": 1,
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 135,
+        "line": 133
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      },
+      "display": "complexity.month",
+      "file": "src/complexity.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "month",
+      "namespace": "complexity",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 6
+      },
+      "display": "crap_scores.overdue",
+      "file": "src/crap_scores.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "overdue",
+      "namespace": "crap_scores",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 42,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 21
+      },
+      "display": "crap_scores.clamp",
+      "file": "src/crap_scores.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "clamp",
+      "namespace": "crap_scores",
+      "parameters": 3,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 32
+      },
+      "display": "crap_scores.toCents",
+      "file": "src/crap_scores.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "toCents",
+      "namespace": "crap_scores",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "dead_export.unusedTotal",
+      "file": "src/dead_export.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "unusedTotal",
+      "namespace": "dead_export",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "dead_helpers.forgottenRate",
+      "file": "src/dead_helpers.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "forgottenRate",
+      "namespace": "dead_helpers",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "private"
     },
     {
       "body": {
@@ -55,6 +431,7 @@
       "lang": "javascript",
       "name": "classify",
       "namespace": "decide",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -76,6 +453,7 @@
       "lang": "javascript",
       "name": "firstOverdraft",
       "namespace": "decide",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -97,6 +475,7 @@
       "lang": "javascript",
       "name": "label",
       "namespace": "decide",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -118,6 +497,7 @@
       "lang": "javascript",
       "name": "parseCents",
       "namespace": "decide",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -139,6 +519,7 @@
       "lang": "javascript",
       "name": "money",
       "namespace": "format",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -160,6 +541,7 @@
       "lang": "javascript",
       "name": "double",
       "namespace": "inline",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -181,6 +563,7 @@
       "lang": "javascript",
       "name": "doubles",
       "namespace": "inline",
+      "parameters": 0,
       "span": {
         "col": 17,
         "end_col": 4,
@@ -202,6 +585,7 @@
       "lang": "javascript",
       "name": "load",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -223,6 +607,7 @@
       "lang": "javascript",
       "name": "add",
       "namespace": "math",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -244,6 +629,7 @@
       "lang": "javascript",
       "name": "range",
       "namespace": "math",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -265,6 +651,7 @@
       "lang": "javascript",
       "name": "toCents",
       "namespace": "money.cents",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -286,6 +673,7 @@
       "lang": "javascript",
       "name": "default",
       "namespace": "plugin",
+      "parameters": 1,
       "span": {
         "col": 16,
         "end_col": 2,
@@ -307,6 +695,7 @@
       "lang": "javascript",
       "name": "discounted",
       "namespace": "pricing",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -328,6 +717,7 @@
       "lang": "javascript",
       "name": "tally",
       "namespace": "pricing",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -349,6 +739,7 @@
       "lang": "javascript",
       "name": "logTotal",
       "namespace": "pricing",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -370,6 +761,7 @@
       "lang": "javascript",
       "name": "summary",
       "namespace": "report",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -391,6 +783,7 @@
       "lang": "javascript",
       "name": "constructor",
       "namespace": "shapes.geometry.Circle",
+      "parameters": 1,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -412,6 +805,7 @@
       "lang": "javascript",
       "name": "area",
       "namespace": "shapes.geometry.Circle",
+      "parameters": 0,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -433,6 +827,7 @@
       "lang": "javascript",
       "name": "unit",
       "namespace": "shapes.geometry.Circle",
+      "parameters": 0,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -454,6 +849,7 @@
       "lang": "javascript",
       "name": "#isValid",
       "namespace": "shapes.geometry.Circle",
+      "parameters": 0,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -475,6 +871,7 @@
       "lang": "javascript",
       "name": "scale",
       "namespace": "shapes.geometry",
+      "parameters": 2,
       "span": {
         "col": 14,
         "end_col": 76,
@@ -496,6 +893,7 @@
       "lang": "javascript",
       "name": "perimeter",
       "namespace": "shapes.geometry",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -517,6 +915,7 @@
       "lang": "javascript",
       "name": "twice",
       "namespace": "shapes.geometry.perimeter",
+      "parameters": 1,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -538,6 +937,7 @@
       "lang": "javascript",
       "name": "netTotal",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -559,6 +959,7 @@
       "lang": "javascript",
       "name": "sumAfterCharge",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -580,6 +981,7 @@
       "lang": "javascript",
       "name": "netTotalFloor",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -601,6 +1003,7 @@
       "lang": "javascript",
       "name": "netTotalLaidOut",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -622,6 +1025,7 @@
       "lang": "javascript",
       "name": "netTotalPlus",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -643,6 +1047,7 @@
       "lang": "javascript",
       "name": "netTotalCapped",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -664,6 +1069,7 @@
       "lang": "javascript",
       "name": "netTotalProduct",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -685,6 +1091,7 @@
       "lang": "javascript",
       "name": "classifies overdrawn balances",
       "namespace": "test.decide",
+      "parameters": 0,
       "span": {
         "col": 39,
         "end_col": 2,
@@ -706,6 +1113,7 @@
       "lang": "javascript",
       "name": "does not call an empty balance rich",
       "namespace": "test.decide",
+      "parameters": 0,
       "span": {
         "col": 45,
         "end_col": 2,
@@ -727,6 +1135,7 @@
       "lang": "javascript",
       "name": "labels through a stub",
       "namespace": "test.decide",
+      "parameters": 0,
       "span": {
         "col": 31,
         "end_col": 2,
@@ -748,6 +1157,7 @@
       "lang": "javascript",
       "name": "waits for the ledger server",
       "namespace": "test.decide",
+      "parameters": 1,
       "span": {
         "col": 37,
         "end_col": 2,
@@ -769,6 +1179,7 @@
       "lang": "javascript",
       "name": "shows two decimals",
       "namespace": "test.format.money",
+      "parameters": 0,
       "span": {
         "col": 28,
         "end_col": 4,
@@ -790,11 +1201,210 @@
       "lang": "javascript",
       "name": "is not called by accident",
       "namespace": "test.format.money",
+      "parameters": 0,
       "span": {
         "col": 35,
         "end_col": 4,
         "end_line": 13,
         "line": 10
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 28,
+        "end_col": 4,
+        "end_line": 8,
+        "line": 6
+      },
+      "display": "test.math.quality.adds exactly",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "adds exactly",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 22,
+        "end_col": 4,
+        "end_line": 8,
+        "line": 6
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
+      },
+      "display": "test.math.quality.rejects blank amounts",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "rejects blank amounts",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 4,
+        "end_line": 16,
+        "line": 14
+      },
+      "display": "test.math.quality.returns something",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "returns something",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 27,
+        "end_col": 4,
+        "end_line": 16,
+        "line": 14
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "test.math.quality.runs without checking",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "runs without checking",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 4,
+        "end_line": 27,
+        "line": 22
+      },
+      "display": "test.math.quality.logs and mails every sum",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "logs and mails every sum",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 34,
+        "end_col": 4,
+        "end_line": 27,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 4,
+        "end_line": 33,
+        "line": 29
+      },
+      "display": "test.math.quality.counts every value in a range",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "counts every value in a range",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 39,
+        "end_col": 4,
+        "end_line": 33,
+        "line": 29
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 4,
+        "end_line": 39,
+        "line": 35
+      },
+      "display": "test.math.quality.adds every pair in the table",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "adds every pair in the table",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 38,
+        "end_col": 4,
+        "end_line": 39,
+        "line": 35
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 46,
+        "line": 41
+      },
+      "display": "test.math.quality.keeps values in order",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "keeps values in order",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 46,
+        "line": 41
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 4,
+        "end_line": 54,
+        "line": 48
+      },
+      "display": "test.math.quality.ends with the last sum",
+      "file": "test/math.quality.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "ends with the last sum",
+      "namespace": "test.math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 32,
+        "end_col": 4,
+        "end_line": 54,
+        "line": 48
       },
       "visibility": "private"
     },
@@ -811,6 +1421,7 @@
       "lang": "javascript",
       "name": "adds two numbers",
       "namespace": "test.math.add",
+      "parameters": 0,
       "span": {
         "col": 26,
         "end_col": 4,
@@ -832,6 +1443,7 @@
       "lang": "javascript",
       "name": "is truthy for non-zero sums",
       "namespace": "test.math.add",
+      "parameters": 0,
       "span": {
         "col": 37,
         "end_col": 4,
@@ -853,6 +1465,7 @@
       "lang": "javascript",
       "name": "returns a defined value",
       "namespace": "test.math.add",
+      "parameters": 0,
       "span": {
         "col": 33,
         "end_col": 4,
@@ -874,6 +1487,7 @@
       "lang": "javascript",
       "name": "does not return zero",
       "namespace": "test.math.add",
+      "parameters": 0,
       "span": {
         "col": 30,
         "end_col": 4,
@@ -895,6 +1509,7 @@
       "lang": "javascript",
       "name": "handles huge numbers",
       "namespace": "test.math.add",
+      "parameters": 0,
       "span": {
         "col": 35,
         "end_col": 4,
@@ -916,6 +1531,7 @@
       "lang": "javascript",
       "name": "can be called without checking",
       "namespace": "test.math.add",
+      "parameters": 0,
       "span": {
         "col": 40,
         "end_col": 4,
@@ -937,6 +1553,7 @@
       "lang": "javascript",
       "name": "rejects empty amounts",
       "namespace": "test.math.parseCents",
+      "parameters": 0,
       "span": {
         "col": 31,
         "end_col": 4,
@@ -958,6 +1575,7 @@
       "lang": "javascript",
       "name": "throws on nothing",
       "namespace": "test.math.parseCents",
+      "parameters": 0,
       "span": {
         "col": 27,
         "end_col": 4,
@@ -979,6 +1597,7 @@
       "lang": "javascript",
       "name": "matches the range snapshot",
       "namespace": "test.math.parseCents",
+      "parameters": 0,
       "span": {
         "col": 36,
         "end_col": 4,
@@ -1000,6 +1619,7 @@
       "lang": "javascript",
       "name": "reports what it parsed",
       "namespace": "test.math.parseCents",
+      "parameters": 0,
       "span": {
         "col": 32,
         "end_col": 4,
@@ -1021,6 +1641,7 @@
       "lang": "javascript",
       "name": "joins one line per entry",
       "namespace": "test.report",
+      "parameters": 0,
       "span": {
         "col": 34,
         "end_col": 2,
@@ -1042,6 +1663,7 @@
       "lang": "javascript",
       "name": "formats currency symbols",
       "namespace": "test.report",
+      "parameters": 0,
       "span": {
         "col": 35,
         "end_col": 2,

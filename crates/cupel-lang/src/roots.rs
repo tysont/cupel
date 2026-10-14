@@ -18,6 +18,23 @@ use crate::symbols::{Definition, definitions};
 /// # Panics
 ///
 /// When the language's `api.scm` or `tests.scm` does not compile; a test compiles every query.
+/// The `names` captures of the language's `file` query over the source, with their nodes.
+fn captured<'t>(source: &Source<'t>, file: QueryFile, names: &[&str]) -> Vec<(String, Node<'t>)> {
+    let spec = source.language.spec();
+    if !spec.has(file) {
+        return Vec::new();
+    }
+    let query = spec
+        .query(file, &source.parsed.grammar)
+        .unwrap_or_else(|error| panic!("{} {file}: {error}", source.language.id()));
+    matches(&query, source.parsed)
+        .into_iter()
+        .flat_map(|m| m.captures)
+        .filter(|(name, _)| names.contains(name))
+        .map(|(name, node)| (name.to_owned(), node))
+        .collect()
+}
+
 pub fn extract(source: &Source<'_>) -> Roots {
     let parsed = source.parsed;
     let spec = source.language.spec();
@@ -25,38 +42,25 @@ pub fn extract(source: &Source<'_>) -> Roots {
         return Roots::default();
     };
     let symbols = definitions(parsed, source.language);
-    let captured = |file: QueryFile, names: &[&str]| -> Vec<(String, Node<'_>)> {
-        if !spec.has(file) {
-            return Vec::new();
-        }
-        let query = spec
-            .query(file, &parsed.grammar)
-            .unwrap_or_else(|error| panic!("{} {file}: {error}", source.language.id()));
-        matches(&query, parsed)
-            .into_iter()
-            .flat_map(|m| m.captures)
-            .filter(|(name, _)| names.contains(name))
-            .map(|(name, node)| (name.to_owned(), node))
-            .collect()
-    };
     let api = captured(
+        source,
         QueryFile::Api,
         &[capture::ROOT_ENTRY_POINT, capture::ROOT_HOOK],
     );
-    let tests = captured(QueryFile::Tests, &[capture::TEST_CASE]);
-
+    let tests = captured(source, QueryFile::Tests, &[capture::TEST_CASE]);
     let mut roots = Vec::new();
     for (index, definition) in symbols.iter().enumerate() {
         let symbol = &definition.symbol;
-        let owns = |node: Node<'_>| owner(&symbols, node) == Some(index);
+        let api_root = |kind: &str| {
+            api.iter()
+                .any(|(n, node)| n == kind && owner(&symbols, *node) == Some(index))
+        };
         let named = |names: &[String]| names.contains(&symbol.name);
         let reasons = [
             (
                 RootReason::EntryPoint,
                 (symbol.kind == SymbolKind::Function && named(&rules.entry_points))
-                    || api
-                        .iter()
-                        .any(|(n, node)| n == capture::ROOT_ENTRY_POINT && owns(*node)),
+                    || api_root(capture::ROOT_ENTRY_POINT),
             ),
             (RootReason::Export, symbol.visibility == Visibility::Public),
             (
@@ -67,20 +71,18 @@ pub fn extract(source: &Source<'_>) -> Roots {
             ),
             (
                 RootReason::FrameworkHook,
-                named(&rules.hooks)
-                    || api
-                        .iter()
-                        .any(|(n, node)| n == capture::ROOT_HOOK && owns(*node)),
+                named(&rules.hooks) || api_root(capture::ROOT_HOOK),
             ),
         ];
-        for (reason, applies) in reasons {
-            if applies {
-                roots.push(LiveRoot {
+        roots.extend(
+            reasons
+                .into_iter()
+                .filter(|(_, applies)| *applies)
+                .map(|(reason, _)| LiveRoot {
                     symbol: symbol.key(),
                     reason,
-                });
-            }
-        }
+                }),
+        );
     }
     Roots { roots }
 }

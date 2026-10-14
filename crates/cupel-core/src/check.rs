@@ -5,13 +5,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::cancel::Cancellation;
-use crate::envelope::CheckResult;
 use crate::error::{Error, Result};
 use crate::event::EventSink;
-use crate::fact::{FactKind, Facts};
+use crate::fact::FactKind;
+use crate::facts::Facts;
 use crate::finding::ActionKind;
 use crate::grade::{CostClass, Tier};
 use crate::id::CheckId;
+use crate::rank::MetricPer;
+use crate::result::{CheckResult, Score};
 use crate::scope::Scope;
 use crate::writer::Writer;
 
@@ -29,7 +31,8 @@ pub struct Manifest {
     /// Facts the check uses for enrichment when present.
     pub wants: Vec<FactKind>,
     pub findings: Vec<FindingKindSpec>,
-    /// Metrics usable as gate keys (`<check-id>.<metric>`).
+    /// What the check measures: `scope` metrics are gate keys (`<check-id>.<metric>`), the others
+    /// are `survey` ranking dimensions (ADR-060, ADR-062).
     pub metrics: Vec<MetricSpec>,
     pub stability: Stability,
     pub summary: String,
@@ -49,6 +52,8 @@ pub struct FindingKindSpec {
 pub struct MetricSpec {
     pub name: String,
     pub summary: String,
+    /// What one value describes (ADR-062).
+    pub per: MetricPer,
 }
 
 /// Whether a described entity's contract may still change.
@@ -66,10 +71,22 @@ pub struct Plan {
     pub est_ms: u64,
 }
 
+impl Plan {
+    /// `targets` units of work estimated from the cost class (ADR-041).
+    pub fn estimate(cost: CostClass, targets: u64) -> Self {
+        Self {
+            targets,
+            est_ms: targets.saturating_mul(cost.est_ms_per_target()),
+        }
+    }
+}
+
 /// What a check can see besides its facts. Grows store access in P2.2. It offers no file-system
 /// or process access beyond a writer confined to the run's scratch directory.
 #[derive(Debug, Clone)]
 pub struct CheckCtx {
+    /// What the run considers for this check's language: the files and the symbols in scope.
+    pub scope: Scope,
     /// This check's resolved configuration, per-language overrides merged.
     pub config: Map<String, Value>,
     /// Writes only inside `.cupel/work/<run>/` (`Writer::scratch`).
@@ -89,6 +106,52 @@ pub trait Check: Send + Sync {
         plan: &Plan,
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult>;
+
+    /// Whether the check compares symbols across the languages of a family (design §8.3.5):
+    /// it then runs once per family in scope, and `Facts::family` serves every member
+    /// language's facts (ADR-051). The default is once per language.
+    fn spans_family(&self) -> bool {
+        false
+    }
+
+    /// The kinds this check also reads as they were at a range's base commit, through
+    /// `Facts::base` (ADR-056). Each must also be in `needs`. A check that declares any runs
+    /// only under a range scope and is skipped with `needs-range` otherwise.
+    fn base_needs(&self) -> &[FactKind] {
+        &[]
+    }
+
+    /// One score from this check's per-language scores, for the envelope's single entry per
+    /// check (ADR-041). The default is the mean weighted by each score's `n`.
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "target counts stay far below 2^52, where f64 is exact"
+    )]
+    fn combine(&self, scores: &[Score]) -> Option<Score> {
+        let first = scores.first()?;
+        let n: u64 = scores.iter().map(|score| score.n).sum();
+        let weighted: f64 = scores
+            .iter()
+            .map(|score| score.value * score.n as f64)
+            .sum();
+        Some(Score {
+            value: if n == 0 { 0.0 } else { weighted / n as f64 },
+            unit: first.unit.clone(),
+            n,
+        })
+    }
+
+    /// One value of the `scope` metric `name` from the per-language results that reported it,
+    /// for the check's one entry (ADR-060). Each result carries its whole score and metric map,
+    /// so a ratio can be weighted by the count it is a ratio of (ADR-063). The default is the
+    /// largest value, since metrics are bounds over a scope; a check whose metric is a ratio or
+    /// a count overrides this.
+    fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
+        results
+            .iter()
+            .filter_map(|result| result.metrics.get(name).copied())
+            .reduce(f64::max)
+    }
 }
 
 /// Every registered check, in registration order, unique by ID.
@@ -101,7 +164,7 @@ impl CheckRegistry {
     pub fn register(&mut self, check: Box<dyn Check>) -> Result<()> {
         let id = &check.manifest().id;
         if self.get(id).is_some() {
-            return Err(Error::DuplicateCheck { id: id.clone() });
+            return Err(Error::DuplicateCheck { id: id.to_string() });
         }
         self.checks.push(check);
         Ok(())
@@ -116,5 +179,12 @@ impl CheckRegistry {
 
     pub fn iter(&self) -> impl Iterator<Item = &dyn Check> {
         self.checks.iter().map(AsRef::as_ref)
+    }
+}
+
+impl Facts {
+    /// Facts declaring exactly what `manifest` needs and wants, holding none yet.
+    pub fn for_manifest(manifest: &Manifest) -> Self {
+        Self::declaring(manifest.needs.iter().chain(&manifest.wants).copied())
     }
 }

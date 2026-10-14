@@ -36,6 +36,134 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 34
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.ts",
+        "line": 50
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 31
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 47
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 58
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 124
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.ts",
+        "line": 131
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.ts",
+        "line": 135
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 141
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.ts",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.ts",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.ts",
+        "line": 32
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/dead_export.ts",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/decide.ts",
         "line": 5
       }
@@ -94,6 +222,78 @@
         "col": 10,
         "file": "src/legacy.ts",
         "line": 2
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 22,
+        "file": "src/math.quality.test.ts",
+        "line": 5
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 33,
+        "file": "src/math.quality.test.ts",
+        "line": 9
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 27,
+        "file": "src/math.quality.test.ts",
+        "line": 13
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "src/math.quality.test.ts",
+        "line": 17
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 34,
+        "file": "src/math.quality.test.ts",
+        "line": 21
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 39,
+        "file": "src/math.quality.test.ts",
+        "line": 28
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 38,
+        "file": "src/math.quality.test.ts",
+        "line": 34
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "src/math.quality.test.ts",
+        "line": 40
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 32,
+        "file": "src/math.quality.test.ts",
+        "line": 47
       }
     },
     {

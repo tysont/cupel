@@ -1,5 +1,7 @@
 // ABOUTME: Tests for the extension model: fact kinds, the `Facts` accessor, language coverage,
 // ABOUTME: check and producer registries, and support-matrix resolution over synthetic registries.
+mod support;
+
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
@@ -7,9 +9,9 @@ use cupel_core::syntax::{Decisions, MutationSites, Symbols};
 use cupel_core::{
     ActionKind, Availability, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult,
     CheckStatus, CostClass, Ctx, Error, Event, EventSink, Fact, FactKind, Facts, FindingKindSpec,
-    Lang, LangFamily, LangId, Langs, Manifest, MetricSpec, Plan, ProduceCtx, Producer, ProducerId,
-    ProducerRegistry, Result, RunId, Scope, Stability, Support, SupportMatrix, Tier, ToolId,
-    WriteError, Writer,
+    Lang, LangFamily, LangId, Langs, Manifest, MetricPer, MetricSpec, Plan, ProduceCtx, Producer,
+    ProducerId, ProducerRegistry, Result, RunId, Scope, Stability, Support, SupportMatrix, Tier,
+    ToolId, WriteError, Writer,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -41,9 +43,7 @@ fn typescript() -> Lang {
 }
 
 fn ctx() -> Ctx {
-    Ctx {
-        root: PathBuf::from("."),
-    }
+    Ctx::new(PathBuf::from("."))
 }
 
 fn manifest(id: &str, needs: &[FactKind], wants: &[FactKind]) -> Manifest {
@@ -83,6 +83,7 @@ impl Check for ReportingCheck {
             tier: self.0.tier,
             cost: self.0.cost,
             score: None,
+            metrics: std::collections::BTreeMap::new(),
             delta: None,
             findings: 0,
             duration_ms: 0,
@@ -207,12 +208,21 @@ fn fact_kinds_are_the_catalog_rows_in_kebab_case() {
         "analyzer-report",
         "divergence-results",
     ];
-    assert_eq!(FactKind::ALL.len(), names.len());
-    for (kind, name) in FactKind::ALL.into_iter().zip(names) {
-        assert_eq!(serde_json::to_value(kind).unwrap(), json!(name));
-        assert_eq!(kind.to_string(), name);
-        assert_eq!(kind.as_str(), name);
-    }
+    let spelled: Vec<(serde_json::Value, String, &str)> = FactKind::ALL
+        .into_iter()
+        .map(|kind| {
+            (
+                serde_json::to_value(kind).unwrap(),
+                kind.to_string(),
+                kind.as_str(),
+            )
+        })
+        .collect();
+    let expected: Vec<(serde_json::Value, String, &str)> = names
+        .into_iter()
+        .map(|name| (json!(name), name.to_owned(), name))
+        .collect();
+    assert_eq!(spelled, expected);
 }
 
 // ---------------------------------------------------------------- Facts accessor
@@ -265,20 +275,27 @@ fn facts_serves_wanted_kinds_too() {
     let mut facts =
         Facts::for_manifest(&manifest("c", &[FactKind::Symbols], &[FactKind::Decisions]));
     facts.insert(Decisions { symbols: vec![] }).unwrap();
-    assert!(facts.get::<Decisions>().is_ok());
+    assert_eq!(facts.get::<Decisions>(), Ok(&Decisions { symbols: vec![] }));
 }
 
 // ---------------------------------------------------------------- languages and sinks
 
 #[test]
 fn langs_cover_by_any_by_id_and_by_family() {
-    assert!(Langs::Any.covers(&go()));
-    assert!(only(&["rust", "go"]).covers(&go()));
-    assert!(!only(&["rust"]).covers(&go()));
     let ecma = Langs::Family(LangFamily::from("ecma"));
-    assert!(ecma.covers(&javascript()));
-    assert!(ecma.covers(&typescript()));
-    assert!(!ecma.covers(&rust()));
+    let cases = [
+        (Langs::Any, go()),
+        (only(&["rust", "go"]), go()),
+        (only(&["rust"]), go()),
+        (ecma.clone(), javascript()),
+        (ecma.clone(), typescript()),
+        (ecma, rust()),
+    ];
+    let covered: Vec<bool> = cases
+        .iter()
+        .map(|(langs, lang)| langs.covers(lang))
+        .collect();
+    assert_eq!(covered, [true, true, false, true, true, false]);
 }
 
 #[test]
@@ -311,7 +328,7 @@ fn check_registry_finds_checks_by_id_and_rejects_duplicates() {
             .register(check("static.complexity", &[], &[]))
             .unwrap_err(),
         Error::DuplicateCheck {
-            id: CheckId::from("static.complexity")
+            id: "static.complexity".to_owned()
         }
     );
     assert_eq!(registry.iter().count(), 1);
@@ -357,6 +374,7 @@ fn manifest_round_trips_with_kebab_fact_kinds() {
     m.metrics.push(MetricSpec {
         name: "score".into(),
         summary: "Killed ratio.".into(),
+        per: MetricPer::Scope,
     });
     let value = serde_json::to_value(&m).unwrap();
     assert_eq!(value["needs"], json!(["mutation-outcomes"]));
@@ -368,8 +386,8 @@ fn manifest_round_trips_with_kebab_fact_kinds() {
 
 // ---------------------------------------------------------------- support matrix
 
-#[test]
-fn check_needing_a_fact_without_producer_is_unsupported_for_that_fact() {
+/// `static.complexity`, needing symbols and decisions, and a producer of symbols for any language.
+fn complexity_with_symbols() -> (CheckRegistry, ProducerRegistry) {
     let checks = checks(vec![check(
         "static.complexity",
         &[FactKind::Symbols, FactKind::Decisions],
@@ -377,6 +395,12 @@ fn check_needing_a_fact_without_producer_is_unsupported_for_that_fact() {
     )]);
     let mut producers = ProducerRegistry::default();
     producers.register(producer::<Symbols>("lang.symbols", Langs::Any, &[]));
+    (checks, producers)
+}
+
+#[test]
+fn check_needing_a_fact_without_producer_is_unsupported_for_that_fact() {
+    let (checks, producers) = complexity_with_symbols();
     let m = matrix(&checks, &producers, &[rust()]);
     assert_eq!(
         support(&m, "static.complexity", &rust()),
@@ -386,13 +410,7 @@ fn check_needing_a_fact_without_producer_is_unsupported_for_that_fact() {
 
 #[test]
 fn check_is_supported_exactly_where_every_need_has_a_producer() {
-    let checks = checks(vec![check(
-        "static.complexity",
-        &[FactKind::Symbols, FactKind::Decisions],
-        &[],
-    )]);
-    let mut producers = ProducerRegistry::default();
-    producers.register(producer::<Symbols>("lang.symbols", Langs::Any, &[]));
+    let (checks, mut producers) = complexity_with_symbols();
     producers.register(producer::<Decisions>("lang.rust", only(&["rust"]), &[]));
     let m = matrix(&checks, &producers, &[rust(), go()]);
     assert_eq!(
@@ -541,10 +559,10 @@ fn a_cycle_among_producers_resolves_as_unsupported() {
     producers.register(producer::<Symbols>("a", Langs::Any, &[FactKind::Decisions]));
     producers.register(producer::<Decisions>("b", Langs::Any, &[FactKind::Symbols]));
     let m = matrix(&checks, &producers, &[rust()]);
-    assert!(matches!(
+    assert_eq!(
         support(&m, "static.complexity", &rust()),
-        Support::Unsupported(_)
-    ));
+        Support::Unsupported(FactKind::Symbols)
+    );
 }
 
 #[test]
@@ -618,9 +636,7 @@ fn produce_ctx(root: &std::path::Path, cancel: Cancellation) -> ProduceCtx {
     // `--write` was given, yet producers only ever get the confined writer.
     let writer = Writer::new(root, true).unwrap().confined();
     ProduceCtx {
-        ctx: Ctx {
-            root: writer.root().to_path_buf(),
-        },
+        ctx: Ctx::new(writer.root().to_path_buf()),
         config: serde_json::Map::new(),
         writer,
         cancel,
@@ -632,12 +648,15 @@ fn producers_write_only_under_cupel_through_their_context() {
     let dir = tempfile::tempdir().unwrap();
     let ctx = produce_ctx(dir.path(), Cancellation::new());
     let result = CachingProducer.produce(&ctx, &Scope::default(), &mut Vec::new());
-    assert!(
-        matches!(result, Err(Error::Write(WriteError::Outside { .. }))),
-        "{result:?}"
+    let outside = dir.path().canonicalize().unwrap().join("src/generated.rs");
+    assert_eq!(
+        result,
+        Err(Error::Write(WriteError::Outside { path: outside }))
     );
-    assert!(dir.path().join(".cupel/cache/symbols").exists());
-    assert!(!dir.path().join("src").exists());
+    assert_eq!(
+        support::files_under(dir.path()),
+        [".cupel/.gitignore", ".cupel/cache/symbols"]
+    );
 }
 
 #[test]
@@ -657,6 +676,7 @@ fn a_check_context_carries_a_scratch_writer_for_its_run() {
     let run = RunId::generate();
     let writer = Writer::new(dir.path(), true).unwrap();
     let ctx = CheckCtx {
+        scope: Scope::default(),
         config: serde_json::Map::new(),
         writer: writer.scratch(&run),
         cancel: Cancellation::new(),

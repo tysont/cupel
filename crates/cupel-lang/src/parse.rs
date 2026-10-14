@@ -9,8 +9,6 @@ use std::sync::{Arc, Mutex, OnceLock, PoisonError};
 use cupel_core::LangId;
 use tree_sitter::{Node, Parser, Tree};
 
-use crate::language::Language;
-
 /// A parsed source text. Identical texts share one, whatever their paths.
 #[derive(Debug)]
 pub struct Syntax {
@@ -104,23 +102,23 @@ impl ParseCache {
         }
     }
 
-    /// Reads and parses `file` (relative to `root`) as `language`. Concurrent requests for the
-    /// same content wait for one parse.
+    /// Reads and parses `file` (relative to `root`) of language `lang` with `grammar`.
+    /// Concurrent requests for the same content wait for one parse.
     pub fn parse(
         &self,
         root: &Path,
         file: &str,
-        language: &dyn Language,
+        lang: &LangId,
+        grammar: tree_sitter::Language,
     ) -> Result<Parsed, ParseProblem> {
         let problem = |reason: String| ParseProblem {
             file: file.to_owned(),
-            lang: language.id(),
+            lang: lang.clone(),
             reason,
         };
         let bytes = fs::read(root.join(file)).map_err(|error| problem(error.to_string()))?;
         let source =
             String::from_utf8(bytes).map_err(|_| problem("the file is not UTF-8".to_owned()))?;
-        let grammar = language.grammar(Path::new(file));
         let key = (blake3::hash(source.as_bytes()), grammar.clone());
         let parse_grammar = grammar.clone();
         let cell = Arc::clone(
@@ -149,7 +147,7 @@ impl ParseCache {
             .ok_or_else(|| problem("the parser could not run".to_owned()))?;
         Ok(Parsed {
             file: file.to_owned(),
-            lang: language.id(),
+            lang: lang.clone(),
             grammar,
             syntax,
         })

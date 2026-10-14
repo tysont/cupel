@@ -68,21 +68,500 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
-          "kind": "branch",
-          "nesting": 0
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 50
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 2,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 3,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 4,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 51
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 63
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 130
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/complexity.rs",
+        "line": 141
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 147
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "boolean-op",
-          "nesting": 0
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_export.rs",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_helpers.rs",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -95,21 +574,27 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 2
+          "nesting": 2,
+          "table": false
         }
       ],
       "symbol": {
@@ -122,9 +607,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -137,21 +624,41 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 0,
+          "continues": true,
           "cyclomatic": 1,
           "kind": "case",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
         "col": 1,
         "file": "src/decide.rs",
         "line": 25
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/deps_tree/leaf.rs",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/deps_tree/mod.rs",
+        "line": 5
       }
     },
     {
@@ -198,21 +705,27 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "boolean-op",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 0,
           "kind": "early-return",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -225,15 +738,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "loop",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 1
+          "nesting": 1,
+          "table": false
         }
       ],
       "symbol": {
@@ -310,9 +827,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -325,9 +844,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -340,9 +861,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -355,9 +878,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -370,9 +895,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -385,15 +912,19 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         },
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -406,9 +937,11 @@
       "decisions": [
         {
           "cognitive": 1,
+          "continues": false,
           "cyclomatic": 1,
           "kind": "branch",
-          "nesting": 0
+          "nesting": 0,
+          "table": false
         }
       ],
       "symbol": {
@@ -471,6 +1004,153 @@
         "col": 1,
         "file": "tests/ledger.rs",
         "line": 42
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 23
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 36
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 43
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 50
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 58
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 67
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 71
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 76
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 83
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 89
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 95
       }
     }
   ]

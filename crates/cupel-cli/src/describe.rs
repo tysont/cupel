@@ -1,9 +1,9 @@
 // ABOUTME: The `describe` verb: renders the registry for the CLI, one command, a schema, or all of it.
-// ABOUTME: Languages, facts, and the matrix come from the registries; checks and findings arrive in P2.1.
+// ABOUTME: Languages, facts, checks, finding kinds, and the matrix come from the registries.
 use std::path::Path;
 
 use cupel_core::{
-    AllDescription, Description, Envelope, FactKind, LangId, SchemaDescription, schema,
+    AllDescription, CheckId, Description, Envelope, FactKind, LangId, SchemaDescription, schema,
 };
 use serde_json::Value;
 
@@ -70,10 +70,15 @@ fn describe(args: &DescribeArgs, root: &Path) -> Result<Description, CupelError>
         ["fact", kind] => fact_kind(kind)
             .map(|kind| Description::Fact(Catalog::builtin().fact(kind)))
             .ok_or_else(|| unknown_fact(Some(kind))),
-        ["finding", _] => Err(CupelError::pending_description("describe finding", "P2.1")),
-        [check] if check.contains('.') => {
-            Err(CupelError::pending_description("describe CHECK", "P2.1"))
-        }
+        ["finding"] => Err(unknown_finding(None)),
+        ["finding", kind] => Catalog::builtin()
+            .finding(kind)
+            .map(Description::Finding)
+            .ok_or_else(|| unknown_finding(Some(kind))),
+        [check] if check.contains('.') => Catalog::builtin()
+            .check(&CheckId::from(*check), root)
+            .map(Description::Check)
+            .ok_or_else(|| unknown_check(check)),
         _ => registry::find(&args.subject)
             .map(Description::Command)
             .ok_or_else(|| unknown_subject(&words.join(" "))),
@@ -130,6 +135,21 @@ fn unknown_language(id: Option<&str>) -> CupelError {
         .map(ToString::to_string)
         .collect();
     unknown_named("describe language", "language", id, valid)
+}
+
+fn unknown_check(id: &str) -> CupelError {
+    let catalog = Catalog::builtin();
+    let valid: Vec<String> = catalog
+        .checks()
+        .iter()
+        .map(|check| check.manifest().id.to_string())
+        .collect();
+    unknown_named("describe CHECK", "check", Some(id), valid)
+}
+
+fn unknown_finding(kind: Option<&str>) -> CupelError {
+    let valid = Catalog::builtin().finding_kinds();
+    unknown_named("describe finding", "finding kind", kind, valid)
 }
 
 fn unknown_fact(kind: Option<&str>) -> CupelError {

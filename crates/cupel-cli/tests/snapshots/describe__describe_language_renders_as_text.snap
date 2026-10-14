@@ -19,7 +19,13 @@ facts
   project-info      lang.typescript (quick)
 
 checks
-  none registered
+  static.clones      supported
+  static.complexity  supported
+  static.crap        supported
+  static.dead-code   supported
+  static.deps        supported
+  tests.quality      supported
+  tests.weakening    supported
 
 toolchain
   launchers

@@ -52,6 +52,126 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 34
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 50
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 34
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 51
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 63
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 130
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/complexity.rs",
+        "line": 141
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 147
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 7
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 22
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 33
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_export.rs",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "src/decide.rs",
         "line": 1
       }
@@ -78,6 +198,22 @@
         "col": 1,
         "file": "src/decide.rs",
         "line": 25
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/deps_tree/leaf.rs",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/deps_tree/mod.rs",
+        "line": 5
       }
     },
     {
@@ -286,6 +422,110 @@
         "col": 1,
         "file": "tests/ledger.rs",
         "line": 42
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 7
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 13
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 18
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 23
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 28
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 36
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 43
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 50
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 58
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 67
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 76
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 83
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 95
       }
     }
   ]

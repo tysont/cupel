@@ -55,6 +55,14 @@
       }
     },
     {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/deps_layers/port.py",
+        "line": 7
+      }
+    },
+    {
       "sites": [
         {
           "from": "sum(entries)",
@@ -562,6 +570,3104 @@
         "col": 1,
         "file": "src/ledger/cli.py",
         "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "owed = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 13,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f83d307de46e302c",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "open_count = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 19,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "92b0eb4caf9054f4",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "not invoice.paid",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "dd88ea9af36272a8",
+          "span": {
+            "col": 12,
+            "end_col": 28,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "not (not invoice.paid)"
+          ]
+        },
+        {
+          "from": "owed += invoice.amount",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7732d531f50c8af5",
+          "span": {
+            "col": 13,
+            "end_col": 35,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "edf2660819bc0583",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "open_count += 1",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "2cb8ada1363782a7",
+          "span": {
+            "col": 13,
+            "end_col": 28,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "afdf609e413c409c",
+          "span": {
+            "col": 24,
+            "end_col": 26,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "efdbcdf8ca8a8bff",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "balance = max(owed - credit, 0)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 5,
+            "end_col": 36,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "6dd61d63194f7a37",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "3c9213ab29201eee",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "balance, open_count",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d619db9db8b50ae1",
+          "span": {
+            "col": 12,
+            "end_col": 31,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "due = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 12,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f83d307de46e302c",
+          "span": {
+            "col": 11,
+            "end_col": 12,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "pending = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 16,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "92b0eb4caf9054f4",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "not payment.paid",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "dd88ea9af36272a8",
+          "span": {
+            "col": 12,
+            "end_col": 28,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "not (not payment.paid)"
+          ]
+        },
+        {
+          "from": "due += payment.amount",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7732d531f50c8af5",
+          "span": {
+            "col": 13,
+            "end_col": 34,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "edf2660819bc0583",
+          "span": {
+            "col": 17,
+            "end_col": 19,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "pending += 1",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "2cb8ada1363782a7",
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "afdf609e413c409c",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "efdbcdf8ca8a8bff",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "remainder = max(due - allowance, 10)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 5,
+            "end_col": 41,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "6dd61d63194f7a37",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4c60ac2240774385",
+          "span": {
+            "col": 38,
+            "end_col": 40,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "remainder, pending",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d619db9db8b50ae1",
+          "span": {
+            "col": 12,
+            "end_col": 30,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 15
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "lines = []",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 15,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "total = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "92b0eb4caf9054f4",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "count = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "7e9da5a9ccdaf8f2",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "cost = quantity * price - discount",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a5b2c88a7f90dc64",
+          "span": {
+            "col": 9,
+            "end_col": 43,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "643c9330cf9f4cae",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ec853b2adbbae138",
+          "span": {
+            "col": 33,
+            "end_col": 34,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "total += cost",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "58c30e6f73bcf1ba",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "5af85f489a9e832c",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "count += quantity",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d264fefd4f8a7186",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "c09a3aa3dd2dce61",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "lines.append(f\"{quantity} x {price} = {cost}\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "bc45df34a074cc12",
+          "span": {
+            "col": 9,
+            "end_col": 55,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "average = total / max(count, 1)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "28903e4d345660ea",
+          "span": {
+            "col": 5,
+            "end_col": 36,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "560d00be9e894293",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "735c39f6269ae983",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "lines.append(f\"total {total}\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "85106360966efc62",
+          "span": {
+            "col": 5,
+            "end_col": 35,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "lines.append(f\"average {average}\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4502fbe9d94f2b5c",
+          "span": {
+            "col": 5,
+            "end_col": 39,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "lines",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "2ce059b38d5557c4",
+          "span": {
+            "col": 12,
+            "end_col": 17,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "lines = []",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 15,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "total = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "92b0eb4caf9054f4",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "count = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "7e9da5a9ccdaf8f2",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "cost = quantity * price - discount",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a5b2c88a7f90dc64",
+          "span": {
+            "col": 9,
+            "end_col": 43,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "643c9330cf9f4cae",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ec853b2adbbae138",
+          "span": {
+            "col": 33,
+            "end_col": 34,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "total += cost",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "58c30e6f73bcf1ba",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "5af85f489a9e832c",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "count += quantity",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d264fefd4f8a7186",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "c09a3aa3dd2dce61",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "lines.append(f\"{quantity} x {price} = {cost}\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "bc45df34a074cc12",
+          "span": {
+            "col": 9,
+            "end_col": 55,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "lines.sort()",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "28903e4d345660ea",
+          "span": {
+            "col": 5,
+            "end_col": 17,
+            "end_line": 50,
+            "line": 50
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "average = total / max(count, 1)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "85106360966efc62",
+          "span": {
+            "col": 5,
+            "end_col": 36,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "dc766a25bd28111b",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "77fab7303afc7b9e",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "lines.append(f\"total {total}\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4502fbe9d94f2b5c",
+          "span": {
+            "col": 5,
+            "end_col": 35,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "lines.append(f\"average {average}\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e0943a8086fbc067",
+          "span": {
+            "col": 5,
+            "end_col": 39,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "lines",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "c3d00c1fbc6f1fbc",
+          "span": {
+            "col": 12,
+            "end_col": 17,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 41
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "83a3ecc936af0c56",
+          "span": {
+            "col": 8,
+            "end_col": 18,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "not (amount < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "a29d36964a63a001",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "bdd199b8b68e6d81",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "013ead286a10ea73",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "name = \"refund\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "288c85e32ab407cc",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "amount == 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "2d11a8a2b76e1d7e",
+          "span": {
+            "col": 10,
+            "end_col": 21,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "not (amount == 0)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "dddc60cb8dd71b8f",
+          "span": {
+            "col": 17,
+            "end_col": 19,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9c29f2223ccef230",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "name = \"empty\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b6c9964cc85518f0",
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "amount > limit * 100",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b693f10a12f35756",
+          "span": {
+            "col": 10,
+            "end_col": 30,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "not (amount > limit * 100)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "3b34675f4c9253e1",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "1bf4f7639175735b",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "da26adb94231b466",
+          "span": {
+            "col": 27,
+            "end_col": 30,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"huge\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7477717711a2542e",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "amount > limit * 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "59ba45e72bef08f5",
+          "span": {
+            "col": 10,
+            "end_col": 29,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "not (amount > limit * 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "710b13b6e79dfd1f",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d1d88a4a0a45cc07",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "66649b166e7b5c9e",
+          "span": {
+            "col": 27,
+            "end_col": 29,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"large\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "95b64fca56d5e87f",
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "amount > limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "08141c66b22f3015",
+          "span": {
+            "col": 10,
+            "end_col": 24,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "not (amount > limit)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "0f676fa30b5a9f80",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "name = \"over\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "54cc95ce2d2f6a9d",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "amount == limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "792767b1cc63d09f",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "not (amount == limit)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "717ce5b6cae32207",
+          "span": {
+            "col": 17,
+            "end_col": 19,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "name = \"at-limit\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ce964d36bfda183f",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "amount > limit / 2",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "4b7759db2293b848",
+          "span": {
+            "col": 10,
+            "end_col": 28,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "not (amount > limit / 2)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "006e18814eb54210",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "e6af74348ff2dbf6",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "748b1ba926425522",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"high\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "fe1ca225fba921aa",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "amount > limit / 4",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "3af040c93c3528a4",
+          "span": {
+            "col": 10,
+            "end_col": 28,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "not (amount > limit / 4)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "9466d27f9d1414a2",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "c8a78aebf5439b5b",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d6061605934f82ee",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"medium\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7731fe788cc1ba07",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "amount > limit / 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "41ae2b6e54353973",
+          "span": {
+            "col": 10,
+            "end_col": 29,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "not (amount > limit / 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "6f6888ca269a00d2",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "4f45ca7f6057012c",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0e63264fb8c80362",
+          "span": {
+            "col": 27,
+            "end_col": 29,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"low\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ec682938635a5314",
+          "span": {
+            "col": 9,
+            "end_col": 21,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "amount > 1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "89ce55612a0a42f5",
+          "span": {
+            "col": 10,
+            "end_col": 20,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "not (amount > 1)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "ed7a5e43763f19af",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "251c8415e08f3078",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "9aeb133918dbf9cb",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "1 + 1",
+            "1 - 1"
+          ]
+        },
+        {
+          "from": "name = \"tiny\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "423b9c136e57ee09",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "name = \"unit\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "cb53283dfcc18eb8",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "name",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b95e59cf7d8b5d92",
+          "span": {
+            "col": 12,
+            "end_col": 16,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "settled = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 16,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f83d307de46e302c",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "batch",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "1ad92724fc97e69a",
+          "span": {
+            "col": 12,
+            "end_col": 17,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "not (batch)"
+          ]
+        },
+        {
+          "from": "amount > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "1971a467a4ecd3d8",
+          "span": {
+            "col": 20,
+            "end_col": 30,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "not (amount > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "a54c926fb44dd158",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "5a2093f57b2f1c5f",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "5e3ce9a54e8246a6",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "settled < limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "a6a0453373446e37",
+          "span": {
+            "col": 27,
+            "end_col": 42,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "not (settled < limit)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "a7dae1579065d322",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "settled += amount",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "acab08bf2a14e6dc",
+          "span": {
+            "col": 25,
+            "end_col": 42,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d66b5bff903642e5",
+          "span": {
+            "col": 33,
+            "end_col": 35,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "settled",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "903f65b79420f497",
+          "span": {
+            "col": 12,
+            "end_col": 19,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 30
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "f\"{owner}/{currency}/{limit}/{overdraft}/{branch}/{opened}\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b678b5b1bffc48b2",
+          "span": {
+            "col": 12,
+            "end_col": 71,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 41
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "[\n        \"ACME LEDGER\",\n        \"===========\",\n        \"\",\n        \"Account holder:\",\n        \"Account number:\",\n        \"Branch:\",\n        \"Currency:\",\n        \"Statement period:\",\n        \"\",\n        \"Opening balance\",\n        \"---------------\",\n        \"Balance brought forward:\",\n        \"Pending credits:\",\n        \"Pending debits:\",\n        \"\",\n        \"Credits\",\n        \"-------\",\n        \"Deposits:\",\n        \"Transfers in:\",\n        \"Interest:\",\n        \"Refunds:\",\n        \"Adjustments:\",\n        \"\",\n        \"Debits\",\n        \"------\",\n        \"Withdrawals:\",\n        \"Transfers out:\",\n        \"Card payments:\",\n        \"Direct debits:\",\n        \"Standing orders:\",\n        \"Fees:\",\n        \"Charges:\",\n        \"\",\n        \"Closing balance\",\n        \"---------------\",\n        \"Balance carried forward:\",\n        \"Available balance:\",\n        \"Overdraft limit:\",\n        \"Overdraft used:\",\n        \"\",\n        \"Notices\",\n        \"-------\",\n        \"Rates changed this period.\",\n        \"Fees are listed above.\",\n        \"Keep this statement for your records.\",\n        \"Report errors within thirty days.\",\n        \"\",\n        \"Contact\",\n        \"-------\",\n        \"Telephone:\",\n        \"Email:\",\n        \"Post:\",\n        \"\",\n        \"Opening hours\",\n        \"-------------\",\n        \"Weekdays: 9 to 5\",\n        \"Saturday: 9 to 12\",\n        \"Sunday: closed\",\n        \"\",\n        \"Page 1 of 1\",\n        \"End of statement\",\n    ]",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "387e44c4ed29876b",
+          "span": {
+            "col": 12,
+            "end_col": 6,
+            "end_line": 108,
+            "line": 46
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 45
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "credits - debits",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f38c549949b0b827",
+          "span": {
+            "col": 12,
+            "end_col": 28,
+            "end_line": 112,
+            "line": 112
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "1c3bfe022b91cc80",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 112,
+            "line": 112
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 111
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "self.owner = owner",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 117,
+            "line": 117
+          },
+          "to": [
+            "pass"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/complexity.py",
+        "line": 116
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "f\"{self.owner}: {amount}\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b678b5b1bffc48b2",
+          "span": {
+            "col": 16,
+            "end_col": 41,
+            "end_line": 120,
+            "line": 120
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/complexity.py",
+        "line": 119
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4efe702b7591ee93",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 126,
+            "line": 126
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"jan\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "78bb942a5833e0ab",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 127,
+            "line": 127
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b47a30278e3a0226",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 128,
+            "line": 128
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"feb\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "a14effaa508aa4d7",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 129,
+            "line": 129
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "61de538b09cb1189",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 130,
+            "line": 130
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"mar\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "1691adfffb2ae2f0",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7160be1a246679a9",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 132,
+            "line": 132
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"apr\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "a3b406c76957917a",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 133,
+            "line": 133
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "52323e9d0121a915",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 134,
+            "line": 134
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"may\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "91ce248e85e0ae83",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 135,
+            "line": 135
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "6",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "961d1623895124c6",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 136,
+            "line": 136
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"jun\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "bea8794299c6c5dc",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 137,
+            "line": 137
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "7",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d094cdcf3fdd8624",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 138,
+            "line": 138
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"jul\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "2c2c0f8bdde93ea4",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 139,
+            "line": 139
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "8",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "5a86f092b5f16e43",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 140,
+            "line": 140
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"aug\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "47b6b90865ba9e64",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 141,
+            "line": 141
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "9",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d7caa21c7b20a1c5",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 142,
+            "line": 142
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"sep\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "732f2a184d77de0b",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 143,
+            "line": 143
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ed31af9ec57644ed",
+          "span": {
+            "col": 14,
+            "end_col": 16,
+            "end_line": 144,
+            "line": 144
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"oct\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d47a3ff6f86ae9e5",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 145,
+            "line": 145
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "11",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0149f263a2646b52",
+          "span": {
+            "col": 14,
+            "end_col": 16,
+            "end_line": 146,
+            "line": 146
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"nov\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "07334ec77583eb01",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 147,
+            "line": 147
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "12",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "08cc6e08271fb113",
+          "span": {
+            "col": 14,
+            "end_col": 16,
+            "end_line": 148,
+            "line": 148
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "\"dec\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "0b71b2e538793d82",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 149,
+            "line": 149
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "\"none\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d82f85755484e620",
+          "span": {
+            "col": 20,
+            "end_col": 26,
+            "end_line": 151,
+            "line": 151
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 123
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "count = 0",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "92b0eb4caf9054f4",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "day > 30 and day > grace",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "40a78c5a2cb57198",
+          "span": {
+            "col": 12,
+            "end_col": 36,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "not (day > 30 and day > grace)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "e3f19f72b4bbb21d",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "30",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b4f660d00ceeae95",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "30",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "74ed45cd5ab1e038",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "30 + 1",
+            "30 - 1"
+          ]
+        },
+        {
+          "from": "and",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "183dceb1ee498010",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "or"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "469d633391380e52",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "count += 1",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7732d531f50c8af5",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "edf2660819bc0583",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "793529b7a0df4166",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "day < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "68fb440b22b41c46",
+          "span": {
+            "col": 14,
+            "end_col": 21,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "not (day < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "960804d8f1c072dd",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "dde1296166918abd",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "685b9b10c064e4b2",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "count -= 1",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "82bb74bbdaf24fc4",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "-=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d280b0b1929c40f5",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "+="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "deb636aaa65e1ca3",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "day == 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6857f8836fc10741",
+          "span": {
+            "col": 14,
+            "end_col": 22,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "not (day == 0)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "441e9275bfb45da4",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9b8a7b299ec8aafd",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "count -= 1",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ad8deba386ec099c",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "-=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "fa9c166a4a7d8a79",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "+="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d32faf79135ba642",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "count",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 12,
+            "end_col": 17,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < low",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6f609840becc0e07",
+          "span": {
+            "col": 8,
+            "end_col": 20,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "not (amount < low)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "256fef425a8b2e30",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "low",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "5636905745e471e0",
+          "span": {
+            "col": 16,
+            "end_col": 19,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "amount > high",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "1a3b9b0f015447d1",
+          "span": {
+            "col": 8,
+            "end_col": 21,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "not (amount > high)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8149c24ec10c9d56",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "high",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "0e0fd497898ce5e1",
+          "span": {
+            "col": 16,
+            "end_col": 20,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "amount",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 12,
+            "end_col": 18,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 24
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "units * 100",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f61ac90156b17cdc",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f789293da4809c1e",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "16ee083cd1dff643",
+          "span": {
+            "col": 20,
+            "end_col": 23,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/crap_scores.py",
+        "line": 33
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "len(entries)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "746768f05b0b8e55",
+          "span": {
+            "col": 12,
+            "end_col": 24,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_export.py",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount // 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f38c549949b0b827",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "//",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "0dbab41edae6a7e5",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "35633e40b47a49c0",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_helpers.py",
+        "line": 1
       }
     },
     {
@@ -3390,6 +6496,671 @@
         "col": 5,
         "file": "tests/test_pricing.py",
         "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0edb481884075219",
+          "span": {
+            "col": 23,
+            "end_col": 27,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "True",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "74066cd198d30bb7",
+          "span": {
+            "col": 29,
+            "end_col": 33,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "False"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "28c760800f97fe25",
+          "span": {
+            "col": 35,
+            "end_col": 37,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "900",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a543f6b53d7980e3",
+          "span": {
+            "col": 38,
+            "end_col": 41,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "require_positive(-1)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "c5c1b9c8b767f387",
+          "span": {
+            "col": 9,
+            "end_col": 29,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9308a77800c04d00",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 12
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 17
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "classify(100, False)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1fd3a3fc5b654bbe",
+          "span": {
+            "col": 14,
+            "end_col": 17,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "False",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "06e2f2f32dd79f56",
+          "span": {
+            "col": 19,
+            "end_col": 24,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "True"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "mocker.patch(\"ledger.pricing.log_total\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 45,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "mocker.patch(\"ledger.pricing.mail_total\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 46,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "mocker.patch(\"ledger.pricing.clock\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 5,
+            "end_col": 41,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c990da8df2cb4146",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7b99a45add747e7e",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "e9c0f845a1f19eaa",
+          "span": {
+            "col": 26,
+            "end_col": 28,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b69589adcbc91fd1",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "False",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "116ea9b54d32ac0a",
+          "span": {
+            "col": 33,
+            "end_col": 38,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "True"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 25
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "7b1642c7ae1a502a",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "20",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3c2623559733b281",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "300",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f759bdfb38d9d352",
+          "span": {
+            "col": 26,
+            "end_col": 29,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "3460c06fb9151ad2",
+          "span": {
+            "col": 33,
+            "end_col": 35,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 32
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d7e1a13f40d3ead9",
+          "span": {
+            "col": 24,
+            "end_col": 27,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "400",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "95e52db4b560ad33",
+          "span": {
+            "col": 29,
+            "end_col": 32,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b32581b0fc5a7a9c",
+          "span": {
+            "col": 34,
+            "end_col": 37,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "3460c06fb9151ad2",
+          "span": {
+            "col": 33,
+            "end_col": 35,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 37
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account = Account(\"kim\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 29,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "account.deposit(100)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a2a7535cc5e7a3f0",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "account.deposit(50)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "feaaf40736975740",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "e9c0f845a1f19eaa",
+          "span": {
+            "col": 26,
+            "end_col": 28,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 42
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account = Account(\"lee\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 5,
+            "end_col": 29,
+            "end_line": 50,
+            "line": 50
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "account.deposit(200)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a2a7535cc5e7a3f0",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "account.deposit(25)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "25",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "feaaf40736975740",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "total = account.cents",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 5,
+            "end_col": 26,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "8e11b46a32be969a",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "225",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b33896617411f692",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_quality_signals.py",
+        "line": 49
       }
     }
   ]

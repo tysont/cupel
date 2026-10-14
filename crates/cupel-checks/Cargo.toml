@@ -1,0 +1,24 @@
+# ABOUTME: Manifest for cupel-checks: Cupel's native checks, one module per check (ADR-001).
+# ABOUTME: Depends on cupel-core only; clippy.toml forbids file-system, process, and environment access.
+[package]
+name = "cupel-checks"
+description = "Cupel's native checks: pure computations over facts."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+cupel-core.workspace = true
+globset.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+schemars.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+tempfile.workspace = true
+
+[lints]
+workspace = true

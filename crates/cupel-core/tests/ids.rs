@@ -65,7 +65,10 @@ fn subject_finding_ids_never_collide_with_symbol_finding_ids() {
         "k",
         "sh_4b1d9e0c4b1d9e0c\0a1b2c3d4e5f60718",
     );
-    assert_ne!(by_symbol, by_subject);
+    assert_eq!(
+        [by_symbol.as_str(), by_subject.as_str()],
+        ["fnd_fbd0e5", "fnd_384801"]
+    );
 }
 
 #[test]
@@ -83,7 +86,7 @@ fn finding_id_keeps_24_bits_as_six_hex_digits_after_prefix() {
 fn finding_id_parts_are_separated_unambiguously() {
     let a = FindingId::compute(&CheckId::from("ab"), "c", &symbol(), None);
     let b = FindingId::compute(&CheckId::from("a"), "bc", &symbol(), None);
-    assert_ne!(a, b);
+    assert_eq!([a.as_str(), b.as_str()], ["fnd_fa3441", "fnd_7312c8"]);
 }
 
 #[test]
@@ -91,42 +94,86 @@ fn finding_id_depends_on_every_structural_input() {
     let site: SiteHash = "a1b2c3d4e5f60718".parse().unwrap();
     let other_site: SiteHash = "a1b2c3d4e5f60719".parse().unwrap();
     let other_symbol: SymbolHash = "sh_4b1d9e0c4b1d9e0d".parse().unwrap();
-    let base = FindingId::compute(&CheckId::from("c"), "k", &symbol(), Some(&site));
-    for variant in [
+    let ids = [
+        FindingId::compute(&CheckId::from("c"), "k", &symbol(), Some(&site)),
         FindingId::compute(&CheckId::from("c2"), "k", &symbol(), Some(&site)),
         FindingId::compute(&CheckId::from("c"), "k2", &symbol(), Some(&site)),
         FindingId::compute(&CheckId::from("c"), "k", &other_symbol, Some(&site)),
         FindingId::compute(&CheckId::from("c"), "k", &symbol(), Some(&other_site)),
         FindingId::compute(&CheckId::from("c"), "k", &symbol(), None),
-    ] {
-        assert_ne!(base, variant);
-    }
+    ];
+    // Each input changed alone gives an ID of its own.
+    assert_eq!(
+        ids.map(|id| id.to_string()),
+        [
+            "fnd_fbd0e5",
+            "fnd_181cbb",
+            "fnd_1a232b",
+            "fnd_8c6588",
+            "fnd_868af6",
+            "fnd_4c7527"
+        ]
+    );
 }
 
 #[test]
 fn finding_id_parses_and_round_trips_through_json() {
-    let id: FindingId = "fnd_7c2e1a".parse().unwrap();
-    let json = serde_json::to_string(&id).unwrap();
-    assert_eq!(json, "\"fnd_7c2e1a\"");
-    assert_eq!(serde_json::from_str::<FindingId>(&json).unwrap(), id);
+    assert_eq!(
+        assert_json_round_trip::<FindingId>("fnd_7c2e1a").as_str(),
+        "fnd_7c2e1a"
+    );
+}
+
+/// Parses `text`, asserts it serializes to the JSON string `text` and reads back equal, and
+/// returns the parsed value.
+fn assert_json_round_trip<T>(text: &str) -> T
+where
+    T: std::str::FromStr<Err: std::fmt::Debug>
+        + serde::Serialize
+        + serde::de::DeserializeOwned
+        + PartialEq
+        + std::fmt::Debug,
+{
+    let value: T = text.parse().unwrap();
+    let json = serde_json::to_string(&value).unwrap();
+    assert_eq!(json, format!("\"{text}\""));
+    assert_eq!(serde_json::from_str::<T>(&json).unwrap(), value);
+    value
 }
 
 #[test]
 fn finding_id_rejects_malformed_strings() {
-    for bad in [
+    let bad = [
         "7c2e1a",
         "fnd_7c2e1",
         "fnd_7c2e1a0",
         "fnd_7C2E1A",
         "fnd_7c2e1g",
         "fn_7c2e1a",
-    ] {
-        assert!(
-            bad.parse::<FindingId>().is_err(),
-            "{bad} should be rejected"
-        );
-        assert!(serde_json::from_str::<FindingId>(&format!("\"{bad}\"")).is_err());
-    }
+    ];
+    let parsed: Vec<String> = bad
+        .iter()
+        .map(|text| text.parse::<FindingId>().unwrap_err().to_string())
+        .collect();
+    let expected: Vec<String> = bad
+        .iter()
+        .map(|text| {
+            format!(
+                "invalid FindingId `{text}`: expected `fnd_` followed by six lowercase hex digits"
+            )
+        })
+        .collect();
+    assert_eq!(parsed, expected);
+    let read: Vec<String> = bad
+        .iter()
+        .map(|text| {
+            let json = format!("\"{text}\"");
+            serde_json::from_str::<FindingId>(&json)
+                .unwrap_err()
+                .to_string()
+        })
+        .collect();
+    assert_eq!(read, expected);
 }
 
 #[test]
@@ -179,10 +226,8 @@ fn run_ids_are_prefixed_ulids_and_unique() {
 
 #[test]
 fn run_id_round_trips_through_json_and_rejects_bad_input() {
-    let id: RunId = "run_01JA2B3C4D5E6F7G8H9JKMNPQR".parse().unwrap();
-    let json = serde_json::to_string(&id).unwrap();
-    assert_eq!(json, "\"run_01JA2B3C4D5E6F7G8H9JKMNPQR\"");
-    assert_eq!(serde_json::from_str::<RunId>(&json).unwrap(), id);
+    let id = assert_json_round_trip::<RunId>("run_01JA2B3C4D5E6F7G8H9JKMNPQR");
+    assert_eq!(id.to_string(), "run_01JA2B3C4D5E6F7G8H9JKMNPQR");
     for bad in [
         "01JA2B3C4D5E6F7G8H9JKMNPQR",
         "run_",

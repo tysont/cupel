@@ -263,11 +263,21 @@ impl VerbArgs {
 }
 
 impl Cli {
-    /// Whether this invocation only plans: `--dry-run`, or `init` without `--write`, which
-    /// previews (ADR-021 §5). Planning invocations write nothing, not even a run record.
+    /// Whether this invocation only plans: `--dry-run`, or `init`, `baseline set`, or
+    /// `baseline import` without `--write`, which preview (ADR-021 §5, ADR-046 §3). Planning
+    /// invocations write nothing, not even a run record.
     pub fn plans_only(&self) -> bool {
-        self.global.dry_run
-            || matches!(self.verb, Some(VerbArgs::Init { .. }) if !self.global.write)
+        let previews = matches!(
+            self.verb,
+            Some(
+                VerbArgs::Init { .. }
+                    | VerbArgs::Baseline {
+                        action: BaselineArgs::Set { .. } | BaselineArgs::Import { .. },
+                        ..
+                    }
+            )
+        );
+        self.global.dry_run || (previews && !self.global.write)
     }
 }
 

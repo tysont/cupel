@@ -5,8 +5,262 @@
     "version": "<version>"
   },
   "description": {
-    "cells": [],
-    "checks": [],
+    "cells": [
+      {
+        "check": "static.clones",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.clones",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.clones",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.clones",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.clones",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.crap",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.crap",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.crap",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.crap",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.crap",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.deps",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.deps",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.deps",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.deps",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.deps",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
+    "checks": [
+      "static.clones",
+      "static.complexity",
+      "static.crap",
+      "static.dead-code",
+      "static.deps",
+      "tests.quality",
+      "tests.weakening"
+    ],
     "languages": [
       "go",
       "javascript",
@@ -17,9 +271,11 @@
     "subject": "matrix"
   },
   "exit_code": 0,
+  "explanation": null,
   "findings": [],
   "next_actions": [],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

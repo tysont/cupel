@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use cupel_core::config::{Config, ConfigError, ConfigFile, ConfigRequest};
 use cupel_core::{
     Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CostClass, Error, EventSink, Facts,
-    LangId, Manifest, MetricSpec, Plan, Result, Scope, Stability, Tier,
+    LangId, Manifest, MetricPer, MetricSpec, Plan, Result, Scope, Stability, Tier,
 };
 
 /// A registered check that is never planned or run here; only its manifest matters.
@@ -28,6 +28,7 @@ impl Check for DeclaredCheck {
     }
 }
 
+/// A check declaring `metrics`; a name ending in `@symbol` is a per-symbol ranking dimension.
 fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
     Box::new(DeclaredCheck(Manifest {
         id: CheckId::from(id),
@@ -39,9 +40,17 @@ fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
         findings: vec![],
         metrics: metrics
             .iter()
-            .map(|name| MetricSpec {
-                name: (*name).to_owned(),
-                summary: String::new(),
+            .map(|name| match name.strip_suffix("@symbol") {
+                Some(name) => MetricSpec {
+                    name: name.to_owned(),
+                    summary: String::new(),
+                    per: MetricPer::Symbol,
+                },
+                None => MetricSpec {
+                    name: (*name).to_owned(),
+                    summary: String::new(),
+                    per: MetricPer::Scope,
+                },
             })
             .collect(),
         stability: Stability::Experimental,
@@ -52,7 +61,7 @@ fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
 fn registry() -> CheckRegistry {
     let mut checks = CheckRegistry::default();
     checks
-        .register(declared("tests.mutation", &["score"]))
+        .register(declared("tests.mutation", &["score", "survivors@symbol"]))
         .unwrap();
     checks.register(declared("tests.weakening", &[])).unwrap();
     checks
@@ -75,7 +84,7 @@ fn validate(text: &str) -> Result<()> {
 
 #[test]
 fn a_config_naming_only_registered_ids_is_valid() {
-    validate(
+    let result = validate(
         r#"
 [roots]
 api = { path = "api", lang = "go" }
@@ -94,7 +103,8 @@ operators = "extended"
 "tests.weakening" = "none"
 "#,
     )
-    .unwrap();
+    .map_err(|err| err.to_string());
+    assert_eq!(result, Ok(()));
 }
 
 #[test]
@@ -111,6 +121,10 @@ fn unregistered_ids_are_usage_errors_listing_the_valid_ones() {
         (
             "[gate.changed]\n\"tests.mutation.ratio\" = \">= 0.8\"\n",
             "unknown metric `ratio` of `tests.mutation` in `[gate.changed]`; registered: `score`",
+        ),
+        (
+            "[gate.changed]\n\"tests.mutation.survivors\" = \"< 3\"\n",
+            "unknown metric `survivors` of `tests.mutation` in `[gate.changed]`; registered: `score`",
         ),
         (
             "[gate.changed]\n\"tests.weakening.count\" = \"== 0\"\n",
@@ -152,7 +166,7 @@ fn validate_languages(text: &str) -> Result<()> {
 
 #[test]
 fn language_validation_accepts_check_tables_and_gates_while_no_check_is_registered() {
-    validate_languages(
+    let result = validate_languages(
         r#"
 [roots]
 api = { path = "api", lang = "go" }
@@ -170,7 +184,8 @@ threshold = 0.9
 "tests.mutation.score" = ">= 0.80"
 "#,
     )
-    .unwrap();
+    .map_err(|err| err.to_string());
+    assert_eq!(result, Ok(()));
 }
 
 #[test]

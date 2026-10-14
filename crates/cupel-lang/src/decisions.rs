@@ -17,7 +17,10 @@
 //!   that parent, and neither is anything nested under it.
 //! - **Early returns** whose node is the symbol body's final statement are dropped: a return
 //!   is final when every node from it up to the body is its parent's last named child.
-//! - **Cases**: only the first `case` among siblings keeps its cognitive weight.
+//! - **Cases**: only the first `case` among siblings keeps its cognitive weight; the others
+//!   are marked `continues` (one multiway decision, ADR-072).
+//! - **Tables**: `@loop.table` (any pattern) on a loop node marks it as iterating over a table
+//!   of cases written in place; the loop's decision has `table: true` (ADR-069).
 use std::collections::HashSet;
 
 use cupel_core::syntax::{Decision, DecisionKind, Decisions, SymbolDecisions};
@@ -45,7 +48,8 @@ pub fn extract(source: &Source<'_>) -> Decisions {
         .query(QueryFile::Decisions, &parsed.grammar)
         .unwrap_or_else(|error| panic!("{} decisions.scm: {error}", source.language.id()));
     let mut seen = HashSet::new();
-    let mut found: Vec<(DecisionKind, Node<'_>)> = matches(&query, parsed)
+    let all = matches(&query, parsed);
+    let mut found: Vec<(DecisionKind, Node<'_>)> = all
         .iter()
         .filter_map(|m| {
             let (kind, node) = m.prefixed(capture::DECISION_PREFIX)?;
@@ -54,6 +58,11 @@ pub fn extract(source: &Source<'_>) -> Decisions {
         })
         .collect();
     found.sort_by_key(|(_, node)| node.start_byte());
+    let tables: HashSet<usize> = all
+        .iter()
+        .flat_map(|m| m.nodes(capture::LOOP_TABLE))
+        .map(|node| node.id())
+        .collect();
 
     let owners: Vec<Option<usize>> = found
         .iter()
@@ -72,7 +81,7 @@ pub fn extract(source: &Source<'_>) -> Decisions {
                     .collect();
                 SymbolDecisions {
                     symbol: symbol.symbol.key(),
-                    decisions: weigh(&mine, symbol, rules),
+                    decisions: weigh(&mine, symbol, rules, &tables),
                 }
             })
             .collect(),
@@ -96,6 +105,7 @@ fn weigh(
     found: &[(DecisionKind, Node<'_>)],
     symbol: &Definition<'_>,
     rules: &DecisionRules,
+    tables: &HashSet<usize>,
 ) -> Vec<Decision> {
     let body = symbol.body.unwrap_or(symbol.node);
     let kept: Vec<(DecisionKind, Node<'_>)> = found
@@ -114,6 +124,8 @@ fn weigh(
                 nesting: nesting(*node, symbol.node, &kept, rules),
                 cyclomatic: weight.cyclomatic,
                 cognitive: if first_case { weight.cognitive } else { 0 },
+                table: *kind == DecisionKind::Loop && tables.contains(&node.id()),
+                continues: !first_case,
             }
         })
         .collect()

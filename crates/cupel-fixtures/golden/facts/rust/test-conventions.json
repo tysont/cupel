@@ -3,7 +3,8 @@
     {
       "source": "src/lib.rs",
       "tests": [
-        "tests/ledger.rs"
+        "tests/ledger.rs",
+        "tests/quality_signals.rs"
       ]
     },
     {

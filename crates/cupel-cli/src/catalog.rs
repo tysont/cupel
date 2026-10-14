@@ -1,12 +1,12 @@
-// ABOUTME: The registries `describe` reads: compiled-in languages, the producers they register, and
-// ABOUTME: checks. Builds the language, fact, and matrix descriptions from them, never from lists.
+// ABOUTME: The registries every verb reads: compiled-in languages, the producers they register, and
+// ABOUTME: the native checks. Builds the `describe` payloads from them, never from lists.
 use std::path::Path;
 
 use cupel_core::{
-    CheckRegistry, CheckSupport, Ctx, FactDescription, FactKind, FactProducers, LangId,
-    LanguageDescription, LanguageProducers, LanguageSummary, LanguagesDescription, MatrixCell,
-    MatrixDescription, ProducerDescription, ProducerRegistry, RegisteredProducer, SupportMatrix,
-    schema,
+    CheckDescription, CheckId, CheckRegistry, CheckSupport, Ctx, FactDescription, FactKind,
+    FactProducers, FindingDescription, LangId, LanguageDescription, LanguageProducers,
+    LanguageSummary, LanguageSupport, LanguagesDescription, MatrixCell, MatrixDescription,
+    ProducerDescription, ProducerRegistry, RegisteredProducer, SupportMatrix, schema,
 };
 use cupel_lang::{Language, LanguageRegistry};
 use serde_json::Value;
@@ -19,7 +19,7 @@ pub struct Catalog {
 }
 
 impl Catalog {
-    /// The compiled-in languages and their producers. Checks register in P2.1.
+    /// The compiled-in languages, their producers, and the native checks.
     pub fn builtin() -> Self {
         let languages = LanguageRegistry::builtin();
         let mut producers = ProducerRegistry::default();
@@ -27,12 +27,70 @@ impl Catalog {
         Self {
             languages,
             producers,
-            checks: CheckRegistry::default(),
+            checks: checks(),
         }
     }
 
     pub fn language_ids(&self) -> Vec<LangId> {
         self.languages.ids()
+    }
+
+    pub fn language_registry(&self) -> &LanguageRegistry {
+        &self.languages
+    }
+
+    pub fn producers(&self) -> &ProducerRegistry {
+        &self.producers
+    }
+
+    pub fn checks(&self) -> &CheckRegistry {
+        &self.checks
+    }
+
+    /// `None` when no check has that ID.
+    pub fn check(&self, id: &CheckId, root: &Path) -> Option<CheckDescription> {
+        let manifest = self.checks.get(id)?.manifest().clone();
+        let matrix = self.matrix_of(root);
+        Some(CheckDescription {
+            languages: matrix
+                .cells()
+                .filter(|(check, _, _)| *check == id)
+                .map(|(_, lang, support)| LanguageSupport {
+                    lang: lang.clone(),
+                    support: support.into(),
+                })
+                .collect(),
+            manifest,
+        })
+    }
+
+    /// The finding kind `kind`, from the manifest of the check that emits it.
+    pub fn finding(&self, kind: &str) -> Option<FindingDescription> {
+        self.checks.iter().find_map(|check| {
+            let manifest = check.manifest();
+            manifest
+                .findings
+                .iter()
+                .find(|spec| spec.kind == kind)
+                .map(|spec| FindingDescription::of(manifest, spec))
+        })
+    }
+
+    /// Every finding kind a registered check emits, sorted.
+    pub fn finding_kinds(&self) -> Vec<String> {
+        let mut kinds: Vec<String> = self
+            .checks
+            .iter()
+            .flat_map(|check| {
+                check
+                    .manifest()
+                    .findings
+                    .iter()
+                    .map(|spec| spec.kind.clone())
+            })
+            .collect();
+        kinds.sort();
+        kinds
     }
 
     pub fn languages(&self) -> LanguagesDescription {
@@ -135,9 +193,7 @@ impl Catalog {
             &self.checks,
             &self.producers,
             &self.languages.langs(),
-            &Ctx {
-                root: root.to_path_buf(),
-            },
+            &Ctx::new(root.to_path_buf()),
         )
     }
 
@@ -156,6 +212,13 @@ impl Catalog {
             })
             .collect()
     }
+}
+
+/// The native checks, registered once through `cupel-checks` (ADR-001).
+pub fn checks() -> CheckRegistry {
+    let mut registry = CheckRegistry::default();
+    cupel_checks::register(&mut registry);
+    registry
 }
 
 fn extensions(language: &dyn Language) -> Vec<String> {

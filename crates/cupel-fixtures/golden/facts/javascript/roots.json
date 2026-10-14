@@ -20,6 +20,134 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/clones_settlement.js",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.js",
+        "line": 16
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.js",
+        "line": 29
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.js",
+        "line": 45
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.js",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.js",
+        "line": 31
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.js",
+        "line": 47
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.js",
+        "line": 58
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.js",
+        "line": 124
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.js",
+        "line": 129
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.js",
+        "line": 133
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.js",
+        "line": 139
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.js",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.js",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/crap_scores.js",
+        "line": 32
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/dead_export.js",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/decide.js",
         "line": 1
       }
@@ -278,6 +406,78 @@
         "col": 35,
         "file": "test/format.spec.js",
         "line": 10
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 22,
+        "file": "test/math.quality.test.js",
+        "line": 6
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 10
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 27,
+        "file": "test/math.quality.test.js",
+        "line": 14
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 18
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 34,
+        "file": "test/math.quality.test.js",
+        "line": 22
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 39,
+        "file": "test/math.quality.test.js",
+        "line": 29
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 38,
+        "file": "test/math.quality.test.js",
+        "line": 35
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 41
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 32,
+        "file": "test/math.quality.test.js",
+        "line": 48
       }
     },
     {

@@ -75,6 +75,7 @@ impl Language for Rust {
         reg.register::<ProjectInfo, _>(ProjectRoots::new(
             Arc::clone(&language),
             &project::ECOSYSTEM,
+            &super::ecosystems::KNOWN,
         ));
         // Module resolution needs Cargo manifests and the `mod` tree, which queries cannot see.
         reg.register::<ModuleGraph, _>(ImportGraph::new(

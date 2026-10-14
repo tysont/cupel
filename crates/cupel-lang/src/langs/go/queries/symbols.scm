@@ -27,3 +27,38 @@
 (var_spec
   name: (identifier) @symbol.name
   value: (expression_list . (func_literal body: (block) @symbol.body) .)) @symbol.closure
+
+; Parameters: each name of a declaration in a function's own parameter list (`a, b int` is two),
+; or the declaration itself when it names none (`func(int)`). The receiver list is not matched.
+(function_declaration
+  parameters: (parameter_list
+    (parameter_declaration
+      name: (identifier) @symbol.parameter)))
+
+(method_declaration
+  parameters: (parameter_list
+    (parameter_declaration
+      name: (identifier) @symbol.parameter)))
+
+(func_literal
+  parameters: (parameter_list
+    (parameter_declaration
+      name: (identifier) @symbol.parameter)))
+
+(function_declaration
+  parameters: (parameter_list
+    (parameter_declaration
+      !name) @symbol.parameter))
+
+(method_declaration
+  parameters: (parameter_list
+    (parameter_declaration
+      !name) @symbol.parameter))
+
+(func_literal
+  parameters: (parameter_list
+    (parameter_declaration
+      !name) @symbol.parameter))
+
+(parameter_list
+  (variadic_parameter_declaration) @symbol.parameter)

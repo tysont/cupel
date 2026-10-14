@@ -9,6 +9,94 @@
       }
     },
     {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 35
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 52
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 57
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 124
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 134
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 139
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 23
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "crap_scores.go",
+        "line": 34
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "dead_export/dead_export.go",
+        "line": 3
+      }
+    },
+    {
       "reason": "framework-hook",
       "symbol": {
         "col": 1,
@@ -54,6 +142,150 @@
         "col": 1,
         "file": "ledger.go",
         "line": 75
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 9
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 13
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 13
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 18
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 18
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 22
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 22
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 26
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 26
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 34
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 34
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 40
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 40
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 46
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 46
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 53
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_quality_test.go",
+        "line": 53
       }
     },
     {

@@ -18,3 +18,14 @@
 (import_from_statement
   module_name: (_) @import.specifier
   (wildcard_import) @import.name) @import
+
+; `__all__` lists the names a module exports; an import of one of them is a re-export.
+(module
+  (expression_statement
+    (assignment
+      left: (identifier) @_all
+      right: [
+        (list (string (string_content) @reexport.name))
+        (tuple (string (string_content) @reexport.name))
+      ]))
+  (#eq? @_all "__all__"))

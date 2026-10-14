@@ -13,11 +13,34 @@
       "lang": "python",
       "name": "cents",
       "namespace": "units",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 31,
         "end_line": 2,
         "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 7
+      },
+      "display": "deps_layers.port.Port.place",
+      "file": "src/deps_layers/port.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "place",
+      "namespace": "deps_layers.port.Port",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 7
       },
       "visibility": "public"
     },
@@ -34,6 +57,7 @@
       "lang": "python",
       "name": "balance",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 24,
@@ -55,6 +79,7 @@
       "lang": "python",
       "name": "audit_limit",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 32,
@@ -76,6 +101,7 @@
       "lang": "python",
       "name": "_scale",
       "namespace": "ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 21,
@@ -97,6 +123,7 @@
       "lang": "python",
       "name": "audit_trail",
       "namespace": "ledger.account.Audited",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 44,
@@ -118,6 +145,7 @@
       "lang": "python",
       "name": "is_clean",
       "namespace": "ledger.account.Audited",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 38,
@@ -139,6 +167,7 @@
       "lang": "python",
       "name": "__init__",
       "namespace": "ledger.account.Account",
+      "parameters": 1,
       "span": {
         "col": 5,
         "end_col": 23,
@@ -160,6 +189,7 @@
       "lang": "python",
       "name": "opening",
       "namespace": "ledger.account.Account",
+      "parameters": 1,
       "span": {
         "col": 5,
         "end_col": 30,
@@ -181,6 +211,7 @@
       "lang": "python",
       "name": "deposit",
       "namespace": "ledger.account.Account",
+      "parameters": 1,
       "span": {
         "col": 5,
         "end_col": 28,
@@ -202,6 +233,7 @@
       "lang": "python",
       "name": "statement",
       "namespace": "ledger.account.Account",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 52,
@@ -223,6 +255,7 @@
       "lang": "python",
       "name": "line",
       "namespace": "ledger.account.Account.statement",
+      "parameters": 2,
       "span": {
         "col": 9,
         "end_col": 39,
@@ -244,6 +277,7 @@
       "lang": "python",
       "name": "header",
       "namespace": "ledger.account.Account.statement",
+      "parameters": 0,
       "span": {
         "col": 9,
         "end_col": 51,
@@ -265,6 +299,7 @@
       "lang": "python",
       "name": "_audit",
       "namespace": "ledger.account.Account",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 30,
@@ -286,6 +321,7 @@
       "lang": "python",
       "name": "__check",
       "namespace": "ledger.account.Account",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 31,
@@ -307,6 +343,7 @@
       "lang": "python",
       "name": "main",
       "namespace": "ledger.cli",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 47,
@@ -328,6 +365,7 @@
       "lang": "python",
       "name": "run",
       "namespace": "ledger.cli",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 30,
@@ -335,6 +373,380 @@
         "line": 10
       },
       "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 31,
+        "end_line": 12,
+        "line": 5
+      },
+      "display": "ledger.clones_settlement.settle_invoices",
+      "file": "src/ledger/clones_settlement.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "settle_invoices",
+      "namespace": "ledger.clones_settlement",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 12,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 23,
+        "line": 16
+      },
+      "display": "ledger.clones_settlement.reconcile_payments",
+      "file": "src/ledger/clones_settlement.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "reconcile_payments",
+      "namespace": "ledger.clones_settlement",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 23,
+        "line": 15
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 17,
+        "end_line": 38,
+        "line": 27
+      },
+      "display": "ledger.clones_settlement.order_lines",
+      "file": "src/ledger/clones_settlement.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "order_lines",
+      "namespace": "ledger.clones_settlement",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 38,
+        "line": 26
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 17,
+        "end_line": 54,
+        "line": 42
+      },
+      "display": "ledger.clones_settlement.refund_lines",
+      "file": "src/ledger/clones_settlement.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "refund_lines",
+      "namespace": "ledger.clones_settlement",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 54,
+        "line": 41
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 16,
+        "end_line": 27,
+        "line": 5
+      },
+      "display": "ledger.complexity.label",
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "label",
+      "namespace": "ledger.complexity",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 27,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 19,
+        "end_line": 38,
+        "line": 31
+      },
+      "display": "ledger.complexity.settle",
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "settle",
+      "namespace": "ledger.complexity",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 38,
+        "line": 30
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 71,
+        "end_line": 42,
+        "line": 42
+      },
+      "display": "ledger.complexity.open_account",
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "open_account",
+      "namespace": "ledger.complexity",
+      "parameters": 6,
+      "span": {
+        "col": 1,
+        "end_col": 71,
+        "end_line": 42,
+        "line": 41
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 108,
+        "line": 46
+      },
+      "display": "ledger.complexity.statement_template",
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "statement_template",
+      "namespace": "ledger.complexity",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 6,
+        "end_line": 108,
+        "line": 45
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 28,
+        "end_line": 112,
+        "line": 112
+      },
+      "display": "ledger.complexity.net",
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "net",
+      "namespace": "ledger.complexity",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 112,
+        "line": 111
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 27,
+        "end_line": 117,
+        "line": 117
+      },
+      "display": "ledger.complexity.Statement.__init__",
+      "file": "src/ledger/complexity.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "__init__",
+      "namespace": "ledger.complexity.Statement",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 27,
+        "end_line": 117,
+        "line": 116
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 41,
+        "end_line": 120,
+        "line": 120
+      },
+      "display": "ledger.complexity.Statement.line",
+      "file": "src/ledger/complexity.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "line",
+      "namespace": "ledger.complexity.Statement",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 41,
+        "end_line": 120,
+        "line": 119
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 26,
+        "end_line": 151,
+        "line": 124
+      },
+      "display": "ledger.complexity.month",
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "month",
+      "namespace": "ledger.complexity",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 151,
+        "line": 123
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 17,
+        "end_line": 21,
+        "line": 9
+      },
+      "display": "ledger.crap_scores.overdue",
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "overdue",
+      "namespace": "ledger.crap_scores",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 21,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 18,
+        "end_line": 30,
+        "line": 25
+      },
+      "display": "ledger.crap_scores.clamp",
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "clamp",
+      "namespace": "ledger.crap_scores",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 30,
+        "line": 24
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 23,
+        "end_line": 35,
+        "line": 34
+      },
+      "display": "ledger.crap_scores.to_cents",
+      "file": "src/ledger/crap_scores.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "to_cents",
+      "namespace": "ledger.crap_scores",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 35,
+        "line": 33
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 24,
+        "end_line": 2,
+        "line": 2
+      },
+      "display": "ledger.dead_export.unused_total",
+      "file": "src/ledger/dead_export.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "unused_total",
+      "namespace": "ledger.dead_export",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 2,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 23,
+        "end_line": 2,
+        "line": 2
+      },
+      "display": "ledger.dead_helpers._forgotten_rate",
+      "file": "src/ledger/dead_helpers.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "_forgotten_rate",
+      "namespace": "ledger.dead_helpers",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 2,
+        "line": 1
+      },
+      "visibility": "internal"
     },
     {
       "body": {
@@ -349,6 +761,7 @@
       "lang": "python",
       "name": "classify",
       "namespace": "ledger.decide",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 17,
@@ -370,6 +783,7 @@
       "lang": "python",
       "name": "first_overdraft",
       "namespace": "ledger.decide",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 16,
@@ -391,6 +805,7 @@
       "lang": "python",
       "name": "parse_cents",
       "namespace": "ledger.decide",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 30,
@@ -412,6 +827,7 @@
       "lang": "python",
       "name": "require_positive",
       "namespace": "ledger.decide",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 17,
@@ -433,6 +849,7 @@
       "lang": "python",
       "name": "describe",
       "namespace": "ledger.decide",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 29,
@@ -454,6 +871,7 @@
       "lang": "python",
       "name": "sign",
       "namespace": "ledger.decide",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 37,
@@ -475,6 +893,7 @@
       "lang": "python",
       "name": "positives",
       "namespace": "ledger.decide",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 53,
@@ -496,6 +915,7 @@
       "lang": "python",
       "name": "discounted",
       "namespace": "ledger.pricing",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 17,
@@ -517,6 +937,7 @@
       "lang": "python",
       "name": "tally",
       "namespace": "ledger.pricing",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 28,
@@ -538,6 +959,7 @@
       "lang": "python",
       "name": "has_price",
       "namespace": "ledger.pricing",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 34,
@@ -559,6 +981,7 @@
       "lang": "python",
       "name": "log_total",
       "namespace": "ledger.pricing",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 17,
@@ -580,6 +1003,7 @@
       "lang": "python",
       "name": "summary",
       "namespace": "ledger.report",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 40,
@@ -601,6 +1025,7 @@
       "lang": "python",
       "name": "render",
       "namespace": "ledger.report.format",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 32,
@@ -622,6 +1047,7 @@
       "lang": "python",
       "name": "publish",
       "namespace": "ledger.report.format",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 73,
@@ -643,6 +1069,7 @@
       "lang": "python",
       "name": "net_total",
       "namespace": "ledger.twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 13,
@@ -664,6 +1091,7 @@
       "lang": "python",
       "name": "sum_after_charge",
       "namespace": "ledger.twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 13,
@@ -685,6 +1113,7 @@
       "lang": "python",
       "name": "net_total_floor",
       "namespace": "ledger.twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 14,
@@ -706,6 +1135,7 @@
       "lang": "python",
       "name": "net_total_laid_out",
       "namespace": "ledger.twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 13,
@@ -727,6 +1157,7 @@
       "lang": "python",
       "name": "net_total_plus",
       "namespace": "ledger.twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 13,
@@ -748,6 +1179,7 @@
       "lang": "python",
       "name": "net_total_capped",
       "namespace": "ledger.twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 13,
@@ -769,6 +1201,7 @@
       "lang": "python",
       "name": "net_total_product",
       "namespace": "ledger.twins",
+      "parameters": 2,
       "span": {
         "col": 1,
         "end_col": 13,
@@ -790,6 +1223,7 @@
       "lang": "python",
       "name": "account",
       "namespace": "tests.conftest",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 26,
@@ -811,6 +1245,7 @@
       "lang": "python",
       "name": "test_deposit_adds_to_the_balance",
       "namespace": "tests.test_ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 32,
@@ -832,6 +1267,7 @@
       "lang": "python",
       "name": "test_statements_mention_the_owner",
       "namespace": "tests.test_ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 31,
@@ -853,6 +1289,7 @@
       "lang": "python",
       "name": "test_parsing_garbage_gives_nothing",
       "namespace": "tests.test_ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 42,
@@ -874,6 +1311,7 @@
       "lang": "python",
       "name": "test_an_opening_account_exists",
       "namespace": "tests.test_ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 46,
@@ -895,6 +1333,7 @@
       "lang": "python",
       "name": "test_negative_deposits_are_rejected",
       "namespace": "tests.test_ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 29,
@@ -916,6 +1355,7 @@
       "lang": "python",
       "name": "test_rounding_is_close",
       "namespace": "tests.test_ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 70,
@@ -937,6 +1377,7 @@
       "lang": "python",
       "name": "test_statement_is_published",
       "namespace": "tests.test_ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 47,
@@ -958,6 +1399,7 @@
       "lang": "python",
       "name": "test_report_matches_snapshot",
       "namespace": "tests.test_ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 36,
@@ -979,6 +1421,7 @@
       "lang": "python",
       "name": "test_publish_posts_once",
       "namespace": "tests.test_ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 39,
@@ -1000,6 +1443,7 @@
       "lang": "python",
       "name": "test_rendering_can_be_replaced",
       "namespace": "tests.test_ledger",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 28,
@@ -1021,6 +1465,7 @@
       "lang": "python",
       "name": "test_opening_an_account_does_not_raise",
       "namespace": "tests.test_ledger",
+      "parameters": 0,
       "span": {
         "col": 1,
         "end_col": 19,
@@ -1042,6 +1487,7 @@
       "lang": "python",
       "name": "setUp",
       "namespace": "tests.test_pricing.PricingTest",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 32,
@@ -1063,6 +1509,7 @@
       "lang": "python",
       "name": "test_tally_reports_overdraft",
       "namespace": "tests.test_pricing.PricingTest",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 35,
@@ -1084,6 +1531,7 @@
       "lang": "python",
       "name": "test_members_get_a_discount",
       "namespace": "tests.test_pricing.PricingTest",
+      "parameters": 0,
       "span": {
         "col": 5,
         "end_col": 56,
@@ -1105,11 +1553,210 @@
       "lang": "python",
       "name": "test_tally_logs_once",
       "namespace": "tests.test_pricing.PricingTest",
+      "parameters": 1,
       "span": {
         "col": 5,
         "end_col": 45,
         "end_line": 23,
         "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 41,
+        "end_line": 9,
+        "line": 9
+      },
+      "display": "tests.test_quality_signals.test_members_pay_exactly_the_discounted_price",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_members_pay_exactly_the_discounted_price",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 9,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 29,
+        "end_line": 14,
+        "line": 13
+      },
+      "display": "tests.test_quality_signals.test_negative_amounts_are_rejected",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_negative_amounts_are_rejected",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 14,
+        "line": 12
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 38,
+        "end_line": 18,
+        "line": 18
+      },
+      "display": "tests.test_quality_signals.test_statements_are_not_empty",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_statements_are_not_empty",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 38,
+        "end_line": 18,
+        "line": 17
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 25,
+        "end_line": 22,
+        "line": 22
+      },
+      "display": "tests.test_quality_signals.test_classifying_runs",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_classifying_runs",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 22,
+        "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 26
+      },
+      "display": "tests.test_quality_signals.test_tallies_are_logged_and_mailed",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_tallies_are_logged_and_mailed",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 41,
+        "end_line": 34,
+        "line": 33
+      },
+      "display": "tests.test_quality_signals.test_every_entry_counts_toward_the_balance",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_every_entry_counts_toward_the_balance",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 34,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 41,
+        "end_line": 39,
+        "line": 38
+      },
+      "display": "tests.test_quality_signals.test_computed_entries_count_toward_the_balance",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_computed_entries_count_toward_the_balance",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 39,
+        "line": 37
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 34,
+        "end_line": 46,
+        "line": 43
+      },
+      "display": "tests.test_quality_signals.test_deposits_keep_the_owner",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_deposits_keep_the_owner",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 34,
+        "end_line": 46,
+        "line": 42
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 24,
+        "end_line": 54,
+        "line": 50
+      },
+      "display": "tests.test_quality_signals.test_deposits_accumulate",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_deposits_accumulate",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 54,
+        "line": 49
       },
       "visibility": "public"
     }

@@ -32,6 +32,17 @@ expression: pretty(&schema)
     "exit_code": {
       "$ref": "#/$defs/ExitCode"
     },
+    "explanation": {
+      "description": "What `explain` adds to the finding or check result it returns; null for every other verb.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Explanation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "findings": {
       "type": "array",
       "items": {
@@ -49,6 +60,17 @@ expression: pretty(&schema)
       "anyOf": [
         {
           "$ref": "#/$defs/RunPlan"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rankings": {
+      "description": "What `survey` ranks: the worst targets per dimension; null for every other verb (ADR-062).",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Rankings"
         },
         {
           "type": "null"
@@ -79,9 +101,11 @@ expression: pretty(&schema)
     "cupel",
     "description",
     "exit_code",
+    "explanation",
     "findings",
     "next_actions",
     "plan",
+    "rankings",
     "run",
     "status",
     "summary",
@@ -275,6 +299,26 @@ expression: pretty(&schema)
         "name"
       ]
     },
+    "CheckDescription": {
+      "description": "One check: its manifest, and whether it can run for each registered language (design §6.5).",
+      "type": "object",
+      "properties": {
+        "languages": {
+          "description": "Every registered language and whether the check can run there, derived from its needs.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LanguageSupport"
+          }
+        },
+        "manifest": {
+          "$ref": "#/$defs/Manifest"
+        }
+      },
+      "required": [
+        "languages",
+        "manifest"
+      ]
+    },
     "CheckId": {
       "description": "A check's stable namespaced ID, such as `tests.mutation`.",
       "type": "string"
@@ -309,6 +353,15 @@ expression: pretty(&schema)
         },
         "id": {
           "$ref": "#/$defs/CheckId"
+        },
+        "metrics": {
+          "description": "The value of each `scope` metric the check measured, by metric name; the gate reads\nthem as `<check-id>.<metric>` (ADR-060).",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "format": "double"
+          },
+          "default": {}
         },
         "oracle": {
           "description": "The oracle a differential or trace check compared against.",
@@ -350,6 +403,7 @@ expression: pretty(&schema)
         "duration_ms",
         "findings",
         "id",
+        "metrics",
         "oracle",
         "score",
         "skipped",
@@ -743,6 +797,34 @@ expression: pretty(&schema)
           "required": [
             "subject"
           ]
+        },
+        {
+          "description": "`cupel describe <check-id>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "check"
+            }
+          },
+          "$ref": "#/$defs/CheckDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe finding <kind>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "finding"
+            }
+          },
+          "$ref": "#/$defs/FindingDescription",
+          "required": [
+            "subject"
+          ]
         }
       ]
     },
@@ -769,6 +851,49 @@ expression: pretty(&schema)
         "command",
         "exit_code",
         "summary"
+      ]
+    },
+    "Excerpt": {
+      "description": "Lines of one file around a location.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Relative to the repository root.",
+          "type": "string"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExcerptLine"
+          }
+        }
+      },
+      "required": [
+        "file",
+        "lines"
+      ]
+    },
+    "ExcerptLine": {
+      "type": "object",
+      "properties": {
+        "focus": {
+          "description": "Whether the line is inside the finding's location.",
+          "type": "boolean"
+        },
+        "line": {
+          "description": "1-based.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "focus",
+        "line",
+        "text"
       ]
     },
     "ExitCode": {
@@ -805,6 +930,72 @@ expression: pretty(&schema)
         "meaning",
         "name",
         "stability"
+      ]
+    },
+    "ExplainSubject": {
+      "description": "What `explain` was asked about.",
+      "type": "string",
+      "enum": [
+        "finding",
+        "check"
+      ]
+    },
+    "Explanation": {
+      "description": "Context for one finding or one check result, read from the fact store. The finding or check\nresult itself is in the envelope's `findings` or `checks`.",
+      "type": "object",
+      "properties": {
+        "covering_tests": {
+          "description": "Tests that cover the finding's site, from `action.hints.covering_tests`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excerpt": {
+          "description": "The source around the finding's location; null when it has no location or the file is\ngone.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Excerpt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metrics": {
+          "description": "The check's metrics in that run, per symbol; empty for a finding.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          }
+        },
+        "nearest_test_file": {
+          "description": "The test file nearest to the finding's site, from `action.hints.nearest_test_file`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "run": {
+          "description": "The stored run the explanation comes from: the latest run that produced the finding, or\nthe latest run of the check.",
+          "$ref": "#/$defs/RunId"
+        },
+        "subject": {
+          "$ref": "#/$defs/ExplainSubject"
+        },
+        "target": {
+          "description": "The finding ID or check ID that was asked about.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "covering_tests",
+        "excerpt",
+        "metrics",
+        "nearest_test_file",
+        "run",
+        "subject",
+        "target"
       ]
     },
     "FactDescription": {
@@ -1000,10 +1191,70 @@ expression: pretty(&schema)
         "title"
       ]
     },
+    "FindingDescription": {
+      "description": "One finding kind: the check that emits it, the action it asks for, and the JSON Schema of its\nevidence (ADR-012).",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "evidence": {
+          "description": "JSON Schema of this kind's `evidence` object.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "kind": {
+          "type": "string"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "check",
+        "evidence",
+        "kind",
+        "stability",
+        "summary"
+      ]
+    },
     "FindingId": {
       "description": "`fnd_` followed by six lowercase hex digits",
       "type": "string",
       "pattern": "^fnd_[0-9a-f]{6}$"
+    },
+    "FindingKindSpec": {
+      "description": "A finding kind a check emits, the action it maps to, and its evidence schema (ADR-012).",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "evidence": {
+          "description": "JSON Schema of this kind's `evidence` object.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "kind": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "evidence",
+        "kind",
+        "summary"
+      ]
     },
     "GateOutcome": {
       "type": "string",
@@ -1039,7 +1290,7 @@ expression: pretty(&schema)
       "type": "object",
       "properties": {
         "actual": {
-          "description": "The measured value; null when the metric was not produced.",
+          "description": "The measured value; null when the rule could not be evaluated.",
           "type": [
             "number",
             "null"
@@ -1047,7 +1298,7 @@ expression: pretty(&schema)
           "format": "double"
         },
         "result": {
-          "$ref": "#/$defs/GateOutcome"
+          "$ref": "#/$defs/RuleOutcome"
         },
         "rule": {
           "description": "The rule as written, such as `tests.mutation.score >= 0.80`.",
@@ -1205,6 +1456,21 @@ expression: pretty(&schema)
         "stability"
       ]
     },
+    "LanguageSupport": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "support": {
+          "$ref": "#/$defs/SupportDescription"
+        }
+      },
+      "required": [
+        "lang",
+        "support"
+      ]
+    },
     "LanguagesDescription": {
       "description": "Every language, one line each.",
       "type": "object",
@@ -1289,6 +1555,72 @@ expression: pretty(&schema)
         "line"
       ]
     },
+    "Manifest": {
+      "description": "Everything Cupel knows about a check without running it. Plugins describe themselves with\nthe same shape. Language applicability is never declared; it is derived (design §8.3.5).",
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/CostClass"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FindingKindSpec"
+          }
+        },
+        "id": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "metrics": {
+          "description": "What the check measures: `scope` metrics are gate keys (`<check-id>.<metric>`), the others\nare `survey` ranking dimensions (ADR-060, ADR-062).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MetricSpec"
+          }
+        },
+        "needs": {
+          "description": "Facts the check cannot run without.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "version": {
+          "description": "Bumped when results change for the same facts; invalidates cached results.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "wants": {
+          "description": "Facts the check uses for enrichment when present.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        }
+      },
+      "required": [
+        "cost",
+        "findings",
+        "id",
+        "metrics",
+        "needs",
+        "stability",
+        "summary",
+        "tier",
+        "version",
+        "wants"
+      ]
+    },
     "MatrixCell": {
       "type": "object",
       "properties": {
@@ -1336,6 +1668,82 @@ expression: pretty(&schema)
         "cells",
         "checks",
         "languages"
+      ]
+    },
+    "Metric": {
+      "description": "One measured value of a check, for a symbol or for the check as a whole.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "The metric's name, such as `cyclomatic` or `score`.",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "Null for a value about the whole check, such as its score.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolHash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "key",
+        "symbol",
+        "value"
+      ]
+    },
+    "MetricPer": {
+      "description": "What one value of a metric describes: the whole scope, reported in `CheckResult.metrics` and\nusable as a gate key, or one target, reported through `EventSink::measure` and ranked by\n`survey`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "scope"
+          ]
+        },
+        {
+          "description": "A function or method.",
+          "type": "string",
+          "const": "symbol"
+        },
+        {
+          "description": "A file or module.",
+          "type": "string",
+          "const": "module"
+        },
+        {
+          "description": "A set of targets, such as a clone cluster or a dependency cycle.",
+          "type": "string",
+          "const": "group"
+        }
+      ]
+    },
+    "MetricSpec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "per": {
+          "description": "What one value describes (ADR-062).",
+          "$ref": "#/$defs/MetricPer"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "per",
+        "summary"
       ]
     },
     "NextAction": {
@@ -1544,6 +1952,117 @@ expression: pretty(&schema)
     "ProducerId": {
       "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
       "type": "string"
+    },
+    "RankedTarget": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "rank": {
+          "description": "1 is the highest value.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "target": {
+          "$ref": "#/$defs/Target"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "lang",
+        "rank",
+        "target",
+        "value"
+      ]
+    },
+    "RankingDimension": {
+      "description": "One per-target metric of one check, with its worst targets.",
+      "type": "object",
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "entries": {
+          "description": "The highest values first, at most `top`.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RankedTarget"
+          }
+        },
+        "measured": {
+          "description": "How many targets were measured.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "metric": {
+          "type": "string"
+        },
+        "per": {
+          "$ref": "#/$defs/MetricPer"
+        },
+        "summary": {
+          "description": "The metric's summary from the manifest.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check",
+        "entries",
+        "measured",
+        "metric",
+        "per",
+        "summary"
+      ]
+    },
+    "Rankings": {
+      "description": "What `survey` adds to its envelope: the highest values of every ranking dimension.",
+      "type": "object",
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RankingDimension"
+          }
+        },
+        "top": {
+          "description": "The most entries a dimension lists.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "dimensions",
+        "top"
+      ]
+    },
+    "RuleOutcome": {
+      "description": "One gate rule's result (ADR-060 §6). Only `pass` passes.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        {
+          "description": "The rule's check did not run to completion here, or did not report the metric.",
+          "type": "string",
+          "const": "skipped"
+        },
+        {
+          "description": "The rule's operator cannot be evaluated yet (`no-breaking`).",
+          "type": "string",
+          "const": "unsupported"
+        }
+      ]
     },
     "RunId": {
       "description": "A run ID: `run_` followed by a ULID.",
@@ -1858,7 +2377,8 @@ expression: pretty(&schema)
         "unavailable",
         "unconfigured",
         "budget",
-        "timeout"
+        "timeout",
+        "needs-range"
       ]
     },
     "Skipped": {
@@ -2078,6 +2598,42 @@ expression: pretty(&schema)
       "description": "`sh_` followed by sixteen lowercase hex digits",
       "type": "string",
       "pattern": "^sh_[0-9a-f]{16}$"
+    },
+    "Target": {
+      "description": "What a measurement is about.",
+      "type": "object",
+      "properties": {
+        "display": {
+          "description": "How people name it: a symbol's display name, a module path, a cluster's description.",
+          "type": "string"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Location"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "symbol": {
+          "description": "The structural hash, when the target is a symbol.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolHash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "display",
+        "location",
+        "symbol"
+      ]
     },
     "Tier": {
       "description": "Evidence tier: 0 structural metric … 6 proof.",

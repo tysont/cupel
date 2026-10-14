@@ -86,7 +86,7 @@ fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
     for kind in FactKind::ALL {
         assert_eq!(
             schema::fact(kind).is_some(),
-            FactKind::SYNTACTIC.contains(&kind),
+            FactKind::SYNTACTIC.contains(&kind) || kind == FactKind::CoverageMap,
             "{kind}"
         );
     }
@@ -119,15 +119,24 @@ fn envelope_schema_types_exit_code_as_an_integer_0_to_6() {
     assert_eq!(exit_code["enum"], json!([0, 1, 2, 3, 4, 5, 6]));
 }
 
+/// The `definition.field` pairs of `fields` that `schema` does not list as required.
+fn not_required(schema: &Schema, fields: &[(&str, &str)]) -> Vec<String> {
+    let defs = &schema.as_value()["$defs"];
+    fields
+        .iter()
+        .filter(|(def, field)| {
+            let required: Vec<String> =
+                serde_json::from_value(defs[*def]["required"].clone()).unwrap();
+            !required.iter().any(|name| name == field)
+        })
+        .map(|(def, field)| format!("{def}.{field}"))
+        .collect()
+}
+
 /// ADR-013: every key is always emitted, absent values as `null`, so every property is required.
 #[test]
 fn optional_fields_are_required_and_nullable() {
-    let schema = schema::run();
-    let defs = &schema.as_value()["$defs"];
-    let required = |def: &str| -> Vec<String> {
-        serde_json::from_value(defs[def]["required"].clone()).unwrap()
-    };
-    for (def, field) in [
+    let run = [
         ("RunInfo", "git"),
         ("RunInfo", "budget_ms"),
         ("RunInfo", "baseline"),
@@ -136,11 +145,11 @@ fn optional_fields_are_required_and_nullable() {
         ("Location", "col"),
         ("NextAction", "command"),
         ("CheckResult", "skipped"),
-    ] {
-        assert!(required(def).contains(&field.to_owned()), "{def}.{field}");
-    }
-    let fact = schema::fact(FactKind::Symbols).unwrap();
-    let body_required: Vec<String> =
-        serde_json::from_value(fact.as_value()["$defs"]["SymbolDef"]["required"].clone()).unwrap();
-    assert!(body_required.contains(&"body".to_owned()));
+    ];
+    assert_eq!(not_required(&schema::run(), &run), Vec::<String>::new());
+    let symbols = schema::fact(FactKind::Symbols).unwrap();
+    assert_eq!(
+        not_required(&symbols, &[("SymbolDef", "body")]),
+        Vec::<String>::new()
+    );
 }

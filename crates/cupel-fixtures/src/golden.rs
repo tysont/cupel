@@ -78,6 +78,11 @@ impl Goldens {
         )
     }
 
+    /// The directory the goldens live in.
+    pub fn dir(&self) -> &Path {
+        &self.dir
+    }
+
     /// The file a golden name maps to: `<dir>/<name>.json`. Names are slash-separated relative
     /// paths such as `cli/describe` or `static.complexity/rust`.
     pub fn path(&self, name: &str) -> Result<PathBuf, GoldenError> {

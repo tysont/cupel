@@ -19,6 +19,24 @@ fn verb_names() -> Vec<String> {
         .collect()
 }
 
+/// Asserts `cupel <args>` passes with a description of `subject`, and returns the description.
+fn assert_described(args: &[&str], subject: &str) -> Value {
+    let outcome = run(args);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let description = outcome.envelope()["description"].clone();
+    assert_eq!(description["subject"], json!(subject));
+    description
+}
+
+/// Asserts `cupel <args>` exits 2 with one finding of `kind`, and returns the finding.
+fn assert_rejected(args: &[&str], kind: &str) -> Value {
+    let outcome = run(args);
+    assert_eq!(outcome.code, 2, "{}", outcome.stdout);
+    let finding = outcome.finding();
+    assert_eq!(finding["kind"], json!(kind));
+    finding
+}
+
 #[test]
 fn describe_without_a_subject_describes_the_cli() {
     let outcome = run(["describe"]);
@@ -72,27 +90,26 @@ fn describe_cli_lists_every_verb_exit_code_and_schema() {
 
 #[test]
 fn describe_verb_describes_its_arguments_and_pending_step() {
-    let outcome = run(["describe", "check"]);
+    let outcome = run(["describe", "tests"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["description"]["subject"], json!("command"));
-    assert_eq!(envelope["description"]["name"], json!("check"));
-    assert_eq!(envelope["description"]["pending_step"], json!("P2.1"));
+    assert_eq!(envelope["description"]["name"], json!("tests"));
+    assert_eq!(envelope["description"]["pending_step"], json!("P3.3"));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
 }
 
 #[test]
 fn verb_describe_flag_matches_describe_verb() {
-    for verb in verb_names() {
-        let by_flag = run([verb.as_str(), "--describe"]);
-        assert_eq!(by_flag.code, 0, "{verb} --describe: {}", by_flag.stdout);
-        let by_verb = run(["describe", verb.as_str()]);
-        assert_eq!(
-            by_flag.envelope()["description"],
-            by_verb.envelope()["description"],
-            "{verb}"
-        );
-    }
+    let by_flag: Vec<Value> = verb_names()
+        .iter()
+        .map(|verb| assert_described(&[verb, "--describe"], "command"))
+        .collect();
+    let by_verb: Vec<Value> = verb_names()
+        .iter()
+        .map(|verb| assert_described(&["describe", verb], "command"))
+        .collect();
+    assert_eq!(by_flag, by_verb);
 }
 
 #[test]
@@ -166,38 +183,99 @@ fn describe_schema_with_an_unknown_name_names_the_valid_ones() {
 
 #[test]
 fn describe_unknown_subject_is_a_usage_error_listing_subjects() {
-    let outcome = run(["describe", "frobnicate"]);
-    assert_eq!(outcome.code, 2);
-    let finding = outcome.finding();
-    assert_eq!(finding["kind"], json!("cli.usage"));
-    let valid = finding["evidence"]["valid"].as_array().unwrap();
-    for subject in ["check", "schema", "matrix"] {
-        assert!(valid.contains(&json!(subject)), "{subject} in {valid:?}");
-    }
+    let finding = assert_rejected(&["describe", "frobnicate"], "cli.usage");
+    assert_eq!(
+        finding["evidence"]["valid"],
+        json!([
+            "init",
+            "doctor",
+            "describe",
+            "check",
+            "survey",
+            "explain",
+            "baseline",
+            "oracle",
+            "tests",
+            "suppress",
+            "serve",
+            "schema",
+            "finding",
+            "language",
+            "languages",
+            "fact",
+            "matrix"
+        ])
+    );
 }
 
 #[test]
 fn describe_subjects_from_later_steps_are_not_implemented_yet() {
-    for (args, step) in [
-        (vec!["describe", "finding", "mutant.survived"], "P2.1"),
-        (vec!["describe", "static.complexity"], "P2.1"),
-        (vec!["describe", "--agent"], "P8.3"),
+    let finding = assert_rejected(&["describe", "--agent"], "cli.not-implemented");
+    let detail = finding["detail"].as_str().unwrap();
+    assert!(detail.contains("P8.3"), "{detail}");
+}
+
+#[test]
+fn describe_check_shows_its_manifest_and_support_per_language() {
+    let description = assert_described(&["describe", "static.complexity"], "check");
+    assert_eq!(description["manifest"]["id"], json!("static.complexity"));
+    assert_eq!(
+        description["manifest"]["needs"],
+        json!(["symbols", "decisions", "norm-tree"])
+    );
+    let languages = description["languages"].as_array().unwrap();
+    assert_eq!(languages.len(), 5);
+    assert!(
+        languages
+            .iter()
+            .all(|entry| entry["support"]["status"] == json!("supported"))
+    );
+}
+
+#[test]
+fn describe_finding_shows_its_check_action_and_evidence_schema() {
+    let description = assert_described(&["describe", "finding", "complexity.high"], "finding");
+    let required = json!(["cyclomatic", "cognitive", "cyclomatic_max", "cognitive_max"]);
+    assert_eq!(
+        (
+            &description["check"],
+            &description["action"],
+            &description["evidence"]["required"]
+        ),
+        (
+            &json!("static.complexity"),
+            &json!("reduce_complexity"),
+            &required
+        )
+    );
+}
+
+#[test]
+fn unknown_checks_and_finding_kinds_are_usage_errors_listing_the_known_ones() {
+    for (args, valid) in [
+        (vec!["describe", "static.complexty"], "static.complexity"),
+        (
+            vec!["describe", "finding", "mutant.survived"],
+            "complexity.high",
+        ),
     ] {
         let outcome = run(&args);
         assert_eq!(outcome.code, 2, "{args:?}");
         let finding = outcome.finding();
-        assert_eq!(finding["kind"], json!("cli.not-implemented"), "{args:?}");
-        let detail = finding["detail"].as_str().unwrap();
-        assert!(detail.contains(step), "{args:?}: {detail}");
+        assert_eq!(finding["kind"], json!("cli.usage"), "{args:?}");
+        assert!(
+            finding["evidence"]["valid"]
+                .as_array()
+                .unwrap()
+                .contains(&json!(valid)),
+            "{args:?}"
+        );
     }
 }
 
 #[test]
 fn describe_all_is_one_document_with_everything() {
-    let outcome = run(["describe", "--all"]);
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let description = outcome.envelope()["description"].clone();
-    assert_eq!(description["subject"], json!("all"));
+    let description = assert_described(&["describe", "--all"], "all");
     assert_eq!(
         description["cli"],
         run(["describe"]).envelope()["description"]
@@ -216,18 +294,27 @@ fn describe_all_is_one_document_with_everything() {
         .map(|command| command["name"].as_str().unwrap())
         .collect();
     assert_eq!(commands, verb_names());
-    for command in description["commands"].as_array().unwrap() {
-        let name = command["name"].as_str().unwrap();
-        let mut by_verb = run(["describe", name]).envelope()["description"].clone();
-        by_verb.as_object_mut().unwrap().remove("subject");
-        assert_eq!(command, &by_verb, "{name}");
-    }
-    let schemas = description["schemas"].as_array().unwrap();
-    assert_eq!(schemas.len(), schema::PUBLISHED.len());
-    for (described, (name, generate)) in schemas.iter().zip(schema::PUBLISHED) {
-        assert_eq!(described["name"], json!(name));
-        assert_eq!(&described["schema"], generate().as_value());
-    }
+    let by_verb: Vec<Value> = commands
+        .iter()
+        .map(|name| {
+            let mut by_verb = run(["describe", name]).envelope()["description"].clone();
+            by_verb.as_object_mut().unwrap().remove("subject");
+            by_verb
+        })
+        .collect();
+    assert_eq!(&description["commands"], &Value::Array(by_verb));
+    let schemas: Vec<(&Value, &Value)> = description["schemas"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|described| (&described["name"], &described["schema"]))
+        .collect();
+    let published: Vec<(Value, Value)> = schema::PUBLISHED
+        .iter()
+        .map(|(name, generate)| (json!(name), generate().as_value().clone()))
+        .collect();
+    let published: Vec<(&Value, &Value)> = published.iter().map(|(a, b)| (a, b)).collect();
+    assert_eq!(schemas, published);
 }
 
 /// Every object `describe --all` names — CLI, commands, arguments, exit codes, schemas — states
@@ -269,18 +356,19 @@ fn every_described_entity_carries_stability() {
 #[test]
 fn exit_codes_are_stable_and_everything_else_is_experimental() {
     let description = run(["describe"]).envelope()["description"].clone();
-    for code in description["exit_codes"].as_array().unwrap() {
-        assert_eq!(code["stability"], json!("stable"));
-    }
+    let stabilities: Vec<&Value> = description["exit_codes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|code| &code["stability"])
+        .collect();
+    assert_eq!(stabilities, vec![&json!("stable"); 7]);
     assert_eq!(description["stability"], json!("experimental"));
 }
 
 #[test]
 fn describe_languages_lists_every_language_with_its_family_and_extensions() {
-    let outcome = run(["describe", "languages"]);
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let description = outcome.envelope()["description"].clone();
-    assert_eq!(description["subject"], json!("languages"));
+    let description = assert_described(&["describe", "languages"], "languages");
     let languages = description["languages"].as_array().unwrap();
     let ids: Vec<&str> = languages
         .iter()
@@ -299,15 +387,28 @@ fn describe_languages_lists_every_language_with_its_family_and_extensions() {
 
 #[test]
 fn describe_language_shows_identity_facts_and_check_support() {
-    let outcome = run(["describe", "language", "rust"]);
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let description = outcome.envelope()["description"].clone();
-    assert_eq!(description["subject"], json!("language"));
-    assert_eq!(description["id"], json!("rust"));
-    assert_eq!(description["family"], json!("rust"));
-    assert_eq!(description["extensions"], json!([".rs"]));
+    let description = assert_described(&["describe", "language", "rust"], "language");
+    assert_eq!(
+        (
+            &description["id"],
+            &description["family"],
+            &description["extensions"]
+        ),
+        (&json!("rust"), &json!("rust"), &json!([".rs"]))
+    );
     assert!(description["facts"].is_array());
-    assert_eq!(description["checks"], json!([]));
+    assert_eq!(
+        description["checks"],
+        json!([
+            {"check": "static.clones", "support": {"status": "supported"}},
+            {"check": "static.complexity", "support": {"status": "supported"}},
+            {"check": "static.crap", "support": {"status": "supported"}},
+            {"check": "static.dead-code", "support": {"status": "supported"}},
+            {"check": "static.deps", "support": {"status": "supported"}},
+            {"check": "tests.quality", "support": {"status": "supported"}},
+            {"check": "tests.weakening", "support": {"status": "supported"}}
+        ])
+    );
 }
 
 #[test]
@@ -340,10 +441,7 @@ fn describe_language_shows_its_toolchain_row_in_default_order() {
 
 #[test]
 fn describe_language_with_an_unknown_id_is_a_usage_error_listing_languages() {
-    let outcome = run(["describe", "language", "cobol"]);
-    assert_eq!(outcome.code, 2);
-    let finding = outcome.finding();
-    assert_eq!(finding["kind"], json!("cli.usage"));
+    let finding = assert_rejected(&["describe", "language", "cobol"], "cli.usage");
     assert_eq!(
         finding["evidence"]["valid"],
         json!(["go", "javascript", "python", "rust", "typescript"])
@@ -353,12 +451,11 @@ fn describe_language_with_an_unknown_id_is_a_usage_error_listing_languages() {
 
 #[test]
 fn describe_fact_shows_version_schema_and_producers_for_every_language() {
-    let outcome = run(["describe", "fact", "norm-tree"]);
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let description = outcome.envelope()["description"].clone();
-    assert_eq!(description["subject"], json!("fact"));
-    assert_eq!(description["kind"], json!("norm-tree"));
-    assert_eq!(description["syntactic"], json!(true));
+    let description = assert_described(&["describe", "fact", "norm-tree"], "fact");
+    assert_eq!(
+        (&description["kind"], &description["syntactic"]),
+        (&json!("norm-tree"), &json!(true))
+    );
     assert!(description["version"].as_u64().is_some());
     assert_eq!(
         description["schema"]["$id"],
@@ -371,39 +468,73 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
         .map(|entry| entry["lang"].as_str().unwrap())
         .collect();
     assert_eq!(langs, ["go", "javascript", "python", "rust", "typescript"]);
-    assert_eq!(description["consumers"], json!([]));
+    assert_eq!(
+        description["consumers"],
+        json!([
+            "static.clones",
+            "static.complexity",
+            "static.crap",
+            "static.dead-code",
+            "tests.quality"
+        ])
+    );
 }
 
 #[test]
 fn describe_fact_without_a_payload_type_yet_has_no_version_or_schema() {
-    let description = run(["describe", "fact", "coverage-map"]).envelope()["description"].clone();
+    let description = run(["describe", "fact", "test-results"]).envelope()["description"].clone();
     assert_eq!(description["syntactic"], json!(false));
     assert_eq!(description["version"], Value::Null);
     assert_eq!(description["schema"], Value::Null);
 }
 
 #[test]
+fn the_coverage_map_has_a_payload_type_before_any_producer_makes_one() {
+    let description = run(["describe", "fact", "coverage-map"]).envelope()["description"].clone();
+    assert_eq!(description["syntactic"], json!(false));
+    assert_eq!(description["version"], json!(1));
+    assert_eq!(
+        description["schema"]["required"],
+        json!(["files"]),
+        "{description:#}"
+    );
+}
+
+#[test]
 fn describe_fact_with_an_unknown_kind_is_a_usage_error_listing_kinds() {
-    let outcome = run(["describe", "fact", "vibes"]);
-    assert_eq!(outcome.code, 2);
-    let finding = outcome.finding();
+    let finding = assert_rejected(&["describe", "fact", "vibes"], "cli.usage");
     let valid = finding["evidence"]["valid"].as_array().unwrap();
     assert_eq!(valid.len(), cupel_core::FactKind::ALL.len());
     assert_eq!(valid[0], json!("symbols"));
 }
 
 #[test]
-fn describe_matrix_has_every_language_and_no_rows_without_checks() {
-    let outcome = run(["describe", "matrix"]);
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let description = outcome.envelope()["description"].clone();
-    assert_eq!(description["subject"], json!("matrix"));
+fn describe_matrix_has_every_language_and_a_row_per_check() {
+    let description = assert_described(&["describe", "matrix"], "matrix");
     assert_eq!(
         description["languages"],
         json!(["go", "javascript", "python", "rust", "typescript"])
     );
-    assert_eq!(description["checks"], json!([]));
-    assert_eq!(description["cells"], json!([]));
+    assert_eq!(
+        description["checks"],
+        json!([
+            "static.clones",
+            "static.complexity",
+            "static.crap",
+            "static.dead-code",
+            "static.deps",
+            "tests.quality",
+            "tests.weakening"
+        ])
+    );
+    let cells = description["cells"].as_array().unwrap();
+    let checks = description["checks"].as_array().unwrap().len();
+    assert_eq!(cells.len(), checks * 5, "one cell per check per language");
+    assert!(
+        cells
+            .iter()
+            .all(|cell| cell["support"]["status"] == json!("supported"))
+    );
 }
 
 #[test]
@@ -428,19 +559,18 @@ fn describe_language_text_lists_the_toolchain_with_rules_and_commands() {
         .split_once("\ntoolchain\n")
         .expect("a toolchain section")
         .1;
-    for line in [
+    let missing: Vec<&str> = [
         "  runners",
         "    tool.cargo-nextest  when file `.config/nextest.toml` exists",
         "      cargo nextest run --workspace",
         "    tool.cargo-test  otherwise",
         "    tool.cargo-llvm-cov  lcov · always",
         "  race      miri, loom",
-    ] {
-        assert!(
-            toolchain.lines().any(|l| l == line),
-            "{line:?} in\n{toolchain}"
-        );
-    }
+    ]
+    .into_iter()
+    .filter(|line| !toolchain.lines().any(|shown| shown == *line))
+    .collect();
+    assert_eq!(missing, Vec::<&str>::new(), "{toolchain}");
 }
 
 #[test]

@@ -19,9 +19,22 @@ fn compare(op: Comparison, value: f64, percent: bool) -> GateCondition {
     }
 }
 
+/// Parses each (key, condition) and asserts its key and condition.
+fn assert_parses(cases: &[(&str, &str, GateKey, GateCondition)]) {
+    for (raw_key, raw_condition, expected_key, expected_condition) in cases {
+        let rule = GateRuleSpec::parse(raw_key, raw_condition)
+            .unwrap_or_else(|err| panic!("{raw_key} = {raw_condition}: {err}"));
+        assert_eq!(
+            (&rule.key, &rule.condition),
+            (expected_key, expected_condition),
+            "{raw_key} = {raw_condition}"
+        );
+    }
+}
+
 #[test]
-fn parses_every_operator() {
-    let cases = [
+fn parses_every_comparison() {
+    assert_parses(&[
         (
             "tests.mutation.score",
             ">= 0.80",
@@ -58,6 +71,12 @@ fn parses_every_operator() {
             key("perf.bench", Some("regression")),
             compare(Comparison::Lt, 5.0, true),
         ),
+    ]);
+}
+
+#[test]
+fn parses_every_presence_condition() {
+    assert_parses(&[
         (
             "tests.weakening",
             "none",
@@ -70,16 +89,7 @@ fn parses_every_operator() {
             key("static.api-surface", None),
             GateCondition::NoBreaking,
         ),
-    ];
-    for (raw_key, raw_condition, expected_key, expected_condition) in cases {
-        let rule = GateRuleSpec::parse(raw_key, raw_condition)
-            .unwrap_or_else(|err| panic!("{raw_key} = {raw_condition}: {err}"));
-        assert_eq!(rule.key, expected_key, "{raw_key} = {raw_condition}");
-        assert_eq!(
-            rule.condition, expected_condition,
-            "{raw_key} = {raw_condition}"
-        );
-    }
+    ]);
 }
 
 #[test]

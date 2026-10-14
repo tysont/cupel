@@ -130,6 +130,2386 @@
     {
       "sites": [
         {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9373a348e4ae3b48",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "04f333404e5e04bc",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "!invoice.paid",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "94b4e5fa296a4160",
+          "span": {
+            "col": 12,
+            "end_col": 25,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "!(!invoice.paid)"
+          ]
+        },
+        {
+          "from": "owed += invoice.amount;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "97b7a7a3ee48d528",
+          "span": {
+            "col": 13,
+            "end_col": 36,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "376d9d4a71cc7d45",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "open += 1;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "64f1ba7a2c5c47fc",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "a89d1b97ecc8df63",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "069eac9a0378feb0",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "37f127681b27e4b7",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d892d803f042926d",
+          "span": {
+            "col": 39,
+            "end_col": 40,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9373a348e4ae3b48",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "04f333404e5e04bc",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "!payment.paid",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "94b4e5fa296a4160",
+          "span": {
+            "col": 12,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "!(!payment.paid)"
+          ]
+        },
+        {
+          "from": "due += payment.amount;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "97b7a7a3ee48d528",
+          "span": {
+            "col": 13,
+            "end_col": 35,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "376d9d4a71cc7d45",
+          "span": {
+            "col": 17,
+            "end_col": 19,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "pending += 1;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "64f1ba7a2c5c47fc",
+          "span": {
+            "col": 13,
+            "end_col": 26,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "a89d1b97ecc8df63",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "069eac9a0378feb0",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "37f127681b27e4b7",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "85e958ac4f595101",
+          "span": {
+            "col": 43,
+            "end_col": 45,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "04f333404e5e04bc",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "ddf9aa8c7bb26028",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "3b74e4920f35b47c",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "f1ca810916d38f23",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "total += cost;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6d84e1d5391a9525",
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "74f6a2cbf1cfd612",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "count += quantity;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "004f2e2d880785d5",
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "88c7d1970127dcde",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"{quantity} x {price} = {cost}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "adbae211a8433d80",
+          "span": {
+            "col": 9,
+            "end_col": 62,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "c8b5da1e6e0cc353",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9589fc89df2259a1",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"total {total}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "492fbd15d8e6b2a0",
+          "span": {
+            "col": 5,
+            "end_col": 42,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"average {average}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b9f3b575f3d4e222",
+          "span": {
+            "col": 5,
+            "end_col": 46,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 34
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "04f333404e5e04bc",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "ddf9aa8c7bb26028",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "3b74e4920f35b47c",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "f1ca810916d38f23",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "total += cost;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6d84e1d5391a9525",
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "74f6a2cbf1cfd612",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "count += quantity;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "004f2e2d880785d5",
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "88c7d1970127dcde",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"{quantity} x {price} = {cost}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "adbae211a8433d80",
+          "span": {
+            "col": 9,
+            "end_col": 62,
+            "end_line": 58,
+            "line": 58
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines.sort();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "5be059db27d2e092",
+          "span": {
+            "col": 5,
+            "end_col": 18,
+            "end_line": 60,
+            "line": 60
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f305137027519407",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "923e3a342e8afb1d",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"total {total}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b9f3b575f3d4e222",
+          "span": {
+            "col": 5,
+            "end_col": 42,
+            "end_line": 62,
+            "line": 62
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines.push(format!(\"average {average}\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6b8bbc3427b4a1e3",
+          "span": {
+            "col": 5,
+            "end_col": 46,
+            "end_line": 63,
+            "line": 63
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/clones_settlement.rs",
+        "line": 50
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 18,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "!(amount < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "6e23f5728fb7b3d1",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "db3207e43372da1a",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "fcc28f22f0b9dd42",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "label = \"refund\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "9d05695746503022",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount == 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d171c2099d3afb56",
+          "span": {
+            "col": 15,
+            "end_col": 26,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "!(amount == 0)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "759ca33488c858bf",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "10f58bb957fd1c30",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "label = \"empty\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "87fe2442a5514aa8",
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit * 100",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "67c3629608cbc1be",
+          "span": {
+            "col": 15,
+            "end_col": 35,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "!(amount > limit * 100)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "ae86ca545a6c5fb4",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "117458e77f494350",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c70e26afb2072aff",
+          "span": {
+            "col": 32,
+            "end_col": 35,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"huge\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "14270053f057e0fd",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit * 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "728e2cfe2cf9fdbf",
+          "span": {
+            "col": 15,
+            "end_col": 34,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "!(amount > limit * 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "79fd9bf5b8111806",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "9f521274428734b5",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "92755df348ba02c4",
+          "span": {
+            "col": 32,
+            "end_col": 34,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"large\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a8c997c3d85cb6dd",
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "24e4c0a35e4aec3e",
+          "span": {
+            "col": 15,
+            "end_col": 29,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "!(amount > limit)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "e89ee3472b07c7e9",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "label = \"over\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ded874f4567603ad",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount == limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d53e0c689f0d53e6",
+          "span": {
+            "col": 15,
+            "end_col": 30,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "!(amount == limit)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "2299b2f2f17768c8",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "label = \"at-limit\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b20198d7d0e36986",
+          "span": {
+            "col": 9,
+            "end_col": 28,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 2",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "df9204fa54360637",
+          "span": {
+            "col": 15,
+            "end_col": 33,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "!(amount > limit / 2)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "33e170abef6f1fff",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "4118ebf5c644234a",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3eb9bc42d8aaf9fd",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"high\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "fa8060dadaac3237",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 4",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b7d6576d631e1859",
+          "span": {
+            "col": 15,
+            "end_col": 33,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "!(amount > limit / 4)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "ccbb7678d1ec5935",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f43f690d7d9ef9b0",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "be28cb0d35761727",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"medium\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7555949869ad2866",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "9f214c8ad1fdd87c",
+          "span": {
+            "col": 15,
+            "end_col": 34,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "!(amount > limit / 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "c9815f5da3f1d386",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "054e23690e4933b2",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "8c0697bd3a93e257",
+          "span": {
+            "col": 32,
+            "end_col": 34,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"low\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6eb4b896753ed2bb",
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > 1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f15c6d4115cece1b",
+          "span": {
+            "col": 15,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "!(amount > 1)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "db7c90d4e964ec10",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "72401495bcbcb65a",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "926ddcb49e7f98ca",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "1 + 1",
+            "1 - 1"
+          ]
+        },
+        {
+          "from": "label = \"tiny\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "864a7ac2b693ee3f",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "label = \"unit\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "2b973a4b48ef78d1",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9373a348e4ae3b48",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "!batch.is_empty()",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "5876e1c4ebd22526",
+          "span": {
+            "col": 12,
+            "end_col": 29,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "!(!batch.is_empty())"
+          ]
+        },
+        {
+          "from": "*amount > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b887e5fe77ba6e71",
+          "span": {
+            "col": 20,
+            "end_col": 31,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "!(*amount > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8f0a123cc0a3ecaa",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "3d8e483563a0c555",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "066e228238355e5f",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "settled < limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "e009b32fe487521c",
+          "span": {
+            "col": 27,
+            "end_col": 42,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "!(settled < limit)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "df40d700d3d2fa5f",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "settled += *amount;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "f56d18e9f50b4c0f",
+          "span": {
+            "col": 25,
+            "end_col": 44,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e0ad57d5b141185b",
+          "span": {
+            "col": 33,
+            "end_col": 35,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "-="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 34
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 51
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 63
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "a97c95d795e0a69c",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 130
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/complexity.rs",
+        "line": 141
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "0e59ba0b253aabaf",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 149,
+            "line": 149
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0f34f1f2cb22aa9c",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 150,
+            "line": 150
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "257f8913b6b74a3d",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 151,
+            "line": 151
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c86c254e8f31b8d2",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 152,
+            "line": 152
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "58782ff0fcc4cca2",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 153,
+            "line": 153
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "6",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "923febb71713f43e",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 154,
+            "line": 154
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "7",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "24834a6e5ae1e0d0",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 155,
+            "line": 155
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "8",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ebfc1d19635ff850",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 156,
+            "line": 156
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "9",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "42750111b7d01bf2",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 157,
+            "line": 157
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "75be629b4150f6e4",
+          "span": {
+            "col": 9,
+            "end_col": 11,
+            "end_line": 158,
+            "line": 158
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "11",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9c45e9c9e872534b",
+          "span": {
+            "col": 9,
+            "end_col": 11,
+            "end_line": 159,
+            "line": 159
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "12",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f52b0ec5d9e0fd33",
+          "span": {
+            "col": 9,
+            "end_col": 11,
+            "end_line": 160,
+            "line": 160
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 147
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9373a348e4ae3b48",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "*day > 30 && *day > grace",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "bad77baafa9c2284",
+          "span": {
+            "col": 12,
+            "end_col": 37,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "!(*day > 30 && *day > grace)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "36b90eae47fa0a80",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "30",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "42d7d9f65872ca2c",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "30",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "29d6f0df7bdb81d8",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "30 + 1",
+            "30 - 1"
+          ]
+        },
+        {
+          "from": "&&",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "4bade7dc324839b3",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "||"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "a066eb3de20f8d84",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "count += 1;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "208c6a8ff287c081",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "14ce33051f09f021",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "39acc8d476139050",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "*day < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d052ccedaf470865",
+          "span": {
+            "col": 19,
+            "end_col": 27,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "!(*day < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "a0c9b2817dcfcb59",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "645bdc7747e33cee",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "8cbd26dbba7e1802",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "count -= 1;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "47fa6dc6a2bd8c0e",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "-=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "434701139ff7e12a",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "+="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d6f046c9ddeefb97",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "*day == 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "189713b2bdc12eaf",
+          "span": {
+            "col": 19,
+            "end_col": 28,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "!(*day == 0)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "8cbcbfe174ead560",
+          "span": {
+            "col": 24,
+            "end_col": 26,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b154af3c0f1c56d5",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "count -= 1;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b9312dc01fa4627f",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "-=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "3fd1f6d667c14faa",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "+="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "625ae0e14eba2e3f",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < low",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "20ad5ab612d2c447",
+          "span": {
+            "col": 8,
+            "end_col": 20,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "!(amount < low)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "679137a6dd9fbfc9",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "low",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "e591e8dd3de6b4b2",
+          "span": {
+            "col": 16,
+            "end_col": 19,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "Default::default()"
+          ]
+        },
+        {
+          "from": "amount > high",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 21,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "!(amount > high)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8ea9f496f9dbf2eb",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "high",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "152aaad0acda3044",
+          "span": {
+            "col": 16,
+            "end_col": 20,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "Default::default()"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "8a8f6411ebcb0bcf",
+          "span": {
+            "col": 11,
+            "end_col": 12,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "16382587999e94df",
+          "span": {
+            "col": 13,
+            "end_col": 16,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/crap_scores.rs",
+        "line": 33
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_export.rs",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "3bd497618cdc220a",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "af31a8cac2b0b2ef",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_helpers.rs",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "amount < 0",
           "operator": "negation",
           "set": "extended",
@@ -433,6 +2813,22 @@
         "col": 1,
         "file": "src/decide.rs",
         "line": 25
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/deps_tree/leaf.rs",
+        "line": 3
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/deps_tree/mod.rs",
+        "line": 5
       }
     },
     {
@@ -1996,6 +4392,891 @@
         "col": 1,
         "file": "tests/ledger.rs",
         "line": 42
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(discounted(1000, 10, true), 900);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 49,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "37e82aa4a928f2c7",
+          "span": {
+            "col": 27,
+            "end_col": 31,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2d7a7313e2200b3b",
+          "span": {
+            "col": 33,
+            "end_col": 35,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "3302bb0f1f6ed447",
+          "span": {
+            "col": 37,
+            "end_col": 41,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "900",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "cddbe8ee5ec7efc3",
+          "span": {
+            "col": 44,
+            "end_col": 47,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "balance(&[i64::MAX, 1]);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 29,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "6464eac50a0afdab",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 13
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert!(!Account::new(\"ann\").statement().is_empty());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 58,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 18
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "classify(100, 50);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "415d54fb9c8db080",
+          "span": {
+            "col": 14,
+            "end_col": 17,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "45640e75cc4c0eb2",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 23
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(tally(&[1, 2]), (3, false));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4e9ba542371c547e",
+          "span": {
+            "col": 5,
+            "end_col": 44,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c2c1a2059154d994",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2eba420ce3fc165d",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4cf706bd6abe249a",
+          "span": {
+            "col": 33,
+            "end_col": 34,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "false",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "558017db10a047e3",
+          "span": {
+            "col": 36,
+            "end_col": 41,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "true"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 28
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d63bec2f2e9f48b0",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "20",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "855517476f220958",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "300",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "dd8d0c530a85c306",
+          "span": {
+            "col": 26,
+            "end_col": 29,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assert_eq!(balance(&[cents]), cents);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "47755e7b1ed9ca37",
+          "span": {
+            "col": 9,
+            "end_col": 46,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 36
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "df2d0216781fdeba",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "350cd7ebc2f333c5",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "dc75c192427feaea",
+          "span": {
+            "col": 36,
+            "end_col": 37,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d2d9271750bbfa04",
+          "span": {
+            "col": 38,
+            "end_col": 41,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assert_eq!(balance(&[cents]), cents);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "47755e7b1ed9ca37",
+          "span": {
+            "col": 9,
+            "end_col": 46,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 43
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account.deposit(100);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4f2a10b82fd2b1e6",
+          "span": {
+            "col": 5,
+            "end_col": 26,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "08b5bd7ab4eb7e63",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "account.deposit(50);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e039051e9c004738",
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "aeef2629462b7562",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assert_eq!(account.to_string(), \"kim (150)\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4e9ba542371c547e",
+          "span": {
+            "col": 5,
+            "end_col": 50,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 50
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account.deposit(200);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4f2a10b82fd2b1e6",
+          "span": {
+            "col": 5,
+            "end_col": 26,
+            "end_line": 60,
+            "line": 60
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "08b5bd7ab4eb7e63",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 60,
+            "line": 60
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "account.deposit(25);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e039051e9c004738",
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "25",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "aeef2629462b7562",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assert_eq!(statement, \"Account of lee\\nbalance: 225\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "835c2c5e573dcc56",
+          "span": {
+            "col": 5,
+            "end_col": 59,
+            "end_line": 63,
+            "line": 63
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 58
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert!(balance(&[1, 2]) == 3);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 36,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "a858f82e4a0be4c2",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "86afccfb4dc71351",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "cddbe8ee5ec7efc3",
+          "span": {
+            "col": 33,
+            "end_col": 34,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 67
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(balance(entries), expected);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 44,
+            "end_line": 72,
+            "line": 72
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 71
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_balanced(&[2, 3], 5);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 33,
+            "end_line": 77,
+            "line": 77
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "849e71c4b3852f05",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 77,
+            "line": 77
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e00317a6c5bddd0b",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 77,
+            "line": 77
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "45640e75cc4c0eb2",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 77,
+            "line": 77
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 76
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(balance(&[cents]), cents);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "47755e7b1ed9ca37",
+          "span": {
+            "col": 9,
+            "end_col": 46,
+            "end_line": 85,
+            "line": 85
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 83
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(balance(&cents), expected);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 5,
+            "end_col": 43,
+            "end_line": 91,
+            "line": 91
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 89
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_balance_of::<i32>(&[2, 3], 5);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 42,
+            "end_line": 96,
+            "line": 96
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "849e71c4b3852f05",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 96,
+            "line": 96
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e00317a6c5bddd0b",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 96,
+            "line": 96
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "45640e75cc4c0eb2",
+          "span": {
+            "col": 39,
+            "end_col": 40,
+            "end_line": 96,
+            "line": 96
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 95
       }
     }
   ]

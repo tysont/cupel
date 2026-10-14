@@ -165,12 +165,16 @@ mod tests {
 
     #[test]
     fn names_matches_whole_package_names_only() {
-        assert!(names("dev = [\"pytest>=8\"]", "pytest"));
-        assert!(names("[tool.pytest.ini_options]", "pytest"));
-        assert!(!names("pytest-benchmark", "pytest"));
-        assert!(!names("my_pytest", "pytest"));
-        assert!(names("pytest-benchmark==4", "pytest-benchmark"));
-        assert!(!names("", "pytest"));
+        let cases = [
+            ("dev = [\"pytest>=8\"]", "pytest"),
+            ("[tool.pytest.ini_options]", "pytest"),
+            ("pytest-benchmark", "pytest"),
+            ("my_pytest", "pytest"),
+            ("pytest-benchmark==4", "pytest-benchmark"),
+            ("", "pytest"),
+        ];
+        let named = cases.map(|(text, package)| names(text, package));
+        assert_eq!(named, [true, true, false, false, true, false]);
     }
 
     #[test]
@@ -211,13 +215,17 @@ mod tests {
             prefix: prefix.map(str::to_owned),
             members,
         };
-        assert!(json(&["pm"], Some("pnpm@"), false).holds(&dirs));
-        assert!(!json(&["pm"], Some("yarn@"), false).holds(&dirs));
-        assert!(!json(&["deps", "x"], None, false).holds(&dirs));
-        assert!(json(&["deps", "x"], None, true).holds(&dirs));
         let all = Rule::All {
             all: vec![json(&["pm"], None, false), json(&["nope"], None, false)],
         };
-        assert!(!all.holds(&dirs));
+        let rules = [
+            json(&["pm"], Some("pnpm@"), false),
+            json(&["pm"], Some("yarn@"), false),
+            json(&["deps", "x"], None, false),
+            json(&["deps", "x"], None, true),
+            all,
+        ];
+        let held = rules.map(|rule| rule.holds(&dirs));
+        assert_eq!(held, [true, false, false, true, false]);
     }
 }

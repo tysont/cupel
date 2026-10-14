@@ -11,10 +11,11 @@ use serde::ser::{SerializeMap, Serializer};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use crate::config::ConfigError;
+use crate::config::error::ConfigError;
 use crate::config::gate::{GateRuleSpec, is_segment, parse_check_id};
 use crate::config::settings::{Format, Settings, TimeLimit};
 use crate::error::Result;
+use crate::exclude::Exclude;
 use crate::grade::CostClass;
 use crate::id::{CheckId, LangId};
 
@@ -32,6 +33,9 @@ pub struct ConfigFile {
     pub depth: Option<CostClass>,
     pub format: Option<Format>,
     pub budget: Option<TimeLimit>,
+    /// Which paths a run considers (ADR-065).
+    #[serde(default)]
+    pub scope: ScopeConfig,
     /// Project roots of a monorepo, by name.
     #[serde(default)]
     pub roots: BTreeMap<String, RootConfig>,
@@ -71,6 +75,15 @@ impl ConfigFile {
             budget: self.budget,
         }
     }
+}
+
+/// `[scope]`: paths no run considers.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ScopeConfig {
+    /// Excluded from the file walk, project-root detection, and range scopes.
+    #[serde(default)]
+    pub exclude: Exclude,
 }
 
 /// One project root of a monorepo.

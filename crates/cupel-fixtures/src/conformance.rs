@@ -494,16 +494,12 @@ pub fn produce_fixture_fact(
         .map_err(|e| e.to_string())?
         .confined();
     let ctx = ProduceCtx {
-        ctx: Ctx {
-            root: writer.root().to_path_buf(),
-        },
+        ctx: Ctx::new(writer.root().to_path_buf()),
         config: Map::new(),
         writer,
         cancel: Cancellation::new(),
     };
-    let scope = Scope {
-        files: walk(&root, languages, &ProjectInfo::default()),
-    };
+    let scope = Scope::of_files(walk(&root, languages, &ProjectInfo::default()));
     let mut events = Vec::new();
     let fact = producer
         .produce(&ctx, &scope, &mut events)

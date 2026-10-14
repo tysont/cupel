@@ -26,6 +26,7 @@ fn one_symbol_per_file(source: &Source<'_>) -> Symbols {
                 end_col: 1,
             },
             body: None,
+            parameters: 0,
         }],
     }
 }
@@ -33,9 +34,7 @@ fn one_symbol_per_file(source: &Source<'_>) -> Symbols {
 fn produce_ctx(root: &Path, cancel: Cancellation) -> ProduceCtx {
     let writer = Writer::new(root, false).unwrap().confined();
     ProduceCtx {
-        ctx: Ctx {
-            root: writer.root().to_path_buf(),
-        },
+        ctx: Ctx::new(writer.root().to_path_buf()),
         config: serde_json::Map::new(),
         writer,
         cancel,
@@ -52,9 +51,7 @@ fn rust_producer(registry: &LanguageRegistry) -> QueryProducer<Symbols> {
 }
 
 fn scope(files: &[&str]) -> Scope {
-    Scope {
-        files: files.iter().map(|f| (*f).to_owned()).collect(),
-    }
+    Scope::of_files(files.iter().map(|f| (*f).to_owned()).collect())
 }
 
 #[test]
@@ -131,18 +128,20 @@ fn unreadable_and_non_utf8_files_are_findings_not_panics() {
         )
         .unwrap();
 
-    assert!(fact.symbols.is_empty());
-    let files: Vec<String> = events
-        .iter()
-        .map(|event| match event {
-            Event::Finding(finding) => {
-                assert_eq!(finding.kind, "lang.parse-error");
-                finding.location.as_ref().unwrap().file.clone()
-            }
-            other => panic!("unexpected event {other:?}"),
-        })
-        .collect();
-    assert_eq!(files, ["bytes.rs", "missing.rs"]);
+    assert_eq!(fact.symbols, []);
+    let findings: Vec<(String, String)> = events.iter().filter_map(finding_at).collect();
+    assert_eq!(
+        findings,
+        [
+            ("lang.parse-error".to_owned(), "bytes.rs".to_owned()),
+            ("lang.parse-error".to_owned(), "missing.rs".to_owned()),
+        ]
+    );
+    assert_eq!(
+        events.len(),
+        findings.len(),
+        "every event is a finding: {events:?}"
+    );
 }
 
 #[test]
@@ -161,4 +160,13 @@ fn a_cancelled_run_stops_the_producer() {
     );
 
     assert_eq!(result, Err(Error::Cancelled));
+}
+
+/// A finding event's kind and file; `None` for any other event.
+fn finding_at(event: &Event) -> Option<(String, String)> {
+    let Event::Finding(finding) = event else {
+        return None;
+    };
+    let file = finding.location.as_ref()?.file.clone();
+    Some((finding.kind.clone(), file))
 }

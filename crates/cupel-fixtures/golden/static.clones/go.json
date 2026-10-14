@@ -1,0 +1,434 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 1.0,
+        "max_jaccard": 1.0,
+        "pairs": 17.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 52,
+        "unit": "pairs",
+        "value": 17.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settleInvoices` and `reconcilePayments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 21,
+          "file": "clones_settlement.go",
+          "hash": "sh_ed632916472d61d2",
+          "lang": "go",
+          "line": 10,
+          "lines": 12,
+          "nodes": 72,
+          "symbol": "ledger.settleInvoices"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 34,
+          "file": "clones_settlement.go",
+          "hash": "sh_ed632916472d61d2",
+          "lang": "go",
+          "line": 23,
+          "lines": 12,
+          "nodes": 72,
+          "symbol": "ledger.reconcilePayments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_496bec",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 21,
+        "file": "clones_settlement.go",
+        "line": 10
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_ed632916472d61d2",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_496bec --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.settleInvoices",
+        "hash": "sh_ed632916472d61d2",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.settleInvoices` and `ledger.reconcilePayments` (clones_settlement.go:23) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `orderLines` and `refundLines` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "jaccard": 0.88,
+        "left": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 50,
+          "file": "clones_settlement.go",
+          "hash": "sh_7ebe219b8477cdb1",
+          "lang": "go",
+          "line": 36,
+          "lines": 15,
+          "nodes": 125,
+          "symbol": "ledger.orderLines"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 67,
+          "file": "clones_settlement.go",
+          "hash": "sh_ca97b0cf7974f0c7",
+          "lang": "go",
+          "line": 52,
+          "lines": 16,
+          "nodes": 135,
+          "symbol": "ledger.refundLines"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_0c30be",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 50,
+        "file": "clones_settlement.go",
+        "line": 36
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_7ebe219b8477cdb1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0c30be --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.orderLines",
+        "hash": "sh_7ebe219b8477cdb1",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.orderLines` and `ledger.refundLines` (clones_settlement.go:52) are type-3 clones (jaccard 0.88)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `TestBlankAmountsAreRejected` and `TestParseCentsRejectsBlanks` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 16,
+          "file": "ledger_quality_test.go",
+          "hash": "sh_1484de0443216190",
+          "lang": "go",
+          "line": 13,
+          "lines": 4,
+          "nodes": 29,
+          "symbol": "ledger.TestBlankAmountsAreRejected"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 36,
+          "file": "pricing_test.go",
+          "hash": "sh_1484de0443216190",
+          "lang": "go",
+          "line": 33,
+          "lines": 4,
+          "nodes": 29,
+          "symbol": "ledger.TestParseCentsRejectsBlanks"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_258580",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 16,
+        "file": "ledger_quality_test.go",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_1484de0443216190",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_258580 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestBlankAmountsAreRejected",
+        "hash": "sh_1484de0443216190",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.TestBlankAmountsAreRejected` and `ledger.TestParseCentsRejectsBlanks` (pricing_test.go:33) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `netTotal` shares with 5 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 11,
+            "file": "twins.go",
+            "hash": "sh_0134d56248677416",
+            "lang": "go",
+            "line": 5,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.netTotal"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 19,
+            "file": "twins.go",
+            "hash": "sh_0134d56248677416",
+            "lang": "go",
+            "line": 13,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.sumAfterCharge"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 27,
+            "file": "twins.go",
+            "hash": "sh_0134d56248677416",
+            "lang": "go",
+            "line": 21,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.netTotalFloor"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 39,
+            "file": "twins.go",
+            "hash": "sh_0134d56248677416",
+            "lang": "go",
+            "line": 29,
+            "lines": 11,
+            "nodes": 36,
+            "symbol": "ledger.netTotalLaidOut"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 47,
+            "file": "twins.go",
+            "hash": "sh_2b4b20df59bc267c",
+            "lang": "go",
+            "line": 41,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.netTotalPlus"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 65,
+            "file": "twins.go",
+            "hash": "sh_8d915c89cc43559e",
+            "lang": "go",
+            "line": 59,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.netTotalProduct"
+          }
+        ],
+        "min_jaccard": 0.826,
+        "pairs": 14,
+        "threshold": 0.82
+      },
+      "id": "fnd_3514a9",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "file": "twins.go",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_0134d56248677416",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3514a9 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.netTotal",
+        "hash": "sh_0134d56248677416",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.netTotal` and 5 other symbols are clones of one another (jaccard 0.83–1.00)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_496bec",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract what `settleInvoices` and `reconcilePayments` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_0c30be",
+      "kind": "refactor_extract",
+      "priority": 2,
+      "summary": "Extract what `orderLines` and `refundLines` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_258580",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Extract what `TestBlankAmountsAreRejected` and `TestParseCentsRejectsBlanks` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_3514a9",
+      "kind": "refactor_extract",
+      "priority": 4,
+      "summary": "Extract the structure `netTotal` shares with 5 other symbols into one function and call it from each."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 20,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 76
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 4
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 4,
+  "truncated": false
+}

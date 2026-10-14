@@ -45,18 +45,18 @@ fn format_text_renders_a_status_line_instead_of_json() {
 
 #[test]
 fn format_text_shows_findings_with_their_fix() {
-    let outcome = run(["check", "--format", "text"]);
+    let outcome = run(["tests", "--format", "text"]);
     assert_eq!(outcome.code, 2);
-    let id = cli_finding_id("cli.not-implemented", "check");
-    assert!(outcome.stdout.starts_with("cupel check: error (exit 2)\n"));
+    let id = cli_finding_id("cli.not-implemented", "tests");
+    assert!(outcome.stdout.starts_with("cupel tests: error (exit 2)\n"));
     let findings = format!(
-        "fail (1)\n  cli\n    `cupel check` is not implemented yet\n      \
+        "fail (1)\n  cli\n    `cupel tests` is not implemented yet\n      \
          {id} · cli.not-implemented · tier 0 · confidence 1\n      \
-         Implemented in plan step P2.1.\n      \
-         evidence: step \"P2.1\" (full: cupel explain {id})\n      \
+         Implemented in plan step P3.3.\n      \
+         evidence: step \"P3.3\" (full: cupel explain {id})\n      \
          action review (priority 1): Use a verb that is implemented; `cupel describe` marks \
          pending ones with pending_step.\n      \
-         repro: cupel check --format text\n      \
+         repro: cupel tests --format text\n      \
          suppress: cupel suppress {id} --reason '…'\n"
     );
     assert!(
@@ -69,7 +69,10 @@ fn format_text_shows_findings_with_their_fix() {
 #[test]
 fn cupel_format_env_selects_the_format() {
     let outcome = run_with(cupel().env("CUPEL_FORMAT", "text"), ["describe"]);
-    assert!(outcome.stdout.starts_with("cupel describe: pass"));
+    assert_eq!(
+        outcome.stdout.lines().next(),
+        Some("cupel describe: pass (exit 0)")
+    );
 }
 
 #[test]
@@ -83,13 +86,10 @@ fn format_flag_overrides_cupel_format_env() {
 
 #[test]
 fn format_flag_may_come_before_or_after_the_verb() {
-    for args in [["--format=text", "describe"], ["describe", "--format=text"]] {
-        let outcome = run(args);
-        assert!(
-            outcome.stdout.starts_with("cupel describe: pass"),
-            "{args:?}"
-        );
-    }
+    let first_lines = [["--format=text", "describe"], ["describe", "--format=text"]]
+        .map(|args| run(args).stdout.lines().next().map(str::to_owned));
+    let expected = Some("cupel describe: pass (exit 0)".to_owned());
+    assert_eq!(first_lines, [expected.clone(), expected]);
 }
 
 #[test]

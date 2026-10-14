@@ -2,10 +2,11 @@
 // ABOUTME: chai, and node:test cases, assertion kinds and strengths, skips, mocks, setup, and test pairing.
 mod support;
 
-use cupel_core::syntax::{
-    AssertionKind, AssertionStrength, TestCase, TestConventions, TestFile, TestFrames,
+use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
+use support::Skip::{Because, Runs, Skipped};
+use support::{
+    Expected, assert_framework, assert_test_file, case, expected, fixture, produce, rows, tree,
 };
-use support::{fixture, produce, tree};
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
 use AssertionStrength::{Strong, Weak};
@@ -14,190 +15,107 @@ fn frames(lang: &str) -> TestFrames {
     produce(lang, &fixture(lang))
 }
 
-fn file<'a>(frames: &'a TestFrames, path: &str) -> &'a TestFile {
-    frames
-        .files
-        .iter()
-        .find(|f| f.file == path)
-        .unwrap_or_else(|| panic!("no test file {path}"))
-}
+/// The module `math.test.js` mocks.
+const MODULE: &str = "../src/report.cjs";
 
-/// Whether a case is skipped, and why.
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum Skip {
-    Runs,
-    Skipped,
-    Because(String),
-}
-
-/// (name, assertions as (kind, strength), skip, mock targets, start line) per case.
-type CaseRow = (
-    String,
-    Vec<(AssertionKind, AssertionStrength)>,
-    Skip,
-    Vec<String>,
-    u32,
-);
-
-fn rows(file: &TestFile) -> Vec<CaseRow> {
-    file.cases.iter().map(row).collect()
-}
-
-fn row(case: &TestCase) -> CaseRow {
+const MATH_CASES: &[Expected] = &[
     (
-        case.name.clone(),
-        case.assertions
-            .iter()
-            .map(|a| (a.kind, a.strength))
-            .collect(),
-        match case.skip.as_ref().map(|s| s.reason.clone()) {
-            None => Skip::Runs,
-            Some(None) => Skip::Skipped,
-            Some(Some(reason)) => Skip::Because(reason),
-        },
-        case.mocks.iter().map(|m| m.target.clone()).collect(),
-        case.span.line,
-    )
-}
-
-fn case(
-    name: &str,
-    assertions: &[(AssertionKind, AssertionStrength)],
-    skip: Skip,
-    mocks: &[&str],
-    line: u32,
-) -> CaseRow {
+        "adds two numbers",
+        &[(Equality, Strong)],
+        None,
+        &[MODULE],
+        14,
+    ),
     (
-        name.to_owned(),
-        assertions.to_vec(),
-        skip,
-        mocks.iter().map(|m| (*m).to_owned()).collect(),
-        line,
-    )
-}
-
-fn setup_lines(file: &TestFile) -> Vec<u32> {
-    file.setup.iter().map(|s| s.line).collect()
-}
+        "is truthy for non-zero sums",
+        &[(Truthiness, Weak)],
+        None,
+        &[MODULE],
+        18,
+    ),
+    (
+        "returns a defined value",
+        &[(NotNull, Weak)],
+        None,
+        &[MODULE],
+        22,
+    ),
+    (
+        "does not return zero",
+        &[(Equality, Weak)],
+        None,
+        &[MODULE],
+        26,
+    ),
+    (
+        "handles huge numbers",
+        &[(Equality, Strong)],
+        Some(None),
+        &[MODULE],
+        30,
+    ),
+    ("can be called without checking", &[], None, &[MODULE], 34),
+    (
+        "rejects empty amounts",
+        &[(Throws, Strong)],
+        None,
+        &[MODULE],
+        40,
+    ),
+    ("throws on nothing", &[(Throws, Weak)], None, &[MODULE], 44),
+    (
+        "matches the range snapshot",
+        &[(Snapshot, Strong)],
+        None,
+        &[MODULE],
+        48,
+    ),
+    (
+        "reports what it parsed",
+        &[(Equality, Strong)],
+        None,
+        &[MODULE, "vi.fn"],
+        52,
+    ),
+];
 
 #[test]
 fn vitest_cases_classify_expect_matchers_and_share_module_mocks() {
-    let frames = frames("javascript");
-    let math = file(&frames, "test/math.test.js");
-    assert_eq!(math.framework, "vitest");
-    assert_eq!(setup_lines(math), [10]);
-    let module = "../src/report.cjs";
-    assert_eq!(
-        rows(math),
-        [
-            case(
-                "adds two numbers",
-                &[(Equality, Strong)],
-                Skip::Runs,
-                &[module],
-                14
-            ),
-            case(
-                "is truthy for non-zero sums",
-                &[(Truthiness, Weak)],
-                Skip::Runs,
-                &[module],
-                18
-            ),
-            case(
-                "returns a defined value",
-                &[(NotNull, Weak)],
-                Skip::Runs,
-                &[module],
-                22
-            ),
-            case(
-                "does not return zero",
-                &[(Equality, Weak)],
-                Skip::Runs,
-                &[module],
-                26
-            ),
-            case(
-                "handles huge numbers",
-                &[(Equality, Strong)],
-                Skip::Skipped,
-                &[module],
-                30
-            ),
-            case(
-                "can be called without checking",
-                &[],
-                Skip::Runs,
-                &[module],
-                34
-            ),
-            case(
-                "rejects empty amounts",
-                &[(Throws, Strong)],
-                Skip::Runs,
-                &[module],
-                40
-            ),
-            case(
-                "throws on nothing",
-                &[(Throws, Weak)],
-                Skip::Runs,
-                &[module],
-                44
-            ),
-            case(
-                "matches the range snapshot",
-                &[(Snapshot, Strong)],
-                Skip::Runs,
-                &[module],
-                48
-            ),
-            case(
-                "reports what it parsed",
-                &[(Equality, Strong)],
-                Skip::Runs,
-                &[module, "vi.fn"],
-                52
-            ),
-        ]
-    );
+    let math = &assert_test_file("javascript", "test/math.test.js", "vitest", &[10]);
+    assert_eq!(rows(math), expected(MATH_CASES));
 }
 
 #[test]
 fn node_test_cases_classify_assert_calls_and_skip_with_a_reason() {
-    let frames = frames("javascript");
-    let decide = file(&frames, "test/decide.test.js");
-    assert_eq!(decide.framework, "node-test");
-    assert!(decide.setup.is_empty());
+    let decide = &assert_test_file("javascript", "test/decide.test.js", "node-test", &[]);
     assert_eq!(
         rows(decide),
         [
             case(
                 "classifies overdrawn balances",
                 &[(Equality, Strong)],
-                Skip::Runs,
+                Runs,
                 &[],
                 5
             ),
             case(
                 "does not call an empty balance rich",
                 &[(Equality, Weak)],
-                Skip::Runs,
+                Runs,
                 &[],
                 9
             ),
             case(
                 "labels through a stub",
                 &[(Truthiness, Weak)],
-                Skip::Runs,
+                Runs,
                 &["mock.fn"],
                 13
             ),
             case(
                 "waits for the ledger server",
                 &[(Equality, Strong)],
-                Skip::Because("needs a ledger server".to_owned()),
+                Because("needs a ledger server".to_owned()),
                 &[],
                 18
             ),
@@ -208,8 +126,7 @@ fn node_test_cases_classify_assert_calls_and_skip_with_a_reason() {
 #[test]
 fn jest_globals_mocha_with_chai_and_in_source_tests_are_recognized() {
     let frames = frames("javascript");
-    let report = file(&frames, "test/report.test.js");
-    assert_eq!(report.framework, "jest");
+    let report = &assert_framework(&frames, "test/report.test.js", "jest");
     let module = "../src/format.cjs";
     assert_eq!(
         rows(report),
@@ -217,54 +134,43 @@ fn jest_globals_mocha_with_chai_and_in_source_tests_are_recognized() {
             case(
                 "joins one line per entry",
                 &[(Equality, Strong)],
-                Skip::Runs,
+                Runs,
                 &[module],
                 5
             ),
             case(
                 "formats currency symbols",
                 &[(Snapshot, Strong)],
-                Skip::Skipped,
+                Skipped,
                 &[module],
                 9
             ),
         ]
     );
-    let format = file(&frames, "test/format.spec.js");
-    assert_eq!(format.framework, "mocha");
+    let format = &assert_framework(&frames, "test/format.spec.js", "mocha");
     assert_eq!(
         rows(format),
         [
-            case(
-                "shows two decimals",
-                &[(Equality, Strong)],
-                Skip::Runs,
-                &[],
-                6
-            ),
+            case("shows two decimals", &[(Equality, Strong)], Runs, &[], 6),
             case(
                 "is not called by accident",
                 &[(Truthiness, Weak)],
-                Skip::Runs,
+                Runs,
                 &["sinon.spy"],
                 10
             ),
         ]
     );
-    let inline = file(&frames, "src/inline.js");
-    assert_eq!(inline.framework, "vitest");
+    let inline = &assert_framework(&frames, "src/inline.js", "vitest");
     assert_eq!(
         rows(inline),
-        [case("doubles", &[(Equality, Strong)], Skip::Runs, &[], 8)]
+        [case("doubles", &[(Equality, Strong)], Runs, &[], 8)]
     );
 }
 
 #[test]
 fn typescript_vitest_cases_match_their_javascript_twins() {
-    let frames = frames("typescript");
-    let math = file(&frames, "src/math.test.ts");
-    assert_eq!(math.framework, "vitest");
-    assert_eq!(setup_lines(math), [13]);
+    let math = &assert_test_file("typescript", "src/math.test.ts", "vitest", &[13]);
     let module = "./legacy";
     assert_eq!(
         rows(math),
@@ -272,56 +178,50 @@ fn typescript_vitest_cases_match_their_javascript_twins() {
             case(
                 "adds two numbers",
                 &[(Equality, Strong)],
-                Skip::Runs,
+                Runs,
                 &[module],
                 7
             ),
             case(
                 "is truthy for non-zero sums",
                 &[(Truthiness, Weak)],
-                Skip::Runs,
+                Runs,
                 &[module],
                 17
             ),
             case(
                 "returns a defined value",
                 &[(NotNull, Weak)],
-                Skip::Runs,
+                Runs,
                 &[module],
                 21
             ),
             case(
                 "does not return zero",
                 &[(Equality, Weak)],
-                Skip::Runs,
+                Runs,
                 &[module],
                 25
             ),
             case(
                 "handles huge numbers",
                 &[(Equality, Strong)],
-                Skip::Skipped,
+                Skipped,
                 &[module],
                 29
             ),
-            case(
-                "can be called without checking",
-                &[],
-                Skip::Runs,
-                &[module],
-                33
-            ),
+            case("can be called without checking", &[], Runs, &[module], 33),
             case(
                 "matches its snapshot",
                 &[(Snapshot, Strong)],
-                Skip::Runs,
+                Runs,
                 &[module],
                 39
             ),
             case(
                 "is consumed by a spy",
                 &[(Equality, Strong)],
-                Skip::Runs,
+                Runs,
                 &[module, "vi.fn"],
                 43
             ),
@@ -332,76 +232,85 @@ fn typescript_vitest_cases_match_their_javascript_twins() {
 #[test]
 fn typescript_node_test_jest_and_tsx_test_files_are_recognized() {
     let frames = frames("typescript");
-    let decide = file(&frames, "test/decide.test.ts");
-    assert_eq!(decide.framework, "node-test");
+    let decide = &assert_framework(&frames, "test/decide.test.ts", "node-test");
     assert_eq!(
         rows(decide),
         [
             case(
                 "classifies overdrawn balances",
                 &[(Equality, Strong)],
-                Skip::Runs,
+                Runs,
                 &[],
                 5
             ),
-            case(
-                "rejects empty amounts",
-                &[(Throws, Strong)],
-                Skip::Runs,
-                &[],
-                9
-            ),
+            case("rejects empty amounts", &[(Throws, Strong)], Runs, &[], 9),
             case(
                 "waits for the ledger server",
                 &[(Truthiness, Weak)],
-                Skip::Because("needs a ledger server".to_owned()),
+                Because("needs a ledger server".to_owned()),
                 &[],
                 13
             ),
         ]
     );
-    let pricing = file(&frames, "src/__tests__/pricing.test.ts");
-    assert_eq!(pricing.framework, "jest");
+    let pricing = &assert_framework(&frames, "src/__tests__/pricing.test.ts", "jest");
     assert_eq!(
         rows(pricing),
         [
-            case(
-                "members pay less",
-                &[(Equality, Strong)],
-                Skip::Runs,
-                &[],
-                5
-            ),
+            case("members pay less", &[(Equality, Strong)], Runs, &[], 5),
             case(
                 "tallies stay within bounds",
                 &[(Truthiness, Weak), (Custom, Weak)],
-                Skip::Runs,
+                Runs,
                 &["log"],
                 9
             ),
         ]
     );
-    let widget = file(&frames, "src/widget.test.tsx");
-    assert_eq!(widget.framework, "vitest");
+    let widget = &assert_framework(&frames, "src/widget.test.tsx", "vitest");
     assert_eq!(
         rows(widget),
-        [case(
-            "renders a count",
-            &[(Equality, Strong)],
-            Skip::Runs,
-            &[],
-            4
-        )]
+        [case("renders a count", &[(Equality, Strong)], Runs, &[], 4)]
     );
 }
 
+const JAVASCRIPT_TEST_FILES: [&str; 6] = [
+    "src/inline.js",
+    "test/decide.test.js",
+    "test/format.spec.js",
+    "test/math.quality.test.js",
+    "test/math.test.js",
+    "test/report.test.js",
+];
+
+const TYPESCRIPT_TEST_FILES: [&str; 6] = [
+    "src/__tests__/pricing.test.ts",
+    "src/inline.ts",
+    "src/math.quality.test.ts",
+    "src/math.test.ts",
+    "src/widget.test.tsx",
+    "test/decide.test.ts",
+];
+
 #[test]
 fn files_without_test_cases_have_no_frames() {
-    for lang in ["javascript", "typescript"] {
-        let frames = frames(lang);
-        assert!(frames.files.iter().all(|f| !f.cases.is_empty()));
-        assert!(frames.files.iter().all(|f| !f.file.contains("pricing.js")));
-    }
+    let files = ["javascript", "typescript"].map(|lang| {
+        frames(lang)
+            .files
+            .iter()
+            .map(|f| (f.file.clone(), f.cases.is_empty()))
+            .collect::<Vec<_>>()
+    });
+    let expected = [JAVASCRIPT_TEST_FILES, TYPESCRIPT_TEST_FILES].map(|files| {
+        files
+            .iter()
+            .map(|file| ((*file).to_owned(), false))
+            .collect::<Vec<_>>()
+    });
+    assert_eq!(
+        files, expected,
+        "only files with test cases; pricing.js has none"
+    );
 }
 
 #[test]
@@ -411,13 +320,12 @@ fn a_file_without_framework_imports_is_jest_and_unknown_matchers_are_custom() {
         "describe(\"cart\", () => {\n  fit(\"totals\", () => {\n    expect(total()).toSatisfy(isEven);\n  });\n  xit(\"empties\", () => {});\n});\n",
     )]);
     let frames: TestFrames = produce("javascript", dir.path());
-    let cart = file(&frames, "spec/cart.spec.js");
-    assert_eq!(cart.framework, "jest");
+    let cart = &assert_framework(&frames, "spec/cart.spec.js", "jest");
     assert_eq!(
         rows(cart),
         [
-            case("totals", &[(Custom, Strong)], Skip::Runs, &[], 2),
-            case("empties", &[], Skip::Skipped, &[], 5),
+            case("totals", &[(Custom, Strong)], Runs, &[], 2),
+            case("empties", &[], Skipped, &[], 5),
         ]
     );
 }

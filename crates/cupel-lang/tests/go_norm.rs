@@ -2,19 +2,9 @@
 // ABOUTME: and properties: invariant under renames, layout, literals, and moves; sensitive to structure.
 mod support;
 
-use cupel_core::syntax::{NormNode, NormTree, Symbols};
+use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{produce, tree};
-
-/// `(label child …)`, or `label` for a leaf.
-fn sexp(node: &NormNode) -> String {
-    if node.children.is_empty() {
-        node.label.clone()
-    } else {
-        let children: Vec<String> = node.children.iter().map(sexp).collect();
-        format!("({} {})", node.label, children.join(" "))
-    }
-}
+use support::{assert_distinct, produce, sexp, tree};
 
 /// The normalized tree and hash of the only symbol in `source`, a Go file at `path`.
 fn normalize_at(path: &str, source: &str) -> (String, String) {
@@ -74,9 +64,11 @@ fn package_qualified_calls_keep_the_function_name() {
         "money.go",
         "package money\n\nfunc f(s string) string { return strings.ToUpper(s) }\n",
     );
-    assert!(
-        shape.contains("(call_expression (selector_expression $id ToUpper) (argument_list $id))"),
-        "{shape}"
+    assert_eq!(
+        shape,
+        "(function_declaration (parameter_list (parameter_declaration $id $id)) $id \
+         (block (statement_list (return_statement (expression_list (call_expression \
+         (selector_expression $id ToUpper) (argument_list $id)))))))"
     );
 }
 
@@ -91,18 +83,15 @@ fn moving_a_file_keeps_its_hashes() {
 
 #[test]
 fn hashes_change_with_structure() {
-    let base = hash(
+    let sources = [
         "package p\n\nfunc f(a, b int64) int64 {\n\tif a > b {\n\t\treturn a - b\n\t}\n\treturn g(a)\n}\n",
-    );
-    for changed in [
         "package p\n\nfunc f(a, b int64) int64 {\n\tif a < b {\n\t\treturn a - b\n\t}\n\treturn g(a)\n}\n",
         "package p\n\nfunc f(a, b int64) int64 {\n\tif a > b {\n\t\treturn a + b\n\t}\n\treturn g(a)\n}\n",
         "package p\n\nfunc f(a, b int64) int64 {\n\tif a > b {\n\t\treturn a - b\n\t}\n\treturn h(a)\n}\n",
         "package p\n\nfunc f(a, b int64) int64 {\n\tif a > b {\n\t\treturn a - b\n\t} else if a == 0 {\n\t\treturn 0\n\t}\n\treturn g(a)\n}\n",
         "package p\n\nfunc f(a int64) int64 {\n\tif a > 0 {\n\t\treturn a - 1\n\t}\n\treturn g(a)\n}\n",
-    ] {
-        assert_ne!(hash(changed), base, "{changed}");
-    }
+    ];
+    assert_distinct(&sources.map(hash));
 }
 
 /// A function whose names, literals, and layout are all chosen by the caller. Go inserts

@@ -1,0 +1,2316 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 1.0,
+        "max_jaccard": 1.0,
+        "pairs": 17.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 52,
+        "unit": "pairs",
+        "value": 17.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 65.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 76,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "static.crap",
+      "metrics": {},
+      "oracle": null,
+      "score": null,
+      "skipped": null,
+      "status": "pass",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "static.dead-code",
+      "metrics": {
+        "dead_exports": 1.0,
+        "dead_symbols": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 76,
+        "unit": "dead_symbols",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 18,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 11,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 1.0869565217391304,
+        "no_assertion": 2.0,
+        "weak_ratio": 0.4
+      },
+      "oracle": null,
+      "score": {
+        "n": 23,
+        "unit": "assertion_density",
+        "value": 1.0869565217391304
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.weakening",
+      "metrics": {},
+      "oracle": null,
+      "score": null,
+      "skipped": {
+        "fact": null,
+        "lang": "go",
+        "reason": "needs-range",
+        "see": "cupel check --changed --only tests.weakening",
+        "tool": null
+      },
+      "status": "skipped",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settleInvoices` and `reconcilePayments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 21,
+          "file": "clones_settlement.go",
+          "hash": "sh_ed632916472d61d2",
+          "lang": "go",
+          "line": 10,
+          "lines": 12,
+          "nodes": 72,
+          "symbol": "ledger.settleInvoices"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 34,
+          "file": "clones_settlement.go",
+          "hash": "sh_ed632916472d61d2",
+          "lang": "go",
+          "line": 23,
+          "lines": 12,
+          "nodes": 72,
+          "symbol": "ledger.reconcilePayments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_496bec",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 21,
+        "file": "clones_settlement.go",
+        "line": 10
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_ed632916472d61d2",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_496bec --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.settleInvoices",
+        "hash": "sh_ed632916472d61d2",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.settleInvoices` and `ledger.reconcilePayments` (clones_settlement.go:23) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `orderLines` and `refundLines` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "jaccard": 0.88,
+        "left": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 50,
+          "file": "clones_settlement.go",
+          "hash": "sh_7ebe219b8477cdb1",
+          "lang": "go",
+          "line": 36,
+          "lines": 15,
+          "nodes": 125,
+          "symbol": "ledger.orderLines"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 67,
+          "file": "clones_settlement.go",
+          "hash": "sh_ca97b0cf7974f0c7",
+          "lang": "go",
+          "line": 52,
+          "lines": 16,
+          "nodes": 135,
+          "symbol": "ledger.refundLines"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_0c30be",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 50,
+        "file": "clones_settlement.go",
+        "line": 36
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_7ebe219b8477cdb1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0c30be --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.orderLines",
+        "hash": "sh_7ebe219b8477cdb1",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.orderLines` and `ledger.refundLines` (clones_settlement.go:52) are type-3 clones (jaccard 0.88)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `Label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_130664",
+      "kind": "complexity.high",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "complexity.go",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_1a1f0a9a227f0600",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_130664 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Label",
+        "hash": "sh_1a1f0a9a227f0600",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.Label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `Settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_86f7cd",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "file": "complexity.go",
+        "line": 35
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_e073e3e6ae0851be",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_86f7cd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Settle",
+        "hash": "sh_e073e3e6ae0851be",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.Settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `OpenAccount` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_551c92",
+      "kind": "params.many",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 54,
+        "file": "complexity.go",
+        "line": 52
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_09482ea319cc07e1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_551c92 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.OpenAccount",
+        "hash": "sh_09482ea319cc07e1",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.OpenAccount` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `StatementTemplate` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 65
+      },
+      "id": "fnd_d516cd",
+      "kind": "function.long",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 121,
+        "file": "complexity.go",
+        "line": 57
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_34a2153c8ca08d2d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d516cd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.StatementTemplate",
+        "hash": "sh_34a2153c8ca08d2d",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.StatementTemplate` is 65 lines long (max 60)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `UnusedTotal` from dead_export/dead_export.go if nothing outside the repository uses it, or import dead_export/dead_export.go where `UnusedTotal` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to dead_export/dead_export.go or another file of its module, and nothing in it is an entry point, test, or framework hook. If `UnusedTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "dead_export/dead_export.go",
+        "module": "deadexport",
+        "module_files": [
+          "dead_export/dead_export.go"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_ae44d0",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "file": "dead_export/dead_export.go",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_539a6449581debc1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_ae44d0 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "deadexport.UnusedTotal",
+        "hash": "sh_539a6449581debc1",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`deadexport.UnusedTotal` is exported but no import resolves to dead_export/dead_export.go"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `forgottenRate` from dead_helpers/dead_helpers.go if nothing outside the repository uses it, or import dead_helpers/dead_helpers.go where `forgottenRate` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.8,
+      "detail": "No import in the repository resolves to dead_helpers/dead_helpers.go or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `forgottenRate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
+      "evidence": {
+        "file": "dead_helpers/dead_helpers.go",
+        "module": "deadhelpers",
+        "module_files": [
+          "dead_helpers/dead_helpers.go"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_1a4bbc",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "file": "dead_helpers/dead_helpers.go",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_22f5962997734db1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1a4bbc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "deadhelpers.forgottenRate",
+        "hash": "sh_22f5962997734db1",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`deadhelpers.forgottenRate` is unreachable: no import resolves to dead_helpers/dead_helpers.go"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle deps_cycle/alpha/alpha.go → deps_cycle/beta/beta.go → deps_cycle/alpha/alpha.go: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "deps_cycle/alpha/alpha.go",
+          "deps_cycle/beta/beta.go"
+        ],
+        "modules": [
+          "deps_cycle/alpha/alpha.go",
+          "deps_cycle/beta/beta.go"
+        ],
+        "size": 2
+      },
+      "id": "fnd_e9613f",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "deps_cycle/alpha/alpha.go",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e9613f --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: deps_cycle/alpha/alpha.go → deps_cycle/beta/beta.go → deps_cycle/alpha/alpha.go"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `deps_layers/infra/store.go` from `deps_layers/domain/order.go`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "deps_layers/domain/order.go",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "example.com/ledger/deps_layers/infra",
+        "to": "deps_layers/infra/store.go",
+        "to_layer": "infra"
+      },
+      "id": "fnd_d6cece",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "deps_layers/domain/order.go",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d6cece --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`deps_layers/domain/order.go` (layer domain) imports `deps_layers/infra/store.go` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `deps_layers/port/port.go`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 0,
+        "distance": 1.0,
+        "distance_max": 0.7,
+        "efferent": 1,
+        "external": 0,
+        "instability": 1.0,
+        "module": "deps_layers/port/port.go",
+        "unresolved": 0
+      },
+      "id": "fnd_0e1166",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "deps_layers/port/port.go",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0e1166 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`deps_layers/port/port.go` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `TestBlankAmountsAreRejected` and `TestParseCentsRejectsBlanks` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 16,
+          "file": "ledger_quality_test.go",
+          "hash": "sh_1484de0443216190",
+          "lang": "go",
+          "line": 13,
+          "lines": 4,
+          "nodes": 29,
+          "symbol": "ledger.TestBlankAmountsAreRejected"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 36,
+          "file": "pricing_test.go",
+          "hash": "sh_1484de0443216190",
+          "lang": "go",
+          "line": 33,
+          "lines": 4,
+          "nodes": 29,
+          "symbol": "ledger.TestParseCentsRejectsBlanks"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_258580",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 16,
+        "file": "ledger_quality_test.go",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_1484de0443216190",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_258580 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestBlankAmountsAreRejected",
+        "hash": "sh_1484de0443216190",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.TestBlankAmountsAreRejected` and `ledger.TestParseCentsRejectsBlanks` (pricing_test.go:33) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestStatementsAreNotEmpty` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_3924cf",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "file": "ledger_quality_test.go",
+        "line": 18
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_f9bb326a4f0a9a27",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3924cf --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestStatementsAreNotEmpty",
+        "hash": "sh_f9bb326a4f0a9a27",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestStatementsAreNotEmpty` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `TestClassifyingRuns` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_ec0009",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "file": "ledger_quality_test.go",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_d93be59fc6b954ee",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ec0009 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestClassifyingRuns",
+        "hash": "sh_d93be59fc6b954ee",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestClassifyingRuns` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `TestMailGoesThroughEveryNotifier`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 75,
+        "mock_density_max": 50,
+        "mocks": 3,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "MockNotifier",
+          "MockNotifier",
+          "MockNotifier"
+        ]
+      },
+      "id": "fnd_f0da12",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "ledger_quality_test.go",
+        "line": 26
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_65555fee174f3fa3",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_f0da12 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestMailGoesThroughEveryNotifier",
+        "hash": "sh_65555fee174f3fa3",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestMailGoesThroughEveryNotifier` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `TestComputedEntriesCountTowardTheBalance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 0,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 1,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "id": "fnd_eff639",
+      "kind": "test.logic",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "file": "ledger_quality_test.go",
+        "line": 40
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_b2267047de58b174",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_eff639 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestComputedEntriesCountTowardTheBalance",
+        "hash": "sh_b2267047de58b174",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestComputedEntriesCountTowardTheBalance` contains logic: 1 loop(s) or branch(es) (max 0)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `TestDepositsKeepTheOwner`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          46,
+          53
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 3,
+        "statements": 3,
+        "tests": [
+          "ledger.TestDepositsKeepTheOwner",
+          "ledger.TestDepositsAccumulate"
+        ]
+      },
+      "id": "fnd_31d301",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 51,
+        "file": "ledger_quality_test.go",
+        "line": 46
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_009a1b16914c5764",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_31d301 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestDepositsKeepTheOwner",
+        "hash": "sh_009a1b16914c5764",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestDepositsKeepTheOwner` and 1 other test(s) repeat the same 3 leading statements"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestMembersGetADiscount` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_c9f8d6",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "file": "ledger_test.go",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_53f862293ba6de55",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c9f8d6 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestMembersGetADiscount",
+        "hash": "sh_53f862293ba6de55",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestMembersGetADiscount` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestNewAccountsAreRegistered` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "not-null"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_c72554",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 33,
+        "file": "ledger_test.go",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_b5f1dc3fc6ada671",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c72554 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestNewAccountsAreRegistered",
+        "hash": "sh_b5f1dc3fc6ada671",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestNewAccountsAreRegistered` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestParsingGarbageFails` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_9335ff",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 39,
+        "file": "ledger_test.go",
+        "line": 35
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_91f0f96d75ab198b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_9335ff --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestParsingGarbageFails",
+        "hash": "sh_91f0f96d75ab198b",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestParsingGarbageFails` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestNewAccountsHaveDistinctIDs` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_e4fb17",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 46,
+        "file": "ledger_test.go",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_02914d7263fa737b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e4fb17 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestNewAccountsHaveDistinctIDs",
+        "hash": "sh_02914d7263fa737b",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestNewAccountsHaveDistinctIDs` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `TestStatementIsMailed` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_e7d0af",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 73,
+        "file": "ledger_test.go",
+        "line": 66
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_91ea22f895f9f0a9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e7d0af --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestStatementIsMailed",
+        "hash": "sh_91ea22f895f9f0a9",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestStatementIsMailed` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `TestOpeningAnAccountDoesNotPanic` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_ce8fb9",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 87,
+        "file": "ledger_test.go",
+        "line": 85
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_8d0bf23821b2d110",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ce8fb9 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.TestOpeningAnAccountDoesNotPanic",
+        "hash": "sh_8d0bf23821b2d110",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`ledger.TestOpeningAnAccountDoesNotPanic` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `netTotal` shares with 5 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 11,
+            "file": "twins.go",
+            "hash": "sh_0134d56248677416",
+            "lang": "go",
+            "line": 5,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.netTotal"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 19,
+            "file": "twins.go",
+            "hash": "sh_0134d56248677416",
+            "lang": "go",
+            "line": 13,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.sumAfterCharge"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 27,
+            "file": "twins.go",
+            "hash": "sh_0134d56248677416",
+            "lang": "go",
+            "line": 21,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.netTotalFloor"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 39,
+            "file": "twins.go",
+            "hash": "sh_0134d56248677416",
+            "lang": "go",
+            "line": 29,
+            "lines": 11,
+            "nodes": 36,
+            "symbol": "ledger.netTotalLaidOut"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 47,
+            "file": "twins.go",
+            "hash": "sh_2b4b20df59bc267c",
+            "lang": "go",
+            "line": 41,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.netTotalPlus"
+          },
+          {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 65,
+            "file": "twins.go",
+            "hash": "sh_8d915c89cc43559e",
+            "lang": "go",
+            "line": 59,
+            "lines": 7,
+            "nodes": 36,
+            "symbol": "ledger.netTotalProduct"
+          }
+        ],
+        "min_jaccard": 0.826,
+        "pairs": 14,
+        "threshold": 0.82
+      },
+      "id": "fnd_3514a9",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "file": "twins.go",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_0134d56248677416",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3514a9 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.netTotal",
+        "hash": "sh_0134d56248677416",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.netTotal` and 5 other symbols are clones of one another (jaccard 0.83–1.00)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_3924cf",
+      "kind": "strengthen_assertion",
+      "priority": 1,
+      "summary": "Replace the truthiness, presence, or inequality checks in `TestStatementsAreNotEmpty` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ec0009",
+      "kind": "write_test",
+      "priority": 2,
+      "summary": "Add an assertion to `TestClassifyingRuns` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_f0da12",
+      "kind": "review",
+      "priority": 3,
+      "summary": "Use real collaborators or simple fakes for some of the doubles in `TestMailGoesThroughEveryNotifier`, or split it, so it checks behavior rather than wiring."
+    },
+    {
+      "command": null,
+      "finding": "fnd_eff639",
+      "kind": "refactor_extract",
+      "priority": 4,
+      "summary": "Split `TestComputedEntriesCountTowardTheBalance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+    },
+    {
+      "command": null,
+      "finding": "fnd_31d301",
+      "kind": "refactor_extract",
+      "priority": 5,
+      "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `TestDepositsKeepTheOwner`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c9f8d6",
+      "kind": "strengthen_assertion",
+      "priority": 6,
+      "summary": "Replace the truthiness, presence, or inequality checks in `TestMembersGetADiscount` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c72554",
+      "kind": "strengthen_assertion",
+      "priority": 7,
+      "summary": "Replace the truthiness, presence, or inequality checks in `TestNewAccountsAreRegistered` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_9335ff",
+      "kind": "strengthen_assertion",
+      "priority": 8,
+      "summary": "Replace the truthiness, presence, or inequality checks in `TestParsingGarbageFails` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e4fb17",
+      "kind": "strengthen_assertion",
+      "priority": 9,
+      "summary": "Replace the truthiness, presence, or inequality checks in `TestNewAccountsHaveDistinctIDs` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e7d0af",
+      "kind": "strengthen_assertion",
+      "priority": 10,
+      "summary": "Replace the truthiness, presence, or inequality checks in `TestStatementIsMailed` with an assertion that pins the expected value."
+    }
+  ],
+  "plan": null,
+  "rankings": {
+    "dimensions": [
+      {
+        "check": "static.clones",
+        "entries": [
+          {
+            "lang": "go",
+            "rank": 1,
+            "target": {
+              "display": "ledger.netTotal and 5 others",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 11,
+                "file": "twins.go",
+                "line": 5
+              },
+              "symbol": null
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "go",
+            "rank": 2,
+            "target": {
+              "display": "ledger.TestBlankAmountsAreRejected and 1 other",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 16,
+                "file": "ledger_quality_test.go",
+                "line": 13
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "go",
+            "rank": 3,
+            "target": {
+              "display": "ledger.orderLines and 1 other",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 50,
+                "file": "clones_settlement.go",
+                "line": 36
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "go",
+            "rank": 4,
+            "target": {
+              "display": "ledger.settleInvoices and 1 other",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 21,
+                "file": "clones_settlement.go",
+                "line": 10
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          }
+        ],
+        "measured": 4,
+        "metric": "cluster_size",
+        "per": "group",
+        "summary": "Symbols in each clone group: 2 for a pair, more for a cluster."
+      },
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "go",
+            "rank": 1,
+            "target": {
+              "display": "ledger.Label",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 32,
+                "file": "complexity.go",
+                "line": 6
+              },
+              "symbol": "sh_1a1f0a9a227f0600"
+            },
+            "value": 11.0
+          },
+          {
+            "lang": "go",
+            "rank": 2,
+            "target": {
+              "display": "ledger.Overdue",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "crap_scores.go",
+                "line": 8
+              },
+              "symbol": "sh_79fbe60bd9ea14a3"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "go",
+            "rank": 3,
+            "target": {
+              "display": "ledger.Settle",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 49,
+                "file": "complexity.go",
+                "line": 35
+              },
+              "symbol": "sh_e073e3e6ae0851be"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "go",
+            "rank": 4,
+            "target": {
+              "display": "ledger.classify",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "decide.go",
+                "line": 12
+              },
+              "symbol": "sh_45c7fad8783a6f24"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "go",
+            "rank": 5,
+            "target": {
+              "display": "ledger.Clamp",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 31,
+                "file": "crap_scores.go",
+                "line": 23
+              },
+              "symbol": "sh_6ce41581baffa13b"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 6,
+            "target": {
+              "display": "ledger.TestClassify",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 64,
+                "file": "ledger_test.go",
+                "line": 48
+              },
+              "symbol": "sh_5f625545c5fc2a8d"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 7,
+            "target": {
+              "display": "ledger.TestParseCentsTrimsSpaces",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 83,
+                "file": "ledger_test.go",
+                "line": 75
+              },
+              "symbol": "sh_c82dca632fedb8cf"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 8,
+            "target": {
+              "display": "ledger.TestStatementIsMailed",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 73,
+                "file": "ledger_test.go",
+                "line": 66
+              },
+              "symbol": "sh_91ea22f895f9f0a9"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 9,
+            "target": {
+              "display": "ledger.discounted",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 11,
+                "file": "pricing.go",
+                "line": 5
+              },
+              "symbol": "sh_7f973ccecdf46b55"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 10,
+            "target": {
+              "display": "ledger.drain",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 70,
+                "file": "decide.go",
+                "line": 60
+              },
+              "symbol": "sh_fd21a285fc7bc076"
+            },
+            "value": 3.0
+          }
+        ],
+        "measured": 76,
+        "metric": "cyclomatic",
+        "per": "symbol",
+        "summary": "Modified cyclomatic complexity per function (a match counts once)."
+      },
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "go",
+            "rank": 1,
+            "target": {
+              "display": "ledger.Settle",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 49,
+                "file": "complexity.go",
+                "line": 35
+              },
+              "symbol": "sh_e073e3e6ae0851be"
+            },
+            "value": 15.0
+          },
+          {
+            "lang": "go",
+            "rank": 2,
+            "target": {
+              "display": "ledger.Month",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 168,
+                "file": "complexity.go",
+                "line": 139
+              },
+              "symbol": "sh_c4ec510a9caf4017"
+            },
+            "value": 13.0
+          },
+          {
+            "lang": "go",
+            "rank": 3,
+            "target": {
+              "display": "ledger.Label",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 32,
+                "file": "complexity.go",
+                "line": 6
+              },
+              "symbol": "sh_1a1f0a9a227f0600"
+            },
+            "value": 10.0
+          },
+          {
+            "lang": "go",
+            "rank": 4,
+            "target": {
+              "display": "ledger.Overdue",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "crap_scores.go",
+                "line": 8
+              },
+              "symbol": "sh_79fbe60bd9ea14a3"
+            },
+            "value": 8.0
+          },
+          {
+            "lang": "go",
+            "rank": 5,
+            "target": {
+              "display": "ledger.Clamp",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 31,
+                "file": "crap_scores.go",
+                "line": 23
+              },
+              "symbol": "sh_6ce41581baffa13b"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "go",
+            "rank": 6,
+            "target": {
+              "display": "ledger.firstOverdraft",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "decide.go",
+                "line": 22
+              },
+              "symbol": "sh_c8aa080e4d92afb3"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "go",
+            "rank": 7,
+            "target": {
+              "display": "ledger.netTotalCapped",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 57,
+                "file": "twins.go",
+                "line": 49
+              },
+              "symbol": "sh_35dfa87324281c41"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "go",
+            "rank": 8,
+            "target": {
+              "display": "ledger.TestClassify",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 64,
+                "file": "ledger_test.go",
+                "line": 48
+              },
+              "symbol": "sh_5f625545c5fc2a8d"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 9,
+            "target": {
+              "display": "ledger.classify",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "decide.go",
+                "line": 12
+              },
+              "symbol": "sh_45c7fad8783a6f24"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 10,
+            "target": {
+              "display": "ledger.describe",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 48,
+                "file": "decide.go",
+                "line": 39
+              },
+              "symbol": "sh_a03a03dfe774b355"
+            },
+            "value": 3.0
+          }
+        ],
+        "measured": 76,
+        "metric": "cognitive",
+        "per": "symbol",
+        "summary": "Cognitive complexity per function."
+      },
+      {
+        "check": "static.crap",
+        "entries": [],
+        "measured": 0,
+        "metric": "crap",
+        "per": "symbol",
+        "summary": "CRAP per function."
+      },
+      {
+        "check": "static.deps",
+        "entries": [
+          {
+            "lang": "go",
+            "rank": 1,
+            "target": {
+              "display": "clones_settlement.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "clones_settlement.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "go",
+            "rank": 2,
+            "target": {
+              "display": "complexity.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "complexity.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "go",
+            "rank": 3,
+            "target": {
+              "display": "deps_layers/infra/store.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "deps_layers/infra/store.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "go",
+            "rank": 4,
+            "target": {
+              "display": "deps_layers/port/port.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "deps_layers/port/port.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "go",
+            "rank": 5,
+            "target": {
+              "display": "shapes/geometry.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "shapes/geometry.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "go",
+            "rank": 6,
+            "target": {
+              "display": "deps_layers/domain/order.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "deps_layers/domain/order.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.5
+          },
+          {
+            "lang": "go",
+            "rank": 7,
+            "target": {
+              "display": "ledger.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "ledger.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.167
+          },
+          {
+            "lang": "go",
+            "rank": 8,
+            "target": {
+              "display": "pricing.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "pricing.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 0.0
+          }
+        ],
+        "measured": 8,
+        "metric": "distance",
+        "per": "module",
+        "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+      },
+      {
+        "check": "static.deps",
+        "entries": [
+          {
+            "lang": "go",
+            "rank": 1,
+            "target": {
+              "display": "cmd/ledger/main.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "cmd/ledger/main.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 7.0
+          },
+          {
+            "lang": "go",
+            "rank": 2,
+            "target": {
+              "display": "ledger.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "ledger.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 3,
+            "target": {
+              "display": "deps_cycle/alpha/alpha.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "deps_cycle/alpha/alpha.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "go",
+            "rank": 4,
+            "target": {
+              "display": "deps_cycle/beta/beta.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "deps_cycle/beta/beta.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "go",
+            "rank": 5,
+            "target": {
+              "display": "deps_layers/domain/order.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "deps_layers/domain/order.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "go",
+            "rank": 6,
+            "target": {
+              "display": "clones_settlement.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "clones_settlement.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "go",
+            "rank": 7,
+            "target": {
+              "display": "complexity.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "complexity.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "go",
+            "rank": 8,
+            "target": {
+              "display": "crap_scores.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "crap_scores.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "go",
+            "rank": 9,
+            "target": {
+              "display": "decide.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "decide.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          },
+          {
+            "lang": "go",
+            "rank": 10,
+            "target": {
+              "display": "deps_layers/infra/store.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "deps_layers/infra/store.go",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 1.0
+          }
+        ],
+        "measured": 18,
+        "metric": "coupling",
+        "per": "module",
+        "summary": "Afferent plus efferent coupling per module."
+      },
+      {
+        "check": "static.deps",
+        "entries": [
+          {
+            "lang": "go",
+            "rank": 1,
+            "target": {
+              "display": "deps_cycle/alpha/alpha.go → deps_cycle/beta/beta.go → deps_cycle/alpha/alpha.go",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 3,
+                "file": "deps_cycle/alpha/alpha.go",
+                "line": 3
+              },
+              "symbol": null
+            },
+            "value": 2.0
+          }
+        ],
+        "measured": 1,
+        "metric": "cycle_size",
+        "per": "group",
+        "summary": "Modules in each import cycle."
+      },
+      {
+        "check": "tests.quality",
+        "entries": [
+          {
+            "lang": "go",
+            "rank": 1,
+            "target": {
+              "display": "ledger.TestMailGoesThroughEveryNotifier",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 32,
+                "file": "ledger_quality_test.go",
+                "line": 26
+              },
+              "symbol": "sh_65555fee174f3fa3"
+            },
+            "value": 75.0
+          },
+          {
+            "lang": "go",
+            "rank": 2,
+            "target": {
+              "display": "ledger.TestMailNotifiesTheOwner",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 47,
+                "file": "pricing_test.go",
+                "line": 42
+              },
+              "symbol": "sh_92d0287ea4174ed9"
+            },
+            "value": 33.0
+          },
+          {
+            "lang": "go",
+            "rank": 3,
+            "target": {
+              "display": "ledger.TestBlankAmountsAreRejected",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 16,
+                "file": "ledger_quality_test.go",
+                "line": 13
+              },
+              "symbol": "sh_1484de0443216190"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "go",
+            "rank": 4,
+            "target": {
+              "display": "ledger.TestClassify",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 64,
+                "file": "ledger_test.go",
+                "line": 48
+              },
+              "symbol": "sh_5f625545c5fc2a8d"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "go",
+            "rank": 5,
+            "target": {
+              "display": "ledger.TestClassifyingRuns",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 24,
+                "file": "ledger_quality_test.go",
+                "line": 22
+              },
+              "symbol": "sh_d93be59fc6b954ee"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "go",
+            "rank": 6,
+            "target": {
+              "display": "ledger.TestComputedEntriesCountTowardTheBalance",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 44,
+                "file": "ledger_quality_test.go",
+                "line": 40
+              },
+              "symbol": "sh_b2267047de58b174"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "go",
+            "rank": 7,
+            "target": {
+              "display": "ledger.TestDepositAddsToTheBalance",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "ledger_test.go",
+                "line": 13
+              },
+              "symbol": "sh_bd5d9bc2c5699215"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "go",
+            "rank": 8,
+            "target": {
+              "display": "ledger.TestDepositsAccumulate",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 59,
+                "file": "ledger_quality_test.go",
+                "line": 53
+              },
+              "symbol": "sh_64f25c365ab1b44d"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "go",
+            "rank": 9,
+            "target": {
+              "display": "ledger.TestDepositsKeepTheOwner",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 51,
+                "file": "ledger_quality_test.go",
+                "line": 46
+              },
+              "symbol": "sh_009a1b16914c5764"
+            },
+            "value": 0.0
+          },
+          {
+            "lang": "go",
+            "rank": 10,
+            "target": {
+              "display": "ledger.TestDiscountSnapshot",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 40,
+                "file": "pricing_test.go",
+                "line": 38
+              },
+              "symbol": "sh_ed30b775bf36058f"
+            },
+            "value": 0.0
+          }
+        ],
+        "measured": 23,
+        "metric": "mock_density",
+        "per": "symbol",
+        "summary": "Test doubles per test as a percentage of its doubles plus assertions."
+      }
+    ],
+    "top": 10
+  },
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 20,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 76
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "survey"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 1,
+      "warn": 23
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 24,
+  "truncated": false
+}

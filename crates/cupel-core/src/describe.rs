@@ -6,12 +6,14 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use crate::check::Stability;
-use crate::envelope::{ConfigSource, ExitCode};
+use crate::check::{FindingKindSpec, Manifest, Stability};
+use crate::config::ConfigSource;
 use crate::fact::FactKind;
+use crate::finding::ActionKind;
 use crate::grade::CostClass;
 use crate::id::{CheckId, LangFamily, LangId, ProducerId, ToolId};
 use crate::matrix::Support;
+use crate::status::ExitCode;
 
 /// What `describe` returns, tagged by the kind of thing described.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -33,6 +35,10 @@ pub enum Description {
     Fact(FactDescription),
     /// `cupel describe matrix`.
     Matrix(MatrixDescription),
+    /// `cupel describe <check-id>`.
+    Check(CheckDescription),
+    /// `cupel describe finding <kind>`.
+    Finding(FindingDescription),
 }
 
 /// Verbs, global flags, exit codes, schema URLs, and configuration precedence.
@@ -239,6 +245,47 @@ pub struct ProducerDescription {
     pub cost: CostClass,
     /// Facts the producer consumes.
     pub needs: Vec<FactKind>,
+}
+
+/// One check: its manifest, and whether it can run for each registered language (design §6.5).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct CheckDescription {
+    pub manifest: Manifest,
+    /// Every registered language and whether the check can run there, derived from its needs.
+    pub languages: Vec<LanguageSupport>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct LanguageSupport {
+    pub lang: LangId,
+    pub support: SupportDescription,
+}
+
+/// One finding kind: the check that emits it, the action it asks for, and the JSON Schema of its
+/// evidence (ADR-012).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct FindingDescription {
+    pub kind: String,
+    pub check: CheckId,
+    pub action: ActionKind,
+    pub summary: String,
+    /// JSON Schema of this kind's `evidence` object.
+    pub evidence: Map<String, Value>,
+    pub stability: Stability,
+}
+
+impl FindingDescription {
+    /// `spec`, a finding kind of the check `manifest` describes.
+    pub fn of(manifest: &Manifest, spec: &FindingKindSpec) -> Self {
+        Self {
+            kind: spec.kind.clone(),
+            check: manifest.id.clone(),
+            action: spec.action,
+            summary: spec.summary.clone(),
+            evidence: spec.evidence.clone(),
+            stability: manifest.stability,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

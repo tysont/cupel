@@ -13,6 +13,222 @@
       }
     },
     {
+      "file": "src/clones_settlement.ts",
+      "kind": "interface",
+      "path": "clones_settlement.Invoice",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/clones_settlement.ts",
+      "kind": "function",
+      "path": "clones_settlement.settleInvoices",
+      "signature": "(_: Invoice[], _: number): [number, number]",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/clones_settlement.ts",
+      "kind": "function",
+      "path": "clones_settlement.reconcilePayments",
+      "signature": "(_: readonly Invoice[], _: number): [number, number]",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 21
+      }
+    },
+    {
+      "file": "src/clones_settlement.ts",
+      "kind": "function",
+      "path": "clones_settlement.orderLines",
+      "signature": "(_: number[], _: number[], _: number): string[]",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      }
+    },
+    {
+      "file": "src/clones_settlement.ts",
+      "kind": "function",
+      "path": "clones_settlement.refundLines",
+      "signature": "(_: number[], _: number[], _: number): string[]",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 65,
+        "line": 50
+      }
+    },
+    {
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "path": "complexity.label",
+      "signature": "(_: number, _: number): string",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "path": "complexity.settle",
+      "signature": "(_: number[] [], _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "line": 31
+      }
+    },
+    {
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "path": "complexity.openAccount",
+      "signature": "(_: string, _: string, _: number, _: boolean, _: number, _: number): string",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 56,
+        "line": 47
+      }
+    },
+    {
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "path": "complexity.statementTemplate",
+      "signature": "(): string[]",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 122,
+        "line": 58
+      }
+    },
+    {
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "path": "complexity.net",
+      "signature": "(_: number, _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      }
+    },
+    {
+      "file": "src/complexity.ts",
+      "kind": "type",
+      "path": "complexity.Statement",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 138,
+        "line": 128
+      }
+    },
+    {
+      "file": "src/complexity.ts",
+      "kind": "method",
+      "path": "complexity.Statement.constructor",
+      "signature": "(_: string)",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 133,
+        "line": 131
+      }
+    },
+    {
+      "file": "src/complexity.ts",
+      "kind": "method",
+      "path": "complexity.Statement.line",
+      "signature": "(_: number): string",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 137,
+        "line": 135
+      }
+    },
+    {
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "path": "complexity.month",
+      "signature": "(_: number): string",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 170,
+        "line": 141
+      }
+    },
+    {
+      "file": "src/crap_scores.ts",
+      "kind": "function",
+      "path": "crap_scores.overdue",
+      "signature": "(_: number[], _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/crap_scores.ts",
+      "kind": "function",
+      "path": "crap_scores.clamp",
+      "signature": "(_: number, _: number, _: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 21
+      }
+    },
+    {
+      "file": "src/crap_scores.ts",
+      "kind": "function",
+      "path": "crap_scores.toCents",
+      "signature": "(_: number): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 32
+      }
+    },
+    {
+      "file": "src/dead_export.ts",
+      "kind": "function",
+      "path": "dead_export.unusedTotal",
+      "signature": "(_: number[]): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
       "file": "src/decide.ts",
       "kind": "interface",
       "path": "decide.Entry",
@@ -70,6 +286,90 @@
         "end_col": 2,
         "end_line": 43,
         "line": 34
+      }
+    },
+    {
+      "file": "src/deps_cycle/alpha.ts",
+      "kind": "constant",
+      "path": "deps_cycle.alpha.ALPHA",
+      "signature": "",
+      "span": {
+        "col": 14,
+        "end_col": 30,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.ts",
+      "kind": "constant",
+      "path": "deps_cycle.beta.BETA",
+      "signature": "",
+      "span": {
+        "col": 14,
+        "end_col": 22,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.ts",
+      "kind": "constant",
+      "path": "deps_cycle.beta.BOTH",
+      "signature": "",
+      "span": {
+        "col": 14,
+        "end_col": 34,
+        "end_line": 4,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/order.ts",
+      "kind": "type",
+      "path": "deps_layers.domain.order.Order",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 38,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_layers/infra/store.ts",
+      "kind": "type",
+      "path": "deps_layers.infra.store.Store",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 38,
+        "end_line": 1,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/port.ts",
+      "kind": "interface",
+      "path": "deps_layers.port.Port",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_layers/port.ts",
+      "kind": "method",
+      "path": "deps_layers.port.Port.place",
+      "signature": "(_: Order): void",
+      "span": {
+        "col": 3,
+        "end_col": 28,
+        "end_line": 4,
+        "line": 4
       }
     },
     {

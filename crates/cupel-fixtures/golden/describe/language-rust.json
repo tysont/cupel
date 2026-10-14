@@ -5,7 +5,50 @@
     "version": "<version>"
   },
   "description": {
-    "checks": [],
+    "checks": [
+      {
+        "check": "static.clones",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.crap",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.dead-code",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.deps",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
     "extensions": [
       ".rs"
     ],
@@ -185,9 +228,11 @@
     }
   },
   "exit_code": 0,
+  "explanation": null,
   "findings": [],
   "next_actions": [],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

@@ -1,5 +1,5 @@
-# ABOUTME: Continuous integration: runs `make check` on Linux and macOS for every push and pull request.
-# ABOUTME: The toolchain comes from rust-toolchain.toml, so CI compiles with the pinned compiler.
+# ABOUTME: Continuous integration: `make check` on Linux and macOS, and `make dogfood` (Cupel's own gate)
+# ABOUTME: for every push and pull request. The toolchain comes from rust-toolchain.toml.
 name: ci
 
 on:
@@ -20,3 +20,23 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: make check
         run: make check
+
+  dogfood:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # `--changed` diffs against the merge base with main, so the history must be there.
+          fetch-depth: 0
+      - name: Install pinned toolchain
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: Local main branch for --changed
+        if: github.ref != 'refs/heads/main'
+        run: git branch --force main origin/main
+      - name: make dogfood (changed gate)
+        if: github.ref != 'refs/heads/main'
+        run: make dogfood
+      - name: make dogfood (tree gate on main, which has no merge base to diff against)
+        if: github.ref == 'refs/heads/main'
+        run: make dogfood DOGFOOD_SCOPE=tree
