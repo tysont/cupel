@@ -51,7 +51,7 @@ pub struct Job<'a> {
 /// What a run (or a dry run's planning) produced.
 #[derive(Debug, Default)]
 pub struct Outcome {
-    /// One entry per check that ran, then one per skipped (check, language).
+    /// One entry per selected check, its languages combined (ADR-064).
     pub checks: Vec<CheckResult>,
     /// Every check's findings plus producers' findings, de-duplicated by ID, sorted.
     pub findings: Vec<Finding>,
@@ -117,8 +117,11 @@ impl Scheduler<'_> {
                 .iter()
                 .filter(|skip| same(skip.check, *check))
                 .collect();
+            let skips: Vec<Skipped> = skips.into_iter().map(|skip| skip.skipped.clone()).collect();
             // A check runs when some language supports it, or when no language is in scope.
-            if !tasks.is_empty() || skips.is_empty() {
+            if tasks.is_empty() && !skips.is_empty() {
+                checks.push(skipped_entry(*check, skips));
+            } else {
                 let mut run = CheckRun::start(*check, &tasks, sink);
                 for task in tasks {
                     let result = Self::run_task(
@@ -137,12 +140,11 @@ impl Scheduler<'_> {
                             .is_some_and(|skipped| skipped.reason == SkipReason::Timeout);
                     run.record(task, result, sink);
                 }
-                let finished = run.finish(sink);
-                checks.extend(finished.results);
+                let finished = run.finish(skips, sink);
+                checks.push(finished.result);
                 findings.extend(finished.findings);
                 measurements.extend(finished.measurements);
             }
-            checks.extend(skips.into_iter().map(skipped_result));
         }
         // P2.2 persists this to the store.
         findings.extend(store.findings);
@@ -628,8 +630,8 @@ struct CheckRun<'a> {
 
 /// What one check produced across its languages.
 struct Finished {
-    /// The combined entry (unless every language was skipped), then the timeout's skips.
-    results: Vec<CheckResult>,
+    /// The check's one entry (ADR-064).
+    result: CheckResult,
     findings: Vec<Finding>,
     measurements: Vec<Measured>,
 }
@@ -673,41 +675,46 @@ impl<'a> CheckRun<'a> {
         self.results.push(result);
     }
 
-    /// The check's one combined entry, then an entry per language the timeout skipped, with
-    /// its findings and measurements. A check whose every language was skipped has no combined
-    /// entry.
-    fn finish(self, sink: &mut dyn EventSink) -> Finished {
+    /// The check's one entry (ADR-064), with its findings and measurements: its languages'
+    /// results combined, `partial` with the first cut-short language's skip when the timeout or
+    /// budget skipped a language, or one `skipped` entry when every language was skipped.
+    /// `skips` are the languages the support matrix or a missing range ruled out.
+    fn finish(self, mut skips: Vec<Skipped>, sink: &mut dyn EventSink) -> Finished {
         let manifest = self.check.manifest();
         let (skipped, ran): (Vec<CheckResult>, Vec<CheckResult>) = self
             .results
             .into_iter()
             .partition(|result| result.status == CheckStatus::Skipped);
-        let flagged = self
-            .findings
-            .iter()
-            .any(|finding| finding.severity != Severity::Info);
-        let status = if ran.is_empty() && !skipped.is_empty() {
-            CheckStatus::Skipped
+        skips.extend(skipped.into_iter().filter_map(|result| result.skipped));
+        let duration_ms = elapsed_ms(self.started);
+        let result = if ran.is_empty() && !skips.is_empty() {
+            CheckResult {
+                duration_ms,
+                ..skipped_entry(self.check, skips)
+            }
         } else {
-            ran.iter()
+            let flagged = self
+                .findings
+                .iter()
+                .any(|finding| finding.severity != Severity::Info);
+            let cut = skips
+                .into_iter()
+                .filter(|skipped| {
+                    matches!(skipped.reason, SkipReason::Timeout | SkipReason::Budget)
+                })
+                .min_by(|a, b| a.lang.cmp(&b.lang));
+            let status = ran
+                .iter()
                 .map(|result| result.status)
                 .chain(flagged.then_some(CheckStatus::Fail))
+                .chain(cut.is_some().then_some(CheckStatus::Partial))
                 .max_by_key(|status| rank(*status))
-                .unwrap_or(CheckStatus::Pass)
-        };
-        let duration_ms = elapsed_ms(self.started);
-        sink.emit(Event::CheckEnd {
-            id: manifest.id.clone(),
-            status,
-            duration_ms,
-        });
-        let mut entries = Vec::new();
-        if status != CheckStatus::Skipped {
+                .unwrap_or(CheckStatus::Pass);
             let scores: Vec<_> = ran
                 .iter()
                 .filter_map(|result| result.score.clone())
                 .collect();
-            entries.push(CheckResult {
+            CheckResult {
                 id: manifest.id.clone(),
                 status,
                 tier: manifest.tier,
@@ -717,13 +724,17 @@ impl<'a> CheckRun<'a> {
                 delta: None,
                 findings: self.findings.len() as u64,
                 duration_ms,
-                skipped: None,
+                skipped: cut,
                 oracle: None,
-            });
-        }
-        entries.extend(skipped);
+            }
+        };
+        sink.emit(Event::CheckEnd {
+            id: manifest.id.clone(),
+            status: result.status,
+            duration_ms,
+        });
         Finished {
-            results: entries,
+            result,
             findings: self.findings,
             measurements: self.measurements,
         }
@@ -799,8 +810,21 @@ fn same(a: &dyn Check, b: &dyn Check) -> bool {
     a.manifest().id == b.manifest().id
 }
 
-fn skipped_result(skip: &Skip<'_>) -> CheckResult {
-    let manifest = skip.check.manifest();
+/// The one entry of a check every language skipped (ADR-064): the first language's skip in
+/// language-ID order, naming no language when every language was skipped alike.
+fn skipped_entry(check: &dyn Check, mut skips: Vec<Skipped>) -> CheckResult {
+    skips.sort_by(|a, b| a.lang.cmp(&b.lang));
+    let alike = |a: &Skipped, b: &Skipped| {
+        (a.reason, &a.fact, &a.tool, &a.see) == (b.reason, &b.fact, &b.tool, &b.see)
+    };
+    let mut skipped = skips.first().cloned();
+    if let Some(first) = skipped.as_mut()
+        && skips.len() > 1
+        && skips.iter().all(|other| alike(first, other))
+    {
+        first.lang = None;
+    }
+    let manifest = check.manifest();
     CheckResult {
         id: manifest.id.clone(),
         status: CheckStatus::Skipped,
@@ -811,7 +835,7 @@ fn skipped_result(skip: &Skip<'_>) -> CheckResult {
         delta: None,
         findings: 0,
         duration_ms: 0,
-        skipped: Some(skip.skipped.clone()),
+        skipped,
         oracle: None,
     }
 }

@@ -459,14 +459,9 @@ fn unsupported_languages_are_skipped_with_the_missing_fact() {
     );
     let (outcome, events) = world.run(&["go", "rust"], |_| {});
     let checks = outcome.unwrap().checks;
-    assert_eq!(checks.len(), 2, "{checks:?}");
+    assert_eq!(checks.len(), 1, "one entry per check (ADR-064): {checks:?}");
     assert_eq!(checks[0].status, CheckStatus::Pass);
-    assert_eq!(checks[1].status, CheckStatus::Skipped);
-    let skipped = checks[1].skipped.as_ref().unwrap();
-    assert_eq!(skipped.reason, SkipReason::Unsupported);
-    assert_eq!(skipped.fact, Some(FactKind::Decisions));
-    assert_eq!(skipped.lang, Some(LangId::from("go")));
-    assert_eq!(skipped.see.as_deref(), Some("cupel describe matrix"));
+    assert_eq!(checks[0].skipped, None);
     assert!(events.iter().any(|event| matches!(
         event,
         Event::Skip {
@@ -477,12 +472,100 @@ fn unsupported_languages_are_skipped_with_the_missing_fact() {
 }
 
 #[test]
-fn a_check_no_language_supports_has_only_skipped_entries() {
+fn a_check_no_language_supports_has_one_skipped_entry_with_the_missing_fact() {
     let world = World::new(vec![check("t.deep", &[FactKind::Decisions], ok)], "");
     let (outcome, _) = world.run(&["go"], |_| {});
     let checks = outcome.unwrap().checks;
     assert_eq!(checks.len(), 1);
     assert_eq!(checks[0].status, CheckStatus::Skipped);
+    assert_eq!(
+        checks[0].skipped,
+        Some(Skipped {
+            reason: SkipReason::Unsupported,
+            fact: Some(FactKind::Decisions),
+            lang: Some(LangId::from("go")),
+            tool: None,
+            see: Some("cupel describe matrix".to_owned()),
+        })
+    );
+}
+
+#[test]
+fn a_check_every_language_skips_alike_has_one_entry_naming_no_language() {
+    fn unconfigured(ctx: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+        let lang = ctx.config["language"].as_str().unwrap();
+        Ok(CheckResult {
+            status: CheckStatus::Skipped,
+            skipped: Some(Skipped {
+                reason: SkipReason::Unconfigured,
+                fact: Some(FactKind::CoverageMap),
+                lang: Some(LangId::from(lang)),
+                tool: None,
+                see: Some("cupel describe t.unconfigured".to_owned()),
+            }),
+            ..passing("t.unconfigured", None)
+        })
+    }
+    let world = World::new(
+        vec![check("t.unconfigured", &[FactKind::Symbols], unconfigured)],
+        "[checks.\"t.unconfigured\".lang.go]\nlanguage = \"go\"\n\
+         [checks.\"t.unconfigured\".lang.rust]\nlanguage = \"rust\"\n",
+    );
+    let (outcome, _) = world.run(&["go", "rust"], |_| {});
+    let checks = outcome.unwrap().checks;
+    assert_eq!(checks.len(), 1, "{checks:?}");
+    assert_eq!(checks[0].status, CheckStatus::Skipped);
+    assert_eq!(
+        checks[0].skipped,
+        Some(Skipped {
+            reason: SkipReason::Unconfigured,
+            fact: Some(FactKind::CoverageMap),
+            lang: None,
+            tool: None,
+            see: Some("cupel describe t.unconfigured".to_owned()),
+        })
+    );
+}
+
+#[test]
+fn languages_skipped_for_different_reasons_keep_the_first_languages_reason() {
+    let world = World::new(
+        vec![check(
+            "t.deep",
+            &[FactKind::Symbols, FactKind::Decisions],
+            ok,
+        )],
+        "",
+    );
+    let (outcome, _) = world.run(&["go", "rust"], |job| {
+        job.cancel.cancel();
+    });
+    let checks = outcome.unwrap().checks;
+    assert_eq!(checks.len(), 1, "{checks:?}");
+    let skipped = checks[0].skipped.as_ref().unwrap();
+    assert_eq!(
+        (skipped.reason, skipped.lang.as_ref()),
+        (SkipReason::Unsupported, Some(&LangId::from("go")))
+    );
+}
+
+#[test]
+fn a_language_cut_short_makes_the_combined_entry_partial_with_its_skip() {
+    fn cancelling(ctx: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+        ctx.cancel.cancel();
+        Ok(passing("t.one", None))
+    }
+    let world = World::new(vec![check("t.one", &[FactKind::Symbols], cancelling)], "");
+    let (outcome, _) = world.run(&["rust", "go"], |_| {});
+    let outcome = outcome.unwrap();
+    assert!(outcome.interrupted);
+    assert_eq!(outcome.checks.len(), 1, "{:?}", outcome.checks);
+    assert_eq!(outcome.checks[0].status, CheckStatus::Partial);
+    let skipped = outcome.checks[0].skipped.as_ref().unwrap();
+    assert_eq!(
+        (skipped.reason, skipped.lang.as_ref()),
+        (SkipReason::Timeout, Some(&LangId::from("go")))
+    );
 }
 
 #[test]
@@ -608,11 +691,9 @@ fn an_unsupported_family_member_is_skipped_and_the_rest_of_the_family_runs() {
         job.langs = vec![in_family("go", "pair"), in_family("rust", "pair")];
     });
     let checks = outcome.unwrap().checks;
-    assert_eq!(checks.len(), 2, "{checks:?}");
+    assert_eq!(checks.len(), 1, "{checks:?}");
     assert!((checks[0].score.as_ref().unwrap().value - 1.0).abs() < f64::EPSILON);
-    let skipped = checks[1].skipped.as_ref().unwrap();
-    assert_eq!(skipped.lang, Some(LangId::from("go")));
-    assert_eq!(skipped.fact, Some(FactKind::Decisions));
+    assert_eq!(checks[0].skipped, None);
 }
 
 #[test]
@@ -893,12 +974,10 @@ fn a_cancelled_run_skips_unstarted_work_with_reason_timeout() {
     let outcome = outcome.unwrap();
     assert!(outcome.interrupted);
     assert_eq!(world.symbols_made.load(Ordering::SeqCst), 0);
-    assert_eq!(outcome.checks.len(), 2);
-    for (result, lang) in outcome.checks.iter().zip(["rust", "go"]) {
-        let skipped = result.skipped.as_ref().unwrap();
-        assert_eq!(skipped.reason, SkipReason::Timeout);
-        assert_eq!(skipped.lang, Some(LangId::from(lang)));
-    }
+    assert_eq!(outcome.checks.len(), 1);
+    let skipped = outcome.checks[0].skipped.as_ref().unwrap();
+    assert_eq!(skipped.reason, SkipReason::Timeout);
+    assert_eq!(skipped.lang, None, "both languages were cut short");
 }
 
 #[test]
@@ -956,22 +1035,22 @@ fn a_plan_lists_targets_estimates_needs_and_skips_without_running_checks() {
 }
 
 #[test]
-fn a_check_that_reads_the_base_is_skipped_per_language_without_a_range() {
+fn a_check_that_reads_the_base_is_skipped_once_without_a_range() {
     let world = World::new(vec![base_check("t.base", ok)], "");
     let (outcome, events) = world.run(&["go", "rust"], |_| {});
     let checks = outcome.unwrap().checks;
-    assert_eq!(checks.len(), 2, "{checks:?}");
-    for (result, lang) in checks.iter().zip(["go", "rust"]) {
-        assert_eq!(result.status, CheckStatus::Skipped);
-        let skipped = result.skipped.as_ref().unwrap();
-        assert_eq!(skipped.reason, SkipReason::NeedsRange);
-        assert_eq!(skipped.lang, Some(LangId::from(lang)));
-        assert_eq!(skipped.fact, None);
-        assert_eq!(
-            skipped.see.as_deref(),
-            Some("cupel check --changed --only t.base")
-        );
-    }
+    assert_eq!(checks.len(), 1, "{checks:?}");
+    assert_eq!(checks[0].status, CheckStatus::Skipped);
+    assert_eq!(
+        checks[0].skipped,
+        Some(Skipped {
+            reason: SkipReason::NeedsRange,
+            fact: None,
+            lang: None,
+            tool: None,
+            see: Some("cupel check --changed --only t.base".to_owned()),
+        })
+    );
     assert!(events.iter().any(|event| matches!(
         event,
         Event::Skip {

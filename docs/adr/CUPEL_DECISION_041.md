@@ -1,6 +1,6 @@
 # CUPEL_DECISION_041: Scheduler v1: a per-language fact DAG, shared facts, and one result per check
 
-**Date:** 2026-10-13 · **Status:** accepted · **Phase:** P2.1
+**Date:** 2026-10-13 · **Status:** accepted; the per-language `skipped` entries of the Results bullet superseded by [064](CUPEL_DECISION_064.md) (one `checks[]` entry per check) · **Phase:** P2.1
 
 ## Context
 
