@@ -8,8 +8,9 @@ use cupel_core::config::{ConfigError, Table};
 use cupel_core::syntax::{NormNode, NormTree, SymbolDef, Symbols};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
-    Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Measurement, MetricPer,
-    Plan, Result, Scope, Score, Severity, SiteHash, Stability, Symbol, SymbolHash, Target, Tier,
+    Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
+    Measurement, MetricPer, MetricSpec, Plan, Result, Scope, Score, Severity, SiteHash, Stability,
+    Symbol, SymbolHash, Target, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -147,29 +148,8 @@ impl StaticClones {
                 cost: CostClass::Quick,
                 needs: vec![FactKind::Symbols, FactKind::NormTree],
                 wants: vec![],
-                findings: vec![
-                    kind::<ClonePair>(
-                        PAIR,
-                        ActionKind::RefactorExtract,
-                        "Two symbols whose normalized trees are at least `threshold` similar \
-                         and similar to no third symbol.",
-                    ),
-                    kind::<CloneCluster>(
-                        CLUSTER,
-                        ActionKind::RefactorExtract,
-                        "Three or more symbols connected by pairs at least `threshold` similar.",
-                    ),
-                ],
-                metrics: vec![
-                    metric("pairs", "Pairs of symbols at least `threshold` similar."),
-                    metric("clusters", "Groups of three or more similar symbols."),
-                    metric("max_jaccard", "The highest similarity of any pair."),
-                    ranked(
-                        "cluster_size",
-                        MetricPer::Group,
-                        "Symbols in each clone group: 2 for a pair, more for a cluster.",
-                    ),
-                ],
+                findings: finding_kinds(),
+                metrics: metrics(),
                 stability: Stability::Experimental,
                 summary: "Type 1, 2, and 3 clones: functions whose normalized syntax trees share \
                           most subtree fingerprints, compared within a language family. \
@@ -181,6 +161,61 @@ impl StaticClones {
             },
         }
     }
+}
+
+/// Every symbol of the family long and large enough to compare, with its fingerprints, in
+/// symbol-key order.
+fn comparable<'a>(facts: &'a Facts, settings: &Settings) -> Result<Vec<Compared<'a>>> {
+    let trees = trees_by_symbol(facts.family::<NormTree>()?);
+    let mut compared: Vec<Compared<'a>> = facts
+        .family::<Symbols>()?
+        .into_iter()
+        .flat_map(|fact| &fact.symbols)
+        .filter(|symbol| lines(symbol) >= settings.min_lines)
+        .filter_map(|symbol| {
+            let (hash, root) = trees.get(&symbol.key())?;
+            Some(Compared {
+                symbol,
+                hash,
+                root,
+                prints: Fingerprints::of(root),
+            })
+        })
+        .filter(|compared| compared.prints.nodes >= settings.min_nodes)
+        .collect();
+    compared.sort_by_key(|compared| compared.symbol.key());
+    Ok(compared)
+}
+
+/// The finding kinds this check reports, with their actions and evidence.
+fn finding_kinds() -> Vec<FindingKindSpec> {
+    vec![
+        kind::<ClonePair>(
+            PAIR,
+            ActionKind::RefactorExtract,
+            "Two symbols whose normalized trees are at least `threshold` similar \
+             and similar to no third symbol.",
+        ),
+        kind::<CloneCluster>(
+            CLUSTER,
+            ActionKind::RefactorExtract,
+            "Three or more symbols connected by pairs at least `threshold` similar.",
+        ),
+    ]
+}
+
+/// The metrics this check reports: gate keys, then what `survey` ranks.
+fn metrics() -> Vec<MetricSpec> {
+    vec![
+        metric("pairs", "Pairs of symbols at least `threshold` similar."),
+        metric("clusters", "Groups of three or more similar symbols."),
+        metric("max_jaccard", "The highest similarity of any pair."),
+        ranked(
+            "cluster_size",
+            MetricPer::Group,
+            "Symbols in each clone group: 2 for a pair, more for a cluster.",
+        ),
+    ]
 }
 
 impl Check for StaticClones {
@@ -201,24 +236,7 @@ impl Check for StaticClones {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         let settings = Settings::read(&self.manifest.id, &ctx.config)?;
-        let trees = trees_by_symbol(facts.family::<NormTree>()?);
-        let mut compared: Vec<Compared<'_>> = facts
-            .family::<Symbols>()?
-            .into_iter()
-            .flat_map(|fact| &fact.symbols)
-            .filter(|symbol| lines(symbol) >= settings.min_lines)
-            .filter_map(|symbol| {
-                let (hash, root) = trees.get(&symbol.key())?;
-                Some(Compared {
-                    symbol,
-                    hash,
-                    root,
-                    prints: Fingerprints::of(root),
-                })
-            })
-            .filter(|compared| compared.prints.nodes >= settings.min_nodes)
-            .collect();
-        compared.sort_by_key(|compared| compared.symbol.key());
+        let compared = comparable(facts, &settings)?;
         ctx.cancel.checkpoint()?;
         let sets: Vec<Fingerprints> = compared.iter().map(|c| c.prints.clone()).collect();
         let pairs: Vec<Similar> = search(&sets, settings.threshold)

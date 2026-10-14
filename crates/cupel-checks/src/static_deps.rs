@@ -6,8 +6,9 @@ use cupel_core::config::{ConfigError, Table};
 use cupel_core::syntax::{ApiItemKind, ApiSurface, EdgeKind, ImportTarget, ModuleGraph};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
-    Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Measurement, MetricPer,
-    Plan, Result, Scope, Score, Severity, Stability, Target, Tier,
+    Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
+    Measurement, MetricPer, MetricSpec, Plan, Result, Scope, Score, Severity, Stability, Target,
+    Tier,
 };
 use globset::{GlobBuilder, GlobMatcher};
 use schemars::JsonSchema;
@@ -91,50 +92,8 @@ impl StaticDeps {
                 cost: CostClass::Quick,
                 needs: vec![FactKind::ModuleGraph, FactKind::ApiSurface],
                 wants: vec![],
-                findings: vec![
-                    kind::<ImportCycle>(
-                        "dep.cycle",
-                        ActionKind::BreakCycle,
-                        "Modules that import each other, directly or through others.",
-                    ),
-                    kind::<LayerViolation>(
-                        "dep.layer-violation",
-                        ActionKind::Review,
-                        "A module imports a module in a higher layer than its own \
-                         ([checks.\"static.deps\".layers]).",
-                    ),
-                    kind::<UnstableAbstract>(
-                        "dep.unstable-abstract",
-                        ActionKind::Review,
-                        "An abstract module that little depends on: A + I − 1 exceeds \
-                         distance_max.",
-                    ),
-                ],
-                metrics: vec![
-                    metric("cycles", "Import cycles (strongly connected components)."),
-                    metric(
-                        "max_distance",
-                        "The largest distance from the main sequence of any module that \
-                         declares a type and has a coupling.",
-                    ),
-                    metric("violations", "Imports that break a layering rule."),
-                    ranked(
-                        "distance",
-                        MetricPer::Module,
-                        "Distance from the main sequence per module that declares a type and \
-                         has a coupling.",
-                    ),
-                    ranked(
-                        "coupling",
-                        MetricPer::Module,
-                        "Afferent plus efferent coupling per module.",
-                    ),
-                    ranked(
-                        "cycle_size",
-                        MetricPer::Group,
-                        "Modules in each import cycle.",
-                    ),
-                ],
+                findings: finding_kinds(),
+                metrics: metrics(),
                 stability: Stability::Experimental,
                 summary: "Module graph: import cycles, afferent and efferent coupling, \
                           instability, abstractness, distance from the main sequence, and \
@@ -143,6 +102,58 @@ impl StaticDeps {
             },
         }
     }
+}
+
+/// The finding kinds this check reports, with their actions and evidence.
+fn finding_kinds() -> Vec<FindingKindSpec> {
+    vec![
+        kind::<ImportCycle>(
+            "dep.cycle",
+            ActionKind::BreakCycle,
+            "Modules that import each other, directly or through others.",
+        ),
+        kind::<LayerViolation>(
+            "dep.layer-violation",
+            ActionKind::Review,
+            "A module imports a module in a higher layer than its own \
+             ([checks.\"static.deps\".layers]).",
+        ),
+        kind::<UnstableAbstract>(
+            "dep.unstable-abstract",
+            ActionKind::Review,
+            "An abstract module that little depends on: A + I − 1 exceeds \
+             distance_max.",
+        ),
+    ]
+}
+
+/// The metrics this check reports: gate keys, then what `survey` ranks.
+fn metrics() -> Vec<MetricSpec> {
+    vec![
+        metric("cycles", "Import cycles (strongly connected components)."),
+        metric(
+            "max_distance",
+            "The largest distance from the main sequence of any module that \
+             declares a type and has a coupling.",
+        ),
+        metric("violations", "Imports that break a layering rule."),
+        ranked(
+            "distance",
+            MetricPer::Module,
+            "Distance from the main sequence per module that declares a type and \
+             has a coupling.",
+        ),
+        ranked(
+            "coupling",
+            MetricPer::Module,
+            "Afferent plus efferent coupling per module.",
+        ),
+        ranked(
+            "cycle_size",
+            MetricPer::Group,
+            "Modules in each import cycle.",
+        ),
+    ]
 }
 
 impl Check for StaticDeps {
@@ -598,58 +609,97 @@ impl Graph {
 /// deep import chains cannot overflow the stack. Components come out in reverse topological
 /// order; every node is in exactly one.
 fn strongly_connected(successors: &[Vec<usize>]) -> Vec<Vec<usize>> {
-    const UNVISITED: usize = usize::MAX;
-    let n = successors.len();
-    let mut index = vec![UNVISITED; n];
-    let mut low = vec![0; n];
-    let mut on_stack = vec![false; n];
-    let mut stack = Vec::new();
-    let mut components = Vec::new();
-    let mut next_index = 0;
-    for root in 0..n {
-        if index[root] != UNVISITED {
-            continue;
+    let mut tarjan = Tarjan::new(successors);
+    for root in 0..successors.len() {
+        if !tarjan.visited(root) {
+            tarjan.explore(root);
         }
-        // Each frame is a node and how many of its successors have been explored.
+    }
+    tarjan.components
+}
+
+/// The state of Tarjan's algorithm over one graph.
+struct Tarjan<'a> {
+    successors: &'a [Vec<usize>],
+    /// The order each node was first visited in; `None` before that.
+    index: Vec<Option<usize>>,
+    low: Vec<usize>,
+    on_stack: Vec<bool>,
+    stack: Vec<usize>,
+    components: Vec<Vec<usize>>,
+    next_index: usize,
+}
+
+impl<'a> Tarjan<'a> {
+    fn new(successors: &'a [Vec<usize>]) -> Self {
+        let n = successors.len();
+        Self {
+            successors,
+            index: vec![None; n],
+            low: vec![0; n],
+            on_stack: vec![false; n],
+            stack: Vec::new(),
+            components: Vec::new(),
+            next_index: 0,
+        }
+    }
+
+    fn visited(&self, node: usize) -> bool {
+        self.index[node].is_some()
+    }
+
+    /// Numbers `node` and pushes it on the component stack.
+    fn visit(&mut self, node: usize) {
+        self.index[node] = Some(self.next_index);
+        self.low[node] = self.next_index;
+        self.next_index += 1;
+        self.stack.push(node);
+        self.on_stack[node] = true;
+    }
+
+    /// Depth-first from `root` with an explicit stack of frames, each a node and how many of its
+    /// successors have been explored.
+    fn explore(&mut self, root: usize) {
+        self.visit(root);
         let mut frames = vec![(root, 0)];
-        index[root] = next_index;
-        low[root] = next_index;
-        next_index += 1;
-        stack.push(root);
-        on_stack[root] = true;
         while let Some(&mut (node, ref mut explored)) = frames.last_mut() {
-            if let Some(&next) = successors[node].get(*explored) {
-                *explored += 1;
-                if index[next] == UNVISITED {
-                    index[next] = next_index;
-                    low[next] = next_index;
-                    next_index += 1;
-                    stack.push(next);
-                    on_stack[next] = true;
-                    frames.push((next, 0));
-                } else if on_stack[next] {
-                    low[node] = low[node].min(index[next]);
+            let Some(&next) = self.successors[node].get(*explored) else {
+                frames.pop();
+                if let Some(&(parent, _)) = frames.last() {
+                    self.low[parent] = self.low[parent].min(self.low[node]);
                 }
+                self.close(node);
                 continue;
-            }
-            frames.pop();
-            if let Some(&(parent, _)) = frames.last() {
-                low[parent] = low[parent].min(low[node]);
-            }
-            if low[node] == index[node] {
-                let mut component = Vec::new();
-                while let Some(member) = stack.pop() {
-                    on_stack[member] = false;
-                    component.push(member);
-                    if member == node {
-                        break;
-                    }
+            };
+            *explored += 1;
+            match self.index[next] {
+                None => {
+                    self.visit(next);
+                    frames.push((next, 0));
                 }
-                components.push(component);
+                Some(index) if self.on_stack[next] => {
+                    self.low[node] = self.low[node].min(index);
+                }
+                Some(_) => {}
             }
         }
     }
-    components
+
+    /// Pops `node`'s component when `node` is its root.
+    fn close(&mut self, node: usize) {
+        if Some(self.low[node]) != self.index[node] {
+            return;
+        }
+        let mut component = Vec::new();
+        while let Some(member) = self.stack.pop() {
+            self.on_stack[member] = false;
+            component.push(member);
+            if member == node {
+                break;
+            }
+        }
+        self.components.push(component);
+    }
 }
 
 /// A module's couplings (ADR-052): Ca and Ce over `File` edges; the rest only reported.

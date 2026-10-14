@@ -1,13 +1,15 @@
 // ABOUTME: `static.crap`: per-symbol CRAP, `CC² × (1 − coverage)³ + CC`, from Symbols, Decisions, NormTree, and
 // ABOUTME: a CoverageMap; without coverage CRAP is null and nothing is reported (ADR-048, ADR-067).
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::coverage::CoverageMap;
-use cupel_core::syntax::{Decisions, NormTree, SymbolDef, Symbols, TestConventions};
+use cupel_core::syntax::{
+    Decision, Decisions, NormTree, SymbolDef, SymbolKey, Symbols, TestConventions,
+};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
-    FactKind, Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score,
-    Severity, Stability, SymbolHash, Tier,
+    FactKind, Facts, Finding, FindingKindSpec, Manifest, Measurement, MetricPer, MetricSpec, Plan,
+    Result, Scope, Score, Severity, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -56,23 +58,8 @@ impl StaticCrap {
                 cost: CostClass::Quick,
                 needs: vec![FactKind::Symbols, FactKind::Decisions, FactKind::NormTree],
                 wants: vec![FactKind::CoverageMap, FactKind::TestConventions],
-                findings: vec![
-                    kind::<CrapScore>(
-                        "crap.high",
-                        ActionKind::WriteTest,
-                        "CRAP is at least high (default 30): complex code that tests do not cover.",
-                    ),
-                    kind::<CrapScore>(
-                        "crap.watch",
-                        ActionKind::Review,
-                        "CRAP is at least watch (default 5) but below high.",
-                    ),
-                ],
-                metrics: vec![
-                    metric("max", "The largest CRAP score in scope."),
-                    metric("mean", "The mean CRAP score over the symbols in scope."),
-                    ranked("crap", MetricPer::Symbol, "CRAP per function."),
-                ],
+                findings: finding_kinds(),
+                metrics: metrics(),
                 stability: Stability::Experimental,
                 summary: "CRAP per function: cyclomatic complexity weighted by missing test \
                           coverage. Limitation: CRAP exists only where coverage was measured; \
@@ -84,6 +71,31 @@ impl StaticCrap {
             },
         }
     }
+}
+
+/// The finding kinds this check reports, with their actions and evidence.
+fn finding_kinds() -> Vec<FindingKindSpec> {
+    vec![
+        kind::<CrapScore>(
+            "crap.high",
+            ActionKind::WriteTest,
+            "CRAP is at least high (default 30): complex code that tests do not cover.",
+        ),
+        kind::<CrapScore>(
+            "crap.watch",
+            ActionKind::Review,
+            "CRAP is at least watch (default 5) but below high.",
+        ),
+    ]
+}
+
+/// The metrics this check reports: gate keys, then what `survey` ranks.
+fn metrics() -> Vec<MetricSpec> {
+    vec![
+        metric("max", "The largest CRAP score in scope."),
+        metric("mean", "The mean CRAP score over the symbols in scope."),
+        ranked("crap", MetricPer::Symbol, "CRAP per function."),
+    ]
 }
 
 impl Check for StaticCrap {
@@ -114,68 +126,29 @@ impl Check for StaticCrap {
                 0,
             ));
         };
-        let symbols = facts.get::<Symbols>()?;
-        let conventions = facts.get::<TestConventions>().ok();
-        let decisions = decisions_by_symbol(facts.get::<Decisions>()?);
-        let hashes = hashes_by_symbol(facts.get::<NormTree>()?);
-        let bands = Bands::of(&limits);
+        let inputs = Inputs {
+            coverage,
+            conventions: facts.get::<TestConventions>().ok(),
+            decisions: decisions_by_symbol(facts.get::<Decisions>()?),
+            hashes: hashes_by_symbol(facts.get::<NormTree>()?),
+            bands: Bands::of(&limits),
+        };
         let mut tally = Tally::default();
         // Test code is what lowers CRAP, not what it scores (ADR-048).
-        for symbol in symbols
+        for symbol in facts
+            .get::<Symbols>()?
             .symbols
             .iter()
             .filter(|symbol| ctx.scope.includes(&symbol.key()))
-            .filter(|symbol| !conventions.is_some_and(|c| c.is_test(&symbol.file)))
+            .filter(|symbol| !inputs.conventions.is_some_and(|c| c.is_test(&symbol.file)))
         {
             ctx.cancel.checkpoint()?;
-            let key = symbol.key();
-            let Some(covered) =
-                coverage.line_coverage(&symbol.file, symbol.span.line, symbol.span.end_line)
-            else {
-                continue;
-            };
-            let cyclomatic = cyclomatic(decisions.get(&key).copied().unwrap_or_default());
-            let crap = crap(cyclomatic, covered);
-            tally.add(crap);
-            sink.measure(Measurement {
-                metric: "crap".to_owned(),
-                value: crap,
-                target: symbol_target(symbol, hashes.get(&key).copied()),
-            });
-            // A symbol without a structural hash cannot be identified, so it is scored but not
-            // reported; every language producing NormTree hashes every symbol.
-            let Some(hash) = hashes.get(&key) else {
-                continue;
-            };
-            let score = CrapScore {
-                crap,
-                cyclomatic,
-                coverage: covered,
-                watch: bands.watch,
-                high: bands.high,
-            };
-            if let Some(finding) = self.band(Subject { symbol, hash }, score, &bands, conventions) {
+            if let Some(finding) = self.score(symbol, &inputs, &mut tally, sink) {
                 tally.report(&finding);
                 sink.emit(Event::Finding(Box::new(finding)));
             }
         }
-        let status = outcome::status(tally.flagged);
-        let score = Score {
-            value: tally.worst,
-            unit: "max".to_owned(),
-            n: tally.scored,
-        };
-        let metrics = BTreeMap::from([
-            ("max".to_owned(), tally.worst),
-            ("mean".to_owned(), tally.mean()),
-        ]);
-        Ok(outcome::result(
-            &self.manifest,
-            status,
-            Some(score),
-            metrics,
-            tally.findings,
-        ))
+        Ok(tally.result(&self.manifest))
     }
 
     /// The largest value, over the symbols of every language (ADR-048).
@@ -191,6 +164,15 @@ impl Check for StaticCrap {
             _ => largest(name, results),
         }
     }
+}
+
+/// What scoring reads besides the symbols.
+struct Inputs<'a> {
+    coverage: &'a CoverageMap,
+    conventions: Option<&'a TestConventions>,
+    decisions: HashMap<&'a SymbolKey, &'a [Decision]>,
+    hashes: HashMap<&'a SymbolKey, &'a SymbolHash>,
+    bands: Bands,
 }
 
 /// What the scored symbols added up to.
@@ -214,6 +196,26 @@ impl Tally {
     fn report(&mut self, finding: &Finding) {
         self.findings += 1;
         self.flagged |= finding.severity != Severity::Info;
+    }
+
+    /// The language's result: `fail` with a `crap.high`, scored by the largest CRAP.
+    fn result(&self, manifest: &Manifest) -> CheckResult {
+        let score = Score {
+            value: self.worst,
+            unit: "max".to_owned(),
+            n: self.scored,
+        };
+        let metrics = BTreeMap::from([
+            ("max".to_owned(), self.worst),
+            ("mean".to_owned(), self.mean()),
+        ]);
+        outcome::result(
+            manifest,
+            outcome::status(self.flagged),
+            Some(score),
+            metrics,
+            self.findings,
+        )
     }
 
     /// The mean CRAP of the scored symbols; 0 for none.
@@ -261,6 +263,45 @@ fn crap(cyclomatic: u32, coverage: f64) -> f64 {
 }
 
 impl StaticCrap {
+    /// Scores `symbol` when coverage measured it, measuring its CRAP; its finding, if any.
+    fn score(
+        &self,
+        symbol: &SymbolDef,
+        inputs: &Inputs<'_>,
+        tally: &mut Tally,
+        sink: &mut dyn EventSink,
+    ) -> Option<Finding> {
+        let key = symbol.key();
+        let covered =
+            inputs
+                .coverage
+                .line_coverage(&symbol.file, symbol.span.line, symbol.span.end_line)?;
+        let cyclomatic = cyclomatic(inputs.decisions.get(&key).copied().unwrap_or_default());
+        let crap = crap(cyclomatic, covered);
+        tally.add(crap);
+        sink.measure(Measurement {
+            metric: "crap".to_owned(),
+            value: crap,
+            target: symbol_target(symbol, inputs.hashes.get(&key).copied()),
+        });
+        // A symbol without a structural hash cannot be identified, so it is scored but not
+        // reported; every language producing NormTree hashes every symbol.
+        let hash = inputs.hashes.get(&key)?;
+        let score = CrapScore {
+            crap,
+            cyclomatic,
+            coverage: covered,
+            watch: inputs.bands.watch,
+            high: inputs.bands.high,
+        };
+        self.band(
+            Subject { symbol, hash },
+            score,
+            &inputs.bands,
+            inputs.conventions,
+        )
+    }
+
     /// The finding for a scored symbol in the band its CRAP falls in; none below `watch`.
     fn band(
         &self,
@@ -298,7 +339,10 @@ impl StaticCrap {
              cyclomatic complexity, {}), or split it until CRAP is below {}.",
             symbol.name, score.cyclomatic, score.high
         );
-        let mut finding = self.report(subject, "crap.high", Severity::Warn, title, score, summary);
+        let mut finding = self
+            .report(subject, "crap.high", score)
+            .described(title, summary)
+            .finding();
         if let Some(test) =
             conventions.and_then(|conventions| conventions.test_files_for(&symbol.file).first())
         {
@@ -321,38 +365,20 @@ impl StaticCrap {
              flow.",
             symbol.name, score.high
         );
-        self.report(subject, "crap.watch", Severity::Info, title, score, summary)
+        self.report(subject, "crap.watch", score)
+            .described(title, summary)
+            .at(Severity::Info)
+            .finding()
     }
 
-    /// A finding of `kind` about the subject, with the action its manifest maps it to.
-    fn report(
-        &self,
-        subject: Subject<'_>,
+    /// A finding of `kind` about the subject.
+    fn report<'a>(
+        &'a self,
+        subject: Subject<'a>,
         kind: &'static str,
-        severity: Severity,
-        title: String,
-        evidence: CrapScore,
-        summary: String,
-    ) -> Finding {
-        let action = self
-            .manifest
-            .findings
-            .iter()
-            .find(|spec| spec.kind == kind)
-            .map_or(ActionKind::Review, |spec| spec.action);
-        SymbolFinding {
-            check: &self.manifest.id,
-            kind,
-            symbol: subject.symbol,
-            hash: subject.hash,
-            severity,
-            tier: self.manifest.tier,
-            title,
-            evidence,
-            action,
-            summary,
-        }
-        .finding()
+        score: CrapScore,
+    ) -> SymbolFinding<'a, CrapScore> {
+        SymbolFinding::new(&self.manifest, kind, subject.symbol, subject.hash, score)
     }
 }
 

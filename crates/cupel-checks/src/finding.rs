@@ -2,8 +2,8 @@
 // ABOUTME: structural hash, location from the symbol span, and repro and suppress commands.
 use cupel_core::syntax::SymbolDef;
 use cupel_core::{
-    Action, ActionKind, CheckId, Evidence, Finding, FindingId, Location, Severity, Symbol,
-    SymbolHash, Tier,
+    Action, ActionKind, CheckId, Evidence, Finding, FindingId, Location, Manifest, Severity,
+    Symbol, SymbolHash, Tier,
 };
 use serde::Serialize;
 use serde_json::Value;
@@ -22,7 +22,48 @@ pub struct SymbolFinding<'a, E> {
     pub summary: String,
 }
 
-impl<E: Serialize> SymbolFinding<'_, E> {
+impl<'a, E: Serialize> SymbolFinding<'a, E> {
+    /// A `warn` finding of `kind` from the check `manifest` describes, about `symbol`, with the
+    /// action the manifest maps `kind` to; `described` gives it a title and an action summary.
+    pub fn new(
+        manifest: &'a Manifest,
+        kind: &'static str,
+        symbol: &'a SymbolDef,
+        hash: &'a SymbolHash,
+        evidence: E,
+    ) -> Self {
+        Self {
+            check: &manifest.id,
+            kind,
+            symbol,
+            hash,
+            severity: Severity::Warn,
+            tier: manifest.tier,
+            title: String::new(),
+            evidence,
+            action: manifest
+                .findings
+                .iter()
+                .find(|spec| spec.kind == kind)
+                .map_or(ActionKind::Review, |spec| spec.action),
+            summary: String::new(),
+        }
+    }
+
+    /// This finding with `title`, and `summary` saying what its action asks.
+    pub fn described(self, title: String, summary: String) -> Self {
+        Self {
+            title,
+            summary,
+            ..self
+        }
+    }
+
+    /// This finding at `severity`.
+    pub fn at(self, severity: Severity) -> Self {
+        Self { severity, ..self }
+    }
+
     /// The finding, identified by `FindingId::compute(check, kind, hash, None)` and reproduced by
     /// running only this check on only this symbol.
     pub fn finding(self) -> Finding {

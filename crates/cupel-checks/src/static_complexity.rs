@@ -5,8 +5,8 @@ use std::collections::BTreeMap;
 use cupel_core::syntax::{Decision, DecisionKind, Decisions, NormTree, SymbolDef, Symbols};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
-    Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score, Severity,
-    Stability, SymbolHash, Tier,
+    Facts, Finding, FindingKindSpec, Manifest, Measurement, MetricPer, MetricSpec, Plan, Result,
+    Scope, Score, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -82,55 +82,8 @@ impl StaticComplexity {
                 cost: CostClass::Quick,
                 needs: vec![FactKind::Symbols, FactKind::Decisions, FactKind::NormTree],
                 wants: vec![],
-                findings: vec![
-                    kind::<ComplexityHigh>(
-                        "complexity.high",
-                        ActionKind::ReduceComplexity,
-                        "Cyclomatic or cognitive complexity exceeds its limit \
-                         (cyclomatic_max, cognitive_max).",
-                    ),
-                    kind::<NestingDeep>(
-                        "nesting.deep",
-                        ActionKind::ReduceComplexity,
-                        "Control flow nests deeper than nesting_max.",
-                    ),
-                    kind::<ParamsMany>(
-                        "params.many",
-                        ActionKind::RefactorExtract,
-                        "More declared parameters than params_max, not counting a receiver.",
-                    ),
-                    kind::<FunctionLong>(
-                        "function.long",
-                        ActionKind::RefactorExtract,
-                        "The symbol spans more lines than length_max.",
-                    ),
-                ],
-                metrics: vec![
-                    metric(
-                        "cyclomatic_max",
-                        "The largest cyclomatic complexity in scope.",
-                    ),
-                    metric(
-                        "cognitive_max",
-                        "The largest cognitive complexity in scope.",
-                    ),
-                    metric("nesting_max", "The deepest nesting in scope."),
-                    metric(
-                        "params_max",
-                        "The most parameters any symbol in scope declares.",
-                    ),
-                    metric("length_max", "The most lines any symbol in scope spans."),
-                    ranked(
-                        "cyclomatic",
-                        MetricPer::Symbol,
-                        "Cyclomatic complexity per function.",
-                    ),
-                    ranked(
-                        "cognitive",
-                        MetricPer::Symbol,
-                        "Cognitive complexity per function.",
-                    ),
-                ],
+                findings: finding_kinds(),
+                metrics: metrics(),
                 stability: Stability::Experimental,
                 summary: "Cyclomatic and cognitive complexity, nesting depth, parameter count, \
                           and length per function, against configurable limits."
@@ -138,6 +91,63 @@ impl StaticComplexity {
             },
         }
     }
+}
+
+/// The finding kinds this check reports, with their actions and evidence.
+fn finding_kinds() -> Vec<FindingKindSpec> {
+    vec![
+        kind::<ComplexityHigh>(
+            "complexity.high",
+            ActionKind::ReduceComplexity,
+            "Cyclomatic or cognitive complexity exceeds its limit \
+             (cyclomatic_max, cognitive_max).",
+        ),
+        kind::<NestingDeep>(
+            "nesting.deep",
+            ActionKind::ReduceComplexity,
+            "Control flow nests deeper than nesting_max.",
+        ),
+        kind::<ParamsMany>(
+            "params.many",
+            ActionKind::RefactorExtract,
+            "More declared parameters than params_max, not counting a receiver.",
+        ),
+        kind::<FunctionLong>(
+            "function.long",
+            ActionKind::RefactorExtract,
+            "The symbol spans more lines than length_max.",
+        ),
+    ]
+}
+
+/// The metrics this check reports: gate keys, then what `survey` ranks.
+fn metrics() -> Vec<MetricSpec> {
+    vec![
+        metric(
+            "cyclomatic_max",
+            "The largest cyclomatic complexity in scope.",
+        ),
+        metric(
+            "cognitive_max",
+            "The largest cognitive complexity in scope.",
+        ),
+        metric("nesting_max", "The deepest nesting in scope."),
+        metric(
+            "params_max",
+            "The most parameters any symbol in scope declares.",
+        ),
+        metric("length_max", "The most lines any symbol in scope spans."),
+        ranked(
+            "cyclomatic",
+            MetricPer::Symbol,
+            "Cyclomatic complexity per function.",
+        ),
+        ranked(
+            "cognitive",
+            MetricPer::Symbol,
+            "Cognitive complexity per function.",
+        ),
+    ]
 }
 
 impl Check for StaticComplexity {
@@ -343,25 +353,9 @@ impl StaticComplexity {
         evidence: Value,
         summary: String,
     ) -> Finding {
-        let action = self
-            .manifest
-            .findings
-            .iter()
-            .find(|spec| spec.kind == kind)
-            .map_or(ActionKind::Review, |spec| spec.action);
-        SymbolFinding {
-            check: &self.manifest.id,
-            kind,
-            symbol: subject.symbol,
-            hash: subject.hash,
-            severity: Severity::Warn,
-            tier: self.manifest.tier,
-            title,
-            evidence,
-            action,
-            summary,
-        }
-        .finding()
+        SymbolFinding::new(&self.manifest, kind, subject.symbol, subject.hash, evidence)
+            .described(title, summary)
+            .finding()
     }
 }
 

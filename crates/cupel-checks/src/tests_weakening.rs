@@ -349,94 +349,46 @@ fn stem(path: &str) -> &str {
     name.rfind('.').map_or(name, |at| &name[..at])
 }
 
+/// What a finding says: its kind, title, evidence, and what to do.
+struct Said {
+    kind: &'static str,
+    title: String,
+    evidence: Value,
+    summary: String,
+}
+
 impl TestsWeakening {
     /// What weakened between a base test and its head counterpart.
     fn compare(&self, old: &Test<'_>, new: &Test<'_>, commit: &str) -> Vec<Finding> {
-        let name = &new.case.name;
-        let mut findings = Vec::new();
-        if new.case.skip.is_some() && old.case.skip.is_none() {
-            let reason = new.case.skip.as_ref().and_then(|skip| skip.reason.clone());
-            findings.push(self.report(
-                "test.skipped",
-                new,
-                &new.case.span,
-                format!("`{name}` is now skipped"),
-                evidence(&TestSkipped {
-                    test: name.clone(),
-                    reason,
-                }),
-                format!("Remove the skip marker from `{name}` and fix what made it fail."),
-                commit,
-            ));
-        }
         let (before, after) = (Counts::of(old.case), Counts::of(new.case));
-        if after.total < before.total {
-            findings.push(self.report(
-                "assertion.removed",
-                new,
-                &new.case.span,
-                format!(
-                    "`{name}` makes {} assertions, down from {}",
-                    after.total, before.total
-                ),
-                evidence(&AssertionRemoved {
-                    test: name.clone(),
-                    base: before.total,
-                    head: after.total,
-                }),
-                format!(
-                    "Restore the assertions removed from `{name}` (see it at {commit}); if one \
-                     is wrong, replace it with a correct one rather than dropping it."
-                ),
-                commit,
-            ));
-        }
-        let loosened = before
-            .strong
-            .saturating_sub(after.strong)
-            .min(after.weak.saturating_sub(before.weak));
-        if loosened > 0 {
-            findings.push(self.report(
-                "matcher.loosened",
-                new,
-                &new.case.span,
-                format!("`{name}` replaced {loosened} exact assertion(s) with weaker ones"),
-                evidence(&MatcherLoosened {
-                    test: name.clone(),
-                    strong_base: before.strong,
-                    strong_head: after.strong,
-                    weak_base: before.weak,
-                    weak_head: after.weak,
-                }),
-                format!(
-                    "Restore the exact expected values in `{name}` instead of truthiness, \
-                     presence, or inequality checks."
-                ),
-                commit,
-            ));
-        }
-        findings
+        [
+            skipped(old, new),
+            removed(new, &before, &after, commit),
+            loosened(new, &before, &after),
+        ]
+        .into_iter()
+        .flatten()
+        .map(|said| self.report(said, new, commit))
+        .collect()
     }
 
     fn deleted(&self, old: &Test<'_>, commit: &str) -> Finding {
         let name = &old.case.name;
-        self.report(
-            "test.deleted",
-            old,
-            &old.case.span,
-            format!("`{name}` was deleted"),
-            evidence(&TestDeleted {
+        let said = Said {
+            kind: "test.deleted",
+            title: format!("`{name}` was deleted"),
+            evidence: evidence(&TestDeleted {
                 test: name.clone(),
                 file: old.file.to_owned(),
                 line: old.case.span.line,
             }),
-            format!(
+            summary: format!(
                 "Restore `{name}` from {}:{} at {commit}, or move its assertions to the test \
                  that replaces it.",
                 old.file, old.case.span.line
             ),
-            commit,
-        )
+        };
+        self.report(said, old, commit)
     }
 
     /// `snapshot.rewritten` for a modified snapshot, attributed to the head tests it belongs
@@ -449,25 +401,7 @@ impl TestsWeakening {
         matched: &[Option<usize>],
         commit: &str,
     ) -> Option<Finding> {
-        let owners: Vec<usize> = head
-            .tests
-            .iter()
-            .enumerate()
-            .filter(|(_, test)| test.has_snapshot())
-            .filter_map(|(index, test)| {
-                let below = snapshot.strip_prefix(directory(test.file))?;
-                below.contains(stem(test.file)).then_some(index)
-            })
-            .collect();
-        let named: Vec<usize> = owners
-            .iter()
-            .copied()
-            .filter(|index| {
-                let test = &head.tests[*index];
-                snapshot[directory(test.file).len()..].contains(test.case.name.as_str())
-            })
-            .collect();
-        let owners = if named.is_empty() { owners } else { named };
+        let owners = owners(snapshot, head);
         if owners.iter().any(|index| !matched.contains(&Some(*index))) {
             return None;
         }
@@ -475,15 +409,18 @@ impl TestsWeakening {
             .iter()
             .map(|index| head.tests[*index].case.name.clone())
             .collect();
-        let title = format!("snapshot `{snapshot}` was rewritten");
-        let summary = format!(
-            "Restore `{snapshot}` from {commit} and fix the code until it matches, or justify \
-             the new expected output in review."
-        );
-        let body = evidence(&SnapshotRewritten {
-            snapshot: snapshot.to_owned(),
-            tests,
-        });
+        let said = Said {
+            kind: "snapshot.rewritten",
+            title: format!("snapshot `{snapshot}` was rewritten"),
+            evidence: evidence(&SnapshotRewritten {
+                snapshot: snapshot.to_owned(),
+                tests,
+            }),
+            summary: format!(
+                "Restore `{snapshot}` from {commit} and fix the code until it matches, or \
+                 justify the new expected output in review."
+            ),
+        };
         let location = owners.first().map_or_else(
             || Location {
                 file: snapshot.to_owned(),
@@ -494,60 +431,19 @@ impl TestsWeakening {
             },
             |index| location(head.tests[*index].file, &head.tests[*index].case.span),
         );
-        Some(self.finding(
-            "snapshot.rewritten",
-            snapshot,
-            location,
-            title,
-            body,
-            summary,
-            commit,
-        ))
+        Some(self.finding(said, snapshot, location, commit))
     }
 
-    /// A finding of `kind` about `test`, located at `span` in the test's file.
-    #[allow(
-        clippy::too_many_arguments,
-        reason = "every argument is a distinct part of the finding"
-    )]
-    fn report(
-        &self,
-        kind: &'static str,
-        test: &Test<'_>,
-        span: &Span,
-        title: String,
-        evidence: Value,
-        summary: String,
-        commit: &str,
-    ) -> Finding {
-        self.finding(
-            kind,
-            &test.subject(),
-            location(test.file, span),
-            title,
-            evidence,
-            summary,
-            commit,
-        )
+    /// A finding about `test`, located at the test.
+    fn report(&self, said: Said, test: &Test<'_>, commit: &str) -> Finding {
+        let location = location(test.file, &test.case.span);
+        self.finding(said, &test.subject(), location, commit)
     }
 
     /// A `fail` finding identified by its structural subject (ADR-057).
-    #[allow(
-        clippy::too_many_arguments,
-        reason = "every argument is a distinct part of the finding"
-    )]
-    fn finding(
-        &self,
-        kind: &'static str,
-        subject: &str,
-        location: Location,
-        title: String,
-        evidence: Value,
-        summary: String,
-        commit: &str,
-    ) -> Finding {
-        let id = FindingId::for_subject(&self.manifest.id, kind, subject);
-        let evidence = match evidence {
+    fn finding(&self, said: Said, subject: &str, location: Location, commit: &str) -> Finding {
+        let id = FindingId::for_subject(&self.manifest.id, said.kind, subject);
+        let evidence = match said.evidence {
             Value::Object(fields) => fields,
             _ => Map::new(),
         };
@@ -556,25 +452,109 @@ impl TestsWeakening {
             repro: format!("cupel check --only {} --base {commit}", self.manifest.id),
             id,
             check: self.manifest.id.clone(),
-            kind: kind.to_owned(),
+            kind: said.kind.to_owned(),
             severity: Severity::Fail,
             confidence: 1.0,
             tier: self.manifest.tier,
             symbol: None,
             location: Some(location),
-            title,
+            title: said.title,
             detail: None,
             evidence: Evidence(evidence),
             action: Action {
                 kind: ActionKind::RestoreTest,
                 priority: 1,
-                summary,
+                summary: said.summary,
                 hints: Map::new(),
             },
             new_since_baseline: false,
             suppressed: false,
         }
     }
+}
+
+/// `test.skipped` when the head test is skipped and the base one was not.
+fn skipped(old: &Test<'_>, new: &Test<'_>) -> Option<Said> {
+    let name = &new.case.name;
+    let skip = new.case.skip.as_ref().filter(|_| old.case.skip.is_none())?;
+    Some(Said {
+        kind: "test.skipped",
+        title: format!("`{name}` is now skipped"),
+        evidence: evidence(&TestSkipped {
+            test: name.clone(),
+            reason: skip.reason.clone(),
+        }),
+        summary: format!("Remove the skip marker from `{name}` and fix what made it fail."),
+    })
+}
+
+/// `assertion.removed` when the head test makes fewer assertions.
+fn removed(new: &Test<'_>, before: &Counts, after: &Counts, commit: &str) -> Option<Said> {
+    let name = &new.case.name;
+    (after.total < before.total).then(|| Said {
+        kind: "assertion.removed",
+        title: format!(
+            "`{name}` makes {} assertions, down from {}",
+            after.total, before.total
+        ),
+        evidence: evidence(&AssertionRemoved {
+            test: name.clone(),
+            base: before.total,
+            head: after.total,
+        }),
+        summary: format!(
+            "Restore the assertions removed from `{name}` (see it at {commit}); if one is \
+             wrong, replace it with a correct one rather than dropping it."
+        ),
+    })
+}
+
+/// `matcher.loosened` when strong assertions became weak ones.
+fn loosened(new: &Test<'_>, before: &Counts, after: &Counts) -> Option<Said> {
+    let name = &new.case.name;
+    let loosened = before
+        .strong
+        .saturating_sub(after.strong)
+        .min(after.weak.saturating_sub(before.weak));
+    (loosened > 0).then(|| Said {
+        kind: "matcher.loosened",
+        title: format!("`{name}` replaced {loosened} exact assertion(s) with weaker ones"),
+        evidence: evidence(&MatcherLoosened {
+            test: name.clone(),
+            strong_base: before.strong,
+            strong_head: after.strong,
+            weak_base: before.weak,
+            weak_head: after.weak,
+        }),
+        summary: format!(
+            "Restore the exact expected values in `{name}` instead of truthiness, presence, or \
+             inequality checks."
+        ),
+    })
+}
+
+/// The head tests a snapshot belongs to: those whose file's stem appears in the snapshot path
+/// below the test's directory, narrowed to those whose name appears too when any does.
+fn owners(snapshot: &str, head: &Tests<'_>) -> Vec<usize> {
+    let owners: Vec<usize> = head
+        .tests
+        .iter()
+        .enumerate()
+        .filter(|(_, test)| test.has_snapshot())
+        .filter_map(|(index, test)| {
+            let below = snapshot.strip_prefix(directory(test.file))?;
+            below.contains(stem(test.file)).then_some(index)
+        })
+        .collect();
+    let named: Vec<usize> = owners
+        .iter()
+        .copied()
+        .filter(|index| {
+            let test = &head.tests[*index];
+            snapshot[directory(test.file).len()..].contains(test.case.name.as_str())
+        })
+        .collect();
+    if named.is_empty() { owners } else { named }
 }
 
 fn location(file: &str, span: &Span) -> Location {

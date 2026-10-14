@@ -8,8 +8,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Error, Event, EventSink,
-    FactKind, Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score,
-    Severity, Stability, SymbolHash, Tier,
+    FactKind, Facts, Finding, FindingKindSpec, Manifest, Measurement, MetricPer, MetricSpec, Plan,
+    Result, Scope, Score, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -147,54 +147,8 @@ impl TestsQuality {
                 cost: CostClass::Quick,
                 needs: vec![FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree],
                 wants: vec![FactKind::Decisions],
-                findings: vec![
-                    kind::<WeakAssertion>(
-                        "test.weak-assertion",
-                        ActionKind::StrengthenAssertion,
-                        "Every assertion in the test is weak: truthiness, presence, inequality, or \
-                         a partial match.",
-                    ),
-                    kind::<NoAssertion>(
-                        "test.no-assertion",
-                        ActionKind::WriteTest,
-                        "The test asserts nothing; an expected panic, raise, or throw counts as an \
-                         assertion.",
-                    ),
-                    kind::<MockHeavy>(
-                        "test.mock-heavy",
-                        ActionKind::Review,
-                        "At least mocks_min test doubles, making up more than mock_density_max \
-                         percent of the test's doubles and assertions.",
-                    ),
-                    kind::<TestLogic>(
-                        "test.logic",
-                        ActionKind::RefactorExtract,
-                        "More than logic_max loops, alternatives, and branches beyond guarded \
-                         assertions inside a test body.",
-                    ),
-                    kind::<DuplicateSetup>(
-                        "test.duplicate-setup",
-                        ActionKind::RefactorExtract,
-                        "Tests in one file repeat the same setup_statements_min or more leading \
-                         statements.",
-                    ),
-                ],
-                metrics: vec![
-                    metric(
-                        "assertion_density",
-                        "Assertions per test in scope; the score.",
-                    ),
-                    metric(
-                        "weak_ratio",
-                        "Weak assertions as a share of all assertions in scope.",
-                    ),
-                    metric("no_assertion", "Tests in scope that assert nothing."),
-                    ranked(
-                        "mock_density",
-                        MetricPer::Symbol,
-                        "Test doubles per test as a percentage of its doubles plus assertions.",
-                    ),
-                ],
+                findings: finding_kinds(),
+                metrics: metrics(),
                 stability: Stability::Experimental,
                 summary: "SCRAP-style test quality: assertion density, weak and missing \
                           assertions, mock density, logic in tests, and duplicated setup."
@@ -202,6 +156,62 @@ impl TestsQuality {
             },
         }
     }
+}
+
+/// The finding kinds this check reports, with their actions and evidence.
+fn finding_kinds() -> Vec<FindingKindSpec> {
+    vec![
+        kind::<WeakAssertion>(
+            "test.weak-assertion",
+            ActionKind::StrengthenAssertion,
+            "Every assertion in the test is weak: truthiness, presence, inequality, or \
+             a partial match.",
+        ),
+        kind::<NoAssertion>(
+            "test.no-assertion",
+            ActionKind::WriteTest,
+            "The test asserts nothing; an expected panic, raise, or throw counts as an \
+             assertion.",
+        ),
+        kind::<MockHeavy>(
+            "test.mock-heavy",
+            ActionKind::Review,
+            "At least mocks_min test doubles, making up more than mock_density_max \
+             percent of the test's doubles and assertions.",
+        ),
+        kind::<TestLogic>(
+            "test.logic",
+            ActionKind::RefactorExtract,
+            "More than logic_max loops, alternatives, and branches beyond guarded \
+             assertions inside a test body.",
+        ),
+        kind::<DuplicateSetup>(
+            "test.duplicate-setup",
+            ActionKind::RefactorExtract,
+            "Tests in one file repeat the same setup_statements_min or more leading \
+             statements.",
+        ),
+    ]
+}
+
+/// The metrics this check reports: gate keys, then what `survey` ranks.
+fn metrics() -> Vec<MetricSpec> {
+    vec![
+        metric(
+            "assertion_density",
+            "Assertions per test in scope; the score.",
+        ),
+        metric(
+            "weak_ratio",
+            "Weak assertions as a share of all assertions in scope.",
+        ),
+        metric("no_assertion", "Tests in scope that assert nothing."),
+        ranked(
+            "mock_density",
+            MetricPer::Symbol,
+            "Test doubles per test as a percentage of its doubles plus assertions.",
+        ),
+    ]
 }
 
 impl Check for TestsQuality {
@@ -223,6 +233,7 @@ impl Check for TestsQuality {
     ) -> Result<CheckResult> {
         let limits = Settings::read(&self.manifest.id, &ctx.config)?;
         let index = Index {
+            limits,
             symbols: facts
                 .get::<Symbols>()?
                 .symbols
@@ -240,7 +251,7 @@ impl Check for TestsQuality {
         let mut counts = Counts::default();
         let mut reported = Vec::new();
         for file in &facts.get::<TestFrames>()?.files {
-            reported.extend(self.file_findings(ctx, file, &index, &limits, &mut counts, sink)?);
+            reported.extend(self.file_findings(ctx, file, &index, &mut counts, sink)?);
         }
         let findings = reported.len() as u64;
         for finding in reported {
@@ -268,8 +279,9 @@ impl Check for TestsQuality {
     }
 }
 
-/// The per-symbol facts a case joins by its key (ADR-054).
+/// The thresholds in force and the per-symbol facts a case joins by its key (ADR-054).
 struct Index<'a> {
+    limits: Settings,
     symbols: HashMap<SymbolKey, &'a SymbolDef>,
     trees: HashMap<&'a SymbolKey, (&'a SymbolHash, &'a NormNode)>,
     decisions: Option<HashMap<&'a SymbolKey, &'a [Decision]>>,
@@ -406,7 +418,6 @@ impl TestsQuality {
         ctx: &CheckCtx,
         file: &TestFile,
         index: &Index<'_>,
-        limits: &Settings,
         counts: &mut Counts,
         sink: &mut dyn EventSink,
     ) -> Result<Vec<Finding>> {
@@ -435,10 +446,10 @@ impl TestsQuality {
             let logic = index.decisions.as_ref().map(|by_symbol| {
                 LogicCount::of(case, by_symbol.get(&key).copied().unwrap_or_default())
             });
-            reported.extend(self.case_findings(&subject, case, logic.as_ref(), limits));
+            reported.extend(self.case_findings(&subject, case, logic.as_ref(), &index.limits));
             candidates.push((subject, statements(root)));
         }
-        reported.extend(self.duplicate_setup(&candidates, limits));
+        reported.extend(self.duplicate_setup(&candidates, &index.limits));
         Ok(reported)
     }
 
@@ -597,69 +608,59 @@ impl TestsQuality {
         candidates: &[(Subject<'_>, &[NormNode])],
         limits: &Settings,
     ) -> Vec<Finding> {
-        let min = limits.setup_statements_min as usize;
-        let mut groups: BTreeMap<String, Vec<&(Subject<'_>, &[NormNode])>> = BTreeMap::new();
-        for candidate in candidates {
-            let body = candidate.1;
-            // Something must follow the repeated part, and an empty prefix repeats trivially.
-            if min == 0 || body.len() <= min {
-                continue;
-            }
-            let prefix = serde_json::to_string(&body[..min]).unwrap_or_default();
-            groups.entry(prefix).or_default().push(candidate);
-        }
-        let mut groups: Vec<_> = groups
-            .into_values()
-            .filter(|members| members.len() > 1)
-            .collect();
-        groups.sort_by_key(|members| members[0].0.symbol.span.line);
-        groups
+        setup_groups(candidates, limits.setup_statements_min as usize)
             .into_iter()
-            .map(|mut members| {
-                members.sort_by_key(|(subject, _)| subject.symbol.span.line);
-                let shortest = members
-                    .iter()
-                    .map(|(_, body)| body.len())
-                    .min()
-                    .unwrap_or(0);
-                let first = members[0].1;
-                let shared = (min..shortest - 1)
-                    .take_while(|&at| members.iter().all(|(_, body)| body[at] == first[at]))
-                    .count()
-                    + min;
-                let statements = u32::try_from(shared).unwrap_or(u32::MAX);
-                let subject = &members[0].0;
-                let others = members.len() - 1;
-                self.report(
-                    subject,
-                    "test.duplicate-setup",
-                    format!(
-                        "`{}` and {others} other test(s) repeat the same {statements} leading \
-                         statements",
-                        subject.symbol.display
-                    ),
-                    evidence(&DuplicateSetup {
-                        remediation_mode: RemediationMode::ExtractFixture,
-                        actionability: Actionability::Mechanical,
-                        statements,
-                        setup_statements_min: limits.setup_statements_min,
-                        tests: members
-                            .iter()
-                            .map(|(member, _)| member.symbol.display.clone())
-                            .collect(),
-                        lines: members
-                            .iter()
-                            .map(|(member, _)| member.symbol.span.line)
-                            .collect(),
-                    }),
-                    format!(
-                        "Extract the {statements} leading statements these tests share into a \
-                         fixture or setup helper, starting from `{}`.",
-                        subject.symbol.name
-                    ),
-                )
-            })
+            .map(|members| self.duplicate_group(&members, limits))
             .collect()
+    }
+
+    /// The finding for one group of tests sharing their leading statements, about its first.
+    fn duplicate_group(
+        &self,
+        members: &[&(Subject<'_>, &[NormNode])],
+        limits: &Settings,
+    ) -> Finding {
+        let min = limits.setup_statements_min as usize;
+        let shortest = members
+            .iter()
+            .map(|(_, body)| body.len())
+            .min()
+            .unwrap_or(0);
+        let first = members[0].1;
+        let shared = (min..shortest - 1)
+            .take_while(|&at| members.iter().all(|(_, body)| body[at] == first[at]))
+            .count()
+            + min;
+        let statements = u32::try_from(shared).unwrap_or(u32::MAX);
+        let subject = &members[0].0;
+        let others = members.len() - 1;
+        self.report(
+            subject,
+            "test.duplicate-setup",
+            format!(
+                "`{}` and {others} other test(s) repeat the same {statements} leading statements",
+                subject.symbol.display
+            ),
+            evidence(&DuplicateSetup {
+                remediation_mode: RemediationMode::ExtractFixture,
+                actionability: Actionability::Mechanical,
+                statements,
+                setup_statements_min: limits.setup_statements_min,
+                tests: members
+                    .iter()
+                    .map(|(member, _)| member.symbol.display.clone())
+                    .collect(),
+                lines: members
+                    .iter()
+                    .map(|(member, _)| member.symbol.span.line)
+                    .collect(),
+            }),
+            format!(
+                "Extract the {statements} leading statements these tests share into a fixture or \
+                 setup helper, starting from `{}`.",
+                subject.symbol.name
+            ),
+        )
     }
 
     /// A `warn` finding of `kind` about the subject, with the action its manifest maps it to.
@@ -671,26 +672,38 @@ impl TestsQuality {
         evidence: Value,
         summary: String,
     ) -> Finding {
-        let action = self
-            .manifest
-            .findings
-            .iter()
-            .find(|spec| spec.kind == kind)
-            .map_or(ActionKind::Review, |spec| spec.action);
-        SymbolFinding {
-            check: &self.manifest.id,
-            kind,
-            symbol: subject.symbol,
-            hash: subject.hash,
-            severity: Severity::Warn,
-            tier: self.manifest.tier,
-            title,
-            evidence,
-            action,
-            summary,
-        }
-        .finding()
+        SymbolFinding::new(&self.manifest, kind, subject.symbol, subject.hash, evidence)
+            .described(title, summary)
+            .finding()
     }
+}
+
+/// The groups of two or more candidates whose first `min` statements are equal and which each
+/// have more statements than that, each sorted by line, the groups by their first line.
+fn setup_groups<'c, 's>(
+    candidates: &'c [(Subject<'s>, &'s [NormNode])],
+    min: usize,
+) -> Vec<Vec<&'c (Subject<'s>, &'s [NormNode])>> {
+    let mut groups: BTreeMap<String, Vec<&(Subject<'_>, &[NormNode])>> = BTreeMap::new();
+    for candidate in candidates {
+        let body = candidate.1;
+        // Something must follow the repeated part, and an empty prefix repeats trivially.
+        if min == 0 || body.len() <= min {
+            continue;
+        }
+        let prefix = serde_json::to_string(&body[..min]).unwrap_or_default();
+        groups.entry(prefix).or_default().push(candidate);
+    }
+    let mut groups: Vec<_> = groups
+        .into_values()
+        .filter(|members| members.len() > 1)
+        .map(|mut members| {
+            members.sort_by_key(|(subject, _)| subject.symbol.span.line);
+            members
+        })
+        .collect();
+    groups.sort_by_key(|members| members[0].0.symbol.span.line);
+    groups
 }
 
 /// The top-level statements of a symbol's body (ADR-055): the children of the tree's last child,

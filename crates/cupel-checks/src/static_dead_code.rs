@@ -8,7 +8,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
-    Facts, Finding, Manifest, Plan, Result, Scope, Score, Severity, Stability, SymbolHash, Tier,
+    Facts, Finding, FindingKindSpec, Manifest, MetricSpec, Plan, Result, Scope, Score, Severity,
+    Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -68,31 +69,8 @@ impl StaticDeadCode {
                     FactKind::Roots,
                 ],
                 wants: vec![],
-                findings: vec![
-                    kind::<Unreachable>(
-                        "dead.symbol",
-                        ActionKind::Review,
-                        "A symbol in a module that nothing imports, that exports nothing, and \
-                         that holds no entry point, test, or framework hook.",
-                    ),
-                    kind::<Unreachable>(
-                        "dead.export",
-                        ActionKind::Review,
-                        "An exported symbol in a module that nothing in the repository imports \
-                         and that holds no entry point, test, or framework hook (info: it may \
-                         be a library's public API).",
-                    ),
-                ],
-                metrics: vec![
-                    metric(
-                        "dead_symbols",
-                        "The number of dead.symbol findings in scope.",
-                    ),
-                    metric(
-                        "dead_exports",
-                        "The number of dead.export findings in scope.",
-                    ),
-                ],
+                findings: finding_kinds(),
+                metrics: metrics(),
                 stability: Stability::Experimental,
                 summary: "Symbols and exports in modules that no import reaches and no entry \
                           point, test, or framework hook keeps alive. Limitation: no fact carries \
@@ -104,6 +82,39 @@ impl StaticDeadCode {
             },
         }
     }
+}
+
+/// The finding kinds this check reports, with their actions and evidence.
+fn finding_kinds() -> Vec<FindingKindSpec> {
+    vec![
+        kind::<Unreachable>(
+            "dead.symbol",
+            ActionKind::Review,
+            "A symbol in a module that nothing imports, that exports nothing, and \
+             that holds no entry point, test, or framework hook.",
+        ),
+        kind::<Unreachable>(
+            "dead.export",
+            ActionKind::Review,
+            "An exported symbol in a module that nothing in the repository imports \
+             and that holds no entry point, test, or framework hook (info: it may \
+             be a library's public API).",
+        ),
+    ]
+}
+
+/// The metrics this check reports: gate keys, then what `survey` ranks.
+fn metrics() -> Vec<MetricSpec> {
+    vec![
+        metric(
+            "dead_symbols",
+            "The number of dead.symbol findings in scope.",
+        ),
+        metric(
+            "dead_exports",
+            "The number of dead.export findings in scope.",
+        ),
+    ]
 }
 
 impl Check for StaticDeadCode {
@@ -226,33 +237,20 @@ impl StaticDeadCode {
                 ),
             ),
         };
-        let action = self
-            .manifest
-            .findings
-            .iter()
-            .find(|spec| spec.kind == kind)
-            .map_or(ActionKind::Review, |spec| spec.action);
-        let mut finding = SymbolFinding {
-            check: &self.manifest.id,
-            kind,
-            symbol,
-            hash,
-            severity,
-            tier: self.manifest.tier,
-            title,
-            evidence: Unreachable {
-                file: file.clone(),
-                module: verdict.module.to_owned(),
-                module_files: verdict.files.iter().map(|f| (*f).to_owned()).collect(),
-                suspect_imports: verdict.suspects.clone(),
-            },
-            action,
-            summary: format!(
-                "Delete `{name}` from {file} if nothing outside the repository uses it, or \
-                 import {file} where `{name}` is meant to be called."
-            ),
-        }
-        .finding();
+        let evidence = Unreachable {
+            file: file.clone(),
+            module: verdict.module.to_owned(),
+            module_files: verdict.files.iter().map(|f| (*f).to_owned()).collect(),
+            suspect_imports: verdict.suspects.clone(),
+        };
+        let summary = format!(
+            "Delete `{name}` from {file} if nothing outside the repository uses it, or import \
+             {file} where `{name}` is meant to be called."
+        );
+        let mut finding = SymbolFinding::new(&self.manifest, kind, symbol, hash, evidence)
+            .described(title, summary)
+            .at(severity)
+            .finding();
         finding.confidence = verdict.confidence();
         finding.detail = Some(detail);
         finding
