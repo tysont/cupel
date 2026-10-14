@@ -80,6 +80,7 @@
     "resolved": 0,
     "suppressed": 0
   },
+  "tests": null,
   "total_findings": 1,
   "truncated": false
 }

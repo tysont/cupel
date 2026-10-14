@@ -6,11 +6,12 @@ use cupel_core::{
     Action, ActionKind, ArgDescription, BaselineRef, CheckId, CheckResult, CheckStatus,
     CommandDescription, ConfigEcho, ConfigSource, CostClass, CupelInfo, Delta, Description,
     Envelope, Evidence, Example, Excerpt, ExcerptLine, ExitCode, ExplainSubject, Explanation,
-    FactKind, Finding, GateOutcome, GateResult, GateRule, GitInfo, LangId, Location, Metric,
-    MetricPer, NextAction, PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RankedTarget,
-    RankingDimension, Rankings, RuleOutcome, RunInfo, RunPlan, ScopeInfo, ScopeMode, Score,
-    Severity, SeverityCounts, SkipReason, Skipped, Stability, Status, Summary, Symbol, Target,
-    Tier, ToolId, ToolchainInfo, ValueType, Verb,
+    FactKind, Finding, GateOutcome, GateResult, GateRule, GitInfo, ImpactBasis, ImpactedTest,
+    LangId, Location, Metric, MetricPer, NextAction, PlannedCheck, PlannedInstall, PlannedSkip,
+    PlannedWrite, ProducerId, RankedTarget, RankingDimension, Rankings, RuleOutcome, RunInfo,
+    RunPlan, ScopeInfo, ScopeMode, Score, Severity, SeverityCounts, SkipReason, Skipped, Stability,
+    Status, Summary, Symbol, Target, TestCommand, TestsReport, Tier, ToolId, ToolchainInfo,
+    ValueType, Verb,
 };
 use serde_json::{Map, Value, json};
 
@@ -163,8 +164,65 @@ pub fn envelope() -> Envelope {
         plan: Some(plan()),
         explanation: Some(explanation()),
         rankings: Some(rankings()),
+        tests: Some(tests()),
         truncated: false,
         total_findings: 3,
+    }
+}
+
+/// One language chose by per-test coverage and one fell back to file-level impact (ADR-077).
+fn tests() -> TestsReport {
+    TestsReport {
+        per_test_map: false,
+        impacted: vec![
+            ImpactedTest {
+                id: "calc tests::adds".to_owned(),
+                file: Some("src/lib.rs".to_owned()),
+                reason: "covers calc::add (src/lib.rs:5)".to_owned(),
+                lang: LangId::from("rust"),
+            },
+            ImpactedTest {
+                id: "web/add.test.ts".to_owned(),
+                file: Some("web/add.test.ts".to_owned()),
+                reason: "imports web/add.ts".to_owned(),
+                lang: LangId::from("typescript"),
+            },
+        ],
+        commands: vec![
+            TestCommand {
+                lang: LangId::from("rust"),
+                runner: ProducerId::from("tool.cargo-nextest"),
+                dir: ".".to_owned(),
+                command:
+                    "cargo nextest run --workspace -E '(binary_id(=calc) & test(=tests::adds))'"
+                        .to_owned(),
+                narrowed: true,
+            },
+            TestCommand {
+                lang: LangId::from("typescript"),
+                runner: ProducerId::from("tool.vitest"),
+                dir: "web".to_owned(),
+                command: "npx vitest run add.test.ts".to_owned(),
+                narrowed: true,
+            },
+        ],
+        languages: vec![
+            ImpactBasis {
+                lang: LangId::from("rust"),
+                per_test_map: true,
+                producer: Some(ProducerId::from("tool.llvm-cov-per-test")),
+                fallback: None,
+            },
+            ImpactBasis {
+                lang: LangId::from("typescript"),
+                per_test_map: false,
+                producer: None,
+                fallback: Some(
+                    "no producer makes per-test-map for this language (see `cupel describe matrix`)"
+                        .to_owned(),
+                ),
+            },
+        ],
     }
 }
 

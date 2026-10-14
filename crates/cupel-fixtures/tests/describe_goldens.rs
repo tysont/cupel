@@ -206,8 +206,11 @@ fn describe_fact_symbols_matches_its_golden() {
 fn describe_matrix_matches_its_golden_and_every_check_s_row() {
     let registries = Registries::builtin();
     let mut envelope = described(&["describe", "matrix"]);
-    let [checks, cells] =
-        <[Value; 2]>::try_from(take(&mut envelope, &["checks", "cells"])).unwrap();
+    let [checks, cells, verbs] =
+        <[Value; 3]>::try_from(take(&mut envelope, &["checks", "cells", "verbs"])).unwrap();
+    // Whether a verb's fact can be produced depends on the tools installed here; the CLI's
+    // describe tests pin what does not (ADR-006).
+    assert_eq!(verbs[0]["verb"], json!("tests --impacted"));
     let ids: Vec<String> = registries
         .checks
         .iter()

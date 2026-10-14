@@ -71,6 +71,41 @@ pub struct Outcome {
     pub refused: Option<Unevaluable>,
 }
 
+/// The scheduler's fact store opened for a verb that reads facts itself rather than running
+/// checks (`tests --impacted`, ADR-077 §4): facts are produced exactly as a run produces them.
+pub struct Production<'a>(FactStore<'a>);
+
+impl<'a> Scheduler<'a> {
+    /// A fact store over `job`'s files and configuration.
+    pub fn production(&self, job: &Job<'a>) -> Production<'a> {
+        Production(FactStore::new(self.producers, job))
+    }
+}
+
+impl Production<'_> {
+    /// `kind` for `lang`, produced on first request (with the producer's needs) and kept.
+    pub fn ensure(
+        &mut self,
+        kind: FactKind,
+        lang: &Lang,
+        sink: &mut dyn EventSink,
+    ) -> Result<SharedFact> {
+        self.0.ensure(kind, lang, sink)
+    }
+
+    /// Whether the run's cancellation cut production short.
+    pub fn interrupted(&self) -> bool {
+        self.0.interrupted
+    }
+
+    /// The producers' findings, each once, sorted.
+    pub fn into_findings(self) -> Vec<Finding> {
+        let mut findings = self.0.findings;
+        sort_findings(&mut findings);
+        findings
+    }
+}
+
 /// One (check, language) the support matrix allows, with its plan.
 struct Task<'a> {
     check: &'a dyn Check,

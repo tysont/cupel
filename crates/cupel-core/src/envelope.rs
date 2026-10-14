@@ -13,6 +13,7 @@ use crate::finding::{ActionKind, Finding};
 use crate::grade::CostClass;
 use crate::hash::FindingId;
 use crate::id::{LangId, RunId};
+use crate::per_test_impact::TestsReport;
 use crate::rank::Rankings;
 pub use crate::result::{CheckResult, CheckStatus, Delta, Score, SkipReason, Skipped};
 pub use crate::scope::ScopeMode;
@@ -37,6 +38,9 @@ pub struct Envelope {
     pub explanation: Option<Explanation>,
     /// What `survey` ranks: the worst targets per dimension; null for every other verb (ADR-062).
     pub rankings: Option<Rankings>,
+    /// What `tests --impacted` selects: the impacted tests and how to run them; null for every
+    /// other verb (ADR-077).
+    pub tests: Option<TestsReport>,
     /// True when paging (`--limit`/`--offset`) left findings out.
     pub truncated: bool,
     pub total_findings: u64,

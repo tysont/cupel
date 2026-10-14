@@ -25,7 +25,7 @@ use crate::problem::Problem;
 use crate::run::{Invocation, Run};
 use crate::{
     against, baseline, catalog, check, describe, doctor, explain, init, persist, registry, render,
-    suppress, survey,
+    suppress, survey, tests_verb,
 };
 
 /// Everything an invocation reads from its process. `main` gathers it once; nothing else looks
@@ -391,6 +391,9 @@ fn run_verb(
         VerbArgs::Init { force } => init_verb(invocation, cli, *force, events),
         VerbArgs::Check { scope } => check::verb(invocation, scope, events),
         VerbArgs::Survey { scope } => survey::verb(invocation, scope, events),
+        VerbArgs::Tests { impacted, scope } => {
+            tests_verb::verb(invocation, *impacted, scope, events)
+        }
         // `explain` only reads the store.
         VerbArgs::Explain { target, .. } => explain::run(run, writer, target),
         VerbArgs::Baseline { name, action } => {

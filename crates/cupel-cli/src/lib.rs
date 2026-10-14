@@ -27,5 +27,6 @@ mod render;
 mod run;
 mod suppress;
 mod survey;
+mod tests_verb;
 
 pub use app::{Environment, Output, capture_panics, run};

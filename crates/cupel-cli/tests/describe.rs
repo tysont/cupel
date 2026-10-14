@@ -92,13 +92,69 @@ fn describe_cli_lists_every_verb_exit_code_and_schema() {
 
 #[test]
 fn describe_verb_describes_its_arguments_and_pending_step() {
-    let outcome = run(["describe", "tests"]);
+    let outcome = run(["describe", "oracle"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["description"]["subject"], json!("command"));
-    assert_eq!(envelope["description"]["name"], json!("tests"));
-    assert_eq!(envelope["description"]["pending_step"], json!("P3.3"));
+    assert_eq!(envelope["description"]["name"], json!("oracle"));
+    assert_eq!(envelope["description"]["pending_step"], json!("P5.2"));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
+}
+
+#[test]
+fn describe_tests_documents_impacted_and_the_scope_flags() {
+    let description = described(&["tests"]);
+    assert_eq!(description["pending_step"], Value::Null);
+    let flags: Vec<&str> = description["arguments"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|argument| argument["name"].as_str().unwrap())
+        .collect();
+    for flag in ["--impacted", "--changed", "--base", "--paths", "--symbols"] {
+        assert!(flags.contains(&flag), "{flag} in {flags:?}");
+    }
+}
+
+#[test]
+fn describe_matrix_shows_tests_impacted_unsupported_where_no_per_test_map_exists() {
+    let verbs = described(&["matrix"])["verbs"].clone();
+    assert_eq!(verbs[0]["verb"], json!("tests --impacted"));
+    assert_eq!(verbs[0]["fact"], json!("per-test-map"));
+    for language in verbs[0]["languages"].as_array().unwrap() {
+        let unsupported =
+            language["support"] == json!({"status": "unsupported", "fact": "per-test-map"});
+        let ecma = matches!(language["lang"].as_str(), Some("javascript" | "typescript"));
+        assert_eq!(unsupported, ecma, "{language}");
+    }
+}
+
+#[test]
+fn describe_fact_per_test_map_lists_producers_for_every_language_but_the_ecma_family() {
+    let description = described(&["fact", "per-test-map"]);
+    assert_eq!(description["version"], json!(1));
+    let producers: Vec<(String, usize)> = description["producers"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|entry| {
+            (
+                entry["lang"].as_str().unwrap().to_owned(),
+                entry["producers"].as_array().unwrap().len(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        producers,
+        [
+            ("go", 1),
+            ("javascript", 0),
+            ("python", 1),
+            ("rust", 1),
+            ("typescript", 0)
+        ]
+        .map(|(lang, count)| (lang.to_owned(), count))
+    );
 }
 
 #[test]

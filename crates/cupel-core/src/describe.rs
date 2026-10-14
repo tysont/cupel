@@ -340,6 +340,19 @@ pub struct MatrixDescription {
     pub checks: Vec<CheckId>,
     /// One cell per check and language, ordered by check, then language.
     pub cells: Vec<MatrixCell>,
+    /// Verbs whose behavior depends on a fact a language may lack, such as `tests --impacted`
+    /// on `per-test-map` (ADR-006): per language, whether that fact can be produced.
+    pub verbs: Vec<VerbSupport>,
+}
+
+/// A verb that reads a fact directly, and per language whether the fact can be produced there.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct VerbSupport {
+    /// Such as `tests --impacted`.
+    pub verb: String,
+    pub fact: FactKind,
+    /// One per language, in ID order.
+    pub languages: Vec<LanguageSupport>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

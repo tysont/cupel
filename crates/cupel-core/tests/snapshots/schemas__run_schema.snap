@@ -86,6 +86,17 @@ expression: pretty(&schema)
     "summary": {
       "$ref": "#/$defs/Summary"
     },
+    "tests": {
+      "description": "What `tests --impacted` selects: the impacted tests and how to run them; null for every\nother verb (ADR-077).",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TestsReport"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "total_findings": {
       "type": "integer",
       "format": "uint64",
@@ -109,6 +120,7 @@ expression: pretty(&schema)
     "run",
     "status",
     "summary",
+    "tests",
     "total_findings",
     "truncated"
   ],
@@ -1340,6 +1352,73 @@ expression: pretty(&schema)
         "sha"
       ]
     },
+    "ImpactBasis": {
+      "description": "How one language's impacted tests were chosen.",
+      "type": "object",
+      "properties": {
+        "fallback": {
+          "description": "Why the language fell back to file-level impact; null when it did not.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "per_test_map": {
+          "description": "True when a per-test coverage map chose the tests; false when file-level impact through\nthe import graph did.",
+          "type": "boolean"
+        },
+        "producer": {
+          "description": "The `PerTestMap` producer that measured the map, when one did.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProducerId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "fallback",
+        "lang",
+        "per_test_map",
+        "producer"
+      ]
+    },
+    "ImpactedTest": {
+      "description": "One impacted test.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "The test's file, relative to the repository root, when known.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "The runner's test ID; a test file's path where the language fell back to file impact.",
+          "type": "string"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "reason": {
+          "description": "Why the scope impacts it, such as `covers calc::add (src/lib.rs:5)`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "id",
+        "lang",
+        "reason"
+      ]
+    },
     "LangFamily": {
       "description": "A family of languages whose symbols are comparable, such as `ecma` for JavaScript and\nTypeScript (ADR-011).",
       "type": "string"
@@ -1662,12 +1741,20 @@ expression: pretty(&schema)
           "items": {
             "$ref": "#/$defs/LangId"
           }
+        },
+        "verbs": {
+          "description": "Verbs whose behavior depends on a fact a language may lack, such as `tests --impacted`\non `per-test-map` (ADR-006): per language, whether that fact can be produced.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VerbSupport"
+          }
         }
       },
       "required": [
         "cells",
         "checks",
-        "languages"
+        "languages",
+        "verbs"
       ]
     },
     "Metric": {
@@ -2635,6 +2722,74 @@ expression: pretty(&schema)
         "symbol"
       ]
     },
+    "TestCommand": {
+      "description": "A command that runs one language's impacted tests in one project root.",
+      "type": "object",
+      "properties": {
+        "command": {
+          "description": "Shell words, ready to paste in `dir`.",
+          "type": "string"
+        },
+        "dir": {
+          "description": "The project root to run it in, relative to the repository root; `.` for the root.",
+          "type": "string"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "narrowed": {
+          "description": "False when the runner cannot narrow to the impacted tests and the command runs its whole\nsuite.",
+          "type": "boolean"
+        },
+        "runner": {
+          "$ref": "#/$defs/ProducerId"
+        }
+      },
+      "required": [
+        "command",
+        "dir",
+        "lang",
+        "narrowed",
+        "runner"
+      ]
+    },
+    "TestsReport": {
+      "description": "The tests a scope impacts, and how to run them.",
+      "type": "object",
+      "properties": {
+        "commands": {
+          "description": "One per runner and project root with impacted tests.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TestCommand"
+          }
+        },
+        "impacted": {
+          "description": "Sorted by language, then ID.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ImpactedTest"
+          }
+        },
+        "languages": {
+          "description": "One per language in scope, in ID order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ImpactBasis"
+          }
+        },
+        "per_test_map": {
+          "description": "True only when every language in scope chose its tests from a per-test coverage map.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "commands",
+        "impacted",
+        "languages",
+        "per_test_map"
+      ]
+    },
     "Tier": {
       "description": "Evidence tier: 0 structural metric … 6 proof.",
       "type": "integer",
@@ -2795,6 +2950,31 @@ expression: pretty(&schema)
         "tests",
         "suppress",
         "serve"
+      ]
+    },
+    "VerbSupport": {
+      "description": "A verb that reads a fact directly, and per language whether the fact can be produced there.",
+      "type": "object",
+      "properties": {
+        "fact": {
+          "$ref": "#/$defs/FactKind"
+        },
+        "languages": {
+          "description": "One per language, in ID order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LanguageSupport"
+          }
+        },
+        "verb": {
+          "description": "Such as `tests --impacted`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fact",
+        "languages",
+        "verb"
       ]
     }
   }

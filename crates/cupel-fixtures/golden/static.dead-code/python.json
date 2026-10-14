@@ -895,6 +895,7 @@
     "resolved": 0,
     "suppressed": 0
   },
+  "tests": null,
   "total_findings": 18,
   "truncated": false
 }

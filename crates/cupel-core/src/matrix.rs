@@ -48,6 +48,17 @@ impl SupportMatrix {
         Self { cells }
     }
 
+    /// Whether `kind` can be produced for `lang`, with the reason a check needing it would get
+    /// (ADR-077 §4).
+    pub fn fact(producers: &ProducerRegistry, kind: FactKind, lang: &Lang, ctx: &Ctx) -> Support {
+        Resolver {
+            producers,
+            lang,
+            ctx,
+        }
+        .fact(kind, &mut Vec::new())
+    }
+
     pub fn get(&self, check: &CheckId, lang: &LangId) -> Option<&Support> {
         self.cells.get(&(check.clone(), lang.clone()))
     }

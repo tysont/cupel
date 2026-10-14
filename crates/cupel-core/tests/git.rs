@@ -194,3 +194,26 @@ fn show_reads_a_file_as_it_was_at_a_commit_relative_to_the_root() {
         )
     );
 }
+
+#[test]
+fn changed_lines_are_the_new_side_of_each_hunk_and_a_deletion_is_where_it_was() {
+    let Some((repo, base)) =
+        GitRepo::committed(&[("src/a.rs", "1\n2\n3\n4\n5\n"), ("b.rs", "x\ny\nz\n")])
+    else {
+        return;
+    };
+    repo.write("src/a.rs", "1\nTWO\n3\n4\n5\nsix\nseven\n");
+    repo.write("b.rs", "x\nz\n");
+    let git = Git::open(&repo.root()).unwrap();
+    let lines = git.changed_lines(&base, None).unwrap();
+    let as_vec: Vec<(&str, &[(u32, u32)])> = lines
+        .iter()
+        .map(|(file, ranges)| (file.as_str(), ranges.as_slice()))
+        .collect();
+    assert_eq!(
+        as_vec,
+        [("b.rs", &[(1, 2)][..]), ("src/a.rs", &[(2, 2), (6, 7)][..])]
+    );
+    let head = repo.commit("change");
+    assert_eq!(git.changed_lines(&base, Some(&head)).unwrap(), lines);
+}

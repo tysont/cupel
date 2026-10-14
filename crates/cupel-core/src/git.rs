@@ -1,5 +1,6 @@
 // ABOUTME: Read-only git access: the default branch, HEAD, merge bases, and changed files, answered by
 // ABOUTME: running the `git` on PATH in the repository root (ADR-002). The only place Cupel runs git.
+use std::collections::BTreeMap;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -157,6 +158,28 @@ impl Git {
         Ok(sorted(self.statuses(&[base, head])?))
     }
 
+    /// The lines of each file that differ between `base` and `head` (the working tree when
+    /// `head` is `None`), as inclusive ranges of the new side; a pure deletion is the lines
+    /// around where it was. Files are relative to the root, `/`-separated (ADR-077 §5).
+    pub fn changed_lines(
+        &self,
+        base: &str,
+        head: Option<&str>,
+    ) -> Result<BTreeMap<String, Vec<(u32, u32)>>, GitError> {
+        let mut args = vec![
+            "diff",
+            "-U0",
+            "--no-color",
+            "--no-ext-diff",
+            "--no-renames",
+            "--relative",
+            base,
+        ];
+        args.extend(head);
+        args.push("--");
+        Ok(hunks(&self.output(&args)?))
+    }
+
     /// The contents of `path` (relative to the root) at the commit `rev`.
     pub fn show(&self, rev: &str, path: &str) -> Result<Vec<u8>, GitError> {
         self.bytes(&["show", &format!("{rev}:./{path}")])
@@ -221,6 +244,38 @@ impl Git {
         }
         Ok(output.stdout)
     }
+}
+
+/// The new-side line ranges of each file in a `git diff -U0` (ADR-077 §5).
+fn hunks(diff: &str) -> BTreeMap<String, Vec<(u32, u32)>> {
+    let mut files: BTreeMap<String, Vec<(u32, u32)>> = BTreeMap::new();
+    let mut current: Option<String> = None;
+    for line in diff.lines() {
+        if let Some(path) = line.strip_prefix("+++ ") {
+            current = path.strip_prefix("b/").map(str::to_owned);
+        } else if let (Some(file), Some(header)) = (&current, line.strip_prefix("@@ "))
+            && let Some(range) = new_side(header)
+        {
+            files.entry(file.clone()).or_default().push(range);
+        }
+    }
+    files
+}
+
+/// The new-side range of a hunk header `-a,b +c,d @@`: lines `c` to `c + d - 1`, or the lines
+/// `c` and `c + 1` around a deletion (`d` is 0).
+fn new_side(header: &str) -> Option<(u32, u32)> {
+    let added = header
+        .split_whitespace()
+        .find_map(|part| part.strip_prefix('+'))?;
+    let (start, count) = added.split_once(',').unwrap_or((added, "1"));
+    let start: u32 = start.parse().ok()?;
+    let count: u32 = count.parse().ok()?;
+    Some(if count == 0 {
+        (start.max(1), start + 1)
+    } else {
+        (start, start + count - 1)
+    })
 }
 
 fn failure(args: &[&str], message: String) -> GitError {
