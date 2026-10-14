@@ -1,0 +1,25 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.flaky",
+      "metrics": {},
+      "oracle": null,
+      "score": null,
+      "skipped": {
+        "fact": "test-reruns",
+        "lang": "python",
+        "reason": "unsupported",
+        "see": "cupel describe matrix",
+        "tool": null
+      },
+      "status": "skipped",
+      "tier": 2
+    }
+  ],
+  "findings": [],
+  "rankings": []
+}

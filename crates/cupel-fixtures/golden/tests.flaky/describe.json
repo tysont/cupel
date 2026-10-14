@@ -1,0 +1,265 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "lang": "go",
+        "support": {
+          "fact": "test-reruns",
+          "status": "unsupported"
+        }
+      },
+      {
+        "lang": "javascript",
+        "support": {
+          "fact": "test-reruns",
+          "status": "unsupported"
+        }
+      },
+      {
+        "lang": "python",
+        "support": {
+          "fact": "test-reruns",
+          "status": "unsupported"
+        }
+      },
+      {
+        "lang": "rust",
+        "support": {
+          "fact": "test-reruns",
+          "status": "unsupported"
+        }
+      },
+      {
+        "lang": "typescript",
+        "support": {
+          "fact": "test-reruns",
+          "status": "unsupported"
+        }
+      }
+    ],
+    "manifest": {
+      "cost": "standard",
+      "findings": [
+        {
+          "action": "investigate_flake",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `test.flaky`.",
+            "properties": {
+              "failed": {
+                "description": "Failed or errored.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "outcomes": {
+                "description": "The test's outcome in each rerun, in rerun order; `absent` where it did not run.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "passed": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "reruns": {
+                "description": "Reruns in which the test passed, failed, or errored.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "runner": {
+                "description": "The runner that reran it.",
+                "type": "string"
+              },
+              "same_order": {
+                "description": "Two reruns (by index) that ran the tests in the same order and disagreed.",
+                "items": {
+                  "format": "uint",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "maxItems": 2,
+                "minItems": 2,
+                "type": "array"
+              },
+              "test": {
+                "description": "The test's ID, as its runner names it.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "test",
+              "runner",
+              "reruns",
+              "passed",
+              "failed",
+              "outcomes",
+              "same_order"
+            ],
+            "title": "Flaky",
+            "type": "object"
+          },
+          "kind": "test.flaky",
+          "summary": "The test passed and failed in reruns that ran the tests in the same order."
+        },
+        {
+          "action": "investigate_flake",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `test.order-dependent`.",
+            "properties": {
+              "failed": {
+                "description": "Failed or errored.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "orders": {
+                "description": "The order each rerun asked for: `declared`, `reversed`, or `shuffled`.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "outcomes": {
+                "description": "The test's outcome in each rerun, in rerun order; `absent` where it did not run.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "passed": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "preceded_by": {
+                "description": "Tests that ran before it in every rerun it failed and after it in some rerun it passed:\nthe likely polluters. Empty when the runner does not report its order.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "reruns": {
+                "description": "Reruns in which the test passed, failed, or errored.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "runner": {
+                "description": "The runner that reran it.",
+                "type": "string"
+              },
+              "test": {
+                "description": "The test's ID, as its runner names it.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "test",
+              "runner",
+              "reruns",
+              "passed",
+              "failed",
+              "outcomes",
+              "orders",
+              "preceded_by"
+            ],
+            "title": "OrderDependent",
+            "type": "object"
+          },
+          "kind": "test.order-dependent",
+          "summary": "The test's outcome follows the order the tests ran in: the same in every rerun of one order, different between orders."
+        }
+      ],
+      "id": "tests.flaky",
+      "metrics": [
+        {
+          "name": "flaky",
+          "per": "scope",
+          "summary": "Tests whose outcome changed between reruns of the same order."
+        },
+        {
+          "name": "order_dependent",
+          "per": "scope",
+          "summary": "Tests whose outcome changed only with the order the tests ran in."
+        }
+      ],
+      "needs": [
+        "test-reruns",
+        "test-frames"
+      ],
+      "stability": "experimental",
+      "summary": "Reruns the tests several times with shuffled order, varied seeds, and varied parallelism; reports tests whose outcome changes.",
+      "tier": 2,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}
