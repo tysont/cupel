@@ -2,30 +2,18 @@
 // ABOUTME: and properties: invariant under renames, layout, literals, and moves; sensitive to structure.
 mod support;
 
-use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{assert_distinct, produce, sexp, tree};
+use support::{assert_distinct, normalize_at};
 
 /// The normalized tree and hash of the only symbol in `source`, a Go file at `path`.
-fn normalize_at(path: &str, source: &str) -> (String, String) {
-    let dir = tree(&[(path, source)]);
-    let norm: NormTree = produce("go", dir.path());
-    let symbols: Symbols = produce("go", dir.path());
-    assert_eq!(norm.symbols.len(), 1, "{source}");
-    assert_eq!(norm.symbols[0].symbol, symbols.symbols[0].key());
-    (
-        sexp(&norm.symbols[0].root),
-        norm.symbols[0].hash.to_string(),
-    )
-}
-
 fn hash(source: &str) -> String {
-    normalize_at("money.go", source).1
+    normalize_at("go", "money.go", source).1
 }
 
 #[test]
 fn identifiers_types_and_literals_become_markers_and_operators_and_calls_stay() {
     let (shape, hash) = normalize_at(
+        "go",
         "money.go",
         "package money\n\nfunc f(a Money) int64 {\n\t// a comment\n\treturn a.Cents(1) + 2\n}\n",
     );
@@ -41,6 +29,7 @@ fn identifiers_types_and_literals_become_markers_and_operators_and_calls_stay() 
 #[test]
 fn a_method_keeps_its_receiver_shape_but_not_its_receiver_names() {
     let (pointer, _) = normalize_at(
+        "go",
         "money.go",
         "package money\n\nfunc (m *Money) Add(c int64) { m.cents += c }\n",
     );
@@ -61,6 +50,7 @@ fn a_method_keeps_its_receiver_shape_but_not_its_receiver_names() {
 #[test]
 fn package_qualified_calls_keep_the_function_name() {
     let (shape, _) = normalize_at(
+        "go",
         "money.go",
         "package money\n\nfunc f(s string) string { return strings.ToUpper(s) }\n",
     );
@@ -76,8 +66,8 @@ fn package_qualified_calls_keep_the_function_name() {
 fn moving_a_file_keeps_its_hashes() {
     let source = "package money\n\nfunc F(a int64) int64 { return a * 2 }\n";
     assert_eq!(
-        normalize_at("money.go", source).1,
-        normalize_at("internal/deep/place.go", source).1
+        normalize_at("go", "money.go", source).1,
+        normalize_at("go", "internal/deep/place.go", source).1
     );
 }
 

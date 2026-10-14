@@ -4,56 +4,17 @@ mod support;
 
 use std::path::Path;
 
-use cupel_core::syntax::{MutationOperator, MutationSites, OperatorSet, Site, Symbols};
+use cupel_core::syntax::MutationOperator;
 use proptest::prelude::*;
-use support::{byte_range, fixture, produce, tree};
+use support::{
+    SiteRow as Row, assert_every_replacement_parses, fixture, relaid, site_hashes, site_row as row,
+    sites_of, summary, tree,
+};
 
 use MutationOperator::{
     ArithAddSub, ArithMulDiv, BooleanLiteral, BooleanOp, Boundary, Constant, Equality, Negation,
     Relational, ReturnValue, StatementDeletion, ZeroOne,
 };
-
-fn sites_of(lang: &str, root: &Path, display: &str) -> Vec<Site> {
-    let symbols: Symbols = produce(lang, root);
-    let sites: MutationSites = produce(lang, root);
-    let key = symbols
-        .symbols
-        .iter()
-        .find(|s| s.display == display)
-        .unwrap_or_else(|| panic!("no symbol {display}"))
-        .key();
-    sites
-        .symbols
-        .into_iter()
-        .find(|entry| entry.symbol == key)
-        .unwrap_or_else(|| panic!("no sites entry for {display}"))
-        .sites
-}
-
-type Row = (MutationOperator, OperatorSet, String, Vec<String>, u32);
-
-/// (operator, set, from, to, line) per site.
-fn summary(sites: &[Site]) -> Vec<Row> {
-    sites
-        .iter()
-        .map(|s| (s.operator, s.set, s.from.clone(), s.to.clone(), s.span.line))
-        .collect()
-}
-
-fn row(operator: MutationOperator, from: &str, to: &[&str], line: u32) -> Row {
-    let set = match operator {
-        Relational | Equality | ArithAddSub | ArithMulDiv | BooleanOp | BooleanLiteral
-        | ZeroOne => OperatorSet::Default,
-        _ => OperatorSet::Extended,
-    };
-    (
-        operator,
-        set,
-        from.to_owned(),
-        to.iter().map(|t| (*t).to_owned()).collect(),
-        line,
-    )
-}
 
 /// Asserts that `display` has `expected` sites in both fixture repositories: the TypeScript
 /// `pricing.ts` is the JavaScript `pricing.js` typed.
@@ -179,88 +140,11 @@ fn grammar(file: &str) -> tree_sitter::Language {
     }
 }
 
-/// Every replacement of every site in `root`'s `lang` files leaves a file that parses cleanly
-/// with its own grammar; returns how many grammars were exercised.
-fn assert_every_replacement_parses(lang: &str, root: &Path) -> usize {
-    let sites: MutationSites = produce(lang, root);
-    let symbols: Symbols = produce(lang, root);
-    let mut parser = tree_sitter::Parser::new();
-    let mut checked = 0;
-    let mut grammars = std::collections::BTreeSet::new();
-    for entry in &sites.symbols {
-        let file = &symbols
-            .symbols
-            .iter()
-            .find(|s| s.key() == entry.symbol)
-            .unwrap()
-            .file;
-        parser.set_language(&grammar(file)).unwrap();
-        let source = std::fs::read_to_string(root.join(file)).unwrap();
-        for site in &entry.sites {
-            grammars.insert(Path::new(file).extension().unwrap().to_owned());
-            let (start, end) = byte_range(&source, site);
-            assert_eq!(&source[start..end], site.from, "{file}");
-            for to in &site.to {
-                let mutated = format!("{}{to}{}", &source[..start], &source[end..]);
-                let tree = parser.parse(&mutated, None).unwrap();
-                assert!(
-                    !tree.root_node().has_error(),
-                    "{file}:{}: {} -> {to} does not parse",
-                    site.span.line,
-                    site.from
-                );
-                checked += 1;
-            }
-        }
-    }
-    assert!(checked > 0);
-    grammars.len()
-}
-
 #[test]
 fn every_replacement_in_the_fixture_repositories_parses_in_its_own_grammar() {
-    assert_every_replacement_parses("javascript", &fixture("javascript"));
+    assert_every_replacement_parses("javascript", &fixture("javascript"), grammar);
     // .ts and .tsx files each parse with their own grammar.
-    assert!(assert_every_replacement_parses("typescript", &fixture("typescript")) >= 2);
-}
-
-/// A fixture file, reformatted: indentation, blank lines, and line breaks change.
-fn relaid(lang: &str, file: &str, indent: &str, blank: &str) -> String {
-    std::fs::read_to_string(fixture(lang).join(file))
-        .unwrap()
-        .lines()
-        .map(|line| {
-            let depth = line.len() - line.trim_start().len();
-            format!("{}{}", indent.repeat(depth / 2), line.trim_start())
-        })
-        .collect::<Vec<_>>()
-        .join(&format!("\n{blank}"))
-}
-
-fn site_hashes(lang: &str, root: &Path) -> Vec<(String, Vec<String>)> {
-    let symbols: Symbols = produce(lang, root);
-    let sites: MutationSites = produce(lang, root);
-    sites
-        .symbols
-        .iter()
-        .map(|entry| {
-            let name = symbols
-                .symbols
-                .iter()
-                .find(|s| s.key() == entry.symbol)
-                .unwrap()
-                .name
-                .clone();
-            (
-                name,
-                entry
-                    .sites
-                    .iter()
-                    .map(|s| s.site_hash.to_string())
-                    .collect(),
-            )
-        })
-        .collect()
+    assert!(assert_every_replacement_parses("typescript", &fixture("typescript"), grammar) >= 2);
 }
 
 proptest! {
@@ -288,7 +172,7 @@ proptest! {
         let moved_path = format!("{dir}/{name}");
         let moved = tree(&[(
             moved_path.as_str(),
-            &format!("{prefix}{}", relaid(lang, file, indent, blank)),
+            &format!("{prefix}{}", relaid(lang, file, "  ", indent, blank)),
         )]);
         let mut expected = site_hashes(lang, original.path());
         let mut actual = site_hashes(lang, moved.path());
@@ -296,6 +180,6 @@ proptest! {
         expected.sort();
         actual.sort();
         prop_assert_eq!(actual, expected);
-        assert_every_replacement_parses(lang, moved.path());
+        assert_every_replacement_parses(lang, moved.path(), grammar);
     }
 }

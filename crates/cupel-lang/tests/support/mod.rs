@@ -1,5 +1,5 @@
 // ABOUTME: Shared helpers for cupel-lang integration tests: produce a fact for one language over a
-// ABOUTME: fixture repository (or a scratch tree) through the registries, as the scheduler will.
+// ABOUTME: fixture or scratch tree as the scheduler will, and read decisions, sites, norm trees, and frames.
 #![allow(dead_code)] // Each test crate uses a different subset of these helpers.
 
 use std::path::{Path, PathBuf};
@@ -8,8 +8,9 @@ use cupel_core::{
     Cancellation, Ctx, Event, Exclude, Fact, ProduceCtx, ProducerRegistry, Scope, Writer,
     syntax::{
         ApiItemKind, ApiSurface, AssertionKind, AssertionStrength, DecisionKind, Decisions,
-        EdgeKind, ImportTarget, ModuleGraph, NormNode, ProjectInfo, RootReason, Roots, Site, Span,
-        SymbolDef, SymbolKey, SymbolKind, Symbols, TestCase, TestFile, TestFrames, Visibility,
+        EdgeKind, ImportTarget, ModuleGraph, MutationOperator, MutationSites, NormNode,
+        OperatorSet, ProjectInfo, RootReason, Roots, Site, Span, SymbolDef, SymbolKey, SymbolKind,
+        Symbols, TestCase, TestFile, TestFrames, Visibility,
     },
 };
 use cupel_lang::{LanguageRegistry, walk_excluding};
@@ -93,19 +94,13 @@ pub fn lines(span: Span) -> (u32, u32) {
 /// Whether each loop of the `lang` symbol `display` under `root` iterates over a table of cases
 /// written in place, in document order.
 pub fn loop_tables(lang: &str, root: &Path, display: &str) -> Vec<bool> {
-    decisions_of_kind(lang, root, display, DecisionKind::Loop)
-        .iter()
-        .map(|d| d.table)
-        .collect()
+    flags_of_kind(lang, root, display, DecisionKind::Loop, |d| d.table)
 }
 
 /// Whether each `case` of the `lang` symbol `display` under `root` continues a match or switch
 /// an earlier case began, in document order.
 pub fn case_continuations(lang: &str, root: &Path, display: &str) -> Vec<bool> {
-    decisions_of_kind(lang, root, display, DecisionKind::Case)
-        .iter()
-        .map(|d| d.continues)
-        .collect()
+    flags_of_kind(lang, root, display, DecisionKind::Case, |d| d.continues)
 }
 
 /// (kind, nesting, cyclomatic, cognitive) for each decision of the `lang` symbol `display`.
@@ -113,6 +108,20 @@ pub fn decisions_of(lang: &str, root: &Path, display: &str) -> Vec<(DecisionKind
     decisions_for(lang, root, display)
         .iter()
         .map(|d| (d.kind, d.nesting, d.cyclomatic, d.cognitive))
+        .collect()
+}
+
+/// `flag` of each `kind` decision of the `lang` symbol `display` under `root`, in document order.
+fn flags_of_kind(
+    lang: &str,
+    root: &Path,
+    display: &str,
+    kind: DecisionKind,
+    flag: fn(&cupel_core::syntax::Decision) -> bool,
+) -> Vec<bool> {
+    decisions_of_kind(lang, root, display, kind)
+        .iter()
+        .map(flag)
         .collect()
 }
 
@@ -428,4 +437,155 @@ pub fn expected(cases: &[Expected]) -> Vec<CaseRow> {
 pub fn assert_source_file(lang: &str, path: &str, source: &str, framework: &str) -> TestFile {
     let dir = tree(&[(path, source)]);
     assert_framework(&produce(lang, dir.path()), path, framework)
+}
+
+/// The mutation sites of the `lang` symbol `display` under `root`, in document order.
+pub fn sites_of(lang: &str, root: &Path, display: &str) -> Vec<Site> {
+    let symbols: Symbols = produce(lang, root);
+    let sites: MutationSites = produce(lang, root);
+    let key = symbols
+        .symbols
+        .iter()
+        .find(|s| s.display == display)
+        .unwrap_or_else(|| panic!("no symbol {display}"))
+        .key();
+    sites
+        .symbols
+        .into_iter()
+        .find(|entry| entry.symbol == key)
+        .unwrap_or_else(|| panic!("no sites entry for {display}"))
+        .sites
+}
+
+/// One mutation site as a test compares it: (operator, set, from, to, line).
+pub type SiteRow = (MutationOperator, OperatorSet, String, Vec<String>, u32);
+
+/// (operator, set, from, to, line) per site.
+pub fn summary(sites: &[Site]) -> Vec<SiteRow> {
+    sites
+        .iter()
+        .map(|s| (s.operator, s.set, s.from.clone(), s.to.clone(), s.span.line))
+        .collect()
+}
+
+/// The expected site: its set follows from the operator (the default set or the extended one).
+pub fn site_row(operator: MutationOperator, from: &str, to: &[&str], line: u32) -> SiteRow {
+    use MutationOperator::{
+        ArithAddSub, ArithMulDiv, BooleanLiteral, BooleanOp, Equality, Relational, ZeroOne,
+    };
+    let set = match operator {
+        Relational | Equality | ArithAddSub | ArithMulDiv | BooleanOp | BooleanLiteral
+        | ZeroOne => OperatorSet::Default,
+        _ => OperatorSet::Extended,
+    };
+    (
+        operator,
+        set,
+        from.to_owned(),
+        to.iter().map(|t| (*t).to_owned()).collect(),
+        line,
+    )
+}
+
+/// Each `lang` symbol under `root` that has a sites entry, by name, with its site hashes.
+pub fn site_hashes(lang: &str, root: &Path) -> Vec<(String, Vec<String>)> {
+    let symbols: Symbols = produce(lang, root);
+    let sites: MutationSites = produce(lang, root);
+    sites
+        .symbols
+        .iter()
+        .map(|entry| {
+            let name = symbols
+                .symbols
+                .iter()
+                .find(|s| s.key() == entry.symbol)
+                .unwrap()
+                .name
+                .clone();
+            (
+                name,
+                entry
+                    .sites
+                    .iter()
+                    .map(|s| s.site_hash.to_string())
+                    .collect(),
+            )
+        })
+        .collect()
+}
+
+/// Every replacement of every site in `root`'s `lang` files leaves a file that parses cleanly
+/// with the grammar `grammar` picks for the file; returns how many file extensions were
+/// exercised.
+pub fn assert_every_replacement_parses(
+    lang: &str,
+    root: &Path,
+    grammar: fn(&str) -> tree_sitter::Language,
+) -> usize {
+    let sites: MutationSites = produce(lang, root);
+    let symbols: Symbols = produce(lang, root);
+    let mut parser = tree_sitter::Parser::new();
+    let mut checked = 0;
+    let mut extensions = std::collections::BTreeSet::new();
+    for entry in &sites.symbols {
+        let file = &symbols
+            .symbols
+            .iter()
+            .find(|s| s.key() == entry.symbol)
+            .unwrap()
+            .file;
+        parser.set_language(&grammar(file)).unwrap();
+        let source = std::fs::read_to_string(root.join(file)).unwrap();
+        for site in &entry.sites {
+            extensions.insert(Path::new(file).extension().unwrap().to_owned());
+            let (start, end) = byte_range(&source, site);
+            assert_eq!(&source[start..end], site.from, "{file}");
+            for to in &site.to {
+                let mutated = format!("{}{to}{}", &source[..start], &source[end..]);
+                let tree = parser.parse(&mutated, None).unwrap();
+                assert!(
+                    !tree.root_node().has_error(),
+                    "{file}:{}: {} -> {to} does not parse",
+                    site.span.line,
+                    site.from
+                );
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 0);
+    extensions.len()
+}
+
+/// The `lang` fixture's `file`, reformatted: each leading `unit` of indentation becomes `indent`
+/// and `blank` follows every line break, so every line keeps its depth.
+pub fn relaid(lang: &str, file: &str, unit: &str, indent: &str, blank: &str) -> String {
+    std::fs::read_to_string(fixture(lang).join(file))
+        .unwrap()
+        .lines()
+        .map(|line| {
+            let mut rest = line;
+            let mut depth = 0;
+            while let Some(inner) = rest.strip_prefix(unit) {
+                rest = inner;
+                depth += 1;
+            }
+            format!("{}{}", indent.repeat(depth), line.trim_start())
+        })
+        .collect::<Vec<_>>()
+        .join(&format!("\n{blank}"))
+}
+
+/// The normalized shape (as an s-expression) and structural hash of the one `lang` symbol in a
+/// repository holding only `source` at `path`.
+pub fn normalize_at(lang: &str, path: &str, source: &str) -> (String, String) {
+    let dir = tree(&[(path, source)]);
+    let norm: cupel_core::syntax::NormTree = produce(lang, dir.path());
+    let symbols: Symbols = produce(lang, dir.path());
+    assert_eq!(norm.symbols.len(), 1, "{source}");
+    assert_eq!(norm.symbols[0].symbol, symbols.symbols[0].key());
+    (
+        sexp(&norm.symbols[0].root),
+        norm.symbols[0].hash.to_string(),
+    )
 }

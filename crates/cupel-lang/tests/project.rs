@@ -10,9 +10,7 @@ use cupel_lang::LanguageRegistry;
 use support::{produce, produce_excluding, tree};
 
 fn detect_fixture(case: &str) -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../cupel-fixtures/repos/detect")
-        .join(case)
+    support::fixture("detect").join(case)
 }
 
 /// Every registered language's roots under `root`, ordered by path, then language.
