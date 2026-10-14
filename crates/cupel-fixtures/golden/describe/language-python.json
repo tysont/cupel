@@ -104,7 +104,112 @@
     "family": "python",
     "id": "python",
     "stability": "experimental",
-    "subject": "language"
+    "subject": "language",
+    "toolchain": {
+      "bench": [
+        {
+          "commands": [
+            {
+              "command": "<m> pytest --benchmark-only --benchmark-json={out}",
+              "runner": "tool.pytest"
+            }
+          ],
+          "detect": [
+            "`pyproject.toml` or `setup.cfg` or `requirements*.txt` in the root or a member mentions `pytest-benchmark`"
+          ],
+          "format": null,
+          "producer": "tool.pytest-benchmark"
+        }
+      ],
+      "coverage": [
+        {
+          "commands": [
+            {
+              "command": "<m> pytest --cov --cov-report=lcov:{out}",
+              "runner": "tool.pytest"
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "producer": "tool.pytest-cov"
+        },
+        {
+          "commands": [
+            {
+              "command": "<m> coverage run -m unittest && <m> coverage lcov -o {out}",
+              "runner": "tool.unittest"
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "producer": "tool.coverage-py"
+        }
+      ],
+      "fuzz": [
+        "atheris"
+      ],
+      "launchers": [
+        {
+          "detect": [
+            "file `uv.lock` exists",
+            "`pyproject.toml` contains `[tool.uv`"
+          ],
+          "tool": "uv",
+          "values": {
+            "m": "uv run python -m"
+          }
+        },
+        {
+          "detect": [
+            "file `poetry.lock` exists",
+            "`pyproject.toml` contains `[tool.poetry`"
+          ],
+          "tool": "poetry",
+          "values": {
+            "m": "poetry run python -m"
+          }
+        },
+        {
+          "detect": [],
+          "tool": "pip",
+          "values": {
+            "m": "python -m"
+          }
+        }
+      ],
+      "property": [
+        "hypothesis"
+      ],
+      "race": [],
+      "runners": [
+        {
+          "commands": [
+            {
+              "command": "<m> pytest",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "`pyproject.toml` or `setup.cfg` or `requirements*.txt` in the root or a member mentions `pytest`",
+            "file `pytest.ini` exists",
+            "file `conftest.py` exists"
+          ],
+          "format": null,
+          "producer": "tool.pytest"
+        },
+        {
+          "commands": [
+            {
+              "command": "<m> unittest",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "producer": "tool.unittest"
+        }
+      ]
+    }
   },
   "exit_code": 0,
   "findings": [],

@@ -104,7 +104,75 @@
     "family": "rust",
     "id": "rust",
     "stability": "experimental",
-    "subject": "language"
+    "subject": "language",
+    "toolchain": {
+      "bench": [
+        {
+          "commands": [
+            {
+              "command": "cargo bench --bench {name} -- --save-baseline {id}",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "`Cargo.toml` in the root or a member mentions `criterion`"
+          ],
+          "format": null,
+          "producer": "tool.criterion"
+        }
+      ],
+      "coverage": [
+        {
+          "commands": [
+            {
+              "command": "cargo llvm-cov --lcov --output-path {out}",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "producer": "tool.cargo-llvm-cov"
+        }
+      ],
+      "fuzz": [
+        "cargo-fuzz"
+      ],
+      "launchers": [],
+      "property": [
+        "proptest",
+        "quickcheck"
+      ],
+      "race": [
+        "miri",
+        "loom"
+      ],
+      "runners": [
+        {
+          "commands": [
+            {
+              "command": "cargo nextest run --workspace",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "file `.config/nextest.toml` exists"
+          ],
+          "format": null,
+          "producer": "tool.cargo-nextest"
+        },
+        {
+          "commands": [
+            {
+              "command": "cargo test --workspace",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "producer": "tool.cargo-test"
+        }
+      ]
+    }
   },
   "exit_code": 0,
   "findings": [],

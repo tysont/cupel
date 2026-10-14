@@ -264,11 +264,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a31eee39dddec8330830986fcd7625edb5a24ec90ea038215273bbc3adb08ac6"
 
 [[package]]
+name = "cupel-adapt"
+version = "0.1.0"
+dependencies = [
+ "cupel-core",
+ "globset",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "toml",
+]
+
+[[package]]
 name = "cupel-cli"
 version = "0.1.0"
 dependencies = [
  "assert_cmd",
  "clap",
+ "cupel-adapt",
  "cupel-core",
  "cupel-lang",
  "insta",

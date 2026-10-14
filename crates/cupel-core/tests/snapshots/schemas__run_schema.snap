@@ -530,6 +530,30 @@ expression: pretty(&schema)
         "summary"
       ]
     },
+    "CommandTemplate": {
+      "description": "A default command and the runner it goes with.",
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "runner": {
+          "description": "The runner this command wraps or accompanies; null when it fits every runner.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProducerId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "command",
+        "runner"
+      ]
+    },
     "ConfigEcho": {
       "description": "The effective configuration and the layers it came from.",
       "type": "object",
@@ -1106,6 +1130,17 @@ expression: pretty(&schema)
         },
         "stability": {
           "$ref": "#/$defs/Stability"
+        },
+        "toolchain": {
+          "description": "The language's toolchain-table row (design §8.7); null when it has none.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolchainDescription"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -1114,7 +1149,8 @@ expression: pretty(&schema)
         "facts",
         "family",
         "id",
-        "stability"
+        "stability",
+        "toolchain"
       ]
     },
     "LanguageProducers": {
@@ -1182,6 +1218,33 @@ expression: pretty(&schema)
       },
       "required": [
         "languages"
+      ]
+    },
+    "LauncherDescription": {
+      "description": "A launcher: when it is chosen, and the values it gives `<name>` placeholders in commands.",
+      "type": "object",
+      "properties": {
+        "detect": {
+          "description": "Detection rules, any one of which selects it; empty for the fallback.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tool": {
+          "$ref": "#/$defs/ToolId"
+        },
+        "values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "detect",
+        "tool",
+        "values"
       ]
     },
     "Location": {
@@ -2022,9 +2085,109 @@ expression: pretty(&schema)
       "maximum": 6,
       "minimum": 0
     },
+    "ToolDescription": {
+      "description": "A tool producer in a toolchain row.",
+      "type": "object",
+      "properties": {
+        "commands": {
+          "description": "Default command templates.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommandTemplate"
+          }
+        },
+        "detect": {
+          "description": "Detection rules, any one of which selects it; empty for the fallback.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "format": {
+          "description": "The report format it reads, for coverage producers.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "producer": {
+          "$ref": "#/$defs/ProducerId"
+        }
+      },
+      "required": [
+        "commands",
+        "detect",
+        "format",
+        "producer"
+      ]
+    },
     "ToolId": {
       "description": "An external tool a producer drives, such as `cargo-llvm-cov`.",
       "type": "string"
+    },
+    "ToolchainDescription": {
+      "description": "A toolchain-table row: the tools Cupel knows for a language, each list in default order.",
+      "type": "object",
+      "properties": {
+        "bench": {
+          "description": "Benchmark producers (`BenchSamples`).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolDescription"
+          }
+        },
+        "coverage": {
+          "description": "Coverage producers (`CoverageMap`), each with its report format.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolDescription"
+          }
+        },
+        "fuzz": {
+          "description": "Fuzzers.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolId"
+          }
+        },
+        "launchers": {
+          "description": "Package managers and other prefixes commands are launched through.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LauncherDescription"
+          }
+        },
+        "property": {
+          "description": "Property-testing tools.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolId"
+          }
+        },
+        "race": {
+          "description": "Race and undefined-behavior detectors.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolId"
+          }
+        },
+        "runners": {
+          "description": "Test-runner producers (`TestResults`).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolDescription"
+          }
+        }
+      },
+      "required": [
+        "bench",
+        "coverage",
+        "fuzz",
+        "launchers",
+        "property",
+        "race",
+        "runners"
+      ]
     },
     "ToolchainInfo": {
       "description": "Tool name → version for every toolchain component the run used.",

@@ -1,0 +1,23 @@
+# ABOUTME: Manifest for cupel-adapt: tool producers (runners, coverage, bench) and the toolchain table.
+# ABOUTME: Depends on cupel-core only; never on cupel-lang, cupel-checks, or cupel-cli (design §8.2).
+[package]
+name = "cupel-adapt"
+description = "Cupel's tool layer: the per-language toolchain table and, from P3, tool producers."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+cupel-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+globset.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

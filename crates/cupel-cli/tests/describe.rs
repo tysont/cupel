@@ -311,6 +311,34 @@ fn describe_language_shows_identity_facts_and_check_support() {
 }
 
 #[test]
+fn describe_language_shows_its_toolchain_row_in_default_order() {
+    let description = run(["describe", "language", "python"]).envelope()["description"].clone();
+    let toolchain = &description["toolchain"];
+    let ids = |list: &str, key: &str| -> Vec<String> {
+        toolchain[list]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|entry| entry[key].as_str().unwrap().to_owned())
+            .collect()
+    };
+    assert_eq!(ids("launchers", "tool"), ["uv", "poetry", "pip"]);
+    assert_eq!(ids("runners", "producer"), ["tool.pytest", "tool.unittest"]);
+    assert_eq!(
+        ids("coverage", "producer"),
+        ["tool.pytest-cov", "tool.coverage-py"]
+    );
+    assert_eq!(toolchain["coverage"][0]["format"], json!("lcov"));
+    assert_eq!(
+        toolchain["coverage"][0]["commands"],
+        json!([{"runner": "tool.pytest", "command": "<m> pytest --cov --cov-report=lcov:{out}"}])
+    );
+    assert_eq!(ids("bench", "producer"), ["tool.pytest-benchmark"]);
+    assert_eq!(toolchain["property"], json!(["hypothesis"]));
+    assert_eq!(toolchain["fuzz"], json!(["atheris"]));
+}
+
+#[test]
 fn describe_language_with_an_unknown_id_is_a_usage_error_listing_languages() {
     let outcome = run(["describe", "language", "cobol"]);
     assert_eq!(outcome.code, 2);
@@ -390,6 +418,29 @@ fn describe_language_renders_as_text() {
     let outcome = run(["describe", "language", "typescript", "--format", "text"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     insta::assert_snapshot!(support::redacted_text(&outcome.stdout));
+}
+
+#[test]
+fn describe_language_text_lists_the_toolchain_with_rules_and_commands() {
+    let outcome = run(["describe", "language", "rust", "--format", "text"]);
+    let text = support::redacted_text(&outcome.stdout);
+    let toolchain = text
+        .split_once("\ntoolchain\n")
+        .expect("a toolchain section")
+        .1;
+    for line in [
+        "  runners",
+        "    tool.cargo-nextest  when file `.config/nextest.toml` exists",
+        "      cargo nextest run --workspace",
+        "    tool.cargo-test  otherwise",
+        "    tool.cargo-llvm-cov  lcov · always",
+        "  race      miri, loom",
+    ] {
+        assert!(
+            toolchain.lines().any(|l| l == line),
+            "{line:?} in\n{toolchain}"
+        );
+    }
 }
 
 #[test]

@@ -104,7 +104,59 @@
     "family": "go",
     "id": "go",
     "stability": "experimental",
-    "subject": "language"
+    "subject": "language",
+    "toolchain": {
+      "bench": [
+        {
+          "commands": [
+            {
+              "command": "go test -run=^$ -bench=. <packages>",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "producer": "tool.go-bench"
+        }
+      ],
+      "coverage": [
+        {
+          "commands": [
+            {
+              "command": "go test -coverprofile={out} <packages>",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": "coverprofile",
+          "producer": "tool.go-coverprofile"
+        }
+      ],
+      "fuzz": [
+        "go test -fuzz"
+      ],
+      "launchers": [],
+      "property": [
+        "testing/quick",
+        "rapid"
+      ],
+      "race": [
+        "go test -race"
+      ],
+      "runners": [
+        {
+          "commands": [
+            {
+              "command": "go test -json <packages>",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "producer": "tool.go-test"
+        }
+      ]
+    }
   },
   "exit_code": 0,
   "findings": [],

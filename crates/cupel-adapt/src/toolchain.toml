@@ -1,0 +1,184 @@
+# ABOUTME: The toolchain table (design §8.7, ADR-036): per language, launchers, runners, coverage and
+# ABOUTME: bench producers in default order with detection rules and default commands; see the crate docs.
+
+# Presence probes for programs whose `--version` does not work; every other program is probed
+# with `<program> --version`.
+[probes]
+go = "go version"
+
+# --- JavaScript and TypeScript ------------------------------------------------------------------
+
+[[rows]]
+langs = ["javascript", "typescript"]
+property = ["fast-check"]
+fuzz = ["jazzer.js"]
+race = []
+
+[[rows.launchers]]
+tool = "pnpm"
+detect = [
+  { file = "pnpm-lock.yaml" },
+  { file = "pnpm-workspace.yaml" },
+  { json = "package.json", path = ["packageManager"], prefix = "pnpm@" },
+]
+values = { x = "pnpm", run = "pnpm run" }
+
+[[rows.launchers]]
+tool = "yarn"
+detect = [
+  { file = "yarn.lock" },
+  { json = "package.json", path = ["packageManager"], prefix = "yarn@" },
+]
+values = { x = "yarn", run = "yarn run" }
+
+[[rows.launchers]]
+tool = "npm"
+values = { x = "npx", run = "npm run" }
+
+[[rows.runners]]
+id = "tool.vitest"
+detect = [
+  { json = "package.json", path = ["dependencies", "vitest"], members = true },
+  { json = "package.json", path = ["devDependencies", "vitest"], members = true },
+]
+command = "<x> vitest run"
+
+[[rows.runners]]
+id = "tool.jest"
+detect = [
+  { json = "package.json", path = ["dependencies", "jest"], members = true },
+  { json = "package.json", path = ["devDependencies", "jest"], members = true },
+]
+command = "<x> jest"
+
+[[rows.runners]]
+id = "tool.mocha"
+detect = [
+  { json = "package.json", path = ["dependencies", "mocha"], members = true },
+  { json = "package.json", path = ["devDependencies", "mocha"], members = true },
+]
+command = "<x> mocha"
+
+[[rows.runners]]
+id = "tool.node-test"
+command = "node --test"
+
+[[rows.coverage]]
+id = "tool.vitest-coverage"
+format = "lcov"
+commands = { "tool.vitest" = "<x> vitest run --coverage --coverage.reporter=lcov" }
+
+[[rows.coverage]]
+id = "tool.jest-coverage"
+format = "lcov"
+commands = { "tool.jest" = "<x> jest --coverage --coverageReporters=lcov" }
+
+[[rows.coverage]]
+id = "tool.c8"
+format = "lcov"
+commands = { "tool.mocha" = "<x> c8 --reporter=lcov mocha", "tool.node-test" = "<x> c8 --reporter=lcov node --test" }
+
+[[rows.bench]]
+id = "tool.bench-script"
+detect = [{ json = "package.json", path = ["scripts", "bench"] }]
+command = "<run> bench"
+
+# --- Python -------------------------------------------------------------------------------------
+
+[[rows]]
+langs = ["python"]
+property = ["hypothesis"]
+fuzz = ["atheris"]
+race = []
+
+[[rows.launchers]]
+tool = "uv"
+detect = [{ file = "uv.lock" }, { contains = "[tool.uv", in = "pyproject.toml" }]
+values = { m = "uv run python -m" }
+
+[[rows.launchers]]
+tool = "poetry"
+detect = [{ file = "poetry.lock" }, { contains = "[tool.poetry", in = "pyproject.toml" }]
+values = { m = "poetry run python -m" }
+
+[[rows.launchers]]
+tool = "pip"
+values = { m = "python -m" }
+
+[[rows.runners]]
+id = "tool.pytest"
+detect = [
+  { mentions = "pytest", in = ["pyproject.toml", "setup.cfg", "requirements*.txt"] },
+  { file = "pytest.ini" },
+  { file = "conftest.py" },
+]
+command = "<m> pytest"
+
+[[rows.runners]]
+id = "tool.unittest"
+command = "<m> unittest"
+
+[[rows.coverage]]
+id = "tool.pytest-cov"
+format = "lcov"
+commands = { "tool.pytest" = "<m> pytest --cov --cov-report=lcov:{out}" }
+
+[[rows.coverage]]
+id = "tool.coverage-py"
+format = "lcov"
+commands = { "tool.unittest" = "<m> coverage run -m unittest && <m> coverage lcov -o {out}" }
+
+[[rows.bench]]
+id = "tool.pytest-benchmark"
+detect = [
+  { mentions = "pytest-benchmark", in = ["pyproject.toml", "setup.cfg", "requirements*.txt"] },
+]
+commands = { "tool.pytest" = "<m> pytest --benchmark-only --benchmark-json={out}" }
+
+# --- Rust ---------------------------------------------------------------------------------------
+
+[[rows]]
+langs = ["rust"]
+property = ["proptest", "quickcheck"]
+fuzz = ["cargo-fuzz"]
+race = ["miri", "loom"]
+
+[[rows.runners]]
+id = "tool.cargo-nextest"
+detect = [{ file = ".config/nextest.toml" }]
+command = "cargo nextest run --workspace"
+
+[[rows.runners]]
+id = "tool.cargo-test"
+command = "cargo test --workspace"
+
+[[rows.coverage]]
+id = "tool.cargo-llvm-cov"
+format = "lcov"
+command = "cargo llvm-cov --lcov --output-path {out}"
+
+[[rows.bench]]
+id = "tool.criterion"
+detect = [{ mentions = "criterion", in = ["Cargo.toml"] }]
+command = "cargo bench --bench {name} -- --save-baseline {id}"
+
+# --- Go -----------------------------------------------------------------------------------------
+
+[[rows]]
+langs = ["go"]
+property = ["testing/quick", "rapid"]
+fuzz = ["go test -fuzz"]
+race = ["go test -race"]
+
+[[rows.runners]]
+id = "tool.go-test"
+command = "go test -json <packages>"
+
+[[rows.coverage]]
+id = "tool.go-coverprofile"
+format = "coverprofile"
+command = "go test -coverprofile={out} <packages>"
+
+[[rows.bench]]
+id = "tool.go-bench"
+command = "go test -run=^$ -bench=. <packages>"

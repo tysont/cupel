@@ -3,6 +3,7 @@
 [workspace]
 resolver = "3"
 members = [
+    "crates/cupel-adapt",
     "crates/cupel-cli",
     "crates/cupel-core",
     "crates/cupel-fixtures",
@@ -17,6 +18,7 @@ license = "BSD-3-Clause"
 repository = "https://github.com/tysont/cupel"
 
 [workspace.dependencies]
+cupel-adapt = { path = "crates/cupel-adapt" }
 cupel-core = { path = "crates/cupel-core" }
 cupel-lang = { path = "crates/cupel-lang" }
 cupel-fixtures = { path = "crates/cupel-fixtures" }

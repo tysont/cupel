@@ -1,5 +1,7 @@
 // ABOUTME: The `describe` payload: self-description of the CLI, its commands, flags, exit codes,
 // ABOUTME: and schemas, carried in the envelope's `description` field (ADR-018).
+use std::collections::BTreeMap;
+
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -172,6 +174,56 @@ pub struct LanguageDescription {
     pub facts: Vec<FactProducers>,
     /// Every registered check and whether it can run for this language.
     pub checks: Vec<CheckSupport>,
+    /// The language's toolchain-table row (design §8.7); null when it has none.
+    pub toolchain: Option<ToolchainDescription>,
+}
+
+/// A toolchain-table row: the tools Cupel knows for a language, each list in default order.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct ToolchainDescription {
+    /// Package managers and other prefixes commands are launched through.
+    pub launchers: Vec<LauncherDescription>,
+    /// Test-runner producers (`TestResults`).
+    pub runners: Vec<ToolDescription>,
+    /// Coverage producers (`CoverageMap`), each with its report format.
+    pub coverage: Vec<ToolDescription>,
+    /// Benchmark producers (`BenchSamples`).
+    pub bench: Vec<ToolDescription>,
+    /// Property-testing tools.
+    pub property: Vec<ToolId>,
+    /// Fuzzers.
+    pub fuzz: Vec<ToolId>,
+    /// Race and undefined-behavior detectors.
+    pub race: Vec<ToolId>,
+}
+
+/// A launcher: when it is chosen, and the values it gives `<name>` placeholders in commands.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct LauncherDescription {
+    pub tool: ToolId,
+    /// Detection rules, any one of which selects it; empty for the fallback.
+    pub detect: Vec<String>,
+    pub values: BTreeMap<String, String>,
+}
+
+/// A tool producer in a toolchain row.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct ToolDescription {
+    pub producer: ProducerId,
+    /// The report format it reads, for coverage producers.
+    pub format: Option<String>,
+    /// Detection rules, any one of which selects it; empty for the fallback.
+    pub detect: Vec<String>,
+    /// Default command templates.
+    pub commands: Vec<CommandTemplate>,
+}
+
+/// A default command and the runner it goes with.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct CommandTemplate {
+    /// The runner this command wraps or accompanies; null when it fits every runner.
+    pub runner: Option<ProducerId>,
+    pub command: String,
 }
 
 /// The producers registered for one fact kind, in selection order.

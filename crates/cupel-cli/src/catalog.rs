@@ -73,6 +73,8 @@ impl Catalog {
                     support: support.into(),
                 })
                 .collect(),
+            toolchain: cupel_adapt::toolchain::for_lang(id)
+                .map(cupel_adapt::toolchain::Row::describe),
         })
     }
 

@@ -5,7 +5,8 @@ use std::fmt::Write as _;
 use cupel_core::{
     AllDescription, ArgDescription, CliDescription, CommandDescription, Description,
     FactDescription, LanguageDescription, LanguagesDescription, MatrixDescription,
-    ProducerDescription, SchemaDescription, Stability, SupportDescription, ValueType,
+    ProducerDescription, SchemaDescription, Stability, SupportDescription, ToolDescription,
+    ToolchainDescription, ValueType,
 };
 
 use super::{Paint, continued, name};
@@ -89,7 +90,85 @@ fn render_language(language: &LanguageDescription, paint: &Paint) -> String {
             support(&check.support)
         );
     }
+    if let Some(toolchain) = &language.toolchain {
+        render_toolchain(&mut out, toolchain, paint);
+    }
     out
+}
+
+/// The toolchain row: launchers and tools in default order, each with when it is chosen and
+/// its command templates, then the property, fuzz, and race tool names.
+fn render_toolchain(out: &mut String, toolchain: &ToolchainDescription, paint: &Paint) {
+    let _ = writeln!(out, "\n{}", paint.bold("toolchain"));
+    if !toolchain.launchers.is_empty() {
+        let _ = writeln!(out, "  launchers");
+        for launcher in &toolchain.launchers {
+            let values: Vec<String> = launcher
+                .values
+                .iter()
+                .map(|(name, value)| format!("<{name}> = {value}"))
+                .collect();
+            let _ = writeln!(
+                out,
+                "    {}  {}",
+                launcher.tool,
+                when(&launcher.detect, "otherwise")
+            );
+            let _ = writeln!(out, "      {}", values.join(" · "));
+        }
+    }
+    for (title, tools, fallback) in [
+        ("runners", &toolchain.runners, "otherwise"),
+        ("coverage", &toolchain.coverage, "always"),
+        ("bench", &toolchain.bench, "always"),
+    ] {
+        if !tools.is_empty() {
+            let _ = writeln!(out, "  {title}");
+            for tool in tools {
+                render_tool(out, tool, fallback);
+            }
+        }
+    }
+    for (title, names) in [
+        ("property", &toolchain.property),
+        ("fuzz", &toolchain.fuzz),
+        ("race", &toolchain.race),
+    ] {
+        let names: Vec<&str> = names.iter().map(cupel_core::ToolId::as_str).collect();
+        let _ = writeln!(out, "  {title:<8}  {}", none_if_empty(&names.join(", ")));
+    }
+}
+
+fn render_tool(out: &mut String, tool: &ToolDescription, fallback: &str) {
+    let format = tool
+        .format
+        .as_ref()
+        .map_or_else(String::new, |format| format!("{format} · "));
+    let _ = writeln!(
+        out,
+        "    {}  {format}{}",
+        tool.producer,
+        when(&tool.detect, fallback)
+    );
+    for template in &tool.commands {
+        match &template.runner {
+            Some(runner) => {
+                let _ = writeln!(out, "      with {runner}: {}", template.command);
+            }
+            None => {
+                let _ = writeln!(out, "      {}", template.command);
+            }
+        }
+    }
+}
+
+/// When a launcher or tool is chosen: any one of its rules, or `fallback` when it has none.
+fn when(rules: &[String], fallback: &str) -> String {
+    if rules.is_empty() {
+        fallback.to_owned()
+    } else {
+        format!("when {}", rules.join("; or "))
+    }
 }
 
 fn render_fact(fact: &FactDescription, paint: &Paint) -> String {
