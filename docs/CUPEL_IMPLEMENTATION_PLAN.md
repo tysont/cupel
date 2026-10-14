@@ -855,7 +855,7 @@ P3 fans out to parallel worktrees, each adding a check or a producer. Before it 
 
 #### P3.5 `tests.flaky`
 
-**Status:** not started
+**Status:** in progress (2026-10-14) · [ADR-078](adr/CUPEL_DECISION_078.md)
 
 - A flake engine (`Producer<TestResults>` variant producing repeated runs, registered as `engine.flake`) reruns impacted tests N times (default 3 at `standard`) with shuffled order, varied seeds, varied parallelism. `tests.flaky` check consumes the repeated results and `TestFrames`. Kinds `test.flaky`, `test.order-dependent`; action `investigate_flake`.
 
