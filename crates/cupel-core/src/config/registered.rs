@@ -24,6 +24,12 @@ impl Config {
                 .flat_map(GateSection::rules)
                 .try_for_each(|rule| {
                     let manifest = registry.check(&rule.key.check, section)?;
+                    if section == "[gate.tree]" && needs_range(checks, &rule.key.check) {
+                        return Err(ConfigError::TreeGateNeedsRange {
+                            check: rule.key.check.to_string(),
+                        }
+                        .into());
+                    }
                     match &rule.key.metric {
                         Some(metric) => declared_metric(manifest, metric, section),
                         None => Ok(()),
@@ -85,6 +91,13 @@ impl<'a> Registries<'a> {
             self.langs.iter().map(ToString::to_string),
         ))
     }
+}
+
+/// Whether the registered check `id` reads a range's base side (ADR-056).
+fn needs_range(checks: &CheckRegistry, id: &CheckId) -> bool {
+    checks
+        .get(id)
+        .is_some_and(|check| !check.base_needs().is_empty())
 }
 
 /// Rejects a gate metric the check's manifest does not declare as a `scope` metric: per-target

@@ -81,6 +81,13 @@ pub enum ConfigError {
         /// The settings the check accepts.
         valid: Vec<String>,
     },
+    /// A `[gate.tree]` rule names a check that compares a range's two sides, so a tree scope
+    /// can never evaluate it.
+    #[error(
+        "the `[gate.tree]` rule on `{check}` can never pass: `{check}` compares a range's base \
+         and head, and a tree scope has no range"
+    )]
+    TreeGateNeedsRange { check: String },
     /// An ID is well formed but no registry knows it (ADR-017).
     #[error(
         "unknown {what} in `{section}`; registered: {}",

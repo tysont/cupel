@@ -273,28 +273,20 @@ fn a_weakening_presence_rule_fails_on_a_weakened_change_and_passes_on_a_strength
 }
 
 #[test]
-fn a_weakening_rule_on_the_tree_is_skipped_and_reruns_the_check_over_a_range() {
+fn a_tree_gate_rule_on_a_check_that_needs_a_range_is_rejected_at_load() {
     let repo = python("[gate.tree]\n\"tests.weakening\" = \"none\"\n");
-    repo.write(
-        "tests/test_math.py",
-        "def test_adds():\n    assert 1 + 1 == 2\n",
-    );
     let outcome = repo.run(&["check"]);
-    assert_eq!(outcome.code, 1, "{}", outcome.stdout);
-    let envelope = outcome.envelope();
-    assert_eq!(
-        rules(&envelope),
-        [rule("tests.weakening none", Value::Null, "skipped")]
+    assert_eq!(outcome.code, 2, "{}", outcome.stdout);
+    let finding = outcome.finding();
+    assert_eq!(finding["kind"], json!("cli.usage"));
+    let title = finding["title"].as_str().unwrap();
+    assert!(title.contains("`tests.weakening`"), "{title}");
+    assert!(
+        finding["action"]["summary"]
+            .as_str()
+            .unwrap()
+            .contains("[gate.changed]"),
+        "{finding}"
     );
-    let reruns: Vec<&Value> = envelope["next_actions"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|action| action["kind"] == json!("rerun"))
-        .collect();
-    assert_eq!(reruns.len(), 1, "{reruns:?}");
-    assert_eq!(
-        reruns[0]["command"],
-        json!("cupel check --changed --only tests.weakening")
-    );
+    assert_eq!(outcome.envelope()["checks"], json!([]));
 }

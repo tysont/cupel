@@ -228,16 +228,7 @@ impl Usage {
     /// Describes a configuration problem: which file, variable, or flag is at fault, and the fix.
     /// The subject is the flag, variable, file, or key the user edits (ADR-016).
     pub fn from_config(error: &ConfigError) -> Self {
-        let title = error.to_string();
-        let usage = |subject: &str, fix: String| Self {
-            subject: subject.to_owned(),
-            title: title.clone(),
-            fix,
-            detail: None,
-            argument: None,
-            value: None,
-            valid: Vec::new(),
-        };
+        let usage = |subject: &str, fix: String| Self::configuration(error, subject, fix);
         match error {
             ConfigError::Invalid { path, message } => {
                 // toml ends its message with the problem itself, such as "unknown field `x`,
@@ -246,7 +237,7 @@ impl Usage {
                 let short = problem.split(", expected").next().unwrap_or(problem);
                 Self {
                     title: format!("Invalid configuration in `{}`: {short}", path.display()),
-                    detail: Some(title.clone()),
+                    detail: Some(error.to_string()),
                     value: Some(path.display().to_string()),
                     ..usage(
                         "cupel.toml",
@@ -294,6 +285,28 @@ impl Usage {
                     },
                 )
             },
+            _ => Self::from_config_rules(error),
+        }
+    }
+
+    /// A configuration usage titled by `error`, about `subject`, fixed by `fix`.
+    fn configuration(error: &ConfigError, subject: &str, fix: String) -> Self {
+        Self {
+            subject: subject.to_owned(),
+            title: error.to_string(),
+            fix,
+            detail: None,
+            argument: None,
+            value: None,
+            valid: Vec::new(),
+        }
+    }
+
+    /// Describes a problem with what the configuration says: a check setting, a gate rule, or
+    /// an ID no registry knows.
+    fn from_config_rules(error: &ConfigError) -> Self {
+        let usage = |subject: &str, fix: String| Self::configuration(error, subject, fix);
+        match error {
             ConfigError::CheckSetting {
                 check, key, valid, ..
             } => Self {
@@ -317,6 +330,16 @@ impl Usage {
                         .to_owned(),
                 )
             },
+            ConfigError::TreeGateNeedsRange { check } => Self {
+                value: Some(check.clone()),
+                ..usage(
+                    "[gate.tree]",
+                    format!(
+                        "Move the `{check}` rule from [gate.tree] to [gate.changed], which \
+                         applies to --changed and --base scopes."
+                    ),
+                )
+            },
             ConfigError::Unregistered {
                 section,
                 registered,
@@ -325,6 +348,7 @@ impl Usage {
                 valid: registered.clone(),
                 ..usage(section, format!("Use a registered ID in `{section}`."))
             },
+            _ => Self::configuration(error, "cupel.toml", "Fix cupel.toml.".to_owned()),
         }
     }
 
