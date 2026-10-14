@@ -7,9 +7,9 @@ use cupel_core::syntax::{Decisions, MutationSites, Symbols};
 use cupel_core::{
     ActionKind, Availability, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult,
     CheckStatus, CostClass, Ctx, Error, Event, EventSink, Fact, FactKind, Facts, FindingKindSpec,
-    Lang, LangFamily, LangId, Langs, Manifest, MetricSpec, Plan, ProduceCtx, Producer, ProducerId,
-    ProducerRegistry, Result, RunId, Scope, Stability, Support, SupportMatrix, Tier, ToolId,
-    WriteError, Writer,
+    Lang, LangFamily, LangId, Langs, Manifest, MetricPer, MetricSpec, Plan, ProduceCtx, Producer,
+    ProducerId, ProducerRegistry, Result, RunId, Scope, Stability, Support, SupportMatrix, Tier,
+    ToolId, WriteError, Writer,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -83,6 +83,7 @@ impl Check for ReportingCheck {
             tier: self.0.tier,
             cost: self.0.cost,
             score: None,
+            metrics: std::collections::BTreeMap::new(),
             delta: None,
             findings: 0,
             duration_ms: 0,
@@ -357,6 +358,7 @@ fn manifest_round_trips_with_kebab_fact_kinds() {
     m.metrics.push(MetricSpec {
         name: "score".into(),
         summary: "Killed ratio.".into(),
+        per: MetricPer::Scope,
     });
     let value = serde_json::to_value(&m).unwrap();
     assert_eq!(value["needs"], json!(["mutation-outcomes"]));

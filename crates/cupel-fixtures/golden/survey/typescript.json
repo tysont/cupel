@@ -1,0 +1,615 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 65.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 54,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_01e66c",
+      "kind": "complexity.high",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "src/complexity.ts",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_89983ab5c464c8d1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_01e66c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.label",
+        "hash": "sh_89983ab5c464c8d1",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_b7f885",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "file": "src/complexity.ts",
+        "line": 31
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_7b6a36c322da7c7c",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b7f885 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.settle",
+        "hash": "sh_7b6a36c322da7c7c",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `openAccount` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_fa2cc2",
+      "kind": "params.many",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 56,
+        "file": "src/complexity.ts",
+        "line": 47
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_254ee3901ff330b3",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_fa2cc2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.openAccount",
+        "hash": "sh_254ee3901ff330b3",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.openAccount` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `statementTemplate` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 65
+      },
+      "id": "fnd_d77497",
+      "kind": "function.long",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 122,
+        "file": "src/complexity.ts",
+        "line": 58
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_4726b12fa399cfed",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d77497 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.statementTemplate",
+        "hash": "sh_4726b12fa399cfed",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.statementTemplate` is 65 lines long (max 60)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_01e66c",
+      "kind": "reduce_complexity",
+      "priority": 1,
+      "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+    },
+    {
+      "command": null,
+      "finding": "fnd_b7f885",
+      "kind": "reduce_complexity",
+      "priority": 2,
+      "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+    },
+    {
+      "command": null,
+      "finding": "fnd_fa2cc2",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Group related parameters of `openAccount` into a type, or split it so each part needs at most 5."
+    },
+    {
+      "command": null,
+      "finding": "fnd_d77497",
+      "kind": "refactor_extract",
+      "priority": 4,
+      "summary": "Extract cohesive blocks of `statementTemplate` into named functions until it is at most 60 lines."
+    }
+  ],
+  "plan": null,
+  "rankings": {
+    "dimensions": [
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "typescript",
+            "rank": 1,
+            "target": {
+              "display": "complexity.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "src/complexity.ts",
+                "line": 3
+              },
+              "symbol": "sh_89983ab5c464c8d1"
+            },
+            "value": 11.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 2,
+            "target": {
+              "display": "complexity.settle",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 45,
+                "file": "src/complexity.ts",
+                "line": 31
+              },
+              "symbol": "sh_7b6a36c322da7c7c"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 3,
+            "target": {
+              "display": "decide.classify",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 12,
+                "file": "src/decide.ts",
+                "line": 5
+              },
+              "symbol": "sh_4d82a4cfa0ea00d1"
+            },
+            "value": 5.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 4,
+            "target": {
+              "display": "decide.firstOverdraft",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 21,
+                "file": "src/decide.ts",
+                "line": 14
+              },
+              "symbol": "sh_f8043581d26d9c0c"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 5,
+            "target": {
+              "display": "decide.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 32,
+                "file": "src/decide.ts",
+                "line": 23
+              },
+              "symbol": "sh_da40a6e006646248"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 6,
+            "target": {
+              "display": "decide.parseCents",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 43,
+                "file": "src/decide.ts",
+                "line": 34
+              },
+              "symbol": "sh_a286265a5f4e1c81"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 7,
+            "target": {
+              "display": "pricing.discounted",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 7,
+                "file": "src/pricing.ts",
+                "line": 1
+              },
+              "symbol": "sh_13d81a7dbe1b7234"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 8,
+            "target": {
+              "display": "pricing.tally",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "src/pricing.ts",
+                "line": 9
+              },
+              "symbol": "sh_d624956446d7e04a"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 9,
+            "target": {
+              "display": "ledger.load",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 18,
+                "file": "src/ledger.ts",
+                "line": 13
+              },
+              "symbol": "sh_a8f97199e3f096db"
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 10,
+            "target": {
+              "display": "math.range",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 9,
+                "file": "src/math.ts",
+                "line": 5
+              },
+              "symbol": "sh_16c5e382daac3ed3"
+            },
+            "value": 2.0
+          }
+        ],
+        "measured": 54,
+        "metric": "cyclomatic",
+        "per": "symbol",
+        "summary": "Cyclomatic complexity per function."
+      },
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "typescript",
+            "rank": 1,
+            "target": {
+              "display": "complexity.settle",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 45,
+                "file": "src/complexity.ts",
+                "line": 31
+              },
+              "symbol": "sh_7b6a36c322da7c7c"
+            },
+            "value": 15.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 2,
+            "target": {
+              "display": "complexity.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "src/complexity.ts",
+                "line": 3
+              },
+              "symbol": "sh_89983ab5c464c8d1"
+            },
+            "value": 10.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 3,
+            "target": {
+              "display": "decide.classify",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 12,
+                "file": "src/decide.ts",
+                "line": 5
+              },
+              "symbol": "sh_4d82a4cfa0ea00d1"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 4,
+            "target": {
+              "display": "decide.firstOverdraft",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 21,
+                "file": "src/decide.ts",
+                "line": 14
+              },
+              "symbol": "sh_f8043581d26d9c0c"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 5,
+            "target": {
+              "display": "decide.parseCents",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 43,
+                "file": "src/decide.ts",
+                "line": 34
+              },
+              "symbol": "sh_a286265a5f4e1c81"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 6,
+            "target": {
+              "display": "decide.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 32,
+                "file": "src/decide.ts",
+                "line": 23
+              },
+              "symbol": "sh_da40a6e006646248"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 7,
+            "target": {
+              "display": "pricing.discounted",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 7,
+                "file": "src/pricing.ts",
+                "line": 1
+              },
+              "symbol": "sh_13d81a7dbe1b7234"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 8,
+            "target": {
+              "display": "pricing.tally",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "src/pricing.ts",
+                "line": 9
+              },
+              "symbol": "sh_d624956446d7e04a"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 9,
+            "target": {
+              "display": "twins.netTotalCapped",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 39,
+                "file": "src/twins.ts",
+                "line": 33
+              },
+              "symbol": "sh_ff3b0b0009bbd3fa"
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 10,
+            "target": {
+              "display": "ledger.load",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 18,
+                "file": "src/ledger.ts",
+                "line": 13
+              },
+              "symbol": "sh_a8f97199e3f096db"
+            },
+            "value": 1.0
+          }
+        ],
+        "measured": 54,
+        "metric": "cognitive",
+        "per": "symbol",
+        "summary": "Cognitive complexity per function."
+      }
+    ],
+    "top": 10
+  },
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 19,
+      "languages": [
+        "typescript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 54
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "survey"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 4
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 4,
+  "truncated": false
+}

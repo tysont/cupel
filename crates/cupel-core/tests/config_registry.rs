@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use cupel_core::config::{Config, ConfigError, ConfigFile, ConfigRequest};
 use cupel_core::{
     Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CostClass, Error, EventSink, Facts,
-    LangId, Manifest, MetricSpec, Plan, Result, Scope, Stability, Tier,
+    LangId, Manifest, MetricPer, MetricSpec, Plan, Result, Scope, Stability, Tier,
 };
 
 /// A registered check that is never planned or run here; only its manifest matters.
@@ -28,6 +28,7 @@ impl Check for DeclaredCheck {
     }
 }
 
+/// A check declaring `metrics`; a name ending in `@symbol` is a per-symbol ranking dimension.
 fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
     Box::new(DeclaredCheck(Manifest {
         id: CheckId::from(id),
@@ -39,9 +40,17 @@ fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
         findings: vec![],
         metrics: metrics
             .iter()
-            .map(|name| MetricSpec {
-                name: (*name).to_owned(),
-                summary: String::new(),
+            .map(|name| match name.strip_suffix("@symbol") {
+                Some(name) => MetricSpec {
+                    name: name.to_owned(),
+                    summary: String::new(),
+                    per: MetricPer::Symbol,
+                },
+                None => MetricSpec {
+                    name: (*name).to_owned(),
+                    summary: String::new(),
+                    per: MetricPer::Scope,
+                },
             })
             .collect(),
         stability: Stability::Experimental,
@@ -52,7 +61,7 @@ fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
 fn registry() -> CheckRegistry {
     let mut checks = CheckRegistry::default();
     checks
-        .register(declared("tests.mutation", &["score"]))
+        .register(declared("tests.mutation", &["score", "survivors@symbol"]))
         .unwrap();
     checks.register(declared("tests.weakening", &[])).unwrap();
     checks
@@ -111,6 +120,10 @@ fn unregistered_ids_are_usage_errors_listing_the_valid_ones() {
         (
             "[gate.changed]\n\"tests.mutation.ratio\" = \">= 0.8\"\n",
             "unknown metric `ratio` of `tests.mutation` in `[gate.changed]`; registered: `score`",
+        ),
+        (
+            "[gate.changed]\n\"tests.mutation.survivors\" = \"< 3\"\n",
+            "unknown metric `survivors` of `tests.mutation` in `[gate.changed]`; registered: `score`",
         ),
         (
             "[gate.changed]\n\"tests.weakening.count\" = \"== 0\"\n",

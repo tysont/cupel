@@ -1,5 +1,5 @@
-// ABOUTME: The `check` verb: walk the tree once, resolve the scope, select checks, run the scheduler
-// ABOUTME: (or plan it for --dry-run), and assemble the envelope's checks, findings, scope, and git info.
+// ABOUTME: The `check` verb and the pipeline `survey` shares: walk the tree once, resolve the scope, select
+// ABOUTME: checks, run the scheduler (or plan it), assemble the envelope, and grade it with the gate.
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -7,8 +7,9 @@ use cupel_core::config::Config;
 use cupel_core::git::Git;
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    Envelope, EventSink, ExitCode, GitInfo, Job, Lang, Outcome, PlannedWrite, ResolvedFiles,
-    Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Writer, next_actions,
+    Envelope, EventSink, ExitCode, GitInfo, Job, Lang, Outcome, PlannedWrite, RANKED,
+    ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Verb, Writer, apply_gate,
+    evaluate_gate, gate_for, next_actions, rankings,
 };
 use cupel_lang::LanguageRegistry;
 
@@ -17,7 +18,7 @@ use crate::catalog::Catalog;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::project;
-use crate::run::Run;
+use crate::run::{Run, shell_quote};
 
 /// `cupel check`: the envelope of running the selected checks, or of planning them.
 pub fn verb(
@@ -29,14 +30,65 @@ pub fn verb(
     dry_run: bool,
 ) -> Result<Envelope, CupelError> {
     let config = config.map_err(|error| CupelError::from(error.clone()))?;
-    let mut checked = self::run(run, args, config, writer, events, dry_run)?;
-    Ok(match checked.take_plan() {
-        Some(plan) => {
-            let findings = checked.findings();
-            checked.place(app::plan(run, plan, writer, events, findings))
+    let (table, rules) = gate_for(&config.file.gate, scope_request(args).mode());
+    if args.gate && rules.is_none() {
+        return Err(CupelError::bad_argument(
+            "--gate",
+            None,
+            format!("`--gate` needs a `[{table}]` table, and the configuration has none"),
+            format!("Add `[{table}]` gate rules to cupel.toml, or drop --gate."),
+        ));
+    }
+    let checked = self::run(run, args, config, writer, events, dry_run)?;
+    Ok(checked.into_envelope(run, writer, events))
+}
+
+/// Grades a finished `check` or `survey` envelope after suppressions and deltas: `check`
+/// evaluates the applicable gate unless `--no-gate` (ADR-060), then both rank `next_actions`
+/// (ADR-061). Plans and errors pass through unchanged.
+pub fn grade(envelope: &mut Envelope, verb: Verb, args: &ScopeArgs, config: &Config) {
+    if !matches!(envelope.status, Status::Pass | Status::Partial) {
+        return;
+    }
+    if verb == Verb::Check
+        && !args.no_gate
+        && let Some(scope) = &envelope.run.scope
+        && let (table, Some(section)) = gate_for(&config.file.gate, scope.mode)
+    {
+        let gate = evaluate_gate(table, section.rules(), envelope);
+        apply_gate(envelope, gate);
+    }
+    envelope.next_actions = next_actions(envelope, &rerun(verb, args));
+}
+
+/// The command that reruns `verb` over the scope `args` name (`--only` is appended per check).
+fn rerun(verb: Verb, args: &ScopeArgs) -> String {
+    let mut words = vec!["cupel".to_owned(), crate::cli::verb_name(verb)];
+    if args.changed {
+        words.push("--changed".to_owned());
+    }
+    for (flag, value) in [("--base", &args.base), ("--head", &args.head)] {
+        if let Some(value) = value {
+            words.extend([flag.to_owned(), shell_quote(value)]);
         }
-        None => checked.envelope(run),
-    })
+    }
+    for (flag, values) in [("--paths", &args.paths), ("--symbols", &args.symbols)] {
+        if !values.is_empty() {
+            words.push(flag.to_owned());
+            words.extend(values.iter().map(|value| shell_quote(value)));
+        }
+    }
+    words.join(" ")
+}
+
+fn scope_request(args: &ScopeArgs) -> ScopeRequest {
+    ScopeRequest {
+        changed: args.changed,
+        base: args.base.clone(),
+        head: args.head.clone(),
+        paths: args.paths.clone(),
+        symbols: args.symbols.clone(),
+    }
 }
 
 /// Runs (or, with `dry_run`, plans) the checks `args` select over the scope it names.
@@ -52,13 +104,7 @@ pub fn run(
     let root = writer.root();
     let info = project::detect(writer);
     let tree = cupel_lang::walk(root, catalog.language_registry(), &info);
-    let request = ScopeRequest {
-        changed: args.changed,
-        base: args.base.clone(),
-        head: args.head.clone(),
-        paths: args.paths.clone(),
-        symbols: args.symbols.clone(),
-    };
+    let request = scope_request(args);
     let resolved = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
     let selected = Selection {
         depth: config.effective.depth,
@@ -102,7 +148,7 @@ pub fn run(
     })
 }
 
-/// What `check` found, before it becomes an envelope.
+/// What `check` (or `survey`) found, before it becomes an envelope.
 pub struct CheckRun {
     scope: ScopeInfo,
     git: Option<GitInfo>,
@@ -111,7 +157,7 @@ pub struct CheckRun {
 
 impl CheckRun {
     /// The plan of a dry run, if this was one, with the run record a real run would keep.
-    pub fn take_plan(&mut self) -> Option<cupel_core::RunPlan> {
+    fn take_plan(&mut self) -> Option<cupel_core::RunPlan> {
         self.outcome.plan.take().map(|mut plan| {
             plan.would_write.push(PlannedWrite {
                 path: ".cupel/runs/<id>.json".to_owned(),
@@ -121,17 +167,37 @@ impl CheckRun {
         })
     }
 
-    /// The findings, which a dry run reports too (such as files that do not parse).
-    pub fn findings(&self) -> Vec<cupel_core::Finding> {
-        self.outcome.findings.clone()
+    /// The plan envelope of a dry run, or the envelope of a real run.
+    pub fn into_envelope(
+        mut self,
+        run: &Run,
+        writer: &Writer,
+        events: &mut dyn EventSink,
+    ) -> Envelope {
+        match self.take_plan() {
+            Some(plan) => {
+                let findings = self.outcome.findings.clone();
+                self.place(app::plan(run, plan, writer, events, findings))
+            }
+            None => self.envelope(run),
+        }
     }
 
-    /// The envelope of a real run: `pass` (exit 0) until gates exist (P2.9), `partial` (exit 5)
-    /// when the timeout cut work short.
-    pub fn envelope(mut self, run: &Run) -> Envelope {
+    /// The rankings of every per-target metric of the checks that have a result (ADR-062).
+    pub fn rankings(&self) -> cupel_core::Rankings {
+        let registry = crate::catalog::checks();
+        let manifests = registry
+            .iter()
+            .map(cupel_core::Check::manifest)
+            .filter(|manifest| self.outcome.checks.iter().any(|c| c.id == manifest.id));
+        rankings(manifests, &self.outcome.measurements, RANKED)
+    }
+
+    /// The envelope of a real run: `pass` (exit 0), or `partial` (exit 5) when the timeout cut
+    /// work short; the gate and `next_actions` come after grading (`grade`).
+    fn envelope(mut self, run: &Run) -> Envelope {
         let findings = std::mem::take(&mut self.outcome.findings);
         let mut envelope = self.place(run.reported(Status::Pass, ExitCode::Pass, findings));
-        envelope.next_actions = next_actions(&envelope.findings);
         envelope.checks = std::mem::take(&mut self.outcome.checks);
         if self.outcome.interrupted {
             Run::interrupted(envelope)

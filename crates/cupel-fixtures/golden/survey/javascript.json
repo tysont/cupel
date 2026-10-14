@@ -1,0 +1,615 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 65.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 57,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_c6fae7",
+      "kind": "complexity.high",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "src/complexity.js",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_ff4a9f8bd6e187aa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c6fae7 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.label",
+        "hash": "sh_ff4a9f8bd6e187aa",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`complexity.label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_1d1be3",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "file": "src/complexity.js",
+        "line": 31
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_03c11579c730bcfc",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1d1be3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.settle",
+        "hash": "sh_03c11579c730bcfc",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`complexity.settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `openAccount` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_07cd3d",
+      "kind": "params.many",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 56,
+        "file": "src/complexity.js",
+        "line": 47
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_c4039c90fcd3aeff",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_07cd3d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.openAccount",
+        "hash": "sh_c4039c90fcd3aeff",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`complexity.openAccount` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `statementTemplate` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 65
+      },
+      "id": "fnd_ad069a",
+      "kind": "function.long",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 122,
+        "file": "src/complexity.js",
+        "line": 58
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_2a0e002e38dbb19b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ad069a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.statementTemplate",
+        "hash": "sh_2a0e002e38dbb19b",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`complexity.statementTemplate` is 65 lines long (max 60)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_c6fae7",
+      "kind": "reduce_complexity",
+      "priority": 1,
+      "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+    },
+    {
+      "command": null,
+      "finding": "fnd_1d1be3",
+      "kind": "reduce_complexity",
+      "priority": 2,
+      "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+    },
+    {
+      "command": null,
+      "finding": "fnd_07cd3d",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Group related parameters of `openAccount` into a type, or split it so each part needs at most 5."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ad069a",
+      "kind": "refactor_extract",
+      "priority": 4,
+      "summary": "Extract cohesive blocks of `statementTemplate` into named functions until it is at most 60 lines."
+    }
+  ],
+  "plan": null,
+  "rankings": {
+    "dimensions": [
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "javascript",
+            "rank": 1,
+            "target": {
+              "display": "complexity.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "src/complexity.js",
+                "line": 3
+              },
+              "symbol": "sh_ff4a9f8bd6e187aa"
+            },
+            "value": 11.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 2,
+            "target": {
+              "display": "complexity.settle",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 45,
+                "file": "src/complexity.js",
+                "line": 31
+              },
+              "symbol": "sh_03c11579c730bcfc"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 3,
+            "target": {
+              "display": "decide.classify",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 8,
+                "file": "src/decide.js",
+                "line": 1
+              },
+              "symbol": "sh_bb22f24ee5a0e580"
+            },
+            "value": 5.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 4,
+            "target": {
+              "display": "decide.firstOverdraft",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 17,
+                "file": "src/decide.js",
+                "line": 10
+              },
+              "symbol": "sh_9f89a2ab078cf588"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 5,
+            "target": {
+              "display": "decide.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 28,
+                "file": "src/decide.js",
+                "line": 19
+              },
+              "symbol": "sh_9a3e5711075267b2"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 6,
+            "target": {
+              "display": "decide.parseCents",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 39,
+                "file": "src/decide.js",
+                "line": 30
+              },
+              "symbol": "sh_304d1d882875a850"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 7,
+            "target": {
+              "display": "pricing.discounted",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 7,
+                "file": "src/pricing.js",
+                "line": 1
+              },
+              "symbol": "sh_3daaeda67cda1a62"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 8,
+            "target": {
+              "display": "pricing.tally",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "src/pricing.js",
+                "line": 9
+              },
+              "symbol": "sh_51437bc7ed983221"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 9,
+            "target": {
+              "display": "math.range",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 9,
+                "file": "src/math.js",
+                "line": 5
+              },
+              "symbol": "sh_8418a57e35587a04"
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 10,
+            "target": {
+              "display": "pricing.logTotal",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 24,
+                "file": "src/pricing.js",
+                "line": 22
+              },
+              "symbol": "sh_6f7628d838084283"
+            },
+            "value": 2.0
+          }
+        ],
+        "measured": 57,
+        "metric": "cyclomatic",
+        "per": "symbol",
+        "summary": "Cyclomatic complexity per function."
+      },
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "javascript",
+            "rank": 1,
+            "target": {
+              "display": "complexity.settle",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 45,
+                "file": "src/complexity.js",
+                "line": 31
+              },
+              "symbol": "sh_03c11579c730bcfc"
+            },
+            "value": 15.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 2,
+            "target": {
+              "display": "complexity.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "src/complexity.js",
+                "line": 3
+              },
+              "symbol": "sh_ff4a9f8bd6e187aa"
+            },
+            "value": 10.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 3,
+            "target": {
+              "display": "decide.classify",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 8,
+                "file": "src/decide.js",
+                "line": 1
+              },
+              "symbol": "sh_bb22f24ee5a0e580"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 4,
+            "target": {
+              "display": "decide.firstOverdraft",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 17,
+                "file": "src/decide.js",
+                "line": 10
+              },
+              "symbol": "sh_9f89a2ab078cf588"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 5,
+            "target": {
+              "display": "decide.parseCents",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 39,
+                "file": "src/decide.js",
+                "line": 30
+              },
+              "symbol": "sh_304d1d882875a850"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 6,
+            "target": {
+              "display": "decide.label",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 28,
+                "file": "src/decide.js",
+                "line": 19
+              },
+              "symbol": "sh_9a3e5711075267b2"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 7,
+            "target": {
+              "display": "pricing.discounted",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 7,
+                "file": "src/pricing.js",
+                "line": 1
+              },
+              "symbol": "sh_3daaeda67cda1a62"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 8,
+            "target": {
+              "display": "pricing.tally",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "src/pricing.js",
+                "line": 9
+              },
+              "symbol": "sh_51437bc7ed983221"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 9,
+            "target": {
+              "display": "twins.netTotalCapped",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 36,
+                "file": "src/twins.js",
+                "line": 30
+              },
+              "symbol": "sh_e21e57bde0186a3b"
+            },
+            "value": 2.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 10,
+            "target": {
+              "display": "math.range",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 9,
+                "file": "src/math.js",
+                "line": 5
+              },
+              "symbol": "sh_8418a57e35587a04"
+            },
+            "value": 1.0
+          }
+        ],
+        "measured": 57,
+        "metric": "cognitive",
+        "per": "symbol",
+        "summary": "Cognitive complexity per function."
+      }
+    ],
+    "top": 10
+  },
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 20,
+      "languages": [
+        "javascript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 57
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "survey"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 4
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 4,
+  "truncated": false
+}

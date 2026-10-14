@@ -14,6 +14,21 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "conflicts": [],
         "default": null,
         "env": null,
+        "name": "--impacted",
+        "pending_step": null,
+        "positional": false,
+        "repeated": false,
+        "required": false,
+        "stability": "experimental",
+        "summary": "Select the minimal test set covering the scope.",
+        "value": "switch",
+        "value_name": null,
+        "values": []
+      },
+      {
+        "conflicts": [],
+        "default": null,
+        "env": null,
         "name": "--changed",
         "pending_step": null,
         "positional": false,
@@ -187,12 +202,12 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "default": null,
         "env": null,
         "name": "--gate",
-        "pending_step": "P2.9",
+        "pending_step": null,
         "positional": false,
         "repeated": false,
         "required": false,
         "stability": "experimental",
-        "summary": "Evaluate the gate; the default when the config has one.",
+        "summary": "Evaluate the gate for this scope; the default when the config has its table.",
         "value": "switch",
         "value_name": null,
         "values": []
@@ -204,7 +219,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "default": null,
         "env": null,
         "name": "--no-gate",
-        "pending_step": "P2.9",
+        "pending_step": null,
         "positional": false,
         "repeated": false,
         "required": false,
@@ -262,23 +277,24 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     ],
     "examples": [
       {
-        "command": "cupel survey --depth quick",
+        "command": "cupel tests --impacted --changed",
         "exit_code": 2,
-        "summary": "Find the worst hot spots quickly."
+        "summary": "Tests to run for the working tree's changes."
       }
     ],
-    "name": "survey",
-    "pending_step": "P2.9",
+    "name": "tests",
+    "pending_step": "P3.3",
     "stability": "experimental",
     "subcommands": [],
     "subject": "command",
-    "summary": "Rank a whole tree without a baseline: hot spots, weak tests, clones."
+    "summary": "List the tests that cover a scope, with a command to run them."
   },
   "exit_code": 0,
   "explanation": null,
   "findings": [],
   "next_actions": [],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

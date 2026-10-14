@@ -67,6 +67,7 @@
   ],
   "next_actions": [],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": {
       "id": "<run-id>",

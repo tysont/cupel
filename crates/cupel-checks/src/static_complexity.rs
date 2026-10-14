@@ -7,8 +7,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
-    FactKind, Facts, Finding, FindingKindSpec, Manifest, MetricSpec, Plan, Result, Scope, Score,
-    Severity, Stability, SymbolHash, Tier,
+    FactKind, Facts, Finding, FindingKindSpec, Location, Manifest, Measurement, MetricPer,
+    MetricSpec, Plan, Result, Scope, Score, Severity, Stability, SymbolHash, Target, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -119,6 +119,16 @@ impl StaticComplexity {
                         "The most parameters any symbol in scope declares.",
                     ),
                     metric("length_max", "The most lines any symbol in scope spans."),
+                    MetricSpec {
+                        name: "cyclomatic".to_owned(),
+                        summary: "Cyclomatic complexity per function.".to_owned(),
+                        per: MetricPer::Symbol,
+                    },
+                    MetricSpec {
+                        name: "cognitive".to_owned(),
+                        summary: "Cognitive complexity per function.".to_owned(),
+                        per: MetricPer::Symbol,
+                    },
                 ],
                 stability: Stability::Experimental,
                 summary: "Cyclomatic and cognitive complexity, nesting depth, parameter count, \
@@ -162,7 +172,7 @@ impl Check for StaticComplexity {
             .map(|entry| (&entry.symbol, &entry.hash))
             .collect();
         let mut measured = 0;
-        let mut worst = 0;
+        let mut worst = Worst::default();
         let mut findings = 0;
         for symbol in &symbols.symbols {
             let key = symbol.key();
@@ -172,7 +182,8 @@ impl Check for StaticComplexity {
             ctx.cancel.checkpoint()?;
             let metrics = Metrics::of(symbol, decisions.get(&key).copied().unwrap_or_default());
             measured += 1;
-            worst = worst.max(metrics.cyclomatic);
+            worst.include(symbol, &metrics);
+            measure(sink, symbol, hashes.get(&key).copied(), &metrics);
             // A symbol without a structural hash cannot be identified, so it is measured but
             // not reported; every language producing NormTree hashes every symbol.
             let Some(hash) = hashes.get(&key) else {
@@ -198,10 +209,11 @@ impl Check for StaticComplexity {
             tier: self.manifest.tier,
             cost: self.manifest.cost,
             score: Some(Score {
-                value: f64::from(worst),
+                value: f64::from(worst.cyclomatic),
                 unit: "cyclomatic_max".to_owned(),
                 n: measured,
             }),
+            metrics: worst.metrics(),
             delta: None,
             findings,
             duration_ms: 0,
@@ -411,6 +423,69 @@ impl Metrics {
     }
 }
 
+/// The largest value of each metric over the symbols in scope: the check's `scope` metrics
+/// (ADR-042, ADR-060).
+#[derive(Default)]
+struct Worst {
+    cyclomatic: u32,
+    cognitive: u32,
+    depth: u32,
+    parameters: u32,
+    lines: u32,
+}
+
+impl Worst {
+    fn include(&mut self, symbol: &SymbolDef, metrics: &Metrics) {
+        self.cyclomatic = self.cyclomatic.max(metrics.cyclomatic);
+        self.cognitive = self.cognitive.max(metrics.cognitive);
+        self.depth = self.depth.max(metrics.depth);
+        self.parameters = self.parameters.max(symbol.parameters);
+        self.lines = self.lines.max(metrics.lines);
+    }
+
+    fn metrics(&self) -> BTreeMap<String, f64> {
+        [
+            ("cyclomatic_max", self.cyclomatic),
+            ("cognitive_max", self.cognitive),
+            ("nesting_max", self.depth),
+            ("params_max", self.parameters),
+            ("length_max", self.lines),
+        ]
+        .into_iter()
+        .map(|(name, value)| (name.to_owned(), f64::from(value)))
+        .collect()
+    }
+}
+
+/// Reports `symbol`'s cyclomatic and cognitive complexity for `survey`'s rankings (ADR-062).
+fn measure(
+    sink: &mut dyn EventSink,
+    symbol: &SymbolDef,
+    hash: Option<&SymbolHash>,
+    metrics: &Metrics,
+) {
+    for (metric, value) in [
+        ("cyclomatic", metrics.cyclomatic),
+        ("cognitive", metrics.cognitive),
+    ] {
+        sink.measure(Measurement {
+            metric: metric.to_owned(),
+            value: f64::from(value),
+            target: Target {
+                display: symbol.display.clone(),
+                symbol: hash.cloned(),
+                location: Some(Location {
+                    file: symbol.file.clone(),
+                    line: symbol.span.line,
+                    col: Some(symbol.span.col),
+                    end_line: symbol.span.end_line,
+                    end_col: Some(symbol.span.end_col),
+                }),
+            },
+        });
+    }
+}
+
 /// Kinds that structure control flow: they nest what they contain and carry the nesting
 /// increment of cognitive complexity (ADR-024, ADR-042).
 fn structural(kind: DecisionKind) -> bool {
@@ -442,9 +517,11 @@ fn kind<T: JsonSchema>(kind: &str, action: ActionKind, summary: &str) -> Finding
     }
 }
 
+/// A `scope` metric: a gate key.
 fn metric(name: &str, summary: &str) -> MetricSpec {
     MetricSpec {
         name: name.to_owned(),
         summary: summary.to_owned(),
+        per: MetricPer::Scope,
     }
 }

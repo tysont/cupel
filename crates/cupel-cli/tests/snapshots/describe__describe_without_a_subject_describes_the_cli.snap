@@ -420,9 +420,9 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       },
       {
         "name": "survey",
-        "pending_step": "P2.9",
+        "pending_step": null,
         "stability": "experimental",
-        "summary": "Rank a whole tree without a baseline: hot spots, weak tests, clones."
+        "summary": "Rank a whole tree without a baseline or gate: the worst targets per metric."
       },
       {
         "name": "explain",
@@ -468,6 +468,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
   "findings": [],
   "next_actions": [],
   "plan": null,
+  "rankings": null,
   "run": {
     "baseline": null,
     "budget_ms": null,

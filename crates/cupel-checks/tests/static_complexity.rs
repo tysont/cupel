@@ -1,6 +1,6 @@
 // ABOUTME: static.complexity over synthetic facts: metrics from Decisions and Symbols, thresholds and
 // ABOUTME: their validation, finding identity and shape, scope filtering, and the score (ADR-042).
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use cupel_checks::register;
 use cupel_core::config::ConfigError;
@@ -10,8 +10,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    Error, Event, FactKind, Facts, Finding, FindingId, LangId, Plan, Scope, Score, Severity,
-    SymbolHash, Writer,
+    Error, Event, EventSink, FactKind, Facts, Finding, FindingId, LangId, Measurement, MetricPer,
+    Plan, Scope, Score, Severity, SymbolHash, Writer,
 };
 use serde_json::{Map, Value, json};
 
@@ -179,15 +179,21 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("function.long", ActionKind::RefactorExtract),
         ]
     );
-    let metrics: Vec<&str> = manifest.metrics.iter().map(|m| m.name.as_str()).collect();
+    let metrics: Vec<(&str, MetricPer)> = manifest
+        .metrics
+        .iter()
+        .map(|m| (m.name.as_str(), m.per))
+        .collect();
     assert_eq!(
         metrics,
         [
-            "cyclomatic_max",
-            "cognitive_max",
-            "nesting_max",
-            "params_max",
-            "length_max"
+            ("cyclomatic_max", MetricPer::Scope),
+            ("cognitive_max", MetricPer::Scope),
+            ("nesting_max", MetricPer::Scope),
+            ("params_max", MetricPer::Scope),
+            ("length_max", MetricPer::Scope),
+            ("cyclomatic", MetricPer::Symbol),
+            ("cognitive", MetricPer::Symbol),
         ]
     );
     for spec in &manifest.findings {
@@ -399,4 +405,87 @@ fn scores_combine_by_maximum_across_languages() {
         Some(score(12.0, 11))
     );
     assert_eq!(check.combine(&[]), None);
+}
+
+/// Keeps what the check measures; drops events.
+#[derive(Default)]
+struct Measurements(Vec<Measurement>);
+
+impl EventSink for Measurements {
+    fn emit(&mut self, _: Event) {}
+
+    fn measure(&mut self, measurement: Measurement) {
+        self.0.push(measurement);
+    }
+}
+
+/// Two symbols: `wide` (cyclomatic 3, cognitive 3, nesting 2, 7 parameters, 12 lines) and
+/// `small` (straight-line, 1 parameter, 3 lines).
+fn two_symbols() -> World {
+    use DecisionKind::{Branch, Loop};
+    World {
+        symbols: vec![
+            (
+                symbol("wide", 1, 12, 7),
+                vec![decision(Branch, 0, 1, 1), decision(Loop, 1, 1, 1)],
+            ),
+            (symbol("small", 20, 3, 1), vec![]),
+        ],
+    }
+}
+
+#[test]
+fn the_result_reports_each_scope_metric_as_the_largest_value_in_scope() {
+    let (result, _) = run(&two_symbols(), json!({}));
+    let expected: BTreeMap<String, f64> = [
+        ("cyclomatic_max", 3.0),
+        ("cognitive_max", 3.0),
+        ("nesting_max", 2.0),
+        ("params_max", 7.0),
+        ("length_max", 12.0),
+    ]
+    .into_iter()
+    .map(|(name, value)| (name.to_owned(), value))
+    .collect();
+    assert_eq!(result.metrics, expected);
+    let (empty, _) = run(&World { symbols: vec![] }, json!({}));
+    assert!(
+        empty.metrics.values().all(|value| *value == 0.0),
+        "{:?}",
+        empty.metrics
+    );
+}
+
+#[test]
+fn each_symbol_in_scope_is_measured_for_cyclomatic_and_cognitive_rankings() {
+    let world = two_symbols();
+    let registry = complexity();
+    let check = registry.get(&CheckId::from("static.complexity")).unwrap();
+    let (ctx, _dir) = ctx(world.scope(), json!({}));
+    let plan = check.plan(&ctx, &ctx.scope).unwrap();
+    let mut sink = Measurements::default();
+    check
+        .run(&ctx, &world.facts(check), &plan, &mut sink)
+        .unwrap();
+    let measured: Vec<(&str, &str, f64)> = sink
+        .0
+        .iter()
+        .map(|m| (m.metric.as_str(), m.target.display.as_str(), m.value))
+        .collect();
+    assert_eq!(
+        measured,
+        [
+            ("cyclomatic", "m::wide", 3.0),
+            ("cognitive", "m::wide", 3.0),
+            ("cyclomatic", "m::small", 1.0),
+            ("cognitive", "m::small", 0.0),
+        ]
+    );
+    let wide = &sink.0[0].target;
+    assert_eq!(wide.symbol, Some(hash_of(1)));
+    let location = wide.location.as_ref().unwrap();
+    assert_eq!(
+        (location.file.as_str(), location.line, location.end_line),
+        ("f.x", 1, 12)
+    );
 }

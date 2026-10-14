@@ -125,8 +125,9 @@ fn exit_2_for_every_unimplemented_verb_names_its_plan_step() {
         assert!(detail.contains(step), "{example}: {detail}");
     }
     assert_eq!(
-        pending, 4,
-        "every verb but describe, init, doctor, check, explain, baseline, and suppress is pending"
+        pending, 3,
+        "every verb but describe, init, doctor, check, survey, explain, baseline, and suppress \
+         is pending"
     );
 }
 
@@ -180,6 +181,31 @@ fn flags_that_do_not_apply_to_describe_change_nothing() {
     ]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     assert_eq!(support::redacted(outcome.envelope()), baseline);
+}
+
+#[test]
+fn exit_1_when_the_gate_fails() {
+    let repo = support::Repo::new();
+    repo.write(
+        "src/branchy.rs",
+        "pub fn branchy(a: i32) -> i32 {\n    if a > 1 { 1 } else if a > 2 { 2 } else { 3 }\n}\n",
+    );
+    repo.write(
+        "cupel.toml",
+        "[gate.tree]\n\"static.complexity.cyclomatic_max\" = \"< 3\"\n",
+    );
+    let outcome = repo.run(&["check", "--only", "static.complexity"]);
+    assert_eq!(outcome.code, 1, "{}", outcome.stdout);
+    let envelope = outcome.envelope();
+    assert_eq!(envelope["status"], json!("fail"));
+    assert_eq!(
+        envelope["summary"]["gate"],
+        json!({
+            "result": "fail", "evaluated": "gate.tree",
+            "rules": [{"rule": "static.complexity.cyclomatic_max < 3", "actual": 3.0,
+                       "result": "fail"}]
+        })
+    );
 }
 
 #[test]

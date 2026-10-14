@@ -29,7 +29,8 @@ pub struct Manifest {
     /// Facts the check uses for enrichment when present.
     pub wants: Vec<FactKind>,
     pub findings: Vec<FindingKindSpec>,
-    /// Metrics usable as gate keys (`<check-id>.<metric>`).
+    /// What the check measures: `scope` metrics are gate keys (`<check-id>.<metric>`), the others
+    /// are `survey` ranking dimensions (ADR-060, ADR-062).
     pub metrics: Vec<MetricSpec>,
     pub stability: Stability,
     pub summary: String,
@@ -49,6 +50,23 @@ pub struct FindingKindSpec {
 pub struct MetricSpec {
     pub name: String,
     pub summary: String,
+    /// What one value describes (ADR-062).
+    pub per: MetricPer,
+}
+
+/// What one value of a metric describes: the whole scope, reported in `CheckResult.metrics` and
+/// usable as a gate key, or one target, reported through `EventSink::measure` and ranked by
+/// `survey`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum MetricPer {
+    Scope,
+    /// A function or method.
+    Symbol,
+    /// A file or module.
+    Module,
+    /// A set of targets, such as a clone cluster or a dependency cycle.
+    Group,
 }
 
 /// Whether a described entity's contract may still change.
@@ -120,6 +138,13 @@ pub trait Check: Send + Sync {
             unit: first.unit.clone(),
             n,
         })
+    }
+
+    /// One value of a `scope` metric from its per-language values, for the check's one
+    /// entry (ADR-060). The default is the largest, since metrics are bounds over a scope; a
+    /// check whose metric is a ratio or a count overrides this.
+    fn combine_metric(&self, _name: &str, values: &[f64]) -> Option<f64> {
+        values.iter().copied().reduce(f64::max)
     }
 }
 

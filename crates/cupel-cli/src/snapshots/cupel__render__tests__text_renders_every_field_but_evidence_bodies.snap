@@ -64,13 +64,20 @@ explain   finding fnd_7c2e1a from run_01J9ZZZZZZZZZZZZZZZZZZZZZZ
 
 gate      fail (gate.changed)
   fail  tests.mutation.score >= 0.80  actual 0.71
-  pass  tests.weakening none
+  pass  tests.weakening none  actual 0
+  skipped  perf.bench.regression < 5%
 
 summary   3 findings · fail 6 · warn 9 · info 22 · new 4 · resolved 2 · suppressed 1
 
 checks
-  tests.mutation  fail     tier 3 · standard · score 0.71 killed_ratio (n 34) · delta -0.12 vs baseline · 2 findings · 41000 ms · oracle pg
+  tests.mutation  fail     tier 3 · standard · score 0.71 killed_ratio (n 34) · metrics score 0.71, survivors 10 · delta -0.12 vs baseline · 2 findings · 41000 ms · oracle pg
   perf.bench      skipped  tier 5 · exhaustive · 0 findings · 0 ms · skipped: unavailable (fact symbols, lang go, tool cargo-criterion, see `cupel doctor`)
+
+rankings  top 10 per dimension
+  static.crap.crap  symbol · 11 measured · CRAP score per function.
+     1. 42.5  rewrite::Planner::push_limit  rust · src/rewrite/planner.rs:140:5-171:6 · sh_4b1d9e0c4b1d9e01
+     2. 12  web/limits  typescript
+  static.deps.coupling  module · 0 measured · Afferent plus efferent coupling per module.
 
 fail (2)
   tests.mutation

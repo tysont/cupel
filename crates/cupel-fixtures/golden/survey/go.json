@@ -1,0 +1,615 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 65.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 57,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `Label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_130664",
+      "kind": "complexity.high",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "complexity.go",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_1a1f0a9a227f0600",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_130664 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Label",
+        "hash": "sh_1a1f0a9a227f0600",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.Label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `Settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_86f7cd",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "file": "complexity.go",
+        "line": 35
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_e073e3e6ae0851be",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_86f7cd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Settle",
+        "hash": "sh_e073e3e6ae0851be",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.Settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `OpenAccount` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_551c92",
+      "kind": "params.many",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 54,
+        "file": "complexity.go",
+        "line": 52
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_09482ea319cc07e1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_551c92 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.OpenAccount",
+        "hash": "sh_09482ea319cc07e1",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.OpenAccount` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `StatementTemplate` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 65
+      },
+      "id": "fnd_d516cd",
+      "kind": "function.long",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 121,
+        "file": "complexity.go",
+        "line": 57
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_34a2153c8ca08d2d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d516cd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.StatementTemplate",
+        "hash": "sh_34a2153c8ca08d2d",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.StatementTemplate` is 65 lines long (max 60)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_130664",
+      "kind": "reduce_complexity",
+      "priority": 1,
+      "summary": "Split `Label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+    },
+    {
+      "command": null,
+      "finding": "fnd_86f7cd",
+      "kind": "reduce_complexity",
+      "priority": 2,
+      "summary": "Flatten `Settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+    },
+    {
+      "command": null,
+      "finding": "fnd_551c92",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Group related parameters of `OpenAccount` into a type, or split it so each part needs at most 5."
+    },
+    {
+      "command": null,
+      "finding": "fnd_d516cd",
+      "kind": "refactor_extract",
+      "priority": 4,
+      "summary": "Extract cohesive blocks of `StatementTemplate` into named functions until it is at most 60 lines."
+    }
+  ],
+  "plan": null,
+  "rankings": {
+    "dimensions": [
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "go",
+            "rank": 1,
+            "target": {
+              "display": "ledger.Label",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 32,
+                "file": "complexity.go",
+                "line": 6
+              },
+              "symbol": "sh_1a1f0a9a227f0600"
+            },
+            "value": 11.0
+          },
+          {
+            "lang": "go",
+            "rank": 2,
+            "target": {
+              "display": "ledger.Settle",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 49,
+                "file": "complexity.go",
+                "line": 35
+              },
+              "symbol": "sh_e073e3e6ae0851be"
+            },
+            "value": 6.0
+          },
+          {
+            "lang": "go",
+            "rank": 3,
+            "target": {
+              "display": "ledger.classify",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "decide.go",
+                "line": 12
+              },
+              "symbol": "sh_45c7fad8783a6f24"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "go",
+            "rank": 4,
+            "target": {
+              "display": "ledger.drain",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 70,
+                "file": "decide.go",
+                "line": 60
+              },
+              "symbol": "sh_fd21a285fc7bc076"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "go",
+            "rank": 5,
+            "target": {
+              "display": "ledger.TestClassify",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 64,
+                "file": "ledger_test.go",
+                "line": 48
+              },
+              "symbol": "sh_5f625545c5fc2a8d"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 6,
+            "target": {
+              "display": "ledger.TestParseCentsTrimsSpaces",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 83,
+                "file": "ledger_test.go",
+                "line": 75
+              },
+              "symbol": "sh_c82dca632fedb8cf"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 7,
+            "target": {
+              "display": "ledger.TestStatementIsMailed",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 73,
+                "file": "ledger_test.go",
+                "line": 66
+              },
+              "symbol": "sh_91ea22f895f9f0a9"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 8,
+            "target": {
+              "display": "ledger.describe",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 48,
+                "file": "decide.go",
+                "line": 39
+              },
+              "symbol": "sh_a03a03dfe774b355"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 9,
+            "target": {
+              "display": "ledger.discounted",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 11,
+                "file": "pricing.go",
+                "line": 5
+              },
+              "symbol": "sh_7f973ccecdf46b55"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 10,
+            "target": {
+              "display": "ledger.firstOverdraft",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "decide.go",
+                "line": 22
+              },
+              "symbol": "sh_c8aa080e4d92afb3"
+            },
+            "value": 3.0
+          }
+        ],
+        "measured": 57,
+        "metric": "cyclomatic",
+        "per": "symbol",
+        "summary": "Cyclomatic complexity per function."
+      },
+      {
+        "check": "static.complexity",
+        "entries": [
+          {
+            "lang": "go",
+            "rank": 1,
+            "target": {
+              "display": "ledger.Settle",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 49,
+                "file": "complexity.go",
+                "line": 35
+              },
+              "symbol": "sh_e073e3e6ae0851be"
+            },
+            "value": 15.0
+          },
+          {
+            "lang": "go",
+            "rank": 2,
+            "target": {
+              "display": "ledger.Label",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 32,
+                "file": "complexity.go",
+                "line": 6
+              },
+              "symbol": "sh_1a1f0a9a227f0600"
+            },
+            "value": 10.0
+          },
+          {
+            "lang": "go",
+            "rank": 3,
+            "target": {
+              "display": "ledger.firstOverdraft",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 29,
+                "file": "decide.go",
+                "line": 22
+              },
+              "symbol": "sh_c8aa080e4d92afb3"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "go",
+            "rank": 4,
+            "target": {
+              "display": "ledger.netTotalCapped",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 57,
+                "file": "twins.go",
+                "line": 49
+              },
+              "symbol": "sh_35dfa87324281c41"
+            },
+            "value": 4.0
+          },
+          {
+            "lang": "go",
+            "rank": 5,
+            "target": {
+              "display": "ledger.TestClassify",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 64,
+                "file": "ledger_test.go",
+                "line": 48
+              },
+              "symbol": "sh_5f625545c5fc2a8d"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 6,
+            "target": {
+              "display": "ledger.classify",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 20,
+                "file": "decide.go",
+                "line": 12
+              },
+              "symbol": "sh_45c7fad8783a6f24"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 7,
+            "target": {
+              "display": "ledger.describe",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 48,
+                "file": "decide.go",
+                "line": 39
+              },
+              "symbol": "sh_a03a03dfe774b355"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 8,
+            "target": {
+              "display": "ledger.discounted",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 11,
+                "file": "pricing.go",
+                "line": 5
+              },
+              "symbol": "sh_7f973ccecdf46b55"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 9,
+            "target": {
+              "display": "ledger.drain",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 70,
+                "file": "decide.go",
+                "line": 60
+              },
+              "symbol": "sh_fd21a285fc7bc076"
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "go",
+            "rank": 10,
+            "target": {
+              "display": "ledger.kindOf",
+              "location": {
+                "col": 1,
+                "end_col": 2,
+                "end_line": 58,
+                "file": "decide.go",
+                "line": 50
+              },
+              "symbol": "sh_639500ff10943fa4"
+            },
+            "value": 3.0
+          }
+        ],
+        "measured": 57,
+        "metric": "cognitive",
+        "per": "symbol",
+        "summary": "Cognitive complexity per function."
+      }
+    ],
+    "top": 10
+  },
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 10,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 57
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "survey"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 4
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 4,
+  "truncated": false
+}

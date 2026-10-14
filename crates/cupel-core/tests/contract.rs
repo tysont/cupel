@@ -69,7 +69,8 @@ fn design_finding() -> Value {
     })
 }
 
-/// The envelope from design §7.1, with elided IDs and the finding filled in.
+/// The envelope from design §7.1, with elided IDs and the finding filled in, and the check's
+/// `metrics` (ADR-060).
 fn design_envelope() -> Value {
     json!({
         "cupel": {"version": "0.4.0", "schema": "https://cupel.dev/schema/v1/run.json"},
@@ -88,6 +89,7 @@ fn design_envelope() -> Value {
         "checks": [
             {"id": "tests.mutation", "status": "fail", "tier": 3, "cost": "standard",
              "score": {"value": 0.71, "unit": "killed_ratio", "n": 34},
+             "metrics": {"score": 0.71},
              "delta": {"vs": "baseline", "value": -0.12},
              "findings": 6, "duration_ms": 41000, "skipped": null, "oracle": null}
         ],
@@ -137,7 +139,7 @@ fn skipped_check_result_carries_reason_fact_lang_and_pointer() {
     let mut example = design_envelope();
     example["checks"][0] = json!({
         "id": "static.complexity", "status": "skipped", "tier": 0, "cost": "quick",
-        "score": null, "delta": null, "findings": 0, "duration_ms": 0,
+        "score": null, "metrics": {}, "delta": null, "findings": 0, "duration_ms": 0,
         "skipped": {"reason": "unsupported", "fact": "decisions", "lang": "go", "tool": null,
                     "see": "cupel describe matrix"},
         "oracle": null

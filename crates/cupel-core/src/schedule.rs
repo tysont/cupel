@@ -1,13 +1,13 @@
 // ABOUTME: Scheduler v1 (design §8.9, ADR-041): resolve the symbols in scope, split selected checks into
 // ABOUTME: supported (check, language) tasks and skips, produce each needed fact once, run, and combine.
-use std::collections::{BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::time::Instant;
 
 use crate::cancel::Cancellation;
 use crate::check::{Check, CheckCtx, CheckRegistry, Plan};
 use crate::config::Config;
 use crate::dry_run::{PlannedCheck, PlannedSkip, RunPlan};
-use crate::envelope::{CheckResult, CheckStatus, NextAction, SkipReason, Skipped};
+use crate::envelope::{CheckResult, CheckStatus, SkipReason, Skipped};
 use crate::error::{ArgumentError, Error, Result};
 use crate::event::{Event, EventSink};
 use crate::fact::{FactKind, Facts};
@@ -16,12 +16,10 @@ use crate::id::{LangId, RunId};
 use crate::lang::Lang;
 use crate::matrix::{Support, SupportMatrix};
 use crate::producer::{Availability, Ctx, ProduceCtx, ProducerRegistry, SharedFact};
+use crate::rank::{Measured, Measurement};
 use crate::scope::{Scope, SymbolSelector, select_symbols};
 use crate::syntax::{NormTree, Symbols};
 use crate::writer::Writer;
-
-/// The most `next_actions` an envelope carries until P2.9 ranks and de-duplicates them.
-const NEXT_ACTIONS: usize = 10;
 
 /// The registries a run draws on.
 pub struct Scheduler<'a> {
@@ -54,6 +52,8 @@ pub struct Outcome {
     pub checks: Vec<CheckResult>,
     /// Every check's findings plus producers' findings, de-duplicated by ID, sorted.
     pub findings: Vec<Finding>,
+    /// Every per-target value the checks measured, for `survey`'s rankings (ADR-062).
+    pub measurements: Vec<Measured>,
     /// Symbols in scope across languages.
     pub symbols: u64,
     /// Cancellation cut work short; the envelope is `partial`.
@@ -95,6 +95,7 @@ impl Scheduler<'_> {
         }
         let mut checks = Vec::new();
         let mut findings = Vec::new();
+        let mut measurements = Vec::new();
         let mut interrupted = store.interrupted;
         for check in &job.selected {
             let tasks: Vec<&Task<'_>> = prepared
@@ -111,14 +112,16 @@ impl Scheduler<'_> {
             if !tasks.is_empty() || skips.is_empty() {
                 let mut run = CheckRun::start(*check, &tasks, sink);
                 for task in tasks {
-                    let result = Self::run_task(job, &mut store, task, &mut run.sink(sink));
+                    let result =
+                        Self::run_task(job, &mut store, task, &mut run.sink(&task.lang, sink));
                     interrupted |=
                         matches!(result.status, CheckStatus::Partial | CheckStatus::Skipped);
                     run.record(task, result, sink);
                 }
-                let (results, check_findings) = run.finish(sink);
-                checks.extend(results);
-                findings.extend(check_findings);
+                let finished = run.finish(sink);
+                checks.extend(finished.results);
+                findings.extend(finished.findings);
+                measurements.extend(finished.measurements);
             }
             checks.extend(skips.into_iter().map(skipped_result));
         }
@@ -128,6 +131,7 @@ impl Scheduler<'_> {
         Ok(Outcome {
             checks,
             findings,
+            measurements,
             symbols: prepared.symbols,
             interrupted: interrupted || store.interrupted,
             plan: None,
@@ -179,6 +183,7 @@ impl Scheduler<'_> {
         Ok(Outcome {
             checks: Vec::new(),
             findings,
+            measurements: Vec::new(),
             symbols: prepared.symbols,
             interrupted: store.interrupted,
             plan: Some(RunPlan {
@@ -259,6 +264,7 @@ impl Scheduler<'_> {
             tier: manifest.tier,
             cost: manifest.cost,
             score: None,
+            metrics: BTreeMap::new(),
             delta: None,
             findings: 0,
             duration_ms: elapsed_ms(started),
@@ -499,7 +505,16 @@ struct CheckRun<'a> {
     done: u64,
     results: Vec<CheckResult>,
     findings: Vec<Finding>,
+    measurements: Vec<Measured>,
     started: Instant,
+}
+
+/// What one check produced across its languages.
+struct Finished {
+    /// The combined entry (unless every language was skipped), then the timeout's skips.
+    results: Vec<CheckResult>,
+    findings: Vec<Finding>,
+    measurements: Vec<Measured>,
 }
 
 impl<'a> CheckRun<'a> {
@@ -515,14 +530,18 @@ impl<'a> CheckRun<'a> {
             done: 0,
             results: Vec::new(),
             findings: Vec::new(),
+            measurements: Vec::new(),
             started: Instant::now(),
         }
     }
 
-    fn sink<'s>(&'s mut self, forward: &'s mut dyn EventSink) -> CheckSink<'s> {
+    fn sink<'s>(&'s mut self, lang: &'s Lang, forward: &'s mut dyn EventSink) -> CheckSink<'s> {
         CheckSink {
             forward,
+            check: self.check,
+            lang,
             findings: &mut self.findings,
+            measurements: &mut self.measurements,
         }
     }
 
@@ -537,9 +556,10 @@ impl<'a> CheckRun<'a> {
         self.results.push(result);
     }
 
-    /// The check's one combined entry, then an entry per language the timeout skipped, and
-    /// its findings. A check whose every language was skipped has no combined entry.
-    fn finish(self, sink: &mut dyn EventSink) -> (Vec<CheckResult>, Vec<Finding>) {
+    /// The check's one combined entry, then an entry per language the timeout skipped, with
+    /// its findings and measurements. A check whose every language was skipped has no combined
+    /// entry.
+    fn finish(self, sink: &mut dyn EventSink) -> Finished {
         let manifest = self.check.manifest();
         let (skipped, ran): (Vec<CheckResult>, Vec<CheckResult>) = self
             .results
@@ -576,6 +596,7 @@ impl<'a> CheckRun<'a> {
                 tier: manifest.tier,
                 cost: manifest.cost,
                 score: self.check.combine(&scores),
+                metrics: combine_metrics(self.check, &ran),
                 delta: None,
                 findings: self.findings.len() as u64,
                 duration_ms,
@@ -584,14 +605,40 @@ impl<'a> CheckRun<'a> {
             });
         }
         entries.extend(skipped);
-        (entries, self.findings)
+        Finished {
+            results: entries,
+            findings: self.findings,
+            measurements: self.measurements,
+        }
     }
 }
 
-/// What a check emits through: findings are kept for the envelope and streamed on.
+/// Each `scope` metric any language reported, combined across languages by the check (ADR-060).
+fn combine_metrics(check: &dyn Check, ran: &[CheckResult]) -> BTreeMap<String, f64> {
+    let mut values: BTreeMap<&str, Vec<f64>> = BTreeMap::new();
+    for result in ran {
+        for (name, value) in &result.metrics {
+            values.entry(name).or_default().push(*value);
+        }
+    }
+    values
+        .into_iter()
+        .filter_map(|(name, values)| {
+            check
+                .combine_metric(name, &values)
+                .map(|value| (name.to_owned(), value))
+        })
+        .collect()
+}
+
+/// What a check emits through: findings are kept for the envelope and streamed on;
+/// measurements are kept with the check and language (ADR-062).
 struct CheckSink<'a> {
     forward: &'a mut dyn EventSink,
+    check: &'a dyn Check,
+    lang: &'a Lang,
     findings: &'a mut Vec<Finding>,
+    measurements: &'a mut Vec<Measured>,
 }
 
 impl EventSink for CheckSink<'_> {
@@ -600,6 +647,14 @@ impl EventSink for CheckSink<'_> {
             self.findings.push((**finding).clone());
         }
         self.forward.emit(event);
+    }
+
+    fn measure(&mut self, measurement: Measurement) {
+        self.measurements.push(Measured {
+            check: self.check.manifest().id.clone(),
+            lang: self.lang.id.clone(),
+            measurement,
+        });
     }
 }
 
@@ -633,6 +688,7 @@ fn skipped_result(skip: &Skip<'_>) -> CheckResult {
         tier: manifest.tier,
         cost: manifest.cost,
         score: None,
+        metrics: BTreeMap::new(),
         delta: None,
         findings: 0,
         duration_ms: 0,
@@ -688,25 +744,6 @@ fn sort_findings(findings: &mut [Finding]) {
             b.id.as_str(),
         ))
     });
-}
-
-/// The findings to act on first: by severity, then tier (higher first), then envelope order;
-/// at most ten (ADR-041).
-pub fn next_actions(findings: &[Finding]) -> Vec<NextAction> {
-    let mut ranked: Vec<&Finding> = findings.iter().collect();
-    ranked.sort_by_key(|finding| (finding.severity, std::cmp::Reverse(finding.tier)));
-    ranked
-        .into_iter()
-        .take(NEXT_ACTIONS)
-        .zip(1..)
-        .map(|(finding, priority)| NextAction {
-            priority,
-            finding: Some(finding.id.clone()),
-            kind: finding.action.kind,
-            summary: finding.action.summary.clone(),
-            command: None,
-        })
-        .collect()
 }
 
 fn elapsed_ms(started: Instant) -> u64 {
