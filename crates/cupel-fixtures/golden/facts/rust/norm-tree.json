@@ -11410,6 +11410,414 @@
         "file": "tests/quality_signals.rs",
         "line": 83
       }
+    },
+    {
+      "hash": "sh_0cd2809ad3b9804c",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "<"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "<"
+                              },
+                              {
+                                "children": [],
+                                "label": "primitive_type"
+                              },
+                              {
+                                "children": [],
+                                "label": ">"
+                              }
+                            ],
+                            "label": "type_arguments"
+                          }
+                        ],
+                        "label": "generic_type"
+                      },
+                      {
+                        "children": [],
+                        "label": "+"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "trait_bounds"
+                  }
+                ],
+                "label": "type_parameter"
+              },
+              {
+                "children": [],
+                "label": ">"
+              }
+            ],
+            "label": "type_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "&"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "array_type"
+                      }
+                    ],
+                    "label": "reference_type"
+                  }
+                ],
+                "label": "parameter"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "primitive_type"
+                  }
+                ],
+                "label": "parameter"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "<"
+                          },
+                          {
+                            "children": [],
+                            "label": "primitive_type"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          }
+                        ],
+                        "label": "type_arguments"
+                      }
+                    ],
+                    "label": "generic_type"
+                  },
+                  {
+                    "children": [],
+                    "label": "="
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "iter"
+                                          }
+                                        ],
+                                        "label": "field_expression"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "arguments"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "map"
+                                  }
+                                ],
+                                "label": "field_expression"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "|"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "&"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              }
+                                            ],
+                                            "label": "reference_pattern"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "|"
+                                          }
+                                        ],
+                                        "label": "closure_parameters"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "into"
+                                              }
+                                            ],
+                                            "label": "field_expression"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "arguments"
+                                          }
+                                        ],
+                                        "label": "call_expression"
+                                      }
+                                    ],
+                                    "label": "closure_expression"
+                                  }
+                                ],
+                                "label": "arguments"
+                              }
+                            ],
+                            "label": "call_expression"
+                          },
+                          {
+                            "children": [],
+                            "label": "collect"
+                          }
+                        ],
+                        "label": "field_expression"
+                      },
+                      {
+                        "children": [],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "let_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "assert_eq"
+                      },
+                      {
+                        "children": [],
+                        "label": "!"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "&"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "token_tree"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "token_tree"
+                      }
+                    ],
+                    "label": "macro_invocation"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 89
+      }
+    },
+    {
+      "hash": "sh_97b4a5a01735b690",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "assert_balance_of"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "<"
+                              },
+                              {
+                                "children": [],
+                                "label": "primitive_type"
+                              },
+                              {
+                                "children": [],
+                                "label": ">"
+                              }
+                            ],
+                            "label": "type_arguments"
+                          }
+                        ],
+                        "label": "generic_function"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "&"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "array_expression"
+                              }
+                            ],
+                            "label": "reference_expression"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 95
+      }
     }
   ]
 }

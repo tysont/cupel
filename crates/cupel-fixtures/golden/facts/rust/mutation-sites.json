@@ -5185,6 +5185,99 @@
         "file": "tests/quality_signals.rs",
         "line": 83
       }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(balance(&cents), expected);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 5,
+            "end_col": 43,
+            "end_line": 91,
+            "line": 91
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 89
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_balance_of::<i32>(&[2, 3], 5);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 42,
+            "end_line": 96,
+            "line": 96
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "849e71c4b3852f05",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 96,
+            "line": 96
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e00317a6c5bddd0b",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 96,
+            "line": 96
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "45640e75cc4c0eb2",
+          "span": {
+            "col": 39,
+            "end_col": 40,
+            "end_line": 96,
+            "line": 96
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 95
+      }
     }
   ]
 }

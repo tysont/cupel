@@ -88,12 +88,17 @@
     name: (identifier) @assertion.name)
   (#match? @assertion.name "^(debug_|prop_)?assert")) @test.assertion
 
-; Assertion helpers: by convention a function named `assert_…` asserts. Its name is not in
-; [tests.assertions], so it is `unknown_assertion` (custom, strong).
+; Assertion helpers: by convention a function named `assert_…` asserts, called plainly or with a
+; turbofish. Its name is not in [tests.assertions], so it is `unknown_assertion` (custom, strong).
 (call_expression
   function: [
     (identifier) @assertion.name
     (scoped_identifier name: (identifier) @assertion.name)
+    (generic_function
+      function: [
+        (identifier) @assertion.name
+        (scoped_identifier name: (identifier) @assertion.name)
+      ])
   ]
   (#match? @assertion.name "^assert_")) @test.assertion
 

@@ -7,15 +7,15 @@
       "findings": 11,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 0.9090909090909092,
+        "assertion_density": 0.9130434782608696,
         "no_assertion": 3.0,
-        "weak_ratio": 0.3
+        "weak_ratio": 0.2857142857142857
       },
       "oracle": null,
       "score": {
-        "n": 22,
+        "n": 23,
         "unit": "assertion_density",
-        "value": 0.9090909090909092
+        "value": 0.9130434782608696
       },
       "skipped": null,
       "status": "fail",
@@ -611,7 +611,7 @@
       "roots": [
         "."
       ],
-      "symbols": 72
+      "symbols": 74
     },
     "seed": "<seed>",
     "started": "<timestamp>",

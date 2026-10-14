@@ -551,6 +551,29 @@
             "end_line": 87,
             "line": 83
           }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "custom",
+              "span": {
+                "col": 5,
+                "end_col": 41,
+                "end_line": 96,
+                "line": 96
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "an_assertion_helper_called_with_a_turbofish_is_an_assertion",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 97,
+            "line": 95
+          }
         }
       ],
       "file": "tests/quality_signals.rs",

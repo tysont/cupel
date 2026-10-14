@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 36,
+        "n": 37,
         "unit": "pairs",
         "value": 8.0
       },
@@ -36,7 +36,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 72,
+        "n": 74,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -69,7 +69,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 72,
+        "n": 74,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -105,15 +105,15 @@
       "findings": 11,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 0.9090909090909092,
+        "assertion_density": 0.9130434782608696,
         "no_assertion": 3.0,
-        "weak_ratio": 0.3
+        "weak_ratio": 0.2857142857142857
       },
       "oracle": null,
       "score": {
-        "n": 22,
+        "n": 23,
         "unit": "assertion_density",
-        "value": 0.9090909090909092
+        "value": 0.9130434782608696
       },
       "skipped": null,
       "status": "fail",
@@ -2011,7 +2011,7 @@
             "value": 3.0
           }
         ],
-        "measured": 72,
+        "measured": 74,
         "metric": "cyclomatic",
         "per": "symbol",
         "summary": "Modified cyclomatic complexity per function (a match counts once)."
@@ -2180,7 +2180,7 @@
             "value": 3.0
           }
         ],
-        "measured": 72,
+        "measured": 74,
         "metric": "cognitive",
         "per": "symbol",
         "summary": "Cognitive complexity per function."
@@ -2656,7 +2656,7 @@
             "value": 0.0
           }
         ],
-        "measured": 22,
+        "measured": 23,
         "metric": "mock_density",
         "per": "symbol",
         "summary": "Test doubles per test as a percentage of its doubles plus assertions."
@@ -2716,7 +2716,7 @@
       "roots": [
         "."
       ],
-      "symbols": 72
+      "symbols": 74
     },
     "seed": "<seed>",
     "started": "<timestamp>",

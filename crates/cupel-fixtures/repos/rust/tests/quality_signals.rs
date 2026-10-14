@@ -85,3 +85,13 @@ fn every_listed_entry_counts_toward_the_balance() {
         assert_eq!(balance(&[cents]), cents);
     }
 }
+
+fn assert_balance_of<T: Into<i64> + Copy>(entries: &[T], expected: i64) {
+    let cents: Vec<i64> = entries.iter().map(|&entry| entry.into()).collect();
+    assert_eq!(balance(&cents), expected);
+}
+
+#[test]
+fn an_assertion_helper_called_with_a_turbofish_is_an_assertion() {
+    assert_balance_of::<i32>(&[2, 3], 5);
+}
