@@ -285,32 +285,31 @@ impl Resolver<'_, '_> {
         if self.imports.is_file(path) {
             return Some(path.to_owned());
         }
-        if self.typescript {
-            for (js, sources) in TYPESCRIPT_FOR {
-                if let Some(stem) = path.strip_suffix(js) {
-                    for source in *sources {
-                        let candidate = format!("{stem}{source}");
-                        if self.imports.is_file(&candidate) {
-                            return Some(candidate);
-                        }
-                    }
-                }
-            }
+        if let Some(source) = self.typescript_source(path) {
+            return Some(source);
         }
         if let Some(found) = self.with_extension(path) {
             return Some(found);
         }
-        if self.imports.is_dir(path) {
-            if let Some(main) = self
-                .json(&join(path, "package.json"))
-                .and_then(|m| m.get("main").and_then(Value::as_str).map(str::to_owned))
-                && let Some(found) = self.probe(&normalize(&join(path, &main)))
-            {
-                return Some(found);
-            }
-            return self.index(path);
+        if !self.imports.is_dir(path) {
+            return None;
         }
-        None
+        self.json(&join(path, "package.json"))
+            .and_then(|m| m.get("main").and_then(Value::as_str).map(str::to_owned))
+            .and_then(|main| self.probe(&normalize(&join(path, &main))))
+            .or_else(|| self.index(path))
+    }
+
+    /// In TypeScript, the source a `.js`-style import of `path` compiles from (`a.js` → `a.ts`).
+    fn typescript_source(&self, path: &str) -> Option<String> {
+        if !self.typescript {
+            return None;
+        }
+        TYPESCRIPT_FOR
+            .iter()
+            .filter_map(|(js, sources)| Some((path.strip_suffix(js)?, *sources)))
+            .flat_map(|(stem, sources)| sources.iter().map(move |source| format!("{stem}{source}")))
+            .find(|candidate| self.imports.is_file(candidate))
     }
 
     fn with_extension(&self, path: &str) -> Option<String> {
@@ -359,40 +358,13 @@ impl Resolver<'_, '_> {
 
     /// The root package, its workspaces, and the nearest package above each file in scope.
     fn packages(&self) -> Vec<Package> {
-        let mut dirs: BTreeSet<String> = BTreeSet::new();
-        if let Some(root) = self.json("package.json") {
-            dirs.insert(".".to_owned());
-            let workspaces = root
-                .get("workspaces")
-                .map(|w| w.get("packages").unwrap_or(w))
-                .and_then(Value::as_array)
-                .cloned()
-                .unwrap_or_default();
-            for pattern in workspaces.iter().filter_map(Value::as_str) {
-                for dir in self.imports.expand(".", pattern) {
-                    if self.imports.is_file(&join(&dir, "package.json")) {
-                        dirs.insert(dir);
-                    }
-                }
-            }
-        }
-        for file in self.imports.scope() {
-            let mut current = parent(file).to_owned();
-            loop {
-                if self.imports.is_file(&join(&current, "package.json")) {
-                    dirs.insert(if current.is_empty() {
-                        ".".to_owned()
-                    } else {
-                        current
-                    });
-                    break;
-                }
-                match parent_dir(&current) {
-                    Some(up) => current = up,
-                    None => break,
-                }
-            }
-        }
+        let mut dirs = self.workspace_dirs();
+        dirs.extend(
+            self.imports
+                .scope()
+                .iter()
+                .filter_map(|file| self.package_dir_of(file)),
+        );
         dirs.into_iter()
             .map(|dir| Package {
                 name: self
@@ -401,6 +373,41 @@ impl Resolver<'_, '_> {
                 dir,
             })
             .collect()
+    }
+}
+
+impl Resolver<'_, '_> {
+    /// The root package and its workspace members' directories, when the root has a package.
+    fn workspace_dirs(&self) -> BTreeSet<String> {
+        let Some(root) = self.json("package.json") else {
+            return BTreeSet::new();
+        };
+        let workspaces = root
+            .get("workspaces")
+            .map(|w| w.get("packages").unwrap_or(w))
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        let members = workspaces
+            .iter()
+            .filter_map(Value::as_str)
+            .flat_map(|pattern| self.imports.expand(".", pattern))
+            .filter(|dir| self.imports.is_file(&join(dir, "package.json")));
+        std::iter::once(".".to_owned()).chain(members).collect()
+    }
+
+    /// The directory of the nearest `package.json` at or above `file`'s directory (`.` for the
+    /// root).
+    fn package_dir_of(&self, file: &str) -> Option<String> {
+        let mut current = parent(file).to_owned();
+        while !self.imports.is_file(&join(&current, "package.json")) {
+            current = parent_dir(&current)?;
+        }
+        Some(if current.is_empty() {
+            ".".to_owned()
+        } else {
+            current
+        })
     }
 }
 
@@ -514,32 +521,16 @@ fn normalize(path: &str) -> String {
 fn strip_jsonc(text: &str) -> String {
     let mut out = String::with_capacity(text.len());
     let mut chars = text.chars().peekable();
-    let mut in_string = false;
     while let Some(c) = chars.next() {
-        if in_string {
-            out.push(c);
-            match c {
-                '\\' => out.extend(chars.next()),
-                '"' => in_string = false,
-                _ => {}
-            }
-            continue;
-        }
         match (c, chars.peek()) {
             ('"', _) => {
-                in_string = true;
                 out.push(c);
+                copy_string(&mut chars, &mut out);
             }
             ('/', Some('/')) => while chars.next_if(|&n| n != '\n').is_some() {},
             ('/', Some('*')) => {
                 chars.next();
-                let mut previous = ' ';
-                for n in chars.by_ref() {
-                    if previous == '*' && n == '/' {
-                        break;
-                    }
-                    previous = n;
-                }
+                skip_block_comment(&mut chars);
             }
             _ => out.push(c),
         }
@@ -549,34 +540,43 @@ fn strip_jsonc(text: &str) -> String {
 
 /// Drops commas followed (after whitespace) by `}` or `]`, outside strings.
 fn remove_trailing_commas(text: &str) -> String {
-    let chars: Vec<char> = text.chars().collect();
     let mut out = String::with_capacity(text.len());
-    let mut in_string = false;
-    let mut index = 0;
-    while index < chars.len() {
-        let c = chars[index];
-        if in_string {
-            out.push(c);
-            if c == '\\' {
-                if let Some(next) = chars.get(index + 1) {
-                    out.push(*next);
-                }
-                index += 1;
-            } else if c == '"' {
-                in_string = false;
-            }
-        } else if c == ',' {
-            let next = chars[index + 1..].iter().find(|n| !n.is_whitespace());
-            if !matches!(next, Some('}' | ']')) {
+    let mut chars = text.chars();
+    while let Some(c) = chars.next() {
+        match c {
+            '"' => {
                 out.push(c);
+                copy_string(&mut chars, &mut out);
             }
-        } else {
-            in_string = c == '"';
-            out.push(c);
+            ',' if matches!(chars.clone().find(|n| !n.is_whitespace()), Some('}' | ']')) => {}
+            _ => out.push(c),
         }
-        index += 1;
     }
     out
+}
+
+/// Copies the rest of a string literal whose opening quote was just read, through its closing
+/// quote, escapes included.
+fn copy_string(chars: &mut impl Iterator<Item = char>, out: &mut String) {
+    while let Some(c) = chars.next() {
+        out.push(c);
+        match c {
+            '\\' => out.extend(chars.next()),
+            '"' => return,
+            _ => {}
+        }
+    }
+}
+
+/// Skips the rest of a block comment whose `/*` was just read, through its `*/`.
+fn skip_block_comment(chars: &mut impl Iterator<Item = char>) {
+    let mut previous = ' ';
+    for n in chars {
+        if previous == '*' && n == '/' {
+            break;
+        }
+        previous = n;
+    }
 }
 
 #[cfg(test)]

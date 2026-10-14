@@ -88,8 +88,15 @@ pub fn graph(imports: &Imports<'_>) -> ModuleGraph {
             continue;
         };
         let file_imports = tree.imports_of(imports, file);
+        let importer = Importer {
+            imports,
+            packages: &packages,
+            package,
+            file,
+            location: &location,
+        };
         for import in &file_imports.imports {
-            edges.extend(tree.edges(imports, &packages, package, file, &location, import));
+            edges.extend(tree.edges(&importer, import));
         }
     }
     ModuleGraph {
@@ -167,18 +174,11 @@ impl Tree {
         );
     }
 
-    /// The edges one import statement contributes.
-    fn edges(
-        &self,
-        imports: &Imports<'_>,
-        packages: &[Package],
-        package: Option<&Package>,
-        file: &str,
-        location: &Location,
-        import: &RawImport,
-    ) -> Vec<ImportEdge> {
+    /// The edges one import statement of `from` contributes.
+    fn edges(&self, from: &Importer<'_>, import: &RawImport) -> Vec<ImportEdge> {
+        let location = from.location;
         let edge = |specifier: String, target: ImportTarget, relative: bool| ImportEdge {
-            from: file.to_owned(),
+            from: from.file.to_owned(),
             specifier,
             target,
             relative,
@@ -186,7 +186,7 @@ impl Tree {
             edge_kind: import.kind,
         };
         if import.kind == EdgeKind::Declaration {
-            let target = child_file(imports, &location.children_dir, import)
+            let target = child_file(from.imports, &location.children_dir, import)
                 .map_or(ImportTarget::Unresolved, |path| ImportTarget::File { path });
             return vec![edge(import.specifier.clone(), target, true)];
         }
@@ -194,56 +194,64 @@ impl Tree {
         expand(&import.specifier)
             .into_iter()
             .map(|path| {
-                let (target, relative) =
-                    self.resolve(imports, packages, package, &location.root, &here, &path);
+                let (target, relative) = self.resolve(from, &here, &path);
                 edge(path.join("::"), target, relative)
             })
             .collect()
     }
 
-    /// Where a `use` path written in module `here` of the crate rooted at `root` leads.
+    /// Where a `use` path written by `from` in module `here` of its crate leads, and whether
+    /// it is relative to `here`.
     fn resolve(
         &self,
-        imports: &Imports<'_>,
-        packages: &[Package],
-        package: Option<&Package>,
-        root: &str,
+        from: &Importer<'_>,
         here: &[String],
         path: &[String],
     ) -> (ImportTarget, bool) {
+        let root = from.location.root.as_str();
+        match self.start(root, here, path) {
+            Start::Within {
+                base,
+                skip,
+                relative,
+            } => (self.walk_down(root, &base, &path[skip..]), relative),
+            Start::AboveRoot => (ImportTarget::Unresolved, true),
+            Start::Outside(first) => {
+                let target = match from.extern_crate(first) {
+                    Extern::Crate(lib) => self.walk_down(&lib, &[], &path[1..]),
+                    Extern::External(name) => ImportTarget::External { package: name },
+                    Extern::Missing => ImportTarget::Unresolved,
+                };
+                (target, false)
+            }
+        }
+    }
+
+    /// Where `path`, written in module `here` of the crate rooted at `root`, starts.
+    fn start<'p>(&self, root: &str, here: &[String], path: &'p [String]) -> Start<'p> {
         let Some(first) = path.first().map(String::as_str) else {
-            return (ImportTarget::Unresolved, false);
+            return Start::Outside("");
         };
-        let start = match first {
-            "crate" => Some((root.to_owned(), Vec::new(), 1, false)),
-            "self" => Some((root.to_owned(), here.to_vec(), 1, true)),
+        let within = |base: Vec<String>, skip, relative| Start::Within {
+            base,
+            skip,
+            relative,
+        };
+        match first {
+            "crate" => within(Vec::new(), 1, false),
+            "self" => within(here.to_vec(), 1, true),
             "super" => {
                 let supers = path.iter().take_while(|s| *s == "super").count();
-                (supers <= here.len()).then(|| {
-                    (
-                        root.to_owned(),
-                        here[..here.len() - supers].to_vec(),
-                        supers,
-                        true,
-                    )
-                })
+                if supers <= here.len() {
+                    within(here[..here.len() - supers].to_vec(), supers, true)
+                } else {
+                    Start::AboveRoot
+                }
             }
             _ if self.has(root, &[here, &[first.to_owned()]].concat()) => {
-                Some((root.to_owned(), here.to_vec(), 0, true))
+                within(here.to_vec(), 0, true)
             }
-            _ => {
-                return match Self::extern_crate(imports, packages, package, first) {
-                    Extern::Crate(lib) => (self.walk_down(&lib, &[], &path[1..]), false),
-                    Extern::External(name) => (ImportTarget::External { package: name }, false),
-                    Extern::Missing => (ImportTarget::Unresolved, false),
-                };
-            }
-        };
-        match start {
-            Some((root, base, skip, relative)) => {
-                (self.walk_down(&root, &base, &path[skip..]), relative)
-            }
-            None => (ImportTarget::Unresolved, true),
+            _ => Start::Outside(first),
         }
     }
 
@@ -267,29 +275,36 @@ impl Tree {
     fn has(&self, root: &str, path: &[String]) -> bool {
         self.modules.contains_key(&(root.to_owned(), path.to_vec()))
     }
+}
 
+/// One file whose imports are being resolved, and the workspace around it.
+struct Importer<'a> {
+    imports: &'a Imports<'a>,
+    packages: &'a [Package],
+    /// The package the file belongs to.
+    package: Option<&'a Package>,
+    file: &'a str,
+    location: &'a Location,
+}
+
+impl Importer<'_> {
     /// What a path's first segment names when it is not a module of this crate.
-    fn extern_crate(
-        imports: &Imports<'_>,
-        packages: &[Package],
-        package: Option<&Package>,
-        name: &str,
-    ) -> Extern {
+    fn extern_crate(&self, name: &str) -> Extern {
         let library = |dir: &str| {
             let lib = join(dir, "src/lib.rs");
-            if imports.is_file(&lib) {
+            if self.imports.is_file(&lib) {
                 Extern::Crate(lib)
             } else {
                 Extern::Missing
             }
         };
-        if let Some(dep) = package.and_then(|p| p.deps.get(name)) {
+        if let Some(dep) = self.package.and_then(|p| p.deps.get(name)) {
             return match dep {
                 Dep::Path(dir) => library(dir),
                 Dep::Registry(package) => Extern::External(package.clone()),
             };
         }
-        if let Some(other) = packages.iter().find(|p| p.name == name) {
+        if let Some(other) = self.packages.iter().find(|p| p.name == name) {
             return library(&other.dir);
         }
         if STANDARD.contains(&name) {
@@ -297,6 +312,20 @@ impl Tree {
         }
         Extern::Missing
     }
+}
+
+/// Where a `use` path starts.
+enum Start<'p> {
+    /// In this crate: below `base`, after `skip` leading segments (`crate`, `self`, `super`).
+    Within {
+        base: Vec<String>,
+        skip: usize,
+        relative: bool,
+    },
+    /// More `super`s than the module is deep.
+    AboveRoot,
+    /// Another crate, named by the first segment.
+    Outside(&'p str),
 }
 
 enum Extern {
@@ -383,24 +412,32 @@ fn packages(imports: &Imports<'_>) -> Vec<Package> {
             }
         }
     }
-    for file in imports.scope() {
-        let mut dir = file.rsplit_once('/').map_or("", |(dir, _)| dir).to_owned();
-        loop {
-            let at = if dir.is_empty() { "." } else { dir.as_str() };
-            if manifest(imports, at).is_some_and(|m| m.contains_key("package")) {
-                dirs.insert(at.to_owned());
-                break;
-            }
-            match dir.rsplit_once('/') {
-                Some((parent, _)) => dir = parent.to_owned(),
-                None if !dir.is_empty() => dir.clear(),
-                None => break,
-            }
-        }
-    }
+    dirs.extend(
+        imports
+            .scope()
+            .iter()
+            .filter_map(|file| package_dir_of(imports, file)),
+    );
     dirs.into_iter()
         .filter_map(|dir| package(imports, &dir))
         .collect()
+}
+
+/// The directory (`.` for the root) of the nearest `Cargo.toml` with a `[package]` at or above
+/// `file`'s directory.
+fn package_dir_of(imports: &Imports<'_>, file: &str) -> Option<String> {
+    let mut dir = file.rsplit_once('/').map_or("", |(dir, _)| dir).to_owned();
+    loop {
+        let at = if dir.is_empty() { "." } else { dir.as_str() };
+        if manifest(imports, at).is_some_and(|m| m.contains_key("package")) {
+            return Some(at.to_owned());
+        }
+        match dir.rsplit_once('/') {
+            Some((parent, _)) => dir = parent.to_owned(),
+            None if !dir.is_empty() => dir.clear(),
+            None => return None,
+        }
+    }
 }
 
 fn manifest(imports: &Imports<'_>, dir: &str) -> Option<toml::Table> {
@@ -458,32 +495,27 @@ fn normalize(path: &str) -> String {
 /// Every path a use tree names: `a::{b, c::{self, d as e}, *}` is `a::b`, `a::c`, `a::c::d`,
 /// `a::*`. Aliases are dropped; a leading `::` is ignored.
 pub fn expand(tree: &str) -> Vec<Vec<String>> {
-    let tokens = tokens(tree);
-    let mut position = 0;
-    let mut out = Vec::new();
-    use_tree(&tokens, &mut position, &[], &mut out);
-    out
+    let mut parser = UseTree {
+        tokens: tokens(tree),
+        position: 0,
+        paths: Vec::new(),
+    };
+    parser.tree(&[]);
+    parser.paths
 }
 
 fn tokens(text: &str) -> Vec<String> {
+    let word_char = |c: char| c.is_alphanumeric() || c == '_' || c == '#';
     let mut tokens = Vec::new();
     let mut chars = text.chars().peekable();
     while let Some(c) = chars.next() {
         match c {
-            ':' if chars.peek() == Some(&':') => {
-                chars.next();
-                tokens.push("::".to_owned());
-            }
+            ':' if chars.next_if_eq(&':').is_some() => tokens.push("::".to_owned()),
             '{' | '}' | ',' | '*' => tokens.push(c.to_string()),
-            c if c.is_alphanumeric() || c == '_' || c == '#' => {
+            c if word_char(c) => {
                 let mut word = c.to_string();
-                while let Some(&next) = chars.peek() {
-                    if next.is_alphanumeric() || next == '_' || next == '#' {
-                        word.push(next);
-                        chars.next();
-                    } else {
-                        break;
-                    }
+                while let Some(next) = chars.next_if(|next| word_char(*next)) {
+                    word.push(next);
                 }
                 tokens.push(word.trim_start_matches("r#").to_owned());
             }
@@ -493,62 +525,69 @@ fn tokens(text: &str) -> Vec<String> {
     tokens
 }
 
-/// One use tree at `position`, under `prefix`.
-fn use_tree(
-    tokens: &[String],
-    position: &mut usize,
-    prefix: &[String],
-    out: &mut Vec<Vec<String>>,
-) {
-    let mut path = prefix.to_vec();
-    loop {
-        match tokens.get(*position).map(String::as_str) {
-            Some("::") => *position += 1,
-            Some("{") => {
-                *position += 1;
-                while !matches!(tokens.get(*position).map(String::as_str), Some("}") | None) {
-                    use_tree(tokens, position, &path, out);
-                    if tokens.get(*position).map(String::as_str) == Some(",") {
-                        *position += 1;
+/// A use tree's tokens, read from `position`, and the paths read so far.
+struct UseTree {
+    tokens: Vec<String>,
+    position: usize,
+    paths: Vec<Vec<String>>,
+}
+
+impl UseTree {
+    fn peek(&self) -> Option<&str> {
+        self.tokens.get(self.position).map(String::as_str)
+    }
+
+    /// One use tree under `prefix`.
+    fn tree(&mut self, prefix: &[String]) {
+        let mut path = prefix.to_vec();
+        loop {
+            match self.peek() {
+                Some("::") => self.position += 1,
+                Some("{") => return self.group(&path),
+                Some("*") => {
+                    self.position += 1;
+                    path.push("*".to_owned());
+                    return self.paths.push(path);
+                }
+                Some("self") if !path.is_empty() && path.len() == prefix.len() => {
+                    self.position += 1;
+                    return self.end(path);
+                }
+                Some(word) if word != "," && word != "}" => {
+                    path.push(word.to_owned());
+                    self.position += 1;
+                    if self.peek() != Some("::") {
+                        return self.end(path);
                     }
                 }
-                *position += 1;
-                return;
-            }
-            Some("*") => {
-                *position += 1;
-                path.push("*".to_owned());
-                out.push(path);
-                return;
-            }
-            Some("self") if !path.is_empty() && path.len() == prefix.len() => {
-                *position += 1;
-                skip_alias(tokens, position);
-                out.push(path);
-                return;
-            }
-            Some(word) if word != "," && word != "}" => {
-                path.push(word.to_owned());
-                *position += 1;
-                if tokens.get(*position).map(String::as_str) != Some("::") {
-                    skip_alias(tokens, position);
-                    out.push(path);
+                _ => {
+                    if path.len() > prefix.len() {
+                        self.paths.push(path);
+                    }
                     return;
                 }
             }
-            _ => {
-                if path.len() > prefix.len() {
-                    out.push(path);
-                }
-                return;
-            }
         }
     }
-}
 
-fn skip_alias(tokens: &[String], position: &mut usize) {
-    if tokens.get(*position).map(String::as_str) == Some("as") {
-        *position += 2;
+    /// A braced list of use trees under `prefix`, its `{` next.
+    fn group(&mut self, prefix: &[String]) {
+        self.position += 1;
+        while !matches!(self.peek(), Some("}") | None) {
+            self.tree(prefix);
+            if self.peek() == Some(",") {
+                self.position += 1;
+            }
+        }
+        self.position += 1;
+    }
+
+    /// `path` complete, past any `as` alias.
+    fn end(&mut self, path: Vec<String>) {
+        if self.peek() == Some("as") {
+            self.position += 2;
+        }
+        self.paths.push(path);
     }
 }
 

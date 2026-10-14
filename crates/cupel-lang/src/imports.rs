@@ -35,7 +35,7 @@ use crate::contract::capture;
 use crate::language::{Language, owns, parse_one};
 use crate::parse::{ParseCache, Parsed};
 use crate::producer::{parse_scope, producer_id};
-use crate::query::{encloses, matches};
+use crate::query::{Match, encloses, matches};
 use crate::spec::QueryFile;
 
 /// One import as written.
@@ -101,19 +101,10 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
                 .nodes(capture::IMPORT_NAME)
                 .map(|n| parsed.text(n).to_owned())
                 .collect();
-            let kind = if m.has(capture::IMPORT_MODULE) {
-                EdgeKind::Declaration
-            } else if m.has(capture::IMPORT_REEXPORT)
-                || names.iter().any(|name| reexported.contains(name.as_str()))
-            {
-                EdgeKind::ReExport
-            } else {
-                EdgeKind::Import
-            };
             Some(RawImport {
                 specifier: unquote(parsed.text(specifier)).to_owned(),
+                kind: edge_kind(m, &names, &reexported),
                 names,
-                kind,
                 scope: path_of(statement),
                 line: crate::query::one_based(statement.start_position().row),
             })
@@ -129,6 +120,20 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
         })
         .collect();
     FileImports { imports, modules }
+}
+
+/// What the import `m` matched does with its module: declares it, re-exports it (by its
+/// statement, or because a name it imports is in `reexported`), or uses it.
+fn edge_kind(m: &Match<'_, '_>, names: &[String], reexported: &BTreeSet<&str>) -> EdgeKind {
+    if m.has(capture::IMPORT_MODULE) {
+        EdgeKind::Declaration
+    } else if m.has(capture::IMPORT_REEXPORT)
+        || names.iter().any(|name| reexported.contains(name.as_str()))
+    {
+        EdgeKind::ReExport
+    } else {
+        EdgeKind::Import
+    }
 }
 
 fn unquote(text: &str) -> &str {

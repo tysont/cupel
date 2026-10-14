@@ -66,6 +66,27 @@ pub fn extract(source: &Source<'_>) -> Symbols {
     }
 }
 
+/// One named definition per node, from the earliest pattern that matched it, in document order
+/// (an enclosing definition before what it encloses).
+fn pick<'m, 't>(found: &'m [Match<'_, 't>]) -> Vec<(&'m Match<'m, 't>, SymbolKind, Node<'t>)> {
+    let mut chosen: BTreeMap<usize, (&Match<'_, 't>, SymbolKind, Node<'t>)> = BTreeMap::new();
+    for m in found {
+        let Some((kind, node)) = definition_capture(m) else {
+            continue;
+        };
+        if m.node(capture::SYMBOL_NAME).is_none() {
+            continue;
+        }
+        let entry = chosen.entry(node.id()).or_insert((m, kind, node));
+        if m.pattern < entry.0.pattern {
+            *entry = (m, kind, node);
+        }
+    }
+    let mut picked: Vec<_> = chosen.into_values().collect();
+    picked.sort_by_key(|(_, _, node)| (node.start_byte(), std::cmp::Reverse(node.end_byte())));
+    picked
+}
+
 /// Every symbol in `parsed`, in document order.
 ///
 /// # Panics
@@ -79,23 +100,7 @@ pub fn definitions<'t>(parsed: &'t Parsed, language: &dyn Language) -> Vec<Defin
     let found = matches(&query, parsed);
     let namespaces = Namespaces::new(&spec.tables().namespace, parsed, &found);
 
-    // The earliest pattern wins for each definition node.
-    let mut chosen: BTreeMap<usize, (&Match<'_, 't>, SymbolKind, Node<'t>)> = BTreeMap::new();
-    for m in &found {
-        let Some((kind, node)) = definition_capture(m) else {
-            continue;
-        };
-        if m.node(capture::SYMBOL_NAME).is_none() {
-            continue;
-        }
-        let entry = chosen.entry(node.id()).or_insert((m, kind, node));
-        if m.pattern < entry.0.pattern {
-            *entry = (m, kind, node);
-        }
-    }
-    let mut picked: Vec<(&Match<'_, 't>, SymbolKind, Node<'t>)> = chosen.into_values().collect();
-    picked.sort_by_key(|(_, _, node)| (node.start_byte(), std::cmp::Reverse(node.end_byte())));
-
+    let picked = pick(&found);
     // A symbol namespaces what it encloses by its name and any non-lexical segment of its
     // own (a Go receiver type), so a closure in a method is `Type.method.closure`.
     let enclosing: Vec<Scope<'t>> = picked

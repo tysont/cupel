@@ -187,25 +187,29 @@ fn join(tokens: &[String], tight_after: &[String]) -> String {
         if token == "," && next.is_none_or(closes) {
             continue;
         }
-        if let Some(prev) = previous {
-            let tight_before =
-                matches!(token, "," | ")" | "]" | ">" | ":" | ";" | "?" | "." | "::");
-            let tight_after = matches!(prev, "(" | "[" | "<" | "&" | "*" | "'" | "." | "::")
-                || tight_after.iter().any(|t| t == prev);
-            let call_like = matches!(token, "(" | "<" | "[")
-                && prev != LOCAL
-                && prev
-                    .chars()
-                    .last()
-                    .is_some_and(|c| c.is_alphanumeric() || c == '_' || c == '>');
-            if !(tight_before || tight_after || call_like) {
-                out.push(' ');
-            }
+        if previous.is_some_and(|prev| spaced(prev, token, tight_after)) {
+            out.push(' ');
         }
         out.push_str(token);
         previous = Some(token);
     }
     out
+}
+
+/// Whether a space separates `prev` from the `token` after it: not before closing and joining
+/// punctuation, not after opening punctuation or a `tight_after` token, and not between a
+/// name and the bracket of a call or generic.
+fn spaced(prev: &str, token: &str, tight_after: &[String]) -> bool {
+    let tight_before = matches!(token, "," | ")" | "]" | ">" | ":" | ";" | "?" | "." | "::");
+    let tight_after = matches!(prev, "(" | "[" | "<" | "&" | "*" | "'" | "." | "::")
+        || tight_after.iter().any(|t| t == prev);
+    let call_like = matches!(token, "(" | "<" | "[")
+        && prev != LOCAL
+        && prev
+            .chars()
+            .last()
+            .is_some_and(|c| c.is_alphanumeric() || c == '_' || c == '>');
+    !(tight_before || tight_after || call_like)
 }
 
 #[cfg(test)]
