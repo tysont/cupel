@@ -3,6 +3,7 @@
     {
       "edges": [
         {
+          "edge_kind": "import",
           "from": "src/deps_cycle/alpha.py",
           "line": 1,
           "relative": true,
@@ -13,6 +14,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_cycle/beta.py",
           "line": 1,
           "relative": true,
@@ -23,6 +25,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_layers/domain/order.py",
           "line": 1,
           "relative": true,
@@ -33,6 +36,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_layers/port.py",
           "line": 1,
           "relative": false,
@@ -43,6 +47,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_layers/port.py",
           "line": 3,
           "relative": true,
@@ -53,6 +58,7 @@
           }
         },
         {
+          "edge_kind": "re-export",
           "from": "src/ledger/__init__.py",
           "line": 5,
           "relative": true,
@@ -63,6 +69,7 @@
           }
         },
         {
+          "edge_kind": "re-export",
           "from": "src/ledger/__init__.py",
           "line": 5,
           "relative": true,
@@ -73,6 +80,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/__init__.py",
           "line": 6,
           "relative": true,
@@ -82,6 +90,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/account.py",
           "line": 1,
           "relative": false,
@@ -92,6 +101,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/account.py",
           "line": 3,
           "relative": false,
@@ -102,6 +112,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/cli.py",
           "line": 1,
           "relative": false,
@@ -112,6 +123,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/cli.py",
           "line": 3,
           "relative": false,
@@ -122,6 +134,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/report/__init__.py",
           "line": 1,
           "relative": false,
@@ -132,6 +145,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/report/__init__.py",
           "line": 3,
           "relative": true,
@@ -142,6 +156,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/ledger/report/format.py",
           "line": 1,
           "relative": false,
@@ -152,6 +167,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/conftest.py",
           "line": 1,
           "relative": false,
@@ -162,6 +178,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/conftest.py",
           "line": 3,
           "relative": false,
@@ -172,6 +189,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 1,
           "relative": false,
@@ -182,6 +200,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 3,
           "relative": false,
@@ -192,6 +211,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 5,
           "relative": false,
@@ -202,6 +222,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 6,
           "relative": false,
@@ -212,6 +233,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 6,
           "relative": false,
@@ -222,6 +244,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 7,
           "relative": false,
@@ -232,6 +255,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 7,
           "relative": false,
@@ -242,6 +266,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_pricing.py",
           "line": 1,
           "relative": false,
@@ -252,6 +277,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_pricing.py",
           "line": 2,
           "relative": false,
@@ -262,6 +288,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_pricing.py",
           "line": 4,
           "relative": false,
@@ -272,6 +299,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_pricing.py",
           "line": 4,
           "relative": false,
@@ -282,6 +310,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_quality_signals.py",
           "line": 1,
           "relative": false,
@@ -292,6 +321,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_quality_signals.py",
           "line": 3,
           "relative": false,
@@ -302,6 +332,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_quality_signals.py",
           "line": 3,
           "relative": false,
@@ -312,6 +343,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_quality_signals.py",
           "line": 4,
           "relative": false,
@@ -322,6 +354,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_quality_signals.py",
           "line": 4,
           "relative": false,
@@ -332,6 +365,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_quality_signals.py",
           "line": 5,
           "relative": false,
@@ -342,6 +376,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/test_quality_signals.py",
           "line": 5,
           "relative": false,

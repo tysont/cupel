@@ -7,8 +7,9 @@ use std::collections::BTreeSet;
 use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
-    ImportEdge, ImportTarget, LiveRoot, ModuleGraph, NormNode, NormTree, NormalizedSymbol,
-    RootImports, RootReason, Roots, Span, SymbolDef, SymbolKind, Symbols, Visibility,
+    EdgeKind, ImportEdge, ImportTarget, LiveRoot, ModuleGraph, NormNode, NormTree,
+    NormalizedSymbol, RootImports, RootReason, Roots, Span, SymbolDef, SymbolKind, Symbols,
+    Visibility,
 };
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
@@ -72,6 +73,7 @@ fn edge(from: &str, specifier: &str, target: ImportTarget) -> ImportEdge {
         target,
         relative: false,
         line: 1,
+        edge_kind: EdgeKind::Import,
     }
 }
 

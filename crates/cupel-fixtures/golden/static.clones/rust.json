@@ -310,7 +310,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 24,
+      "files": 26,
       "languages": [
         "rust"
       ],
@@ -318,7 +318,7 @@
       "roots": [
         "."
       ],
-      "symbols": 64
+      "symbols": 66
     },
     "seed": "<seed>",
     "started": "<timestamp>",

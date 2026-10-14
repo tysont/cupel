@@ -1,7 +1,9 @@
 ; Rust imports: `use` trees (expanded by the resolver), child-module declarations, and
-; `extern crate`. Inline modules are scopes, so imports inside them resolve from there.
+; `extern crate`. A `use` with any visibility (`pub use`, `pub(crate) use`) re-exports what it
+; imports. Inline modules are scopes, so imports inside them resolve from there.
 
 (use_declaration
+  (visibility_modifier)? @import.reexport
   argument: (_) @import.specifier) @import
 
 (mod_item

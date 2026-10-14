@@ -31,3 +31,4 @@ fn scale(amount: i64, factor: i64) -> i64 {
 
 mod deps_cycle;
 mod deps_layers;
+mod deps_tree;

@@ -445,6 +445,42 @@
       }
     },
     {
+      "file": "src/deps_tree/leaf.rs",
+      "kind": "function",
+      "path": "deps_tree::leaf::cap",
+      "signature": "(_: u32) -> u32",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_tree/mod.rs",
+      "kind": "constant",
+      "path": "deps_tree::LIMIT",
+      "signature": "u32",
+      "span": {
+        "col": 1,
+        "end_col": 27,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_tree/mod.rs",
+      "kind": "function",
+      "path": "deps_tree::capped",
+      "signature": "(_: u32) -> u32",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
       "file": "src/lib.rs",
       "kind": "module",
       "path": "account",

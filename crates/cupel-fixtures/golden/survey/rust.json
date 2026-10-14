@@ -36,7 +36,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 64,
+        "n": 66,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -69,7 +69,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 64,
+        "n": 66,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -90,7 +90,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 19,
+        "n": 21,
         "unit": "cycles",
         "value": 1.0
       },
@@ -1970,7 +1970,7 @@
             "value": 3.0
           }
         ],
-        "measured": 64,
+        "measured": 66,
         "metric": "cyclomatic",
         "per": "symbol",
         "summary": "Cyclomatic complexity per function."
@@ -2139,7 +2139,7 @@
             "value": 3.0
           }
         ],
-        "measured": 64,
+        "measured": 66,
         "metric": "cognitive",
         "per": "symbol",
         "summary": "Cognitive complexity per function."
@@ -2274,7 +2274,7 @@
               },
               "symbol": null
             },
-            "value": 10.0
+            "value": 11.0
           },
           {
             "lang": "rust",
@@ -2392,6 +2392,22 @@
             "lang": "rust",
             "rank": 9,
             "target": {
+              "display": "src/deps_tree/mod.rs",
+              "location": {
+                "col": null,
+                "end_col": null,
+                "end_line": 1,
+                "file": "src/deps_tree/mod.rs",
+                "line": 1
+              },
+              "symbol": null
+            },
+            "value": 3.0
+          },
+          {
+            "lang": "rust",
+            "rank": 10,
+            "target": {
               "display": "src/pricing.rs",
               "location": {
                 "col": null,
@@ -2403,25 +2419,9 @@
               "symbol": null
             },
             "value": 3.0
-          },
-          {
-            "lang": "rust",
-            "rank": 10,
-            "target": {
-              "display": "src/report/mod.rs",
-              "location": {
-                "col": null,
-                "end_col": null,
-                "end_line": 1,
-                "file": "src/report/mod.rs",
-                "line": 1
-              },
-              "symbol": null
-            },
-            "value": 3.0
           }
         ],
-        "measured": 19,
+        "measured": 21,
         "metric": "coupling",
         "per": "module",
         "summary": "Afferent plus efferent coupling per module."
@@ -2667,7 +2667,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 24,
+      "files": 26,
       "languages": [
         "rust"
       ],
@@ -2675,7 +2675,7 @@
       "roots": [
         "."
       ],
-      "symbols": 64
+      "symbols": 66
     },
     "seed": "<seed>",
     "started": "<timestamp>",

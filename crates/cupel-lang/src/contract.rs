@@ -60,6 +60,8 @@ pub mod capture {
     pub const IMPORT_SPECIFIER: &str = "import.specifier";
     pub const IMPORT_NAME: &str = "import.name";
     pub const IMPORT_MODULE: &str = "import.module";
+    pub const IMPORT_REEXPORT: &str = "import.reexport";
+    pub const REEXPORT_NAME: &str = "reexport.name";
     // api.scm: `api.<kind>`, kinds spelled as `ApiItemKind` serializes.
     pub const API_FUNCTION: &str = "api.function";
     pub const API_METHOD: &str = "api.method";
@@ -202,7 +204,14 @@ const TESTS: Contract = Contract {
 const IMPORTS: Contract = Contract {
     file: QueryFile::Imports,
     required: &[&[c::IMPORT], &[c::IMPORT_SPECIFIER]],
-    optional: &[c::IMPORT_NAME, c::IMPORT_MODULE, c::SCOPE, c::SCOPE_NAME],
+    optional: &[
+        c::IMPORT_NAME,
+        c::IMPORT_MODULE,
+        c::IMPORT_REEXPORT,
+        c::REEXPORT_NAME,
+        c::SCOPE,
+        c::SCOPE_NAME,
+    ],
     open: &[],
 };
 

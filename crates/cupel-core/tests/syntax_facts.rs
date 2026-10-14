@@ -2,7 +2,7 @@
 // ABOUTME: Enum spellings match the construct names used by the per-fact conformance inventories.
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, Assertion, AssertionKind, AssertionStrength, Decision,
-    DecisionKind, Decisions, ImportEdge, ImportTarget, LiveRoot, Mock, ModuleGraph,
+    DecisionKind, Decisions, EdgeKind, ImportEdge, ImportTarget, LiveRoot, Mock, ModuleGraph,
     MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol, OperatorSet,
     ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
     SymbolDecisions, SymbolDef, SymbolKey, SymbolKind, SymbolSites, Symbols, TestCase,
@@ -241,6 +241,7 @@ fn module_graph_edges_are_tagged_by_target_kind() {
         target,
         relative: true,
         line: 1,
+        edge_kind: EdgeKind::ReExport,
     };
     let json = assert_round_trip(&ModuleGraph {
         roots: vec![RootImports {
@@ -267,6 +268,7 @@ fn module_graph_edges_are_tagged_by_target_kind() {
     );
     assert_eq!(edges[2]["target"], json!({"kind": "unresolved"}));
     assert_eq!(edges[0]["relative"], json!(true));
+    assert_eq!(edges[0]["edge_kind"], json!("re-export"));
 }
 
 #[test]
@@ -373,7 +375,7 @@ fn each_payload_declares_its_own_kind_and_version() {
     assert_eq!(kinds, FactKind::SYNTACTIC.into_iter().collect());
     for (kind, version) in declared {
         let expected = match kind {
-            FactKind::ProjectInfo | FactKind::Symbols => 2,
+            FactKind::ProjectInfo | FactKind::Symbols | FactKind::ModuleGraph => 2,
             _ => 1,
         };
         assert_eq!(version, expected, "{kind}");

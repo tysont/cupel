@@ -5876,6 +5876,148 @@
       }
     },
     {
+      "hash": "sh_da5617fa4f3254db",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "primitive_type"
+                  }
+                ],
+                "label": "parameter"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [],
+            "label": "->"
+          },
+          {
+            "children": [],
+            "label": "primitive_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "min"
+                      }
+                    ],
+                    "label": "field_expression"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "arguments"
+                  }
+                ],
+                "label": "call_expression"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/deps_tree/leaf.rs",
+        "line": 3
+      }
+    },
+    {
+      "hash": "sh_a1dbac8caf3dd020",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "primitive_type"
+                  }
+                ],
+                "label": "parameter"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [],
+            "label": "->"
+          },
+          {
+            "children": [],
+            "label": "primitive_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "leaf"
+                      },
+                      {
+                        "children": [],
+                        "label": "cap"
+                      }
+                    ],
+                    "label": "scoped_identifier"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "arguments"
+                  }
+                ],
+                "label": "call_expression"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/deps_tree/mod.rs",
+        "line": 5
+      }
+    },
+    {
       "hash": "sh_84a6f60f1e3128df",
       "root": {
         "children": [

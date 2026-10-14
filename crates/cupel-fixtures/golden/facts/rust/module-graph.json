@@ -3,6 +3,7 @@
     {
       "edges": [
         {
+          "edge_kind": "import",
           "from": "src/account.rs",
           "line": 1,
           "relative": false,
@@ -13,6 +14,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/account.rs",
           "line": 3,
           "relative": false,
@@ -23,6 +25,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/account.rs",
           "line": 5,
           "relative": false,
@@ -33,6 +36,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_cycle/alpha.rs",
           "line": 1,
           "relative": true,
@@ -43,6 +47,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_cycle/beta.rs",
           "line": 1,
           "relative": true,
@@ -53,6 +58,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/deps_cycle/mod.rs",
           "line": 1,
           "relative": true,
@@ -63,6 +69,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/deps_cycle/mod.rs",
           "line": 2,
           "relative": true,
@@ -73,6 +80,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/deps_layers/domain/mod.rs",
           "line": 1,
           "relative": true,
@@ -83,6 +91,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_layers/domain/mod.rs",
           "line": 3,
           "relative": true,
@@ -93,6 +102,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/deps_layers/mod.rs",
           "line": 1,
           "relative": true,
@@ -103,6 +113,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/deps_layers/mod.rs",
           "line": 2,
           "relative": true,
@@ -113,6 +124,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/deps_layers/mod.rs",
           "line": 3,
           "relative": true,
@@ -123,6 +135,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_layers/port.rs",
           "line": 1,
           "relative": true,
@@ -133,6 +146,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_layers/port.rs",
           "line": 2,
           "relative": true,
@@ -143,6 +157,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/deps_layers/port.rs",
           "line": 3,
           "relative": true,
@@ -153,6 +168,29 @@
           }
         },
         {
+          "edge_kind": "import",
+          "from": "src/deps_tree/leaf.rs",
+          "line": 1,
+          "relative": true,
+          "specifier": "super::LIMIT",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_tree/mod.rs"
+          }
+        },
+        {
+          "edge_kind": "declaration",
+          "from": "src/deps_tree/mod.rs",
+          "line": 1,
+          "relative": true,
+          "specifier": "leaf",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_tree/leaf.rs"
+          }
+        },
+        {
+          "edge_kind": "declaration",
           "from": "src/lib.rs",
           "line": 3,
           "relative": true,
@@ -163,6 +201,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/lib.rs",
           "line": 4,
           "relative": true,
@@ -173,6 +212,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/lib.rs",
           "line": 6,
           "relative": true,
@@ -182,6 +222,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/lib.rs",
           "line": 7,
           "relative": true,
@@ -192,6 +233,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/lib.rs",
           "line": 8,
           "relative": true,
@@ -202,6 +244,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/lib.rs",
           "line": 9,
           "relative": true,
@@ -212,6 +255,7 @@
           }
         },
         {
+          "edge_kind": "re-export",
           "from": "src/lib.rs",
           "line": 11,
           "relative": true,
@@ -222,6 +266,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/lib.rs",
           "line": 32,
           "relative": true,
@@ -232,6 +277,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/lib.rs",
           "line": 33,
           "relative": true,
@@ -242,6 +288,18 @@
           }
         },
         {
+          "edge_kind": "declaration",
+          "from": "src/lib.rs",
+          "line": 34,
+          "relative": true,
+          "specifier": "deps_tree",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_tree/mod.rs"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "src/main.rs",
           "line": 1,
           "relative": false,
@@ -252,6 +310,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/pricing.rs",
           "line": 33,
           "relative": false,
@@ -262,6 +321,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/pricing.rs",
           "line": 35,
           "relative": true,
@@ -272,6 +332,7 @@
           }
         },
         {
+          "edge_kind": "declaration",
           "from": "src/report/mod.rs",
           "line": 1,
           "relative": true,
@@ -282,6 +343,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "src/report/mod.rs",
           "line": 3,
           "relative": false,
@@ -292,6 +354,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/ledger.rs",
           "line": 1,
           "relative": false,
@@ -302,6 +365,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/ledger.rs",
           "line": 2,
           "relative": false,
@@ -312,6 +376,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 1,
           "relative": false,
@@ -322,6 +387,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 2,
           "relative": false,
@@ -332,6 +398,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 3,
           "relative": false,
@@ -342,6 +409,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 3,
           "relative": false,
@@ -352,6 +420,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 4,
           "relative": false,

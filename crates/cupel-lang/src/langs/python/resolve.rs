@@ -82,6 +82,7 @@ fn edge(imports: &Imports<'_>, roots: &[String], file: &str, import: &RawImport)
         target,
         relative: dots > 0,
         line: import.line,
+        edge_kind: import.kind,
     }
 }
 

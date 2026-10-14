@@ -3,6 +3,7 @@
     {
       "edges": [
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 4,
           "relative": false,
@@ -13,6 +14,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 5,
           "relative": false,
@@ -23,6 +25,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -33,6 +36,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -43,6 +47,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -53,6 +58,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -63,6 +69,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -73,6 +80,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -83,6 +91,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "cmd/ledger/main.go",
           "line": 7,
           "relative": false,
@@ -93,6 +102,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "complexity.go",
           "line": 3,
           "relative": false,
@@ -103,6 +113,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "decide.go",
           "line": 4,
           "relative": false,
@@ -113,6 +124,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "decide.go",
           "line": 5,
           "relative": false,
@@ -123,6 +135,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "decide.go",
           "line": 6,
           "relative": false,
@@ -133,6 +146,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "deps_cycle/alpha/alpha.go",
           "line": 3,
           "relative": false,
@@ -143,6 +157,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "deps_cycle/beta/beta.go",
           "line": 3,
           "relative": false,
@@ -153,6 +168,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "deps_layers/domain/order.go",
           "line": 3,
           "relative": false,
@@ -163,6 +179,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "deps_layers/port/port.go",
           "line": 3,
           "relative": false,
@@ -173,6 +190,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 4,
           "relative": false,
@@ -183,6 +201,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 6,
           "relative": false,
@@ -193,6 +212,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 8,
           "relative": false,
@@ -202,6 +222,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 9,
           "relative": false,
@@ -212,6 +233,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger.go",
           "line": 10,
           "relative": false,
@@ -222,6 +244,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger_quality_test.go",
           "line": 4,
           "relative": false,
@@ -232,6 +255,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger_quality_test.go",
           "line": 6,
           "relative": false,
@@ -242,6 +266,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger_test.go",
           "line": 4,
           "relative": false,
@@ -252,6 +277,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "ledger_test.go",
           "line": 5,
           "relative": false,
@@ -262,6 +288,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing.go",
           "line": 3,
           "relative": false,
@@ -272,6 +299,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 4,
           "relative": false,
@@ -282,6 +310,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 6,
           "relative": false,
@@ -292,6 +321,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 7,
           "relative": false,
@@ -302,6 +332,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 8,
           "relative": false,
@@ -312,6 +343,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "pricing_test.go",
           "line": 9,
           "relative": false,
@@ -322,6 +354,7 @@
           }
         },
         {
+          "edge_kind": "import",
           "from": "report/format.go",
           "line": 3,
           "relative": false,
@@ -337,6 +370,7 @@
     {
       "edges": [
         {
+          "edge_kind": "import",
           "from": "shapes/geometry.go",
           "line": 3,
           "relative": false,

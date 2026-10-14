@@ -2,7 +2,7 @@
 // ABOUTME: members to package files, the standard library and required modules as external, the rest unresolved.
 mod support;
 
-use cupel_core::syntax::{ImportTarget, ModuleGraph};
+use cupel_core::syntax::{EdgeKind, ImportTarget, ModuleGraph};
 use support::{fixture, produce, tree};
 
 /// (root, from, line, specifier, target, relative) for every edge.
@@ -265,5 +265,26 @@ fn the_deps_fixtures_are_a_package_cycle_and_a_layered_import() {
             &format!("{module}/{package}"),
             target
         ))
+    );
+}
+
+/// (from, specifier, kind) for every edge, in graph order.
+fn kinds(graph: &ModuleGraph) -> Vec<(String, String, EdgeKind)> {
+    graph
+        .roots
+        .iter()
+        .flat_map(|root| &root.edges)
+        .map(|edge| (edge.from.clone(), edge.specifier.clone(), edge.edge_kind))
+        .collect()
+}
+
+#[test]
+fn every_go_import_is_an_import_edge() {
+    let graph = produce::<ModuleGraph>("go", &fixture("go"));
+    let edges = kinds(&graph);
+    assert!(!edges.is_empty());
+    assert!(
+        edges.iter().all(|(_, _, kind)| *kind == EdgeKind::Import),
+        "Go has neither module declarations nor re-exports: {edges:?}"
     );
 }

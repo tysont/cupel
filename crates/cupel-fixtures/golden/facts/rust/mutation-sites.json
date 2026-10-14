@@ -2630,6 +2630,22 @@
       "sites": [],
       "symbol": {
         "col": 1,
+        "file": "src/deps_tree/leaf.rs",
+        "line": 3
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/deps_tree/mod.rs",
+        "line": 5
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
         "file": "src/lib.rs",
         "line": 20
       }

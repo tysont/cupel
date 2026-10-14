@@ -261,6 +261,16 @@ expect = { target = { package = "std" } }
 file = "src/lib.rs"
 name = "generated"
 
+[module-graph.declaration]
+file = "src/lib.rs"
+name = "account"
+expect = { target = { path = "src/account.rs" } }
+
+[module-graph.re-export]
+file = "src/lib.rs"
+name = "account::Account"
+expect = { target = { path = "src/account.rs" } }
+
 [api-surface.function]
 file = "src/lib.rs"
 name = "balance"

@@ -19,11 +19,35 @@ expression: pretty(&schema)
   "required": [
     "roots"
   ],
-  "x-cupel-fact-version": 1,
+  "x-cupel-fact-version": 2,
   "$defs": {
+    "EdgeKind": {
+      "description": "What an import statement does with the module it names.",
+      "oneOf": [
+        {
+          "description": "Uses the module (`use`, `import`, `require`).",
+          "type": "string",
+          "const": "import"
+        },
+        {
+          "description": "Declares the module as a child of the importing one (Rust `mod a;`): structure, not use.",
+          "type": "string",
+          "const": "declaration"
+        },
+        {
+          "description": "Imports names in order to export them again (Rust `pub use`, `export … from`, a Python\nimport of names listed in `__all__`).",
+          "type": "string",
+          "const": "re-export"
+        }
+      ]
+    },
     "ImportEdge": {
       "type": "object",
       "properties": {
+        "edge_kind": {
+          "description": "What the statement does with the module (ADR-068).",
+          "$ref": "#/$defs/EdgeKind"
+        },
         "from": {
           "description": "The importing file.",
           "type": "string"
@@ -46,6 +70,7 @@ expression: pretty(&schema)
         }
       },
       "required": [
+        "edge_kind",
         "from",
         "line",
         "relative",

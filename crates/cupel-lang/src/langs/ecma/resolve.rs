@@ -163,6 +163,7 @@ impl Resolver<'_, '_> {
             specifier,
             relative,
             line: import.line,
+            edge_kind: import.kind,
         }
     }
 

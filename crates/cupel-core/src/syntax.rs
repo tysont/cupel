@@ -270,7 +270,7 @@ pub struct SkipMarker {
 pub struct ModuleGraph {
     pub roots: Vec<RootImports>,
 }
-fact!(ModuleGraph, ModuleGraph);
+fact!(ModuleGraph, ModuleGraph, 2);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct RootImports {
@@ -288,6 +288,21 @@ pub struct ImportEdge {
     /// True for path-relative imports such as `./b`.
     pub relative: bool,
     pub line: u32,
+    /// What the statement does with the module (ADR-068).
+    pub edge_kind: EdgeKind,
+}
+
+/// What an import statement does with the module it names.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum EdgeKind {
+    /// Uses the module (`use`, `import`, `require`).
+    Import,
+    /// Declares the module as a child of the importing one (Rust `mod a;`): structure, not use.
+    Declaration,
+    /// Imports names in order to export them again (Rust `pub use`, `export … from`, a Python
+    /// import of names listed in `__all__`).
+    ReExport,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

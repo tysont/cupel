@@ -262,6 +262,14 @@ expect = { target = { package = "node:fs" } }
 file = "src/ledger.ts"
 name = "./generated"
 
+[module-graph.declaration]
+not-applicable = "ECMAScript modules are files; nothing in source declares one (`declare module` describes an ambient module and imports nothing)."
+
+[module-graph.re-export]
+file = "src/shapes/index.ts"
+name = "./geometry"
+expect = { target = { path = "src/shapes/geometry.ts" } }
+
 [api-surface.function]
 file = "src/math.ts"
 name = "math.add"

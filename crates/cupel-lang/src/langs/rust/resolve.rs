@@ -21,7 +21,7 @@
 //!   modules (`self::`, `super::`, child modules, `mod`) are `relative`.
 use std::collections::{BTreeMap, BTreeSet, HashMap, VecDeque};
 
-use cupel_core::syntax::{ImportEdge, ImportTarget, ModuleGraph, RootImports};
+use cupel_core::syntax::{EdgeKind, ImportEdge, ImportTarget, ModuleGraph, RootImports};
 
 use crate::imports::{FileImports, Imports, RawImport, join};
 
@@ -130,7 +130,11 @@ impl Tree {
                     .entry((location.root.clone(), path))
                     .or_insert_with(|| file.clone());
             }
-            for import in declared.imports.iter().filter(|import| import.module) {
+            for import in declared
+                .imports
+                .iter()
+                .filter(|import| import.kind == EdgeKind::Declaration)
+            {
                 let Some(child) = child_file(imports, &location.children_dir, import) else {
                     continue;
                 };
@@ -179,8 +183,9 @@ impl Tree {
             target,
             relative,
             line: import.line,
+            edge_kind: import.kind,
         };
-        if import.module {
+        if import.kind == EdgeKind::Declaration {
             let target = child_file(imports, &location.children_dir, import)
                 .map_or(ImportTarget::Unresolved, |path| ImportTarget::File { path });
             return vec![edge(import.specifier.clone(), target, true)];

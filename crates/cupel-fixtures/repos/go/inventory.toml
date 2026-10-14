@@ -255,6 +255,12 @@ expect = { target = { package = "std" } }
 file = "ledger.go"
 name = "example.com/ledger/gen"
 
+[module-graph.declaration]
+not-applicable = "Go declares no modules in source: a package is a directory, and every file names its package."
+
+[module-graph.re-export]
+not-applicable = "Go has no re-exports: an imported package's names are reachable only through that package."
+
 [api-surface.function]
 file = "ledger.go"
 name = "ledger.Balance"

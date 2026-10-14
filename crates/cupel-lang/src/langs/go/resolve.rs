@@ -53,6 +53,7 @@ pub fn graph(imports: &Imports<'_>) -> ModuleGraph {
                     target,
                     relative: false,
                     line: import.line,
+                    edge_kind: import.kind,
                 });
             }
         }

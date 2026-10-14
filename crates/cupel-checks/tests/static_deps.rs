@@ -5,7 +5,8 @@ mod support;
 use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
-    ApiItem, ApiItemKind, ApiSurface, ImportEdge, ImportTarget, ModuleGraph, RootImports, Span,
+    ApiItem, ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, RootImports,
+    Span,
 };
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
@@ -37,7 +38,12 @@ struct World {
 
 impl World {
     /// `from` imports `target` at `line`.
-    fn import(mut self, from: &str, target: ImportTarget, line: u32) -> Self {
+    fn import(self, from: &str, target: ImportTarget, line: u32) -> Self {
+        self.link(from, target, line, EdgeKind::Import)
+    }
+
+    /// An edge of `kind` from `from` to `target` at `line`.
+    fn link(mut self, from: &str, target: ImportTarget, line: u32, kind: EdgeKind) -> Self {
         let specifier = match &target {
             ImportTarget::File { path } => path.clone(),
             ImportTarget::External { package } => package.clone(),
@@ -49,6 +55,7 @@ impl World {
             target,
             relative: false,
             line,
+            edge_kind: kind,
         });
         self
     }
@@ -256,6 +263,26 @@ fn a_two_module_cycle_is_one_finding_identified_by_its_members() {
     assert_eq!(result.status, CheckStatus::Fail);
     assert_eq!(result.findings, 1);
     assert_eq!(result.score, Some(cycle_score(1.0, 2)));
+}
+
+#[test]
+fn a_child_importing_its_parent_is_no_cycle_because_declarations_are_structure() {
+    // Rust: `lib.rs` declares `mod child;`, and `child.rs` uses `crate::Error` from `lib.rs`.
+    let world = World::default()
+        .link("lib", file("child"), 1, EdgeKind::Declaration)
+        .edge("child", "lib", 3);
+    let (result, findings) = run(&world, json!({}));
+    assert!(of_kind(&findings, "dep.cycle").is_empty(), "{findings:?}");
+    assert!(result.metrics["cycles"].abs() < f64::EPSILON);
+    let reexporting = World::default()
+        .link("lib", file("child"), 1, EdgeKind::ReExport)
+        .edge("child", "lib", 3);
+    let (_, findings) = run(&reexporting, json!({}));
+    assert_eq!(
+        of_kind(&findings, "dep.cycle").len(),
+        1,
+        "a re-export uses the module it re-exports"
+    );
 }
 
 #[test]

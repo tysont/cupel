@@ -2,7 +2,7 @@
 // ABOUTME: `super`), workspace members and path dependencies, external crates, and unresolved imports.
 mod support;
 
-use cupel_core::syntax::{ImportTarget, ModuleGraph};
+use cupel_core::syntax::{EdgeKind, ImportTarget, ModuleGraph};
 use support::{fixture, produce, tree};
 
 /// (root, from, line, specifier, target, relative) for every edge.
@@ -347,7 +347,7 @@ fn module_names_are_case_sensitive_even_where_the_file_system_is_not() {
 }
 
 #[test]
-fn the_deps_fixtures_are_a_module_cycle_and_a_layered_tree() {
+fn the_deps_fixtures_are_a_module_cycle_a_layered_tree_and_a_parent_child_tree() {
     let graph: ModuleGraph = produce("rust", &fixture("rust"));
     let deps: Vec<Row> = rows(&graph).into_iter().filter(is_deps).collect();
     let (cycle, layers) = ("src/deps_cycle", "src/deps_layers");
@@ -356,6 +356,7 @@ fn the_deps_fixtures_are_a_module_cycle_and_a_layered_tree() {
     };
     let c = |file: &str| format!("{cycle}/{file}");
     let l = |file: &str| format!("{layers}/{file}");
+    let t = |file: &str| format!("src/deps_tree/{file}");
     assert_eq!(
         deps,
         [
@@ -381,8 +382,50 @@ fn the_deps_fixtures_are_a_module_cycle_and_a_layered_tree() {
             ),
             r(l("port.rs"), 2, "super::domain::Order", l("domain/mod.rs")),
             r(l("port.rs"), 3, "super::infra::Store", l("infra/mod.rs")),
+            r(t("leaf.rs"), 1, "super::LIMIT", t("mod.rs")),
+            r(t("mod.rs"), 1, "leaf", t("leaf.rs")),
             r("src/lib.rs".to_owned(), 32, "deps_cycle", c("mod.rs")),
             r("src/lib.rs".to_owned(), 33, "deps_layers", l("mod.rs")),
+            r("src/lib.rs".to_owned(), 34, "deps_tree", t("mod.rs")),
+        ]
+    );
+}
+
+/// (from, specifier, kind) for every edge, in graph order.
+fn kinds(graph: &ModuleGraph) -> Vec<(String, String, EdgeKind)> {
+    graph
+        .roots
+        .iter()
+        .flat_map(|root| &root.edges)
+        .map(|edge| (edge.from.clone(), edge.specifier.clone(), edge.edge_kind))
+        .collect()
+}
+
+fn kind(from: &str, specifier: &str, kind: EdgeKind) -> (String, String, EdgeKind) {
+    (from.to_owned(), specifier.to_owned(), kind)
+}
+
+#[test]
+fn mod_declarations_are_declarations_and_visible_uses_re_exports() {
+    let dir = tree(&[
+        ("Cargo.toml", "[package]\nname = \"app\"\n"),
+        (
+            "src/lib.rs",
+            "mod child;\npub use child::Thing;\npub(crate) use child::Other;\nuse std::fmt;\n",
+        ),
+        (
+            "src/child.rs",
+            "use crate::Error;\npub struct Thing;\npub struct Other;\n",
+        ),
+    ]);
+    assert_eq!(
+        kinds(&produce::<ModuleGraph>("rust", dir.path())),
+        [
+            kind("src/child.rs", "crate::Error", EdgeKind::Import),
+            kind("src/lib.rs", "child", EdgeKind::Declaration),
+            kind("src/lib.rs", "child::Thing", EdgeKind::ReExport),
+            kind("src/lib.rs", "child::Other", EdgeKind::ReExport),
+            kind("src/lib.rs", "std::fmt", EdgeKind::Import),
         ]
     );
 }

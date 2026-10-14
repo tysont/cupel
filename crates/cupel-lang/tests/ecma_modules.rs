@@ -2,7 +2,7 @@
 // ABOUTME: dynamic imports, package `imports`/`exports`/`main`, tsconfig `paths`, builtins, and externals.
 mod support;
 
-use cupel_core::syntax::{ImportTarget, ModuleGraph};
+use cupel_core::syntax::{EdgeKind, ImportTarget, ModuleGraph};
 use support::{fixture, produce, tree};
 
 /// (root, from, line, specifier, target, relative) for every edge.
@@ -473,4 +473,42 @@ fn workspace_patterns_match_one_segment_with_wildcards_and_classes() {
     ]);
     let graph: ModuleGraph = produce("javascript", dir.path());
     assert_eq!(roots(&graph), [".", "libs/core", "tools/cli"]);
+}
+
+/// (from, specifier, kind) for every edge, in graph order.
+fn kinds(graph: &ModuleGraph) -> Vec<(String, String, EdgeKind)> {
+    graph
+        .roots
+        .iter()
+        .flat_map(|root| &root.edges)
+        .map(|edge| (edge.from.clone(), edge.specifier.clone(), edge.edge_kind))
+        .collect()
+}
+
+fn kind(from: &str, specifier: &str, kind: EdgeKind) -> (String, String, EdgeKind) {
+    (from.to_owned(), specifier.to_owned(), kind)
+}
+
+#[test]
+fn export_from_statements_are_re_exports_and_imports_are_imports() {
+    let dir = tree(&[
+        ("package.json", "{ \"name\": \"app\" }"),
+        (
+            "src/index.js",
+            "export { a } from \"./a.js\";\nexport * as b from \"./b.js\";\nimport c from \"./c.js\";\nconst d = require(\"./d.js\");\n",
+        ),
+        ("src/a.js", "export const a = 1;\n"),
+        ("src/b.js", "export const b = 1;\n"),
+        ("src/c.js", "export default 1;\n"),
+        ("src/d.js", "module.exports = {};\n"),
+    ]);
+    assert_eq!(
+        kinds(&produce::<ModuleGraph>("javascript", dir.path())),
+        [
+            kind("src/index.js", "./a.js", EdgeKind::ReExport),
+            kind("src/index.js", "./b.js", EdgeKind::ReExport),
+            kind("src/index.js", "./c.js", EdgeKind::Import),
+            kind("src/index.js", "./d.js", EdgeKind::Import),
+        ]
+    );
 }

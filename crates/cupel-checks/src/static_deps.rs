@@ -3,7 +3,7 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use cupel_core::config::{ConfigError, Table};
-use cupel_core::syntax::{ApiItemKind, ApiSurface, ImportTarget, ModuleGraph};
+use cupel_core::syntax::{ApiItemKind, ApiSurface, EdgeKind, ImportTarget, ModuleGraph};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event,
     EventSink, Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Measurement,
@@ -463,6 +463,8 @@ struct Report {
 struct Import {
     line: u32,
     specifier: String,
+    /// Some edge between the two uses the module rather than only declaring it (ADR-068).
+    uses: bool,
 }
 
 /// One language's file-level import graph (ADR-052).
@@ -497,7 +499,9 @@ impl Graph {
                             .or_insert_with(|| Import {
                                 line: edge.line,
                                 specifier: edge.specifier.clone(),
-                            });
+                                uses: false,
+                            })
+                            .uses |= edge.edge_kind != EdgeKind::Declaration;
                     }
                 }
                 ImportTarget::External { package } => {
@@ -537,6 +541,17 @@ impl Graph {
         }
     }
 
+    /// The modules `module` uses: a cycle follows uses, never a module declaration alone,
+    /// which is structure (a Rust parent declaring the child that imports it, ADR-068).
+    fn used<'a>(&'a self, module: &str) -> impl Iterator<Item = &'a String> {
+        self.imports
+            .get(module)
+            .into_iter()
+            .flat_map(|targets| targets.iter())
+            .filter(|(_, import)| import.uses)
+            .map(|(target, _)| target)
+    }
+
     /// Every strongly connected component of more than one module, members sorted, in order
     /// of their smallest member.
     fn cycles(&self) -> Vec<Vec<String>> {
@@ -548,14 +563,7 @@ impl Graph {
             .collect();
         let successors: Vec<Vec<usize>> = modules
             .iter()
-            .map(|module| {
-                self.imports
-                    .get(*module)
-                    .into_iter()
-                    .flat_map(BTreeMap::keys)
-                    .map(|target| index[target])
-                    .collect()
-            })
+            .map(|module| self.used(module).map(|target| index[target]).collect())
             .collect();
         let mut cycles: Vec<Vec<String>> = strongly_connected(&successors)
             .into_iter()
@@ -579,12 +587,7 @@ impl Graph {
         let mut parent: BTreeMap<&String, &String> = BTreeMap::new();
         let mut queue = VecDeque::from([start]);
         while let Some(module) = queue.pop_front() {
-            for next in self
-                .imports
-                .get(module)
-                .into_iter()
-                .flat_map(BTreeMap::keys)
-            {
+            for next in self.used(module) {
                 if next == start {
                     let mut cycle = vec![module.clone()];
                     let mut at = module;

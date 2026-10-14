@@ -262,6 +262,14 @@ expect = { target = { package = "typing" } }
 file = "src/ledger/__init__.py"
 name = ".generated.schema"
 
+[module-graph.declaration]
+not-applicable = "Python declares no modules in source: a module is a file or a package directory, found on import."
+
+[module-graph.re-export]
+file = "src/ledger/__init__.py"
+name = ".account.Account"
+expect = { target = { path = "src/ledger/account.py" } }
+
 [api-surface.function]
 file = "src/ledger/__init__.py"
 name = "ledger.balance"

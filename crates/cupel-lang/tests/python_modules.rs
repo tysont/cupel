@@ -2,7 +2,7 @@
 // ABOUTME: src and flat layouts, workspace projects, pytest base directories, externals, and misses.
 mod support;
 
-use cupel_core::syntax::{ImportTarget, ModuleGraph};
+use cupel_core::syntax::{EdgeKind, ImportTarget, ModuleGraph};
 use support::{fixture, produce, tree};
 
 /// (root, from, line, specifier, target, relative) for every edge.
@@ -337,6 +337,40 @@ fn module_names_are_case_sensitive_even_where_the_file_system_is_not() {
             row(".", "main.py", 1, "pkg.Account", "pkg/__init__.py", false),
             row(".", "main.py", 1, "pkg.account", "pkg/account.py", false),
             row(".", "main.py", 2, "Pkg", "external:Pkg", false),
+        ]
+    );
+}
+
+/// (from, specifier, kind) for every edge, in graph order.
+fn kinds(graph: &ModuleGraph) -> Vec<(String, String, EdgeKind)> {
+    graph
+        .roots
+        .iter()
+        .flat_map(|root| &root.edges)
+        .map(|edge| (edge.from.clone(), edge.specifier.clone(), edge.edge_kind))
+        .collect()
+}
+
+fn kind(from: &str, specifier: &str, kind: EdgeKind) -> (String, String, EdgeKind) {
+    (from.to_owned(), specifier.to_owned(), kind)
+}
+
+#[test]
+fn imports_of_names_listed_in_all_are_re_exports() {
+    let dir = tree(&[
+        ("pyproject.toml", "[project]\nname = \"shop\"\n"),
+        (
+            "shop/__init__.py",
+            "__all__ = [\"Cart\"]\n\nfrom .cart import Cart\nfrom .prices import total\n",
+        ),
+        ("shop/cart.py", "class Cart:\n    pass\n"),
+        ("shop/prices.py", "def total():\n    pass\n"),
+    ]);
+    assert_eq!(
+        kinds(&produce::<ModuleGraph>("python", dir.path())),
+        [
+            kind("shop/__init__.py", ".cart.Cart", EdgeKind::ReExport),
+            kind("shop/__init__.py", ".prices.total", EdgeKind::Import),
         ]
     );
 }

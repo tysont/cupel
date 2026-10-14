@@ -596,6 +596,50 @@
     },
     {
       "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "deps_tree::leaf::cap",
+      "file": "src/deps_tree/leaf.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "cap",
+      "namespace": "deps_tree::leaf",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "deps_tree::capped",
+      "file": "src/deps_tree/mod.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "capped",
+      "namespace": "deps_tree",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 40,
         "end_col": 2,
         "end_line": 22,
