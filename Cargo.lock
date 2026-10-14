@@ -305,6 +305,7 @@ dependencies = [
  "cupel-lang",
  "cupel-store",
  "insta",
+ "inventory",
  "predicates",
  "proptest",
  "semver",

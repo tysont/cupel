@@ -175,7 +175,7 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
         }
     }
     if keeps_run_record(run, cli) {
-        record(&writer, &envelope, &mut stderr);
+        record(&writer, &envelope, &run.take_test_results(), &mut stderr);
     }
     output(envelope, &presentation(rendering), stderr)
 }
@@ -197,11 +197,17 @@ fn writer_for(environment: &Environment, cli: &Cli) -> Result<Writer, CupelError
 
 /// Keeps `envelope` as the run record and in the fact store; a failure is a line on `stderr`
 /// and changes nothing else (ADR-045 §8).
-fn record(writer: &Writer, envelope: &Envelope, stderr: &mut String) {
+fn record(
+    writer: &Writer,
+    envelope: &Envelope,
+    test_results: &[(cupel_core::LangId, cupel_core::TestResults)],
+    stderr: &mut String,
+) {
     if let Err(error) = writer.run_record(&envelope.run.id, envelope) {
         let _ = writeln!(stderr, "cupel: could not write the run record: {error}");
     }
-    if let Err(error) = persist::record(writer, envelope, suppress::load(writer).ok().as_ref()) {
+    let suppressions = suppress::load(writer).ok();
+    if let Err(error) = persist::record(writer, envelope, test_results, suppressions.as_ref()) {
         let _ = writeln!(
             stderr,
             "cupel: could not record the run in the fact store: {error}"

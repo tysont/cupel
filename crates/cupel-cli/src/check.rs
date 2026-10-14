@@ -126,11 +126,7 @@ pub fn run(
         checks: catalog.checks(),
         producers: catalog.producers(),
     };
-    let outcome = if invocation.dry_run {
-        scheduler.plan(&job, events)?
-    } else {
-        scheduler.run(&job, events)?
-    };
+    let outcome = schedule(&scheduler, &job, invocation, events)?;
     let scope = ScopeInfo {
         mode: request.mode(),
         files: resolved.files.len() as u64,
@@ -143,6 +139,28 @@ pub fn run(
         git: git_info(writer.root(), &resolved),
         outcome,
     })
+}
+
+/// Runs (or, for a dry run, plans) `job`, keeping the test runs it made for the store; a red
+/// baseline is the exit-4 refusal (ADR-076).
+fn schedule(
+    scheduler: &Scheduler<'_>,
+    job: &Job<'_>,
+    invocation: &Invocation<'_>,
+    events: &mut dyn EventSink,
+) -> Result<Outcome, CupelError> {
+    let mut outcome = if invocation.dry_run {
+        scheduler.plan(job, events)?
+    } else {
+        scheduler.run(job, events)?
+    };
+    invocation
+        .run
+        .keep_test_results(std::mem::take(&mut outcome.test_results));
+    match outcome.refused.take() {
+        Some(red) => Err(CupelError::Unevaluable(Box::new(red))),
+        None => Ok(outcome),
+    }
 }
 
 /// The project roots outside `[scope] exclude`, and the files and range changes `request`

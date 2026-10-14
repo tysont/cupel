@@ -260,6 +260,10 @@ fn exit_3_when_doctor_finds_something_required_missing() {
     assert_eq!(envelope["findings"][0]["check"], json!("doctor"));
 }
 
+// Exit 4 needs a check that depends on test execution, and none ships before P3.4; its trigger
+// runs the CLI's entry point in-process with a test-only check in `runner_baseline.rs`
+// (ADR-076 §8).
+
 #[test]
 fn exit_5_when_the_timeout_cuts_work_short_keeps_the_partial_results() {
     let started = std::time::Instant::now();
