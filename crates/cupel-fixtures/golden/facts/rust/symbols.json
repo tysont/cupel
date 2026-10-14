@@ -1473,6 +1473,72 @@
         "line": 58
       },
       "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 50,
+        "end_col": 2,
+        "end_line": 69,
+        "line": 67
+      },
+      "display": "tests::quality_signals::a_comparison_inside_assert_pins_the_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "a_comparison_inside_assert_pins_the_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 69,
+        "line": 67
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 2,
+        "end_line": 73,
+        "line": 71
+      },
+      "display": "tests::quality_signals::assert_balanced",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "assert_balanced",
+      "namespace": "tests::quality_signals",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 73,
+        "line": 71
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 42,
+        "end_col": 2,
+        "end_line": 78,
+        "line": 76
+      },
+      "display": "tests::quality_signals::an_assertion_helper_is_an_assertion",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "an_assertion_helper_is_an_assertion",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 78,
+        "line": 76
+      },
+      "visibility": "private"
     }
   ]
 }

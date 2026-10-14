@@ -43,7 +43,28 @@
   (function_item
     name: (identifier) @test.name) @test.case)
 
-; Assertion idioms come before plain assertion macros: the earliest pattern wins.
+; Assertion idioms come before plain assertion macros: the earliest pattern wins. A `==` at the top
+; level of `assert!`'s arguments compares two values, as `assert_eq!` does; a `!=` rules one out.
+(macro_invocation
+  macro: (identifier) @_assert
+  (#eq? @_assert "assert")
+  (token_tree "==")) @test.assertion @assertion.idiom.equal
+
+(macro_invocation
+  macro: (identifier) @_assert
+  (#eq? @_assert "assert")
+  (token_tree "!=")) @test.assertion @assertion.idiom.not-equal
+
+; `assert!(x.is_none())` and `assert!(x.is_empty())` hold for exactly one value of `x`'s type, so
+; they pin it; a leading `!` rules that one value out instead.
+(macro_invocation
+  macro: (identifier) @_assert
+  (#eq? @_assert "assert")
+  (token_tree
+    (identifier) @_method
+    (#any-of? @_method "is_none" "is_empty")) @_arguments
+  (#not-match? @_arguments "^[(]\\s*!")) @test.assertion @assertion.idiom.one-value
+
 (macro_invocation
   macro: (identifier) @_assert
   (#eq? @_assert "assert")
@@ -66,6 +87,21 @@
   macro: (scoped_identifier
     name: (identifier) @assertion.name)
   (#match? @assertion.name "^(debug_|prop_)?assert")) @test.assertion
+
+; Assertion helpers: by convention a function named `assert_…` asserts. Its name is not in
+; [tests.assertions], so it is `unknown_assertion` (custom, strong).
+(call_expression
+  function: [
+    (identifier) @assertion.name
+    (scoped_identifier name: (identifier) @assertion.name)
+  ]
+  (#match? @assertion.name "^assert_")) @test.assertion
+
+; assert_cmd: `Command::assert()` checks the process outcome its chained calls describe.
+(call_expression
+  function: (field_expression
+    field: (field_identifier) @_assert)
+  (#eq? @_assert "assert")) @test.assertion @assertion.idiom.process
 
 ; mockall: `MockThing::new()`.
 (call_expression

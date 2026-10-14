@@ -62,3 +62,17 @@ fn statements_show_the_balance() {
     let statement = account.statement();
     assert_eq!(statement, "Account of lee\nbalance: 225");
 }
+
+#[test]
+fn a_comparison_inside_assert_pins_the_balance() {
+    assert!(balance(&[1, 2]) == 3);
+}
+
+fn assert_balanced(entries: &[i64], expected: i64) {
+    assert_eq!(balance(entries), expected);
+}
+
+#[test]
+fn an_assertion_helper_is_an_assertion() {
+    assert_balanced(&[2, 3], 5);
+}

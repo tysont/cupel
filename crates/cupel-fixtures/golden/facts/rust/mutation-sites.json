@@ -4810,6 +4810,168 @@
         "file": "tests/quality_signals.rs",
         "line": 58
       }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert!(balance(&[1, 2]) == 3);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 36,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "a858f82e4a0be4c2",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "86afccfb4dc71351",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "cddbe8ee5ec7efc3",
+          "span": {
+            "col": 33,
+            "end_col": 34,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 67
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(balance(entries), expected);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 44,
+            "end_line": 72,
+            "line": 72
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 71
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_balanced(&[2, 3], 5);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 33,
+            "end_line": 77,
+            "line": 77
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "849e71c4b3852f05",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 77,
+            "line": 77
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e00317a6c5bddd0b",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 77,
+            "line": 77
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "45640e75cc4c0eb2",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 77,
+            "line": 77
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 76
+      }
     }
   ]
 }

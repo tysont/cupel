@@ -482,6 +482,52 @@
             "end_line": 64,
             "line": 58
           }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 35,
+                "end_line": 68,
+                "line": 68
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "a_comparison_inside_assert_pins_the_balance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 69,
+            "line": 67
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "custom",
+              "span": {
+                "col": 5,
+                "end_col": 32,
+                "end_line": 77,
+                "line": 77
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "an_assertion_helper_is_an_assertion",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 78,
+            "line": 76
+          }
         }
       ],
       "file": "tests/quality_signals.rs",

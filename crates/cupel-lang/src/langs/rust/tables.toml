@@ -103,6 +103,10 @@ assert_display_snapshot = { kind = "snapshot", strength = "strong" }
 assert_json_snapshot = { kind = "snapshot", strength = "strong" }
 assert_yaml_snapshot = { kind = "snapshot", strength = "strong" }
 # Idioms captured as @assertion.idiom.<key>.
+equal = { kind = "equality", strength = "strong" }
+not-equal = { kind = "equality", strength = "weak" }
+one-value = { kind = "equality", strength = "strong" }
+process = { kind = "custom", strength = "strong" }
 is-present = { kind = "not-null", strength = "weak" }
 is-err = { kind = "throws", strength = "weak" }
 should-panic = { kind = "throws", strength = "strong" }

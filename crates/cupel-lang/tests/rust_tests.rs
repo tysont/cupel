@@ -227,3 +227,53 @@ fn conventions_find_a_stem_named_integration_test_below_a_crate() {
         ["crates/bank/tests/vault.rs"]
     );
 }
+
+/// The assertions of the only case in a Rust test file holding `body` as one `#[test]`.
+fn assertions_in(body: &str) -> Vec<(AssertionKind, AssertionStrength)> {
+    let dir = tree(&[("tests/t.rs", &format!("#[test]\nfn t() {{\n{body}\n}}\n"))]);
+    let frames: TestFrames = produce("rust", dir.path());
+    rows(file(&frames, "tests/t.rs"))[0].1.clone()
+}
+
+#[test]
+fn comparisons_and_predicates_true_of_one_value_pin_that_value() {
+    assert_eq!(assertions_in("assert!(total == 3);"), [(Equality, Strong)]);
+    assert_eq!(
+        assertions_in("assert!(found.is_none());"),
+        [(Equality, Strong)]
+    );
+    assert_eq!(
+        assertions_in("assert!(findings.is_empty(), \"{findings:?}\");"),
+        [(Equality, Strong)]
+    );
+    assert_eq!(assertions_in("assert!(a != b);"), [(Equality, Weak)]);
+    assert_eq!(assertions_in("assert!(x.is_some());"), [(NotNull, Weak)]);
+    assert_eq!(assertions_in("assert!(ready(x));"), [(Truthiness, Weak)]);
+    assert_eq!(
+        assertions_in("assert!(items.iter().all(|i| i.len() == 2));"),
+        [(Truthiness, Weak)],
+        "a comparison inside a closure does not pin the asserted value"
+    );
+    assert_eq!(
+        assertions_in("assert!(!list.is_empty());"),
+        [(Truthiness, Weak)],
+        "a negated predicate rules one value out"
+    );
+}
+
+#[test]
+fn assertion_helpers_and_process_assertions_are_assertions() {
+    assert_eq!(
+        assertions_in("assert_fixture(\"cargo\", &expected);"),
+        [(Custom, Strong)]
+    );
+    assert_eq!(
+        assertions_in("support::assert_usage(&outcome, \"--paths\");"),
+        [(Custom, Strong)]
+    );
+    assert_eq!(
+        assertions_in("cupel().arg(\"--version\").assert().success().stdout(\"x\");"),
+        [(Custom, Strong)]
+    );
+    assert_eq!(assertions_in("helper(&outcome);"), []);
+}
