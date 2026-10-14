@@ -2,33 +2,10 @@
 // ABOUTME: switch cases, catches, ternaries, and early returns and throws, with nesting and weights.
 mod support;
 
-use std::path::Path;
-
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{case_continuations, fixture, loop_tables, produce, tree};
+use support::{case_continuations, decisions_of, fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, Catch, EarlyReturn, Loop, Ternary};
-
-/// (kind, nesting, cyclomatic, cognitive) for each decision of the symbol `display`.
-fn decisions_of(lang: &str, root: &Path, display: &str) -> Vec<(DecisionKind, u32, u32, u32)> {
-    let symbols: Symbols = produce(lang, root);
-    let decisions: Decisions = produce(lang, root);
-    let key = symbols
-        .symbols
-        .iter()
-        .find(|s| s.display == display)
-        .unwrap_or_else(|| panic!("no symbol {display}"))
-        .key();
-    decisions
-        .symbols
-        .iter()
-        .find(|entry| entry.symbol == key)
-        .unwrap_or_else(|| panic!("no decisions entry for {display}"))
-        .decisions
-        .iter()
-        .map(|d| (d.kind, d.nesting, d.cyclomatic, d.cognitive))
-        .collect()
-}
 
 /// Both fixture repositories: the TypeScript `decide.ts` is the JavaScript `decide.js` typed.
 fn both(display: &str) -> [Vec<(DecisionKind, u32, u32, u32)>; 2] {

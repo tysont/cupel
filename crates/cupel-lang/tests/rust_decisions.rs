@@ -3,35 +3,14 @@
 mod support;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{case_continuations, fixture, loop_tables, produce, tree};
+use support::{case_continuations, decisions_of, fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, EarlyReturn, Loop};
-
-/// (kind, nesting, cyclomatic, cognitive) for each decision of the symbol `display`.
-fn decisions_of(root: &std::path::Path, display: &str) -> Vec<(DecisionKind, u32, u32, u32)> {
-    let symbols: Symbols = produce("rust", root);
-    let decisions: Decisions = produce("rust", root);
-    let key = symbols
-        .symbols
-        .iter()
-        .find(|s| s.display == display)
-        .unwrap_or_else(|| panic!("no symbol {display}"))
-        .key();
-    decisions
-        .symbols
-        .iter()
-        .find(|entry| entry.symbol == key)
-        .unwrap_or_else(|| panic!("no decisions entry for {display}"))
-        .decisions
-        .iter()
-        .map(|d| (d.kind, d.nesting, d.cyclomatic, d.cognitive))
-        .collect()
-}
 
 #[test]
 fn an_else_if_chain_is_flat_and_conditions_do_not_nest() {
     assert_eq!(
-        decisions_of(&fixture("rust"), "decide::classify"),
+        decisions_of("rust", &fixture("rust"), "decide::classify"),
         [(Branch, 0, 1, 1), (Branch, 0, 1, 1), (BooleanOp, 0, 1, 1),]
     );
 }
@@ -39,7 +18,7 @@ fn an_else_if_chain_is_flat_and_conditions_do_not_nest() {
 #[test]
 fn a_return_inside_a_branch_inside_a_loop_is_nested_twice() {
     assert_eq!(
-        decisions_of(&fixture("rust"), "decide::first_overdraft"),
+        decisions_of("rust", &fixture("rust"), "decide::first_overdraft"),
         [(Loop, 0, 1, 1), (Branch, 1, 1, 1), (EarlyReturn, 2, 0, 1)]
     );
 }
@@ -47,7 +26,7 @@ fn a_return_inside_a_branch_inside_a_loop_is_nested_twice() {
 #[test]
 fn the_question_mark_operator_is_an_early_return() {
     assert_eq!(
-        decisions_of(&fixture("rust"), "decide::parse_cents"),
+        decisions_of("rust", &fixture("rust"), "decide::parse_cents"),
         [(EarlyReturn, 0, 0, 1)]
     );
 }
@@ -55,7 +34,7 @@ fn the_question_mark_operator_is_an_early_return() {
 #[test]
 fn match_arms_are_cases_and_only_the_first_weighs_toward_cognitive() {
     assert_eq!(
-        decisions_of(&fixture("rust"), "decide::describe"),
+        decisions_of("rust", &fixture("rust"), "decide::describe"),
         [(Case, 0, 1, 1), (Case, 0, 1, 0)]
     );
 }
@@ -81,7 +60,7 @@ fn a_final_return_is_not_early_and_comments_do_not_change_that() {
         "fn f(x: i32) -> i32 {\n    if x > 0 {\n        return 1;\n    }\n    return 2;\n    // done\n}\n",
     )]);
     assert_eq!(
-        decisions_of(dir.path(), "f"),
+        decisions_of("rust", dir.path(), "f"),
         [(Branch, 0, 1, 1), (EarlyReturn, 1, 0, 1)]
     );
 }
@@ -95,13 +74,16 @@ fn closures_and_nested_functions_own_their_decisions_and_inline_closures_do_not(
          fn inner(x: i32) -> bool { x > 0 || x < -10 }\n    \
          v.iter().filter(|x| **x > 0 && inner(**x)).map(positive).sum()\n}\n",
     )]);
-    assert_eq!(decisions_of(dir.path(), "outer"), [(BooleanOp, 0, 1, 1)]);
     assert_eq!(
-        decisions_of(dir.path(), "outer::positive"),
+        decisions_of("rust", dir.path(), "outer"),
+        [(BooleanOp, 0, 1, 1)]
+    );
+    assert_eq!(
+        decisions_of("rust", dir.path(), "outer::positive"),
         [(Branch, 0, 1, 1)]
     );
     assert_eq!(
-        decisions_of(dir.path(), "outer::inner"),
+        decisions_of("rust", dir.path(), "outer::inner"),
         [(BooleanOp, 0, 1, 1)]
     );
 }
@@ -117,7 +99,7 @@ fn while_loop_let_else_and_wildcard_arms() {
          n\n}\n",
     )]);
     assert_eq!(
-        decisions_of(dir.path(), "f"),
+        decisions_of("rust", dir.path(), "f"),
         [
             (Branch, 0, 1, 1),
             (EarlyReturn, 1, 0, 1),

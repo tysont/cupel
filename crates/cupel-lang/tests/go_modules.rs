@@ -2,153 +2,171 @@
 // ABOUTME: members to package files, the standard library and required modules as external, the rest unresolved.
 mod support;
 
-use cupel_core::syntax::{EdgeKind, ImportTarget, ModuleGraph};
-use support::{fixture, produce, tree};
-
-/// (root, from, line, specifier, target, relative) for every edge.
-type Row = (String, String, u32, String, String, bool);
-
-fn rows(graph: &ModuleGraph) -> Vec<Row> {
-    graph
-        .roots
-        .iter()
-        .flat_map(|root| {
-            root.edges.iter().map(|edge| {
-                (
-                    root.root.clone(),
-                    edge.from.clone(),
-                    edge.line,
-                    edge.specifier.clone(),
-                    match &edge.target {
-                        ImportTarget::File { path } => path.clone(),
-                        ImportTarget::External { package } => format!("external:{package}"),
-                        ImportTarget::Unresolved => "unresolved".to_owned(),
-                    },
-                    edge.relative,
-                )
-            })
-        })
-        .collect()
-}
-
-/// An edge in the root `root`; Go imports are never path-relative.
-fn row(root: &str, from: &str, line: u32, specifier: &str, target: &str) -> Row {
-    (
-        root.to_owned(),
-        from.to_owned(),
-        line,
-        specifier.to_owned(),
-        target.to_owned(),
-        false,
-    )
-}
+use cupel_core::syntax::{EdgeKind, ModuleGraph};
+use support::{Edge, EdgeRow, edge_rows, fixture, kinds, produce, row, tree, under};
 
 /// Whether an edge starts or ends in the `deps_` fixtures, which `static.deps` reads and
 /// `the_deps_fixtures_are_a_package_cycle_and_a_layered_import` pins separately.
-fn is_deps(row: &Row) -> bool {
+fn is_deps(row: &EdgeRow) -> bool {
     row.1.contains("deps_") || row.4.contains("deps_")
 }
 
 /// The fixture's rows outside the `deps_` fixtures.
-fn without_deps(rows: Vec<Row>) -> Vec<Row> {
+fn without_deps(rows: Vec<EdgeRow>) -> Vec<EdgeRow> {
     rows.into_iter().filter(|row| !is_deps(row)).collect()
 }
+
+const FIXTURE_EDGES: &[Edge<'static>] = &[
+    ("cmd/ledger/main.go", 4, "fmt", "external:std", false),
+    ("cmd/ledger/main.go", 5, "os", "external:std", false),
+];
+
+/// The command imports the root package, which is an edge to each of its files.
+const PACKAGE_FILES: [&str; 7] = [
+    "clones_settlement.go",
+    "complexity.go",
+    "crap_scores.go",
+    "decide.go",
+    "ledger.go",
+    "pricing.go",
+    "twins.go",
+];
+
+const PACKAGE_EDGES: &[Edge<'static>] = &[
+    ("complexity.go", 3, "fmt", "external:std", false),
+    ("decide.go", 4, "errors", "external:std", false),
+    ("decide.go", 5, "strconv", "external:std", false),
+    ("decide.go", 6, "strings", "external:std", false),
+    ("ledger.go", 4, "fmt", "external:std", false),
+    (
+        "ledger.go",
+        6,
+        "github.com/google/uuid",
+        "external:github.com/google/uuid",
+        false,
+    ),
+    (
+        "ledger.go",
+        8,
+        "example.com/ledger/gen",
+        "unresolved",
+        false,
+    ),
+    (
+        "ledger.go",
+        9,
+        "example.com/ledger/report",
+        "report/format.go",
+        false,
+    ),
+    (
+        "ledger.go",
+        10,
+        "example.com/shapes",
+        "shapes/geometry.go",
+        false,
+    ),
+    (
+        "ledger_quality_test.go",
+        4,
+        "testing",
+        "external:std",
+        false,
+    ),
+    (
+        "ledger_quality_test.go",
+        6,
+        "github.com/stretchr/testify/assert",
+        "external:github.com/stretchr/testify",
+        false,
+    ),
+    ("ledger_test.go", 4, "os", "external:std", false),
+    ("ledger_test.go", 5, "testing", "external:std", false),
+    ("pricing.go", 3, "log", "external:std", false),
+    ("pricing_test.go", 4, "testing", "external:std", false),
+    (
+        "pricing_test.go",
+        6,
+        "github.com/gkampitakis/go-snaps/snaps",
+        "external:github.com/gkampitakis/go-snaps",
+        false,
+    ),
+    (
+        "pricing_test.go",
+        7,
+        "github.com/stretchr/testify/assert",
+        "external:github.com/stretchr/testify",
+        false,
+    ),
+    (
+        "pricing_test.go",
+        8,
+        "github.com/stretchr/testify/mock",
+        "external:github.com/stretchr/testify",
+        false,
+    ),
+    (
+        "pricing_test.go",
+        9,
+        "github.com/stretchr/testify/require",
+        "external:github.com/stretchr/testify",
+        false,
+    ),
+    ("report/format.go", 3, "fmt", "external:std", false),
+];
+
+const SHAPES_EDGES: &[Edge<'static>] = &[("shapes/geometry.go", 3, "math", "external:std", false)];
 
 #[test]
 fn the_fixture_graph_is_exactly_its_import_edges() {
     let graph: ModuleGraph = produce("go", &fixture("go"));
     let roots: Vec<&str> = graph.roots.iter().map(|r| r.root.as_str()).collect();
     assert_eq!(roots, [".", "shapes"]);
-    let testify = "external:github.com/stretchr/testify";
-    // The command imports the root package, which is an edge to each of its files.
-    let package_files = [
-        "clones_settlement.go",
-        "complexity.go",
-        "crap_scores.go",
-        "decide.go",
-        "ledger.go",
-        "pricing.go",
-        "twins.go",
-    ]
-    .map(|file| row(".", "cmd/ledger/main.go", 7, "example.com/ledger", file));
-    let mut expected = vec![
-        row(".", "cmd/ledger/main.go", 4, "fmt", "external:std"),
-        row(".", "cmd/ledger/main.go", 5, "os", "external:std"),
-    ];
-    expected.extend(package_files);
-    expected.extend([
-        row(".", "complexity.go", 3, "fmt", "external:std"),
-        row(".", "decide.go", 4, "errors", "external:std"),
-        row(".", "decide.go", 5, "strconv", "external:std"),
-        row(".", "decide.go", 6, "strings", "external:std"),
-        row(".", "ledger.go", 4, "fmt", "external:std"),
+    let mut expected = under(".", FIXTURE_EDGES);
+    expected.extend(PACKAGE_FILES.map(|file| {
         row(
             ".",
-            "ledger.go",
-            6,
-            "github.com/google/uuid",
-            "external:github.com/google/uuid",
-        ),
-        row(".", "ledger.go", 8, "example.com/ledger/gen", "unresolved"),
-        row(
-            ".",
-            "ledger.go",
-            9,
-            "example.com/ledger/report",
-            "report/format.go",
-        ),
-        row(
-            ".",
-            "ledger.go",
-            10,
-            "example.com/shapes",
-            "shapes/geometry.go",
-        ),
-        row(".", "ledger_quality_test.go", 4, "testing", "external:std"),
-        row(
-            ".",
-            "ledger_quality_test.go",
-            6,
-            "github.com/stretchr/testify/assert",
-            "external:github.com/stretchr/testify",
-        ),
-        row(".", "ledger_test.go", 4, "os", "external:std"),
-        row(".", "ledger_test.go", 5, "testing", "external:std"),
-        row(".", "pricing.go", 3, "log", "external:std"),
-        row(".", "pricing_test.go", 4, "testing", "external:std"),
-        row(
-            ".",
-            "pricing_test.go",
-            6,
-            "github.com/gkampitakis/go-snaps/snaps",
-            "external:github.com/gkampitakis/go-snaps",
-        ),
-        row(
-            ".",
-            "pricing_test.go",
-            7,
-            "github.com/stretchr/testify/assert",
-            testify,
-        ),
-        row(
-            ".",
-            "pricing_test.go",
-            8,
-            "github.com/stretchr/testify/mock",
-            testify,
-        ),
-        row(
-            ".",
-            "pricing_test.go",
-            9,
-            "github.com/stretchr/testify/require",
-            testify,
-        ),
-        row(".", "report/format.go", 3, "fmt", "external:std"),
-        row("shapes", "shapes/geometry.go", 3, "math", "external:std"),
-    ]);
-    assert_eq!(without_deps(rows(&graph)), expected);
+            ("cmd/ledger/main.go", 7, "example.com/ledger", file, false),
+        )
+    }));
+    expected.extend(under(".", PACKAGE_EDGES));
+    expected.extend(under("shapes", SHAPES_EDGES));
+    assert_eq!(without_deps(edge_rows(&graph)), expected);
 }
+
+const WORKSPACE_EDGES: &[Edge<'static>] = &[
+    ("app/main.go", 4, "bank/util", "app/util/util.go", false),
+    ("app/main.go", 5, "embed", "external:std", false),
+    (
+        "app/main.go",
+        6,
+        "example.org/lib/money",
+        "lib/money/cents.go",
+        false,
+    ),
+    (
+        "app/main.go",
+        6,
+        "example.org/lib/money",
+        "lib/money/money.go",
+        false,
+    ),
+    (
+        "app/main.go",
+        7,
+        "github.com/acme/kit/v2/log",
+        "external:github.com/acme/kit/v2",
+        false,
+    ),
+    (
+        "app/main.go",
+        8,
+        "github.com/acme/other",
+        "unresolved",
+        false,
+    ),
+    ("app/main.go", 9, "bank/empty", "unresolved", false),
+];
 
 #[test]
 fn work_members_dotless_module_paths_aliases_and_unrequired_modules() {
@@ -175,42 +193,7 @@ fn work_members_dotless_module_paths_aliases_and_unrequired_modules() {
     let graph: ModuleGraph = produce("go", dir.path());
     let roots: Vec<&str> = graph.roots.iter().map(|r| r.root.as_str()).collect();
     assert_eq!(roots, ["app", "lib"]);
-    assert_eq!(
-        rows(&graph),
-        [
-            row("app", "app/main.go", 4, "bank/util", "app/util/util.go"),
-            row("app", "app/main.go", 5, "embed", "external:std"),
-            row(
-                "app",
-                "app/main.go",
-                6,
-                "example.org/lib/money",
-                "lib/money/cents.go"
-            ),
-            row(
-                "app",
-                "app/main.go",
-                6,
-                "example.org/lib/money",
-                "lib/money/money.go"
-            ),
-            row(
-                "app",
-                "app/main.go",
-                7,
-                "github.com/acme/kit/v2/log",
-                "external:github.com/acme/kit/v2"
-            ),
-            row(
-                "app",
-                "app/main.go",
-                8,
-                "github.com/acme/other",
-                "unresolved"
-            ),
-            row("app", "app/main.go", 9, "bank/empty", "unresolved"),
-        ]
-    );
+    assert_eq!(edge_rows(&graph), under("app", WORKSPACE_EDGES));
 }
 
 #[test]
@@ -221,18 +204,21 @@ fn files_outside_any_module_are_grouped_under_the_repository_root() {
     )]);
     let graph: ModuleGraph = produce("go", dir.path());
     assert_eq!(
-        rows(&graph),
-        [
-            row(".", "loose.go", 4, "net/http", "external:std"),
-            row(".", "loose.go", 5, "github.com/acme/kit", "unresolved"),
-        ]
+        edge_rows(&graph),
+        under(
+            ".",
+            &[
+                ("loose.go", 4, "net/http", "external:std", false),
+                ("loose.go", 5, "github.com/acme/kit", "unresolved", false),
+            ]
+        )
     );
 }
 
 #[test]
 fn the_deps_fixtures_are_a_package_cycle_and_a_layered_import() {
     let graph: ModuleGraph = produce("go", &fixture("go"));
-    let deps: Vec<Row> = rows(&graph).into_iter().filter(is_deps).collect();
+    let deps: Vec<EdgeRow> = edge_rows(&graph).into_iter().filter(is_deps).collect();
     let module = "example.com/ledger";
     assert_eq!(
         deps,
@@ -260,22 +246,9 @@ fn the_deps_fixtures_are_a_package_cycle_and_a_layered_import() {
         ]
         .map(|(from, package, target)| row(
             ".",
-            from,
-            3,
-            &format!("{module}/{package}"),
-            target
+            (from, 3, &format!("{module}/{package}"), target, false)
         ))
     );
-}
-
-/// (from, specifier, kind) for every edge, in graph order.
-fn kinds(graph: &ModuleGraph) -> Vec<(String, String, EdgeKind)> {
-    graph
-        .roots
-        .iter()
-        .flat_map(|root| &root.edges)
-        .map(|edge| (edge.from.clone(), edge.specifier.clone(), edge.edge_kind))
-        .collect()
 }
 
 #[test]

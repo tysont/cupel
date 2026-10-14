@@ -2,20 +2,10 @@
 // ABOUTME: normalized signatures, API differences, and roots (main, exports, tests, init, TestMain).
 mod support;
 
-use cupel_core::syntax::{
-    ApiItemKind, ApiSurface, RootReason, Roots, SymbolDef, Symbols, TestFrames,
-};
-use support::{fixture, produce, tree};
+use cupel_core::syntax::{ApiItemKind, ApiSurface, RootReason, Roots, Symbols, TestFrames};
+use support::{fixture, items, produce, reasons, tree};
 
 use ApiItemKind::{Constant, Function, Interface, Method, Type, Variable};
-
-fn items(api: &ApiSurface, file: &str) -> Vec<(String, ApiItemKind, String)> {
-    api.items
-        .iter()
-        .filter(|item| item.file == file)
-        .map(|item| (item.path.clone(), item.kind, item.signature.clone()))
-        .collect()
-}
 
 fn item(path: &str, kind: ApiItemKind, signature: &str) -> (String, ApiItemKind, String) {
     (path.to_owned(), kind, signature.to_owned())
@@ -139,20 +129,6 @@ fn signatures_ignore_layout_and_names_and_removing_a_parameter_changes_them() {
     assert_eq!(spread.items[0].signature, compact.items[0].signature);
     assert_eq!(removed.items[0].path, compact.items[0].path);
     assert_eq!(removed.items[0].signature, "(_ int64) error");
-}
-
-fn reasons(roots: &Roots, symbols: &Symbols, display: &str) -> Vec<RootReason> {
-    let symbol: &SymbolDef = symbols
-        .symbols
-        .iter()
-        .find(|s| s.display == display)
-        .unwrap_or_else(|| panic!("no symbol {display}"));
-    roots
-        .roots
-        .iter()
-        .filter(|root| root.symbol == symbol.key())
-        .map(|root| root.reason)
-        .collect()
 }
 
 #[test]

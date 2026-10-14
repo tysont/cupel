@@ -6,7 +6,7 @@ use std::path::Path;
 
 use cupel_core::syntax::{MutationOperator, MutationSites, OperatorSet, Site, Symbols};
 use proptest::prelude::*;
-use support::{fixture, produce, tree};
+use support::{byte_range, fixture, produce, tree};
 
 use MutationOperator::{
     ArithAddSub, ArithMulDiv, BooleanLiteral, BooleanOp, Boundary, Constant, Equality, Negation,
@@ -160,22 +160,6 @@ fn every_replacement_parses(root: &Path) {
         }
     }
     assert!(checked > 0);
-}
-
-/// The byte range of a site from its 1-based line and byte columns.
-fn byte_range(source: &str, site: &Site) -> (usize, usize) {
-    let offset = |line: u32, col: u32| {
-        let start: usize = source
-            .split_inclusive('\n')
-            .take(line as usize - 1)
-            .map(str::len)
-            .sum();
-        start + col as usize - 1
-    };
-    (
-        offset(site.span.line, site.span.col),
-        offset(site.span.end_line, site.span.end_col),
-    )
 }
 
 #[test]

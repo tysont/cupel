@@ -2,19 +2,9 @@
 // ABOUTME: `self`/`cls` receivers normalize away; renames, literals, layout, and moves keep the hash.
 mod support;
 
-use cupel_core::syntax::{NormNode, NormTree, Symbols};
+use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{produce, tree};
-
-/// `(label child …)`, or `label` for a leaf.
-fn sexp(node: &NormNode) -> String {
-    if node.children.is_empty() {
-        node.label.clone()
-    } else {
-        let children: Vec<String> = node.children.iter().map(sexp).collect();
-        format!("({} {})", node.label, children.join(" "))
-    }
-}
+use support::{produce, sexp, tree};
 
 /// (display, normalized tree, hash) of every symbol in `source`, a Python file at `path`.
 fn normalize_all(path: &str, source: &str) -> Vec<(String, String, String)> {

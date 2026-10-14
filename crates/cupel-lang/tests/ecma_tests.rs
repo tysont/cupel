@@ -2,78 +2,14 @@
 // ABOUTME: chai, and node:test cases, assertion kinds and strengths, skips, mocks, setup, and test pairing.
 mod support;
 
-use cupel_core::syntax::{
-    AssertionKind, AssertionStrength, TestCase, TestConventions, TestFile, TestFrames,
-};
-use support::{fixture, produce, tree};
+use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFile, TestFrames};
+use support::{Skip, case, file, fixture, produce, rows, tree};
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
 use AssertionStrength::{Strong, Weak};
 
 fn frames(lang: &str) -> TestFrames {
     produce(lang, &fixture(lang))
-}
-
-fn file<'a>(frames: &'a TestFrames, path: &str) -> &'a TestFile {
-    frames
-        .files
-        .iter()
-        .find(|f| f.file == path)
-        .unwrap_or_else(|| panic!("no test file {path}"))
-}
-
-/// Whether a case is skipped, and why.
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum Skip {
-    Runs,
-    Skipped,
-    Because(String),
-}
-
-/// (name, assertions as (kind, strength), skip, mock targets, start line) per case.
-type CaseRow = (
-    String,
-    Vec<(AssertionKind, AssertionStrength)>,
-    Skip,
-    Vec<String>,
-    u32,
-);
-
-fn rows(file: &TestFile) -> Vec<CaseRow> {
-    file.cases.iter().map(row).collect()
-}
-
-fn row(case: &TestCase) -> CaseRow {
-    (
-        case.name.clone(),
-        case.assertions
-            .iter()
-            .map(|a| (a.kind, a.strength))
-            .collect(),
-        match case.skip.as_ref().map(|s| s.reason.clone()) {
-            None => Skip::Runs,
-            Some(None) => Skip::Skipped,
-            Some(Some(reason)) => Skip::Because(reason),
-        },
-        case.mocks.iter().map(|m| m.target.clone()).collect(),
-        case.span.line,
-    )
-}
-
-fn case(
-    name: &str,
-    assertions: &[(AssertionKind, AssertionStrength)],
-    skip: Skip,
-    mocks: &[&str],
-    line: u32,
-) -> CaseRow {
-    (
-        name.to_owned(),
-        assertions.to_vec(),
-        skip,
-        mocks.iter().map(|m| (*m).to_owned()).collect(),
-        line,
-    )
 }
 
 fn setup_lines(file: &TestFile) -> Vec<u32> {

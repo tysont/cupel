@@ -2,19 +2,9 @@
 // ABOUTME: TS-annotated twin normalizing alike, and hash invariance under renames, literals, layout, moves.
 mod support;
 
-use cupel_core::syntax::{NormNode, NormTree, Symbols};
+use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{fixture, produce, tree};
-
-/// `(label child …)`, or `label` for a leaf.
-fn sexp(node: &NormNode) -> String {
-    if node.children.is_empty() {
-        node.label.clone()
-    } else {
-        let children: Vec<String> = node.children.iter().map(sexp).collect();
-        format!("({} {})", node.label, children.join(" "))
-    }
-}
+use support::{fixture, produce, sexp, tree};
 
 /// The normalized tree and hash of the only symbol in `source`, a `lang` file at `path`.
 fn normalize_at(lang: &str, path: &str, source: &str) -> (String, String) {

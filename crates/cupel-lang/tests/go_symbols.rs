@@ -3,26 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{SymbolKind, Symbols, Visibility};
-use support::{fixture, lines, produce, tree};
-
-type Row = (&'static str, SymbolKind, Visibility, (u32, u32));
-
-fn rows(symbols: &Symbols, file: &str) -> Vec<(String, SymbolKind, Visibility, (u32, u32))> {
-    symbols
-        .symbols
-        .iter()
-        .filter(|symbol| symbol.file == file)
-        .map(|s| (s.display.clone(), s.kind, s.visibility, lines(s.span)))
-        .collect()
-}
-
-fn expect(symbols: &Symbols, file: &str, expected: &[Row]) {
-    let expected: Vec<(String, SymbolKind, Visibility, (u32, u32))> = expected
-        .iter()
-        .map(|(d, k, v, l)| ((*d).to_owned(), *k, *v, *l))
-        .collect();
-    assert_eq!(rows(symbols, file), expected, "{file}");
-}
+use support::{assert_symbols, fixture, produce, tree};
 
 use SymbolKind::{Closure, Function, Method};
 use Visibility::{Internal, Public};
@@ -30,7 +11,7 @@ use Visibility::{Internal, Public};
 #[test]
 fn package_files_have_functions_methods_and_closures_namespaced_by_package_and_receiver() {
     let symbols: Symbols = produce("go", &fixture("go"));
-    expect(
+    assert_symbols(
         &symbols,
         "ledger.go",
         &[
@@ -55,17 +36,17 @@ fn package_files_have_functions_methods_and_closures_namespaced_by_package_and_r
 #[test]
 fn the_namespace_is_the_package_name_not_the_directory() {
     let symbols: Symbols = produce("go", &fixture("go"));
-    expect(
+    assert_symbols(
         &symbols,
         "report/format.go",
         &[("report.Render", Function, Public, (6, 8))],
     );
-    expect(
+    assert_symbols(
         &symbols,
         "cmd/ledger/main.go",
         &[("main.main", Function, Internal, (10, 14))],
     );
-    expect(
+    assert_symbols(
         &symbols,
         "shapes/geometry.go",
         &[
@@ -81,9 +62,11 @@ fn the_namespace_is_the_package_name_not_the_directory() {
 #[test]
 fn test_files_hold_test_functions_and_test_doubles() {
     let symbols: Symbols = produce("go", &fixture("go"));
-    let names: Vec<String> = rows(&symbols, "pricing_test.go")
-        .into_iter()
-        .map(|row| row.0)
+    let names: Vec<&str> = symbols
+        .symbols
+        .iter()
+        .filter(|symbol| symbol.file == "pricing_test.go")
+        .map(|symbol| symbol.display.as_str())
         .collect();
     assert_eq!(
         names,
@@ -110,7 +93,7 @@ fn generic_receivers_package_level_function_variables_and_anonymous_literals() {
          func Run() {\n\tgo func() {}()\n\tvar done = func() {}\n\tdone()\n}\n",
     )]);
     let symbols: Symbols = produce("go", dir.path());
-    expect(
+    assert_symbols(
         &symbols,
         "stack.go",
         &[

@@ -2,19 +2,9 @@
 // ABOUTME: and properties: invariant under renames, layout, literals, and moves; sensitive to structure.
 mod support;
 
-use cupel_core::syntax::{NormNode, NormTree, Symbols};
+use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{produce, tree};
-
-/// `(label child …)`, or `label` for a leaf.
-fn sexp(node: &NormNode) -> String {
-    if node.children.is_empty() {
-        node.label.clone()
-    } else {
-        let children: Vec<String> = node.children.iter().map(sexp).collect();
-        format!("({} {})", node.label, children.join(" "))
-    }
-}
+use support::{produce, sexp, tree};
 
 /// The normalized tree and hash of the only symbol in `source`, a Go file at `path`.
 fn normalize_at(path: &str, source: &str) -> (String, String) {
