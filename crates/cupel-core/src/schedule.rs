@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use crate::base::BaseTree;
 use crate::cancel::Cancellation;
-use crate::check::{Check, CheckCtx, CheckRegistry, Plan};
+use crate::check::{Check, CheckCtx, CheckRegistry, Manifest, Plan};
 use crate::config::Config;
 use crate::dry_run::{PlannedCheck, PlannedSkip, RunPlan};
 use crate::error::{ArgumentError, Error, Result};
@@ -86,7 +86,7 @@ impl Scheduler<'_> {
     /// Runs `job`, streaming events to `sink`.
     pub fn run(&self, job: &Job<'_>, sink: &mut dyn EventSink) -> Result<Outcome> {
         let mut store = FactStore::new(self.producers, job);
-        let mut base = job
+        let base = job
             .base
             .as_ref()
             .map(|base| FactStore::at(self.producers, job, base));
@@ -103,50 +103,30 @@ impl Scheduler<'_> {
                 reason: skip.skipped.reason,
             });
         }
+        let mut execution = Execution {
+            job,
+            store,
+            base,
+            interrupted: false,
+        };
         let mut checks = Vec::new();
         let mut findings = Vec::new();
         let mut measurements = Vec::new();
-        let mut interrupted = store.interrupted;
         for check in &job.selected {
-            let tasks: Vec<&Task<'_>> = prepared
-                .tasks
-                .iter()
-                .filter(|task| same(task.check, *check))
-                .collect();
-            let skips: Vec<&Skip<'_>> = prepared
-                .skips
-                .iter()
-                .filter(|skip| same(skip.check, *check))
-                .collect();
-            let skips: Vec<Skipped> = skips.into_iter().map(|skip| skip.skipped.clone()).collect();
+            let (tasks, skips) = prepared.of(*check);
             // A check runs when some language supports it, or when no language is in scope.
             if tasks.is_empty() && !skips.is_empty() {
                 checks.push(skipped_entry(*check, skips));
-            } else {
-                let mut run = CheckRun::start(*check, &tasks, sink);
-                for task in tasks {
-                    let result = Self::run_task(
-                        job,
-                        &mut store,
-                        base.as_mut(),
-                        task,
-                        &mut run.sink(&task.lang, sink),
-                    );
-                    // A check may skip itself for its own reasons (ADR-048); only a cut-short
-                    // check or a timeout skip makes the run partial.
-                    interrupted |= result.status == CheckStatus::Partial
-                        || result
-                            .skipped
-                            .as_ref()
-                            .is_some_and(|skipped| skipped.reason == SkipReason::Timeout);
-                    run.record(task, result, sink);
-                }
-                let finished = run.finish(skips, sink);
-                checks.push(finished.result);
-                findings.extend(finished.findings);
-                measurements.extend(finished.measurements);
+                continue;
             }
+            let finished = execution.run_check(*check, &tasks, skips, sink);
+            checks.push(finished.result);
+            findings.extend(finished.findings);
+            measurements.extend(finished.measurements);
         }
+        let Execution {
+            store, interrupted, ..
+        } = execution;
         // P2.2 persists this to the store.
         findings.extend(store.findings);
         sort_findings(&mut findings);
@@ -237,143 +217,144 @@ impl Scheduler<'_> {
                 exclude: job.config.file.scope.exclude.clone(),
             },
         );
-        let mut tasks = Vec::new();
-        let mut skips = Vec::new();
-        for check in &job.selected {
-            let manifest = check.manifest();
-            let mut supported = Vec::new();
-            for lang in &job.langs {
-                let support = matrix
-                    .get(&manifest.id, &lang.id)
-                    .cloned()
-                    .unwrap_or(Support::Supported);
-                if support == Support::Supported {
-                    supported.push(lang.clone());
-                } else {
-                    skips.push(Skip {
-                        check: *check,
-                        skipped: unsupported(&support, &lang.id),
-                    });
-                }
-            }
-            for mut langs in task_groups(*check, supported) {
-                let lang = langs.remove(0);
-                let scope = langs.iter().fold(
-                    scopes.get(&lang.id).cloned().unwrap_or_default(),
-                    |scope, sibling| union(scope, scopes.get(&sibling.id)),
-                );
-                if !check.base_needs().is_empty() && job.base.is_none() {
-                    skips.push(Skip {
-                        check: *check,
-                        skipped: needs_range(&manifest.id, &lang.id),
-                    });
-                    continue;
-                }
-                let ctx = check_ctx(job, *check, &lang.id, scope.clone());
-                let plan = check.plan(&ctx, &scope)?;
-                tasks.push(Task {
-                    check: *check,
-                    lang,
-                    siblings: langs,
-                    scope,
-                    plan,
-                });
-            }
-        }
-        Ok(Prepared {
-            tasks,
-            skips,
+        let mut prepared = Prepared {
+            tasks: Vec::new(),
+            skips: Vec::new(),
             symbols,
-        })
+        };
+        for check in &job.selected {
+            prepared.add(job, *check, &matrix, &scopes)?;
+        }
+        Ok(prepared)
+    }
+}
+
+/// A real run in progress: the fact stores and whether the timeout cut work short.
+struct Execution<'a, 'j> {
+    job: &'j Job<'j>,
+    store: FactStore<'a>,
+    /// The base side of a range scope (ADR-056).
+    base: Option<FactStore<'a>>,
+    /// Some task was cut short or skipped by the timeout.
+    interrupted: bool,
+}
+
+impl Execution<'_, '_> {
+    /// Runs every task of `check` and combines them with the `skips` into its one entry.
+    fn run_check(
+        &mut self,
+        check: &dyn Check,
+        tasks: &[&Task<'_>],
+        skips: Vec<Skipped>,
+        sink: &mut dyn EventSink,
+    ) -> Finished {
+        let mut run = CheckRun::start(check, tasks, sink);
+        for task in tasks {
+            let result = self.run_task(task, &mut run.sink(&task.lang, sink));
+            // A check may skip itself for its own reasons (ADR-048); only a cut-short check or
+            // a timeout skip makes the run partial.
+            self.interrupted |= result.status == CheckStatus::Partial
+                || result
+                    .skipped
+                    .as_ref()
+                    .is_some_and(|skipped| skipped.reason == SkipReason::Timeout);
+            run.record(task, result, sink);
+        }
+        run.finish(skips, sink)
     }
 
     /// Produces what `task` reads and runs it; never fails, since one check's failure must not
     /// stop the others (ADR-041).
-    fn run_task(
-        job: &Job<'_>,
-        store: &mut FactStore<'_>,
-        base: Option<&mut FactStore<'_>>,
-        task: &Task<'_>,
-        sink: &mut CheckSink<'_>,
-    ) -> CheckResult {
-        let manifest = task.check.manifest();
+    fn run_task(&mut self, task: &Task<'_>, sink: &mut CheckSink<'_>) -> CheckResult {
         let started = Instant::now();
-        let result = |status, skipped| CheckResult {
-            id: manifest.id.clone(),
-            status,
-            tier: manifest.tier,
-            cost: manifest.cost,
-            score: None,
-            metrics: BTreeMap::new(),
-            delta: None,
-            findings: 0,
+        let ended = |status, skipped| CheckResult {
             duration_ms: elapsed_ms(started),
-            skipped,
-            oracle: None,
+            ..unfinished(task.check.manifest(), status, skipped)
         };
-        if job.cancel.is_cancelled() {
-            return result(
+        if self.job.cancel.is_cancelled() {
+            return ended(
                 CheckStatus::Skipped,
                 Some(skip_reason(SkipReason::Timeout, &task.lang.id)),
             );
         }
-        let mut facts = Facts::for_manifest(manifest);
-        for kind in &manifest.needs {
-            match store.ensure(*kind, &task.lang, &mut *sink.forward) {
-                Ok(fact) => {
-                    if let Err(error) = facts.insert_shared(&fact) {
-                        return result(status_of(&error), None);
-                    }
-                }
-                Err(error) => return result(status_of(&error), None),
-            }
-        }
-        for kind in &manifest.wants {
-            if let Ok(fact) = store.ensure(*kind, &task.lang, &mut *sink.forward) {
-                let _ = facts.insert_shared(&fact);
-            }
-        }
-        for sibling in &task.siblings {
-            for kind in &manifest.needs {
-                match store.ensure(*kind, sibling, &mut *sink.forward) {
-                    Ok(fact) => {
-                        if let Err(error) = facts.insert_shared_sibling(&fact) {
-                            return result(status_of(&error), None);
-                        }
-                    }
-                    Err(error) => return result(status_of(&error), None),
-                }
-            }
-            for kind in &manifest.wants {
-                if let Ok(fact) = store.ensure(*kind, sibling, &mut *sink.forward) {
-                    let _ = facts.insert_shared_sibling(&fact);
-                }
-            }
-        }
-        if let Some(tree) = &job.base {
-            facts.set_range(tree.range.clone());
-        }
-        if let Some(base) = base {
-            for kind in task.check.base_needs() {
-                // Base-side producer findings describe code the change replaced: dropped.
-                match base.ensure(*kind, &task.lang, &mut Vec::new()) {
-                    Ok(fact) => {
-                        if let Err(error) = facts.insert_base_shared(&fact) {
-                            return result(status_of(&error), None);
-                        }
-                    }
-                    Err(error) => return result(status_of(&error), None),
-                }
-            }
-        }
-        let ctx = check_ctx(job, task.check, &task.lang.id, task.scope.clone());
-        match task.check.run(&ctx, &facts, &task.plan, sink) {
+        let ran = self.facts_for(task, &mut *sink.forward).and_then(|facts| {
+            let ctx = check_ctx(self.job, task.check, &task.lang.id, task.scope.clone());
+            task.check.run(&ctx, &facts, &task.plan, sink)
+        });
+        match ran {
             Ok(mut ran) => {
                 ran.duration_ms = elapsed_ms(started);
                 ran
             }
-            Err(error) => result(status_of(&error), None),
+            Err(error) => ended(status_of(&error), None),
         }
+    }
+
+    /// The facts `task`'s check reads: its language's, its family siblings', the range, and the
+    /// base side's.
+    fn facts_for(&mut self, task: &Task<'_>, forward: &mut dyn EventSink) -> Result<Facts> {
+        let manifest = task.check.manifest();
+        let mut facts = Facts::for_manifest(manifest);
+        serve(
+            &mut self.store,
+            manifest,
+            &task.lang,
+            forward,
+            &mut |fact| facts.insert_shared(fact),
+        )?;
+        for sibling in &task.siblings {
+            serve(&mut self.store, manifest, sibling, forward, &mut |fact| {
+                facts.insert_shared_sibling(fact)
+            })?;
+        }
+        if let Some(tree) = &self.job.base {
+            facts.set_range(tree.range.clone());
+        }
+        if let Some(base) = &mut self.base {
+            for kind in task.check.base_needs() {
+                // Base-side producer findings describe code the change replaced: dropped.
+                let fact = base.ensure(*kind, &task.lang, &mut Vec::new())?;
+                facts.insert_base_shared(&fact)?;
+            }
+        }
+        Ok(facts)
+    }
+}
+
+/// Produces `manifest`'s needs for `lang`, failing on the first that cannot be made, then
+/// whichever of its wants can be, handing each to `insert`.
+fn serve(
+    store: &mut FactStore<'_>,
+    manifest: &Manifest,
+    lang: &Lang,
+    forward: &mut dyn EventSink,
+    insert: &mut dyn FnMut(&SharedFact) -> Result<()>,
+) -> Result<()> {
+    for kind in &manifest.needs {
+        insert(&store.ensure(*kind, lang, forward)?)?;
+    }
+    for kind in &manifest.wants {
+        if let Ok(fact) = store.ensure(*kind, lang, forward) {
+            let _ = insert(&fact);
+        }
+    }
+    Ok(())
+}
+
+/// A result of `manifest`'s check with `status`, before it ran or when it could not run.
+fn unfinished(manifest: &Manifest, status: CheckStatus, skipped: Option<Skipped>) -> CheckResult {
+    CheckResult {
+        id: manifest.id.clone(),
+        status,
+        tier: manifest.tier,
+        cost: manifest.cost,
+        score: None,
+        metrics: BTreeMap::new(),
+        delta: None,
+        findings: 0,
+        duration_ms: 0,
+        skipped,
+        oracle: None,
     }
 }
 
@@ -413,45 +394,84 @@ struct Prepared<'a> {
     symbols: u64,
 }
 
+impl<'a> Prepared<'a> {
+    /// `check`'s tasks, and the skip of every (check, language) the matrix or a missing range
+    /// rules out.
+    fn add(
+        &mut self,
+        job: &Job<'a>,
+        check: &'a dyn Check,
+        matrix: &SupportMatrix,
+        scopes: &HashMap<LangId, Scope>,
+    ) -> Result<()> {
+        let manifest = check.manifest();
+        let mut supported = Vec::new();
+        for lang in &job.langs {
+            match matrix
+                .get(&manifest.id, &lang.id)
+                .cloned()
+                .unwrap_or(Support::Supported)
+            {
+                Support::Supported => supported.push(lang.clone()),
+                support => self.skips.push(Skip {
+                    check,
+                    skipped: unsupported(&support, &lang.id),
+                }),
+            }
+        }
+        for mut langs in task_groups(check, supported) {
+            let lang = langs.remove(0);
+            if !check.base_needs().is_empty() && job.base.is_none() {
+                self.skips.push(Skip {
+                    check,
+                    skipped: needs_range(&manifest.id, &lang.id),
+                });
+                continue;
+            }
+            let scope = langs.iter().fold(
+                scopes.get(&lang.id).cloned().unwrap_or_default(),
+                |scope, sibling| union(scope, scopes.get(&sibling.id)),
+            );
+            let ctx = check_ctx(job, check, &lang.id, scope.clone());
+            let plan = check.plan(&ctx, &scope)?;
+            self.tasks.push(Task {
+                check,
+                lang,
+                siblings: langs,
+                scope,
+                plan,
+            });
+        }
+        Ok(())
+    }
+
+    /// `check`'s tasks and the skips of its ruled-out languages.
+    fn of(&self, check: &dyn Check) -> (Vec<&Task<'a>>, Vec<Skipped>) {
+        let tasks = self
+            .tasks
+            .iter()
+            .filter(|task| same(task.check, check))
+            .collect();
+        let skips = self
+            .skips
+            .iter()
+            .filter(|skip| same(skip.check, check))
+            .map(|skip| skip.skipped.clone())
+            .collect();
+        (tasks, skips)
+    }
+}
+
 /// The symbols in scope per language: every symbol of its files, or those the selectors match.
 fn resolve_symbols(
     job: &Job<'_>,
     store: &mut FactStore<'_>,
     sink: &mut dyn EventSink,
 ) -> Result<HashMap<LangId, Scope>> {
-    let needs_hashes = job.selectors.iter().any(SymbolSelector::needs_hashes);
     let mut matched = vec![false; job.selectors.len()];
     let mut scopes = HashMap::new();
     for lang in &job.langs {
-        let Ok(symbols) = store.ensure(FactKind::Symbols, lang, sink) else {
-            scopes.insert(lang.id.clone(), scope_of(job, BTreeSet::new()));
-            continue;
-        };
-        let Some(symbols) = symbols.downcast_ref::<Symbols>() else {
-            scopes.insert(lang.id.clone(), scope_of(job, BTreeSet::new()));
-            continue;
-        };
-        let keys = if job.selectors.is_empty() {
-            symbols
-                .symbols
-                .iter()
-                .map(crate::syntax::SymbolDef::key)
-                .collect()
-        } else {
-            let norm = if needs_hashes {
-                store.ensure(FactKind::NormTree, lang, sink).ok()
-            } else {
-                None
-            };
-            let norm = norm
-                .as_ref()
-                .and_then(|fact| fact.downcast_ref::<NormTree>());
-            let (keys, hits) = select_symbols(&job.selectors, symbols, norm);
-            for (seen, hit) in matched.iter_mut().zip(hits) {
-                *seen |= hit;
-            }
-            keys
-        };
+        let keys = symbols_in_scope(job, store, lang, &mut matched, sink).unwrap_or_default();
         scopes.insert(lang.id.clone(), scope_of(job, keys));
     }
     if job.selectors_must_match
@@ -470,6 +490,42 @@ fn resolve_symbols(
         .into());
     }
     Ok(scopes)
+}
+
+/// The keys of `lang`'s symbols in scope, marking in `matched` the selectors that matched one;
+/// `None` when the language's symbols cannot be produced.
+fn symbols_in_scope(
+    job: &Job<'_>,
+    store: &mut FactStore<'_>,
+    lang: &Lang,
+    matched: &mut [bool],
+    sink: &mut dyn EventSink,
+) -> Option<BTreeSet<crate::syntax::SymbolKey>> {
+    let produced = store.ensure(FactKind::Symbols, lang, sink).ok()?;
+    let symbols = produced.downcast_ref::<Symbols>()?;
+    if job.selectors.is_empty() {
+        return Some(
+            symbols
+                .symbols
+                .iter()
+                .map(crate::syntax::SymbolDef::key)
+                .collect(),
+        );
+    }
+    let norm = job
+        .selectors
+        .iter()
+        .any(SymbolSelector::needs_hashes)
+        .then(|| store.ensure(FactKind::NormTree, lang, sink).ok())
+        .flatten();
+    let norm = norm
+        .as_ref()
+        .and_then(|fact| fact.downcast_ref::<NormTree>());
+    let (keys, hits) = select_symbols(&job.selectors, symbols, norm);
+    for (seen, hit) in matched.iter_mut().zip(hits) {
+        *seen |= hit;
+    }
+    Some(keys)
 }
 
 fn scope_of(job: &Job<'_>, keys: BTreeSet<crate::syntax::SymbolKey>) -> Scope {

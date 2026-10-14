@@ -310,7 +310,12 @@ impl Store {
                     params![run, check.id.as_str(), serde_json::to_string(check)?],
                 )?;
                 if let Some(score) = &check.score {
-                    insert_metric(tx, &run, &check.id, None, "score", score.value)?;
+                    let metric = Metric {
+                        symbol: None,
+                        key: "score".to_owned(),
+                        value: score.value,
+                    };
+                    insert_metric(tx, &run, &check.id, &metric)?;
                 }
             }
             Ok(())
@@ -322,14 +327,7 @@ impl Store {
         let run = run.to_string();
         self.write(|tx| {
             for metric in metrics {
-                insert_metric(
-                    tx,
-                    &run,
-                    check,
-                    metric.symbol.as_ref(),
-                    &metric.key,
-                    metric.value,
-                )?;
+                insert_metric(tx, &run, check, metric)?;
             }
             Ok(())
         })
@@ -374,19 +372,35 @@ impl Store {
         else {
             return Ok(None);
         };
+        let findings = self.findings_of(&run, check)?;
+        let metrics = self.metrics_of(&run, check)?;
+        Ok(Some(CheckRun {
+            run: parse_run(&run)?,
+            result: serde_json::from_str(&json)?,
+            findings,
+            metrics,
+        }))
+    }
+
+    /// The findings `check` reported in `run`, in the order recorded.
+    fn findings_of(&self, run: &str, check: &CheckId) -> Result<Vec<Finding>> {
         let mut findings = self.connection.prepare(
             "SELECT json FROM findings WHERE run_id = ?1 AND check_id = ?2 ORDER BY rowid",
         )?;
-        let findings = findings
-            .query_map([&run, check.as_str()], |row| row.get::<_, String>(0))?
+        findings
+            .query_map([run, check.as_str()], |row| row.get::<_, String>(0))?
             .map(|json| Ok(serde_json::from_str(&json?)?))
-            .collect::<Result<Vec<Finding>>>()?;
+            .collect()
+    }
+
+    /// The metrics of `check` in `run`: check-level first, then per-symbol, each as recorded.
+    fn metrics_of(&self, run: &str, check: &CheckId) -> Result<Vec<Metric>> {
         let mut metrics = self.connection.prepare(
             "SELECT symbol_hash, key, value FROM metrics WHERE run_id = ?1 AND check_id = ?2
              ORDER BY symbol_hash IS NOT NULL, rowid",
         )?;
-        let metrics = metrics
-            .query_map([&run, check.as_str()], |row| {
+        metrics
+            .query_map([run, check.as_str()], |row| {
                 Ok((
                     row.get::<_, Option<String>>(0)?,
                     row.get::<_, String>(1)?,
@@ -401,13 +415,7 @@ impl Store {
                     value,
                 })
             })
-            .collect::<Result<Vec<Metric>>>()?;
-        Ok(Some(CheckRun {
-            run: parse_run(&run)?,
-            result: serde_json::from_str(&json)?,
-            findings,
-            metrics,
-        }))
+            .collect()
     }
 
     /// The latest *result run*: a run of `init`, `doctor`, `check`, `survey`, or `tests` that
@@ -638,17 +646,16 @@ fn repeats_other_runs(envelope: &Envelope) -> bool {
     )
 }
 
-fn insert_metric(
-    tx: &Connection,
-    run: &str,
-    check: &CheckId,
-    symbol: Option<&SymbolHash>,
-    key: &str,
-    value: f64,
-) -> Result<()> {
+fn insert_metric(tx: &Connection, run: &str, check: &CheckId, metric: &Metric) -> Result<()> {
     tx.execute(
         "INSERT INTO metrics (symbol_hash, check_id, key, value, run_id) VALUES (?1, ?2, ?3, ?4, ?5)",
-        params![symbol.map(SymbolHash::as_str), check.as_str(), key, value, run],
+        params![
+            metric.symbol.as_ref().map(SymbolHash::as_str),
+            check.as_str(),
+            metric.key,
+            metric.value,
+            run
+        ],
     )?;
     Ok(())
 }

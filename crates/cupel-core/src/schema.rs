@@ -67,29 +67,26 @@ pub fn plugin() -> Schema {
 /// Schema of a fact kind's payload, or `None` for kinds whose payload type does not exist yet.
 /// Execution-fact payloads are added in the phase that first produces them.
 pub fn fact(kind: FactKind) -> Option<Schema> {
-    match kind {
-        FactKind::Symbols => Some(fact_schema::<Symbols>()),
-        FactKind::Decisions => Some(fact_schema::<Decisions>()),
-        FactKind::NormTree => Some(fact_schema::<NormTree>()),
-        FactKind::MutationSites => Some(fact_schema::<MutationSites>()),
-        FactKind::TestFrames => Some(fact_schema::<TestFrames>()),
-        FactKind::ModuleGraph => Some(fact_schema::<ModuleGraph>()),
-        FactKind::ApiSurface => Some(fact_schema::<ApiSurface>()),
-        FactKind::Roots => Some(fact_schema::<Roots>()),
-        FactKind::TestConventions => Some(fact_schema::<TestConventions>()),
-        FactKind::ProjectInfo => Some(fact_schema::<ProjectInfo>()),
-        FactKind::CoverageMap => Some(fact_schema::<CoverageMap>()),
-        FactKind::TestResults
-        | FactKind::PerTestMap
-        | FactKind::MutationOutcomes
-        | FactKind::BenchSamples
-        | FactKind::PropertyResults
-        | FactKind::FuzzResults
-        | FactKind::RaceReports
-        | FactKind::AnalyzerReport
-        | FactKind::DivergenceResults => None,
-    }
+    FACT_SCHEMAS
+        .iter()
+        .find(|(with_payload, _)| *with_payload == kind)
+        .map(|(_, schema)| schema())
 }
+
+/// The fact kinds whose payload types exist, each with its schema.
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 11] = [
+    (FactKind::Symbols, fact_schema::<Symbols>),
+    (FactKind::Decisions, fact_schema::<Decisions>),
+    (FactKind::NormTree, fact_schema::<NormTree>),
+    (FactKind::MutationSites, fact_schema::<MutationSites>),
+    (FactKind::TestFrames, fact_schema::<TestFrames>),
+    (FactKind::ModuleGraph, fact_schema::<ModuleGraph>),
+    (FactKind::ApiSurface, fact_schema::<ApiSurface>),
+    (FactKind::Roots, fact_schema::<Roots>),
+    (FactKind::TestConventions, fact_schema::<TestConventions>),
+    (FactKind::ProjectInfo, fact_schema::<ProjectInfo>),
+    (FactKind::CoverageMap, fact_schema::<CoverageMap>),
+];
 
 /// The payload version of a fact kind, or `None` for kinds whose payload type does not exist yet.
 pub fn fact_version(kind: FactKind) -> Option<u32> {

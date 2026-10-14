@@ -161,6 +161,29 @@ impl ScopeRequest {
         root: &Path,
         default_branch: Option<&str>,
     ) -> Result<Option<(Vec<Change>, String)>> {
+        let Some(argument) = self.range_argument()? else {
+            return Ok(None);
+        };
+        let git = Git::open(root).ok_or_else(|| {
+            ArgumentError::new(
+                argument,
+                None,
+                format!("`{argument}` needs a git repository"),
+                "Run in a git work tree with git installed, or scope with --paths instead."
+                    .to_owned(),
+            )
+        })?;
+        let range = if self.changed {
+            changed_range(&git, default_branch)?
+        } else {
+            self.explicit_range(&git)?
+        };
+        Ok(Some(range))
+    }
+
+    /// The flag that chooses the range, `--changed` or `--base`; `None` without one. A
+    /// `--head` without `--base`, or both `--changed` and `--base`, is a usage error.
+    fn range_argument(&self) -> Result<Option<&'static str>> {
         if self.head.is_some() && self.base.is_none() {
             return Err(ArgumentError::new(
                 "--head",
@@ -182,68 +205,63 @@ impl ScopeRequest {
             )
             .into());
         }
-        let argument = if self.changed {
-            "--changed"
-        } else if self.base.is_some() {
-            "--base"
+        Ok(if self.changed {
+            Some("--changed")
         } else {
-            return Ok(None);
-        };
-        let git = Git::open(root).ok_or_else(|| {
-            ArgumentError::new(
-                argument,
-                None,
-                format!("`{argument}` needs a git repository"),
-                "Run in a git work tree with git installed, or scope with --paths instead."
-                    .to_owned(),
-            )
-        })?;
-        let git_failure = |error: crate::git::GitError| {
-            ArgumentError::new(
-                argument,
-                self.base.as_deref(),
-                error.message.clone(),
-                format!("Fix the range; git said: {error}"),
-            )
-        };
-        if self.changed {
-            let branch = default_branch
-                .map(str::to_owned)
-                .or_else(|| git.default_branch())
-                .ok_or_else(|| {
-                    ArgumentError::new(
-                        "--changed",
-                        None,
-                        "no default branch to compare with".to_owned(),
-                        "Set default_branch in cupel.toml, or use --base REF.".to_owned(),
-                    )
-                })?;
-            let start = git
-                .commit(&branch)
-                .and_then(|_| git.merge_base(&branch, "HEAD"))
-                .map_err(git_failure)?;
-            let files = git.changes_since(&start).map_err(git_failure)?;
-            return Ok(Some((files, start)));
-        }
+            self.base.as_ref().map(|_| "--base")
+        })
+    }
+
+    /// `--base` to `--head`, or to the working tree without `--head`.
+    fn explicit_range(&self, git: &Git) -> Result<(Vec<Change>, String)> {
         let base = self.base.as_deref().unwrap_or_default();
-        let start = git.commit(base).map_err(git_failure)?;
+        let start = git
+            .commit(base)
+            .map_err(|error| git_failure("--base", Some(base), &error))?;
         let files = match &self.head {
             Some(head) => {
-                let end = git.commit(head).map_err(|error| {
-                    ArgumentError::new(
-                        "--head",
-                        Some(head),
-                        error.message.clone(),
-                        format!("Fix the range; git said: {error}"),
-                    )
-                })?;
+                let end = git
+                    .commit(head)
+                    .map_err(|error| git_failure("--head", Some(head), &error))?;
                 git.changes_between(&start, &end)
             }
             None => git.changes_since(&start),
         }
-        .map_err(git_failure)?;
-        Ok(Some((files, start)))
+        .map_err(|error| git_failure("--base", Some(base), &error))?;
+        Ok((files, start))
     }
+}
+
+/// `--changed`: the merge base of `HEAD` with the default branch, to the working tree.
+fn changed_range(git: &Git, default_branch: Option<&str>) -> Result<(Vec<Change>, String)> {
+    let branch = default_branch
+        .map(str::to_owned)
+        .or_else(|| git.default_branch())
+        .ok_or_else(|| {
+            ArgumentError::new(
+                "--changed",
+                None,
+                "no default branch to compare with".to_owned(),
+                "Set default_branch in cupel.toml, or use --base REF.".to_owned(),
+            )
+        })?;
+    let failure = |error: crate::git::GitError| git_failure("--changed", None, &error);
+    let start = git
+        .commit(&branch)
+        .and_then(|_| git.merge_base(&branch, "HEAD"))
+        .map_err(failure)?;
+    let files = git.changes_since(&start).map_err(failure)?;
+    Ok((files, start))
+}
+
+/// The usage error for a range git could not follow, on `argument` with `value`.
+fn git_failure(argument: &str, value: Option<&str>, error: &crate::git::GitError) -> ArgumentError {
+    ArgumentError::new(
+        argument,
+        value,
+        error.message.clone(),
+        format!("Fix the range; git said: {error}"),
+    )
 }
 
 /// One `--paths` value: a file, a directory, or a glob, relative to the root.
