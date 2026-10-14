@@ -7,9 +7,9 @@ use cupel_core::syntax::{
     Symbols, TestCase, TestFile, TestFrames,
 };
 use cupel_core::{
-    ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Error, Event,
-    EventSink, FactKind, Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope,
-    Score, Severity, Stability, SymbolHash, Tier,
+    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Error, Event, EventSink,
+    FactKind, Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score,
+    Severity, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -17,7 +17,10 @@ use serde_json::{Map, Value};
 
 use crate::finding::SymbolFinding;
 use crate::manifest::{evidence, kind, metric, ranked};
-use crate::metrics::{scored, sum, symbol_target, weighted_mean};
+use crate::metrics::{
+    decisions_by_symbol, scored, sum, symbol_target, trees_by_symbol, weighted_mean,
+};
+use crate::outcome;
 use crate::settings::Limits;
 
 const ID: &str = "tests.quality";
@@ -208,14 +211,9 @@ impl Check for TestsQuality {
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
         LIMITS.read(&self.manifest.id, &ctx.config)?;
-        let targets = scope.symbols.as_ref().map_or(0, |keys| keys.len() as u64);
-        Ok(Plan::estimate(self.manifest.cost, targets))
+        Ok(outcome::plan_symbols(&self.manifest, scope))
     }
 
-    #[expect(
-        clippy::cast_precision_loss,
-        reason = "assertion and test counts stay far below 2^52, where f64 is exact"
-    )]
     fn run(
         &self,
         ctx: &CheckCtx,
@@ -224,99 +222,37 @@ impl Check for TestsQuality {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         let limits = Settings::read(&self.manifest.id, &ctx.config)?;
-        let symbols: HashMap<SymbolKey, &SymbolDef> = facts
-            .get::<Symbols>()?
-            .symbols
-            .iter()
-            .map(|symbol| (symbol.key(), symbol))
-            .collect();
-        let trees: HashMap<&SymbolKey, (&SymbolHash, &NormNode)> = facts
-            .get::<NormTree>()?
-            .symbols
-            .iter()
-            .map(|entry| (&entry.symbol, (&entry.hash, &entry.root)))
-            .collect();
-        // Decisions are wanted: without them every kind but `test.logic` still reports.
-        let decisions: Option<HashMap<&SymbolKey, &[Decision]>> = match facts.get::<Decisions>() {
-            Ok(decisions) => Some(
-                decisions
-                    .symbols
-                    .iter()
-                    .map(|entry| (&entry.symbol, entry.decisions.as_slice()))
-                    .collect(),
-            ),
-            Err(Error::AbsentFact { .. }) => None,
-            Err(error) => return Err(error),
+        let index = Index {
+            symbols: facts
+                .get::<Symbols>()?
+                .symbols
+                .iter()
+                .map(|symbol| (symbol.key(), symbol))
+                .collect(),
+            trees: trees_by_symbol([facts.get::<NormTree>()?]),
+            // Decisions are wanted: without them every kind but `test.logic` still reports.
+            decisions: match facts.get::<Decisions>() {
+                Ok(decisions) => Some(decisions_by_symbol(decisions)),
+                Err(Error::AbsentFact { .. }) => None,
+                Err(error) => return Err(error),
+            },
         };
-        let mut tests = 0_u64;
-        let mut assertions = 0_u64;
-        let mut weak = 0_u64;
-        let mut no_assertion = 0_u64;
+        let mut counts = Counts::default();
         let mut reported = Vec::new();
         for file in &facts.get::<TestFrames>()?.files {
-            let mut candidates = Vec::new();
-            for case in &file.cases {
-                let key = key_of(file, case);
-                if !ctx.scope.includes(&key) {
-                    continue;
-                }
-                ctx.cancel.checkpoint()?;
-                tests += 1;
-                assertions += case.assertions.len() as u64;
-                weak +=
-                    u64::from(count(case.assertions.iter().filter(|assertion| {
-                        assertion.strength == AssertionStrength::Weak
-                    })));
-                no_assertion += u64::from(case.assertions.is_empty());
-                // A case without a symbol or structural hash cannot be identified, so it is
-                // measured but not reported; every language's test cases are symbols (ADR-054).
-                let (Some(symbol), Some((hash, root))) = (symbols.get(&key), trees.get(&key))
-                else {
-                    continue;
-                };
-                sink.measure(Measurement {
-                    metric: "mock_density".to_owned(),
-                    value: f64::from(mock_density(case)),
-                    target: symbol_target(symbol, Some(hash)),
-                });
-                let subject = Subject { symbol, hash };
-                let logic = decisions.as_ref().map(|by_symbol| {
-                    LogicCount::of(case, by_symbol.get(&key).copied().unwrap_or_default())
-                });
-                reported.extend(self.case_findings(&subject, case, logic.as_ref(), &limits));
-                candidates.push((subject, statements(root)));
-            }
-            reported.extend(self.duplicate_setup(&candidates, &limits));
+            reported.extend(self.file_findings(ctx, file, &index, &limits, &mut counts, sink)?);
         }
         let findings = reported.len() as u64;
         for finding in reported {
             sink.emit(Event::Finding(Box::new(finding)));
         }
-        Ok(CheckResult {
-            id: self.manifest.id.clone(),
-            status: if findings == 0 {
-                CheckStatus::Pass
-            } else {
-                CheckStatus::Fail
-            },
-            tier: self.manifest.tier,
-            cost: self.manifest.cost,
-            score: Some(Score {
-                value: ratio(assertions, tests),
-                unit: "assertion_density".to_owned(),
-                n: tests,
-            }),
-            metrics: BTreeMap::from([
-                ("assertion_density".to_owned(), ratio(assertions, tests)),
-                ("weak_ratio".to_owned(), ratio(weak, assertions)),
-                ("no_assertion".to_owned(), no_assertion as f64),
-            ]),
-            delta: None,
+        Ok(outcome::result(
+            &self.manifest,
+            outcome::status(findings > 0),
+            Some(counts.score()),
+            counts.metrics(),
             findings,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-        })
+        ))
     }
 
     /// Ratios over every language's tests together: density weighted by tests, the weak share
@@ -329,6 +265,57 @@ impl Check for TestsQuality {
             }),
             _ => sum(name, results),
         }
+    }
+}
+
+/// The per-symbol facts a case joins by its key (ADR-054).
+struct Index<'a> {
+    symbols: HashMap<SymbolKey, &'a SymbolDef>,
+    trees: HashMap<&'a SymbolKey, (&'a SymbolHash, &'a NormNode)>,
+    decisions: Option<HashMap<&'a SymbolKey, &'a [Decision]>>,
+}
+
+/// What the measured cases add up to.
+#[derive(Default)]
+struct Counts {
+    tests: u64,
+    assertions: u64,
+    weak: u64,
+    no_assertion: u64,
+}
+
+impl Counts {
+    fn add(&mut self, case: &TestCase) {
+        self.tests += 1;
+        self.assertions += case.assertions.len() as u64;
+        self.weak +=
+            u64::from(count(case.assertions.iter().filter(|assertion| {
+                assertion.strength == AssertionStrength::Weak
+            })));
+        self.no_assertion += u64::from(case.assertions.is_empty());
+    }
+
+    fn score(&self) -> Score {
+        Score {
+            value: ratio(self.assertions, self.tests),
+            unit: "assertion_density".to_owned(),
+            n: self.tests,
+        }
+    }
+
+    #[expect(
+        clippy::cast_precision_loss,
+        reason = "test counts stay far below 2^52, where f64 is exact"
+    )]
+    fn metrics(&self) -> BTreeMap<String, f64> {
+        BTreeMap::from([
+            (
+                "assertion_density".to_owned(),
+                ratio(self.assertions, self.tests),
+            ),
+            ("weak_ratio".to_owned(), ratio(self.weak, self.assertions)),
+            ("no_assertion".to_owned(), self.no_assertion as f64),
+        ])
     }
 }
 
@@ -413,6 +400,48 @@ impl LogicCount {
 }
 
 impl TestsQuality {
+    /// Counts the in-scope cases of `file` and returns their findings, duplicate setup last.
+    fn file_findings(
+        &self,
+        ctx: &CheckCtx,
+        file: &TestFile,
+        index: &Index<'_>,
+        limits: &Settings,
+        counts: &mut Counts,
+        sink: &mut dyn EventSink,
+    ) -> Result<Vec<Finding>> {
+        let mut reported = Vec::new();
+        let mut candidates = Vec::new();
+        for case in &file.cases {
+            let key = key_of(file, case);
+            if !ctx.scope.includes(&key) {
+                continue;
+            }
+            ctx.cancel.checkpoint()?;
+            counts.add(case);
+            // A case without a symbol or structural hash cannot be identified, so it is
+            // measured but not reported; every language's test cases are symbols (ADR-054).
+            let (Some(symbol), Some((hash, root))) =
+                (index.symbols.get(&key), index.trees.get(&key))
+            else {
+                continue;
+            };
+            sink.measure(Measurement {
+                metric: "mock_density".to_owned(),
+                value: f64::from(mock_density(case)),
+                target: symbol_target(symbol, Some(hash)),
+            });
+            let subject = Subject { symbol, hash };
+            let logic = index.decisions.as_ref().map(|by_symbol| {
+                LogicCount::of(case, by_symbol.get(&key).copied().unwrap_or_default())
+            });
+            reported.extend(self.case_findings(&subject, case, logic.as_ref(), limits));
+            candidates.push((subject, statements(root)));
+        }
+        reported.extend(self.duplicate_setup(&candidates, limits));
+        Ok(reported)
+    }
+
     fn case_findings(
         &self,
         subject: &Subject<'_>,

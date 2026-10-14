@@ -1,7 +1,38 @@
-// ABOUTME: Measurements more than one check makes the same way, so their numbers agree: cyclomatic complexity
-// ABOUTME: (ADR-024, ADR-042), a symbol as a ranking target, and combining `scope` metrics across languages (ADR-063).
-use cupel_core::syntax::{Decision, SymbolDef};
+// ABOUTME: Measurements more than one check makes the same way, so their numbers agree: per-symbol fact indexes,
+// ABOUTME: cyclomatic complexity (ADR-024, ADR-042), ranking targets, and combining `scope` metrics (ADR-063).
+use std::collections::HashMap;
+
+use cupel_core::syntax::{Decision, Decisions, NormNode, NormTree, SymbolDef, SymbolKey};
 use cupel_core::{CheckResult, Location, SymbolHash, Target};
+
+/// Each symbol's decisions, by symbol.
+pub fn decisions_by_symbol(decisions: &Decisions) -> HashMap<&SymbolKey, &[Decision]> {
+    decisions
+        .symbols
+        .iter()
+        .map(|entry| (&entry.symbol, entry.decisions.as_slice()))
+        .collect()
+}
+
+/// Each symbol's structural hash, by symbol (ADR-014).
+pub fn hashes_by_symbol(trees: &NormTree) -> HashMap<&SymbolKey, &SymbolHash> {
+    trees
+        .symbols
+        .iter()
+        .map(|entry| (&entry.symbol, &entry.hash))
+        .collect()
+}
+
+/// Each symbol's structural hash and normalized tree, by symbol.
+pub fn trees_by_symbol<'a>(
+    trees: impl IntoIterator<Item = &'a NormTree>,
+) -> HashMap<&'a SymbolKey, (&'a SymbolHash, &'a NormNode)> {
+    trees
+        .into_iter()
+        .flat_map(|fact| &fact.symbols)
+        .map(|entry| (&entry.symbol, (&entry.hash, &entry.root)))
+        .collect()
+}
 
 /// 1 plus the cyclomatic weight of every decision.
 pub fn cyclomatic(decisions: &[Decision]) -> u32 {

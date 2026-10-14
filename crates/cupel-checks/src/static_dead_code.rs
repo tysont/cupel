@@ -7,16 +7,16 @@ use cupel_core::syntax::{
     Symbols,
 };
 use cupel_core::{
-    ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
-    FactKind, Facts, Finding, Manifest, Plan, Result, Scope, Score, Severity, Stability,
-    SymbolHash, Tier,
+    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
+    Facts, Finding, Manifest, Plan, Result, Scope, Score, Severity, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::finding::SymbolFinding;
 use crate::manifest::{kind, metric};
-use crate::metrics::sum;
+use crate::metrics::{hashes_by_symbol, sum};
+use crate::outcome;
 use crate::settings::Limits;
 
 const ID: &str = "static.dead-code";
@@ -113,8 +113,7 @@ impl Check for StaticDeadCode {
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
-        let targets = scope.symbols.as_ref().map_or(0, |keys| keys.len() as u64);
-        Ok(Plan::estimate(self.manifest.cost, targets))
+        Ok(outcome::plan_symbols(&self.manifest, scope))
     }
 
     fn run(
@@ -126,12 +125,7 @@ impl Check for StaticDeadCode {
     ) -> Result<CheckResult> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
         let symbols = facts.get::<Symbols>()?;
-        let hashes: HashMap<&SymbolKey, &SymbolHash> = facts
-            .get::<NormTree>()?
-            .symbols
-            .iter()
-            .map(|entry| (&entry.symbol, &entry.hash))
-            .collect();
+        let hashes = hashes_by_symbol(facts.get::<NormTree>()?);
         let reachability = Reachability::of(
             &symbols.symbols,
             facts.get::<Roots>()?,
@@ -167,40 +161,25 @@ impl Check for StaticDeadCode {
                 self.report(symbol, hash, &verdict),
             )));
         }
-        Ok(CheckResult {
-            id: self.manifest.id.clone(),
-            status: if dead_symbols == 0 {
-                CheckStatus::Pass
-            } else {
-                CheckStatus::Fail
-            },
-            tier: self.manifest.tier,
-            cost: self.manifest.cost,
-            score: Some(Score {
+        Ok(outcome::result(
+            &self.manifest,
+            outcome::status(dead_symbols > 0),
+            Some(Score {
                 value: f64::from(dead_symbols),
                 unit: "dead_symbols".to_owned(),
                 n: in_scope,
             }),
-            metrics: BTreeMap::from([
+            BTreeMap::from([
                 ("dead_symbols".to_owned(), f64::from(dead_symbols)),
                 ("dead_exports".to_owned(), f64::from(dead_exports)),
             ]),
-            delta: None,
             findings,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-        })
+        ))
     }
 
     /// Dead symbols add up across languages (ADR-059).
     fn combine(&self, scores: &[Score]) -> Option<Score> {
-        let first = scores.first()?;
-        Some(Score {
-            value: scores.iter().map(|score| score.value).sum(),
-            unit: first.unit.clone(),
-            n: scores.iter().map(|score| score.n).sum(),
-        })
+        outcome::summed(scores)
     }
 
     /// Both metrics are counts, so they add up across languages (ADR-063).

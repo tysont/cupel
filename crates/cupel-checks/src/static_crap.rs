@@ -1,11 +1,9 @@
 // ABOUTME: `static.crap`: per-symbol CRAP, `CC² × (1 − coverage)³ + CC`, from Symbols, Decisions, NormTree, and
 // ABOUTME: a CoverageMap; without coverage CRAP is null and nothing is reported (ADR-048, ADR-067).
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 use cupel_core::coverage::CoverageMap;
-use cupel_core::syntax::{
-    Decision, Decisions, NormTree, SymbolDef, SymbolKey, Symbols, TestConventions,
-};
+use cupel_core::syntax::{Decisions, NormTree, SymbolDef, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
     FactKind, Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score,
@@ -17,7 +15,11 @@ use serde_json::Value;
 
 use crate::finding::SymbolFinding;
 use crate::manifest::{kind, metric, ranked};
-use crate::metrics::{cyclomatic, largest, scored, symbol_target, weighted_mean};
+use crate::metrics::{
+    cyclomatic, decisions_by_symbol, hashes_by_symbol, largest, scored, symbol_target,
+    weighted_mean,
+};
+use crate::outcome;
 use crate::settings::Limits;
 
 const ID: &str = "static.crap";
@@ -91,8 +93,7 @@ impl Check for StaticCrap {
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
-        let targets = scope.symbols.as_ref().map_or(0, |keys| keys.len() as u64);
-        Ok(Plan::estimate(self.manifest.cost, targets))
+        Ok(outcome::plan_symbols(&self.manifest, scope))
     }
 
     fn run(
@@ -105,22 +106,18 @@ impl Check for StaticCrap {
         let limits = SETTINGS.read(&self.manifest.id, &ctx.config)?;
         // Without coverage CRAP is undefined, not CC alone (ADR-067).
         let Ok(coverage) = facts.get::<CoverageMap>() else {
-            return Ok(self.result(CheckStatus::Pass, None, BTreeMap::new(), 0));
+            return Ok(outcome::result(
+                &self.manifest,
+                CheckStatus::Pass,
+                None,
+                BTreeMap::new(),
+                0,
+            ));
         };
         let symbols = facts.get::<Symbols>()?;
         let conventions = facts.get::<TestConventions>().ok();
-        let decisions: HashMap<&SymbolKey, &[Decision]> = facts
-            .get::<Decisions>()?
-            .symbols
-            .iter()
-            .map(|entry| (&entry.symbol, entry.decisions.as_slice()))
-            .collect();
-        let hashes: HashMap<&SymbolKey, &SymbolHash> = facts
-            .get::<NormTree>()?
-            .symbols
-            .iter()
-            .map(|entry| (&entry.symbol, &entry.hash))
-            .collect();
+        let decisions = decisions_by_symbol(facts.get::<Decisions>()?);
+        let hashes = hashes_by_symbol(facts.get::<NormTree>()?);
         let bands = Bands::of(&limits);
         let mut tally = Tally::default();
         // Test code is what lowers CRAP, not what it scores (ADR-048).
@@ -162,11 +159,7 @@ impl Check for StaticCrap {
                 sink.emit(Event::Finding(Box::new(finding)));
             }
         }
-        let status = if tally.flagged {
-            CheckStatus::Fail
-        } else {
-            CheckStatus::Pass
-        };
+        let status = outcome::status(tally.flagged);
         let score = Score {
             value: tally.worst,
             unit: "max".to_owned(),
@@ -176,17 +169,18 @@ impl Check for StaticCrap {
             ("max".to_owned(), tally.worst),
             ("mean".to_owned(), tally.mean()),
         ]);
-        Ok(self.result(status, Some(score), metrics, tally.findings))
+        Ok(outcome::result(
+            &self.manifest,
+            status,
+            Some(score),
+            metrics,
+            tally.findings,
+        ))
     }
 
     /// The largest value, over the symbols of every language (ADR-048).
     fn combine(&self, scores: &[Score]) -> Option<Score> {
-        let first = scores.first()?;
-        Some(Score {
-            value: scores.iter().map(|score| score.value).fold(0.0, f64::max),
-            unit: first.unit.clone(),
-            n: scores.iter().map(|score| score.n).sum(),
-        })
+        outcome::maximum(scores)
     }
 
     /// `max` is the largest; `mean` is the mean over every language's scored symbols
@@ -267,29 +261,6 @@ fn crap(cyclomatic: u32, coverage: f64) -> f64 {
 }
 
 impl StaticCrap {
-    /// This check's result for one language.
-    fn result(
-        &self,
-        status: CheckStatus,
-        score: Option<Score>,
-        metrics: BTreeMap<String, f64>,
-        findings: u64,
-    ) -> CheckResult {
-        CheckResult {
-            id: self.manifest.id.clone(),
-            status,
-            tier: self.manifest.tier,
-            cost: self.manifest.cost,
-            score,
-            metrics,
-            delta: None,
-            findings,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-        }
-    }
-
     /// The finding for a scored symbol in the band its CRAP falls in; none below `watch`.
     fn band(
         &self,

@@ -5,9 +5,9 @@ use std::collections::{BTreeMap, HashMap};
 use cupel_core::git::ChangeKind;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, Span, TestCase, TestFrames};
 use cupel_core::{
-    Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event,
-    EventSink, Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result,
-    Scope, Score, Severity, Stability, Tier,
+    Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
+    Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result, Scope, Score,
+    Severity, Stability, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -15,6 +15,7 @@ use serde_json::{Map, Value};
 
 use crate::manifest::{evidence, kind, metric};
 use crate::metrics::sum;
+use crate::outcome;
 use crate::settings::Limits;
 
 const ID: &str = "tests.weakening";
@@ -146,7 +147,7 @@ impl Check for TestsWeakening {
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
-        Ok(Plan::estimate(self.manifest.cost, scope.files.len() as u64))
+        Ok(outcome::plan_files(&self.manifest, scope))
     }
 
     fn run(
@@ -190,27 +191,17 @@ impl Check for TestsWeakening {
         for finding in findings {
             sink.emit(Event::Finding(Box::new(finding)));
         }
-        Ok(CheckResult {
-            id: self.manifest.id.clone(),
-            status: if count == 0 {
-                CheckStatus::Pass
-            } else {
-                CheckStatus::Fail
-            },
-            tier: self.manifest.tier,
-            cost: self.manifest.cost,
-            score: Some(Score {
+        Ok(outcome::result(
+            &self.manifest,
+            outcome::status(count > 0),
+            Some(Score {
                 value,
                 unit: "weakened".to_owned(),
                 n: matched.iter().flatten().count() as u64,
             }),
-            metrics: BTreeMap::from([("weakened".to_owned(), value)]),
-            delta: None,
-            findings: count,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-        })
+            BTreeMap::from([("weakened".to_owned(), value)]),
+            count,
+        ))
     }
 
     /// Weakenings add up across languages (ADR-063).
@@ -220,12 +211,7 @@ impl Check for TestsWeakening {
 
     /// The total over every language: weakenings add up (ADR-057).
     fn combine(&self, scores: &[Score]) -> Option<Score> {
-        let first = scores.first()?;
-        Some(Score {
-            value: scores.iter().map(|score| score.value).sum(),
-            unit: first.unit.clone(),
-            n: scores.iter().map(|score| score.n).sum(),
-        })
+        outcome::summed(scores)
     }
 }
 

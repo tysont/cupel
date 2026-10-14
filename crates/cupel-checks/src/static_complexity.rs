@@ -1,14 +1,12 @@
 // ABOUTME: `static.complexity`: per-symbol cyclomatic and cognitive complexity, nesting depth, parameter
 // ABOUTME: count, and length from Symbols, Decisions, and NormTree, against configurable limits (ADR-042).
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
-use cupel_core::syntax::{
-    Decision, DecisionKind, Decisions, NormTree, SymbolDef, SymbolKey, Symbols,
-};
+use cupel_core::syntax::{Decision, DecisionKind, Decisions, NormTree, SymbolDef, Symbols};
 use cupel_core::{
-    ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
-    FactKind, Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score,
-    Severity, Stability, SymbolHash, Tier,
+    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
+    Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score, Severity,
+    Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -16,7 +14,8 @@ use serde_json::Value;
 
 use crate::finding::SymbolFinding;
 use crate::manifest::{evidence, kind, metric, ranked};
-use crate::metrics::{cyclomatic, symbol_target};
+use crate::metrics::{cyclomatic, decisions_by_symbol, hashes_by_symbol, symbol_target};
+use crate::outcome;
 use crate::settings::Limits;
 
 const ID: &str = "static.complexity";
@@ -148,8 +147,7 @@ impl Check for StaticComplexity {
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
         LIMITS.read(&self.manifest.id, &ctx.config)?;
-        let targets = scope.symbols.as_ref().map_or(0, |keys| keys.len() as u64);
-        Ok(Plan::estimate(self.manifest.cost, targets))
+        Ok(outcome::plan_symbols(&self.manifest, scope))
     }
 
     fn run(
@@ -161,18 +159,8 @@ impl Check for StaticComplexity {
     ) -> Result<CheckResult> {
         let limits = LIMITS.read(&self.manifest.id, &ctx.config)?;
         let symbols = facts.get::<Symbols>()?;
-        let decisions: HashMap<&SymbolKey, &[Decision]> = facts
-            .get::<Decisions>()?
-            .symbols
-            .iter()
-            .map(|entry| (&entry.symbol, entry.decisions.as_slice()))
-            .collect();
-        let hashes: HashMap<&SymbolKey, &SymbolHash> = facts
-            .get::<NormTree>()?
-            .symbols
-            .iter()
-            .map(|entry| (&entry.symbol, &entry.hash))
-            .collect();
+        let decisions = decisions_by_symbol(facts.get::<Decisions>()?);
+        let hashes = hashes_by_symbol(facts.get::<NormTree>()?);
         let mut measured = 0;
         let mut worst = Worst::default();
         let mut findings = 0;
@@ -201,37 +189,22 @@ impl Check for StaticComplexity {
                 sink.emit(Event::Finding(Box::new(finding)));
             }
         }
-        Ok(CheckResult {
-            id: self.manifest.id.clone(),
-            status: if findings == 0 {
-                CheckStatus::Pass
-            } else {
-                CheckStatus::Fail
-            },
-            tier: self.manifest.tier,
-            cost: self.manifest.cost,
-            score: Some(Score {
+        Ok(outcome::result(
+            &self.manifest,
+            outcome::status(findings > 0),
+            Some(Score {
                 value: f64::from(worst.cyclomatic),
                 unit: "cyclomatic_max".to_owned(),
                 n: measured,
             }),
-            metrics: worst.metrics(),
-            delta: None,
+            worst.metrics(),
             findings,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-        })
+        ))
     }
 
     /// The largest value, over the symbols of every language (ADR-042).
     fn combine(&self, scores: &[Score]) -> Option<Score> {
-        let first = scores.first()?;
-        Some(Score {
-            value: scores.iter().map(|score| score.value).fold(0.0, f64::max),
-            unit: first.unit.clone(),
-            n: scores.iter().map(|score| score.n).sum(),
-        })
+        outcome::maximum(scores)
     }
 }
 

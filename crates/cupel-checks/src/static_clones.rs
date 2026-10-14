@@ -2,15 +2,14 @@
 // ABOUTME: fingerprints through MinHash and LSH to exact Jaccard, reported as pairs and clusters (ADR-050).
 mod similarity;
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 
 use cupel_core::config::{ConfigError, Table};
-use cupel_core::syntax::{NormNode, NormTree, SymbolDef, SymbolKey, Symbols};
+use cupel_core::syntax::{NormNode, NormTree, SymbolDef, Symbols};
 use cupel_core::{
-    Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event,
-    EventSink, Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Measurement,
-    MetricPer, Plan, Result, Scope, Score, Severity, SiteHash, Stability, Symbol, SymbolHash,
-    Target, Tier,
+    Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
+    Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Measurement, MetricPer,
+    Plan, Result, Scope, Score, Severity, SiteHash, Stability, Symbol, SymbolHash, Target, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -19,7 +18,8 @@ use serde_json::{Map, Value};
 use similarity::{Fingerprints, Similar, combine, mix, search};
 
 use crate::manifest::{evidence, kind, metric, ranked};
-use crate::metrics::{largest, sum};
+use crate::metrics::{largest, sum, trees_by_symbol};
+use crate::outcome;
 
 const ID: &str = "static.clones";
 const PAIR: &str = "clone.pair";
@@ -190,8 +190,7 @@ impl Check for StaticClones {
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
         Settings::read(&self.manifest.id, &ctx.config)?;
-        let targets = scope.symbols.as_ref().map_or(0, |keys| keys.len() as u64);
-        Ok(Plan::estimate(self.manifest.cost, targets))
+        Ok(outcome::plan_symbols(&self.manifest, scope))
     }
 
     fn run(
@@ -202,12 +201,7 @@ impl Check for StaticClones {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         let settings = Settings::read(&self.manifest.id, &ctx.config)?;
-        let trees: HashMap<&SymbolKey, (&SymbolHash, &NormNode)> = facts
-            .family::<NormTree>()?
-            .into_iter()
-            .flat_map(|fact| &fact.symbols)
-            .map(|entry| (&entry.symbol, (&entry.hash, &entry.root)))
-            .collect();
+        let trees = trees_by_symbol(facts.family::<NormTree>()?);
         let mut compared: Vec<Compared<'_>> = facts
             .family::<Symbols>()?
             .into_iter()
@@ -253,37 +247,22 @@ impl Check for StaticClones {
                 reported.include(group);
             }
         }
-        Ok(CheckResult {
-            id: self.manifest.id.clone(),
-            status: if findings == 0 {
-                CheckStatus::Pass
-            } else {
-                CheckStatus::Fail
-            },
-            tier: self.manifest.tier,
-            cost: self.manifest.cost,
-            score: Some(Score {
+        Ok(outcome::result(
+            &self.manifest,
+            outcome::status(findings > 0),
+            Some(Score {
                 value: f64::from(u32::try_from(pairs.len()).unwrap_or(u32::MAX)),
                 unit: "pairs".to_owned(),
                 n: compared.len() as u64,
             }),
-            metrics: reported.metrics(),
-            delta: None,
+            reported.metrics(),
             findings,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-        })
+        ))
     }
 
     /// Pairs add up across families.
     fn combine(&self, scores: &[Score]) -> Option<Score> {
-        let first = scores.first()?;
-        Some(Score {
-            value: scores.iter().map(|score| score.value).sum(),
-            unit: first.unit.clone(),
-            n: scores.iter().map(|score| score.n).sum(),
-        })
+        outcome::summed(scores)
     }
 
     /// Pairs and clusters add up across families; `max_jaccard` is the largest (ADR-063).

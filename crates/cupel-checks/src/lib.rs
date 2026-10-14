@@ -35,6 +35,7 @@
 mod finding;
 mod manifest;
 mod metrics;
+mod outcome;
 mod settings;
 mod static_clones;
 mod static_complexity;

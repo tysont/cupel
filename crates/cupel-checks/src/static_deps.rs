@@ -5,9 +5,9 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use cupel_core::config::{ConfigError, Table};
 use cupel_core::syntax::{ApiItemKind, ApiSurface, EdgeKind, ImportTarget, ModuleGraph};
 use cupel_core::{
-    Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event,
-    EventSink, Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Measurement,
-    MetricPer, Plan, Result, Scope, Score, Severity, Stability, Target, Tier,
+    Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
+    Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Measurement, MetricPer,
+    Plan, Result, Scope, Score, Severity, Stability, Target, Tier,
 };
 use globset::{GlobBuilder, GlobMatcher};
 use schemars::JsonSchema;
@@ -16,6 +16,7 @@ use serde_json::{Map, Value};
 
 use crate::manifest::{evidence, kind, metric, ranked};
 use crate::metrics::{largest, sum};
+use crate::outcome;
 
 const ID: &str = "static.deps";
 
@@ -151,7 +152,7 @@ impl Check for StaticDeps {
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
         Settings::read(&self.manifest.id, &ctx.config)?;
-        Ok(Plan::estimate(self.manifest.cost, scope.files.len() as u64))
+        Ok(outcome::plan_files(&self.manifest, scope))
     }
 
     fn run(
@@ -192,41 +193,26 @@ impl Check for StaticDeps {
         for finding in findings {
             sink.emit(Event::Finding(Box::new(finding)));
         }
-        Ok(CheckResult {
-            id: self.manifest.id.clone(),
-            status: if count == 0 {
-                CheckStatus::Pass
-            } else {
-                CheckStatus::Fail
-            },
-            tier: self.manifest.tier,
-            cost: self.manifest.cost,
-            score: Some(Score {
+        Ok(outcome::result(
+            &self.manifest,
+            outcome::status(count > 0),
+            Some(Score {
                 value: f64::from(u32::try_from(components.len()).unwrap_or(u32::MAX)),
                 unit: "cycles".to_owned(),
                 n: graph.modules.len() as u64,
             }),
-            metrics: BTreeMap::from([
+            BTreeMap::from([
                 ("cycles".to_owned(), as_value(components.len())),
                 ("max_distance".to_owned(), max_distance),
                 ("violations".to_owned(), as_value(violations)),
             ]),
-            delta: None,
-            findings: count,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-        })
+            count,
+        ))
     }
 
     /// Cycles are counts, so per-language scores add up (ADR-052).
     fn combine(&self, scores: &[Score]) -> Option<Score> {
-        let first = scores.first()?;
-        Some(Score {
-            value: scores.iter().map(|score| score.value).sum(),
-            unit: first.unit.clone(),
-            n: scores.iter().map(|score| score.n).sum(),
-        })
+        outcome::summed(scores)
     }
 
     /// Cycles and violations add up across languages; `max_distance` is the largest (ADR-063).
