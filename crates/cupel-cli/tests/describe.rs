@@ -479,7 +479,7 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
 
 #[test]
 fn describe_fact_without_a_payload_type_yet_has_no_version_or_schema() {
-    let description = run(["describe", "fact", "test-results"]).envelope()["description"].clone();
+    let description = run(["describe", "fact", "per-test-map"]).envelope()["description"].clone();
     assert_eq!(description["syntactic"], json!(false));
     assert_eq!(description["version"], Value::Null);
     assert_eq!(description["schema"], Value::Null);

@@ -27,6 +27,7 @@ mod hash;
 mod id;
 mod lang;
 mod matrix;
+mod process;
 mod producer;
 mod rank;
 mod ranking;
@@ -38,6 +39,7 @@ mod select;
 mod status;
 mod suppression;
 pub mod syntax;
+mod test_results;
 mod writer;
 
 pub use actions::{NEXT_ACTIONS, next_actions};
@@ -75,6 +77,7 @@ pub use hash::{FindingId, SiteHash, SymbolHash};
 pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
+pub use process::{Captured, Process, find_program};
 pub use producer::{
     Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
     SharedFact,
@@ -87,4 +90,8 @@ pub use schedule::{Job, Outcome, Scheduler};
 pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;
 pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};
+pub use test_results::{
+    OUTPUT_TAIL_LINES, RunnerInvocation, TestOutcome, TestResult, TestResults, Unevaluable,
+    output_tail,
+};
 pub use writer::{WriteError, Writer};

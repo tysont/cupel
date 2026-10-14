@@ -16,6 +16,7 @@ use crate::syntax::{
     ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, ProjectInfo, Roots, Symbols,
     TestConventions, TestFrames,
 };
+use crate::test_results::TestResults;
 
 /// Every published schema's `$id` starts with this.
 pub const BASE_URL: &str = "https://cupel.dev/schema/v1/";
@@ -74,7 +75,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 11] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 12] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -85,6 +86,7 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 11] = [
     (FactKind::Roots, fact_schema::<Roots>),
     (FactKind::TestConventions, fact_schema::<TestConventions>),
     (FactKind::ProjectInfo, fact_schema::<ProjectInfo>),
+    (FactKind::TestResults, fact_schema::<TestResults>),
     (FactKind::CoverageMap, fact_schema::<CoverageMap>),
 ];
 

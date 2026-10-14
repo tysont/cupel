@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use crate::config::error::ConfigError;
 use crate::fact::FactKind;
+use crate::test_results::Unevaluable;
 
 /// Errors raised by cupel-core.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -51,6 +52,18 @@ pub enum Error {
     /// file; a usage error (exit 2) naming the fix.
     #[error("{}", .0.title)]
     Argument(Box<ArgumentError>),
+    /// An external program could not be started.
+    #[error("cannot run `{program}`: {message}")]
+    Process { program: String, message: String },
+    /// The baseline test suite is red, so nothing that depends on test execution can be scored
+    /// (exit 4, ADR-076).
+    #[error(
+        "the baseline test suite for {} is red: {} failing, {} incomplete",
+        .0.lang,
+        .0.results.failures().count(),
+        .0.results.incomplete().count()
+    )]
+    Unevaluable(Box<Unevaluable>),
 }
 
 /// Why a scope or selection flag cannot be honored, and what to do instead.
