@@ -15,7 +15,7 @@ verbs
   explain   Give full context and remediation for one finding or check result.
   baseline  Set, show, diff, export, or import the baseline runs are compared with.
   oracle    Add, list, remove, or verify the oracles differential checks compare with. · pending P5.2
-  tests     List the tests that cover a scope, with a command to run them. · pending P3.3
+  tests     List the tests a scope impacts, why, and the command that runs them.
   suppress  Suppress a finding, with a reason and an optional expiry.
   serve     Run the daemon and MCP server with warm caches and event streaming. · pending P4.2
 

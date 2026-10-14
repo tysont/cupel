@@ -148,11 +148,10 @@ fn examples(command: &Value) -> Vec<(String, i64)> {
 
 #[test]
 fn exit_2_for_every_unimplemented_verb_names_its_plan_step() {
-    // Every verb but describe, init, doctor, check, survey, explain, baseline, and suppress is
+    // Every verb but describe, init, doctor, check, survey, explain, baseline, tests, and suppress is
     // pending: (verb, its first example, its plan step).
     let pending = [
         ("oracle", "cupel oracle list", "P5.2"),
-        ("tests", "cupel tests --impacted --changed", "P3.3"),
         ("serve", "cupel serve --mcp", "P4.2"),
     ];
     let owned =

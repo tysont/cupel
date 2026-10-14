@@ -450,19 +450,20 @@ fn oracle_verb() -> CommandDescription {
 fn tests_verb() -> CommandDescription {
     verb(
         "tests",
-        "List the tests that cover a scope, with a command to run them.",
-        Some("P3.3"),
+        "List the tests a scope impacts, why, and the command that runs them.",
+        None,
         [switch(
             "--impacted",
-            "Select the minimal test set covering the scope.",
+            "Select the tests covering the scope: by per-test coverage where a language has it, \
+             else the test files importing the scope's files.",
         )]
         .into_iter()
         .chain(scope_flags())
         .collect(),
         examples(&[(
-            "cupel tests --impacted --changed",
-            "Tests to run for the working tree's changes.",
-            ExitCode::Usage,
+            "cupel tests --impacted",
+            "Every test of the tree, with commands; add --changed for the working tree's changes.",
+            ExitCode::Pass,
         )]),
     )
 }
@@ -1067,7 +1068,7 @@ mod tests {
             .into_iter()
             .filter_map(|command| Some((command.name, command.pending_step?)))
             .collect();
-        let expected = [("oracle", "P5.2"), ("tests", "P3.3"), ("serve", "P4.2")]
+        let expected = [("oracle", "P5.2"), ("serve", "P4.2")]
             .map(|(name, step)| (name.to_owned(), step.to_owned()));
         assert_eq!(pending, expected);
     }

@@ -444,9 +444,9 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       },
       {
         "name": "tests",
-        "pending_step": "P3.3",
+        "pending_step": null,
         "stability": "experimental",
-        "summary": "List the tests that cover a scope, with a command to run them."
+        "summary": "List the tests a scope impacts, why, and the command that runs them."
       },
       {
         "name": "suppress",
@@ -515,6 +515,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "resolved": 0,
     "suppressed": 0
   },
+  "tests": null,
   "total_findings": 0,
   "truncated": false
 }

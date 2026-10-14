@@ -77,7 +77,7 @@ fn rerun(verb: Verb, args: &ScopeArgs) -> String {
     words.join(" ")
 }
 
-fn scope_request(args: &ScopeArgs) -> ScopeRequest {
+pub(crate) fn scope_request(args: &ScopeArgs) -> ScopeRequest {
     ScopeRequest {
         changed: args.changed,
         base: args.base.clone(),
@@ -97,7 +97,11 @@ pub fn run(
     let (run, writer) = (invocation.run, invocation.writer);
     let catalog = Catalog::builtin();
     let request = scope_request(args);
-    let (info, resolved) = resolve(writer, config, &request, catalog.language_registry())?;
+    let Scoped {
+        info,
+        files: resolved,
+        ..
+    } = resolve(writer, config, &request, catalog.language_registry())?;
     let selected = Selection {
         depth: config.effective.depth,
         only: args.only.clone(),
@@ -163,23 +167,30 @@ fn schedule(
     }
 }
 
-/// The project roots outside `[scope] exclude`, and the files and range changes `request`
-/// selects from the walk (ADR-065).
-fn resolve(
+/// A resolved scope: the project roots outside `[scope] exclude`, every file of the walk, and
+/// the files and range changes the request selects from it (ADR-065).
+pub(crate) struct Scoped {
+    pub info: ProjectInfo,
+    pub tree: Vec<String>,
+    pub files: ResolvedFiles,
+}
+
+/// Walks the repository and resolves `request` against the walk.
+pub(crate) fn resolve(
     writer: &Writer,
     config: &Config,
     request: &ScopeRequest,
     languages: &LanguageRegistry,
-) -> Result<(ProjectInfo, ResolvedFiles), CupelError> {
+) -> Result<Scoped, CupelError> {
     let root = writer.root();
     let exclude = &config.file.scope.exclude;
     let info = project::detect(writer, exclude);
     let tree = cupel_lang::walk_excluding(root, languages, &info, exclude);
-    let mut resolved = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
-    resolved
+    let mut files = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
+    files
         .changes
         .retain(|change| !exclude.excludes(&change.path));
-    Ok((info, resolved))
+    Ok(Scoped { info, tree, files })
 }
 
 /// What `check` (or `survey`) found, before it becomes an envelope.
@@ -286,7 +297,7 @@ fn base_tree(
 }
 
 /// The languages that own at least one of `files`, in ID order.
-fn languages_of<'a>(
+pub(crate) fn languages_of<'a>(
     languages: &LanguageRegistry,
     files: impl Iterator<Item = &'a String>,
 ) -> Vec<Lang> {
@@ -302,7 +313,7 @@ fn languages_of<'a>(
 }
 
 /// The detected project roots of the languages in scope; `.` when none is detected.
-fn roots(info: &ProjectInfo, langs: &[Lang]) -> Vec<String> {
+pub(crate) fn roots(info: &ProjectInfo, langs: &[Lang]) -> Vec<String> {
     let roots: BTreeSet<String> = info
         .roots
         .iter()
@@ -317,7 +328,7 @@ fn roots(info: &ProjectInfo, langs: &[Lang]) -> Vec<String> {
 }
 
 /// `run.git`: null outside a work tree or before the first commit.
-fn git_info(root: &Path, resolved: &ResolvedFiles) -> Option<GitInfo> {
+pub(crate) fn git_info(root: &Path, resolved: &ResolvedFiles) -> Option<GitInfo> {
     let head = Git::open(root)?.head();
     Some(GitInfo {
         sha: head.sha?,

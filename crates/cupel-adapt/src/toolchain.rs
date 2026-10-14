@@ -141,6 +141,17 @@ pub fn detects(id: &ProducerId, root: &Path) -> bool {
         .is_some_and(|tool| detected(&tool.detect, &dirs))
 }
 
+/// The table's command for the runner `id` in `root`, with the launcher detected there and the
+/// root's packages filled in; `None` when the table lists no command for it.
+pub fn runner_command(id: &ProducerId, root: &Root) -> Option<String> {
+    let row = rows()
+        .iter()
+        .find(|row| row.runners.iter().any(|tool| tool.id == *id))?;
+    let mut selection = row.select(root);
+    selection.runner = row.runners.iter().find(|tool| tool.id == *id);
+    selection.commands().test
+}
+
 /// A command that exits 0 when `program` is installed: `[probes]`, else `<program> --version`.
 pub fn probe(program: &str) -> Vec<String> {
     TOOLCHAIN.probes.get(program).map_or_else(

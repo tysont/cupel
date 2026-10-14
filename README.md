@@ -394,6 +394,34 @@ until = "2027-01-31"
 created = "2026-10-14"
 ```
 
+### `cupel tests --impacted`
+
+`tests --impacted` lists the tests a scope impacts, why, and a ready-to-run command per runner. It takes the same scope flags as `check`; with `--changed` or `--base` it reads the changed lines and widens each change to the functions it touches. Where a language has a per-test coverage map (Rust through `cargo llvm-cov` and `cargo nextest`, Go through `go test -coverprofile` per test, Python through pytest-cov's test contexts), a test is impacted when it executes one of those lines. JavaScript and TypeScript have no per-test map, so their impacted tests are the test files that import a changed file, directly or through other files; the envelope says so with `per_test_map: false` and the reason. The same happens for any language whose coverage tool is not installed.
+
+```console
+$ cupel tests --impacted --changed --format text    # `add` changed in calc.py
+cupel tests: pass (exit 0)
+
+tests  1 impacted · per-test map: yes
+  python  per-test map from tool.pytest-cov-per-test
+  tests/test_calc.py::test_add  python
+    covers calc.add (calc.py:6)
+  run in .: python -m pytest tests/test_calc.py::test_add
+  …
+
+$ cupel tests --impacted --changed --format text    # `add` changed in add.js
+cupel tests: pass (exit 0)
+
+tests  1 impacted · per-test map: no
+  javascript  file-level impact: no producer makes per-test-map for this language (see `cupel describe matrix`)
+  add.test.js  javascript
+    imports add.js
+  run in .: npx jest add.test.js
+  …
+```
+
+In JSON the same report is the envelope's `tests`: `per_test_map`, `impacted` (`id`, `file`, `reason`, `lang`), `commands` (`lang`, `runner`, `dir`, `command`, and `narrowed: false` when the runner cannot run only those tests and the command runs its whole suite), and `languages` (per language, whether a per-test map chose the tests or why not). Measuring a per-test map runs each test alone under coverage, so it costs a full test run or more; `cupel describe matrix` shows which languages can have one here.
+
 ### Global flags
 
 | Flag | Meaning |

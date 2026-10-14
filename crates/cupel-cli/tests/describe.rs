@@ -92,13 +92,82 @@ fn describe_cli_lists_every_verb_exit_code_and_schema() {
 
 #[test]
 fn describe_verb_describes_its_arguments_and_pending_step() {
-    let outcome = run(["describe", "tests"]);
+    let outcome = run(["describe", "oracle"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["description"]["subject"], json!("command"));
-    assert_eq!(envelope["description"]["name"], json!("tests"));
-    assert_eq!(envelope["description"]["pending_step"], json!("P3.3"));
+    assert_eq!(envelope["description"]["name"], json!("oracle"));
+    assert_eq!(envelope["description"]["pending_step"], json!("P5.2"));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
+}
+
+#[test]
+fn describe_tests_documents_impacted_and_the_scope_flags() {
+    let description = described(&["tests"]);
+    assert_eq!(description["pending_step"], Value::Null);
+    let flags: Vec<&str> = description["arguments"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|argument| argument["name"].as_str().unwrap())
+        .collect();
+    for flag in ["--impacted", "--changed", "--base", "--paths", "--symbols"] {
+        assert!(flags.contains(&flag), "{flag} in {flags:?}");
+    }
+}
+
+/// The languages for which `verb` (a `describe matrix` verb row) is unsupported for lack of
+/// its fact.
+fn unsupported_languages(verb: &Value) -> Vec<String> {
+    let lacking = json!({"status": "unsupported", "fact": verb["fact"]});
+    verb["languages"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|language| language["support"] == lacking)
+        .map(|language| language["lang"].as_str().unwrap().to_owned())
+        .collect()
+}
+
+#[test]
+fn describe_matrix_shows_tests_impacted_unsupported_where_no_per_test_map_exists() {
+    let verbs = described(&["matrix"])["verbs"].clone();
+    assert_eq!(
+        (&verbs[0]["verb"], &verbs[0]["fact"]),
+        (&json!("tests --impacted"), &json!("per-test-map"))
+    );
+    assert_eq!(
+        unsupported_languages(&verbs[0]),
+        ["javascript", "typescript"]
+    );
+}
+
+#[test]
+fn describe_fact_per_test_map_lists_producers_for_every_language_but_the_ecma_family() {
+    let description = described(&["fact", "per-test-map"]);
+    assert_eq!(description["version"], json!(1));
+    let producers: Vec<(String, usize)> = description["producers"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|entry| {
+            (
+                entry["lang"].as_str().unwrap().to_owned(),
+                entry["producers"].as_array().unwrap().len(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        producers,
+        [
+            ("go", 1),
+            ("javascript", 0),
+            ("python", 1),
+            ("rust", 1),
+            ("typescript", 0)
+        ]
+        .map(|(lang, count)| (lang.to_owned(), count))
+    );
 }
 
 #[test]
@@ -479,7 +548,8 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
 
 #[test]
 fn describe_fact_without_a_payload_type_yet_has_no_version_or_schema() {
-    let description = run(["describe", "fact", "per-test-map"]).envelope()["description"].clone();
+    let description =
+        run(["describe", "fact", "mutation-outcomes"]).envelope()["description"].clone();
     assert_eq!(description["syntactic"], json!(false));
     assert_eq!(description["version"], Value::Null);
     assert_eq!(description["schema"], Value::Null);

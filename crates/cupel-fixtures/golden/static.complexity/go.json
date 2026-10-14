@@ -282,6 +282,7 @@
     "resolved": 0,
     "suppressed": 0
   },
+  "tests": null,
   "total_findings": 4,
   "truncated": false
 }

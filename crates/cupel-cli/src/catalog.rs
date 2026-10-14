@@ -6,7 +6,7 @@ use cupel_core::{
     CheckDescription, CheckId, CheckRegistry, CheckSupport, Ctx, FactDescription, FactKind,
     FactProducers, FindingDescription, LangId, LanguageDescription, LanguageProducers,
     LanguageSummary, LanguageSupport, LanguagesDescription, MatrixCell, MatrixDescription,
-    ProducerDescription, ProducerRegistry, RegisteredProducer, SupportMatrix, schema,
+    ProducerDescription, ProducerRegistry, RegisteredProducer, SupportMatrix, VerbSupport, schema,
 };
 use cupel_lang::{Language, LanguageRegistry};
 use serde_json::Value;
@@ -184,6 +184,29 @@ impl Catalog {
                     check: check.clone(),
                     lang: lang.clone(),
                     support: support.into(),
+                })
+                .collect(),
+            verbs: vec![self.verb_support(
+                crate::tests_verb::IMPACTED,
+                crate::tests_verb::IMPACT_FACT,
+                root,
+            )],
+        }
+    }
+
+    /// Per language, whether `fact`, which `verb` reads, can be produced.
+    fn verb_support(&self, verb: &str, fact: FactKind, root: &Path) -> VerbSupport {
+        let ctx = Ctx::new(root.to_path_buf());
+        VerbSupport {
+            verb: verb.to_owned(),
+            fact,
+            languages: self
+                .languages
+                .langs()
+                .iter()
+                .map(|lang| LanguageSupport {
+                    lang: lang.id.clone(),
+                    support: (&SupportMatrix::fact(&self.producers, fact, lang, &ctx)).into(),
                 })
                 .collect(),
         }

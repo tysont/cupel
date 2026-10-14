@@ -27,6 +27,8 @@ mod hash;
 mod id;
 mod lang;
 mod matrix;
+mod per_test;
+mod per_test_impact;
 mod process;
 mod producer;
 mod rank;
@@ -56,7 +58,7 @@ pub use describe::{
     FactDescription, FactProducers, FindingDescription, LanguageDescription, LanguageProducers,
     LanguageSummary, LanguageSupport, LanguagesDescription, LauncherDescription, MatrixCell,
     MatrixDescription, ProducerDescription, SchemaDescription, SchemaRef, SupportDescription,
-    ToolDescription, ToolchainDescription, ValueType,
+    ToolDescription, ToolchainDescription, ValueType, VerbSupport,
 };
 pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPlan};
 pub use envelope::{
@@ -77,16 +79,18 @@ pub use hash::{FindingId, SiteHash, SymbolHash};
 pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
+pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
+pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
     Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
-    SharedFact, ToolProbe, Upstream,
+    Runner, RunnerCommand, SharedFact, TestSelection, ToolProbe, Upstream,
 };
 pub use rank::{
     Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,
 };
 pub use ranking::rankings;
-pub use schedule::{Job, Outcome, Scheduler};
+pub use schedule::{Job, Outcome, Production, Scheduler};
 pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;
 pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};

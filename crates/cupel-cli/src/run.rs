@@ -205,6 +205,7 @@ impl Run {
             plan: None,
             explanation: None,
             rankings: None,
+            tests: None,
             truncated: false,
             total_findings,
         }

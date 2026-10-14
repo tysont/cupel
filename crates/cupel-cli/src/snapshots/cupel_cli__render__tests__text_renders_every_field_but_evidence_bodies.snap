@@ -79,6 +79,16 @@ rankings  top 10 per dimension
      2. 12  web/limits  typescript
   static.deps.coupling  module · 0 measured · Afferent plus efferent coupling per module.
 
+tests  2 impacted · per-test map: no
+  rust  per-test map from tool.llvm-cov-per-test
+  typescript  file-level impact: no producer makes per-test-map for this language (see `cupel describe matrix`)
+  calc tests::adds  rust
+    covers calc::add (src/lib.rs:5)
+  web/add.test.ts  typescript
+    imports web/add.ts
+  run in .: cargo nextest run --workspace -E '(binary_id(=calc) & test(=tests::adds))'
+  run in web: npx vitest run add.test.ts
+
 fail (2)
   tests.mutation
     Mutant survived: `<=` → `<` at planner.rs:142

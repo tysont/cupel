@@ -9,285 +9,223 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "version": "[version]"
   },
   "description": {
-    "arguments": [
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--impacted",
-        "pending_step": null,
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Select the minimal test set covering the scope.",
-        "value": "switch",
-        "value_name": null,
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--changed",
-        "pending_step": null,
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Scope to changes since the merge base, including the working tree.",
-        "value": "switch",
-        "value_name": null,
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--base",
-        "pending_step": null,
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Start of an explicit range.",
-        "value": "string",
-        "value_name": "REF",
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--head",
-        "pending_step": null,
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "End of an explicit range; defaults to the working tree.",
-        "value": "string",
-        "value_name": "REF",
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--paths",
-        "pending_step": null,
-        "positional": false,
-        "repeated": true,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Files, directories, or globs.",
-        "value": "string",
-        "value_name": "P",
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--symbols",
-        "pending_step": null,
-        "positional": false,
-        "repeated": true,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Symbols by ns::name or structural hash.",
-        "value": "string",
-        "value_name": "S",
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--since-baseline",
-        "pending_step": "P2.1",
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Symbols whose structural hash changed since the baseline.",
-        "value": "switch",
-        "value_name": null,
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": "standard",
-        "env": "CUPEL_DEPTH",
-        "name": "--depth",
-        "pending_step": null,
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "How much evidence to gather.",
-        "value": "enum",
-        "value_name": "DEPTH",
-        "values": [
-          "quick",
-          "standard",
-          "deep",
-          "exhaustive"
-        ]
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": "CUPEL_BUDGET",
-        "name": "--budget",
-        "pending_step": "P4.3",
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "A time budget that overrides the depth.",
-        "value": "duration",
-        "value_name": "DURATION",
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--only",
-        "pending_step": null,
-        "positional": false,
-        "repeated": true,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Run only these checks or groups.",
-        "value": "string",
-        "value_name": "ID",
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--skip",
-        "pending_step": null,
-        "positional": false,
-        "repeated": true,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Skip these checks or groups.",
-        "value": "string",
-        "value_name": "ID",
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--tier",
-        "pending_step": null,
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Run only checks at or above tier N.",
-        "value": "string",
-        "value_name": "N+",
-        "values": []
-      },
-      {
-        "conflicts": [
-          "--no-gate"
-        ],
-        "default": null,
-        "env": null,
-        "name": "--gate",
-        "pending_step": null,
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Evaluate the gate for this scope; the default when the config has its table.",
-        "value": "switch",
-        "value_name": null,
-        "values": []
-      },
-      {
-        "conflicts": [
-          "--gate"
-        ],
-        "default": null,
-        "env": null,
-        "name": "--no-gate",
-        "pending_step": null,
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "Do not evaluate the gate.",
-        "value": "switch",
-        "value_name": null,
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--against",
-        "pending_step": null,
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "What deltas are computed against.",
-        "value": "string",
-        "value_name": "baseline|REF|run:ID",
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--oracle",
-        "pending_step": "P5.3",
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "The oracle for differential checks.",
-        "value": "string",
-        "value_name": "NAME",
-        "values": []
-      },
-      {
-        "conflicts": [],
-        "default": null,
-        "env": null,
-        "name": "--cases",
-        "pending_step": "P5.4",
-        "positional": false,
-        "repeated": false,
-        "required": false,
-        "stability": "experimental",
-        "summary": "The case budget for generative checks.",
-        "value": "integer",
-        "value_name": "N",
-        "values": []
-      }
-    ],
+    "arguments": [],
     "examples": [
       {
-        "command": "cupel tests --impacted --changed",
+        "command": "cupel oracle list",
         "exit_code": 2,
-        "summary": "Tests to run for the working tree's changes."
+        "summary": "List registered oracles."
       }
     ],
-    "name": "tests",
-    "pending_step": "P3.3",
+    "name": "oracle",
+    "pending_step": "P5.2",
     "stability": "experimental",
-    "subcommands": [],
+    "subcommands": [
+      {
+        "arguments": [
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "NAME",
+            "pending_step": null,
+            "positional": true,
+            "repeated": false,
+            "required": true,
+            "stability": "experimental",
+            "summary": "The oracle's name.",
+            "value": "string",
+            "value_name": "NAME",
+            "values": []
+          },
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "--kind",
+            "pending_step": null,
+            "positional": false,
+            "repeated": false,
+            "required": true,
+            "stability": "experimental",
+            "summary": "What the oracle compares against.",
+            "value": "enum",
+            "value_name": "KIND",
+            "values": [
+              "ref",
+              "command",
+              "spec"
+            ]
+          },
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "--ref",
+            "pending_step": null,
+            "positional": false,
+            "repeated": false,
+            "required": false,
+            "stability": "experimental",
+            "summary": "The git ref of a reference build.",
+            "value": "string",
+            "value_name": "REF",
+            "values": []
+          },
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "--cmd",
+            "pending_step": null,
+            "positional": false,
+            "repeated": false,
+            "required": false,
+            "stability": "experimental",
+            "summary": "The command whose output is the reference.",
+            "value": "string",
+            "value_name": "CMD",
+            "values": []
+          },
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "--spec",
+            "pending_step": null,
+            "positional": false,
+            "repeated": false,
+            "required": false,
+            "stability": "experimental",
+            "summary": "The specification file.",
+            "value": "path",
+            "value_name": "FILE",
+            "values": []
+          },
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "--lang",
+            "pending_step": null,
+            "positional": false,
+            "repeated": false,
+            "required": false,
+            "stability": "experimental",
+            "summary": "The specification language: tla+, quint, or p.",
+            "value": "string",
+            "value_name": "LANG",
+            "values": []
+          }
+        ],
+        "examples": [
+          {
+            "command": "cupel oracle add pg --kind ref --ref v1.2.0",
+            "exit_code": 2,
+            "summary": "Register an oracle: a reference build, a command, or a specification."
+          }
+        ],
+        "name": "oracle add",
+        "pending_step": null,
+        "stability": "experimental",
+        "subcommands": [],
+        "summary": "Register an oracle: a reference build, a command, or a specification."
+      },
+      {
+        "arguments": [],
+        "examples": [
+          {
+            "command": "cupel oracle list",
+            "exit_code": 2,
+            "summary": "List registered oracles."
+          }
+        ],
+        "name": "oracle list",
+        "pending_step": null,
+        "stability": "experimental",
+        "subcommands": [],
+        "summary": "List registered oracles."
+      },
+      {
+        "arguments": [
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "NAME",
+            "pending_step": null,
+            "positional": true,
+            "repeated": false,
+            "required": true,
+            "stability": "experimental",
+            "summary": "The oracle to remove.",
+            "value": "string",
+            "value_name": "NAME",
+            "values": []
+          }
+        ],
+        "examples": [
+          {
+            "command": "cupel oracle remove pg",
+            "exit_code": 2,
+            "summary": "Remove an oracle."
+          }
+        ],
+        "name": "oracle remove",
+        "pending_step": null,
+        "stability": "experimental",
+        "subcommands": [],
+        "summary": "Remove an oracle."
+      },
+      {
+        "arguments": [
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "NAME",
+            "pending_step": null,
+            "positional": true,
+            "repeated": false,
+            "required": false,
+            "stability": "experimental",
+            "summary": "The oracle to verify.",
+            "value": "string",
+            "value_name": "NAME",
+            "values": []
+          },
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "--all",
+            "pending_step": null,
+            "positional": false,
+            "repeated": false,
+            "required": false,
+            "stability": "experimental",
+            "summary": "Verify every oracle.",
+            "value": "switch",
+            "value_name": null,
+            "values": []
+          }
+        ],
+        "examples": [
+          {
+            "command": "cupel oracle verify pg",
+            "exit_code": 2,
+            "summary": "Smoke-test an oracle and record that it is verified."
+          }
+        ],
+        "name": "oracle verify",
+        "pending_step": null,
+        "stability": "experimental",
+        "subcommands": [],
+        "summary": "Smoke-test an oracle and record that it is verified."
+      }
+    ],
     "subject": "command",
-    "summary": "List the tests that cover a scope, with a command to run them."
+    "summary": "Add, list, remove, or verify the oracles differential checks compare with."
   },
   "exit_code": 0,
   "explanation": null,
@@ -341,6 +279,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "resolved": 0,
     "suppressed": 0
   },
+  "tests": null,
   "total_findings": 0,
   "truncated": false
 }

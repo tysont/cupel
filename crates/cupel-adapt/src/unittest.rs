@@ -1,9 +1,9 @@
 // ABOUTME: The `unittest` runner producer: `python3 -m unittest discover -v -b`, output merged so each failure's
 // ABOUTME: buffered output follows it, no bytecode written into the tree; read by the unittest text parser.
-use cupel_core::{LangId, Langs, TestResult, TestResults};
+use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::unittest;
-use crate::runner::{Ran, Root, Runner, RunnerSpec};
+use crate::runner::{Ran, Root, Runner, RunnerSpec, whole_suite};
 
 const ID: &str = "tool.unittest";
 
@@ -18,11 +18,13 @@ static UNITTEST: RunnerSpec = RunnerSpec {
     merged: true,
     read,
     completed_codes: &[0],
+    select: whole_suite,
+    list: None,
 };
 
 inventory::submit!(crate::ToolProducer {
     id: ID,
-    register: |registry| registry.register::<TestResults, _>(Runner(&UNITTEST)),
+    register: |registry| registry.register_runner(Runner(&UNITTEST)),
 });
 
 fn command(root: &Root) -> Vec<String> {

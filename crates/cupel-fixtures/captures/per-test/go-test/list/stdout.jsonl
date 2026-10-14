@@ -1,0 +1,5 @@
+{"Time":"2026-10-14T11:50:33.412184-07:00","Action":"start","Package":"example.com/calc"}
+{"Time":"2026-10-14T11:50:33.684444-07:00","Action":"output","Package":"example.com/calc","Output":"TestAdd\n"}
+{"Time":"2026-10-14T11:50:33.684746-07:00","Action":"output","Package":"example.com/calc","Output":"TestScale\n"}
+{"Time":"2026-10-14T11:50:33.685118-07:00","Action":"output","Package":"example.com/calc","Output":"ok  \texample.com/calc\t0.272s\n"}
+{"Time":"2026-10-14T11:50:33.685203-07:00","Action":"pass","Package":"example.com/calc","Elapsed":0.273}

@@ -518,6 +518,53 @@ expression: out
       }
     ]
   },
+  "tests": {
+    "per_test_map": false,
+    "impacted": [
+      {
+        "id": "calc tests::adds",
+        "file": "src/lib.rs",
+        "reason": "covers calc::add (src/lib.rs:5)",
+        "lang": "rust"
+      },
+      {
+        "id": "web/add.test.ts",
+        "file": "web/add.test.ts",
+        "reason": "imports web/add.ts",
+        "lang": "typescript"
+      }
+    ],
+    "commands": [
+      {
+        "lang": "rust",
+        "runner": "tool.cargo-nextest",
+        "dir": ".",
+        "command": "cargo nextest run --workspace -E '(binary_id(=calc) & test(=tests::adds))'",
+        "narrowed": true
+      },
+      {
+        "lang": "typescript",
+        "runner": "tool.vitest",
+        "dir": "web",
+        "command": "npx vitest run add.test.ts",
+        "narrowed": true
+      }
+    ],
+    "languages": [
+      {
+        "lang": "rust",
+        "per_test_map": true,
+        "producer": "tool.llvm-cov-per-test",
+        "fallback": null
+      },
+      {
+        "lang": "typescript",
+        "per_test_map": false,
+        "producer": null,
+        "fallback": "no producer makes per-test-map for this language (see `cupel describe matrix`)"
+      }
+    ]
+  },
   "truncated": false,
   "total_findings": 3
 }

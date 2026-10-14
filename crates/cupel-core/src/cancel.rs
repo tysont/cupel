@@ -14,6 +14,8 @@ const WAIT_SLICE: Duration = Duration::from_millis(10);
 pub struct Cancellation {
     cancelled: Arc<AtomicBool>,
     deadline: Option<Instant>,
+    /// A token whose cancellation cancels this one too (see [`child`](Self::child)).
+    parent: Option<Box<Cancellation>>,
 }
 
 impl Cancellation {
@@ -27,6 +29,17 @@ impl Cancellation {
         Self {
             cancelled: Arc::default(),
             deadline: Some(deadline),
+            parent: None,
+        }
+    }
+
+    /// A token cancelled when this one is, or once `timeout` passes; cancelling it, or its
+    /// timeout passing, leaves this one alone (a runner's per-call timeout, ADR-077).
+    #[must_use]
+    pub fn child(&self, timeout: Duration) -> Self {
+        Self {
+            parent: Some(Box::new(self.clone())),
+            ..Self::with_deadline(Instant::now() + timeout)
         }
     }
 
@@ -38,6 +51,10 @@ impl Cancellation {
         if self
             .deadline
             .is_some_and(|deadline| Instant::now() >= deadline)
+            || self
+                .parent
+                .as_ref()
+                .is_some_and(|parent| parent.is_cancelled())
         {
             self.cancel();
         }

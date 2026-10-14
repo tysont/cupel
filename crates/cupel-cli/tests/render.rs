@@ -17,7 +17,7 @@ fn jsonl(stdout: &str) -> (Value, Vec<Value>) {
 
 #[test]
 fn jsonl_writes_the_envelope_header_then_each_finding_on_its_own_line() {
-    let outcome = run(["tests", "--format", "jsonl"]);
+    let outcome = run(["oracle", "list", "--format", "jsonl"]);
     assert_eq!(outcome.code, 2);
     let (header, findings) = jsonl(&outcome.stdout);
     assert_eq!(header["findings"], json!([]));
@@ -27,7 +27,7 @@ fn jsonl_writes_the_envelope_header_then_each_finding_on_its_own_line() {
     assert_eq!(findings.len(), 1);
     assert_eq!(
         findings[0]["id"],
-        json!(cli_finding_id("cli.not-implemented", "tests"))
+        json!(cli_finding_id("cli.not-implemented", "oracle list"))
     );
 }
 

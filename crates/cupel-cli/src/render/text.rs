@@ -7,7 +7,7 @@ use std::fmt::Write as _;
 use cupel_core::{
     CheckResult, Envelope, Excerpt, Explanation, Finding, GateOutcome, GateResult, GitInfo,
     Location, Metric, NextAction, PlannedCheck, Rankings, RuleOutcome, RunInfo, RunPlan, ScopeInfo,
-    Severity, Skipped, Status, Summary,
+    Severity, Skipped, Status, Summary, TestsReport,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -50,6 +50,11 @@ pub fn render(envelope: &Envelope, color: bool) -> String {
             .rankings
             .as_ref()
             .map(|rankings| rankings_block(rankings, &paint))
+            .unwrap_or_default(),
+        envelope
+            .tests
+            .as_ref()
+            .map(|tests| tests_block(tests, &paint))
             .unwrap_or_default(),
         findings_block(envelope, &paint),
         run_block(envelope, &paint),
@@ -304,6 +309,38 @@ fn rankings_block(rankings: &Rankings, paint: &Paint) -> String {
                 paint.dim(&facts.join(" · "))
             );
         }
+    }
+    out
+}
+
+/// How each language chose its tests, the impacted tests with why, and the commands that run
+/// them (ADR-077 §6).
+fn tests_block(tests: &TestsReport, paint: &Paint) -> String {
+    let mut out = format!(
+        "{}  {} impacted · per-test map: {}\n",
+        paint.bold("tests"),
+        tests.impacted.len(),
+        if tests.per_test_map { "yes" } else { "no" }
+    );
+    for basis in &tests.languages {
+        let how = match (&basis.producer, &basis.fallback) {
+            (_, Some(fallback)) => format!("file-level impact: {fallback}"),
+            (Some(producer), None) => format!("per-test map from {producer}"),
+            (None, None) => "per-test map".to_owned(),
+        };
+        let _ = writeln!(out, "  {}  {}", basis.lang, paint.dim(&how));
+    }
+    for test in &tests.impacted {
+        let _ = writeln!(out, "  {}  {}", test.id, paint.dim(&test.lang.to_string()));
+        let _ = writeln!(out, "    {}", test.reason);
+    }
+    for command in &tests.commands {
+        let scope = if command.narrowed {
+            ""
+        } else {
+            " (whole suite)"
+        };
+        let _ = writeln!(out, "  run in {}{scope}: {}", command.dir, command.command);
     }
     out
 }

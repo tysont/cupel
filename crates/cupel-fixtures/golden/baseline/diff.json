@@ -123,6 +123,7 @@
     "resolved": 1,
     "suppressed": 0
   },
+  "tests": null,
   "total_findings": 2,
   "truncated": false
 }

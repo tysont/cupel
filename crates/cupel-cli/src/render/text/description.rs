@@ -349,6 +349,24 @@ fn render_matrix(matrix: &MatrixDescription, paint: &Paint) -> String {
         }
         let _ = writeln!(out, "{}", line.trim_end());
     }
+    out.push_str(&verb_rows(matrix, paint));
+    out
+}
+
+/// Each verb that reads a fact directly, with whether each language can produce it.
+fn verb_rows(matrix: &MatrixDescription, paint: &Paint) -> String {
+    let mut out = String::new();
+    for verb in &matrix.verbs {
+        let _ = writeln!(out, "\n{} needs {}", paint.bold(&verb.verb), verb.fact);
+        for language in &verb.languages {
+            let _ = writeln!(
+                out,
+                "  {:<12}{}",
+                language.lang.as_str(),
+                support(&language.support)
+            );
+        }
+    }
     out
 }
 

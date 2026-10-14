@@ -1,11 +1,12 @@
-// ABOUTME: The producer contract and registry: anything that makes a fact, for some languages.
-// ABOUTME: The registry maps (fact kind, language) to producers in selection order (design §8.3.3).
+// ABOUTME: The producer contract and registry: anything that makes a fact, and runners, which also select tests.
+// ABOUTME: The registry maps (fact kind, language) to producers in selection order (design §8.3.3, ADR-077).
 use std::any::Any;
 use std::collections::BTreeMap;
 use std::fmt;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::time::Duration;
 
 use serde_json::{Map, Value};
 
@@ -19,6 +20,7 @@ use crate::grade::CostClass;
 use crate::id::{LangId, ProducerId, ToolId};
 use crate::lang::{Lang, Langs};
 use crate::scope::Scope;
+use crate::test_results::TestResults;
 use crate::writer::Writer;
 
 /// What a producer can see when reporting whether it can run here.
@@ -134,6 +136,48 @@ pub trait Producer<F: Fact>: Send + Sync {
         None
     }
     fn produce(&self, ctx: &ProduceCtx, scope: &Scope, sink: &mut dyn EventSink) -> Result<F>;
+}
+
+/// Which tests a runner runs.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TestSelection {
+    /// The whole suite.
+    All,
+    /// These tests, by the IDs the runner's `TestResults` use (ADR-075).
+    Tests(Vec<String>),
+    /// The tests in these files, relative to the repository root.
+    Files(Vec<String>),
+}
+
+/// A command a person or agent runs to run a selection in one project root.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RunnerCommand {
+    /// The project root it runs in, relative to the repository root; `.` for the root.
+    pub dir: String,
+    /// Shell words, ready to paste in `dir`.
+    pub command: String,
+}
+
+/// A test runner: produces `TestResults` for the whole suite, and runs selections of it for the
+/// consumers that choose tests (`tests --impacted`, the mutation engine).
+pub trait Runner: Producer<TestResults> {
+    /// The IDs of the suite's tests, without running them.
+    fn list(&self, ctx: &ProduceCtx) -> Result<Vec<String>>;
+
+    /// Runs `selection` with `env` added to the runner's environment. The run's cancellation
+    /// still applies (`Error::Cancelled`); `timeout` ends only this run, which then reports an
+    /// incomplete invocation.
+    fn run(
+        &self,
+        ctx: &ProduceCtx,
+        selection: &TestSelection,
+        env: &[(String, String)],
+        timeout: Option<Duration>,
+    ) -> Result<TestResults>;
+
+    /// The command lines that run `selection`, one per project root it reaches; `None` when the
+    /// runner cannot narrow its suite to it.
+    fn commands(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Option<Vec<RunnerCommand>>;
 }
 
 /// A fact a producer made, with its type erased: what [`RegisteredProducer::produce`] returns.
@@ -302,6 +346,8 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
 #[derive(Default)]
 pub struct ProducerRegistry {
     by_kind: BTreeMap<FactKind, Vec<Box<dyn RegisteredProducer>>>,
+    /// The `TestResults` producers registered as runners, by ID (ADR-077).
+    runners: BTreeMap<ProducerId, Box<dyn Runner>>,
 }
 
 impl ProducerRegistry {
@@ -313,6 +359,17 @@ impl ProducerRegistry {
                 producer,
                 fact: PhantomData,
             }));
+    }
+
+    /// Registers `runner` as a `TestResults` producer and keeps it for [`runner`](Self::runner).
+    pub fn register_runner<R: Runner + Clone + 'static>(&mut self, runner: R) {
+        self.runners.insert(runner.id(), Box::new(runner.clone()));
+        self.register::<TestResults, _>(runner);
+    }
+
+    /// The runner registered as `id`.
+    pub fn runner(&self, id: &ProducerId) -> Option<&dyn Runner> {
+        self.runners.get(id).map(AsRef::as_ref)
     }
 
     /// Producers of `kind` that serve `lang`, in selection order.

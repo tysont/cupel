@@ -62,6 +62,7 @@ mod cargo_nextest;
 mod cargo_test;
 mod go_test;
 mod jest;
+mod per_test;
 mod pytest;
 pub mod report;
 mod rules;

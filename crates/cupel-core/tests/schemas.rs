@@ -87,7 +87,10 @@ fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
         assert_eq!(
             schema::fact(kind).is_some(),
             FactKind::SYNTACTIC.contains(&kind)
-                || matches!(kind, FactKind::CoverageMap | FactKind::TestResults),
+                || matches!(
+                    kind,
+                    FactKind::CoverageMap | FactKind::TestResults | FactKind::PerTestMap
+                ),
             "{kind}"
         );
     }

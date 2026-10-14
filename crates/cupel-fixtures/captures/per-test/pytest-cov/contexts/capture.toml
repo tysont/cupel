@@ -1,0 +1,6 @@
+# Captured from the real tool on the per-test/python fixture (P3.3); the other files here are its
+# unedited output. `dir` is where it ran, which parsers strip from absolute paths.
+tool = "pytest 9.1.1, pytest-cov 7.1.0, coverage 7.16.2, Python 3.13.1"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p33/work/python"
+command = "pytest -p no:cacheprovider --cov=. --cov-context=test --cov-config=<rc> --cov-report=json:<report>"
+exit_code = 0

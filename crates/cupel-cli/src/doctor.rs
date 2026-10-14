@@ -172,23 +172,32 @@ impl Resolution {
             for lang in langs {
                 for kind in &check.manifest().needs {
                     let purpose = format!("{} ({kind} for {})", check.manifest().id, lang.id);
-                    resolution.resolve(&walk, *kind, lang, &purpose, &mut Vec::new());
+                    resolution.resolve(&walk, *kind, lang, (&purpose, true), &mut Vec::new());
                 }
             }
+        }
+        // `tests --impacted` falls back without its per-test map (ADR-006), so its tool is
+        // reported but not required.
+        let (verb, kind) = (crate::tests_verb::IMPACTED, crate::tests_verb::IMPACT_FACT);
+        for lang in langs {
+            let purpose = format!("{verb} ({kind} for {})", lang.id);
+            resolution.resolve(&walk, kind, lang, (&purpose, false), &mut Vec::new());
         }
         resolution
     }
 
     /// Records the tool of the producer chosen for `kind` in `lang` (the first ready candidate,
-    /// else the first), then resolves that producer's needs.
+    /// else the first), then resolves that producer's needs. `need` is what needs it and
+    /// whether that cannot run without it.
     fn resolve(
         &mut self,
         walk: &Walk<'_>,
         kind: FactKind,
         lang: &Lang,
-        purpose: &str,
+        need: (&str, bool),
         visiting: &mut Vec<FactKind>,
     ) {
+        let (purpose, required) = need;
         if visiting.contains(&kind) {
             return;
         }
@@ -216,19 +225,22 @@ impl Resolution {
                 Some(known) => {
                     known.needed_for.push_str(", ");
                     known.needed_for.push_str(&purpose);
+                    known.required |= required;
+                    known.versioned |= required;
                 }
                 None => self.requirements.push(Requirement {
                     tool: tool.name,
                     needed_for: purpose,
-                    required: true,
+                    required,
                     probe: tool.version,
-                    versioned: true,
+                    // Only what the checks need is versioned in `run.toolchain`.
+                    versioned: required,
                 }),
             }
         }
         visiting.push(kind);
-        for need in producer.needs() {
-            self.resolve(walk, *need, lang, purpose, visiting);
+        for upstream in producer.needs() {
+            self.resolve(walk, *upstream, lang, need, visiting);
         }
         visiting.pop();
     }
@@ -735,6 +747,16 @@ mod tests {
         (shape(&resolution.requirements), problems)
     }
 
+    /// The optional requirement `tests --impacted` adds for python's per-test map.
+    fn per_test_map() -> Shape {
+        (
+            "pytest".to_owned(),
+            "tests --impacted (per-test-map for python) via tool.pytest-cov-per-test".to_owned(),
+            false,
+            "pytest --version".to_owned(),
+        )
+    }
+
     #[test]
     fn the_tool_of_the_runner_a_check_needs_is_required_and_versioned() {
         let detected = resolved(&json!({}));
@@ -745,19 +767,24 @@ mod tests {
                 (
                     vec![(
                         "pytest".to_owned(),
-                        "t.needs (test-results for python) via tool.pytest".to_owned(),
+                        "t.needs (test-results for python) via tool.pytest, tests --impacted \
+                         (per-test-map for python) via tool.pytest-cov-per-test"
+                            .to_owned(),
                         true,
                         "pytest --version".to_owned()
                     )],
                     vec![]
                 ),
                 (
-                    vec![(
-                        "python3".to_owned(),
-                        "t.needs (test-results for python) via tool.unittest".to_owned(),
-                        true,
-                        "python3 --version".to_owned()
-                    )],
+                    vec![
+                        (
+                            "python3".to_owned(),
+                            "t.needs (test-results for python) via tool.unittest".to_owned(),
+                            true,
+                            "python3 --version".to_owned()
+                        ),
+                        per_test_map()
+                    ],
                     vec![]
                 )
             )
@@ -770,7 +797,7 @@ mod tests {
         assert_eq!(
             (requirements, problems),
             (
-                vec![],
+                vec![per_test_map()],
                 vec!["doctor.producer-unknown lang.python.runner".to_owned()]
             )
         );
