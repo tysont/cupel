@@ -364,7 +364,7 @@ expression: pretty(&schema)
           "default": {}
         },
         "notes": {
-          "description": "What the result could not take into account, such as `branches: unavailable` when the\ncoverage map measured no branches. Absent when empty: the one optional property of an\nemitted type, so results without notes are unchanged (ADR-077).",
+          "description": "What the result could not take into account, such as `branches: unavailable` when the\ncoverage map measured no branches. Absent when empty: the one optional property of an\nemitted type, so results without notes are unchanged (ADR-079).",
           "type": "array",
           "items": {
             "type": "string"

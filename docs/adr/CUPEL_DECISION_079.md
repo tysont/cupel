@@ -1,4 +1,4 @@
-# CUPEL_DECISION_077: Coverage producers, report freshness, `tests.coverage`, and CRAP with coverage
+# CUPEL_DECISION_079: Coverage producers, report freshness, `tests.coverage`, and CRAP with coverage
 
 **Date:** 2026-10-14 · **Status:** accepted · **Phase:** P3.2
 

@@ -1,4 +1,4 @@
-# The coverage fixture (ADR-077): `.cupel/cache/coverage/` holds the report a real run of this command
+# The coverage fixture (ADR-079): `.cupel/cache/coverage/` holds the report a real run of this command
 # left, which every run ingests while it is fresh. After changing a file here, delete that cache and
 # run `cupel check --only tests.coverage` here with the tool installed, then commit the new cache.
 [lang.rust]

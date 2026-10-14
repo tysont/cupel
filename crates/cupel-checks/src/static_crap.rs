@@ -1,5 +1,5 @@
 // ABOUTME: `static.crap`: per-symbol CRAP, `CC² × (1 − coverage)³ + CC`, from Symbols, Decisions, NormTree, and
-// ABOUTME: a CoverageMap; without coverage CRAP is null and nothing is reported (ADR-048, ADR-067, ADR-077).
+// ABOUTME: a CoverageMap; without coverage CRAP is null and nothing is reported (ADR-048, ADR-067, ADR-079).
 use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::coverage::CoverageMap;

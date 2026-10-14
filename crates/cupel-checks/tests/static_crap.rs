@@ -166,7 +166,7 @@ fn without_coverage_crap_is_null_and_nothing_is_reported() {
 #[test]
 fn coverage_lowers_crap_toward_cyclomatic_complexity() {
     // CRAP = CC² × (1 − coverage)³ + CC: CC 6 fully covered is 6; half covered 6 × 6 / 8 + 6.
-    // Coverage is of the body: the declaration line (10) does not count (ADR-077).
+    // Coverage is of the body: the declaration line (10) does not count (ADR-079).
     let full = symbol("full", 1);
     let half = symbol("half", 10);
     let mut coverage = covered([&full].into_iter(), 3);

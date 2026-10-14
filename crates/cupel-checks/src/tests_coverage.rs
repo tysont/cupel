@@ -1,5 +1,5 @@
 // ABOUTME: `tests.coverage`: per-symbol line and branch coverage from Symbols and a CoverageMap: symbols no test
-// ABOUTME: ran, branches no test took (only where the map measured branches), and line/branch ratios (ADR-077).
+// ABOUTME: ran, branches no test took (only where the map measured branches), and line/branch ratios (ADR-079).
 use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::coverage::CoverageMap;
@@ -62,7 +62,7 @@ impl TestsCoverage {
     }
 }
 
-/// The manifest: needs, wants, finding kinds with their evidence, and metrics (ADR-077).
+/// The manifest: needs, wants, finding kinds with their evidence, and metrics (ADR-079).
 fn manifest() -> Manifest {
     Manifest {
         id: CheckId::from(ID),

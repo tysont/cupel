@@ -207,7 +207,7 @@ impl Resolution {
             return;
         };
         // A producer waiting for configuration (a coverage producer without a
-        // `[lang.<id>] coverage` command, ADR-077) runs nothing, so it needs no tool yet.
+        // `[lang.<id>] coverage` command, ADR-079) runs nothing, so it needs no tool yet.
         if matches!(
             producer.availability(walk.ctx),
             Availability::Unconfigured { .. }

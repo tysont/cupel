@@ -1,5 +1,5 @@
 // ABOUTME: Recognizing a coverage report's format from its text, reading it as that format, and placing its
-// ABOUTME: paths in the repository relative to where the tool ran (ADR-077).
+// ABOUTME: paths in the repository relative to where the tool ran (ADR-079).
 use std::path::Path;
 
 use cupel_core::coverage::CoverageMap;

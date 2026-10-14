@@ -1,5 +1,5 @@
 // ABOUTME: The `CoverageMap` fact payload (design §8.3.2): line hits and optional branch hits per file, as
-// ABOUTME: a coverage producer reports them (ADR-067), merged and sorted, with per-range queries (ADR-077).
+// ABOUTME: a coverage producer reports them (ADR-067), merged and sorted, with per-range queries (ADR-079).
 use std::collections::BTreeMap;
 
 use schemars::JsonSchema;
@@ -10,7 +10,7 @@ use crate::fact::{Fact, FactKind};
 /// Which lines (and, when the producer measures them, branches) the test suite ran.
 ///
 /// Files are sorted by path, lines by number, and branches by line and index, each once; build
-/// one with [`CoverageMap::new`] to get that shape from records in any order (ADR-077).
+/// one with [`CoverageMap::new`] to get that shape from records in any order (ADR-079).
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct CoverageMap {
     pub files: Vec<FileCoverage>,

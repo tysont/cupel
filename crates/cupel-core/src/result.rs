@@ -30,7 +30,7 @@ pub struct CheckResult {
     pub oracle: Option<String>,
     /// What the result could not take into account, such as `branches: unavailable` when the
     /// coverage map measured no branches. Absent when empty: the one optional property of an
-    /// emitted type, so results without notes are unchanged (ADR-077).
+    /// emitted type, so results without notes are unchanged (ADR-079).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub notes: Vec<String>,

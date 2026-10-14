@@ -1,5 +1,5 @@
 // ABOUTME: `static.crap` through the binary: no CRAP without coverage, CRAP from the coverage fixtures' reports with
-// ABOUTME: `explain` and one-line text evidence, and `describe` of the check and its kinds (ADR-067, ADR-077).
+// ABOUTME: `explain` and one-line text evidence, and `describe` of the check and its kinds (ADR-067, ADR-079).
 use cupel_fixtures::{copy_repo, run_cupel};
 use serde_json::{Value, json};
 

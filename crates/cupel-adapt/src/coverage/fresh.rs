@@ -1,4 +1,4 @@
-// ABOUTME: Freshness of coverage reports (ADR-077): what every file under a project root hashed to when Cupel
+// ABOUTME: Freshness of coverage reports (ADR-079): what every file under a project root hashed to when Cupel
 // ABOUTME: made a report, and whether a cached report, or one the tool left in the tree, still describes it.
 use std::collections::BTreeMap;
 use std::fs;

@@ -59,7 +59,7 @@ fn every_committed_coverage_report_is_fresh() {
             ready,
             "the coverage report committed in repos/coverage/{lang}/.cupel/cache/coverage/ is \
              stale: delete that directory, run `cupel check --only tests.coverage` in a copy of \
-             the fixture with the tool installed, and commit the copy's new cache (ADR-077)"
+             the fixture with the tool installed, and commit the copy's new cache (ADR-079)"
         );
     }
 }

@@ -133,10 +133,10 @@ fn with_id(mut schema: Schema, id: &str) -> Schema {
 
 /// Marks every property of every object schema required. Core types never skip a field when
 /// serializing; absent optional values are emitted as `null` (ADR-013). The exception is a
-/// property marked `x-cupel-optional`, which is omitted when empty (ADR-077).
+/// property marked `x-cupel-optional`, which is omitted when empty (ADR-079).
 fn require_every_property(schema: &mut Schema) {
     transform_subschemas(&mut require_every_property, schema);
-    // A property marked `x-cupel-optional` is omitted when empty (ADR-077).
+    // A property marked `x-cupel-optional` is omitted when empty (ADR-079).
     let names: Option<Vec<Value>> =
         schema
             .get("properties")

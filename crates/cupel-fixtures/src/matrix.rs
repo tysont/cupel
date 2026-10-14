@@ -97,7 +97,7 @@ impl Registries {
 
     /// Every (check, language) with its support in the fixture repository it runs on, which is
     /// what the matrix test verifies: support is per repository, and a fresh coverage report
-    /// committed in a fixture is part of it (ADR-077). Ordered by check, then language.
+    /// committed in a fixture is part of it (ADR-079). Ordered by check, then language.
     pub fn fixture_pairs(&self) -> Vec<Pair> {
         let repos = repo_path(".");
         let langs = self.languages.langs();

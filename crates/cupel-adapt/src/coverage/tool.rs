@@ -1,4 +1,4 @@
-// ABOUTME: What every coverage producer shares (ADR-077): a `CoverageSpec` names the tool and its default report;
+// ABOUTME: What every coverage producer shares (ADR-079): a `CoverageSpec` names the tool and its default report;
 // ABOUTME: `CoverageTool` ingests a fresh report or runs the configured command per project root.
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -75,7 +75,7 @@ impl Producer<CoverageMap> for CoverageTool {
     }
 
     /// `Ready` with a fresh report to ingest; else `unconfigured` without a coverage command;
-    /// else whether the tool is installed (ADR-077).
+    /// else whether the tool is installed (ADR-079).
     fn availability(&self, ctx: &Ctx) -> Availability {
         if self.ingestible(ctx) {
             return Availability::Ready;
@@ -115,7 +115,7 @@ impl Producer<CoverageMap> for CoverageTool {
         })
     }
 
-    /// The coverage tool, probed as a runner is: it is what `doctor` requires (ADR-077).
+    /// The coverage tool, probed as a runner is: it is what `doctor` requires (ADR-079).
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
         let spec = self.0;
         probe(spec.tool, spec.node_bin, spec.version, &ctx.root).into()
@@ -351,7 +351,7 @@ impl Failure<'_> {
         }
     }
 
-    /// The `coverage.run-failed` finding: a red or broken suite has no coverage (ADR-077).
+    /// The `coverage.run-failed` finding: a red or broken suite has no coverage (ADR-079).
     fn finding(&self) -> Finding {
         let check = CheckId::from("coverage");
         let kind = "coverage.run-failed";

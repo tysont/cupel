@@ -1,4 +1,4 @@
-// ABOUTME: The `CoverageMap` payload (ADR-067, ADR-077): building one merges and sorts files, lines, and
+// ABOUTME: The `CoverageMap` payload (ADR-067, ADR-079): building one merges and sorts files, lines, and
 // ABOUTME: branches; symbol line coverage stays in [0, 1]; branch coverage exists only where it was measured.
 use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage};
 use proptest::prelude::*;

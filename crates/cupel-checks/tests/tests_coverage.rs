@@ -1,5 +1,5 @@
 // ABOUTME: tests.coverage over synthetic facts: uncovered symbols, uncovered branches only where the map measured
-// ABOUTME: branches (else the `branches: unavailable` note), test code and unmeasured symbols, metrics (ADR-077).
+// ABOUTME: branches (else the `branches: unavailable` note), test code and unmeasured symbols, metrics (ADR-079).
 mod support;
 
 use cupel_core::coverage::{CoverageMap, FileCoverage};

@@ -1,5 +1,5 @@
 // ABOUTME: Coverage report parsers, one per format (LCOV, Cobertura XML, Istanbul JSON, Go coverprofile, JaCoCo
-// ABOUTME: XML), format recognition, and placing a report's paths in the repository (design §8.7, ADR-077).
+// ABOUTME: XML), format recognition, and placing a report's paths in the repository (design §8.7, ADR-079).
 //! Coverage reports.
 //!
 //! A format parser knows a format, not a tool, and touches neither processes nor files: each

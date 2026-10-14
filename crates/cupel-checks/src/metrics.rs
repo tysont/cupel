@@ -38,7 +38,7 @@ pub fn trees_by_symbol<'a>(
 /// The instrumented lines that say whether tests ran `symbol`: those after its first line, or
 /// its first line alone when nothing after it is instrumented. A declaration line runs when the
 /// definition is evaluated (a Python `def` on import), not when the function is called
-/// (ADR-077).
+/// (ADR-079).
 pub fn symbol_lines<'a>(coverage: &'a CoverageMap, symbol: &SymbolDef) -> Vec<&'a LineHits> {
     let (first, last) = (symbol.span.line, symbol.span.end_line);
     let body = coverage.line_hits(&symbol.file, first.saturating_add(1), last);
