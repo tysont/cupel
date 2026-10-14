@@ -230,21 +230,7 @@ impl Usage {
     pub fn from_config(error: &ConfigError) -> Self {
         let usage = |subject: &str, fix: String| Self::configuration(error, subject, fix);
         match error {
-            ConfigError::Invalid { path, message } => {
-                // toml ends its message with the problem itself, such as "unknown field `x`,
-                // expected one of …"; the lines before it locate the problem in the file.
-                let problem = message.lines().last().unwrap_or(message).trim();
-                let short = problem.split(", expected").next().unwrap_or(problem);
-                Self {
-                    title: format!("Invalid configuration in `{}`: {short}", path.display()),
-                    detail: Some(error.to_string()),
-                    value: Some(path.display().to_string()),
-                    ..usage(
-                        "cupel.toml",
-                        format!("Edit `{}`: {problem}.", path.display()),
-                    )
-                }
-            }
+            ConfigError::Invalid { path, message } => Self::invalid_file(error, path, message),
             ConfigError::Missing { path } => Self {
                 argument: Some("--config".to_owned()),
                 value: Some(path.display().to_string()),
@@ -286,6 +272,24 @@ impl Usage {
                 )
             },
             _ => Self::from_config_rules(error),
+        }
+    }
+
+    /// A `cupel.toml` that does not parse or holds unknown keys.
+    fn invalid_file(error: &ConfigError, path: &std::path::Path, message: &str) -> Self {
+        // toml ends its message with the problem itself, such as "unknown field `x`, expected
+        // one of …"; the lines before it locate the problem in the file.
+        let problem = message.lines().last().unwrap_or(message).trim();
+        let short = problem.split(", expected").next().unwrap_or(problem);
+        Self {
+            title: format!("Invalid configuration in `{}`: {short}", path.display()),
+            detail: Some(error.to_string()),
+            value: Some(path.display().to_string()),
+            ..Self::configuration(
+                error,
+                "cupel.toml",
+                format!("Edit `{}`: {problem}.", path.display()),
+            )
         }
     }
 
@@ -364,42 +368,7 @@ impl Usage {
             .to_owned();
         let argument = first(error, ContextKind::InvalidArg).map(|arg| argument_name(&arg));
         let value = first(error, ContextKind::InvalidValue);
-        let mut valid = all(error, ContextKind::ValidValue);
-        let fix = match error.kind() {
-            ErrorKind::InvalidValue | ErrorKind::ValueValidation => {
-                let arg = argument.clone().unwrap_or_default();
-                if valid.is_empty() {
-                    format!("Pass a valid value to {arg}; `cupel describe` gives its type.")
-                } else {
-                    format!("Pass one of: {} to {arg}.", valid.join(", "))
-                }
-            }
-            ErrorKind::UnknownArgument => match first(error, ContextKind::SuggestedArg) {
-                Some(suggestion) => format!("Did you mean {suggestion}?"),
-                None => "Remove it; `cupel describe <verb>` lists the accepted flags.".to_owned(),
-            },
-            ErrorKind::InvalidSubcommand | ErrorKind::MissingSubcommand => {
-                valid = all(error, ContextKind::ValidSubcommand);
-                if valid.is_empty() {
-                    valid = verbs.to_vec();
-                }
-                format!("Use one of: {}.", valid.join(", "))
-            }
-            ErrorKind::MissingRequiredArgument => {
-                let missing = all(error, ContextKind::InvalidArg);
-                format!("Pass {}.", missing.join(" and "))
-            }
-            ErrorKind::ArgumentConflict => {
-                let prior = first(error, ContextKind::PriorArg)
-                    .map(|arg| argument_name(&arg))
-                    .unwrap_or_default();
-                format!(
-                    "Pass only one of {} and {prior}.",
-                    argument.clone().unwrap_or_default()
-                )
-            }
-            _ => "Run `cupel describe` for valid usage.".to_owned(),
-        };
+        let (fix, valid) = clap_fix(error, argument.as_deref(), verbs);
         let (subject, argument, value) = match error.kind() {
             ErrorKind::InvalidSubcommand => (
                 "verb".to_owned(),
@@ -454,6 +423,49 @@ fn all(error: &clap::Error, kind: ContextKind) -> Vec<String> {
         Some(ContextValue::String(value)) => vec![value.clone()],
         _ => Vec::new(),
     }
+}
+
+/// What to do about clap's `error` on `argument`, and the values that would have been
+/// accepted; `verbs` are offered when the verb itself is missing or unknown.
+fn clap_fix(
+    error: &clap::Error,
+    argument: Option<&str>,
+    verbs: &[String],
+) -> (String, Vec<String>) {
+    let valid = all(error, ContextKind::ValidValue);
+    let argument = argument.unwrap_or_default();
+    let fix = match error.kind() {
+        ErrorKind::InvalidValue | ErrorKind::ValueValidation if valid.is_empty() => {
+            format!("Pass a valid value to {argument}; `cupel describe` gives its type.")
+        }
+        ErrorKind::InvalidValue | ErrorKind::ValueValidation => {
+            format!("Pass one of: {} to {argument}.", valid.join(", "))
+        }
+        ErrorKind::UnknownArgument => match first(error, ContextKind::SuggestedArg) {
+            Some(suggestion) => format!("Did you mean {suggestion}?"),
+            None => "Remove it; `cupel describe <verb>` lists the accepted flags.".to_owned(),
+        },
+        ErrorKind::InvalidSubcommand | ErrorKind::MissingSubcommand => {
+            let mut subcommands = all(error, ContextKind::ValidSubcommand);
+            if subcommands.is_empty() {
+                subcommands = verbs.to_vec();
+            }
+            let fix = format!("Use one of: {}.", subcommands.join(", "));
+            return (fix, subcommands);
+        }
+        ErrorKind::MissingRequiredArgument => {
+            let missing = all(error, ContextKind::InvalidArg);
+            format!("Pass {}.", missing.join(" and "))
+        }
+        ErrorKind::ArgumentConflict => {
+            let prior = first(error, ContextKind::PriorArg)
+                .map(|arg| argument_name(&arg))
+                .unwrap_or_default();
+            format!("Pass only one of {argument} and {prior}.")
+        }
+        _ => "Run `cupel describe` for valid usage.".to_owned(),
+    };
+    (fix, valid)
 }
 
 #[cfg(test)]

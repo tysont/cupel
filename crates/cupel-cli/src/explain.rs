@@ -3,8 +3,8 @@
 use std::path::Path;
 
 use cupel_core::{
-    CheckId, Envelope, Excerpt, ExcerptLine, ExitCode, ExplainSubject, Explanation, FindingId,
-    Location, Status, Writer,
+    CheckId, Envelope, Excerpt, ExcerptLine, ExitCode, ExplainSubject, Explanation, Finding,
+    FindingId, Location, RunId, Status, Writer,
 };
 use serde_json::Value;
 
@@ -16,6 +16,35 @@ use crate::run::Run;
 const CONTEXT: u32 = 3;
 
 /// Explains `target`: a finding ID (`fnd_…`) or a check ID.
+/// What `explain` adds to a finding: an excerpt of its location and the tests its action names.
+fn finding_explanation(root: &Path, target: &str, finding: &Finding, run: RunId) -> Explanation {
+    let hints = &finding.action.hints;
+    Explanation {
+        subject: ExplainSubject::Finding,
+        target: target.to_owned(),
+        run,
+        excerpt: finding
+            .location
+            .as_ref()
+            .and_then(|location| excerpt(root, location)),
+        covering_tests: hints
+            .get("covering_tests")
+            .and_then(Value::as_array)
+            .map(|tests| {
+                tests
+                    .iter()
+                    .filter_map(|test| test.as_str().map(str::to_owned))
+                    .collect()
+            })
+            .unwrap_or_default(),
+        nearest_test_file: hints
+            .get("nearest_test_file")
+            .and_then(Value::as_str)
+            .map(str::to_owned),
+        metrics: Vec::new(),
+    }
+}
+
 pub fn run(run: &Run, writer: &Writer, target: &str) -> Result<Envelope, CupelError> {
     let store = persist::open(writer)?;
     let unknown = |what: &str| {
@@ -35,31 +64,7 @@ pub fn run(run: &Run, writer: &Writer, target: &str) -> Result<Envelope, CupelEr
             .finding(&id)
             .map_err(stored)?
             .ok_or_else(|| unknown("the finding"))?;
-        let hints = &finding.action.hints;
-        let explanation = Explanation {
-            subject: ExplainSubject::Finding,
-            target: target.to_owned(),
-            run: from,
-            excerpt: finding
-                .location
-                .as_ref()
-                .and_then(|location| excerpt(writer.root(), location)),
-            covering_tests: hints
-                .get("covering_tests")
-                .and_then(Value::as_array)
-                .map(|tests| {
-                    tests
-                        .iter()
-                        .filter_map(|test| test.as_str().map(str::to_owned))
-                        .collect()
-                })
-                .unwrap_or_default(),
-            nearest_test_file: hints
-                .get("nearest_test_file")
-                .and_then(Value::as_str)
-                .map(str::to_owned),
-            metrics: Vec::new(),
-        };
+        let explanation = finding_explanation(writer.root(), target, &finding, from);
         return Ok(explained(run, vec![finding], Vec::new(), explanation));
     }
     let check = CheckId::from(target);

@@ -249,12 +249,7 @@ fn configured(
             );
         }
     };
-    run.config = config.echo();
-    run.depth = Some(config.effective.depth);
-    run.budget_ms = config
-        .effective
-        .budget
-        .map(|budget| u64::try_from(budget.as_duration().as_millis()).unwrap_or(u64::MAX));
+    run.configure(&config);
     let format = config
         .effective
         .format
@@ -264,9 +259,10 @@ fn configured(
         Err(error) => return (run.failed(&error), Rendering::Json, said),
     };
     if cli.global.verbose {
+        let config_path = config.path.as_deref().map(Path::display);
         let _ = writeln!(stderr, "cupel: root: {}", writer.root().display());
-        if let Some(path) = &config.path {
-            let _ = writeln!(stderr, "cupel: config: {}", path.display());
+        if let Some(path) = config_path {
+            let _ = writeln!(stderr, "cupel: config: {path}");
         }
         let _ = writeln!(stderr, "cupel: format: {}", format.as_str());
     }

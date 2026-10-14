@@ -94,6 +94,16 @@ impl Run {
         self.planned(plan, findings)
     }
 
+    /// Records the loaded configuration's echo, depth, and budget for the envelope.
+    pub fn configure(&mut self, config: &Config) {
+        self.config = config.echo();
+        self.depth = Some(config.effective.depth);
+        self.budget_ms = config
+            .effective
+            .budget
+            .map(|budget| u64::try_from(budget.as_duration().as_millis()).unwrap_or(u64::MAX));
+    }
+
     /// The envelope of a `--dry-run`: the plan, what planning found, and nothing done.
     pub fn planned(&self, plan: RunPlan, findings: Vec<Finding>) -> Envelope {
         let mut envelope = self.envelope(Status::Plan, ExitCode::Pass, findings, None);

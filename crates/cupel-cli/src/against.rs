@@ -24,6 +24,32 @@ pub struct Reference {
 
 /// The run `spec` names: `baseline` (the baseline `name`), `run:<id>`, or a git ref resolved to
 /// the latest stored result run at its commit. Anything unknown is a usage error on `--against`.
+/// The latest stored result run made at the commit the git ref `spec` names.
+fn run_at(
+    store: &Store,
+    root: &Path,
+    spec: &str,
+    refuse: &dyn Fn(String, &str) -> CupelError,
+) -> Result<RunId, CupelError> {
+    let commit = Git::open(root)
+        .and_then(|git| git.commit(spec).ok())
+        .ok_or_else(|| {
+            refuse(
+                format!("git cannot resolve `{spec}` to a commit"),
+                "Pass --against baseline, run:ID, or a git ref that names a commit.",
+            )
+        })?;
+    store
+        .last_result_run_at(&commit)
+        .map_err(|error| persist::unusable(&error))?
+        .ok_or_else(|| {
+            refuse(
+                format!("No stored run was made at `{spec}` ({commit})"),
+                "Compare with a commit Cupel has run at, or pass --against run:ID.",
+            )
+        })
+}
+
 pub fn resolve(
     store: &Store,
     root: &Path,
@@ -51,23 +77,7 @@ pub fn resolve(
         })?;
         (run, spec.to_owned(), spec.to_owned())
     } else {
-        let commit = Git::open(root)
-            .and_then(|git| git.commit(spec).ok())
-            .ok_or_else(|| {
-                refuse(
-                    format!("git cannot resolve `{spec}` to a commit"),
-                    "Pass --against baseline, run:ID, or a git ref that names a commit.",
-                )
-            })?;
-        let run = store
-            .last_result_run_at(&commit)
-            .map_err(stored)?
-            .ok_or_else(|| {
-                refuse(
-                    format!("No stored run was made at `{spec}` ({commit})"),
-                    "Compare with a commit Cupel has run at, or pass --against run:ID.",
-                )
-            })?;
+        let run = run_at(store, root, spec, &refuse)?;
         (run, spec.to_owned(), spec.to_owned())
     };
     let envelope = store.run(&run).map_err(stored)?.ok_or_else(|| {

@@ -36,9 +36,7 @@ pub fn render(description: &Description, paint: &Paint) -> String {
 fn render_check(check: &CheckDescription, paint: &Paint) -> String {
     let manifest = &check.manifest;
     let mut out = format!(
-        "{} · tier {} · cost {} · version {} · {}
-  {}
-",
+        "{} · tier {} · cost {} · version {} · {}\n  {}\n",
         paint.bold(&format!("check {}", manifest.id)),
         manifest.tier.value(),
         name(manifest.cost),
@@ -50,62 +48,48 @@ fn render_check(check: &CheckDescription, paint: &Paint) -> String {
         let names: Vec<String> = list.iter().map(ToString::to_string).collect();
         none_if_empty(&names.join(", "))
     };
-    let _ = writeln!(
-        out,
-        "
-{}",
-        paint.bold("facts")
-    );
-    let _ = writeln!(out, "  needs  {}", kinds(&manifest.needs));
-    let _ = writeln!(out, "  wants  {}", kinds(&manifest.wants));
-    let _ = writeln!(
-        out,
-        "
-{}",
-        paint.bold("findings")
-    );
-    let width = column(manifest.findings.iter().map(|f| f.kind.len()));
-    for finding in &manifest.findings {
-        let _ = writeln!(
-            out,
-            "  {:<width$}  {} · {}",
-            finding.kind,
-            name(finding.action),
-            finding.summary
-        );
-    }
-    let _ = writeln!(
-        out,
-        "
-{}",
-        paint.bold("metrics")
-    );
-    let width = column(manifest.metrics.iter().map(|m| m.name.len()));
-    for metric in &manifest.metrics {
-        let _ = writeln!(
-            out,
-            "  {:<width$}  {} · {}",
-            metric.name,
-            name(metric.per),
-            metric.summary
-        );
-    }
-    let _ = writeln!(
-        out,
-        "
-{}",
-        paint.bold("languages")
-    );
-    let width = column(check.languages.iter().map(|l| l.lang.as_str().len()));
-    for language in &check.languages {
-        let _ = writeln!(
-            out,
-            "  {:<width$}  {}",
-            language.lang.as_str(),
-            support(&language.support)
-        );
+    let facts = vec![
+        ("needs".to_owned(), kinds(&manifest.needs)),
+        ("wants".to_owned(), kinds(&manifest.wants)),
+    ];
+    let findings = manifest
+        .findings
+        .iter()
+        .map(|f| {
+            (
+                f.kind.clone(),
+                format!("{} · {}", name(f.action), f.summary),
+            )
+        })
+        .collect();
+    let metrics = manifest
+        .metrics
+        .iter()
+        .map(|m| (m.name.clone(), format!("{} · {}", name(m.per), m.summary)))
+        .collect();
+    let languages = check
+        .languages
+        .iter()
+        .map(|l| (l.lang.as_str().to_owned(), support(&l.support)))
+        .collect();
+    for (heading, rows) in [
+        ("facts", facts),
+        ("findings", findings),
+        ("metrics", metrics),
+        ("languages", languages),
+    ] {
+        section(&mut out, heading, &rows, paint);
     }
     out
+}
+
+/// A blank line, a bold heading, and `rows` as aligned `key  value` lines.
+fn section(out: &mut String, heading: &str, rows: &[(String, String)], paint: &Paint) {
+    let _ = writeln!(out, "\n{}", paint.bold(heading));
+    let width = column(rows.iter().map(|(key, _)| key.len()));
+    for (key, value) in rows {
+        let _ = writeln!(out, "  {key:<width$}  {value}");
+    }
 }
 
 fn render_finding(finding: &FindingDescription, paint: &Paint) -> String {

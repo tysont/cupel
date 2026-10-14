@@ -150,23 +150,23 @@ fn init_verb() -> CommandDescription {
         "Detect project roots, languages, and test, coverage, and bench commands; write cupel.toml.",
         None,
         vec![switch("--force", "Replace an existing cupel.toml.")],
-        vec![
-            example(
+        examples(&[
+            (
                 "cupel init",
                 "Preview the cupel.toml and .cupel/.gitignore init would write; writes nothing.",
                 ExitCode::Pass,
             ),
-            example(
+            (
                 "cupel init --dry-run",
                 "The same preview, as a dry run.",
                 ExitCode::Pass,
             ),
-            example(
+            (
                 "cupel init --write",
                 "Write cupel.toml and .cupel/.gitignore.",
                 ExitCode::Pass,
             ),
-        ],
+        ]),
     )
 }
 
@@ -182,18 +182,18 @@ fn doctor_verb() -> CommandDescription {
             )
             .pending("P3.1"),
         ],
-        vec![
-            example(
+        examples(&[
+            (
                 "cupel doctor",
                 "Check this repository's setup; exits 3 if something required is missing.",
                 ExitCode::Pass,
             ),
-            example(
+            (
                 "cupel doctor --dry-run",
                 "A dry run; doctor writes nothing worth planning, so the plan is empty.",
                 ExitCode::Pass,
             ),
-        ],
+        ]),
     )
 }
 
@@ -217,58 +217,18 @@ fn describe_verb() -> CommandDescription {
                 .pending("P8.3")
                 .conflicts(&["SUBJECT", "--all"]),
         ],
-        vec![
-            example(
-                "cupel describe",
-                "Verbs, global flags, exit codes, and schema URLs.",
-                ExitCode::Pass,
-            ),
-            example(
-                "cupel describe check",
-                "The check verb's arguments.",
-                ExitCode::Pass,
-            ),
-            example(
-                "cupel describe baseline set",
-                "A sub-verb's arguments.",
-                ExitCode::Pass,
-            ),
-            example(
-                "cupel describe schema run",
-                "The envelope's JSON Schema.",
-                ExitCode::Pass,
-            ),
-            example(
-                "cupel describe languages",
-                "Every language, one line each.",
-                ExitCode::Pass,
-            ),
-            example(
-                "cupel describe language rust",
-                "A language's extensions, family, facts, and checks.",
-                ExitCode::Pass,
-            ),
-            example(
-                "cupel describe fact symbols",
-                "A fact's schema, version, and producers per language.",
-                ExitCode::Pass,
-            ),
-            example(
-                "cupel describe matrix",
-                "Which checks can run for which languages, and why not.",
-                ExitCode::Pass,
-            ),
-            example(
-                "cupel describe --all",
-                "Everything, in one document.",
-                ExitCode::Pass,
-            ),
-            example(
-                "cupel check --describe",
-                "Any verb describes itself.",
-                ExitCode::Pass,
-            ),
-        ],
+        examples(&[
+            ("cupel describe", "Verbs, global flags, exit codes, and schema URLs.", ExitCode::Pass),
+            ("cupel describe check", "The check verb's arguments.", ExitCode::Pass),
+            ("cupel describe baseline set", "A sub-verb's arguments.", ExitCode::Pass),
+            ("cupel describe schema run", "The envelope's JSON Schema.", ExitCode::Pass),
+            ("cupel describe languages", "Every language, one line each.", ExitCode::Pass),
+            ("cupel describe language rust", "A language's extensions, family, facts, and checks.", ExitCode::Pass),
+            ("cupel describe fact symbols", "A fact's schema, version, and producers per language.", ExitCode::Pass),
+            ("cupel describe matrix", "Which checks can run for which languages, and why not.", ExitCode::Pass),
+            ("cupel describe --all", "Everything, in one document.", ExitCode::Pass),
+            ("cupel check --describe", "Any verb describes itself.", ExitCode::Pass),
+        ]),
     )
 }
 
@@ -278,18 +238,18 @@ fn check_verb() -> CommandDescription {
         "Run checks over a scope at a depth and evaluate the gate.",
         None,
         scope_flags(),
-        vec![
-            example(
+        examples(&[
+            (
                 "cupel check --only static.complexity",
                 "Measure every function's complexity in the whole tree.",
                 ExitCode::Pass,
             ),
-            example(
+            (
                 "cupel check --depth quick --dry-run",
                 "Show which checks a quick run would run and skip, with estimates.",
                 ExitCode::Pass,
             ),
-        ],
+        ]),
     )
 }
 
@@ -299,11 +259,11 @@ fn survey_verb() -> CommandDescription {
         "Rank a whole tree without a baseline or gate: the worst targets per metric.",
         None,
         scope_flags(),
-        vec![example(
+        examples(&[(
             "cupel survey --depth quick",
             "Find the worst hot spots quickly.",
             ExitCode::Pass,
-        )],
+        )]),
     )
 }
 
@@ -320,62 +280,67 @@ fn explain_verb() -> CommandDescription {
         .into_iter()
         .chain(scope_flags())
         .collect(),
-        vec![example(
+        examples(&[(
             "cupel explain fnd_7c2e1a",
             "Explain one finding.",
             ExitCode::Usage,
-        )],
+        )]),
     )
+}
+
+/// The `baseline` sub-verbs.
+fn baseline_subcommands() -> Vec<CommandDescription> {
+    vec![
+        sub(
+            "baseline set",
+            "Name the latest result run, or a given run, as the baseline; previews without --write.",
+            vec![valued(
+                "--from",
+                ValueType::String,
+                "run:ID",
+                "The run to use instead of the latest.",
+            )],
+            "cupel baseline set --write",
+        ),
+        sub(
+            "baseline show",
+            "Print the baseline.",
+            vec![],
+            "cupel baseline show",
+        ),
+        sub(
+            "baseline diff",
+            "Compare two runs as an envelope of new and resolved findings.",
+            vec![valued(
+                "--against",
+                ValueType::String,
+                "run:ID|REF",
+                "baseline, run:ID, or a git ref to compare the latest result run with; default baseline.",
+            )],
+            "cupel baseline diff",
+        ),
+        sub(
+            "baseline export",
+            "Write the baseline to a file as JSON.",
+            vec![positional(
+                "FILE",
+                ValueType::Path,
+                "Where to write the baseline.",
+            )],
+            "cupel baseline export baseline.json",
+        ),
+        sub(
+            "baseline import",
+            "Read a baseline from a JSON file; previews without --write.",
+            vec![positional("FILE", ValueType::Path, "The baseline to read.")],
+            "cupel baseline import baseline.json",
+        ),
+    ]
 }
 
 fn baseline_verb() -> CommandDescription {
     CommandDescription {
-        subcommands: vec![
-            sub(
-                "baseline set",
-                "Name the latest result run, or a given run, as the baseline; previews without --write.",
-                vec![valued(
-                    "--from",
-                    ValueType::String,
-                    "run:ID",
-                    "The run to use instead of the latest.",
-                )],
-                "cupel baseline set --write",
-            ),
-            sub(
-                "baseline show",
-                "Print the baseline.",
-                vec![],
-                "cupel baseline show",
-            ),
-            sub(
-                "baseline diff",
-                "Compare two runs as an envelope of new and resolved findings.",
-                vec![valued(
-                    "--against",
-                    ValueType::String,
-                    "run:ID|REF",
-                    "baseline, run:ID, or a git ref to compare the latest result run with; default baseline.",
-                )],
-                "cupel baseline diff",
-            ),
-            sub(
-                "baseline export",
-                "Write the baseline to a file as JSON.",
-                vec![positional(
-                    "FILE",
-                    ValueType::Path,
-                    "Where to write the baseline.",
-                )],
-                "cupel baseline export baseline.json",
-            ),
-            sub(
-                "baseline import",
-                "Read a baseline from a JSON file; previews without --write.",
-                vec![positional("FILE", ValueType::Path, "The baseline to read.")],
-                "cupel baseline import baseline.json",
-            ),
-        ],
+        subcommands: baseline_subcommands(),
         ..verb(
             "baseline",
             "Set, show, diff, export, or import the baseline runs are compared with.",
@@ -386,88 +351,98 @@ fn baseline_verb() -> CommandDescription {
                 "NAME",
                 "Which named baseline; default `default`.",
             )],
-            vec![example(
+            examples(&[(
                 "cupel baseline show",
                 "Print the baseline.",
                 ExitCode::Usage,
-            )],
+            )]),
         )
     }
 }
 
-fn oracle_verb() -> CommandDescription {
-    CommandDescription {
-        subcommands: vec![
-            sub(
-                "oracle add",
-                "Register an oracle: a reference build, a command, or a specification.",
-                vec![
-                    positional("NAME", ValueType::String, "The oracle's name."),
-                    choice(
-                        "--kind",
-                        "KIND",
-                        &["ref", "command", "spec"],
-                        "What the oracle compares against.",
-                    )
-                    .required(),
-                    valued(
-                        "--ref",
-                        ValueType::String,
-                        "REF",
-                        "The git ref of a reference build.",
-                    ),
-                    valued(
-                        "--cmd",
-                        ValueType::String,
-                        "CMD",
-                        "The command whose output is the reference.",
-                    ),
-                    valued("--spec", ValueType::Path, "FILE", "The specification file."),
-                    valued(
-                        "--lang",
-                        ValueType::String,
-                        "LANG",
-                        "The specification language: tla+, quint, or p.",
-                    ),
-                ],
-                "cupel oracle add pg --kind ref --ref v1.2.0",
+/// `oracle add`, which registers an oracle of one of three kinds.
+fn oracle_add() -> CommandDescription {
+    sub(
+        "oracle add",
+        "Register an oracle: a reference build, a command, or a specification.",
+        vec![
+            positional("NAME", ValueType::String, "The oracle's name."),
+            choice(
+                "--kind",
+                "KIND",
+                &["ref", "command", "spec"],
+                "What the oracle compares against.",
+            )
+            .required(),
+            valued(
+                "--ref",
+                ValueType::String,
+                "REF",
+                "The git ref of a reference build.",
             ),
-            sub(
-                "oracle list",
-                "List registered oracles.",
-                vec![],
-                "cupel oracle list",
+            valued(
+                "--cmd",
+                ValueType::String,
+                "CMD",
+                "The command whose output is the reference.",
             ),
-            sub(
-                "oracle remove",
-                "Remove an oracle.",
-                vec![positional(
-                    "NAME",
-                    ValueType::String,
-                    "The oracle to remove.",
-                )],
-                "cupel oracle remove pg",
-            ),
-            sub(
-                "oracle verify",
-                "Smoke-test an oracle and record that it is verified.",
-                vec![
-                    positional("NAME", ValueType::String, "The oracle to verify.").optional(),
-                    switch("--all", "Verify every oracle."),
-                ],
-                "cupel oracle verify pg",
+            valued("--spec", ValueType::Path, "FILE", "The specification file."),
+            valued(
+                "--lang",
+                ValueType::String,
+                "LANG",
+                "The specification language: tla+, quint, or p.",
             ),
         ],
+        "cupel oracle add pg --kind ref --ref v1.2.0",
+    )
+}
+
+/// The `oracle` sub-verbs.
+fn oracle_subcommands() -> Vec<CommandDescription> {
+    vec![
+        oracle_add(),
+        sub(
+            "oracle list",
+            "List registered oracles.",
+            vec![],
+            "cupel oracle list",
+        ),
+        sub(
+            "oracle remove",
+            "Remove an oracle.",
+            vec![positional(
+                "NAME",
+                ValueType::String,
+                "The oracle to remove.",
+            )],
+            "cupel oracle remove pg",
+        ),
+        sub(
+            "oracle verify",
+            "Smoke-test an oracle and record that it is verified.",
+            vec![
+                positional("NAME", ValueType::String, "The oracle to verify.").optional(),
+                switch("--all", "Verify every oracle."),
+            ],
+            "cupel oracle verify pg",
+        ),
+    ]
+}
+
+fn oracle_verb() -> CommandDescription {
+    CommandDescription {
+        subcommands: oracle_subcommands(),
         ..verb(
             "oracle",
             "Add, list, remove, or verify the oracles differential checks compare with.",
             Some("P5.2"),
             vec![],
-            vec![example(
+            examples(&[(
                 "cupel oracle list",
                 "List registered oracles.",
                 ExitCode::Usage,
-            )],
+            )]),
         )
     }
 }
@@ -484,11 +459,11 @@ fn tests_verb() -> CommandDescription {
         .into_iter()
         .chain(scope_flags())
         .collect(),
-        vec![example(
+        examples(&[(
             "cupel tests --impacted --changed",
             "Tests to run for the working tree's changes.",
             ExitCode::Usage,
-        )],
+        )]),
     )
 }
 
@@ -517,11 +492,11 @@ fn suppress_verb() -> CommandDescription {
                 "When the suppression expires.",
             ),
         ],
-        vec![example(
+        examples(&[(
             "cupel suppress fnd_7c2e1a --reason known-flake",
             "Suppress one finding.",
             ExitCode::Usage,
-        )],
+        )]),
     )
 }
 
@@ -540,16 +515,22 @@ fn serve_verb() -> CommandDescription {
             switch("--mcp", "Expose the verbs as MCP tools."),
             switch("--watch", "Reparse files as they change."),
         ],
-        vec![example(
+        examples(&[(
             "cupel serve --mcp",
             "Serve the verbs over MCP.",
             ExitCode::Usage,
-        )],
+        )]),
     )
 }
 
 /// Flags every verb accepts (design §6.3).
 fn global_flags() -> Vec<ArgDescription> {
+    [invocation_flags(), run_control_flags()].concat()
+}
+
+/// What to read and where to report: format, dry run, description, configuration, root, and
+/// diagnostics.
+fn invocation_flags() -> Vec<ArgDescription> {
     vec![
         choice(
             "--format",
@@ -593,6 +574,12 @@ fn global_flags() -> Vec<ArgDescription> {
             "PATH|stderr",
             "Stream progress events as JSON lines to stderr or a file under .cupel/.",
         ),
+    ]
+}
+
+/// What a run may do and how much it returns: time, seed, paging, color, installs, writes.
+fn run_control_flags() -> Vec<ArgDescription> {
+    vec![
         valued(
             "--timeout",
             ValueType::Duration,
@@ -788,16 +775,19 @@ fn sub(
         summary,
         None,
         arguments,
-        vec![example(example_command, summary, ExitCode::Usage)],
+        examples(&[(example_command, summary, ExitCode::Usage)]),
     )
 }
 
-fn example(command: &str, summary: &str, exit_code: ExitCode) -> Example {
-    Example {
-        command: command.to_owned(),
-        summary: summary.to_owned(),
-        exit_code,
-    }
+/// Examples from (command, what it does, the exit code it ends with) rows.
+fn examples(rows: &[(&str, &str, ExitCode)]) -> Vec<Example> {
+    rows.iter()
+        .map(|(command, summary, exit_code)| Example {
+            command: (*command).to_owned(),
+            summary: (*summary).to_owned(),
+            exit_code: *exit_code,
+        })
+        .collect()
 }
 
 fn switch(name: &str, summary: &str) -> ArgDescription {
