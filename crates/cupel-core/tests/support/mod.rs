@@ -71,6 +71,7 @@ pub fn job<'a>(
         selectors: Vec::new(),
         selectors_must_match: true,
         base: None,
+        seed: 0,
     }
 }
 

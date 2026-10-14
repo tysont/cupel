@@ -12,6 +12,7 @@ use crate::envelope::Envelope;
 use crate::event::Event;
 use crate::fact::{Fact, FactKind};
 use crate::finding::Finding;
+use crate::flake::TestReruns;
 use crate::syntax::{
     ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, ProjectInfo, Roots, Symbols,
     TestConventions, TestFrames,
@@ -75,7 +76,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 12] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 13] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -87,6 +88,7 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 12] = [
     (FactKind::TestConventions, fact_schema::<TestConventions>),
     (FactKind::ProjectInfo, fact_schema::<ProjectInfo>),
     (FactKind::TestResults, fact_schema::<TestResults>),
+    (FactKind::TestReruns, fact_schema::<TestReruns>),
     (FactKind::CoverageMap, fact_schema::<CoverageMap>),
 ];
 

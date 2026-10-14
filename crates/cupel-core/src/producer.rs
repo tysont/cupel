@@ -62,11 +62,14 @@ pub struct ProduceCtx {
     pub cancel: Cancellation,
     /// The facts the producer's `needs` name, produced first for the same language.
     pub upstream: Upstream,
+    /// The run's seed (`--seed`, else random), for producers that vary their work by seed
+    /// (ADR-078); 0 outside a scheduled run.
+    pub seed: u64,
 }
 
 impl ProduceCtx {
     /// The context of producing in `ctx`'s repository with `writer` and `cancel`, with no
-    /// `[lang.*]` configuration and no upstream facts.
+    /// `[lang.*]` configuration, no upstream facts, and seed 0.
     pub fn new(ctx: Ctx, writer: Writer, cancel: Cancellation) -> Self {
         Self {
             ctx,
@@ -74,6 +77,7 @@ impl ProduceCtx {
             writer,
             cancel,
             upstream: Upstream::default(),
+            seed: 0,
         }
     }
 }
