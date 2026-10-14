@@ -1,0 +1,20 @@
+[package]
+name = "ledger"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+members = ["shapes"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+shapes = { path = "shapes" }
+
+[dev-dependencies]
+insta = "1"
+mockall = "0.13"
+rstest = "0.23"
+tokio = { version = "1", features = ["macros", "rt"] }
+
+[features]
+codegen = []

@@ -1,0 +1,307 @@
+# Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
+# repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+file = "ledger.go"
+name = "ledger.Balance"
+
+[symbols.method]
+file = "ledger.go"
+name = "ledger.Account.Deposit"
+
+[symbols.static-method]
+not-applicable = "Go methods always have a receiver; package-level functions play the role of static methods."
+
+[symbols.nested-function]
+not-applicable = "Go has no named nested functions; a function literal bound to a name is a closure."
+
+[symbols.closure]
+file = "ledger.go"
+name = "ledger.Account.Statement.header"
+
+[symbols.public]
+file = "ledger.go"
+name = "ledger.Balance"
+
+[symbols.internal]
+file = "ledger.go"
+name = "ledger.scale"
+
+[symbols.private]
+not-applicable = "Go has no file- or type-private visibility; unexported names are visible throughout the package."
+
+[symbols.file-namespace]
+file = "report/format.go"
+name = "report.Render"
+expect = { namespace = "report" }
+
+[decisions.if]
+file = "decide.go"
+name = "ledger.classify"
+
+[decisions.else-if]
+file = "decide.go"
+name = "ledger.classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "decide.go"
+name = "ledger.firstOverdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "decide.go"
+name = "ledger.firstOverdraft"
+
+[decisions.boolean-op]
+file = "decide.go"
+name = "ledger.classify"
+
+[decisions.early-return]
+file = "decide.go"
+name = "ledger.parseCents"
+
+[decisions.case]
+file = "decide.go"
+name = "ledger.describe"
+
+[decisions.ternary]
+not-applicable = "Go has no conditional operator; a value chosen by a condition is assigned in an `if`, which is a branch."
+
+[decisions.catch]
+not-applicable = "Go has no exception handlers: errors are values tested by `if err != nil` (a branch), and `recover` is an ordinary call in a deferred function whose result is tested by an `if`."
+
+[norm-tree.rename]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.sumAfterCharge"
+
+[norm-tree.literal]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalFloor"
+
+[norm-tree.layout]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalLaidOut"
+
+[norm-tree.operator]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalPlus"
+
+[norm-tree.branch]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalCapped"
+
+[norm-tree.call]
+file = "twins.go"
+name = "ledger.netTotal"
+twin = "ledger.netTotalProduct"
+
+[mutation-sites.relational]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "!=", to = ["=="] }
+
+[mutation-sites.arith-add-sub]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "+=", to = ["-="] }
+
+[mutation-sites.arith-mul-div]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "&&", to = ["||"] }
+
+[mutation-sites.boolean-literal]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "false", to = ["true"] }
+
+[mutation-sites.zero-one]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "pricing.go"
+name = "ledger.tally"
+expect = { from = "logTotal(total)", to = [""] }
+
+[mutation-sites.return-value]
+file = "pricing.go"
+name = "ledger.Mail"
+expect = { from = "notifier.Notify(account.Owner, account.Statement())", to = ["nil"] }
+
+[mutation-sites.constant]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "decide.go"
+name = "ledger.classify"
+expect = { from = "0", to = ["0 + 1", "0 - 1"] }
+
+[mutation-sites.negation]
+file = "pricing.go"
+name = "ledger.discounted"
+expect = { from = "member && cut != 0", to = ["!(member && cut != 0)"] }
+
+[test-frames.case]
+file = "ledger_test.go"
+name = "TestDepositAddsToTheBalance"
+
+[test-frames.assertion-equality]
+file = "ledger_test.go"
+name = "TestDepositAddsToTheBalance"
+
+[test-frames.assertion-truthiness]
+file = "ledger_test.go"
+name = "TestMembersGetADiscount"
+
+[test-frames.assertion-not-null]
+file = "ledger_test.go"
+name = "TestNewAccountsAreRegistered"
+
+[test-frames.assertion-throws]
+file = "pricing_test.go"
+name = "TestParseCentsRejectsBlanks"
+
+[test-frames.assertion-snapshot]
+file = "pricing_test.go"
+name = "TestDiscountSnapshot"
+
+[test-frames.weak-assertion]
+file = "ledger_test.go"
+name = "TestNewAccountsHaveDistinctIDs"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "ledger_test.go"
+name = "TestOpeningAnAccountDoesNotPanic"
+
+[test-frames.skip]
+file = "ledger_test.go"
+name = "TestStatementIsMailed"
+expect = { skip = { reason = "talks to the network" } }
+
+[test-frames.mock]
+file = "pricing_test.go"
+name = "TestMailNotifiesTheOwner"
+expect = { target = "MockNotifier" }
+
+[test-frames.setup]
+file = "ledger_test.go"
+
+[test-frames.framework]
+file = "ledger_test.go"
+expect = { framework = "go-test" }
+
+[test-conventions.separate-test-file]
+file = "ledger.go"
+name = "ledger_test.go"
+
+[test-conventions.inline-tests]
+not-applicable = "The go tool runs only functions in `_test.go` files; a source file cannot contain its own tests."
+
+[module-graph.relative]
+not-applicable = "Go modules have no path-relative imports: every import path is absolute, starting at a module path or the standard library."
+
+[module-graph.absolute]
+file = "ledger.go"
+name = "example.com/ledger/report"
+expect = { target = { path = "report/format.go" } }
+
+[module-graph.workspace-member]
+file = "ledger.go"
+name = "example.com/shapes"
+expect = { target = { path = "shapes/geometry.go" } }
+
+[module-graph.external]
+file = "ledger.go"
+name = "github.com/google/uuid"
+expect = { target = { package = "github.com/google/uuid" } }
+
+[module-graph.standard-library]
+file = "ledger.go"
+name = "fmt"
+expect = { target = { package = "std" } }
+
+[module-graph.unresolved]
+file = "ledger.go"
+name = "example.com/ledger/gen"
+
+[api-surface.function]
+file = "ledger.go"
+name = "ledger.Balance"
+expect = { signature = "(_ []int64) int64" }
+
+[api-surface.method]
+file = "ledger.go"
+name = "ledger.Account.Deposit"
+expect = { signature = "(_ *Account) Deposit(_ int64)" }
+
+[api-surface.type]
+file = "ledger.go"
+name = "ledger.Account"
+
+[api-surface.interface]
+file = "ledger.go"
+name = "ledger.Audited"
+
+[api-surface.constant]
+file = "ledger.go"
+name = "ledger.MaxEntries"
+
+[api-surface.variable]
+file = "ledger.go"
+name = "ledger.Currency"
+
+[api-surface.module]
+not-applicable = "Go declares no modules or packages in source: a package is a directory, and the package clause every file repeats names the namespace of its items rather than declaring an item."
+
+[roots.entry-point]
+file = "cmd/ledger/main.go"
+name = "main.main"
+
+[roots.export]
+file = "ledger.go"
+name = "ledger.Balance"
+
+[roots.test]
+file = "ledger_test.go"
+name = "ledger.TestDepositAddsToTheBalance"
+
+[roots.hook]
+file = "ledger.go"
+name = "ledger.init"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "go", build_files = ["go.work", "go.mod", "shapes/go.mod"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["shapes"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = ["vendor"] }
+
+[project-info.packages]
+file = "."
+expect = { packages = ["./...", "./shapes/..."] }

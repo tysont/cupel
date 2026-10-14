@@ -1,0 +1,532 @@
+{
+  "roots": [
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "libs/units/src/units/__init__.py",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/__init__.py",
+        "line": 13
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 7
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 16
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 16
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 24
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/ledger/account.py",
+        "line": 27
+      }
+    },
+    {
+      "reason": "entry-point",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/cli.py",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/cli.py",
+        "line": 6
+      }
+    },
+    {
+      "reason": "entry-point",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/cli.py",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/cli.py",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 20
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 28
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 34
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 44
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.py",
+        "line": 48
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.py",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.py",
+        "line": 19
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.py",
+        "line": 23
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/report/__init__.py",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/report/format.py",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/report/format.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 15
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 22
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 33
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 40
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.py",
+        "line": 49
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/conftest.py",
+        "line": 7
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 1,
+        "file": "tests/conftest.py",
+        "line": 7
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 10
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 15
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 15
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 19
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 19
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 23
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 23
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 27
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 27
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 32
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 32
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 37
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 37
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 41
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 41
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 46
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 46
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 51
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 51
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 56
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_ledger.py",
+        "line": 56
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 11
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 17
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 17
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 21
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_pricing.py",
+        "line": 21
+      }
+    }
+  ]
+}

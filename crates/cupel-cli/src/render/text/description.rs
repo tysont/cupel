@@ -4,7 +4,9 @@ use std::fmt::Write as _;
 
 use cupel_core::{
     AllDescription, ArgDescription, CliDescription, CommandDescription, Description,
-    SchemaDescription, Stability, ValueType,
+    FactDescription, LanguageDescription, LanguagesDescription, MatrixDescription,
+    ProducerDescription, SchemaDescription, Stability, SupportDescription, ToolDescription,
+    ToolchainDescription, ValueType,
 };
 
 use super::{Paint, continued, name};
@@ -22,6 +24,291 @@ pub fn render(description: &Description, paint: &Paint) -> String {
         }
         Description::Schema(schema) => render_schema(schema, None, paint),
         Description::All(all) => render_all(all, paint),
+        Description::Language(language) => render_language(language, paint),
+        Description::Languages(languages) => render_languages(languages, paint),
+        Description::Fact(fact) => render_fact(fact, paint),
+        Description::Matrix(matrix) => render_matrix(matrix, paint),
+    }
+}
+
+fn render_languages(languages: &LanguagesDescription, paint: &Paint) -> String {
+    let mut out = format!("{}\n", paint.bold("languages"));
+    let id_width = column(languages.languages.iter().map(|l| l.id.as_str().len()));
+    let family_width = column(languages.languages.iter().map(|l| l.family.as_str().len()));
+    let ext_width = column(
+        languages
+            .languages
+            .iter()
+            .map(|l| l.extensions.join(" ").len()),
+    );
+    for language in &languages.languages {
+        let facts: Vec<String> = language.facts.iter().map(ToString::to_string).collect();
+        let _ = writeln!(
+            out,
+            "  {:<id_width$}  {:<family_width$}  {:<ext_width$}  {} · facts: {}",
+            language.id.as_str(),
+            language.family.as_str(),
+            language.extensions.join(" "),
+            name(language.stability),
+            none_if_empty(&facts.join(", "))
+        );
+    }
+    out
+}
+
+fn render_language(language: &LanguageDescription, paint: &Paint) -> String {
+    let mut out = format!(
+        "{} · family {} · {} · {}\n",
+        paint.bold(&format!("language {}", language.id)),
+        language.family,
+        language.extensions.join(" "),
+        name(language.stability)
+    );
+    let _ = writeln!(out, "\n{}", paint.bold("facts"));
+    if language.facts.is_empty() {
+        let _ = writeln!(out, "  none");
+    }
+    let width = column(language.facts.iter().map(|f| f.kind.as_str().len()));
+    for fact in &language.facts {
+        let _ = writeln!(
+            out,
+            "  {:<width$}  {}",
+            fact.kind.as_str(),
+            producers(&fact.producers)
+        );
+    }
+    let _ = writeln!(out, "\n{}", paint.bold("checks"));
+    if language.checks.is_empty() {
+        let _ = writeln!(out, "  none registered");
+    }
+    let width = column(language.checks.iter().map(|c| c.check.as_str().len()));
+    for check in &language.checks {
+        let _ = writeln!(
+            out,
+            "  {:<width$}  {}",
+            check.check.as_str(),
+            support(&check.support)
+        );
+    }
+    if let Some(toolchain) = &language.toolchain {
+        render_toolchain(&mut out, toolchain, paint);
+    }
+    out
+}
+
+/// The toolchain row: launchers and tools in default order, each with when it is chosen and
+/// its command templates, then the property, fuzz, and race tool names.
+fn render_toolchain(out: &mut String, toolchain: &ToolchainDescription, paint: &Paint) {
+    let _ = writeln!(out, "\n{}", paint.bold("toolchain"));
+    if !toolchain.launchers.is_empty() {
+        let _ = writeln!(out, "  launchers");
+        for launcher in &toolchain.launchers {
+            let values: Vec<String> = launcher
+                .values
+                .iter()
+                .map(|(name, value)| format!("<{name}> = {value}"))
+                .collect();
+            let _ = writeln!(
+                out,
+                "    {}  {}",
+                launcher.tool,
+                when(&launcher.detect, "otherwise")
+            );
+            let _ = writeln!(out, "      {}", values.join(" · "));
+        }
+    }
+    for (title, tools, fallback) in [
+        ("runners", &toolchain.runners, "otherwise"),
+        ("coverage", &toolchain.coverage, "always"),
+        ("bench", &toolchain.bench, "always"),
+    ] {
+        if !tools.is_empty() {
+            let _ = writeln!(out, "  {title}");
+            for tool in tools {
+                render_tool(out, tool, fallback);
+            }
+        }
+    }
+    for (title, names) in [
+        ("property", &toolchain.property),
+        ("fuzz", &toolchain.fuzz),
+        ("race", &toolchain.race),
+    ] {
+        let names: Vec<&str> = names.iter().map(cupel_core::ToolId::as_str).collect();
+        let _ = writeln!(out, "  {title:<8}  {}", none_if_empty(&names.join(", ")));
+    }
+}
+
+fn render_tool(out: &mut String, tool: &ToolDescription, fallback: &str) {
+    let format = tool
+        .format
+        .as_ref()
+        .map_or_else(String::new, |format| format!("{format} · "));
+    let _ = writeln!(
+        out,
+        "    {}  {format}{}",
+        tool.producer,
+        when(&tool.detect, fallback)
+    );
+    for template in &tool.commands {
+        match &template.runner {
+            Some(runner) => {
+                let _ = writeln!(out, "      with {runner}: {}", template.command);
+            }
+            None => {
+                let _ = writeln!(out, "      {}", template.command);
+            }
+        }
+    }
+}
+
+/// When a launcher or tool is chosen: any one of its rules, or `fallback` when it has none.
+fn when(rules: &[String], fallback: &str) -> String {
+    if rules.is_empty() {
+        fallback.to_owned()
+    } else {
+        format!("when {}", rules.join("; or "))
+    }
+}
+
+fn render_fact(fact: &FactDescription, paint: &Paint) -> String {
+    let version = fact.version.map_or_else(
+        || "no payload type yet".to_owned(),
+        |v| format!("version {v}"),
+    );
+    let origin = if fact.syntactic {
+        "syntactic"
+    } else {
+        "execution"
+    };
+    let mut out = format!(
+        "{} · {version} · {origin}\n",
+        paint.bold(&format!("fact {}", fact.kind))
+    );
+    let _ = writeln!(out, "\n{}", paint.bold("producers"));
+    let width = column(fact.producers.iter().map(|p| p.lang.as_str().len()));
+    for lang in &fact.producers {
+        let _ = writeln!(
+            out,
+            "  {:<width$}  {}",
+            lang.lang.as_str(),
+            producers(&lang.producers)
+        );
+    }
+    let consumers: Vec<&str> = fact
+        .consumers
+        .iter()
+        .map(cupel_core::CheckId::as_str)
+        .collect();
+    let _ = writeln!(
+        out,
+        "\n{}\n  {}",
+        paint.bold("consumers"),
+        none_if_empty(&consumers.join(", "))
+    );
+    if let Some(id) = fact
+        .schema
+        .as_ref()
+        .and_then(|schema| schema.get("$id"))
+        .and_then(serde_json::Value::as_str)
+    {
+        let _ = writeln!(out, "\n{}\n  {id}", paint.bold("schema"));
+    }
+    out
+}
+
+fn render_matrix(matrix: &MatrixDescription, paint: &Paint) -> String {
+    let mut out = format!(
+        "{} · {} checks × {} languages\n",
+        paint.bold("matrix"),
+        matrix.checks.len(),
+        matrix.languages.len()
+    );
+    let check_width = column(matrix.checks.iter().map(|c| c.as_str().len())).max(5);
+    let cells: Vec<Vec<String>> = matrix
+        .checks
+        .iter()
+        .map(|check| {
+            matrix
+                .languages
+                .iter()
+                .map(|lang| {
+                    matrix
+                        .cells
+                        .iter()
+                        .find(|cell| cell.check == *check && cell.lang == *lang)
+                        .map_or_else(String::new, |cell| support(&cell.support))
+                })
+                .collect()
+        })
+        .collect();
+    let widths: Vec<usize> = matrix
+        .languages
+        .iter()
+        .enumerate()
+        .map(|(i, lang)| {
+            cells
+                .iter()
+                .map(|row| row[i].len())
+                .chain([lang.as_str().len()])
+                .max()
+                .unwrap_or(0)
+        })
+        .collect();
+    let mut header = format!("  {:<check_width$}", "check");
+    for (lang, width) in matrix.languages.iter().zip(&widths) {
+        let _ = write!(header, "  {:<width$}", lang.as_str());
+    }
+    let _ = writeln!(out, "{}", header.trim_end());
+    if matrix.checks.is_empty() {
+        let _ = writeln!(out, "  no checks registered");
+    }
+    for (check, row) in matrix.checks.iter().zip(&cells) {
+        let mut line = format!("  {:<check_width$}", check.as_str());
+        for (cell, width) in row.iter().zip(&widths) {
+            let _ = write!(line, "  {cell:<width$}");
+        }
+        let _ = writeln!(out, "{}", line.trim_end());
+    }
+    out
+}
+
+/// `lang.rust (quick)`, comma-separated, or `none`.
+fn producers(list: &[ProducerDescription]) -> String {
+    let described: Vec<String> = list
+        .iter()
+        .map(|producer| {
+            let needs: Vec<String> = producer.needs.iter().map(ToString::to_string).collect();
+            if needs.is_empty() {
+                format!("{} ({})", producer.id, name(producer.cost))
+            } else {
+                format!(
+                    "{} ({}, needs {})",
+                    producer.id,
+                    name(producer.cost),
+                    needs.join(", ")
+                )
+            }
+        })
+        .collect();
+    none_if_empty(&described.join(", "))
+}
+
+/// `supported`, `unsupported(<fact>)`, `unavailable(<tool>)`, or `unconfigured(<key>)`.
+fn support(support: &SupportDescription) -> String {
+    match support {
+        SupportDescription::Supported => "supported".to_owned(),
+        SupportDescription::Unsupported { fact } => format!("unsupported({fact})"),
+        SupportDescription::Unavailable { tool } => format!("unavailable({tool})"),
+        SupportDescription::Unconfigured { key } => format!("unconfigured({key})"),
+    }
+}
+
+fn none_if_empty(text: &str) -> String {
+    if text.is_empty() {
+        "none".to_owned()
+    } else {
+        text.to_owned()
     }
 }
 

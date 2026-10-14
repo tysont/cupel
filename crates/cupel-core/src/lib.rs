@@ -29,8 +29,11 @@ pub use check::{
     Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,
 };
 pub use describe::{
-    AllDescription, ArgDescription, CliDescription, CommandDescription, CommandSummary,
-    Description, Example, ExitCodeDescription, SchemaDescription, SchemaRef, ValueType,
+    AllDescription, ArgDescription, CheckSupport, CliDescription, CommandDescription,
+    CommandSummary, CommandTemplate, Description, Example, ExitCodeDescription, FactDescription,
+    FactProducers, LanguageDescription, LanguageProducers, LanguageSummary, LanguagesDescription,
+    LauncherDescription, MatrixCell, MatrixDescription, ProducerDescription, SchemaDescription,
+    SchemaRef, SupportDescription, ToolDescription, ToolchainDescription, ValueType,
 };
 pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPlan};
 pub use envelope::{
@@ -47,6 +50,8 @@ pub use hash::{FindingId, SiteHash, SymbolHash};
 pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
-pub use producer::{Availability, Ctx, ProduceCtx, Producer, ProducerRegistry, RegisteredProducer};
+pub use producer::{
+    Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
+};
 pub use scope::Scope;
 pub use writer::{WriteError, Writer};

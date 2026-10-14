@@ -1,0 +1,148 @@
+// ABOUTME: JavaScript and TypeScript: one implementation with two language IDs in the `ecma` family,
+// ABOUTME: sharing queries and tables; each prepends its own query files, and `.tsx` parses as TSX.
+pub mod project;
+mod resolve;
+
+use std::path::Path;
+use std::sync::{Arc, LazyLock};
+
+use cupel_core::syntax::{ModuleGraph, ProjectInfo};
+use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
+
+use crate::imports::ImportGraph;
+use crate::language::Language;
+use crate::parse::ParseCache;
+use crate::project::ProjectRoots;
+use crate::spec::{LanguageSpec, QueryFile};
+
+const TABLES: &str = include_str!("tables.toml");
+
+/// Queries shared by both languages.
+const SHARED: &[(QueryFile, &str)] = &[
+    (QueryFile::Symbols, include_str!("queries/symbols.scm")),
+    (QueryFile::Decisions, include_str!("queries/decisions.scm")),
+    (QueryFile::Mutations, include_str!("queries/mutations.scm")),
+    (QueryFile::Tests, include_str!("queries/tests.scm")),
+    (QueryFile::Imports, include_str!("queries/imports.scm")),
+    (QueryFile::Api, include_str!("queries/api.scm")),
+];
+
+/// JavaScript-only queries: patterns the TypeScript grammars reject, such as a bare identifier
+/// as a parameter. They are placed before the shared queries of the same file.
+const JAVASCRIPT_ONLY: &[(QueryFile, &str)] =
+    &[(QueryFile::Api, include_str!("queries/javascript/api.scm"))];
+
+/// TypeScript-only queries. They are placed before the shared queries of the same file, so
+/// their patterns win where both match one definition.
+const TYPESCRIPT_ONLY: &[(QueryFile, &str)] = &[
+    (
+        QueryFile::Symbols,
+        include_str!("queries/typescript/symbols.scm"),
+    ),
+    (
+        QueryFile::Imports,
+        include_str!("queries/typescript/imports.scm"),
+    ),
+    (QueryFile::Api, include_str!("queries/typescript/api.scm")),
+];
+
+static JAVASCRIPT: LazyLock<LanguageSpec> = LazyLock::new(|| {
+    let queries: Vec<(QueryFile, &str)> = JAVASCRIPT_ONLY.iter().chain(SHARED).copied().collect();
+    LanguageSpec::new("javascript", &queries, TABLES)
+});
+
+static TYPESCRIPT: LazyLock<LanguageSpec> = LazyLock::new(|| {
+    let queries: Vec<(QueryFile, &str)> = TYPESCRIPT_ONLY.iter().chain(SHARED).copied().collect();
+    LanguageSpec::new("typescript", &queries, TABLES)
+});
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Dialect {
+    JavaScript,
+    TypeScript,
+}
+
+#[derive(Clone)]
+pub struct Ecma {
+    dialect: Dialect,
+    cache: Arc<ParseCache>,
+}
+
+impl Ecma {
+    pub fn javascript(cache: Arc<ParseCache>) -> Self {
+        Self {
+            dialect: Dialect::JavaScript,
+            cache,
+        }
+    }
+
+    pub fn typescript(cache: Arc<ParseCache>) -> Self {
+        Self {
+            dialect: Dialect::TypeScript,
+            cache,
+        }
+    }
+}
+
+impl Language for Ecma {
+    fn id(&self) -> LangId {
+        LangId::from(match self.dialect {
+            Dialect::JavaScript => "javascript",
+            Dialect::TypeScript => "typescript",
+        })
+    }
+
+    fn family(&self) -> LangFamily {
+        LangFamily::from("ecma")
+    }
+
+    fn extensions(&self) -> &[&str] {
+        match self.dialect {
+            Dialect::JavaScript => &[".js", ".jsx", ".mjs", ".cjs"],
+            Dialect::TypeScript => &[".ts", ".mts", ".cts", ".tsx"],
+        }
+    }
+
+    /// The JavaScript grammar reads JSX itself; TypeScript has separate grammars with and
+    /// without JSX, because `<T>x` means a type assertion in one and an element in the other.
+    fn grammar(&self, path: &Path) -> tree_sitter::Language {
+        match self.dialect {
+            Dialect::JavaScript => tree_sitter_javascript::LANGUAGE.into(),
+            Dialect::TypeScript if path.extension().is_some_and(|ext| ext == "tsx") => {
+                tree_sitter_typescript::LANGUAGE_TSX.into()
+            }
+            Dialect::TypeScript => tree_sitter_typescript::LANGUAGE_TYPESCRIPT.into(),
+        }
+    }
+
+    fn spec(&self) -> &LanguageSpec {
+        match self.dialect {
+            Dialect::JavaScript => &JAVASCRIPT,
+            Dialect::TypeScript => &TYPESCRIPT,
+        }
+    }
+
+    fn stability(&self) -> Stability {
+        Stability::Experimental
+    }
+
+    fn register(&self, reg: &mut ProducerRegistry) {
+        let language: Arc<dyn Language> = Arc::new(self.clone());
+        crate::generic::register(&language, &self.cache, reg);
+        // Project roots come from build manifests on disk, which queries cannot see.
+        reg.register::<ProjectInfo, _>(ProjectRoots::new(
+            Arc::clone(&language),
+            &project::ECOSYSTEM,
+        ));
+        // Module resolution needs package manifests and tsconfig, which queries cannot see.
+        let resolve = match self.dialect {
+            Dialect::JavaScript => resolve::javascript,
+            Dialect::TypeScript => resolve::typescript,
+        };
+        reg.register::<ModuleGraph, _>(ImportGraph::new(
+            language,
+            Arc::clone(&self.cache),
+            resolve,
+        ));
+    }
+}

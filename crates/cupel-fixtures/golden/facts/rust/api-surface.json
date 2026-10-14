@@ -1,0 +1,436 @@
+{
+  "items": [
+    {
+      "file": "shapes/src/lib.rs",
+      "kind": "function",
+      "path": "square",
+      "signature": "(_: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/account.rs",
+      "kind": "type",
+      "path": "account::Account",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/account.rs",
+      "kind": "method",
+      "path": "account::Account::new",
+      "signature": "(_: &str) -> Self",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 19,
+        "line": 14
+      }
+    },
+    {
+      "file": "src/account.rs",
+      "kind": "method",
+      "path": "account::Account::deposit",
+      "signature": "(&mut self, _: i64)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 23,
+        "line": 21
+      }
+    },
+    {
+      "file": "src/account.rs",
+      "kind": "method",
+      "path": "account::Account::statement",
+      "signature": "(&self) -> String",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 31,
+        "line": 25
+      }
+    },
+    {
+      "file": "src/account.rs",
+      "kind": "interface",
+      "path": "account::Audited",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 46,
+        "line": 40
+      }
+    },
+    {
+      "file": "src/account.rs",
+      "kind": "method",
+      "path": "account::Audited::audit_trail",
+      "signature": "(&self) -> Vec<String>",
+      "span": {
+        "col": 5,
+        "end_col": 42,
+        "end_line": 41,
+        "line": 41
+      }
+    },
+    {
+      "file": "src/account.rs",
+      "kind": "method",
+      "path": "account::Audited::is_clean",
+      "signature": "(&self) -> bool",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 45,
+        "line": 43
+      }
+    },
+    {
+      "file": "src/decide.rs",
+      "kind": "function",
+      "path": "decide::classify",
+      "signature": "(_: i64, _: i64) -> &'static str",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/decide.rs",
+      "kind": "function",
+      "path": "decide::first_overdraft",
+      "signature": "(_: &[i64]) -> Option<usize>",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 11
+      }
+    },
+    {
+      "file": "src/decide.rs",
+      "kind": "function",
+      "path": "decide::parse_cents",
+      "signature": "(_: &str) -> Result<i64, std::num::ParseIntError>",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 20
+      }
+    },
+    {
+      "file": "src/decide.rs",
+      "kind": "function",
+      "path": "decide::describe",
+      "signature": "(_: u8) -> &'static str",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 25
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "kind": "module",
+      "path": "account",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "kind": "module",
+      "path": "decide",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 4,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "kind": "module",
+      "path": "pricing",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 7,
+        "line": 7
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "kind": "module",
+      "path": "report",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 8,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "kind": "module",
+      "path": "twins",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 9,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "kind": "constant",
+      "path": "MAX_ENTRIES",
+      "signature": "usize",
+      "span": {
+        "col": 1,
+        "end_col": 38,
+        "end_line": 14,
+        "line": 14
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "kind": "variable",
+      "path": "CURRENCY",
+      "signature": "&str",
+      "span": {
+        "col": 1,
+        "end_col": 35,
+        "end_line": 17,
+        "line": 17
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "kind": "function",
+      "path": "balance",
+      "signature": "(_: &[i64]) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 22,
+        "line": 20
+      }
+    },
+    {
+      "file": "src/main.rs",
+      "kind": "function",
+      "path": "ledger_version",
+      "signature": "() -> u32",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 10,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "path": "pricing::discounted",
+      "signature": "(_: i64, _: i64, _: bool) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "path": "pricing::tally",
+      "signature": "(_: &[i64]) ->(i64, bool)",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/pricing.rs",
+      "kind": "interface",
+      "path": "pricing::Log",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 27
+      }
+    },
+    {
+      "file": "src/pricing.rs",
+      "kind": "method",
+      "path": "pricing::Log::write",
+      "signature": "(&self, _: &str)",
+      "span": {
+        "col": 5,
+        "end_col": 33,
+        "end_line": 28,
+        "line": 28
+      }
+    },
+    {
+      "file": "src/report/format.rs",
+      "kind": "function",
+      "path": "report::format::render",
+      "signature": "(_: &[String]) -> String",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/report/mod.rs",
+      "kind": "module",
+      "path": "report::format",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 1,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/report/mod.rs",
+      "kind": "function",
+      "path": "report::summary",
+      "signature": "(_: &[String]) -> String",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/report/mod.rs",
+      "kind": "function",
+      "path": "report::floor_area",
+      "signature": "(_: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/twins.rs",
+      "kind": "function",
+      "path": "twins::net_total",
+      "signature": "(_: &[i64], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/twins.rs",
+      "kind": "function",
+      "path": "twins::sum_after_charge",
+      "signature": "(_: &[i64], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/twins.rs",
+      "kind": "function",
+      "path": "twins::net_total_floor",
+      "signature": "(_: &[i64], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      }
+    },
+    {
+      "file": "src/twins.rs",
+      "kind": "function",
+      "path": "twins::net_total_laid_out",
+      "signature": "(_: &[i64], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 18
+      }
+    },
+    {
+      "file": "src/twins.rs",
+      "kind": "function",
+      "path": "twins::net_total_plus",
+      "signature": "(_: &[i64], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 30
+      }
+    },
+    {
+      "file": "src/twins.rs",
+      "kind": "function",
+      "path": "twins::net_total_capped",
+      "signature": "(_: &[i64], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 35
+      }
+    },
+    {
+      "file": "src/twins.rs",
+      "kind": "function",
+      "path": "twins::net_total_product",
+      "signature": "(_: &[i64], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 46
+      }
+    }
+  ]
+}

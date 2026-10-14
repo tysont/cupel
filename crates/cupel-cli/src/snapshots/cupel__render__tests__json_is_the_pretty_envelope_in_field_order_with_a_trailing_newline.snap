@@ -113,7 +113,7 @@ expression: out
       "tier": 3,
       "symbol": {
         "display": "exonym::rewrite::Planner::push_limit_0",
-        "hash": "sh_4b1d00",
+        "hash": "sh_4b1d9e0c4b1d9e00",
         "lang": "rust"
       },
       "location": {
@@ -150,7 +150,7 @@ expression: out
           "nearest_test_file": "tests/rewrite/limit_tests.rs"
         }
       },
-      "repro": "cupel check --only tests.mutation --symbols sh_4b1d00 --seed 42",
+      "repro": "cupel check --only tests.mutation --symbols sh_4b1d9e0c4b1d9e00 --seed 42",
       "suppress": "cupel suppress fnd_7c2e1a --reason '…'",
       "new_since_baseline": true,
       "suppressed": false
@@ -164,7 +164,7 @@ expression: out
       "tier": 3,
       "symbol": {
         "display": "exonym::rewrite::Planner::push_limit_1",
-        "hash": "sh_4b1d01",
+        "hash": "sh_4b1d9e0c4b1d9e01",
         "lang": "rust"
       },
       "location": {
@@ -201,7 +201,7 @@ expression: out
           "nearest_test_file": "tests/rewrite/limit_tests.rs"
         }
       },
-      "repro": "cupel check --only static.crap --symbols sh_4b1d01 --seed 42",
+      "repro": "cupel check --only static.crap --symbols sh_4b1d9e0c4b1d9e01 --seed 42",
       "suppress": "cupel suppress fnd_7c2e1b --reason '…'",
       "new_since_baseline": false,
       "suppressed": false
@@ -215,7 +215,7 @@ expression: out
       "tier": 3,
       "symbol": {
         "display": "exonym::rewrite::Planner::push_limit_2",
-        "hash": "sh_4b1d02",
+        "hash": "sh_4b1d9e0c4b1d9e02",
         "lang": "rust"
       },
       "location": {
@@ -252,7 +252,7 @@ expression: out
           "nearest_test_file": "tests/rewrite/limit_tests.rs"
         }
       },
-      "repro": "cupel check --only tests.mutation --symbols sh_4b1d02 --seed 42",
+      "repro": "cupel check --only tests.mutation --symbols sh_4b1d9e0c4b1d9e02 --seed 42",
       "suppress": "cupel suppress fnd_7c2e1c --reason '…'",
       "new_since_baseline": true,
       "suppressed": true

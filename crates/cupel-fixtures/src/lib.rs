@@ -7,7 +7,11 @@
 //! [`assert_golden`]. `UPDATE_GOLDENS=1 make test` rewrites goldens instead of comparing.
 //! The volatile fields, placeholders, and file format are fixed by ADR-003. Fixture
 //! repositories live under `repos/`; [`copy_repo`] copies one into a scratch directory to run in.
+//!
+//! [`conformance`] checks each language's producers against the per-fact construct
+//! inventories in `conformance/` (design §8.3.7); its module docs define the inventory format.
 
+pub mod conformance;
 mod golden;
 mod redact;
 mod repos;

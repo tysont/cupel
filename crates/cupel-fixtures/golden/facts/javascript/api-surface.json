@@ -1,0 +1,352 @@
+{
+  "items": [
+    {
+      "file": "packages/shapes/lib/square.js",
+      "kind": "function",
+      "path": "packages.shapes.lib.square.square",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/decide.js",
+      "kind": "function",
+      "path": "decide.classify",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/decide.js",
+      "kind": "function",
+      "path": "decide.firstOverdraft",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 17,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/decide.js",
+      "kind": "function",
+      "path": "decide.label",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 19
+      }
+    },
+    {
+      "file": "src/decide.js",
+      "kind": "function",
+      "path": "decide.parseCents",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 30
+      }
+    },
+    {
+      "file": "src/format.cjs",
+      "kind": "function",
+      "path": "format.money",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/index.js",
+      "kind": "module",
+      "path": "geometry",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 50,
+        "end_line": 1,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/index.js",
+      "kind": "constant",
+      "path": "MAX_ENTRIES",
+      "signature": "",
+      "span": {
+        "col": 14,
+        "end_col": 31,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/index.js",
+      "kind": "variable",
+      "path": "currency",
+      "signature": "",
+      "span": {
+        "col": 12,
+        "end_col": 28,
+        "end_line": 5,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/inline.js",
+      "kind": "function",
+      "path": "inline.double",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/ledger.js",
+      "kind": "function",
+      "path": "ledger.load",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/math.js",
+      "kind": "function",
+      "path": "math.add",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/math.js",
+      "kind": "function",
+      "path": "math.range",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/money/cents.js",
+      "kind": "function",
+      "path": "money.cents.toCents",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/plugin.js",
+      "kind": "function",
+      "path": "plugin.default",
+      "signature": "(_)",
+      "span": {
+        "col": 16,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/pricing.js",
+      "kind": "function",
+      "path": "pricing.discounted",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/pricing.js",
+      "kind": "function",
+      "path": "pricing.tally",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/shapes/geometry.js",
+      "kind": "type",
+      "path": "shapes.geometry.Circle",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 17,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/shapes/geometry.js",
+      "kind": "method",
+      "path": "shapes.geometry.Circle.constructor",
+      "signature": "(_)",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 4,
+        "line": 2
+      }
+    },
+    {
+      "file": "src/shapes/geometry.js",
+      "kind": "method",
+      "path": "shapes.geometry.Circle.area",
+      "signature": "()",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 8,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/shapes/geometry.js",
+      "kind": "method",
+      "path": "shapes.geometry.Circle.unit",
+      "signature": "()",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/shapes/geometry.js",
+      "kind": "function",
+      "path": "shapes.geometry.scale",
+      "signature": "(_, _)",
+      "span": {
+        "col": 14,
+        "end_col": 76,
+        "end_line": 19,
+        "line": 19
+      }
+    },
+    {
+      "file": "src/twins.js",
+      "kind": "function",
+      "path": "twins.netTotal",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/twins.js",
+      "kind": "function",
+      "path": "twins.sumAfterCharge",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/twins.js",
+      "kind": "function",
+      "path": "twins.netTotalFloor",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 11
+      }
+    },
+    {
+      "file": "src/twins.js",
+      "kind": "function",
+      "path": "twins.netTotalLaidOut",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 16
+      }
+    },
+    {
+      "file": "src/twins.js",
+      "kind": "function",
+      "path": "twins.netTotalPlus",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 25
+      }
+    },
+    {
+      "file": "src/twins.js",
+      "kind": "function",
+      "path": "twins.netTotalCapped",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 30
+      }
+    },
+    {
+      "file": "src/twins.js",
+      "kind": "function",
+      "path": "twins.netTotalProduct",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 41,
+        "line": 38
+      }
+    }
+  ]
+}

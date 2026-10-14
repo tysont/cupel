@@ -14,7 +14,9 @@ name = "cupel"
 path = "src/main.rs"
 
 [dependencies]
+cupel-adapt.workspace = true
 cupel-core.workspace = true
+cupel-lang.workspace = true
 clap.workspace = true
 serde.workspace = true
 serde_json.workspace = true

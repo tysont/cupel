@@ -73,9 +73,9 @@ impl Run {
         self.envelope(status, exit_code, findings, None)
     }
 
-    /// The envelope of a `--dry-run`: the plan, and nothing done.
-    pub fn planned(&self, plan: RunPlan) -> Envelope {
-        let mut envelope = self.envelope(Status::Plan, ExitCode::Pass, Vec::new(), None);
+    /// The envelope of a `--dry-run`: the plan, what planning found, and nothing done.
+    pub fn planned(&self, plan: RunPlan, findings: Vec<Finding>) -> Envelope {
+        let mut envelope = self.envelope(Status::Plan, ExitCode::Pass, findings, None);
         envelope.plan = Some(plan);
         envelope
     }
@@ -260,7 +260,7 @@ mod tests {
 
     #[test]
     fn planned_envelopes_carry_the_plan_with_status_plan_and_exit_0() {
-        let envelope = Run::start(Vec::new()).planned(RunPlan::default());
+        let envelope = Run::start(Vec::new()).planned(RunPlan::default(), Vec::new());
         assert_eq!(envelope.status, Status::Plan);
         assert_eq!(envelope.exit_code, ExitCode::Pass);
         assert_eq!(envelope.plan, Some(RunPlan::default()));

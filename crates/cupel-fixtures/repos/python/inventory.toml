@@ -1,0 +1,314 @@
+# Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
+# repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
+
+[symbols.method]
+file = "src/ledger/account.py"
+name = "ledger.account.Account.deposit"
+
+[symbols.static-method]
+file = "src/ledger/account.py"
+name = "ledger.account.Account.opening"
+
+[symbols.nested-function]
+file = "src/ledger/account.py"
+name = "ledger.account.Account.statement.line"
+
+[symbols.closure]
+file = "src/ledger/account.py"
+name = "ledger.account.Account.statement.header"
+
+[symbols.public]
+file = "src/ledger/__init__.py"
+name = "ledger.balance"
+
+[symbols.internal]
+file = "src/ledger/__init__.py"
+name = "ledger._scale"
+
+[symbols.private]
+file = "src/ledger/account.py"
+name = "ledger.account.Account.__check"
+
+[symbols.file-namespace]
+file = "src/ledger/report/format.py"
+name = "ledger.report.format.render"
+expect = { namespace = "ledger.report.format" }
+
+[decisions.if]
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
+
+[decisions.else-if]
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "src/ledger/decide.py"
+name = "ledger.decide.first_overdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "src/ledger/decide.py"
+name = "ledger.decide.first_overdraft"
+
+[decisions.boolean-op]
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
+
+[decisions.early-return]
+file = "src/ledger/decide.py"
+name = "ledger.decide.require_positive"
+
+[decisions.case]
+file = "src/ledger/decide.py"
+name = "ledger.decide.describe"
+
+[decisions.ternary]
+file = "src/ledger/decide.py"
+name = "ledger.decide.sign"
+
+[decisions.catch]
+file = "src/ledger/decide.py"
+name = "ledger.decide.parse_cents"
+
+[norm-tree.rename]
+file = "src/ledger/twins.py"
+name = "ledger.twins.net_total"
+twin = "ledger.twins.sum_after_charge"
+
+[norm-tree.literal]
+file = "src/ledger/twins.py"
+name = "ledger.twins.net_total"
+twin = "ledger.twins.net_total_floor"
+
+[norm-tree.layout]
+file = "src/ledger/twins.py"
+name = "ledger.twins.net_total"
+twin = "ledger.twins.net_total_laid_out"
+
+[norm-tree.operator]
+file = "src/ledger/twins.py"
+name = "ledger.twins.net_total"
+twin = "ledger.twins.net_total_plus"
+
+[norm-tree.branch]
+file = "src/ledger/twins.py"
+name = "ledger.twins.net_total"
+twin = "ledger.twins.net_total_capped"
+
+[norm-tree.call]
+file = "src/ledger/twins.py"
+name = "ledger.twins.net_total"
+twin = "ledger.twins.net_total_product"
+
+[mutation-sites.relational]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "!=", to = ["=="] }
+
+[mutation-sites.arith-add-sub]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "+=", to = ["-="] }
+
+[mutation-sites.arith-mul-div]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "and", to = ["or"] }
+
+[mutation-sites.boolean-literal]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "False", to = ["True"] }
+
+[mutation-sites.zero-one]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.tally"
+expect = { from = "log_total(total)", to = ["pass"] }
+
+[mutation-sites.return-value]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "price - cut", to = ["None"] }
+
+[mutation-sites.constant]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "src/ledger/decide.py"
+name = "ledger.decide.classify"
+expect = { from = "0", to = ["0 + 1", "0 - 1"] }
+
+[mutation-sites.negation]
+file = "src/ledger/pricing.py"
+name = "ledger.pricing.discounted"
+expect = { from = "member and cut != 0", to = ["not (member and cut != 0)"] }
+
+[test-frames.case]
+file = "tests/test_ledger.py"
+name = "test_deposit_adds_to_the_balance"
+
+[test-frames.assertion-equality]
+file = "tests/test_ledger.py"
+name = "test_deposit_adds_to_the_balance"
+
+[test-frames.assertion-truthiness]
+file = "tests/test_ledger.py"
+name = "test_statements_mention_the_owner"
+
+[test-frames.assertion-not-null]
+file = "tests/test_ledger.py"
+name = "test_an_opening_account_exists"
+
+[test-frames.assertion-throws]
+file = "tests/test_ledger.py"
+name = "test_negative_deposits_are_rejected"
+
+[test-frames.assertion-snapshot]
+file = "tests/test_ledger.py"
+name = "test_report_matches_snapshot"
+
+[test-frames.weak-assertion]
+file = "tests/test_ledger.py"
+name = "test_statement_is_published"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "tests/test_ledger.py"
+name = "test_opening_an_account_does_not_raise"
+
+[test-frames.skip]
+file = "tests/test_ledger.py"
+name = "test_statement_is_published"
+expect = { skip = { reason = "talks to the network" } }
+
+[test-frames.mock]
+file = "tests/test_ledger.py"
+name = "test_publish_posts_once"
+expect = { target = "ledger.report.format.requests" }
+
+[test-frames.setup]
+file = "tests/test_pricing.py"
+
+[test-frames.framework]
+file = "tests/test_pricing.py"
+expect = { framework = "unittest" }
+
+[test-conventions.separate-test-file]
+file = "src/ledger/pricing.py"
+name = "tests/test_pricing.py"
+
+[test-conventions.inline-tests]
+not-applicable = "Python runners collect tests from separate test modules; a module does not carry its own test cases (doctests are documentation examples that TestFrames does not model)."
+
+[module-graph.relative]
+file = "src/ledger/report/__init__.py"
+name = ".format"
+expect = { target = { path = "src/ledger/report/format.py" } }
+
+[module-graph.absolute]
+file = "src/ledger/account.py"
+name = "ledger.report.format.render"
+expect = { target = { path = "src/ledger/report/format.py" } }
+
+[module-graph.workspace-member]
+file = "src/ledger/report/__init__.py"
+name = "units.cents"
+expect = { target = { path = "libs/units/src/units/__init__.py" } }
+
+[module-graph.external]
+file = "src/ledger/report/format.py"
+name = "requests"
+expect = { target = { package = "requests" } }
+
+[module-graph.standard-library]
+file = "src/ledger/account.py"
+name = "typing.Protocol"
+expect = { target = { package = "typing" } }
+
+[module-graph.unresolved]
+file = "src/ledger/__init__.py"
+name = ".generated.schema"
+
+[api-surface.function]
+file = "src/ledger/__init__.py"
+name = "ledger.balance"
+expect = { signature = "(_: list[int]) -> int" }
+
+[api-surface.method]
+file = "src/ledger/account.py"
+name = "ledger.account.Account.deposit"
+expect = { signature = "(self, _: int) -> None" }
+
+[api-surface.type]
+file = "src/ledger/account.py"
+name = "ledger.account.Account"
+
+[api-surface.interface]
+file = "src/ledger/account.py"
+name = "ledger.account.Audited"
+
+[api-surface.constant]
+file = "src/ledger/__init__.py"
+name = "ledger.MAX_ENTRIES"
+expect = { signature = "int" }
+
+[api-surface.variable]
+file = "src/ledger/__init__.py"
+name = "ledger.default_currency"
+
+[api-surface.module]
+not-applicable = "Python declares no modules in source: a module is its file, and its path is the namespace of every item in it."
+
+[roots.entry-point]
+file = "src/ledger/cli.py"
+name = "ledger.cli.run"
+
+[roots.export]
+file = "src/ledger/__init__.py"
+name = "ledger.balance"
+
+[roots.test]
+file = "tests/test_ledger.py"
+name = "tests.test_ledger.test_deposit_adds_to_the_balance"
+
+[roots.hook]
+file = "src/ledger/account.py"
+name = "ledger.account.Account.__init__"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "python", build_files = ["pyproject.toml", "libs/units/pyproject.toml"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["libs/units"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = [".venv", "venv", "__pycache__", ".tox"] }
+
+[project-info.packages]
+not-applicable = "Python runners collect tests from the project directory; their commands take no package patterns."

@@ -1,0 +1,47 @@
+# ABOUTME: Conformance inventory for the `symbols` fact: the constructs every Symbols producer must
+# ABOUTME: recognize. Each language maps them in repos/<lang>/inventory.toml under [symbols.<id>].
+fact = "symbols"
+
+[[constructs]]
+id = "function"
+summary = "A named function at the top level of a file or module."
+expect = { kind = "function" }
+
+[[constructs]]
+id = "method"
+summary = "A function defined on a type or class that takes an instance (self, this, a receiver); its namespace includes the type."
+expect = { kind = "method" }
+
+[[constructs]]
+id = "static-method"
+summary = "A function defined on a type or class that takes no instance (an associated function, `static`, `@staticmethod`)."
+expect = { kind = "method" }
+
+[[constructs]]
+id = "nested-function"
+summary = "A named function defined inside another function's body; its namespace includes the outer function."
+expect = { kind = "function" }
+
+[[constructs]]
+id = "closure"
+summary = "An anonymous function (closure, arrow function, lambda, function literal) bound to a name."
+expect = { kind = "closure" }
+
+[[constructs]]
+id = "public"
+summary = "A symbol visible outside its package, crate, or module (`pub`, `export`, capitalized, no underscore)."
+expect = { visibility = "public" }
+
+[[constructs]]
+id = "internal"
+summary = "A symbol visible throughout its package or crate but not exported from it (`pub(crate)`, lowercase Go)."
+expect = { visibility = "internal" }
+
+[[constructs]]
+id = "private"
+summary = "A symbol visible only within its module, file, or class."
+expect = { visibility = "private" }
+
+[[constructs]]
+id = "file-namespace"
+summary = "A symbol in a nested module or package file; its namespace comes from the file's module path or package. The mapping's `expect` names the namespace."

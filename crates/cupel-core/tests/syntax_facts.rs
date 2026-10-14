@@ -2,9 +2,9 @@
 // ABOUTME: Enum spellings match the construct names used by the per-fact conformance inventories.
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, Assertion, AssertionKind, AssertionStrength, Decision,
-    DecisionKind, Decisions, DefaultCommands, ImportEdge, ImportTarget, LiveRoot, Mock,
-    ModuleGraph, MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol,
-    OperatorSet, ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
+    DecisionKind, Decisions, ImportEdge, ImportTarget, LiveRoot, Mock, ModuleGraph,
+    MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol, OperatorSet,
+    ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
     SymbolDecisions, SymbolDef, SymbolKey, SymbolKind, SymbolSites, Symbols, TestCase,
     TestConventions, TestFile, TestFrames, TestPairing, Visibility,
 };
@@ -123,7 +123,7 @@ fn norm_tree_payload_carries_symbol_hash() {
     let json = assert_round_trip(&NormTree {
         symbols: vec![NormalizedSymbol {
             symbol: key(),
-            hash: "sh_4b1d9e0c".parse().unwrap(),
+            hash: "sh_4b1d9e0c4b1d9e0c".parse().unwrap(),
             root: NormNode {
                 label: "function".into(),
                 children: vec![NormNode {
@@ -133,7 +133,7 @@ fn norm_tree_payload_carries_symbol_hash() {
             },
         }],
     });
-    assert_eq!(json["symbols"][0]["hash"], json!("sh_4b1d9e0c"));
+    assert_eq!(json["symbols"][0]["hash"], json!("sh_4b1d9e0c4b1d9e0c"));
     assert_eq!(
         json["symbols"][0]["root"]["children"][0]["label"],
         json!("$local")
@@ -150,7 +150,7 @@ fn mutation_sites_payload_shape() {
                 set: OperatorSet::Default,
                 from: "<=".into(),
                 to: vec!["<".into(), ">".into()],
-                site_hash: "a1b2c3".parse().unwrap(),
+                site_hash: "a1b2c3d4e5f60718".parse().unwrap(),
                 span: span(12),
             }],
         }],
@@ -158,7 +158,7 @@ fn mutation_sites_payload_shape() {
     let site = &json["symbols"][0]["sites"][0];
     assert_eq!(site["operator"], json!("relational"));
     assert_eq!(site["set"], json!("default"));
-    assert_eq!(site["site_hash"], json!("a1b2c3"));
+    assert_eq!(site["site_hash"], json!("a1b2c3d4e5f60718"));
 }
 
 #[test]
@@ -326,18 +326,17 @@ fn test_conventions_payload_shape() {
 fn project_info_payload_shape() {
     let json = assert_round_trip(&ProjectInfo {
         roots: vec![ProjectRoot {
-            path: "web".into(),
-            lang: LangId::from("typescript"),
-            build_files: vec!["web/package.json".into(), "web/tsconfig.json".into()],
-            commands: DefaultCommands {
-                test: Some("pnpm vitest run".into()),
-                coverage: None,
-                bench: None,
-            },
-            skip_dirs: vec!["web/node_modules".into()],
+            path: "svc".into(),
+            lang: LangId::from("go"),
+            build_files: vec!["go.work".into(), "api/go.mod".into()],
+            members: vec!["api".into()],
+            packages: vec!["./api/...".into()],
+            skip_dirs: vec!["vendor".into()],
         }],
     });
-    assert_eq!(json["roots"][0]["commands"]["coverage"], Value::Null);
+    assert_eq!(json["roots"][0]["members"], json!(["api"]));
+    assert_eq!(json["roots"][0]["packages"], json!(["./api/..."]));
+    assert!(json["roots"][0].get("commands").is_none());
 }
 
 #[test]
@@ -355,7 +354,7 @@ fn symbol_and_visibility_kinds() {
 }
 
 #[test]
-fn each_payload_declares_its_own_kind_at_version_1() {
+fn each_payload_declares_its_own_kind_and_version() {
     let declared = [
         (Symbols::KIND, Symbols::VERSION),
         (Decisions::KIND, Decisions::VERSION),
@@ -370,5 +369,30 @@ fn each_payload_declares_its_own_kind_at_version_1() {
     ];
     let kinds: BTreeSet<FactKind> = declared.iter().map(|(kind, _)| *kind).collect();
     assert_eq!(kinds, FactKind::SYNTACTIC.into_iter().collect());
-    assert!(declared.iter().all(|(_, version)| *version == 1));
+    for (kind, version) in declared {
+        let expected = if kind == FactKind::ProjectInfo { 2 } else { 1 };
+        assert_eq!(version, expected, "{kind}");
+    }
+}
+
+#[test]
+fn test_conventions_answer_is_test_and_test_files_for() {
+    let conventions = TestConventions {
+        test_globs: vec!["**/tests/**/*.rs".to_owned(), "**/*_test.go".to_owned()],
+        pairs: vec![TestPairing {
+            source: "src/lib.rs".to_owned(),
+            tests: vec!["tests/ledger.rs".to_owned()],
+        }],
+    };
+    assert!(conventions.is_test("tests/ledger.rs"));
+    assert!(conventions.is_test("crates/a/tests/deep/x.rs"));
+    assert!(conventions.is_test("pkg/math_test.go"));
+    assert!(conventions.is_test("math_test.go"));
+    assert!(!conventions.is_test("src/lib.rs"));
+    assert!(!conventions.is_test("src/attests/x.go"));
+    assert_eq!(
+        conventions.test_files_for("src/lib.rs"),
+        ["tests/ledger.rs"]
+    );
+    assert!(conventions.test_files_for("src/other.rs").is_empty());
 }

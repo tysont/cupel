@@ -1,0 +1,193 @@
+# ABOUTME: Tables the generic producers read for python, alongside its queries.
+# ABOUTME: Keys and shapes are documented in the cupel-lang crate docs; unknown keys are errors.
+
+# `src/ledger/report/format.py` is `ledger.report.format`; a package's `__init__.py` is the package.
+[namespace]
+separator = "."
+source_roots = ["src"]
+index_files = ["__init__"]
+
+# Dunder names are protocol methods; `__name` is mangled to its class; `_name` is internal by
+# convention (PEP 8). symbols.scm fixes `__all__` and nested definitions outright (ADR-034).
+[visibility]
+default = "public"
+
+[[visibility.names]]
+prefix = "__"
+suffix = "__"
+visibility = "public"
+
+[[visibility.names]]
+prefix = "__"
+visibility = "private"
+
+[[visibility.names]]
+prefix = "_"
+visibility = "internal"
+
+# `elif` is an `elif_clause` directly under the `if_statement` whose chain it continues.
+[decisions]
+chain_parents = ["if_statement"]
+
+# Annotations, decorators, and the return arrow say nothing about what a function does, so an
+# annotated function and its unannotated twin normalize alike. Strings are literals, f-strings
+# included. langs/python/normalize.rs then drops docstrings and `self`/`cls` (ADR-034).
+[normalize]
+identifiers = ["identifier"]
+literals = [
+  "integer",
+  "float",
+  "string",
+  "concatenated_string",
+  "true",
+  "false",
+  "none",
+  "ellipsis",
+]
+erase = ["decorator", "type", "->"]
+flatten = [
+  "decorated_definition",
+  "typed_parameter",
+  "default_parameter",
+  "typed_default_parameter",
+]
+operators = ["and", "or", "not", "in", "is", "is not", "not in"]
+# `self.items.append(x)` keeps `append`; `self.items` is a receiver and normalizes as usual.
+receivers = ["object"]
+
+[[normalize.calls]]
+kind = "call"
+callee = "function"
+
+[mutations.relational]
+replace = { "<" = ["<="], "<=" = ["<"], ">" = [">="], ">=" = [">"] }
+
+[mutations.equality]
+replace = { "==" = ["!="], "!=" = ["=="], "is" = ["is not"], "is not" = ["is"] }
+
+[mutations.arith-add-sub]
+replace = { "+" = ["-"], "-" = ["+"], "+=" = ["-="], "-=" = ["+="] }
+
+[mutations.arith-mul-div]
+replace = { "*" = ["/"], "/" = ["*"], "//" = ["*"], "*=" = ["/="], "/=" = ["*="], "//=" = ["*="] }
+
+[mutations.boolean-op]
+replace = { "and" = ["or"], "or" = ["and"] }
+
+[mutations.boolean-literal]
+replace = { "True" = ["False"], "False" = ["True"] }
+
+[mutations.zero-one]
+replace = { "0" = ["1"], "1" = ["0"] }
+
+[mutations.statement-deletion]
+templates = ["pass"]
+
+[mutations.return-value]
+templates = ["None"]
+
+[mutations.constant]
+templates = ["0"]
+
+[mutations.boundary]
+templates = ["{} + 1", "{} - 1"]
+
+[mutations.negation]
+templates = ["not ({})"]
+
+[tests]
+framework = "pytest"
+
+[tests.assertions]
+# Idioms captured as @assertion.idiom.<key> from `assert` statements and `pytest.raises`.
+equal = { kind = "equality", strength = "strong" }
+approx = { kind = "equality", strength = "strong" }
+is-none = { kind = "equality", strength = "strong" }
+# Inequality rules out one value and allows every other: weak.
+not-equal = { kind = "equality", strength = "weak" }
+is-not-none = { kind = "not-null", strength = "weak" }
+snapshot = { kind = "snapshot", strength = "strong" }
+ordering = { kind = "custom", strength = "weak" }
+membership = { kind = "custom", strength = "weak" }
+truthy = { kind = "truthiness", strength = "weak" }
+raises = { kind = "throws", strength = "strong" }
+# unittest assert methods.
+assertEqual = { kind = "equality", strength = "strong" }
+assertEquals = { kind = "equality", strength = "strong" }
+assertAlmostEqual = { kind = "equality", strength = "strong" }
+assertIs = { kind = "equality", strength = "strong" }
+assertIsNone = { kind = "equality", strength = "strong" }
+assertCountEqual = { kind = "equality", strength = "strong" }
+assertListEqual = { kind = "equality", strength = "strong" }
+assertTupleEqual = { kind = "equality", strength = "strong" }
+assertSetEqual = { kind = "equality", strength = "strong" }
+assertDictEqual = { kind = "equality", strength = "strong" }
+assertSequenceEqual = { kind = "equality", strength = "strong" }
+assertMultiLineEqual = { kind = "equality", strength = "strong" }
+assertNotEqual = { kind = "equality", strength = "weak" }
+assertNotAlmostEqual = { kind = "equality", strength = "weak" }
+assertIsNot = { kind = "equality", strength = "weak" }
+assertIsNotNone = { kind = "not-null", strength = "weak" }
+assertTrue = { kind = "truthiness", strength = "weak" }
+assertFalse = { kind = "truthiness", strength = "weak" }
+assertIsInstance = { kind = "truthiness", strength = "weak" }
+assertNotIsInstance = { kind = "truthiness", strength = "weak" }
+assertIn = { kind = "custom", strength = "weak" }
+assertNotIn = { kind = "custom", strength = "weak" }
+assertGreater = { kind = "custom", strength = "weak" }
+assertGreaterEqual = { kind = "custom", strength = "weak" }
+assertLess = { kind = "custom", strength = "weak" }
+assertLessEqual = { kind = "custom", strength = "weak" }
+assertRegex = { kind = "custom", strength = "weak" }
+assertNotRegex = { kind = "custom", strength = "weak" }
+assertRaises = { kind = "throws", strength = "strong" }
+assertRaisesRegex = { kind = "throws", strength = "strong" }
+# Mock and snapshot assertion methods; other `assert_*` methods pin a call: custom, strong.
+assert_called = { kind = "custom", strength = "weak" }
+assert_any_call = { kind = "custom", strength = "weak" }
+assert_match = { kind = "snapshot", strength = "strong" }
+
+[conventions]
+test_globs = ["**/test_*.py", "**/*_test.py", "**/tests/**/*.py", "**/conftest.py"]
+
+# A module's tests sit beside it, in a `tests/` directory below it, or in its project's
+# `tests/` directory (`{base}` is the path above `src/`), named `test_<module>.py` or
+# `<module>_test.py`.
+[[conventions.tests_for]]
+template = "{dir}/test_{stem}.py"
+
+[[conventions.tests_for]]
+template = "{dir}/{stem}_test.py"
+
+[[conventions.tests_for]]
+template = "{dir}/tests/**/test_{stem}.py"
+
+[[conventions.tests_for]]
+template = "{base}tests/**/test_{stem}.py"
+
+[[conventions.tests_for]]
+template = "{base}tests/**/{stem}_test.py"
+
+# `main` is an entry point by name; api.scm adds functions a `__main__` guard calls, dunder
+# methods, pytest hooks, and fixtures. These unittest and pytest setup and teardown methods are
+# called by their runner.
+[roots]
+entry_points = ["main"]
+hooks = [
+  "setUp",
+  "tearDown",
+  "setUpClass",
+  "tearDownClass",
+  "setUpModule",
+  "tearDownModule",
+  "asyncSetUp",
+  "asyncTearDown",
+  "setup_method",
+  "teardown_method",
+  "setup_class",
+  "teardown_class",
+  "setup_function",
+  "teardown_function",
+  "setup_module",
+  "teardown_module",
+]

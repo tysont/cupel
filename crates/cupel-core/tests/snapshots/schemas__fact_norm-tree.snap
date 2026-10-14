@@ -60,9 +60,9 @@ expression: pretty(&schema)
       ]
     },
     "SymbolHash": {
-      "description": "`sh_` followed by lowercase hex",
+      "description": "`sh_` followed by sixteen lowercase hex digits",
       "type": "string",
-      "pattern": "^sh_[0-9a-f]+$"
+      "pattern": "^sh_[0-9a-f]{16}$"
     },
     "SymbolKey": {
       "description": "Identifies a symbol within one run by where it starts. Not stable across edits; anything\npersisted across runs uses `SymbolHash` (ADR-014).",

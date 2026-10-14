@@ -1,0 +1,19 @@
+# ABOUTME: Conformance inventory for the `project-info` fact: project roots found from build manifests.
+# ABOUTME: `file` is the root's path; each language's mapping gives the values its fixture must produce.
+fact = "project-info"
+
+[[constructs]]
+id = "manifest-root"
+summary = "A directory whose build manifest makes it a project root of the language, listing that manifest and its members' manifests."
+
+[[constructs]]
+id = "workspace-member"
+summary = "A directory below a root with the same ecosystem's manifest is a member of that root, not a root of its own."
+
+[[constructs]]
+id = "generated-dirs"
+summary = "The directories the ecosystem generates (build output, installed dependencies, environments) are listed to skip."
+
+[[constructs]]
+id = "packages"
+summary = "The package patterns the root's default commands cover, for ecosystems whose commands take them."

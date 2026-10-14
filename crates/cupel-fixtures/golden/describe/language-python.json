@@ -1,0 +1,277 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "checks": [],
+    "extensions": [
+      ".py"
+    ],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "decisions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "norm-tree",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "mutation-sites",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-frames",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "module-graph",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "api-surface",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "roots",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-conventions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "project-info",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.python",
+            "needs": []
+          }
+        ]
+      }
+    ],
+    "family": "python",
+    "id": "python",
+    "stability": "experimental",
+    "subject": "language",
+    "toolchain": {
+      "bench": [
+        {
+          "commands": [
+            {
+              "command": "<m> pytest --benchmark-only --benchmark-json={out}",
+              "runner": "tool.pytest"
+            }
+          ],
+          "detect": [
+            "`pyproject.toml` or `setup.cfg` or `requirements*.txt` in the root or a member mentions `pytest-benchmark`"
+          ],
+          "format": null,
+          "producer": "tool.pytest-benchmark"
+        }
+      ],
+      "coverage": [
+        {
+          "commands": [
+            {
+              "command": "<m> pytest --cov --cov-report=lcov:{out}",
+              "runner": "tool.pytest"
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "producer": "tool.pytest-cov"
+        },
+        {
+          "commands": [
+            {
+              "command": "<m> coverage run -m unittest && <m> coverage lcov -o {out}",
+              "runner": "tool.unittest"
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "producer": "tool.coverage-py"
+        }
+      ],
+      "fuzz": [
+        "atheris"
+      ],
+      "launchers": [
+        {
+          "detect": [
+            "file `uv.lock` exists",
+            "`pyproject.toml` contains `[tool.uv`"
+          ],
+          "tool": "uv",
+          "values": {
+            "m": "uv run python -m"
+          }
+        },
+        {
+          "detect": [
+            "file `poetry.lock` exists",
+            "`pyproject.toml` contains `[tool.poetry`"
+          ],
+          "tool": "poetry",
+          "values": {
+            "m": "poetry run python -m"
+          }
+        },
+        {
+          "detect": [],
+          "tool": "pip",
+          "values": {
+            "m": "python -m"
+          }
+        }
+      ],
+      "property": [
+        "hypothesis"
+      ],
+      "race": [],
+      "runners": [
+        {
+          "commands": [
+            {
+              "command": "<m> pytest",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "`pyproject.toml` or `setup.cfg` or `requirements*.txt` in the root or a member mentions `pytest`",
+            "file `pytest.ini` exists",
+            "file `conftest.py` exists"
+          ],
+          "format": null,
+          "producer": "tool.pytest"
+        },
+        {
+          "commands": [
+            {
+              "command": "<m> unittest",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "producer": "tool.unittest"
+        }
+      ]
+    }
+  },
+  "exit_code": 0,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

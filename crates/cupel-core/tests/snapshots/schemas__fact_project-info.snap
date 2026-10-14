@@ -6,7 +6,7 @@ expression: pretty(&schema)
   "$id": "https://cupel.dev/schema/v1/fact/project-info.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ProjectInfo",
-  "description": "Project roots, their build files, default commands, and directories to skip.",
+  "description": "The project roots detected in the repository: what each language's ecosystem files say,\nnot which tools to run. `cupel init` and `doctor` join a root with the toolchain table to\nchoose commands (ADR-037).",
   "type": "object",
   "properties": {
     "roots": {
@@ -19,59 +19,46 @@ expression: pretty(&schema)
   "required": [
     "roots"
   ],
-  "x-cupel-fact-version": 1,
+  "x-cupel-fact-version": 2,
   "$defs": {
-    "DefaultCommands": {
-      "type": "object",
-      "properties": {
-        "bench": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "coverage": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "test": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "bench",
-        "coverage",
-        "test"
-      ]
-    },
     "LangId": {
       "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
       "type": "string"
     },
     "ProjectRoot": {
+      "description": "A directory with a build manifest of one language's ecosystem.",
       "type": "object",
       "properties": {
         "build_files": {
+          "description": "Manifests of the root, then of its members, relative to the root.",
           "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "commands": {
-          "$ref": "#/$defs/DefaultCommands"
-        },
         "lang": {
           "$ref": "#/$defs/LangId"
         },
+        "members": {
+          "description": "Workspace member directories below the root, relative to it.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "packages": {
+          "description": "Package patterns the root's commands cover (`./...`); empty when commands take none.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "path": {
+          "description": "Relative to the repository root, `/`-separated; `.` for the repository root itself.",
           "type": "string"
         },
         "skip_dirs": {
+          "description": "Directory names the ecosystem generates, skipped below the root.",
           "type": "array",
           "items": {
             "type": "string"
@@ -80,8 +67,9 @@ expression: pretty(&schema)
       },
       "required": [
         "build_files",
-        "commands",
         "lang",
+        "members",
+        "packages",
         "path",
         "skip_dirs"
       ]

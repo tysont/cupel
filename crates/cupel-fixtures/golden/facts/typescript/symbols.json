@@ -1,0 +1,991 @@
+{
+  "symbols": [
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "display": "bin.cli.main",
+      "file": "bin/cli.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "main",
+      "namespace": "bin.cli",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "square",
+      "file": "packages/shapes/src/index.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "square",
+      "namespace": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "__tests__.pricing.discounted.members pay less",
+      "file": "src/__tests__/pricing.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "members pay less",
+      "namespace": "__tests__.pricing.discounted",
+      "span": {
+        "col": 28,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 4,
+        "end_line": 13,
+        "line": 9
+      },
+      "display": "__tests__.pricing.discounted.tallies stay within bounds",
+      "file": "src/__tests__/pricing.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "tallies stay within bounds",
+      "namespace": "__tests__.pricing.discounted",
+      "span": {
+        "col": 38,
+        "end_col": 4,
+        "end_line": 13,
+        "line": 9
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 66,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 5
+      },
+      "display": "decide.classify",
+      "file": "src/decide.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "classify",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 64,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 14
+      },
+      "display": "decide.firstOverdraft",
+      "file": "src/decide.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "firstOverdraft",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 14
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 72,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 23
+      },
+      "display": "decide.label",
+      "file": "src/decide.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "label",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 23
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 62,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 34
+      },
+      "display": "decide.parseCents",
+      "file": "src/decide.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "parseCents",
+      "namespace": "decide",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "inline.double",
+      "file": "src/inline.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "double",
+      "namespace": "inline",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 23,
+        "end_col": 4,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "inline.doubles",
+      "file": "src/inline.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "doubles",
+      "namespace": "inline",
+      "span": {
+        "col": 17,
+        "end_col": 4,
+        "end_line": 10,
+        "line": 8
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 64,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 13
+      },
+      "display": "ledger.load",
+      "file": "src/ledger.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "load",
+      "namespace": "ledger",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 4,
+        "end_line": 4,
+        "line": 2
+      },
+      "display": "legacy.Legacy.round",
+      "file": "src/legacy.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "round",
+      "namespace": "legacy.Legacy",
+      "span": {
+        "col": 10,
+        "end_col": 4,
+        "end_line": 4,
+        "line": 2
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 4,
+        "end_line": 9,
+        "line": 7
+      },
+      "display": "math.add.adds two numbers",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "adds two numbers",
+      "namespace": "math.add",
+      "span": {
+        "col": 26,
+        "end_col": 4,
+        "end_line": 9,
+        "line": 7
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 4,
+        "end_line": 19,
+        "line": 17
+      },
+      "display": "math.add.is truthy for non-zero sums",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "is truthy for non-zero sums",
+      "namespace": "math.add",
+      "span": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 19,
+        "line": 17
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 4,
+        "end_line": 23,
+        "line": 21
+      },
+      "display": "math.add.returns a defined value",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "returns a defined value",
+      "namespace": "math.add",
+      "span": {
+        "col": 33,
+        "end_col": 4,
+        "end_line": 23,
+        "line": 21
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 4,
+        "end_line": 27,
+        "line": 25
+      },
+      "display": "math.add.does not return zero",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "does not return zero",
+      "namespace": "math.add",
+      "span": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 27,
+        "line": 25
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 4,
+        "end_line": 31,
+        "line": 29
+      },
+      "display": "math.add.handles huge numbers",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "handles huge numbers",
+      "namespace": "math.add",
+      "span": {
+        "col": 35,
+        "end_col": 4,
+        "end_line": 31,
+        "line": 29
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 4,
+        "end_line": 35,
+        "line": 33
+      },
+      "display": "math.add.can be called without checking",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "can be called without checking",
+      "namespace": "math.add",
+      "span": {
+        "col": 40,
+        "end_col": 4,
+        "end_line": 35,
+        "line": 33
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 4,
+        "end_line": 41,
+        "line": 39
+      },
+      "display": "math.range.matches its snapshot",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "matches its snapshot",
+      "namespace": "math.range",
+      "span": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 41,
+        "line": 39
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 4,
+        "end_line": 47,
+        "line": 43
+      },
+      "display": "math.range.is consumed by a spy",
+      "file": "src/math.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "is consumed by a spy",
+      "namespace": "math.range",
+      "span": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 47,
+        "line": 43
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 51,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "math.add",
+      "file": "src/math.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "add",
+      "namespace": "math",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 71,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "display": "math.range",
+      "file": "src/math.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "range",
+      "namespace": "math",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "plugin.default",
+      "file": "src/plugin.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "default",
+      "namespace": "plugin",
+      "span": {
+        "col": 16,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 68,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "display": "pricing.discounted",
+      "file": "src/pricing.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "discounted",
+      "namespace": "pricing",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 81,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "display": "pricing.tally",
+      "file": "src/pricing.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "tally",
+      "namespace": "pricing",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "pricing.logTotal",
+      "file": "src/pricing.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "logTotal",
+      "namespace": "pricing",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 22,
+        "end_col": 4,
+        "end_line": 6,
+        "line": 4
+      },
+      "display": "shapes.geometry.Shape.describe",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "describe",
+      "namespace": "shapes.geometry.Shape",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 6,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
+      },
+      "display": "shapes.geometry.Circle.constructor",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "constructor",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 12,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 18,
+        "end_col": 4,
+        "end_line": 16,
+        "line": 14
+      },
+      "display": "shapes.geometry.Circle.area",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "area",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 16,
+        "line": 14
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 25,
+        "end_col": 4,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "shapes.geometry.Circle.unit",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "unit",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "shapes.geometry.Circle.isValid",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "isValid",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 18,
+        "end_col": 20,
+        "end_line": 26,
+        "line": 26
+      },
+      "display": "shapes.geometry.Circle.#cache",
+      "file": "src/shapes/geometry.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "#cache",
+      "namespace": "shapes.geometry.Circle",
+      "span": {
+        "col": 3,
+        "end_col": 20,
+        "end_line": 26,
+        "line": 26
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 3,
+        "end_col": 37,
+        "end_line": 30,
+        "line": 30
+      },
+      "display": "shapes.geometry.scale",
+      "file": "src/shapes/geometry.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "scale",
+      "namespace": "shapes.geometry",
+      "span": {
+        "col": 14,
+        "end_col": 37,
+        "end_line": 30,
+        "line": 29
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 37,
+        "line": 32
+      },
+      "display": "shapes.geometry.perimeter",
+      "file": "src/shapes/geometry.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "perimeter",
+      "namespace": "shapes.geometry",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 37,
+        "line": 32
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 4,
+        "end_line": 35,
+        "line": 33
+      },
+      "display": "shapes.geometry.perimeter.twice",
+      "file": "src/shapes/geometry.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "twice",
+      "namespace": "shapes.geometry.perimeter",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 35,
+        "line": 33
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 66,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 1
+      },
+      "display": "twins.netTotal",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotal",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 82,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      },
+      "display": "twins.sumAfterCharge",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "sumAfterCharge",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 71,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 11
+      },
+      "display": "twins.netTotalFloor",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalFloor",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 11,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 19
+      },
+      "display": "twins.netTotalLaidOut",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalLaidOut",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 70,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 28
+      },
+      "display": "twins.netTotalPlus",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalPlus",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 28
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 72,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 33
+      },
+      "display": "twins.netTotalCapped",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalCapped",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 33
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 73,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 41
+      },
+      "display": "twins.netTotalProduct",
+      "file": "src/twins.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "netTotalProduct",
+      "namespace": "twins",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 41
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 4
+      },
+      "display": "widget.renders a count",
+      "file": "src/widget.test.tsx",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "renders a count",
+      "namespace": "widget",
+      "span": {
+        "col": 23,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 4
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 75,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "widget.Badge",
+      "file": "src/widget.tsx",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "Badge",
+      "namespace": "widget",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "test.decide.classifies overdrawn balances",
+      "file": "test/decide.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "classifies overdrawn balances",
+      "namespace": "test.decide",
+      "span": {
+        "col": 39,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "test.decide.rejects empty amounts",
+      "file": "test/decide.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "rejects empty amounts",
+      "namespace": "test.decide",
+      "span": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "display": "test.decide.waits for the ledger server",
+      "file": "test/decide.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "waits for the ledger server",
+      "namespace": "test.decide",
+      "span": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "visibility": "private"
+    }
+  ]
+}

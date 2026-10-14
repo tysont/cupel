@@ -1,0 +1,69 @@
+# ABOUTME: Conformance inventory for the `test-frames` fact: test cases and what they assert, skip, mock,
+# ABOUTME: and set up. Languages map them in repos/<lang>/inventory.toml under [test-frames.<id>].
+fact = "test-frames"
+
+[[constructs]]
+id = "case"
+summary = "A test case the language's dominant framework runs."
+
+[[constructs]]
+id = "assertion-equality"
+summary = "An assertion that a value equals an expected value (`assert_eq!`, `expect(x).toBe(y)`, `assert x == y`, testify `assert.Equal`)."
+within = "assertions"
+expect = { kind = "equality", strength = "strong" }
+
+[[constructs]]
+id = "assertion-truthiness"
+summary = "An assertion that a value is truthy (`assert!(x)`, `expect(x).toBeTruthy()`, `assert x`); weak."
+within = "assertions"
+expect = { kind = "truthiness", strength = "weak" }
+
+[[constructs]]
+id = "assertion-not-null"
+summary = "An assertion that a value is present (`assert!(x.is_some())`, `expect(x).toBeDefined()`, `assert x is not None`, `assert.NotNil`)."
+within = "assertions"
+expect = { kind = "not-null" }
+
+[[constructs]]
+id = "assertion-throws"
+summary = "An assertion that code raises, panics, or returns an error (`#[should_panic]`, `expect(f).toThrow()`, `pytest.raises`, `assert.Error`)."
+within = "assertions"
+expect = { kind = "throws" }
+
+[[constructs]]
+id = "assertion-snapshot"
+summary = "A snapshot assertion (`insta::assert_snapshot!`, `toMatchSnapshot()`, syrupy)."
+within = "assertions"
+expect = { kind = "snapshot" }
+
+[[constructs]]
+id = "weak-assertion"
+summary = "An assertion idiom the language's tables classify as weak, such as asserting inequality. The mapping's `expect` names its kind."
+within = "assertions"
+expect = { strength = "weak" }
+
+[[constructs]]
+id = "no-assertion"
+summary = "A test case with no assertion at all."
+expect = { assertions = [] }
+
+[[constructs]]
+id = "skip"
+summary = "A skipped test case (`#[ignore]`, `it.skip`, `@pytest.mark.skip`, `t.Skip`); the mapping's `expect` may give the reason."
+expect = { skip = {} }
+
+[[constructs]]
+id = "mock"
+summary = "A test case that replaces a dependency with a test double (mockall, `vi.mock`, `unittest.mock.patch`, gomock)."
+within = "mocks"
+expect = {}
+
+[[constructs]]
+id = "setup"
+summary = "A setup or fixture block shared by a file's cases (`beforeEach`, `@pytest.fixture`, `TestMain`, rstest `#[fixture]`). Map the file only."
+within = "setup"
+expect = {}
+
+[[constructs]]
+id = "framework"
+summary = "The framework a test file is written for. Map the file only; the mapping's `expect` names the framework."

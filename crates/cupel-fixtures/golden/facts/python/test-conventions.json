@@ -1,0 +1,16 @@
+{
+  "pairs": [
+    {
+      "source": "src/ledger/pricing.py",
+      "tests": [
+        "tests/test_pricing.py"
+      ]
+    }
+  ],
+  "test_globs": [
+    "**/test_*.py",
+    "**/*_test.py",
+    "**/tests/**/*.py",
+    "**/conftest.py"
+  ]
+}

@@ -8,8 +8,9 @@ use crate::id::{CheckId, LangId};
 
 impl Config {
     /// Rejects check IDs, gate metrics, and language IDs that the registries do not know. The
-    /// CLI calls this once the registries are populated: checks from P2.1, languages from P1.1.
+    /// CLI calls this once checks register (P2.1); until then it calls `validate_languages`.
     pub fn validate_registered(&self, checks: &CheckRegistry, langs: &[LangId]) -> Result<()> {
+        self.validate_languages(langs)?;
         let registry = Registries { checks, langs };
         for id in self.file.checks.keys() {
             registry.check(id, "[checks]")?;
@@ -29,6 +30,18 @@ impl Config {
                     }
                 })?;
         }
+        Ok(())
+    }
+
+    /// Rejects language IDs in `[lang]`, `[roots]`, and per-check `lang` overrides that `langs`
+    /// does not hold, leaving check IDs and gate keys alone: the language half of
+    /// `validate_registered`, usable before any check is registered (ADR-038).
+    pub fn validate_languages(&self, langs: &[LangId]) -> Result<()> {
+        let checks = CheckRegistry::default();
+        let registry = Registries {
+            checks: &checks,
+            langs,
+        };
         for lang in self.file.lang.keys() {
             registry.lang(lang, "[lang]")?;
         }

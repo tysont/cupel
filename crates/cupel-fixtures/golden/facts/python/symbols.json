@@ -1,0 +1,1117 @@
+{
+  "symbols": [
+    {
+      "body": {
+        "col": 5,
+        "end_col": 31,
+        "end_line": 2,
+        "line": 2
+      },
+      "display": "units.cents",
+      "file": "libs/units/src/units/__init__.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "cents",
+      "namespace": "units",
+      "span": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 2,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 24,
+        "end_line": 14,
+        "line": 14
+      },
+      "display": "ledger.balance",
+      "file": "src/ledger/__init__.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "balance",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 14,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 32,
+        "end_line": 18,
+        "line": 18
+      },
+      "display": "ledger.audit_limit",
+      "file": "src/ledger/__init__.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "audit_limit",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 18,
+        "line": 17
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 21,
+        "end_line": 22,
+        "line": 22
+      },
+      "display": "ledger._scale",
+      "file": "src/ledger/__init__.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "_scale",
+      "namespace": "ledger",
+      "span": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 22,
+        "line": 21
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 44,
+        "end_line": 7,
+        "line": 7
+      },
+      "display": "ledger.account.Audited.audit_trail",
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "audit_trail",
+      "namespace": "ledger.account.Audited",
+      "span": {
+        "col": 5,
+        "end_col": 44,
+        "end_line": 7,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 38,
+        "end_line": 10,
+        "line": 10
+      },
+      "display": "ledger.account.Audited.is_clean",
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "is_clean",
+      "namespace": "ledger.account.Audited",
+      "span": {
+        "col": 5,
+        "end_col": 38,
+        "end_line": 10,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 23,
+        "end_line": 18,
+        "line": 17
+      },
+      "display": "ledger.account.Account.__init__",
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "__init__",
+      "namespace": "ledger.account.Account",
+      "span": {
+        "col": 5,
+        "end_col": 23,
+        "end_line": 18,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 30,
+        "end_line": 22,
+        "line": 22
+      },
+      "display": "ledger.account.Account.opening",
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "opening",
+      "namespace": "ledger.account.Account",
+      "span": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 22,
+        "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 28,
+        "end_line": 25,
+        "line": 25
+      },
+      "display": "ledger.account.Account.deposit",
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "deposit",
+      "namespace": "ledger.account.Account",
+      "span": {
+        "col": 5,
+        "end_col": 28,
+        "end_line": 25,
+        "line": 24
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 52,
+        "end_line": 32,
+        "line": 28
+      },
+      "display": "ledger.account.Account.statement",
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "statement",
+      "namespace": "ledger.account.Account",
+      "span": {
+        "col": 5,
+        "end_col": 52,
+        "end_line": 32,
+        "line": 27
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 13,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 29
+      },
+      "display": "ledger.account.Account.statement.line",
+      "file": "src/ledger/account.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "line",
+      "namespace": "ledger.account.Account.statement",
+      "span": {
+        "col": 9,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 28
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 51,
+        "end_line": 31,
+        "line": 31
+      },
+      "display": "ledger.account.Account.statement.header",
+      "file": "src/ledger/account.py",
+      "kind": "closure",
+      "lang": "python",
+      "name": "header",
+      "namespace": "ledger.account.Account.statement",
+      "span": {
+        "col": 9,
+        "end_col": 51,
+        "end_line": 31,
+        "line": 31
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 30,
+        "end_line": 35,
+        "line": 35
+      },
+      "display": "ledger.account.Account._audit",
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "_audit",
+      "namespace": "ledger.account.Account",
+      "span": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 35,
+        "line": 34
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 31,
+        "end_line": 38,
+        "line": 38
+      },
+      "display": "ledger.account.Account.__check",
+      "file": "src/ledger/account.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "__check",
+      "namespace": "ledger.account.Account",
+      "span": {
+        "col": 5,
+        "end_col": 31,
+        "end_line": 38,
+        "line": 37
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 7
+      },
+      "display": "ledger.cli.main",
+      "file": "src/ledger/cli.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "main",
+      "namespace": "ledger.cli",
+      "span": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 11,
+        "line": 11
+      },
+      "display": "ledger.cli.run",
+      "file": "src/ledger/cli.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "run",
+      "namespace": "ledger.cli",
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 11,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 17,
+        "end_line": 8,
+        "line": 2
+      },
+      "display": "ledger.decide.classify",
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "classify",
+      "namespace": "ledger.decide",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 8,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 16,
+        "end_line": 17,
+        "line": 12
+      },
+      "display": "ledger.decide.first_overdraft",
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "first_overdraft",
+      "namespace": "ledger.decide",
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 17,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 25,
+        "line": 21
+      },
+      "display": "ledger.decide.parse_cents",
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "parse_cents",
+      "namespace": "ledger.decide",
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 25,
+        "line": 20
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 17,
+        "end_line": 31,
+        "line": 29
+      },
+      "display": "ledger.decide.require_positive",
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "require_positive",
+      "namespace": "ledger.decide",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 31,
+        "line": 28
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 29,
+        "end_line": 41,
+        "line": 35
+      },
+      "display": "ledger.decide.describe",
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "describe",
+      "namespace": "ledger.decide",
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 41,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 37,
+        "end_line": 45,
+        "line": 45
+      },
+      "display": "ledger.decide.sign",
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "sign",
+      "namespace": "ledger.decide",
+      "span": {
+        "col": 1,
+        "end_col": 37,
+        "end_line": 45,
+        "line": 44
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 53,
+        "end_line": 49,
+        "line": 49
+      },
+      "display": "ledger.decide.positives",
+      "file": "src/ledger/decide.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "positives",
+      "namespace": "ledger.decide",
+      "span": {
+        "col": 1,
+        "end_col": 53,
+        "end_line": 49,
+        "line": 48
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 17,
+        "end_line": 5,
+        "line": 2
+      },
+      "display": "ledger.pricing.discounted",
+      "file": "src/ledger/pricing.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "discounted",
+      "namespace": "ledger.pricing",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 5,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 28,
+        "end_line": 16,
+        "line": 9
+      },
+      "display": "ledger.pricing.tally",
+      "file": "src/ledger/pricing.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "tally",
+      "namespace": "ledger.pricing",
+      "span": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 16,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 34,
+        "end_line": 20,
+        "line": 20
+      },
+      "display": "ledger.pricing.has_price",
+      "file": "src/ledger/pricing.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "has_price",
+      "namespace": "ledger.pricing",
+      "span": {
+        "col": 1,
+        "end_col": 34,
+        "end_line": 20,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 17,
+        "end_line": 24,
+        "line": 24
+      },
+      "display": "ledger.pricing.log_total",
+      "file": "src/ledger/pricing.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "log_total",
+      "namespace": "ledger.pricing",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 24,
+        "line": 23
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 40,
+        "end_line": 7,
+        "line": 7
+      },
+      "display": "ledger.report.summary",
+      "file": "src/ledger/report/__init__.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "summary",
+      "namespace": "ledger.report",
+      "span": {
+        "col": 1,
+        "end_col": 40,
+        "end_line": 7,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 32,
+        "end_line": 5,
+        "line": 5
+      },
+      "display": "ledger.report.format.render",
+      "file": "src/ledger/report/format.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "render",
+      "namespace": "ledger.report.format",
+      "span": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 5,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 73,
+        "end_line": 9,
+        "line": 9
+      },
+      "display": "ledger.report.format.publish",
+      "file": "src/ledger/report/format.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "publish",
+      "namespace": "ledger.report.format",
+      "span": {
+        "col": 1,
+        "end_col": 73,
+        "end_line": 9,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 13,
+        "end_line": 5,
+        "line": 2
+      },
+      "display": "ledger.twins.net_total",
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "net_total",
+      "namespace": "ledger.twins",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 5,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 13,
+        "end_line": 12,
+        "line": 9
+      },
+      "display": "ledger.twins.sum_after_charge",
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "sum_after_charge",
+      "namespace": "ledger.twins",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 12,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 14,
+        "end_line": 19,
+        "line": 16
+      },
+      "display": "ledger.twins.net_total_floor",
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "net_total_floor",
+      "namespace": "ledger.twins",
+      "span": {
+        "col": 1,
+        "end_col": 14,
+        "end_line": 19,
+        "line": 15
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 13,
+        "end_line": 30,
+        "line": 23
+      },
+      "display": "ledger.twins.net_total_laid_out",
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "net_total_laid_out",
+      "namespace": "ledger.twins",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 30,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 13,
+        "end_line": 37,
+        "line": 34
+      },
+      "display": "ledger.twins.net_total_plus",
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "net_total_plus",
+      "namespace": "ledger.twins",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 37,
+        "line": 33
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 13,
+        "end_line": 46,
+        "line": 41
+      },
+      "display": "ledger.twins.net_total_capped",
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "net_total_capped",
+      "namespace": "ledger.twins",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 46,
+        "line": 40
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 13,
+        "end_line": 53,
+        "line": 50
+      },
+      "display": "ledger.twins.net_total_product",
+      "file": "src/ledger/twins.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "net_total_product",
+      "namespace": "ledger.twins",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 53,
+        "line": 49
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 26,
+        "end_line": 8,
+        "line": 8
+      },
+      "display": "tests.conftest.account",
+      "file": "tests/conftest.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "account",
+      "namespace": "tests.conftest",
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 8,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 32,
+        "end_line": 12,
+        "line": 11
+      },
+      "display": "tests.test_ledger.test_deposit_adds_to_the_balance",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_deposit_adds_to_the_balance",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 12,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 31,
+        "end_line": 16,
+        "line": 16
+      },
+      "display": "tests.test_ledger.test_statements_mention_the_owner",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_statements_mention_the_owner",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 16,
+        "line": 15
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 42,
+        "end_line": 20,
+        "line": 20
+      },
+      "display": "tests.test_ledger.test_parsing_garbage_gives_nothing",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_parsing_garbage_gives_nothing",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 20,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 46,
+        "end_line": 24,
+        "line": 24
+      },
+      "display": "tests.test_ledger.test_an_opening_account_exists",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_an_opening_account_exists",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 46,
+        "end_line": 24,
+        "line": 23
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 29,
+        "end_line": 29,
+        "line": 28
+      },
+      "display": "tests.test_ledger.test_negative_deposits_are_rejected",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_negative_deposits_are_rejected",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 29,
+        "line": 27
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 70,
+        "end_line": 33,
+        "line": 33
+      },
+      "display": "tests.test_ledger.test_rounding_is_close",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_rounding_is_close",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 70,
+        "end_line": 33,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 47,
+        "end_line": 38,
+        "line": 38
+      },
+      "display": "tests.test_ledger.test_statement_is_published",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_statement_is_published",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 38,
+        "line": 37
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 36,
+        "end_line": 42,
+        "line": 42
+      },
+      "display": "tests.test_ledger.test_report_matches_snapshot",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_report_matches_snapshot",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 36,
+        "end_line": 42,
+        "line": 41
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 39,
+        "end_line": 48,
+        "line": 47
+      },
+      "display": "tests.test_ledger.test_publish_posts_once",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_publish_posts_once",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 48,
+        "line": 46
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 28,
+        "end_line": 53,
+        "line": 52
+      },
+      "display": "tests.test_ledger.test_rendering_can_be_replaced",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_rendering_can_be_replaced",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 53,
+        "line": 51
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 19,
+        "end_line": 57,
+        "line": 57
+      },
+      "display": "tests.test_ledger.test_opening_an_account_does_not_raise",
+      "file": "tests/test_ledger.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_opening_an_account_does_not_raise",
+      "namespace": "tests.test_ledger",
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 57,
+        "line": 56
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 32,
+        "end_line": 9,
+        "line": 9
+      },
+      "display": "tests.test_pricing.PricingTest.setUp",
+      "file": "tests/test_pricing.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "setUp",
+      "namespace": "tests.test_pricing.PricingTest",
+      "span": {
+        "col": 5,
+        "end_col": 32,
+        "end_line": 9,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 35,
+        "end_line": 14,
+        "line": 12
+      },
+      "display": "tests.test_pricing.PricingTest.test_tally_reports_overdraft",
+      "file": "tests/test_pricing.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_tally_reports_overdraft",
+      "namespace": "tests.test_pricing.PricingTest",
+      "span": {
+        "col": 5,
+        "end_col": 35,
+        "end_line": 14,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 56,
+        "end_line": 18,
+        "line": 18
+      },
+      "display": "tests.test_pricing.PricingTest.test_members_get_a_discount",
+      "file": "tests/test_pricing.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_members_get_a_discount",
+      "namespace": "tests.test_pricing.PricingTest",
+      "span": {
+        "col": 5,
+        "end_col": 56,
+        "end_line": 18,
+        "line": 17
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 45,
+        "end_line": 23,
+        "line": 22
+      },
+      "display": "tests.test_pricing.PricingTest.test_tally_logs_once",
+      "file": "tests/test_pricing.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_tally_logs_once",
+      "namespace": "tests.test_pricing.PricingTest",
+      "span": {
+        "col": 5,
+        "end_col": 45,
+        "end_line": 23,
+        "line": 21
+      },
+      "visibility": "public"
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+---
+source: crates/cupel-cli/tests/describe.rs
+expression: "support::redacted_text(&outcome.stdout)"
+---
+cupel describe: pass (exit 0)
+
+language typescript · family ecma · .ts .mts .cts .tsx · experimental
+
+facts
+  symbols           lang.typescript (quick)
+  decisions         lang.typescript (quick)
+  norm-tree         lang.typescript (quick)
+  mutation-sites    lang.typescript (quick)
+  test-frames       lang.typescript (quick)
+  module-graph      lang.typescript (quick)
+  api-surface       lang.typescript (quick)
+  roots             lang.typescript (quick)
+  test-conventions  lang.typescript (quick)
+  project-info      lang.typescript (quick)
+
+checks
+  none registered
+
+toolchain
+  launchers
+    pnpm  when file `pnpm-lock.yaml` exists; or file `pnpm-workspace.yaml` exists; or `package.json` has `packageManager` starting `pnpm@`
+      <run> = pnpm run · <x> = pnpm
+    yarn  when file `yarn.lock` exists; or `package.json` has `packageManager` starting `yarn@`
+      <run> = yarn run · <x> = yarn
+    npm  otherwise
+      <run> = npm run · <x> = npx
+  runners
+    tool.vitest  when `package.json` in the root or a member has `dependencies.vitest`; or `package.json` in the root or a member has `devDependencies.vitest`
+      <x> vitest run
+    tool.jest  when `package.json` in the root or a member has `dependencies.jest`; or `package.json` in the root or a member has `devDependencies.jest`
+      <x> jest
+    tool.mocha  when `package.json` in the root or a member has `dependencies.mocha`; or `package.json` in the root or a member has `devDependencies.mocha`
+      <x> mocha
+    tool.node-test  otherwise
+      node --test
+  coverage
+    tool.vitest-coverage  lcov · always
+      with tool.vitest: <x> vitest run --coverage --coverage.reporter=lcov
+    tool.jest-coverage  lcov · always
+      with tool.jest: <x> jest --coverage --coverageReporters=lcov
+    tool.c8  lcov · always
+      with tool.mocha: <x> c8 --reporter=lcov mocha
+      with tool.node-test: <x> c8 --reporter=lcov node --test
+  bench
+    tool.bench-script  when `package.json` has `scripts.bench`
+      <run> bench
+  property  fast-check
+  fuzz      jazzer.js
+  race      none
+
+summary   0 findings · fail 0 · warn 0 · info 0 · new 0 · resolved 0 · suppressed 0
+
+run       [run id, start, duration, seed]
+depth     standard
+config    from flags, defaults
+          depth: standard
+          format: text
+cupel     [version] · https://cupel.dev/schema/v1/run.json

@@ -1,0 +1,4 @@
+{
+  "name": "@ledger/shapes",
+  "main": "./src/index.ts"
+}

@@ -1,0 +1,224 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "checks": [],
+    "extensions": [
+      ".go"
+    ],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "decisions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "norm-tree",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "mutation-sites",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-frames",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "module-graph",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "api-surface",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "roots",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-conventions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "project-info",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.go",
+            "needs": []
+          }
+        ]
+      }
+    ],
+    "family": "go",
+    "id": "go",
+    "stability": "experimental",
+    "subject": "language",
+    "toolchain": {
+      "bench": [
+        {
+          "commands": [
+            {
+              "command": "go test -run=^$ -bench=. <packages>",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "producer": "tool.go-bench"
+        }
+      ],
+      "coverage": [
+        {
+          "commands": [
+            {
+              "command": "go test -coverprofile={out} <packages>",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": "coverprofile",
+          "producer": "tool.go-coverprofile"
+        }
+      ],
+      "fuzz": [
+        "go test -fuzz"
+      ],
+      "launchers": [],
+      "property": [
+        "testing/quick",
+        "rapid"
+      ],
+      "race": [
+        "go test -race"
+      ],
+      "runners": [
+        {
+          "commands": [
+            {
+              "command": "go test -json <packages>",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "producer": "tool.go-test"
+        }
+      ]
+    }
+  },
+  "exit_code": 0,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

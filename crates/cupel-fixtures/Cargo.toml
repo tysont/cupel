@@ -12,7 +12,10 @@ publish = false
 
 [dependencies]
 cupel-core.workspace = true
+cupel-lang.workspace = true
+serde.workspace = true
 serde_json.workspace = true
+toml.workspace = true
 thiserror.workspace = true
 assert_cmd.workspace = true
 similar.workspace = true

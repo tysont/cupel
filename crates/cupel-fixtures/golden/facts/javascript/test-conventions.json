@@ -1,0 +1,28 @@
+{
+  "pairs": [
+    {
+      "source": "src/decide.js",
+      "tests": [
+        "test/decide.test.js"
+      ]
+    },
+    {
+      "source": "src/inline.js",
+      "tests": [
+        "src/inline.js"
+      ]
+    },
+    {
+      "source": "src/math.js",
+      "tests": [
+        "test/math.test.js"
+      ]
+    }
+  ],
+  "test_globs": [
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/__tests__/**",
+    "**/test/**"
+  ]
+}

@@ -1,0 +1,33 @@
+# ABOUTME: Conformance inventory for the `norm-tree` fact: pairs of symbols whose structural hashes must
+# ABOUTME: agree or differ. Each language maps them in repos/<lang>/inventory.toml under [norm-tree.<id>].
+fact = "norm-tree"
+
+[[constructs]]
+id = "rename"
+summary = "`twin` differs from `name` only in its own name and the names of its parameters, locals, and fields."
+relation = "same-hash"
+
+[[constructs]]
+id = "literal"
+summary = "`twin` differs from `name` only in the value of a literal."
+relation = "same-hash"
+
+[[constructs]]
+id = "layout"
+summary = "`twin` differs from `name` only in whitespace, line breaks, and comments."
+relation = "same-hash"
+
+[[constructs]]
+id = "operator"
+summary = "`twin` differs from `name` only in one operator (`-` for `+`)."
+relation = "different-hash"
+
+[[constructs]]
+id = "branch"
+summary = "`twin` is `name` with one more branch."
+relation = "different-hash"
+
+[[constructs]]
+id = "call"
+summary = "`twin` differs from `name` only in the name of a function or method it calls."
+relation = "different-hash"

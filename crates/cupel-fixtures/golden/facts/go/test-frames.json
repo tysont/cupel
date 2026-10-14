@@ -1,0 +1,400 @@
+{
+  "files": [
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 47,
+                "end_line": 18,
+                "line": 18
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestDepositAddsToTheBalance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 20,
+            "line": 13
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 3,
+                "end_col": 37,
+                "end_line": 24,
+                "line": 24
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "TestMembersGetADiscount",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 26,
+            "line": 22
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "not-null",
+              "span": {
+                "col": 3,
+                "end_col": 43,
+                "end_line": 31,
+                "line": 31
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "TestNewAccountsAreRegistered",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 33,
+            "line": 28
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 3,
+                "end_col": 28,
+                "end_line": 37,
+                "line": 37
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "TestParsingGarbageFails",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 39,
+            "line": 35
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 49,
+                "end_line": 44,
+                "line": 44
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "TestNewAccountsHaveDistinctIDs",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 46,
+            "line": 41
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 68,
+                "end_line": 60,
+                "line": 60
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestClassify",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 64,
+            "line": 48
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 36,
+                "end_line": 71,
+                "line": 71
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "TestStatementIsMailed",
+          "skip": {
+            "reason": "talks to the network",
+            "span": {
+              "col": 3,
+              "end_col": 33,
+              "end_line": 68,
+              "line": 68
+            }
+          },
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 73,
+            "line": 66
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "not-null",
+              "span": {
+                "col": 3,
+                "end_col": 15,
+                "end_line": 78,
+                "line": 78
+              },
+              "strength": "weak"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 41,
+                "end_line": 81,
+                "line": 81
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestParseCentsTrimsSpaces",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 83,
+            "line": 75
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "TestOpeningAnAccountDoesNotPanic",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 87,
+            "line": 85
+          }
+        }
+      ],
+      "file": "ledger_test.go",
+      "framework": "go-test",
+      "setup": [
+        {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 11,
+          "line": 8
+        },
+        {
+          "col": 2,
+          "end_col": 52,
+          "end_line": 15,
+          "line": 15
+        }
+      ]
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 2,
+                "end_col": 35,
+                "end_line": 23,
+                "line": 23
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 2,
+                "end_col": 27,
+                "end_line": 24,
+                "line": 24
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "TestTallyReportsOverdraft",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 25,
+            "line": 21
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "not-null",
+              "span": {
+                "col": 2,
+                "end_col": 25,
+                "end_line": 29,
+                "line": 29
+              },
+              "strength": "weak"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 2,
+                "end_col": 36,
+                "end_line": 30,
+                "line": 30
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestParseCentsAcceptsDigits",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 31,
+            "line": 27
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 2,
+                "end_col": 34,
+                "end_line": 35,
+                "line": 35
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestParseCentsRejectsBlanks",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 36,
+            "line": 33
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "snapshot",
+              "span": {
+                "col": 2,
+                "end_col": 51,
+                "end_line": 39,
+                "line": 39
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestDiscountSnapshot",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 40,
+            "line": 38
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "not-null",
+              "span": {
+                "col": 2,
+                "end_col": 55,
+                "end_line": 45,
+                "line": 45
+              },
+              "strength": "weak"
+            },
+            {
+              "kind": "custom",
+              "span": {
+                "col": 2,
+                "end_col": 32,
+                "end_line": 46,
+                "line": 46
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 15,
+                "end_col": 29,
+                "end_line": 43,
+                "line": 43
+              },
+              "target": "MockNotifier"
+            }
+          ],
+          "name": "TestMailNotifiesTheOwner",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 47,
+            "line": 42
+          }
+        }
+      ],
+      "file": "pricing_test.go",
+      "framework": "testify",
+      "setup": []
+    }
+  ]
+}

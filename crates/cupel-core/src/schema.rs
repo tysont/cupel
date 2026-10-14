@@ -90,6 +90,14 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
     }
 }
 
+/// The payload version of a fact kind, or `None` for kinds whose payload type does not exist yet.
+pub fn fact_version(kind: FactKind) -> Option<u32> {
+    fact(kind)?
+        .get("x-cupel-fact-version")
+        .and_then(Value::as_u64)
+        .and_then(|version| u32::try_from(version).ok())
+}
+
 /// A fact payload's schema, carrying the fact version it describes.
 fn fact_schema<F: Fact>() -> Schema {
     let mut schema = root::<F>(&format!("{BASE_URL}fact/{}.json", F::KIND));

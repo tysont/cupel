@@ -1,0 +1,148 @@
+# ABOUTME: Tables the generic producers read for go, alongside its queries.
+# ABOUTME: Keys and shapes are documented in the cupel-lang crate docs; unknown keys are errors.
+
+[namespace]
+separator = "."
+
+# Capitalized names are exported; everything else is visible throughout the package, which is
+# what `internal` means (ADR-032). Go has no narrower level, so nothing is `private`. Exported
+# names in `internal/` directories stay `public`: they are visible outside their package, and
+# the import restriction is a module-boundary rule that a name rule cannot see.
+[visibility]
+default = "internal"
+
+[[visibility.names]]
+capitalized = true
+visibility = "public"
+
+# `else if` is an `if_statement` in the `alternative` field of the branch it continues.
+[decisions]
+chain_parents = ["if_statement"]
+
+# Types are names like any other, so `int64` and `Money` both become `$id`. A method's receiver
+# is an ordinary parameter list: its names normalize away and its shape (pointer or value) stays,
+# so no hand-written override is needed for receivers.
+[normalize]
+identifiers = [
+  "identifier",
+  "field_identifier",
+  "type_identifier",
+  "package_identifier",
+  "label_name",
+]
+literals = [
+  "int_literal",
+  "float_literal",
+  "imaginary_literal",
+  "rune_literal",
+  "interpreted_string_literal",
+  "raw_string_literal",
+  "true",
+  "false",
+]
+# `strings.ToUpper(s)` and `w.Close()` keep the function name; the package or value before the
+# dot is a receiver and normalizes as usual.
+receivers = ["operand"]
+
+[[normalize.calls]]
+kind = "call_expression"
+callee = "function"
+
+[mutations.relational]
+replace = { "<" = ["<="], "<=" = ["<"], ">" = [">="], ">=" = [">"] }
+
+[mutations.equality]
+replace = { "==" = ["!="], "!=" = ["=="] }
+
+[mutations.arith-add-sub]
+replace = { "+" = ["-"], "-" = ["+"], "+=" = ["-="], "-=" = ["+="], "++" = ["--"], "--" = ["++"] }
+
+[mutations.arith-mul-div]
+replace = { "*" = ["/"], "/" = ["*"], "*=" = ["/="], "/=" = ["*="] }
+
+[mutations.boolean-op]
+replace = { "&&" = ["||"], "||" = ["&&"] }
+
+[mutations.boolean-literal]
+replace = { "true" = ["false"], "false" = ["true"] }
+
+[mutations.zero-one]
+replace = { "0" = ["1"], "1" = ["0"] }
+
+[mutations.statement-deletion]
+templates = [""]
+
+# Go has no zero value that fits every type. `nil` fits errors, pointers, slices, maps,
+# channels, functions, and interfaces, which covers the values Go code returns most; a mutant
+# returning `nil` for another type does not compile and the mutation engine reports it so.
+[mutations.return-value]
+templates = ["nil"]
+
+[mutations.constant]
+templates = ["0"]
+
+[mutations.boundary]
+templates = ["{} + 1", "{} - 1"]
+
+[mutations.negation]
+templates = ["!({})"]
+
+[tests]
+framework = "go-test"
+
+[tests.assertions]
+# Idioms captured as @assertion.idiom.<key>: a failure call and the `if` that guards it.
+equal = { kind = "equality", strength = "strong" }
+not-equal = { kind = "equality", strength = "weak" }
+not-nil = { kind = "not-null", strength = "weak" }
+no-error = { kind = "not-null", strength = "weak" }
+error = { kind = "throws", strength = "weak" }
+fails = { kind = "truthiness", strength = "weak" }
+# testify, by function name (assert and require alike).
+Equal = { kind = "equality", strength = "strong" }
+Equalf = { kind = "equality", strength = "strong" }
+EqualValues = { kind = "equality", strength = "strong" }
+Exactly = { kind = "equality", strength = "strong" }
+JSONEq = { kind = "equality", strength = "strong" }
+ElementsMatch = { kind = "equality", strength = "strong" }
+Len = { kind = "equality", strength = "strong" }
+Nil = { kind = "equality", strength = "strong" }
+Zero = { kind = "equality", strength = "strong" }
+NotEqual = { kind = "equality", strength = "weak" }
+NotEqualValues = { kind = "equality", strength = "weak" }
+True = { kind = "truthiness", strength = "weak" }
+False = { kind = "truthiness", strength = "weak" }
+Empty = { kind = "truthiness", strength = "weak" }
+NotEmpty = { kind = "truthiness", strength = "weak" }
+NotNil = { kind = "not-null", strength = "weak" }
+NotZero = { kind = "not-null", strength = "weak" }
+NoError = { kind = "not-null", strength = "weak" }
+Error = { kind = "throws", strength = "weak" }
+Panics = { kind = "throws", strength = "weak" }
+ErrorIs = { kind = "throws", strength = "strong" }
+ErrorAs = { kind = "throws", strength = "strong" }
+EqualError = { kind = "throws", strength = "strong" }
+ErrorContains = { kind = "throws", strength = "weak" }
+PanicsWithValue = { kind = "throws", strength = "strong" }
+PanicsWithError = { kind = "throws", strength = "strong" }
+# go-snaps.
+MatchSnapshot = { kind = "snapshot", strength = "strong" }
+MatchJSON = { kind = "snapshot", strength = "strong" }
+
+# Tests sit beside the code they test as `<name>_test.go`; `testdata/` holds inputs the go tool
+# never builds, so nothing in it is source.
+[conventions]
+test_globs = ["**/*_test.go", "**/testdata/**"]
+
+[[conventions.tests_for]]
+template = "{dir}/{stem}_test.go"
+
+# `[]T`, `map[K]V`, `[T any](…)`, and `...T` read without a space after the bracket or dots.
+[api]
+tight_after = ["]", "..."]
+
+# `main` starts a program; the runtime calls `init` before it, and `go test` calls `TestMain`
+# instead of running a package's tests directly.
+[roots]
+entry_points = ["main"]
+hooks = ["init", "TestMain"]

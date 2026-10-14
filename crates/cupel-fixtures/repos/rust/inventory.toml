@@ -1,0 +1,315 @@
+# Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
+# repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+file = "src/lib.rs"
+name = "balance"
+
+[symbols.method]
+file = "src/account.rs"
+name = "account::Account::deposit"
+
+[symbols.static-method]
+file = "src/account.rs"
+name = "account::Account::new"
+
+[symbols.nested-function]
+file = "src/account.rs"
+name = "account::Account::statement::line"
+
+[symbols.closure]
+file = "src/account.rs"
+name = "account::Account::statement::header"
+
+[symbols.public]
+file = "src/lib.rs"
+name = "balance"
+
+[symbols.internal]
+file = "src/lib.rs"
+name = "audit_limit"
+
+[symbols.private]
+file = "src/lib.rs"
+name = "scale"
+
+[symbols.file-namespace]
+file = "src/report/format.rs"
+name = "report::format::render"
+expect = { namespace = "report::format" }
+
+[decisions.if]
+file = "src/decide.rs"
+name = "decide::classify"
+
+[decisions.else-if]
+file = "src/decide.rs"
+name = "decide::classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "src/decide.rs"
+name = "decide::first_overdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "src/decide.rs"
+name = "decide::first_overdraft"
+
+[decisions.boolean-op]
+file = "src/decide.rs"
+name = "decide::classify"
+
+[decisions.early-return]
+file = "src/decide.rs"
+name = "decide::parse_cents"
+
+[decisions.case]
+file = "src/decide.rs"
+name = "decide::describe"
+
+[decisions.ternary]
+not-applicable = "Rust has no conditional operator; `if` is an expression and is a branch."
+
+[decisions.catch]
+not-applicable = "Rust has no exception handlers; errors are values, and `?` is an early return."
+
+[norm-tree.rename]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::sum_after_charge"
+
+[norm-tree.literal]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_floor"
+
+[norm-tree.layout]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_laid_out"
+
+[norm-tree.operator]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_plus"
+
+[norm-tree.branch]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_capped"
+
+[norm-tree.call]
+file = "src/twins.rs"
+name = "twins::net_total"
+twin = "twins::net_total_product"
+
+[mutation-sites.relational]
+file = "src/pricing.rs"
+name = "pricing::tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "src/pricing.rs"
+name = "pricing::discounted"
+expect = { from = "!=", to = ["=="] }
+
+[mutation-sites.arith-add-sub]
+file = "src/pricing.rs"
+name = "pricing::tally"
+expect = { from = "+=", to = ["-="] }
+
+[mutation-sites.arith-mul-div]
+file = "src/pricing.rs"
+name = "pricing::discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "src/pricing.rs"
+name = "pricing::discounted"
+expect = { from = "&&", to = ["||"] }
+
+[mutation-sites.boolean-literal]
+file = "src/pricing.rs"
+name = "pricing::tally"
+expect = { from = "false", to = ["true"] }
+
+[mutation-sites.zero-one]
+file = "src/pricing.rs"
+name = "pricing::tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "src/pricing.rs"
+name = "pricing::tally"
+expect = { from = "log_total(total);", to = [""] }
+
+[mutation-sites.return-value]
+file = "src/pricing.rs"
+name = "pricing::discounted"
+expect = { from = "price - cut", to = ["Default::default()"] }
+
+[mutation-sites.constant]
+file = "src/pricing.rs"
+name = "pricing::discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "src/decide.rs"
+name = "decide::classify"
+expect = { from = "0", to = ["0 + 1", "0 - 1"] }
+
+[mutation-sites.negation]
+file = "src/pricing.rs"
+name = "pricing::discounted"
+expect = { from = "member && cut != 0", to = ["!(member && cut != 0)"] }
+
+[test-frames.case]
+file = "tests/ledger.rs"
+name = "deposit_adds_to_the_balance"
+
+[test-frames.assertion-equality]
+file = "tests/ledger.rs"
+name = "deposit_adds_to_the_balance"
+
+[test-frames.assertion-truthiness]
+file = "tests/ledger.rs"
+name = "members_get_a_discount"
+
+[test-frames.assertion-not-null]
+file = "tests/ledger.rs"
+name = "statements_mention_the_balance"
+
+[test-frames.assertion-throws]
+file = "tests/ledger.rs"
+name = "huge_deposits_overflow"
+
+[test-frames.assertion-snapshot]
+file = "src/pricing.rs"
+name = "discount_snapshot"
+
+[test-frames.weak-assertion]
+file = "tests/ledger.rs"
+name = "statement_is_mailed"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "tests/ledger.rs"
+name = "opening_an_account_does_not_panic"
+
+[test-frames.skip]
+file = "tests/ledger.rs"
+name = "statement_is_mailed"
+expect = { skip = { reason = "talks to the network" } }
+
+[test-frames.mock]
+file = "src/pricing.rs"
+name = "the_log_is_written_once"
+expect = { target = "MockLog" }
+
+[test-frames.setup]
+file = "src/pricing.rs"
+
+[test-frames.framework]
+file = "tests/ledger.rs"
+expect = { framework = "rust-test" }
+
+[test-conventions.separate-test-file]
+file = "src/lib.rs"
+name = "tests/ledger.rs"
+
+[test-conventions.inline-tests]
+file = "src/pricing.rs"
+name = "src/pricing.rs"
+
+[module-graph.relative]
+file = "src/pricing.rs"
+name = "super::*"
+expect = { target = { path = "src/pricing.rs" } }
+
+[module-graph.absolute]
+file = "src/account.rs"
+name = "crate::report::format::render"
+expect = { target = { path = "src/report/format.rs" } }
+
+[module-graph.workspace-member]
+file = "src/report/mod.rs"
+name = "shapes::square"
+expect = { target = { path = "shapes/src/lib.rs" } }
+
+[module-graph.external]
+file = "src/account.rs"
+name = "serde::Serialize"
+expect = { target = { package = "serde" } }
+
+[module-graph.standard-library]
+file = "src/account.rs"
+name = "std::fmt"
+expect = { target = { package = "std" } }
+
+[module-graph.unresolved]
+file = "src/lib.rs"
+name = "generated"
+
+[api-surface.function]
+file = "src/lib.rs"
+name = "balance"
+expect = { signature = "(_: &[i64]) -> i64" }
+
+[api-surface.method]
+file = "src/account.rs"
+name = "account::Account::deposit"
+expect = { signature = "(&mut self, _: i64)" }
+
+[api-surface.type]
+file = "src/account.rs"
+name = "account::Account"
+
+[api-surface.interface]
+file = "src/account.rs"
+name = "account::Audited"
+
+[api-surface.constant]
+file = "src/lib.rs"
+name = "MAX_ENTRIES"
+expect = { signature = "usize" }
+
+[api-surface.variable]
+file = "src/lib.rs"
+name = "CURRENCY"
+expect = { signature = "&str" }
+
+[api-surface.module]
+file = "src/lib.rs"
+name = "account"
+
+[roots.entry-point]
+file = "src/main.rs"
+name = "main"
+
+[roots.export]
+file = "src/lib.rs"
+name = "balance"
+
+[roots.test]
+file = "tests/ledger.rs"
+name = "tests::ledger::deposit_adds_to_the_balance"
+
+[roots.hook]
+file = "src/main.rs"
+name = "ledger_version"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "rust", build_files = ["Cargo.toml", "shapes/Cargo.toml"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["shapes"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = ["target"] }
+
+[project-info.packages]
+not-applicable = "Cargo commands select packages with `--workspace`, not path patterns."

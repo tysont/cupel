@@ -4,33 +4,33 @@ use cupel_core::{CheckId, FindingId, RunId, SiteHash, SymbolHash};
 use proptest::prelude::*;
 
 fn symbol() -> SymbolHash {
-    "sh_4b1d9e0c".parse().unwrap()
+    "sh_4b1d9e0c4b1d9e0c".parse().unwrap()
 }
 
 #[test]
 fn finding_id_matches_known_vector_for_a_site() {
-    // blake3(b"tests.mutation\0mutant.survived\0sh_4b1d9e0c\0a1b2c3") = 41ee1ce7…, computed with
-    // the Python `blake3` package.
-    let site: SiteHash = "a1b2c3".parse().unwrap();
+    // blake3(b"tests.mutation\0mutant.survived\0sh_4b1d9e0c4b1d9e0c\0a1b2c3d4e5f60718")
+    // = 3e81391d…, computed with the Python `blake3` package.
+    let site: SiteHash = "a1b2c3d4e5f60718".parse().unwrap();
     let id = FindingId::compute(
         &CheckId::from("tests.mutation"),
         "mutant.survived",
         &symbol(),
         Some(&site),
     );
-    assert_eq!(id.as_str(), "fnd_41ee1c");
+    assert_eq!(id.as_str(), "fnd_3e8139");
 }
 
 #[test]
 fn finding_id_matches_known_vector_for_a_whole_symbol() {
-    // blake3(b"static.complexity\0complexity.high\0sh_4b1d9e0c\0") = 5e337c51…
+    // blake3(b"static.complexity\0complexity.high\0sh_4b1d9e0c4b1d9e0c\0") = 3370d1f5…
     let id = FindingId::compute(
         &CheckId::from("static.complexity"),
         "complexity.high",
         &symbol(),
         None,
     );
-    assert_eq!(id.as_str(), "fnd_5e337c");
+    assert_eq!(id.as_str(), "fnd_3370d1");
 }
 
 #[test]
@@ -58,9 +58,13 @@ fn subject_finding_id_depends_on_check_kind_and_subject() {
 fn subject_finding_ids_never_collide_with_symbol_finding_ids() {
     // A symbol hash is never empty, so the empty symbol slot separates the two input spaces:
     // a subject that looks like a site cannot reproduce a symbol finding's ID.
-    let site: SiteHash = "a1b2c3".parse().unwrap();
+    let site: SiteHash = "a1b2c3d4e5f60718".parse().unwrap();
     let by_symbol = FindingId::compute(&CheckId::from("c"), "k", &symbol(), Some(&site));
-    let by_subject = FindingId::for_subject(&CheckId::from("c"), "k", "sh_4b1d9e0c\0a1b2c3");
+    let by_subject = FindingId::for_subject(
+        &CheckId::from("c"),
+        "k",
+        "sh_4b1d9e0c4b1d9e0c\0a1b2c3d4e5f60718",
+    );
     assert_ne!(by_symbol, by_subject);
 }
 
@@ -84,9 +88,9 @@ fn finding_id_parts_are_separated_unambiguously() {
 
 #[test]
 fn finding_id_depends_on_every_structural_input() {
-    let site: SiteHash = "a1b2c3".parse().unwrap();
-    let other_site: SiteHash = "a1b2c4".parse().unwrap();
-    let other_symbol: SymbolHash = "sh_4b1d9e0d".parse().unwrap();
+    let site: SiteHash = "a1b2c3d4e5f60718".parse().unwrap();
+    let other_site: SiteHash = "a1b2c3d4e5f60719".parse().unwrap();
+    let other_symbol: SymbolHash = "sh_4b1d9e0c4b1d9e0d".parse().unwrap();
     let base = FindingId::compute(&CheckId::from("c"), "k", &symbol(), Some(&site));
     for variant in [
         FindingId::compute(&CheckId::from("c2"), "k", &symbol(), Some(&site)),
@@ -126,9 +130,17 @@ fn finding_id_rejects_malformed_strings() {
 }
 
 #[test]
-fn symbol_hash_requires_prefix_and_lowercase_hex() {
-    assert_eq!(symbol().as_str(), "sh_4b1d9e0c");
-    for bad in ["4b1d", "sh_", "sh_XYZ", "sh_4B1D", "fnd_4b1d"] {
+fn symbol_hash_requires_prefix_and_sixteen_lowercase_hex_digits() {
+    assert_eq!(symbol().as_str(), "sh_4b1d9e0c4b1d9e0c");
+    for bad in [
+        "4b1d9e0c4b1d9e0c",
+        "sh_",
+        "sh_4b1d9e0c",
+        "sh_4b1d9e0c4b1d9e0c0",
+        "sh_XYZd9e0c4b1d9e0c",
+        "sh_4B1D9E0C4B1D9E0C",
+        "fnd_4b1d9e0c4b1d9e0c",
+    ] {
         assert!(
             bad.parse::<SymbolHash>().is_err(),
             "{bad} should be rejected"
@@ -138,11 +150,20 @@ fn symbol_hash_requires_prefix_and_lowercase_hex() {
 }
 
 #[test]
-fn site_hash_requires_lowercase_hex() {
-    assert!("".parse::<SiteHash>().is_err());
-    assert!("A1".parse::<SiteHash>().is_err());
-    assert!("sh_a1".parse::<SiteHash>().is_err());
-    assert_eq!("a1".parse::<SiteHash>().unwrap().as_str(), "a1");
+fn site_hash_requires_sixteen_lowercase_hex_digits() {
+    for bad in [
+        "",
+        "a1",
+        "A1B2C3D4E5F60718",
+        "sh_a1b2c3d4e5f60718",
+        "a1b2c3d4e5f607180",
+    ] {
+        assert!(bad.parse::<SiteHash>().is_err(), "{bad} should be rejected");
+    }
+    assert_eq!(
+        "a1b2c3d4e5f60718".parse::<SiteHash>().unwrap().as_str(),
+        "a1b2c3d4e5f60718"
+    );
 }
 
 #[test]
@@ -179,8 +200,8 @@ proptest! {
     fn finding_id_is_deterministic_and_well_formed(
         check in "[a-z]{1,8}\\.[a-z-]{1,12}",
         kind in "[a-z]{1,8}\\.[a-z-]{1,12}",
-        symbol_hex in "[0-9a-f]{1,32}",
-        site_hex in proptest::option::of("[0-9a-f]{1,16}"),
+        symbol_hex in "[0-9a-f]{16}",
+        site_hex in proptest::option::of("[0-9a-f]{16}"),
     ) {
         let symbol: SymbolHash = format!("sh_{symbol_hex}").parse().unwrap();
         let site = site_hex.map(|h| h.parse::<SiteHash>().unwrap());

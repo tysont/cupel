@@ -204,3 +204,70 @@ fn init_describes_itself_without_a_pending_step() {
         .collect();
     assert_eq!(names, ["--force"]);
 }
+
+/// The `init.unsupported-root` findings of an envelope, as `(subject, severity, title)`.
+fn unsupported_roots(outcome: &Outcome) -> Vec<(String, String, String)> {
+    outcome.envelope()["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|finding| finding["kind"] == json!("init.unsupported-root"))
+        .map(|finding| {
+            (
+                finding["subject"].as_str().unwrap_or_default().to_owned(),
+                finding["severity"].as_str().unwrap().to_owned(),
+                finding["title"].as_str().unwrap().to_owned(),
+            )
+        })
+        .collect()
+}
+
+#[test]
+fn init_leaves_java_and_clojure_roots_out_of_roots_and_reports_them() {
+    let repo = cargo_repo();
+    repo.write("svc/pom.xml", "<project/>\n");
+    repo.write("tools/deps.edn", "{}\n");
+
+    let preview = repo.run(&["init"]);
+    assert_eq!(preview.code, 0, "{}", preview.stdout);
+    let text = added(&would_write(&preview)[0].1);
+    assert!(
+        !text.contains("java") && !text.contains("clojure"),
+        "{text}"
+    );
+    let expected = [
+        (
+            "info".to_owned(),
+            "unsupported language root: java at ./svc — supported in a later release".to_owned(),
+        ),
+        (
+            "info".to_owned(),
+            "unsupported language root: clojure at ./tools — supported in a later release"
+                .to_owned(),
+        ),
+    ];
+    let shape = |outcome: &Outcome| -> Vec<(String, String)> {
+        unsupported_roots(outcome)
+            .into_iter()
+            .map(|(_, severity, title)| (severity, title))
+            .collect()
+    };
+    assert_eq!(shape(&preview), expected);
+    let finding = &preview.envelope()["findings"][0];
+    assert_eq!(finding["check"], json!("init"));
+    assert_eq!(finding["action"]["kind"], json!("review"));
+    assert_eq!(
+        finding["evidence"],
+        json!({"lang": "java", "path": "svc", "build_files": ["pom.xml"]})
+    );
+
+    let written = repo.run(&["init", "--write"]);
+    assert_eq!(written.code, 0, "{}", written.stdout);
+    assert_eq!(shape(&written), expected);
+    let doctor = repo.run(&["doctor"]);
+    assert!(
+        !doctor.stdout.contains("doctor.config-invalid"),
+        "the generated cupel.toml validates: {}",
+        doctor.stdout
+    );
+}

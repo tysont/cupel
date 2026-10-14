@@ -1,0 +1,38 @@
+# ABOUTME: Conformance inventory for the `api-surface` fact: kinds of public item an ApiSurface producer
+# ABOUTME: must report. `name` is the item's path; `expect` may give its normalized signature.
+fact = "api-surface"
+
+[[constructs]]
+id = "function"
+summary = "A public function, with parameter names normalized to `_` in its signature."
+expect = { kind = "function" }
+
+[[constructs]]
+id = "method"
+summary = "A public method of a public type."
+expect = { kind = "method" }
+
+[[constructs]]
+id = "type"
+summary = "A public type (struct, enum, class, type alias)."
+expect = { kind = "type" }
+
+[[constructs]]
+id = "interface"
+summary = "A public trait, interface, or protocol."
+expect = { kind = "interface" }
+
+[[constructs]]
+id = "constant"
+summary = "A public constant."
+expect = { kind = "constant" }
+
+[[constructs]]
+id = "variable"
+summary = "A public variable or static."
+expect = { kind = "variable" }
+
+[[constructs]]
+id = "module"
+summary = "A public module or package declaration."
+expect = { kind = "module" }

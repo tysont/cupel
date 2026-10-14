@@ -1,0 +1,215 @@
+# ABOUTME: Tables the generic producers read for javascript and typescript, alongside its queries.
+# ABOUTME: Keys and shapes are documented in the cupel-lang crate docs; unknown keys are errors.
+
+[namespace]
+separator = "."
+source_roots = ["src"]
+index_files = ["index"]
+
+[visibility]
+default = "private"
+# TypeScript accessibility modifiers. `protected` members are not callable from outside the
+# class hierarchy, so they count as private.
+modifiers = { "public" = "public", "protected" = "private", "private" = "private" }
+
+# `else if` is an `if_statement` inside the `else_clause` of the branch it continues.
+[decisions]
+chain_parents = ["else_clause"]
+
+# Types, decorators, and accessibility say nothing about what a function does, so a JavaScript
+# function and its type-annotated TypeScript twin normalize to the same tree.
+[normalize]
+identifiers = [
+  "identifier",
+  "property_identifier",
+  "private_property_identifier",
+  "shorthand_property_identifier",
+  "shorthand_property_identifier_pattern",
+  "statement_identifier",
+  "type_identifier",
+]
+literals = [
+  "number",
+  "string",
+  "template_string",
+  "regex",
+  "true",
+  "false",
+  "null",
+  "undefined",
+]
+erase = [
+  "type_annotation",
+  "type_parameters",
+  "type_arguments",
+  "decorator",
+  "accessibility_modifier",
+  "override_modifier",
+]
+# TypeScript wraps each parameter with its type; JavaScript writes a default as a pattern.
+flatten = ["required_parameter", "assignment_pattern"]
+operators = ["typeof", "instanceof", "in", "of", "delete", "void"]
+# `this.items.push(x)` keeps `push`; `this.items` is a receiver and normalizes as usual.
+receivers = ["object"]
+
+[[normalize.calls]]
+kind = "call_expression"
+callee = "function"
+
+[[normalize.calls]]
+kind = "new_expression"
+callee = "constructor"
+
+[mutations.relational]
+replace = { "<" = ["<="], "<=" = ["<"], ">" = [">="], ">=" = [">"] }
+
+[mutations.equality]
+replace = { "===" = ["!=="], "!==" = ["==="], "==" = ["!="], "!=" = ["=="] }
+
+[mutations.arith-add-sub]
+replace = { "+" = ["-"], "-" = ["+"], "+=" = ["-="], "-=" = ["+="] }
+
+[mutations.arith-mul-div]
+replace = { "*" = ["/"], "/" = ["*"], "*=" = ["/="], "/=" = ["*="] }
+
+[mutations.boolean-op]
+replace = { "&&" = ["||"], "||" = ["&&"] }
+
+[mutations.boolean-literal]
+replace = { "true" = ["false"], "false" = ["true"] }
+
+[mutations.zero-one]
+replace = { "0" = ["1"], "1" = ["0"] }
+
+[mutations.statement-deletion]
+templates = [""]
+
+# `undefined` is what a function without a `return` value gives; TypeScript may reject the
+# mutant, which the mutation engine reports as not viable.
+[mutations.return-value]
+templates = ["undefined"]
+
+[mutations.constant]
+templates = ["0"]
+
+[mutations.boundary]
+templates = ["{} + 1", "{} - 1"]
+
+[mutations.negation]
+templates = ["!({})"]
+
+# Jest's globals need no import, so a file whose framework nothing names is a jest file.
+[tests]
+framework = "jest"
+
+# Keys are expect matchers (the last link of `expect(…).…`), chai assertions, `assert.*`
+# calls, and the idioms tests.scm captures as @assertion.idiom.<key>.
+[tests.assertions]
+toBe = { kind = "equality", strength = "strong" }
+toEqual = { kind = "equality", strength = "strong" }
+toStrictEqual = { kind = "equality", strength = "strong" }
+toBeCloseTo = { kind = "equality", strength = "strong" }
+toHaveLength = { kind = "equality", strength = "strong" }
+toBeNull = { kind = "equality", strength = "strong" }
+toBeUndefined = { kind = "equality", strength = "strong" }
+toBeNaN = { kind = "equality", strength = "strong" }
+toHaveBeenCalledWith = { kind = "equality", strength = "strong" }
+toHaveBeenLastCalledWith = { kind = "equality", strength = "strong" }
+toHaveBeenNthCalledWith = { kind = "equality", strength = "strong" }
+toHaveBeenCalledTimes = { kind = "equality", strength = "strong" }
+toHaveReturnedWith = { kind = "equality", strength = "strong" }
+# A partial match pins only some of the value.
+toMatchObject = { kind = "equality", strength = "weak" }
+toBeTruthy = { kind = "truthiness", strength = "weak" }
+toBeFalsy = { kind = "truthiness", strength = "weak" }
+toBeDefined = { kind = "not-null", strength = "weak" }
+toHaveProperty = { kind = "not-null", strength = "weak" }
+toThrow = { kind = "throws", strength = "weak" }
+toThrowError = { kind = "throws", strength = "weak" }
+toMatchSnapshot = { kind = "snapshot", strength = "strong" }
+toMatchInlineSnapshot = { kind = "snapshot", strength = "strong" }
+toMatchFileSnapshot = { kind = "snapshot", strength = "strong" }
+toThrowErrorMatchingSnapshot = { kind = "snapshot", strength = "strong" }
+toThrowErrorMatchingInlineSnapshot = { kind = "snapshot", strength = "strong" }
+# Ranges, memberships, patterns, and "was called" rule out values without pinning one.
+toHaveBeenCalled = { kind = "custom", strength = "weak" }
+toContain = { kind = "custom", strength = "weak" }
+toContainEqual = { kind = "custom", strength = "weak" }
+toMatch = { kind = "custom", strength = "weak" }
+toBeInstanceOf = { kind = "custom", strength = "weak" }
+toBeGreaterThan = { kind = "custom", strength = "weak" }
+toBeGreaterThanOrEqual = { kind = "custom", strength = "weak" }
+toBeLessThan = { kind = "custom", strength = "weak" }
+toBeLessThanOrEqual = { kind = "custom", strength = "weak" }
+# chai.
+equal = { kind = "equality", strength = "strong" }
+equals = { kind = "equality", strength = "strong" }
+eql = { kind = "equality", strength = "strong" }
+null = { kind = "equality", strength = "strong" }
+undefined = { kind = "equality", strength = "strong" }
+true = { kind = "truthiness", strength = "weak" }
+false = { kind = "truthiness", strength = "weak" }
+ok = { kind = "truthiness", strength = "weak" }
+exist = { kind = "not-null", strength = "weak" }
+throw = { kind = "throws", strength = "weak" }
+include = { kind = "custom", strength = "weak" }
+contain = { kind = "custom", strength = "weak" }
+# node:assert and chai's assert.
+"assert.equal" = { kind = "equality", strength = "strong" }
+"assert.strictEqual" = { kind = "equality", strength = "strong" }
+"assert.deepEqual" = { kind = "equality", strength = "strong" }
+"assert.deepStrictEqual" = { kind = "equality", strength = "strong" }
+"assert.notEqual" = { kind = "equality", strength = "weak" }
+"assert.notStrictEqual" = { kind = "equality", strength = "weak" }
+"assert.notDeepEqual" = { kind = "equality", strength = "weak" }
+"assert.notDeepStrictEqual" = { kind = "equality", strength = "weak" }
+assert = { kind = "truthiness", strength = "weak" }
+"assert.ok" = { kind = "truthiness", strength = "weak" }
+"assert.isOk" = { kind = "truthiness", strength = "weak" }
+"assert.isTrue" = { kind = "truthiness", strength = "weak" }
+"assert.isFalse" = { kind = "truthiness", strength = "weak" }
+"assert.exists" = { kind = "not-null", strength = "weak" }
+"assert.isDefined" = { kind = "not-null", strength = "weak" }
+"assert.isNotNull" = { kind = "not-null", strength = "weak" }
+"assert.throws" = { kind = "throws", strength = "weak" }
+"assert.rejects" = { kind = "throws", strength = "weak" }
+"assert.match" = { kind = "custom", strength = "weak" }
+# Idioms captured as @assertion.idiom.<key>.
+not-equal = { kind = "equality", strength = "weak" }
+not-nullish = { kind = "not-null", strength = "weak" }
+does-not-throw = { kind = "custom", strength = "weak" }
+negated = { kind = "custom", strength = "weak" }
+throws-specific = { kind = "throws", strength = "strong" }
+
+[conventions]
+test_globs = ["**/*.test.*", "**/*.spec.*", "**/__tests__/**", "**/test/**"]
+
+# A test file next to its source, in a `__tests__` directory beside it, or in a `test`
+# directory beside the source root (`src/a/b.js` is tested by `test/a/b.test.js`).
+[[conventions.tests_for]]
+template = "{dir}/{stem}.test{ext}"
+
+[[conventions.tests_for]]
+template = "{dir}/{stem}.spec{ext}"
+
+[[conventions.tests_for]]
+template = "{dir}/__tests__/{stem}.test{ext}"
+
+[[conventions.tests_for]]
+template = "{dir}/__tests__/{stem}.spec{ext}"
+
+[[conventions.tests_for]]
+template = "{base}test/{module}.test{ext}"
+
+[[conventions.tests_for]]
+template = "{base}test/{module}.spec{ext}"
+
+# vitest's in-source tests: a module that tests itself.
+[[conventions.tests_for]]
+template = "{path}"
+contains = "import.meta.vitest"
+
+# Node scripts conventionally call a `main` function; default exports are framework hooks,
+# captured in api.scm.
+[roots]
+entry_points = ["main"]

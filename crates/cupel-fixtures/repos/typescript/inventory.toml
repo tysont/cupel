@@ -1,0 +1,314 @@
+# Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
+# repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+file = "src/math.ts"
+name = "math.add"
+
+[symbols.method]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.Circle.area"
+
+[symbols.static-method]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.Circle.unit"
+
+[symbols.nested-function]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.perimeter.twice"
+
+[symbols.closure]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.scale"
+
+[symbols.public]
+file = "src/math.ts"
+name = "math.add"
+
+[symbols.internal]
+not-applicable = "TypeScript has no package-level visibility: a top-level name is exported (public) or private to its module; `private`, `protected`, and `#name` class members are private."
+
+[symbols.private]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.Circle.isValid"
+
+[symbols.file-namespace]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.perimeter"
+expect = { namespace = "shapes.geometry" }
+
+[decisions.if]
+file = "src/decide.ts"
+name = "decide.classify"
+
+[decisions.else-if]
+file = "src/decide.ts"
+name = "decide.classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "src/decide.ts"
+name = "decide.firstOverdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "src/decide.ts"
+name = "decide.firstOverdraft"
+
+[decisions.boolean-op]
+file = "src/decide.ts"
+name = "decide.classify"
+
+[decisions.early-return]
+file = "src/decide.ts"
+name = "decide.parseCents"
+
+[decisions.case]
+file = "src/decide.ts"
+name = "decide.label"
+
+[decisions.ternary]
+file = "src/decide.ts"
+name = "decide.classify"
+
+[decisions.catch]
+file = "src/decide.ts"
+name = "decide.parseCents"
+
+[norm-tree.rename]
+file = "src/twins.ts"
+name = "twins.netTotal"
+twin = "twins.sumAfterCharge"
+
+[norm-tree.literal]
+file = "src/twins.ts"
+name = "twins.netTotal"
+twin = "twins.netTotalFloor"
+
+[norm-tree.layout]
+file = "src/twins.ts"
+name = "twins.netTotal"
+twin = "twins.netTotalLaidOut"
+
+[norm-tree.operator]
+file = "src/twins.ts"
+name = "twins.netTotal"
+twin = "twins.netTotalPlus"
+
+[norm-tree.branch]
+file = "src/twins.ts"
+name = "twins.netTotal"
+twin = "twins.netTotalCapped"
+
+[norm-tree.call]
+file = "src/twins.ts"
+name = "twins.netTotal"
+twin = "twins.netTotalProduct"
+
+[mutation-sites.relational]
+file = "src/pricing.ts"
+name = "pricing.tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "src/pricing.ts"
+name = "pricing.discounted"
+expect = { from = "!==", to = ["==="] }
+
+[mutation-sites.arith-add-sub]
+file = "src/pricing.ts"
+name = "pricing.tally"
+expect = { from = "+=", to = ["-="] }
+
+[mutation-sites.arith-mul-div]
+file = "src/pricing.ts"
+name = "pricing.discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "src/pricing.ts"
+name = "pricing.discounted"
+expect = { from = "&&", to = ["||"] }
+
+[mutation-sites.boolean-literal]
+file = "src/pricing.ts"
+name = "pricing.tally"
+expect = { from = "false", to = ["true"] }
+
+[mutation-sites.zero-one]
+file = "src/pricing.ts"
+name = "pricing.tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "src/pricing.ts"
+name = "pricing.tally"
+expect = { from = "logTotal(total);", to = [""] }
+
+[mutation-sites.return-value]
+file = "src/pricing.ts"
+name = "pricing.discounted"
+expect = { from = "price - cut", to = ["undefined"] }
+
+[mutation-sites.constant]
+file = "src/pricing.ts"
+name = "pricing.discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "src/decide.ts"
+name = "decide.classify"
+expect = { from = "0", to = ["0 + 1", "0 - 1"] }
+
+[mutation-sites.negation]
+file = "src/pricing.ts"
+name = "pricing.discounted"
+expect = { from = "member && cut !== 0", to = ["!(member && cut !== 0)"] }
+
+[test-frames.case]
+file = "src/math.test.ts"
+name = "adds two numbers"
+
+[test-frames.assertion-equality]
+file = "src/math.test.ts"
+name = "adds two numbers"
+
+[test-frames.assertion-truthiness]
+file = "src/math.test.ts"
+name = "is truthy for non-zero sums"
+
+[test-frames.assertion-not-null]
+file = "src/math.test.ts"
+name = "returns a defined value"
+
+[test-frames.assertion-throws]
+file = "test/decide.test.ts"
+name = "rejects empty amounts"
+
+[test-frames.assertion-snapshot]
+file = "src/math.test.ts"
+name = "matches its snapshot"
+
+[test-frames.weak-assertion]
+file = "src/math.test.ts"
+name = "does not return zero"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "src/math.test.ts"
+name = "can be called without checking"
+
+[test-frames.skip]
+file = "test/decide.test.ts"
+name = "waits for the ledger server"
+expect = { skip = { reason = "needs a ledger server" } }
+
+[test-frames.mock]
+file = "src/math.test.ts"
+name = "is consumed by a spy"
+expect = { target = "vi.fn" }
+
+[test-frames.setup]
+file = "src/math.test.ts"
+
+[test-frames.framework]
+file = "src/math.test.ts"
+expect = { framework = "vitest" }
+
+[test-conventions.separate-test-file]
+file = "src/math.ts"
+name = "src/math.test.ts"
+
+[test-conventions.inline-tests]
+file = "src/inline.ts"
+name = "src/inline.ts"
+
+[module-graph.relative]
+file = "src/ledger.ts"
+name = "./math"
+expect = { target = { path = "src/math.ts" } }
+
+[module-graph.absolute]
+file = "src/ledger.ts"
+name = "@app/shapes/geometry"
+expect = { target = { path = "src/shapes/geometry.ts" } }
+
+[module-graph.workspace-member]
+file = "src/ledger.ts"
+name = "@ledger/shapes"
+expect = { target = { path = "packages/shapes/src/index.ts" } }
+
+[module-graph.external]
+file = "src/ledger.ts"
+name = "zod"
+expect = { target = { package = "zod" } }
+
+[module-graph.standard-library]
+file = "src/ledger.ts"
+name = "node:fs"
+expect = { target = { package = "node:fs" } }
+
+[module-graph.unresolved]
+file = "src/ledger.ts"
+name = "./generated"
+
+[api-surface.function]
+file = "src/math.ts"
+name = "math.add"
+expect = { signature = "(_: number, _: number): number" }
+
+[api-surface.method]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.Circle.area"
+
+[api-surface.type]
+file = "src/shapes/geometry.ts"
+name = "shapes.geometry.Circle"
+
+[api-surface.interface]
+file = "src/plugin.ts"
+name = "plugin.Registry"
+
+[api-surface.constant]
+file = "src/index.ts"
+name = "MAX_ENTRIES"
+expect = { signature = "number" }
+
+[api-surface.variable]
+file = "src/index.ts"
+name = "currency"
+
+[api-surface.module]
+file = "src/index.ts"
+name = "geometry"
+
+[roots.entry-point]
+file = "bin/cli.ts"
+name = "bin.cli.main"
+
+[roots.export]
+file = "src/math.ts"
+name = "math.add"
+
+[roots.test]
+file = "src/math.test.ts"
+name = "math.add.adds two numbers"
+
+[roots.hook]
+file = "src/plugin.ts"
+name = "plugin.default"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "typescript", build_files = ["package.json", "packages/shapes/package.json"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["packages/shapes"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = ["node_modules", "dist", "coverage"] }
+
+[project-info.packages]
+not-applicable = "npm, pnpm, and yarn run a project's scripts and runners from the root; commands take no package patterns."

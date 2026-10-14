@@ -1,0 +1,10 @@
+[project]
+name = "ledger"
+version = "0.1.0"
+dependencies = ["requests>=2", "units"]
+
+[tool.uv.workspace]
+members = ["libs/*"]
+
+[tool.uv.sources]
+units = { workspace = true }

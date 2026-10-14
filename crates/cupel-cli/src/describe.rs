@@ -1,8 +1,13 @@
 // ABOUTME: The `describe` verb: renders the registry for the CLI, one command, a schema, or all of it.
-// ABOUTME: Subjects whose data arrives in later steps (matrix, checks, languages) report that step.
-use cupel_core::{AllDescription, Description, Envelope, SchemaDescription, schema};
+// ABOUTME: Languages, facts, and the matrix come from the registries; checks and findings arrive in P2.1.
+use std::path::Path;
+
+use cupel_core::{
+    AllDescription, Description, Envelope, FactKind, LangId, SchemaDescription, schema,
+};
 use serde_json::Value;
 
+use crate::catalog::Catalog;
 use crate::cli::DescribeArgs;
 use crate::error::{CupelError, Usage};
 use crate::registry;
@@ -18,8 +23,9 @@ const SUBJECTS: [&str; 6] = [
     "matrix",
 ];
 
-pub fn run(run: &Run, args: &DescribeArgs) -> Result<Envelope, CupelError> {
-    Ok(run.passed(Some(describe(args)?)))
+/// `root` is the repository root, against which tool availability is judged for the matrix.
+pub fn run(run: &Run, args: &DescribeArgs, root: &Path) -> Result<Envelope, CupelError> {
+    Ok(run.passed(Some(describe(args, root)?)))
 }
 
 /// `<command> --describe`: the command named by `words`, or the CLI when there are none.
@@ -34,7 +40,7 @@ pub fn command(run: &Run, words: &[String]) -> Result<Envelope, CupelError> {
     Ok(run.passed(Some(description)))
 }
 
-fn describe(args: &DescribeArgs) -> Result<Description, CupelError> {
+fn describe(args: &DescribeArgs, root: &Path) -> Result<Description, CupelError> {
     if args.agent {
         return Err(CupelError::pending_description("describe --agent", "P8.3"));
     }
@@ -53,9 +59,17 @@ fn describe(args: &DescribeArgs) -> Result<Description, CupelError> {
         [] => Ok(Description::Cli(registry::cli())),
         ["schema"] => Err(unknown_schema(None)),
         ["schema", name] => schema_description(name).map(Description::Schema),
-        ["matrix" | "languages"] | ["language" | "fact", _] => Err(
-            CupelError::pending_description(&format!("describe {}", words[0]), "P1.1"),
-        ),
+        ["languages"] => Ok(Description::Languages(Catalog::builtin().languages())),
+        ["matrix"] => Ok(Description::Matrix(Catalog::builtin().matrix(root))),
+        ["language"] => Err(unknown_language(None)),
+        ["language", id] => Catalog::builtin()
+            .language(&LangId::from(*id), root)
+            .map(Description::Language)
+            .ok_or_else(|| unknown_language(Some(id))),
+        ["fact"] => Err(unknown_fact(None)),
+        ["fact", kind] => fact_kind(kind)
+            .map(|kind| Description::Fact(Catalog::builtin().fact(kind)))
+            .ok_or_else(|| unknown_fact(Some(kind))),
         ["finding", _] => Err(CupelError::pending_description("describe finding", "P2.1")),
         [check] if check.contains('.') => {
             Err(CupelError::pending_description("describe CHECK", "P2.1"))
@@ -98,6 +112,40 @@ fn unknown_schema(name: Option<&str>) -> CupelError {
             None => "`describe schema` needs a schema name".to_owned(),
         },
         fix: format!("Name a schema: {}.", valid.join(", ")),
+        detail: None,
+        argument: Some("SUBJECT".to_owned()),
+        value: name.map(str::to_owned),
+        valid,
+    })
+}
+
+fn fact_kind(name: &str) -> Option<FactKind> {
+    FactKind::ALL.into_iter().find(|kind| kind.as_str() == name)
+}
+
+fn unknown_language(id: Option<&str>) -> CupelError {
+    let valid: Vec<String> = Catalog::builtin()
+        .language_ids()
+        .iter()
+        .map(ToString::to_string)
+        .collect();
+    unknown_named("describe language", "language", id, valid)
+}
+
+fn unknown_fact(kind: Option<&str>) -> CupelError {
+    let valid: Vec<String> = FactKind::ALL.iter().map(ToString::to_string).collect();
+    unknown_named("describe fact", "fact kind", kind, valid)
+}
+
+/// A usage error for `describe <subject> <name>` where `name` is missing or not one of `valid`.
+fn unknown_named(subject: &str, noun: &str, name: Option<&str>, valid: Vec<String>) -> CupelError {
+    CupelError::from(Usage {
+        subject: subject.to_owned(),
+        title: match name {
+            Some(name) => format!("No {noun} named `{name}`"),
+            None => format!("`{subject}` needs a {noun}"),
+        },
+        fix: format!("Name a {noun}: {}.", valid.join(", ")),
         detail: None,
         argument: Some("SUBJECT".to_owned()),
         value: name.map(str::to_owned),

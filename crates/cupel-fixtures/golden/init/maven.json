@@ -6,7 +6,37 @@
   },
   "description": null,
   "exit_code": 0,
-  "findings": [],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 1,
+        "summary": "Nothing to do now; java roots join [roots] once Cupel supports java."
+      },
+      "check": "init",
+      "confidence": 1.0,
+      "detail": "cupel.toml leaves this root out of [roots] until its language is registered.",
+      "evidence": {
+        "build_files": [
+          "pom.xml"
+        ],
+        "lang": "java",
+        "path": "."
+      },
+      "id": "fnd_caad39",
+      "kind": "init.unsupported-root",
+      "location": null,
+      "new_since_baseline": false,
+      "repro": "cupel init --dry-run --format json",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_caad39 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "unsupported language root: java at . — supported in a later release"
+    }
+  ],
   "next_actions": [
     {
       "command": "cupel init --write",
@@ -71,7 +101,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 0,
+      "info": 1,
       "warn": 0
     },
     "gate": null,
@@ -79,6 +109,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 0,
+  "total_findings": 1,
   "truncated": false
 }

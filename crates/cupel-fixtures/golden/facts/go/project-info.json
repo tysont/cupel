@@ -1,0 +1,23 @@
+{
+  "roots": [
+    {
+      "build_files": [
+        "go.work",
+        "go.mod",
+        "shapes/go.mod"
+      ],
+      "lang": "go",
+      "members": [
+        "shapes"
+      ],
+      "packages": [
+        "./...",
+        "./shapes/..."
+      ],
+      "path": ".",
+      "skip_dirs": [
+        "vendor"
+      ]
+    }
+  ]
+}

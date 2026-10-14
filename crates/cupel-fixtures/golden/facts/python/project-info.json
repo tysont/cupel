@@ -1,0 +1,22 @@
+{
+  "roots": [
+    {
+      "build_files": [
+        "pyproject.toml",
+        "libs/units/pyproject.toml"
+      ],
+      "lang": "python",
+      "members": [
+        "libs/units"
+      ],
+      "packages": [],
+      "path": ".",
+      "skip_dirs": [
+        ".venv",
+        "venv",
+        "__pycache__",
+        ".tox"
+      ]
+    }
+  ]
+}

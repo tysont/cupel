@@ -8,7 +8,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc check clean-check install
+.PHONY: build test lint fmt doc matrix check clean-check install
 
 build:
 	$(CARGO) build --workspace
@@ -26,6 +26,10 @@ fmt:
 
 doc:
 	RUSTDOCFLAGS="-D warnings" $(CARGO) doc --workspace --no-deps
+
+# The current checks × languages support table, derived from the registries (design §8.3.5).
+matrix:
+	@$(CARGO) run --quiet --package cupel-cli -- describe matrix --format text
 
 # The pre-commit bar. The tree is fingerprinted before the build so clean-check can
 # verify the build itself wrote nothing outside .gitignore (see ADR-010).

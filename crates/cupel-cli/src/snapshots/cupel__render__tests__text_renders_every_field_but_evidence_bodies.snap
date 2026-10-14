@@ -50,39 +50,39 @@ fail (2)
   tests.mutation
     Mutant survived: `<=` → `<` at planner.rs:142
       fnd_7c2e1a · mutant.survived · tier 3 · confidence 0.95 · new
-      at src/rewrite/planner.rs:142:21-144:23 in exonym::rewrite::Planner::push_limit_0 (rust, sh_4b1d00)
+      at src/rewrite/planner.rs:142:21-144:23 in exonym::rewrite::Planner::push_limit_0 (rust, sh_4b1d9e0c4b1d9e00)
       No test distinguishes limit == offset from limit < offset.
       Second detail line.
       evidence: covering_tests [1] · flaky false · mutation {3} · note "a long evidence string that is far longe…" · tests_run 118 (full: cupel explain fnd_7c2e1a)
       action write_test (priority 1): Add a test where limit == offset asserting the boundary.
         covering_tests: ["pushes_through_sort"]
         nearest_test_file: tests/rewrite/limit_tests.rs
-      repro: cupel check --only tests.mutation --symbols sh_4b1d00 --seed 42
+      repro: cupel check --only tests.mutation --symbols sh_4b1d9e0c4b1d9e00 --seed 42
       suppress: cupel suppress fnd_7c2e1a --reason '…'
     Mutant survived: `<=` → `<` at planner.rs:144
       fnd_7c2e1c · mutant.timeout · tier 3 · confidence 0.95 · new · suppressed
-      at src/rewrite/planner.rs:144:21-146:23 in exonym::rewrite::Planner::push_limit_2 (rust, sh_4b1d02)
+      at src/rewrite/planner.rs:144:21-146:23 in exonym::rewrite::Planner::push_limit_2 (rust, sh_4b1d9e0c4b1d9e02)
       No test distinguishes limit == offset from limit < offset.
       Second detail line.
       evidence: covering_tests [1] · flaky false · mutation {3} · note "a long evidence string that is far longe…" · tests_run 118 (full: cupel explain fnd_7c2e1c)
       action write_test (priority 3): Add a test where limit == offset asserting the boundary.
         covering_tests: ["pushes_through_sort"]
         nearest_test_file: tests/rewrite/limit_tests.rs
-      repro: cupel check --only tests.mutation --symbols sh_4b1d02 --seed 42
+      repro: cupel check --only tests.mutation --symbols sh_4b1d9e0c4b1d9e02 --seed 42
       suppress: cupel suppress fnd_7c2e1c --reason '…'
 
 warn (1)
   static.crap
     Mutant survived: `<=` → `<` at planner.rs:143
       fnd_7c2e1b · crap.high · tier 3 · confidence 0.95
-      at src/rewrite/planner.rs:143:21-145:23 in exonym::rewrite::Planner::push_limit_1 (rust, sh_4b1d01)
+      at src/rewrite/planner.rs:143:21-145:23 in exonym::rewrite::Planner::push_limit_1 (rust, sh_4b1d9e0c4b1d9e01)
       No test distinguishes limit == offset from limit < offset.
       Second detail line.
       evidence: covering_tests [1] · flaky false · mutation {3} · note "a long evidence string that is far longe…" · tests_run 118 (full: cupel explain fnd_7c2e1b)
       action write_test (priority 2): Add a test where limit == offset asserting the boundary.
         covering_tests: ["pushes_through_sort"]
         nearest_test_file: tests/rewrite/limit_tests.rs
-      repro: cupel check --only static.crap --symbols sh_4b1d01 --seed 42
+      repro: cupel check --only static.crap --symbols sh_4b1d9e0c4b1d9e01 --seed 42
       suppress: cupel suppress fnd_7c2e1b --reason '…'
 
 run       run_01JA2B3C4D5E6F7G8H9J0KMNPQ · started 2026-10-10T16:31:04Z · 48211 ms · seed 42

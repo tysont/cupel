@@ -7,12 +7,15 @@ use crate::fact::{Fact, FactKind};
 use crate::hash::{SiteHash, SymbolHash};
 use crate::id::LangId;
 
-/// Implements `Fact` for a payload at version 1.
+/// Implements `Fact` for a payload, at version 1 unless a version is given.
 macro_rules! fact {
     ($payload:ident, $kind:ident) => {
+        fact!($payload, $kind, 1);
+    };
+    ($payload:ident, $kind:ident, $version:literal) => {
         impl Fact for $payload {
             const KIND: FactKind = FactKind::$kind;
-            const VERSION: u32 = 1;
+            const VERSION: u32 = $version;
         }
     };
 }
@@ -355,31 +358,54 @@ pub struct TestConventions {
 }
 fact!(TestConventions, TestConventions);
 
+impl TestConventions {
+    /// Whether `path` is a test file: some glob in `test_globs` matches it. A glob that does not
+    /// parse matches nothing.
+    pub fn is_test(&self, path: &str) -> bool {
+        self.test_globs.iter().any(|glob| {
+            globset::GlobBuilder::new(glob)
+                .literal_separator(true)
+                .build()
+                .is_ok_and(|glob| glob.compile_matcher().is_match(path))
+        })
+    }
+
+    /// The test files that test `source`, empty when it has none.
+    pub fn test_files_for(&self, source: &str) -> &[String] {
+        self.pairs
+            .iter()
+            .find(|pair| pair.source == source)
+            .map_or(&[], |pair| pair.tests.as_slice())
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct TestPairing {
     pub source: String,
     pub tests: Vec<String>,
 }
 
-/// Project roots, their build files, default commands, and directories to skip.
+/// The project roots detected in the repository: what each language's ecosystem files say,
+/// not which tools to run. `cupel init` and `doctor` join a root with the toolchain table to
+/// choose commands (ADR-037).
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ProjectInfo {
     pub roots: Vec<ProjectRoot>,
 }
-fact!(ProjectInfo, ProjectInfo);
+fact!(ProjectInfo, ProjectInfo, 2);
 
+/// A directory with a build manifest of one language's ecosystem.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ProjectRoot {
+    /// Relative to the repository root, `/`-separated; `.` for the repository root itself.
     pub path: String,
     pub lang: LangId,
+    /// Manifests of the root, then of its members, relative to the root.
     pub build_files: Vec<String>,
-    pub commands: DefaultCommands,
+    /// Workspace member directories below the root, relative to it.
+    pub members: Vec<String>,
+    /// Package patterns the root's commands cover (`./...`); empty when commands take none.
+    pub packages: Vec<String>,
+    /// Directory names the ecosystem generates, skipped below the root.
     pub skip_dirs: Vec<String>,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-pub struct DefaultCommands {
-    pub test: Option<String>,
-    pub coverage: Option<String>,
-    pub bench: Option<String>,
 }

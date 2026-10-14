@@ -12,7 +12,7 @@ cupel describe          # learn the tool from the tool
 
 ## Status
 
-The platform is built: the binary, the output contract every verb returns, self-description, configuration, project detection, and the run infrastructure (dry runs, event streaming, timeouts, the `.cupel/` directory). **No checks exist yet.** `check`, `survey`, `explain`, `baseline`, `oracle`, `tests`, `suppress`, and `serve` parse and describe themselves but exit 2 with a `cli.not-implemented` finding that names the plan phase that builds them.
+The platform and the language layer are built: the binary, the output contract every verb returns, self-description, configuration, project detection, the run infrastructure (dry runs, event streaming, timeouts, the `.cupel/` directory), and language support for JavaScript, TypeScript, Rust, Go, and Python that produces every syntactic fact the checks will consume. **No checks exist yet.** `check`, `survey`, `explain`, `baseline`, `oracle`, `tests`, `suppress`, and `serve` parse and describe themselves but exit 2 with a `cli.not-implemented` finding that names the plan phase that builds them.
 
 - [Technical design](docs/CUPEL_TECHNICAL_DESIGN.md) — the specification: CLI, output contract, check catalog, architecture.
 - [Implementation plan](docs/CUPEL_IMPLEMENTATION_PLAN.md) — the phased, test-driven build plan, kept current as work proceeds.
@@ -98,6 +98,19 @@ cupel init --describe              # any verb describes itself instead of runnin
 | `--write` | Permit writes outside `.cupel/`; nothing else ever writes elsewhere |
 | `--quiet`, `--verbose`, `--no-color` | Diagnostics on stderr only; stdout's shape never changes |
 
+## Languages
+
+Cupel understands **JavaScript, TypeScript, Rust, Go, and Python** out of the gate. Each language is a tree-sitter grammar plus a declarative spec (queries and tables), and produces the same language-neutral facts: `symbols`, `decisions`, `norm-tree` (the structural hash that gives every function an identity surviving rename, move, and reformat), `mutation-sites`, `test-frames`, `test-conventions`, `module-graph` (imports resolved to files, with Node, `tsconfig` `paths`, Go module, Rust `mod`, and Python package resolution), `api-surface`, `roots`, and `project-info`. Checks consume facts and never see a language, so every check works for every language that produces what it needs.
+
+```sh
+cupel describe languages           # the five languages, one line each
+cupel describe language go         # extensions, facts produced, toolchain row (runners, coverage, bench, fuzz, race)
+cupel describe fact norm-tree      # a fact's schema, version, producers per language, consumers
+cupel describe matrix              # checks × languages — empty until the first check lands
+```
+
+Every language is held to the same conformance inventory: a shared list of constructs per fact that each language must exhibit in its fixture repository and detect, or mark not-applicable with a reason. Adding a language is a new `langs/<id>/` directory, a fixture repository, and a toolchain-table row — nothing in the core, the checks, or the CLI changes.
+
 ## Output contract
 
 Every invocation — success, usage error, unbuilt feature, even an internal panic — writes one JSON envelope to stdout. Agents parse one shape and branch on `status` and `exit_code`.
@@ -168,7 +181,7 @@ make lint       # cargo fmt --check and clippy
 make build      # cargo build --workspace
 ```
 
-The workspace is a set of crates under `crates/`: `cupel-core` (the output contract, fact vocabulary, and extension model), `cupel-cli` (the binary), and `cupel-fixtures` (fixture repositories and golden envelopes). Every behavior is built test-first; see the implementation plan for the phase structure and the definition of done at each step.
+The workspace is a set of crates under `crates/`: `cupel-core` (the output contract, fact vocabulary, and extension model), `cupel-lang` (the `Language` trait, generic query-driven producers, and one `langs/<id>/` directory per language), `cupel-adapt` (the toolchain table of runners, coverage, and bench tools per language), `cupel-cli` (the binary), and `cupel-fixtures` (fixture repositories, conformance inventories, and golden envelopes). `cupel-lang` and `cupel-adapt` depend on `cupel-core` alone and never on each other. Every behavior is built test-first; see the implementation plan for the phase structure and the definition of done at each step.
 
 ## License
 

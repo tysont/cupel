@@ -207,3 +207,30 @@ fn doctor_describes_fix_as_pending_p3_1() {
     assert_eq!(description["arguments"][0]["name"], json!("--fix"));
     assert_eq!(description["arguments"][0]["pending_step"], json!("P3.1"));
 }
+
+#[test]
+fn a_configured_runner_that_is_not_installed_warns_without_failing() {
+    let repo = Repo::new();
+    repo.write(
+        "cupel.toml",
+        "[lang.rust]\ntest = \"cupel-test-no-such-runner --all\"\n",
+    );
+    let outcome = repo.run(&["doctor"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let envelope = outcome.envelope();
+    let finding = envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|finding| finding["evidence"]["tool"] == json!("cupel-test-no-such-runner"))
+        .unwrap_or_else(|| panic!("{}", outcome.stdout))
+        .clone();
+    assert_eq!(finding["kind"], json!("doctor.tool-missing"));
+    assert_eq!(finding["severity"], json!("warn"));
+    assert_eq!(finding["action"]["kind"], json!("install_tool"));
+    assert_eq!(finding["evidence"]["needed_for"], json!("[lang.rust] test"));
+    assert_eq!(
+        finding["id"],
+        doctor_id("doctor.tool-missing", "cupel-test-no-such-runner")
+    );
+}

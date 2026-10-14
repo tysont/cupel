@@ -410,7 +410,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "name": "describe",
         "pending_step": null,
         "stability": "experimental",
-        "summary": "Describe the CLI, a verb, a check, a finding kind, or a schema."
+        "summary": "Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema."
       },
       {
         "name": "check",

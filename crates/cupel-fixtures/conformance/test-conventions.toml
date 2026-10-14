@@ -1,0 +1,11 @@
+# ABOUTME: Conformance inventory for the `test-conventions` fact: how a source file's tests are found.
+# ABOUTME: `file` is the source file and `name` a test file the conventions must pair with it.
+fact = "test-conventions"
+
+[[constructs]]
+id = "separate-test-file"
+summary = "A source file whose tests live in a separate test file found by the language's naming convention."
+
+[[constructs]]
+id = "inline-tests"
+summary = "A source file that contains its own tests (Rust `#[cfg(test)]` modules); `name` is the file itself."

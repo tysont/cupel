@@ -77,22 +77,22 @@ macro_rules! hex_id {
 }
 
 hex_id!(
-    /// A symbol's identity: `sh_` plus the hex digest of its normalized syntax tree. Survives
-    /// rename, move, and reformatting.
+    /// A symbol's identity: `sh_` plus the first 64 bits of the BLAKE3 digest of its language
+    /// and normalized syntax tree, as hex (ADR-025). Survives rename, move, and reformatting.
     SymbolHash,
     prefix = "sh_",
-    digits = None,
-    pattern = "^sh_[0-9a-f]+$",
-    expected = "`sh_` followed by lowercase hex"
+    digits = Some(16),
+    pattern = "^sh_[0-9a-f]{16}$",
+    expected = "`sh_` followed by sixteen lowercase hex digits"
 );
 hex_id!(
-    /// The structural position of a site (a mutation site, a clone span) within its symbol,
-    /// as lowercase hex. Never derived from line numbers.
+    /// The structural position of a site (a mutation site, a clone span) within its symbol:
+    /// the first 64 bits of a BLAKE3 digest, as hex (ADR-025). Never derived from line numbers.
     SiteHash,
     prefix = "",
-    digits = None,
-    pattern = "^[0-9a-f]+$",
-    expected = "lowercase hex"
+    digits = Some(16),
+    pattern = "^[0-9a-f]{16}$",
+    expected = "sixteen lowercase hex digits"
 );
 hex_id!(
     /// A finding's stable ID: `fnd_` plus the first 24 bits of a BLAKE3 digest, as hex.

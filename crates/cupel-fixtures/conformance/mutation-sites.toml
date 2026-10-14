@@ -1,0 +1,75 @@
+# ABOUTME: Conformance inventory for the `mutation-sites` fact: one construct per mutation operator in the
+# ABOUTME: default and extended sets. Languages map them in repos/<lang>/inventory.toml.
+fact = "mutation-sites"
+
+[[constructs]]
+id = "relational"
+summary = "A relational comparison (`<`, `<=`, `>`, `>=`), swapped at its boundary."
+within = "sites"
+expect = { operator = "relational", set = "default" }
+
+[[constructs]]
+id = "equality"
+summary = "An equality comparison (`==`, `!=`, `===`, `!==`), negated."
+within = "sites"
+expect = { operator = "equality", set = "default" }
+
+[[constructs]]
+id = "arith-add-sub"
+summary = "A binary `+` or `-` (or `+=`/`-=`), swapped."
+within = "sites"
+expect = { operator = "arith-add-sub", set = "default" }
+
+[[constructs]]
+id = "arith-mul-div"
+summary = "A binary `*` or `/` (or `*=`/`/=`), swapped."
+within = "sites"
+expect = { operator = "arith-mul-div", set = "default" }
+
+[[constructs]]
+id = "boolean-op"
+summary = "A short-circuit boolean operator (`&&`/`||`, `and`/`or`), swapped."
+within = "sites"
+expect = { operator = "boolean-op", set = "default" }
+
+[[constructs]]
+id = "boolean-literal"
+summary = "A boolean literal, flipped."
+within = "sites"
+expect = { operator = "boolean-literal", set = "default" }
+
+[[constructs]]
+id = "zero-one"
+summary = "An integer literal `0` or `1`, swapped for the other."
+within = "sites"
+expect = { operator = "zero-one", set = "default" }
+
+[[constructs]]
+id = "statement-deletion"
+summary = "A statement evaluated for its effect (a call, an assignment), deleted."
+within = "sites"
+expect = { operator = "statement-deletion", set = "extended" }
+
+[[constructs]]
+id = "return-value"
+summary = "The value of a `return`, replaced by the type's default or the language's empty value."
+within = "sites"
+expect = { operator = "return-value", set = "extended" }
+
+[[constructs]]
+id = "constant"
+summary = "An integer constant other than 0 and 1, replaced by 0."
+within = "sites"
+expect = { operator = "constant", set = "extended" }
+
+[[constructs]]
+id = "boundary"
+summary = "An integer literal compared against, moved by one in each direction."
+within = "sites"
+expect = { operator = "boundary", set = "extended" }
+
+[[constructs]]
+id = "negation"
+summary = "A branch condition, negated."
+within = "sites"
+expect = { operator = "negation", set = "extended" }

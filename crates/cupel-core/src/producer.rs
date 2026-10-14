@@ -1,6 +1,8 @@
 // ABOUTME: The producer contract and registry: anything that makes a fact, for some languages.
 // ABOUTME: The registry maps (fact kind, language) to producers in selection order (design §8.3.3).
+use std::any::Any;
 use std::collections::BTreeMap;
+use std::fmt;
 use std::marker::PhantomData;
 use std::path::PathBuf;
 
@@ -63,6 +65,56 @@ pub trait Producer<F: Fact>: Send + Sync {
     fn produce(&self, ctx: &ProduceCtx, scope: &Scope, sink: &mut dyn EventSink) -> Result<F>;
 }
 
+/// A fact a producer made, with its type erased: what [`RegisteredProducer::produce`] returns.
+/// Callers that know the kind take the typed value back with [`downcast`](Self::downcast);
+/// callers that do not (the conformance harness, `explain`) read it as JSON.
+pub struct Produced {
+    kind: FactKind,
+    value: Box<dyn Any + Send + Sync>,
+    to_json: fn(&(dyn Any + Send + Sync)) -> Value,
+}
+
+impl Produced {
+    pub fn new<F: Fact>(fact: F) -> Self {
+        Self {
+            kind: F::KIND,
+            value: Box::new(fact),
+            to_json: |value| {
+                value
+                    .downcast_ref::<F>()
+                    .and_then(|fact| serde_json::to_value(fact).ok())
+                    .unwrap_or(Value::Null)
+            },
+        }
+    }
+
+    pub fn kind(&self) -> FactKind {
+        self.kind
+    }
+
+    pub fn downcast_ref<F: Fact>(&self) -> Option<&F> {
+        self.value.downcast_ref()
+    }
+
+    pub fn downcast<F: Fact>(self) -> Option<F> {
+        self.value.downcast().ok().map(|fact| *fact)
+    }
+
+    /// The fact as it serializes.
+    pub fn to_json(&self) -> Value {
+        (self.to_json)(self.value.as_ref())
+    }
+}
+
+impl fmt::Debug for Produced {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Produced")
+            .field("kind", &self.kind)
+            .field("value", &(self.to_json)(self.value.as_ref()))
+            .finish()
+    }
+}
+
 /// A producer as the registry holds it, with the fact type erased.
 pub trait RegisteredProducer: Send + Sync {
     fn provides(&self) -> FactKind;
@@ -71,6 +123,13 @@ pub trait RegisteredProducer: Send + Sync {
     fn needs(&self) -> &[FactKind];
     fn cost(&self) -> CostClass;
     fn availability(&self, ctx: &Ctx) -> Availability;
+    /// Runs the producer and returns its fact with the type erased.
+    fn produce(
+        &self,
+        ctx: &ProduceCtx,
+        scope: &Scope,
+        sink: &mut dyn EventSink,
+    ) -> Result<Produced>;
 }
 
 /// Binds a producer to the fact type it makes.
@@ -102,6 +161,15 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
 
     fn availability(&self, ctx: &Ctx) -> Availability {
         self.producer.availability(ctx)
+    }
+
+    fn produce(
+        &self,
+        ctx: &ProduceCtx,
+        scope: &Scope,
+        sink: &mut dyn EventSink,
+    ) -> Result<Produced> {
+        self.producer.produce(ctx, scope, sink).map(Produced::new)
     }
 }
 

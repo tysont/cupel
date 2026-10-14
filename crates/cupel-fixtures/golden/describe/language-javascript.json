@@ -1,0 +1,326 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "checks": [],
+    "extensions": [
+      ".js",
+      ".jsx",
+      ".mjs",
+      ".cjs"
+    ],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "decisions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "norm-tree",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "mutation-sites",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-frames",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "module-graph",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "api-surface",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "roots",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-conventions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "project-info",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
+      }
+    ],
+    "family": "ecma",
+    "id": "javascript",
+    "stability": "experimental",
+    "subject": "language",
+    "toolchain": {
+      "bench": [
+        {
+          "commands": [
+            {
+              "command": "<run> bench",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "`package.json` has `scripts.bench`"
+          ],
+          "format": null,
+          "producer": "tool.bench-script"
+        }
+      ],
+      "coverage": [
+        {
+          "commands": [
+            {
+              "command": "<x> vitest run --coverage --coverage.reporter=lcov",
+              "runner": "tool.vitest"
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "producer": "tool.vitest-coverage"
+        },
+        {
+          "commands": [
+            {
+              "command": "<x> jest --coverage --coverageReporters=lcov",
+              "runner": "tool.jest"
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "producer": "tool.jest-coverage"
+        },
+        {
+          "commands": [
+            {
+              "command": "<x> c8 --reporter=lcov mocha",
+              "runner": "tool.mocha"
+            },
+            {
+              "command": "<x> c8 --reporter=lcov node --test",
+              "runner": "tool.node-test"
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "producer": "tool.c8"
+        }
+      ],
+      "fuzz": [
+        "jazzer.js"
+      ],
+      "launchers": [
+        {
+          "detect": [
+            "file `pnpm-lock.yaml` exists",
+            "file `pnpm-workspace.yaml` exists",
+            "`package.json` has `packageManager` starting `pnpm@`"
+          ],
+          "tool": "pnpm",
+          "values": {
+            "run": "pnpm run",
+            "x": "pnpm"
+          }
+        },
+        {
+          "detect": [
+            "file `yarn.lock` exists",
+            "`package.json` has `packageManager` starting `yarn@`"
+          ],
+          "tool": "yarn",
+          "values": {
+            "run": "yarn run",
+            "x": "yarn"
+          }
+        },
+        {
+          "detect": [],
+          "tool": "npm",
+          "values": {
+            "run": "npm run",
+            "x": "npx"
+          }
+        }
+      ],
+      "property": [
+        "fast-check"
+      ],
+      "race": [],
+      "runners": [
+        {
+          "commands": [
+            {
+              "command": "<x> vitest run",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "`package.json` in the root or a member has `dependencies.vitest`",
+            "`package.json` in the root or a member has `devDependencies.vitest`"
+          ],
+          "format": null,
+          "producer": "tool.vitest"
+        },
+        {
+          "commands": [
+            {
+              "command": "<x> jest",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "`package.json` in the root or a member has `dependencies.jest`",
+            "`package.json` in the root or a member has `devDependencies.jest`"
+          ],
+          "format": null,
+          "producer": "tool.jest"
+        },
+        {
+          "commands": [
+            {
+              "command": "<x> mocha",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "`package.json` in the root or a member has `dependencies.mocha`",
+            "`package.json` in the root or a member has `devDependencies.mocha`"
+          ],
+          "format": null,
+          "producer": "tool.mocha"
+        },
+        {
+          "commands": [
+            {
+              "command": "node --test",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "producer": "tool.node-test"
+        }
+      ]
+    }
+  },
+  "exit_code": 0,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

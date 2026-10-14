@@ -1,0 +1,171 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "extensions": [
+          ".go"
+        ],
+        "facts": [
+          "symbols",
+          "decisions",
+          "norm-tree",
+          "mutation-sites",
+          "test-frames",
+          "module-graph",
+          "api-surface",
+          "roots",
+          "test-conventions",
+          "project-info"
+        ],
+        "family": "go",
+        "id": "go",
+        "stability": "experimental"
+      },
+      {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".mjs",
+          ".cjs"
+        ],
+        "facts": [
+          "symbols",
+          "decisions",
+          "norm-tree",
+          "mutation-sites",
+          "test-frames",
+          "module-graph",
+          "api-surface",
+          "roots",
+          "test-conventions",
+          "project-info"
+        ],
+        "family": "ecma",
+        "id": "javascript",
+        "stability": "experimental"
+      },
+      {
+        "extensions": [
+          ".py"
+        ],
+        "facts": [
+          "symbols",
+          "decisions",
+          "norm-tree",
+          "mutation-sites",
+          "test-frames",
+          "module-graph",
+          "api-surface",
+          "roots",
+          "test-conventions",
+          "project-info"
+        ],
+        "family": "python",
+        "id": "python",
+        "stability": "experimental"
+      },
+      {
+        "extensions": [
+          ".rs"
+        ],
+        "facts": [
+          "symbols",
+          "decisions",
+          "norm-tree",
+          "mutation-sites",
+          "test-frames",
+          "module-graph",
+          "api-surface",
+          "roots",
+          "test-conventions",
+          "project-info"
+        ],
+        "family": "rust",
+        "id": "rust",
+        "stability": "experimental"
+      },
+      {
+        "extensions": [
+          ".ts",
+          ".mts",
+          ".cts",
+          ".tsx"
+        ],
+        "facts": [
+          "symbols",
+          "decisions",
+          "norm-tree",
+          "mutation-sites",
+          "test-frames",
+          "module-graph",
+          "api-surface",
+          "roots",
+          "test-conventions",
+          "project-info"
+        ],
+        "family": "ecma",
+        "id": "typescript",
+        "stability": "experimental"
+      }
+    ],
+    "subject": "languages"
+  },
+  "exit_code": 0,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

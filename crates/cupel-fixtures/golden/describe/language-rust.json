@@ -1,0 +1,240 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "checks": [],
+    "extensions": [
+      ".rs"
+    ],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "decisions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "norm-tree",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "mutation-sites",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-frames",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "module-graph",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "api-surface",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "roots",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-conventions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "project-info",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
+      }
+    ],
+    "family": "rust",
+    "id": "rust",
+    "stability": "experimental",
+    "subject": "language",
+    "toolchain": {
+      "bench": [
+        {
+          "commands": [
+            {
+              "command": "cargo bench --bench {name} -- --save-baseline {id}",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "`Cargo.toml` in the root or a member mentions `criterion`"
+          ],
+          "format": null,
+          "producer": "tool.criterion"
+        }
+      ],
+      "coverage": [
+        {
+          "commands": [
+            {
+              "command": "cargo llvm-cov --lcov --output-path {out}",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "producer": "tool.cargo-llvm-cov"
+        }
+      ],
+      "fuzz": [
+        "cargo-fuzz"
+      ],
+      "launchers": [],
+      "property": [
+        "proptest",
+        "quickcheck"
+      ],
+      "race": [
+        "miri",
+        "loom"
+      ],
+      "runners": [
+        {
+          "commands": [
+            {
+              "command": "cargo nextest run --workspace",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "file `.config/nextest.toml` exists"
+          ],
+          "format": null,
+          "producer": "tool.cargo-nextest"
+        },
+        {
+          "commands": [
+            {
+              "command": "cargo test --workspace",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "producer": "tool.cargo-test"
+        }
+      ]
+    }
+  },
+  "exit_code": 0,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

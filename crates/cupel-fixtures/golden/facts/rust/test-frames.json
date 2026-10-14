@@ -1,0 +1,261 @@
+{
+  "files": [
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 30,
+                "end_line": 45,
+                "line": 45
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 9,
+                "end_col": 27,
+                "end_line": 46,
+                "line": 46
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "tally_reports_overdraft",
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 47,
+            "line": 43
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "snapshot",
+              "span": {
+                "col": 9,
+                "end_col": 71,
+                "end_line": 51,
+                "line": 51
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "discount_snapshot",
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 52,
+            "line": 50
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [
+            {
+              "span": {
+                "col": 23,
+                "end_col": 37,
+                "end_line": 56,
+                "line": 56
+              },
+              "target": "MockLog"
+            }
+          ],
+          "name": "the_log_is_written_once",
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 59,
+            "line": 55
+          }
+        }
+      ],
+      "file": "src/pricing.rs",
+      "framework": "rust-test",
+      "setup": [
+        {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 40,
+          "line": 38
+        }
+      ]
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 49,
+                "end_line": 8,
+                "line": 8
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "deposit_adds_to_the_balance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 9,
+            "line": 5
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 5,
+                "end_col": 47,
+                "end_line": 13,
+                "line": 13
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "members_get_a_discount",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 14,
+            "line": 12
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "not-null",
+              "span": {
+                "col": 5,
+                "end_col": 71,
+                "end_line": 18,
+                "line": 18
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "statements_mention_the_balance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 19,
+            "line": 17
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 5,
+                "end_col": 57,
+                "end_line": 23,
+                "line": 23
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "parsing_garbage_fails",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 24,
+            "line": 22
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 1,
+                "end_col": 39,
+                "end_line": 27,
+                "line": 27
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "huge_deposits_overflow",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 32,
+            "line": 28
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 40,
+                "end_line": 38,
+                "line": 38
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "statement_is_mailed",
+          "skip": {
+            "reason": "talks to the network",
+            "span": {
+              "col": 1,
+              "end_col": 35,
+              "end_line": 35,
+              "line": 35
+            }
+          },
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 39,
+            "line": 36
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "opening_an_account_does_not_panic",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 44,
+            "line": 42
+          }
+        }
+      ],
+      "file": "tests/ledger.rs",
+      "framework": "rust-test",
+      "setup": []
+    }
+  ]
+}

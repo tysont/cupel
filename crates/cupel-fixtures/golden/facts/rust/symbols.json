@@ -1,0 +1,865 @@
+{
+  "symbols": [
+    {
+      "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "square",
+      "file": "shapes/src/lib.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "square",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 6,
+        "end_line": 19,
+        "line": 14
+      },
+      "display": "account::Account::new",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "new",
+      "namespace": "account::Account",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 19,
+        "line": 14
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 6,
+        "end_line": 23,
+        "line": 21
+      },
+      "display": "account::Account::deposit",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "deposit",
+      "namespace": "account::Account",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 23,
+        "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 6,
+        "end_line": 31,
+        "line": 25
+      },
+      "display": "account::Account::statement",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "statement",
+      "namespace": "account::Account",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 31,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 10,
+        "end_line": 28,
+        "line": 26
+      },
+      "display": "account::Account::statement::line",
+      "file": "src/account.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "line",
+      "namespace": "account::Account::statement",
+      "span": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 28,
+        "line": 26
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 65,
+        "end_line": 29,
+        "line": 29
+      },
+      "display": "account::Account::statement::header",
+      "file": "src/account.rs",
+      "kind": "closure",
+      "lang": "rust",
+      "name": "header",
+      "namespace": "account::Account::statement",
+      "span": {
+        "col": 9,
+        "end_col": 66,
+        "end_line": 29,
+        "line": 29
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 62,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 35
+      },
+      "display": "account::Account::fmt",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "fmt",
+      "namespace": "account::Account",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 35
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 6,
+        "end_line": 45,
+        "line": 43
+      },
+      "display": "account::Audited::is_clean",
+      "file": "src/account.rs",
+      "kind": "method",
+      "lang": "rust",
+      "name": "is_clean",
+      "namespace": "account::Audited",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 45,
+        "line": 43
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 58,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 1
+      },
+      "display": "decide::classify",
+      "file": "src/decide.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "classify",
+      "namespace": "decide",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 59,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 11
+      },
+      "display": "decide::first_overdraft",
+      "file": "src/decide.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "first_overdraft",
+      "namespace": "decide",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 18,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 72,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 20
+      },
+      "display": "decide::parse_cents",
+      "file": "src/decide.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "parse_cents",
+      "namespace": "decide",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 20
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 25
+      },
+      "display": "decide::describe",
+      "file": "src/decide.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "describe",
+      "namespace": "decide",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 22,
+        "line": 20
+      },
+      "display": "balance",
+      "file": "src/lib.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "balance",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 22,
+        "line": 20
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 24
+      },
+      "display": "audit_limit",
+      "file": "src/lib.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "audit_limit",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 24
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 28
+      },
+      "display": "scale",
+      "file": "src/lib.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "scale",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 28
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 11,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "main",
+      "file": "src/main.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "main",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "ledger_version",
+      "file": "src/main.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "ledger_version",
+      "namespace": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 10,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 66,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "display": "pricing::discounted",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "discounted",
+      "namespace": "pricing",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "display": "pricing::tally",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "tally",
+      "namespace": "pricing",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "pricing::log_total",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "log_total",
+      "namespace": "pricing",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 30,
+        "end_col": 6,
+        "end_line": 40,
+        "line": 38
+      },
+      "display": "pricing::tests::entries",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "entries",
+      "namespace": "pricing::tests",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 40,
+        "line": 38
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 6,
+        "end_line": 47,
+        "line": 43
+      },
+      "display": "pricing::tests::tally_reports_overdraft",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "tally_reports_overdraft",
+      "namespace": "pricing::tests",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 47,
+        "line": 43
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 28,
+        "end_col": 6,
+        "end_line": 52,
+        "line": 50
+      },
+      "display": "pricing::tests::discount_snapshot",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "discount_snapshot",
+      "namespace": "pricing::tests",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 52,
+        "line": 50
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 6,
+        "end_line": 59,
+        "line": 55
+      },
+      "display": "pricing::tests::the_log_is_written_once",
+      "file": "src/pricing.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "the_log_is_written_once",
+      "namespace": "pricing::tests",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 59,
+        "line": 55
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "report::format::render",
+      "file": "src/report/format.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "render",
+      "namespace": "report::format",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "report::summary",
+      "file": "src/report/mod.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "summary",
+      "namespace": "report",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "report::floor_area",
+      "file": "src/report/mod.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "floor_area",
+      "namespace": "report",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 50,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 3
+      },
+      "display": "twins::net_total",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 61,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 8
+      },
+      "display": "twins::sum_after_charge",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "sum_after_charge",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 56,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "display": "twins::net_total_floor",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_floor",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 59,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 18
+      },
+      "display": "twins::net_total_laid_out",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_laid_out",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 28,
+        "line": 18
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 55,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 30
+      },
+      "display": "twins::net_total_plus",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_plus",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 33,
+        "line": 30
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 35
+      },
+      "display": "twins::net_total_capped",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_capped",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 35
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 58,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 46
+      },
+      "display": "twins::net_total_product",
+      "file": "src/twins.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "net_total_product",
+      "namespace": "twins",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 46
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "display": "tests::ledger::deposit_adds_to_the_balance",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "deposit_adds_to_the_balance",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 12
+      },
+      "display": "tests::ledger::members_get_a_discount",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "members_get_a_discount",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 12
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 17
+      },
+      "display": "tests::ledger::statements_mention_the_balance",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "statements_mention_the_balance",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 17
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 28,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "tests::ledger::parsing_garbage_fails",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "parsing_garbage_fails",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 28
+      },
+      "display": "tests::ledger::huge_deposits_overflow",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "huge_deposits_overflow",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 28
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 36
+      },
+      "display": "tests::ledger::statement_is_mailed",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "statement_is_mailed",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 39,
+        "line": 36
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 42
+      },
+      "display": "tests::ledger::opening_an_account_does_not_panic",
+      "file": "tests/ledger.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "opening_an_account_does_not_panic",
+      "namespace": "tests::ledger",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "line": 42
+      },
+      "visibility": "private"
+    }
+  ]
+}

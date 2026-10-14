@@ -1,9 +1,9 @@
 // ABOUTME: Entry point of the `cupel` binary.
 // ABOUTME: Reads the process environment once, runs the invocation, and writes its output and exit code.
 mod app;
+mod catalog;
 mod cli;
 mod describe;
-mod detect;
 mod doctor;
 mod error;
 mod events;
@@ -12,6 +12,7 @@ mod git;
 mod init;
 mod page;
 mod problem;
+mod project;
 mod registry;
 mod render;
 mod run;

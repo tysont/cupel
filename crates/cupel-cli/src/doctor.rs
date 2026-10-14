@@ -1,14 +1,17 @@
 // ABOUTME: The `doctor` verb: checks configuration, `required_version`, write access to `.cupel/`, and
 // ABOUTME: the tools the configuration needs; one finding per problem, exit 3 for any `fail` (ADR-022).
+use std::path::Path;
 use std::process::{Command, Stdio};
 
 use cupel_core::config::Config;
-use cupel_core::{ActionKind, Envelope, ExitCode, Severity, Status, ToolId, Writer};
+use cupel_core::syntax::{ProjectInfo, ProjectRoot};
+use cupel_core::{ActionKind, Envelope, ExitCode, LangId, Severity, Status, ToolId, Writer};
 use semver::{Version, VersionReq};
 use serde_json::json;
 
 use crate::error::Usage;
 use crate::problem::Problem;
+use crate::project;
 use crate::run::Run;
 
 /// The configuration key `required_version` findings are about.
@@ -43,7 +46,11 @@ pub fn run(
         }
     }
     problems.extend(cupel_dir(writer));
-    problems.extend(tools(&requirements(config.ok()), installed));
+    let info = project::detect(writer);
+    problems.extend(tools(
+        &requirements(config.ok(), writer.root(), &info),
+        installed,
+    ));
     if fix {
         problems.push(fix_pending());
     }
@@ -116,9 +123,10 @@ fn cupel_dir(writer: &Writer) -> Option<Problem> {
     })
 }
 
-/// The tools to check: `git`, which `--changed` needs, then what the configuration's toolchain
-/// needs.
-fn requirements(config: Option<&Config>) -> Vec<Requirement> {
+/// The tools to check: `git`, which `--changed` needs, then the programs the languages' commands
+/// run, for the configuration (when it loaded) and the project roots `info` of the repository at
+/// `repo`.
+fn requirements(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec<Requirement> {
     let git = Requirement {
         tool: ToolId::from("git"),
         needed_for: "--changed".to_owned(),
@@ -126,14 +134,98 @@ fn requirements(config: Option<&Config>) -> Vec<Requirement> {
         probe: vec!["git".to_owned(), "--version".to_owned()],
     };
     std::iter::once(git)
-        .chain(config.map(toolchain).unwrap_or_default())
+        .chain(toolchain(config, repo, info))
         .collect()
 }
 
-/// The runner, coverage, and bench tools `config` selects. Empty until the toolchain table
-/// (P1.9) and its tool producers (P3) exist.
-fn toolchain(_config: &Config) -> Vec<Requirement> {
-    Vec::new()
+/// The programs of every command a language would use (ADR-038): each configured
+/// `[lang.<id>]` `test`, `coverage`, and `bench`, and for keys left unset, the command `init`
+/// would choose for the language's first detected root, named with the toolchain producer it
+/// comes from. One requirement per program, in language order. None is required until P3's
+/// checks run these commands.
+fn toolchain(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec<Requirement> {
+    let configured = |lang: &LangId, key: &str| {
+        config
+            .and_then(|config| config.file.lang.get(lang))
+            .and_then(|table| table.get(key))
+            .and_then(serde_json::Value::as_str)
+            .map(str::to_owned)
+    };
+    let mut langs: Vec<&LangId> = info.roots.iter().map(|root| &root.lang).collect();
+    if let Some(config) = config {
+        langs.extend(config.file.lang.keys());
+    }
+    langs.sort();
+    langs.dedup();
+    let mut uses: Vec<(String, Vec<String>)> = Vec::new();
+    for lang in langs {
+        let root = info.roots.iter().find(|root| root.lang == *lang);
+        for (key, command, producer) in commands(repo, root) {
+            let (command, purpose) = match configured(lang, key) {
+                Some(command) => (command, format!("[lang.{lang}] {key}")),
+                None => match (command, producer) {
+                    (Some(command), Some(producer)) => {
+                        (command, format!("[lang.{lang}] {key} ({producer})"))
+                    }
+                    _ => continue,
+                },
+            };
+            for program in programs(&command) {
+                match uses.iter_mut().find(|(known, _)| *known == program) {
+                    Some((_, needed_for)) => needed_for.push(purpose.clone()),
+                    None => uses.push((program, vec![purpose.clone()])),
+                }
+            }
+        }
+    }
+    uses.into_iter()
+        .map(|(program, needed_for)| Requirement {
+            probe: cupel_adapt::toolchain::probe(&program),
+            tool: ToolId::from(program.as_str()),
+            needed_for: needed_for.join(", "),
+            required: false,
+        })
+        .collect()
+}
+
+/// The `test`, `coverage`, and `bench` commands the toolchain table chooses for `root`, each
+/// with the producer it comes from; all absent without a root.
+fn commands(
+    repo: &Path,
+    root: Option<&ProjectRoot>,
+) -> [(&'static str, Option<String>, Option<String>); 3] {
+    let selection = root.and_then(|root| project::selection(repo, root));
+    let commands = selection
+        .as_ref()
+        .map(cupel_adapt::toolchain::Selection::commands)
+        .unwrap_or_default();
+    let producer =
+        |tool: Option<&cupel_adapt::toolchain::Tool>| tool.map(|tool| tool.id.to_string());
+    let (runner, coverage, bench) = selection.as_ref().map_or((None, None, None), |selection| {
+        (
+            producer(selection.runner),
+            producer(selection.coverage),
+            producer(selection.bench),
+        )
+    });
+    [
+        ("test", commands.test, runner),
+        ("coverage", commands.coverage, coverage),
+        ("bench", commands.bench, bench),
+    ]
+}
+
+/// The programs `command` runs: the first word of each `&&`-separated part that is not an
+/// environment assignment (`FOO=1`), in order, without repeats.
+fn programs(command: &str) -> Vec<String> {
+    let mut programs: Vec<String> = Vec::new();
+    for part in command.split("&&") {
+        let program = part.split_whitespace().find(|word| !word.contains('='));
+        if let Some(program) = program.filter(|program| !programs.iter().any(|p| p == program)) {
+            programs.push(program.to_owned());
+        }
+    }
+    programs
 }
 
 /// One problem per requirement `installed` says is missing: `fail` when required, else `warn`.
@@ -253,13 +345,126 @@ mod tests {
         assert!(!installed(&empty));
     }
 
+    /// `cupel.toml` holding `text`, loaded from a fresh directory.
+    fn config(text: &str) -> Config {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(dir.path().join(cupel_core::config::FILE_NAME), text).unwrap();
+        Config::load(&cupel_core::config::ConfigRequest {
+            root: dir.path().to_path_buf(),
+            ..cupel_core::config::ConfigRequest::default()
+        })
+        .unwrap()
+    }
+
+    /// Each requirement as `(tool, needed_for, required, probe)`.
+    fn shape(requirements: &[Requirement]) -> Vec<(String, String, bool, String)> {
+        requirements
+            .iter()
+            .map(|requirement| {
+                (
+                    requirement.tool.to_string(),
+                    requirement.needed_for.clone(),
+                    requirement.required,
+                    requirement.probe.join(" "),
+                )
+            })
+            .collect()
+    }
+
     #[test]
-    fn the_toolchain_contributes_nothing_until_tool_producers_exist() {
-        let names: Vec<String> = requirements(None)
+    fn programs_are_the_first_word_of_each_part_after_any_assignments() {
+        assert_eq!(programs("cargo test --workspace"), ["cargo"]);
+        assert_eq!(
+            programs("python -m coverage run -m unittest && python -m coverage lcov -o {out}"),
+            ["python"]
+        );
+        assert_eq!(programs("FOO=1 BAR=2 go test && node x"), ["go", "node"]);
+        assert!(programs("  ").is_empty());
+    }
+
+    #[test]
+    fn without_configured_or_detected_languages_only_git_is_checked() {
+        let repo = tempfile::tempdir().unwrap();
+        let names: Vec<String> = requirements(None, repo.path(), &ProjectInfo::default())
             .iter()
             .map(|requirement| requirement.tool.to_string())
             .collect();
         assert_eq!(names, ["git"]);
+    }
+
+    #[test]
+    fn configured_commands_and_detected_roots_defaults_name_their_programs() {
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../cupel-fixtures/repos/detect");
+        let info = ProjectInfo {
+            roots: vec![ProjectRoot {
+                path: "cargo-workspace".to_owned(),
+                lang: LangId::from("rust"),
+                build_files: Vec::new(),
+                members: vec!["crates/engine".to_owned()],
+                packages: Vec::new(),
+                skip_dirs: Vec::new(),
+            }],
+        };
+        let config = config(
+            "[lang.python]\ntest = \"poetry run pytest\"\n\
+             coverage = \"FOO=1 poetry run coverage run -m pytest && go tool cover\"\n",
+        );
+        let requirements = requirements(Some(&config), &repo, &info);
+        assert_eq!(
+            shape(&requirements[1..]),
+            [
+                (
+                    "poetry".to_owned(),
+                    "[lang.python] test, [lang.python] coverage".to_owned(),
+                    false,
+                    "poetry --version".to_owned()
+                ),
+                (
+                    "go".to_owned(),
+                    "[lang.python] coverage".to_owned(),
+                    false,
+                    "go version".to_owned()
+                ),
+                (
+                    "cargo".to_owned(),
+                    "[lang.rust] test (tool.cargo-nextest), [lang.rust] coverage \
+                     (tool.cargo-llvm-cov), [lang.rust] bench (tool.criterion)"
+                        .to_owned(),
+                    false,
+                    "cargo --version".to_owned()
+                ),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_configured_command_replaces_the_default_and_names_no_producer() {
+        let repo = Path::new(env!("CARGO_MANIFEST_DIR")).join("../cupel-fixtures/repos/detect");
+        let info = ProjectInfo {
+            roots: vec![ProjectRoot {
+                path: "cargo-single".to_owned(),
+                lang: LangId::from("rust"),
+                build_files: Vec::new(),
+                members: Vec::new(),
+                packages: Vec::new(),
+                skip_dirs: Vec::new(),
+            }],
+        };
+        let config = config("[lang.rust]\ntest = \"just test\"\n");
+        let requirements = requirements(Some(&config), &repo, &info);
+        assert_eq!(
+            shape(&requirements[1..])
+                .into_iter()
+                .map(|(tool, needed_for, _, _)| (tool, needed_for))
+                .collect::<Vec<_>>(),
+            [
+                ("just".to_owned(), "[lang.rust] test".to_owned()),
+                (
+                    "cargo".to_owned(),
+                    "[lang.rust] coverage (tool.cargo-llvm-cov)".to_owned()
+                ),
+            ]
+        );
     }
 
     #[test]
