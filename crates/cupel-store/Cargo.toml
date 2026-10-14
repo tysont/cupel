@@ -1,0 +1,24 @@
+# ABOUTME: Manifest for cupel-store: the SQLite fact store at `.cupel/cupel.db`, its migrations and queries.
+# ABOUTME: Depends on cupel-core only (design §8.2); opened through core's `Writer` (ADR-045).
+[package]
+name = "cupel-store"
+description = "Cupel's fact store: runs, findings, metrics, baselines, suppressions, and the fact cache."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+cupel-core.workspace = true
+rusqlite.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+blake3.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true
