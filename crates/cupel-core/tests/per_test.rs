@@ -21,7 +21,10 @@ fn map() -> PerTestMap {
         ProducerId::from("tool.cargo-nextest"),
         vec![
             coverage("calc tests::scales", &[("src/lib.rs", &[11, 9, 10, 10])]),
-            coverage("calc tests::adds", &[("src/lib.rs", &[4, 5, 6]), ("src/util.rs", &[2])]),
+            coverage(
+                "calc tests::adds",
+                &[("src/lib.rs", &[4, 5, 6]), ("src/util.rs", &[2])],
+            ),
             coverage("calc tests::nothing", &[]),
         ],
     )
@@ -33,7 +36,11 @@ fn tests_are_sorted_by_id_and_lines_ascend_without_repeats() {
     let ids: Vec<&str> = map.tests.iter().map(|test| test.id.as_str()).collect();
     assert_eq!(
         ids,
-        ["calc tests::adds", "calc tests::nothing", "calc tests::scales"]
+        [
+            "calc tests::adds",
+            "calc tests::nothing",
+            "calc tests::scales"
+        ]
     );
     assert_eq!(map.tests[2].covered[0].lines, [9, 10, 11]);
 }
@@ -60,8 +67,14 @@ fn the_index_names_the_tests_that_execute_a_range_with_the_first_line_each_execu
             .map(|(test, line)| (test.id.clone(), line))
             .collect()
     };
-    assert_eq!(ids("src/lib.rs", 4, 6), [("calc tests::adds".to_owned(), 4)]);
-    assert_eq!(ids("src/lib.rs", 10, 20), [("calc tests::scales".to_owned(), 10)]);
+    assert_eq!(
+        ids("src/lib.rs", 4, 6),
+        [("calc tests::adds".to_owned(), 4)]
+    );
+    assert_eq!(
+        ids("src/lib.rs", 10, 20),
+        [("calc tests::scales".to_owned(), 10)]
+    );
     assert_eq!(
         ids("src/lib.rs", 1, u32::MAX),
         [

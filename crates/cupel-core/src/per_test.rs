@@ -61,10 +61,7 @@ impl PerTestMap {
                 }
             }
         }
-        LineIndex {
-            map: self,
-            by_file,
-        }
+        LineIndex { map: self, by_file }
     }
 }
 
