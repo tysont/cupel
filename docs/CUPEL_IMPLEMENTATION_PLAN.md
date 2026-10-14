@@ -670,7 +670,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 #### P2.9 `survey`, gates, `next_actions`
 
-**Status:** in progress (2026-10-14) · [ADR-060](adr/CUPEL_DECISION_060.md) · [ADR-061](adr/CUPEL_DECISION_061.md) · [ADR-062](adr/CUPEL_DECISION_062.md)
+**Status:** complete (2026-10-14, ab2b292) · [ADR-060](adr/CUPEL_DECISION_060.md) · [ADR-061](adr/CUPEL_DECISION_061.md) · [ADR-062](adr/CUPEL_DECISION_062.md)
 
 - `survey`: same scope/depth; no gate; adds `rankings` (worst CRAP, largest clone clusters, most-coupled modules, dependency cycles; mutation/flaky dimensions join in P3).
 - Gate evaluation per §6.7: `[gate.changed]` for range scopes, `[gate.tree]` otherwise; `--gate/--no-gate`; rule results in `summary.gate`; exit 1 on fail.
