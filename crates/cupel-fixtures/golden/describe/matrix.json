@@ -215,6 +215,41 @@
         "support": {
           "status": "supported"
         }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.weakening",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
       }
     ],
     "checks": [
@@ -223,7 +258,8 @@
       "static.crap",
       "static.dead-code",
       "static.deps",
-      "tests.quality"
+      "tests.quality",
+      "tests.weakening"
     ],
     "languages": [
       "go",

@@ -366,7 +366,8 @@ fn describe_language_shows_identity_facts_and_check_support() {
             {"check": "static.crap", "support": {"status": "supported"}},
             {"check": "static.dead-code", "support": {"status": "supported"}},
             {"check": "static.deps", "support": {"status": "supported"}},
-            {"check": "tests.quality", "support": {"status": "supported"}}
+            {"check": "tests.quality", "support": {"status": "supported"}},
+            {"check": "tests.weakening", "support": {"status": "supported"}}
         ])
     );
 }
@@ -480,7 +481,8 @@ fn describe_matrix_has_every_language_and_a_row_per_check() {
             "static.crap",
             "static.dead-code",
             "static.deps",
-            "tests.quality"
+            "tests.quality",
+            "tests.weakening"
         ])
     );
     let cells = description["cells"].as_array().unwrap();

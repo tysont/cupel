@@ -9,13 +9,15 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use cupel_core::config::{Config, ConfigRequest};
+use cupel_core::git::{Change, ChangeKind};
 use cupel_core::syntax::{Decisions, Span, SymbolDef, SymbolKind, Symbols, Visibility};
 use cupel_core::{
-    Action, ActionKind, Availability, Cancellation, Check, CheckCtx, CheckId, CheckRegistry,
-    CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence, Fact, FactKind,
-    Facts, Finding, FindingId, Job, Lang, LangFamily, LangId, Langs, Location, Manifest, Outcome,
-    Plan, ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, RunId, Scheduler, Scope,
-    Score, Severity, SkipReason, Skipped, Stability, SymbolSelector, Tier, Writer, next_actions,
+    Action, ActionKind, Availability, BaseTree, Cancellation, Check, CheckCtx, CheckId,
+    CheckRegistry, CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence,
+    Fact, FactKind, Facts, Finding, FindingId, Job, Lang, LangFamily, LangId, Langs, Location,
+    Manifest, Outcome, Plan, ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result,
+    RunId, Scheduler, Scope, Score, Severity, SkipReason, Skipped, Stability, SymbolSelector, Tier,
+    Writer, next_actions,
 };
 
 // ---------------------------------------------------------------- fixtures
@@ -298,6 +300,7 @@ impl World {
             files: vec!["a.x".to_owned(), "b.x".to_owned()],
             selectors: Vec::new(),
             selectors_must_match: true,
+            base: None,
         };
         setup(&mut job);
         let scheduler = Scheduler {
@@ -316,6 +319,68 @@ impl World {
 
 fn ok(_: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
     Ok(passing("t.ok", None))
+}
+
+/// A check that also reads `Symbols` from a range's base side (ADR-056).
+struct BaseCheck {
+    manifest: Manifest,
+    body: Body,
+}
+
+impl Check for BaseCheck {
+    fn manifest(&self) -> &Manifest {
+        &self.manifest
+    }
+
+    fn plan(&self, _: &CheckCtx, _: &Scope) -> Result<Plan> {
+        Ok(Plan::estimate(self.manifest.cost, 1))
+    }
+
+    fn run(
+        &self,
+        ctx: &CheckCtx,
+        facts: &Facts,
+        _: &Plan,
+        sink: &mut dyn EventSink,
+    ) -> Result<CheckResult> {
+        (self.body)(ctx, facts, sink)
+    }
+
+    fn base_needs(&self) -> &[FactKind] {
+        &[FactKind::Symbols]
+    }
+}
+
+fn base_check(id: &str, body: Body) -> Box<dyn Check> {
+    Box::new(BaseCheck {
+        manifest: manifest(id, &[FactKind::Symbols]),
+        body,
+    })
+}
+
+/// A base side holding `gone.x`, which the range deleted, and `a.x`, which it modified.
+fn base_tree(root: &Path) -> BaseTree {
+    BaseTree {
+        range: Range {
+            commit: "0123abc".to_owned(),
+            changes: vec![
+                Change {
+                    path: "a.x".to_owned(),
+                    kind: ChangeKind::Modified,
+                },
+                Change {
+                    path: "gone.x".to_owned(),
+                    kind: ChangeKind::Deleted,
+                },
+                Change {
+                    path: "notes.txt".to_owned(),
+                    kind: ChangeKind::Added,
+                },
+            ],
+        },
+        root: root.join("base"),
+        files: vec!["a.x".to_owned(), "gone.x".to_owned()],
+    }
 }
 
 // ---------------------------------------------------------------- the fact DAG
@@ -787,4 +852,84 @@ fn next_actions_rank_by_severity_then_tier() {
         .map(|n| finding("c", "k", &format!("f{n}"), Severity::Warn, 0))
         .collect();
     assert_eq!(next_actions(&many).len(), 10);
+}
+
+// ---------------------------------------------------------------- base-side facts (ADR-056)
+
+#[test]
+fn a_check_that_reads_the_base_is_skipped_per_language_without_a_range() {
+    let world = World::new(vec![base_check("t.base", ok)], "");
+    let (outcome, events) = world.run(&["go", "rust"], |_| {});
+    let checks = outcome.unwrap().checks;
+    assert_eq!(checks.len(), 2, "{checks:?}");
+    for (result, lang) in checks.iter().zip(["go", "rust"]) {
+        assert_eq!(result.status, CheckStatus::Skipped);
+        let skipped = result.skipped.as_ref().unwrap();
+        assert_eq!(skipped.reason, SkipReason::NeedsRange);
+        assert_eq!(skipped.lang, Some(LangId::from(lang)));
+        assert_eq!(skipped.fact, None);
+        assert_eq!(
+            skipped.see.as_deref(),
+            Some("cupel check --changed --only t.base")
+        );
+    }
+    assert!(events.iter().any(|event| matches!(
+        event,
+        Event::Skip {
+            reason: SkipReason::NeedsRange,
+            ..
+        }
+    )));
+    assert_eq!(world.symbols_made.load(Ordering::SeqCst), 2, "scope only");
+}
+
+#[test]
+fn under_a_range_a_check_reads_both_sides_and_the_range() {
+    fn both_sides(_: &CheckCtx, facts: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+        let files = |symbols: &Symbols| -> Vec<String> {
+            symbols.symbols.iter().map(|s| s.file.clone()).collect()
+        };
+        assert_eq!(files(facts.get::<Symbols>()?), ["a.x", "b.x"]);
+        assert_eq!(files(facts.base::<Symbols>()?), ["a.x", "gone.x"]);
+        assert_eq!(
+            facts.base::<Decisions>().unwrap_err(),
+            Error::UndeclaredFact {
+                kind: FactKind::Decisions
+            }
+        );
+        let range = facts.range().expect("a range");
+        assert_eq!(range.commit, "0123abc");
+        assert_eq!(range.changes.len(), 3);
+        Ok(passing("t.base", None))
+    }
+    fn head_only(_: &CheckCtx, facts: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+        assert_eq!(
+            facts.base::<Symbols>().unwrap_err(),
+            Error::AbsentFact {
+                kind: FactKind::Symbols
+            }
+        );
+        assert_eq!(facts.range().map(|r| r.commit.as_str()), Some("0123abc"));
+        Ok(passing("t.head", None))
+    }
+    let world = World::new(
+        vec![
+            base_check("t.base", both_sides),
+            check("t.head", &[FactKind::Symbols], head_only),
+        ],
+        "",
+    );
+    let root = world.root().to_path_buf();
+    let (outcome, _) = world.run(&["rust"], |job| job.base = Some(base_tree(&root)));
+    let checks = outcome.unwrap().checks;
+    assert_eq!(checks.len(), 2, "{checks:?}");
+    assert!(
+        checks.iter().all(|c| c.status == CheckStatus::Pass),
+        "{checks:?}"
+    );
+    assert_eq!(
+        world.symbols_made.load(Ordering::SeqCst),
+        2,
+        "once per side"
+    );
 }

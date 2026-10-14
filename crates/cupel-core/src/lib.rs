@@ -3,6 +3,7 @@
 //! Core types shared by every Cupel crate: the output contract (design §7), identifiers and
 //! structural hashes, and the extension model of facts, producers, and checks (design §8.3).
 
+mod base;
 mod cancel;
 mod check;
 pub mod config;
@@ -30,6 +31,7 @@ mod suppression;
 pub mod syntax;
 mod writer;
 
+pub use base::{BaseTree, Range};
 pub use cancel::Cancellation;
 pub use check::{
     Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,

@@ -41,6 +41,12 @@
         "support": {
           "status": "supported"
         }
+      },
+      {
+        "check": "tests.weakening",
+        "support": {
+          "status": "supported"
+        }
       }
     ],
     "extensions": [

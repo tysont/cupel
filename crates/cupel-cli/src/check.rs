@@ -4,11 +4,12 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 use cupel_core::config::Config;
-use cupel_core::git::Git;
+use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    Envelope, EventSink, ExitCode, GitInfo, Job, Lang, Outcome, PlannedWrite, ResolvedFiles,
-    Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Writer, next_actions,
+    BaseTree, Check, Envelope, EventSink, ExitCode, GitInfo, Job, Lang, Outcome, PlannedWrite,
+    Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Writer,
+    next_actions,
 };
 use cupel_lang::LanguageRegistry;
 
@@ -67,7 +68,20 @@ pub fn run(
         tier: args.tier.clone(),
     }
     .select(catalog.checks())?;
-    let langs = languages_of(catalog.language_registry(), &resolved.files);
+    let base_files = base_files(catalog.language_registry(), &resolved);
+    let langs = languages_of(
+        catalog.language_registry(),
+        resolved.files.iter().chain(&base_files),
+    );
+    let base = base_tree(
+        run,
+        root,
+        writer,
+        &resolved,
+        &base_files,
+        &selected,
+        dry_run,
+    )?;
     let job = Job {
         run: run.id(),
         writer,
@@ -78,6 +92,7 @@ pub fn run(
         files: resolved.files.clone(),
         selectors: request.selectors()?,
         selectors_must_match: !request.has_range(),
+        base,
     };
     let scheduler = Scheduler {
         checks: catalog.checks(),
@@ -148,10 +163,52 @@ impl CheckRun {
     }
 }
 
-/// The languages that own at least one of `files`, in ID order.
-fn languages_of(languages: &LanguageRegistry, files: &[String]) -> Vec<Lang> {
-    let owning: BTreeSet<_> = files
+/// The changed files that existed at the range's base and that a language owns (ADR-056).
+fn base_files(languages: &LanguageRegistry, resolved: &ResolvedFiles) -> Vec<String> {
+    resolved
+        .changes
         .iter()
+        .filter(|change| change.kind != ChangeKind::Added)
+        .filter(|change| languages.for_path(&change.path).is_some())
+        .map(|change| change.path.clone())
+        .collect()
+}
+
+/// The base side of a range scope: checked out into the run's scratch directory when a
+/// selected check reads it, else only described (ADR-056). `None` without a range.
+fn base_tree(
+    run: &Run,
+    root: &Path,
+    writer: &Writer,
+    resolved: &ResolvedFiles,
+    files: &[String],
+    selected: &[&dyn Check],
+    dry_run: bool,
+) -> Result<Option<BaseTree>, CupelError> {
+    let Some(commit) = &resolved.base else {
+        return Ok(None);
+    };
+    let range = Range {
+        commit: commit.clone(),
+        changes: resolved.changes.clone(),
+    };
+    let scratch = writer.scratch(&run.id());
+    let reads_base = selected.iter().any(|check| !check.base_needs().is_empty());
+    let git = Git::open(root).filter(|_| reads_base && !dry_run);
+    Ok(Some(match git {
+        Some(git) => BaseTree::checkout(range, &git, &scratch, |path| {
+            files.iter().any(|file| file == path)
+        })?,
+        None => BaseTree::planned(range, &scratch),
+    }))
+}
+
+/// The languages that own at least one of `files`, in ID order.
+fn languages_of<'a>(
+    languages: &LanguageRegistry,
+    files: impl Iterator<Item = &'a String>,
+) -> Vec<Lang> {
+    let owning: BTreeSet<_> = files
         .filter_map(|file| languages.for_path(file))
         .map(|language| language.id())
         .collect();

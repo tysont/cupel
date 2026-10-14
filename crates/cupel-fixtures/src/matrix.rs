@@ -1,13 +1,14 @@
 // ABOUTME: The matrix test's engine (design §8.3.7, ADR-043): every (check, language) from the registries,
 // ABOUTME: a golden per supported pair, a skip per unsupported pair, and checks run on declared facts only.
+// ABOUTME: Fixtures run as whole trees, so a check that compares a range's two sides records its skip.
 use std::collections::BTreeSet;
 use std::fs;
 
 use cupel_core::syntax::{ProjectInfo, SymbolDef, Symbols};
 use cupel_core::{
     Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus, Ctx, Envelope,
-    Facts, LangId, ProduceCtx, ProducerRegistry, RunId, Scope, SkipReason, Support, SupportMatrix,
-    Writer,
+    Facts, LangId, ProduceCtx, ProducerRegistry, Range, RunId, Scope, SkipReason, Support,
+    SupportMatrix, Writer,
 };
 use cupel_lang::{LanguageRegistry, walk};
 use serde_json::Value;
@@ -125,14 +126,27 @@ fn run_on_fixture(
     Ok((envelope, outcome.cwd, dir))
 }
 
+/// A supported pair runs and matches its golden. A check that reads a range's base side
+/// (ADR-056) cannot run on a whole tree, so its golden records the `needs-range` skip.
 fn verify_supported(goldens: &Goldens, check: &dyn Check, pair: &Pair) -> Result<(), String> {
     let (envelope, root, _dir) = run_on_fixture(pair)?;
-    if let Some(skip) = envelope
-        .checks
-        .iter()
-        .find(|result| result.skipped.is_some())
-    {
+    let needs_range = !check.base_needs().is_empty();
+    if let Some(skip) = envelope.checks.iter().find(|result| {
+        result.skipped.as_ref().is_some_and(|skipped| {
+            !needs_range
+                || skipped.reason != SkipReason::NeedsRange
+                || skipped.lang.as_ref() != Some(&pair.lang)
+        })
+    }) {
         return Err(format!("a supported pair was skipped: {:?}", skip.skipped));
+    }
+    if needs_range
+        && !envelope
+            .checks
+            .iter()
+            .any(|result| result.skipped.is_some())
+    {
+        return Err("a check that reads the base side ran on a whole tree".to_owned());
     }
     for finding in &envelope.findings {
         if finding.check != pair.check {
@@ -233,7 +247,8 @@ fn stale_goldens(goldens: &Goldens, registries: &Registries, pairs: &[Pair]) -> 
 
 /// Runs `pair`'s check on its language's fixture with a `Facts` built from the manifest alone:
 /// exactly its `needs`, plus each `want` the language produces. A check that reads anything
-/// else gets `UndeclaredFact` and fails here.
+/// else gets `UndeclaredFact` and fails here. A check with `base_needs` gets the fixture as
+/// both sides of an empty range (ADR-056).
 pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
     let registries = Registries::builtin();
     let check = registries.check(&pair.check);
@@ -278,6 +293,15 @@ pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
                 .insert_shared(&fact?)
                 .map_err(|error| error.to_string())?;
         }
+    }
+    for kind in check.base_needs() {
+        let fact = produce(*kind).ok_or_else(|| format!("no producer of `{kind}`"))??;
+        facts
+            .insert_base_shared(&fact)
+            .map_err(|error| error.to_string())?;
+    }
+    if !check.base_needs().is_empty() {
+        facts.set_range(Range::default());
     }
     let symbols = produce(cupel_core::FactKind::Symbols)
         .transpose()?

@@ -25,6 +25,7 @@ checks
   static.dead-code   supported
   static.deps        supported
   tests.quality      supported
+  tests.weakening    supported
 
 toolchain
   launchers
