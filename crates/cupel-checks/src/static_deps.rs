@@ -82,6 +82,8 @@ pub struct StaticDeps {
     manifest: Manifest,
 }
 
+inventory::submit!(crate::NativeCheck(|| Box::new(StaticDeps::new())));
+
 impl StaticDeps {
     pub fn new() -> Self {
         Self {

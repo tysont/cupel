@@ -137,6 +137,8 @@ pub struct TestsQuality {
     manifest: Manifest,
 }
 
+inventory::submit!(crate::NativeCheck(|| Box::new(TestsQuality::new())));
+
 impl TestsQuality {
     pub fn new() -> Self {
         Self {

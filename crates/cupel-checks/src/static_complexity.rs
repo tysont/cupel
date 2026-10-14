@@ -73,6 +73,8 @@ pub struct StaticComplexity {
     manifest: Manifest,
 }
 
+inventory::submit!(crate::NativeCheck(|| Box::new(StaticComplexity::new())));
+
 impl StaticComplexity {
     pub fn new() -> Self {
         Self {

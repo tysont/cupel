@@ -1,5 +1,5 @@
-// ABOUTME: Root of cupel-checks: Cupel's native checks, one module per check, and `register`, the one
-// ABOUTME: call that adds them all to a `CheckRegistry` (ADR-001).
+// ABOUTME: Root of cupel-checks: Cupel's native checks, one module per check, each submitting itself,
+// ABOUTME: and `register`, the one call that adds them all to a `CheckRegistry` (ADR-001, ADR-074).
 //! Cupel's native checks.
 //!
 //! A check is a pure function from facts and configuration to findings and a score (design
@@ -24,9 +24,18 @@
 //!
 //! # Adding a check
 //!
-//! One module here, one line in [`register`], fixture code in each language's fixture
-//! repository, and a golden per supported language under `cupel-fixtures/golden/<check>/`;
-//! the matrix test names the goldens that are missing.
+//! A check is one module, named after its ID with `.` and `-` as `_` (`static.dead-code` lives
+//! in `static_dead_code.rs`), that submits itself to the registry (ADR-074):
+//!
+//! ```text
+//! inventory::submit!(crate::NativeCheck(|| Box::new(StaticDeadCode::new())));
+//! ```
+//!
+//! Beside the module file, a new check adds its `mod <name>;` line here and nothing else in
+//! this file, fixture code in each language's fixture repository, and its goldens under
+//! `cupel-fixtures/golden/<check-id>/`; the matrix test names the goldens that are missing.
+//! Tests and `describe` derive everything else from the registry. A test fails if this file
+//! names a registered check anywhere but its `mod` line.
 //!
 //! [`Manifest`]: cupel_core::Manifest
 //! [`Scope`]: cupel_core::Scope
@@ -45,34 +54,29 @@ mod static_deps;
 mod tests_quality;
 mod tests_weakening;
 
-use cupel_core::CheckRegistry;
+use cupel_core::{Check, CheckRegistry};
 
-/// Adds every native check to `registry`, in the order `describe` and the envelope list them.
+/// A native check, submitted by its own module with `inventory::submit!`; [`register`] builds
+/// every submission.
+pub struct NativeCheck(pub fn() -> Box<dyn Check>);
+
+inventory::collect!(NativeCheck);
+
+/// Adds every native check to `registry`, in the order `describe` and the envelope list them:
+/// by check ID.
 ///
 /// # Panics
 ///
 /// When a check is already registered under one of these IDs: native check IDs are unique.
 pub fn register(registry: &mut CheckRegistry) {
-    // Alphabetical by check ID: describe and the envelope list checks in this order.
-    registry
-        .register(Box::new(static_clones::StaticClones::new()))
-        .expect("native check IDs are unique");
-    registry
-        .register(Box::new(static_complexity::StaticComplexity::new()))
-        .expect("native check IDs are unique");
-    registry
-        .register(Box::new(static_crap::StaticCrap::new()))
-        .expect("native check IDs are unique");
-    registry
-        .register(Box::new(static_dead_code::StaticDeadCode::new()))
-        .expect("native check IDs are unique");
-    registry
-        .register(Box::new(static_deps::StaticDeps::new()))
-        .expect("native check IDs are unique");
-    registry
-        .register(Box::new(tests_quality::TestsQuality::new()))
-        .expect("native check IDs are unique");
-    registry
-        .register(Box::new(tests_weakening::TestsWeakening::new()))
-        .expect("native check IDs are unique");
+    let mut checks: Vec<Box<dyn Check>> = inventory::iter::<NativeCheck>
+        .into_iter()
+        .map(|native| (native.0)())
+        .collect();
+    checks.sort_by(|a, b| a.manifest().id.cmp(&b.manifest().id));
+    for check in checks {
+        registry
+            .register(check)
+            .expect("native check IDs are unique");
+    }
 }
