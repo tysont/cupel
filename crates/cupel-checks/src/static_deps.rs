@@ -965,7 +965,7 @@ mod tests {
 
     #[test]
     fn evidence_ratios_round_to_three_decimals() {
-        assert!((rounded(1.0 / 3.0) - 0.333).abs() < f64::EPSILON);
-        assert!((rounded(2.0 / 3.0) - 0.667).abs() < f64::EPSILON);
+        let ratios = [rounded(1.0 / 3.0), rounded(2.0 / 3.0)];
+        assert_eq!(ratios.map(|ratio| ratio.to_string()), ["0.333", "0.667"]);
     }
 }

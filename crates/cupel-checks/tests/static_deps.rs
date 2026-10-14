@@ -176,44 +176,28 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
     let registry = registry();
     let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
     assert_eq!(
-        manifest.needs,
-        [FactKind::ModuleGraph, FactKind::ApiSurface]
+        support::Shape::of(manifest),
+        support::Shape {
+            needs: vec![FactKind::ModuleGraph, FactKind::ApiSurface],
+            wants: vec![],
+            tier: 0,
+            cost: cupel_core::CostClass::Quick,
+            kinds: vec![
+                ("dep.cycle", ActionKind::BreakCycle),
+                ("dep.layer-violation", ActionKind::Review),
+                ("dep.unstable-abstract", ActionKind::Review)
+            ],
+            metrics: vec![
+                ("cycles", MetricPer::Scope),
+                ("max_distance", MetricPer::Scope),
+                ("violations", MetricPer::Scope),
+                ("distance", MetricPer::Module),
+                ("coupling", MetricPer::Module),
+                ("cycle_size", MetricPer::Group)
+            ],
+            evidence: vec!["object"; 3],
+        }
     );
-    assert!(manifest.wants.is_empty());
-    assert_eq!(manifest.tier.value(), 0);
-    assert_eq!(manifest.cost, cupel_core::CostClass::Quick);
-    let kinds: Vec<(&str, ActionKind)> = manifest
-        .findings
-        .iter()
-        .map(|spec| (spec.kind.as_str(), spec.action))
-        .collect();
-    assert_eq!(
-        kinds,
-        [
-            ("dep.cycle", ActionKind::BreakCycle),
-            ("dep.layer-violation", ActionKind::Review),
-            ("dep.unstable-abstract", ActionKind::Review),
-        ]
-    );
-    let metrics: Vec<(&str, MetricPer)> = manifest
-        .metrics
-        .iter()
-        .map(|m| (m.name.as_str(), m.per))
-        .collect();
-    assert_eq!(
-        metrics,
-        [
-            ("cycles", MetricPer::Scope),
-            ("max_distance", MetricPer::Scope),
-            ("violations", MetricPer::Scope),
-            ("distance", MetricPer::Module),
-            ("coupling", MetricPer::Module),
-            ("cycle_size", MetricPer::Group),
-        ]
-    );
-    for spec in &manifest.findings {
-        assert_eq!(spec.evidence["type"], json!("object"), "{}", spec.kind);
-    }
 }
 
 #[test]

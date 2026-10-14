@@ -52,11 +52,27 @@ impl Repo {
         out.sort();
         out
     }
+
+    /// Every file under the root with its bytes, sorted by path.
+    fn contents(&self) -> Vec<(String, Vec<u8>)> {
+        self.files()
+            .into_iter()
+            .map(|file| {
+                let bytes = fs::read(self.root().join(&file)).unwrap();
+                (file, bytes)
+            })
+            .collect()
+    }
 }
 
 /// A direct connection to the repository's database, for inspecting what the store wrote.
 fn raw(repo: &Repo) -> rusqlite::Connection {
     rusqlite::Connection::open(repo.root().join(".cupel/cupel.db")).unwrap()
+}
+
+/// The symbol hash ending in `n`.
+fn symbol_hash(n: u8) -> SymbolHash {
+    format!("sh_{n:016x}").parse().unwrap()
 }
 
 fn run_id(n: u8) -> RunId {
@@ -85,6 +101,13 @@ fn check(id: &str, score: Option<f64>) -> Value {
         "score": score.map(|value| json!({"value": value, "unit": "ratio", "n": 3})),
         "delta": null, "findings": 1, "duration_ms": 5, "skipped": null, "oracle": null
     })
+}
+
+/// Records run `n` of `verb`, exiting with 0, with `findings` and `checks`.
+fn record(store: &Store, n: u8, verb: &str, findings: &[Value], checks: &[Value]) {
+    store
+        .record_run(&envelope(&run_id(n), verb, 0, findings, checks))
+        .unwrap();
 }
 
 fn envelope(
@@ -117,9 +140,7 @@ fn opening_creates_the_database_and_lock_under_cupel_only() {
     let repo = Repo::new();
     fs::write(repo.root().join("main.rs"), "fn main() {}\n").unwrap();
     let store = repo.store();
-    store
-        .record_run(&envelope(&run_id(1), "doctor", 0, &[], &[]))
-        .unwrap();
+    record(&store, 1, "doctor", &[], &[]);
     drop(store);
     let outside: Vec<String> = repo
         .files()
@@ -146,9 +167,7 @@ fn the_database_is_in_wal_mode_while_open() {
         .query_row("PRAGMA journal_mode", [], |row| row.get(0))
         .unwrap();
     assert_eq!(mode, "wal");
-    store
-        .record_run(&envelope(&run_id(1), "doctor", 0, &[], &[]))
-        .unwrap();
+    record(&store, 1, "doctor", &[], &[]);
     assert!(repo.root().join(".cupel/cupel.db-wal").exists());
 }
 
@@ -158,9 +177,7 @@ fn migrations_run_from_empty_and_reopening_changes_nothing() {
     let store = repo.store();
     let version = store.schema_version().unwrap();
     assert_eq!(version, Store::SCHEMA_VERSION);
-    store
-        .record_run(&envelope(&run_id(1), "doctor", 0, &[], &[]))
-        .unwrap();
+    record(&store, 1, "doctor", &[], &[]);
     drop(store);
     let again = repo.store();
     assert_eq!(again.schema_version().unwrap(), version);
@@ -204,13 +221,14 @@ fn a_store_newer_than_the_binary_is_refused() {
             [Store::SCHEMA_VERSION + 1],
         )
         .unwrap();
-    match Store::open(&repo.writer()) {
-        Err(StoreError::TooNew { found, known }) => {
-            assert_eq!(found, Store::SCHEMA_VERSION + 1);
-            assert_eq!(known, Store::SCHEMA_VERSION);
-        }
-        other => panic!("expected TooNew, got {other:?}"),
-    }
+    let error = Store::open(&repo.writer()).err().map(|err| err.to_string());
+    let (found, known) = (Store::SCHEMA_VERSION + 1, Store::SCHEMA_VERSION);
+    assert_eq!(
+        error,
+        Some(format!(
+            "the fact store has schema version {found}, newer than this cupel's {known}"
+        ))
+    );
 }
 
 #[test]
@@ -234,35 +252,32 @@ fn open_existing_reads_but_never_writes() {
     repo.store()
         .record_run(&envelope(&run_id(1), "doctor", 0, &[], &[]))
         .unwrap();
-    let before: Vec<(String, Vec<u8>)> = repo
-        .files()
-        .into_iter()
-        .map(|file| {
-            let bytes = fs::read(repo.root().join(&file)).unwrap();
-            (file, bytes)
-        })
-        .collect();
+    let before = repo.contents();
     let store = Store::open_existing(&repo.writer().recording())
         .unwrap()
         .unwrap();
-    assert!(store.run(&run_id(1)).unwrap().is_some());
+    let read = store
+        .run(&run_id(1))
+        .unwrap()
+        .map(|envelope| envelope.run.id);
+    assert_eq!(read, Some(run_id(1)));
     drop(store);
-    let after: Vec<(String, Vec<u8>)> = repo
-        .files()
-        .into_iter()
-        .map(|file| {
-            let bytes = fs::read(repo.root().join(&file)).unwrap();
-            (file, bytes)
-        })
-        .collect();
+    let after = repo.contents();
     assert_eq!(after, before, "reading changed the store's files");
     let store = Store::open_existing(&repo.writer().recording())
         .unwrap()
         .unwrap();
-    assert!(
-        store
-            .record_run(&envelope(&run_id(2), "doctor", 0, &[], &[]))
-            .is_err()
+    let error = store
+        .record_run(&envelope(&run_id(2), "doctor", 0, &[], &[]))
+        .err()
+        .map(|err| err.to_string());
+    let lock = repo.root().join(".cupel/cupel.lock");
+    assert_eq!(
+        error,
+        Some(format!(
+            "cannot use `{}`: the fact store was opened read-only",
+            lock.display()
+        ))
     );
 }
 
@@ -277,14 +292,26 @@ fn a_store_under_a_path_with_uri_characters_opens_read_only() {
         .record_run(&envelope(&run_id(1), "doctor", 0, &[], &[]))
         .unwrap();
     let store = Store::open_existing(&writer.recording()).unwrap().unwrap();
-    assert!(store.run(&run_id(1)).unwrap().is_some());
+    let read = store
+        .run(&run_id(1))
+        .unwrap()
+        .map(|envelope| envelope.run.id);
+    assert_eq!(read, Some(run_id(1)));
 }
 
 #[test]
 fn a_writer_that_may_not_write_cupel_cannot_open_the_store() {
     let repo = Repo::new();
     let scratch = repo.writer().scratch(&run_id(1));
-    assert!(matches!(Store::open(&scratch), Err(StoreError::Write(_))));
+    let error = Store::open(&scratch).err().map(|err| err.to_string());
+    let cupel = repo.root().join(".cupel");
+    assert_eq!(
+        error,
+        Some(format!(
+            "`{}` is outside .cupel/; pass --write to permit writing it",
+            cupel.display()
+        ))
+    );
 }
 
 #[test]
@@ -444,9 +471,7 @@ fn the_last_run_of_a_check_has_its_result_findings_and_metrics() {
             }],
         )
         .unwrap();
-    store
-        .record_run(&envelope(&run_id(3), "doctor", 0, &[], &[]))
-        .unwrap();
+    record(&store, 3, "doctor", &[], &[]);
 
     let last = store.last_run_for_check(&complexity).unwrap().unwrap();
     assert_eq!(last.run, run_id(2));
@@ -481,22 +506,15 @@ fn the_latest_result_run_skips_bookkeeping_verbs_and_failed_invocations() {
     let repo = Repo::new();
     let store = repo.store();
     assert_eq!(store.last_result_run().unwrap(), None);
-    store
-        .record_run(&envelope(&run_id(1), "doctor", 3, &[], &[]))
-        .unwrap();
-    store
-        .record_run(&envelope(&run_id(2), "check", 2, &[], &[]))
-        .unwrap();
-    store
-        .record_run(&envelope(&run_id(3), "explain", 0, &[], &[]))
-        .unwrap();
-    store
-        .record_run(&envelope(&run_id(4), "baseline", 0, &[], &[]))
-        .unwrap();
+    for (n, verb, exit_code) in [(1, "doctor", 3), (2, "check", 2)] {
+        store
+            .record_run(&envelope(&run_id(n), verb, exit_code, &[], &[]))
+            .unwrap();
+    }
+    record(&store, 3, "explain", &[], &[]);
+    record(&store, 4, "baseline", &[], &[]);
     assert_eq!(store.last_result_run().unwrap(), Some(run_id(1)));
-    store
-        .record_run(&envelope(&run_id(5), "init", 0, &[], &[]))
-        .unwrap();
+    record(&store, 5, "init", &[], &[]);
     assert_eq!(store.last_result_run().unwrap(), Some(run_id(5)));
     assert_eq!(
         store
@@ -621,9 +639,7 @@ fn symbol(name: &str) -> SymbolDef {
 fn symbols_new_since_a_run_are_the_hashes_first_seen_after_it() {
     let repo = Repo::new();
     let store = repo.store();
-    let old: SymbolHash = "sh_0000000000000001".parse().unwrap();
-    let new: SymbolHash = "sh_0000000000000002".parse().unwrap();
-    let unseen: SymbolHash = "sh_0000000000000003".parse().unwrap();
+    let [old, new, unseen] = [1, 2, 3].map(symbol_hash);
     store
         .record_symbols(&run_id(1), &[(old.clone(), symbol("f"))])
         .unwrap();
@@ -656,26 +672,30 @@ fn suppressions_mirror_the_file() {
     assert_eq!(store.suppressions().unwrap(), [entry("fnd_00000b")]);
 }
 
-#[test]
-fn concurrent_writers_take_turns() {
-    let repo = Repo::new();
-    repo.store();
-    let handles: Vec<_> = (1..=8)
+/// Records runs 1 to `runs`, each from a thread of its own with a store of its own.
+fn record_concurrently(repo: &Repo, runs: u8) {
+    let handles: Vec<_> = (1..=runs)
         .map(|n| {
             let writer = repo.writer();
             std::thread::spawn(move || {
-                let store = Store::open(&writer).unwrap();
-                store
-                    .record_run(&envelope(&run_id(n), "doctor", 0, &[], &[]))
-                    .unwrap();
+                record(&Store::open(&writer).unwrap(), n, "doctor", &[], &[]);
             })
         })
         .collect();
     for handle in handles {
         handle.join().unwrap();
     }
+}
+
+#[test]
+fn concurrent_writers_take_turns() {
+    let repo = Repo::new();
+    repo.store();
+    record_concurrently(&repo, 8);
     let store = repo.store();
-    for n in 1..=8 {
-        assert!(store.run(&run_id(n)).unwrap().is_some(), "{n}");
-    }
+    let stored: Vec<RunId> = (1..=8)
+        .filter_map(|n| store.run(&run_id(n)).unwrap())
+        .map(|envelope| envelope.run.id)
+        .collect();
+    assert_eq!(stored, (1..=8).map(run_id).collect::<Vec<_>>());
 }

@@ -167,15 +167,20 @@ fn each_monorepo_root_gets_its_own_ecosystems_commands() {
     );
 }
 
-fn write(root: &Path, relative: &str, text: &str) {
-    let path = root.join(relative);
-    fs::create_dir_all(path.parent().unwrap()).unwrap();
-    fs::write(path, text).unwrap();
+/// A temporary directory holding `files`, each a (relative path, text) pair.
+fn tree(files: &[(&str, &str)]) -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    for (relative, text) in files {
+        let path = dir.path().join(relative);
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(path, text).unwrap();
+    }
+    dir
 }
 
 #[test]
 fn go_commands_cover_the_packages_project_info_reports() {
-    let dir = tempfile::tempdir().unwrap();
+    let dir = tree(&[]);
     let got = commands("go", dir.path(), &[], &["./api/...", "./worker/..."]);
     assert_eq!(
         got.test.as_deref(),
@@ -189,9 +194,7 @@ fn go_commands_cover_the_packages_project_info_reports() {
 
 #[test]
 fn yarn_and_node_test_are_chosen_without_other_signals() {
-    let dir = tempfile::tempdir().unwrap();
-    write(dir.path(), "package.json", "{\"name\": \"plain\"}");
-    write(dir.path(), "yarn.lock", "");
+    let dir = tree(&[("package.json", "{\"name\": \"plain\"}"), ("yarn.lock", "")]);
     let got = commands("javascript", dir.path(), &[], &[]);
     assert_eq!(
         got,
@@ -205,17 +208,13 @@ fn yarn_and_node_test_are_chosen_without_other_signals() {
 
 #[test]
 fn a_member_dependency_selects_the_runner_and_package_manager_fields_select_the_launcher() {
-    let dir = tempfile::tempdir().unwrap();
-    write(
-        dir.path(),
-        "package.json",
-        "{\"packageManager\": \"pnpm@9.1.0\"}",
-    );
-    write(
-        dir.path(),
-        "libs/a/package.json",
-        "{\"devDependencies\": {\"mocha\": \"1\"}}",
-    );
+    let dir = tree(&[
+        ("package.json", "{\"packageManager\": \"pnpm@9.1.0\"}"),
+        (
+            "libs/a/package.json",
+            "{\"devDependencies\": {\"mocha\": \"1\"}}",
+        ),
+    ]);
     let got = commands("javascript", dir.path(), &["libs/a"], &[]);
     assert_eq!(
         got,
@@ -229,8 +228,7 @@ fn a_member_dependency_selects_the_runner_and_package_manager_fields_select_the_
 
 #[test]
 fn a_python_bench_needs_pytest_and_pytest_benchmark_alone_does_not_mean_pytest() {
-    let dir = tempfile::tempdir().unwrap();
-    write(dir.path(), "requirements-dev.txt", "pytest-benchmark==4\n");
+    let dir = tree(&[("requirements-dev.txt", "pytest-benchmark==4\n")]);
     let got = commands("python", dir.path(), &[], &[]);
     assert_eq!(got.test.as_deref(), Some("python -m unittest"));
     assert_eq!(got.bench, None);
@@ -256,63 +254,79 @@ fn selection_names_the_producers_it_chose() {
 
 #[test]
 fn every_launch_language_has_one_row_and_unknown_languages_none() {
-    for lang in ["javascript", "typescript", "rust", "go", "python"] {
-        assert!(toolchain::for_lang(&LangId::from(lang)).is_some(), "{lang}");
-    }
-    assert!(toolchain::for_lang(&LangId::from("java")).is_none());
-    let mut seen = BTreeSet::new();
-    for row in toolchain::rows() {
-        for lang in &row.langs {
-            assert!(seen.insert(lang.clone()), "{lang} has two rows");
-        }
-    }
+    let found = ["javascript", "typescript", "rust", "go", "python", "java"]
+        .map(|lang| toolchain::for_lang(&LangId::from(lang)).is_some());
+    assert_eq!(found, [true, true, true, true, true, false]);
+    let mut langs: Vec<&str> = toolchain::rows()
+        .iter()
+        .flat_map(|row| row.langs.iter().map(LangId::as_str))
+        .collect();
+    langs.sort_unstable();
+    assert_eq!(langs, ["go", "javascript", "python", "rust", "typescript"]);
 }
 
-/// Every producer is `tool.<name>`, unique in its row; every runner a command map names is a
-/// runner of the row; every `<placeholder>` is `<packages>` or a value every launcher sets.
-#[test]
-fn every_row_is_consistent() {
-    for row in toolchain::rows() {
-        let runners: Vec<&ProducerId> = row.runners.iter().map(|tool| &tool.id).collect();
-        let mut ids = BTreeSet::new();
-        for tool in row.runners.iter().chain(&row.coverage).chain(&row.bench) {
-            assert!(tool.id.as_str().starts_with("tool."), "{}", tool.id);
-            assert!(ids.insert(tool.id.clone()), "{} is listed twice", tool.id);
-            for runner in tool.commands.keys() {
-                assert!(
-                    runners.contains(&runner),
-                    "{}: unknown runner {runner}",
-                    tool.id
-                );
-            }
-            assert!(
-                tool.command.is_some() || !tool.commands.is_empty(),
-                "{} has no command",
-                tool.id
-            );
-            for template in tool.command.iter().chain(tool.commands.values()) {
-                for name in placeholders(template) {
-                    let set_by_every_launcher = !row.launchers.is_empty()
-                        && row
-                            .launchers
-                            .iter()
-                            .all(|launcher| launcher.values.contains_key(&name));
-                    assert!(
-                        name == "packages" || set_by_every_launcher,
+/// How `row` breaks the table's rules: every producer is `tool.<name>`, unique in its row, and
+/// has a command; every runner a command map names is a runner of the row; every
+/// `<placeholder>` is `<packages>` or a value every launcher sets; the last runner is the
+/// fallback, detecting nothing.
+fn inconsistencies(row: &toolchain::Row) -> Vec<String> {
+    let runners: Vec<&ProducerId> = row.runners.iter().map(|tool| &tool.id).collect();
+    let mut problems = Vec::new();
+    let mut ids = BTreeSet::new();
+    for tool in row.runners.iter().chain(&row.coverage).chain(&row.bench) {
+        if !tool.id.as_str().starts_with("tool.") {
+            problems.push(format!("{} is not tool.<name>", tool.id));
+        }
+        if !ids.insert(tool.id.clone()) {
+            problems.push(format!("{} is listed twice", tool.id));
+        }
+        if tool.command.is_none() && tool.commands.is_empty() {
+            problems.push(format!("{} has no command", tool.id));
+        }
+        for runner in tool
+            .commands
+            .keys()
+            .filter(|runner| !runners.contains(runner))
+        {
+            problems.push(format!("{}: unknown runner {runner}", tool.id));
+        }
+        for template in tool.command.iter().chain(tool.commands.values()) {
+            for name in placeholders(template) {
+                if name != "packages" && !set_by_every_launcher(row, &name) {
+                    problems.push(format!(
                         "{}: <{name}> is not set by every launcher",
                         tool.id
-                    );
+                    ));
                 }
             }
         }
-        assert!(
-            row.runners
-                .last()
-                .is_some_and(|tool| tool.detect.is_empty()),
-            "the last runner of {:?} is the fallback",
-            row.langs
-        );
     }
+    if !row
+        .runners
+        .last()
+        .is_some_and(|tool| tool.detect.is_empty())
+    {
+        problems.push(format!(
+            "the last runner of {:?} is not the fallback",
+            row.langs
+        ));
+    }
+    problems
+}
+
+/// Whether `row` has launchers and each of them sets the placeholder `name`.
+fn set_by_every_launcher(row: &toolchain::Row, name: &str) -> bool {
+    !row.launchers.is_empty()
+        && row
+            .launchers
+            .iter()
+            .all(|launcher| launcher.values.contains_key(name))
+}
+
+#[test]
+fn every_row_is_consistent() {
+    let problems: Vec<String> = toolchain::rows().iter().flat_map(inconsistencies).collect();
+    assert_eq!(problems, Vec::<String>::new());
 }
 
 fn placeholders(template: &str) -> Vec<String> {

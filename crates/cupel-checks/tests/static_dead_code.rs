@@ -21,13 +21,12 @@ use support::{combined, language};
 
 const ID: &str = "static.dead-code";
 
-/// A symbol `name` in `file` at `line`, spanning three lines, in `namespace` with `separator`.
+/// A symbol `name` in `file` on lines 1 to 3, in `namespace` with `separator`.
 fn symbol(
     file: &str,
     namespace: &str,
     separator: &str,
     name: &str,
-    line: u32,
     visibility: Visibility,
 ) -> SymbolDef {
     SymbolDef {
@@ -43,9 +42,9 @@ fn symbol(
         lang: LangId::from("x"),
         file: file.to_owned(),
         span: Span {
-            line,
+            line: 1,
             col: 1,
-            end_line: line + 2,
+            end_line: 3,
             end_col: 2,
         },
         body: None,
@@ -53,12 +52,25 @@ fn symbol(
     }
 }
 
+/// `def` moved to start at `line`, still spanning three lines.
+fn at(mut def: SymbolDef, line: u32) -> SymbolDef {
+    def.span.line = line;
+    def.span.end_line = line + 2;
+    def
+}
+
 fn private(file: &str, namespace: &str, name: &str, line: u32) -> SymbolDef {
-    symbol(file, namespace, "::", name, line, Visibility::Private)
+    at(
+        symbol(file, namespace, "::", name, Visibility::Private),
+        line,
+    )
 }
 
 fn public(file: &str, namespace: &str, name: &str, line: u32) -> SymbolDef {
-    symbol(file, namespace, "::", name, line, Visibility::Public)
+    at(
+        symbol(file, namespace, "::", name, Visibility::Public),
+        line,
+    )
 }
 
 fn method(mut def: SymbolDef) -> SymbolDef {
@@ -248,11 +260,18 @@ fn the_manifest_states_its_known_limitation() {
         .get(&CheckId::from("static.dead-code"))
         .unwrap()
         .manifest();
-    assert!(
-        manifest.summary.contains("Limitation:")
-            && manifest.summary.contains("no fact carries references"),
-        "{}",
-        manifest.summary
+    let limitation = manifest
+        .summary
+        .split_once("Limitation: ")
+        .map(|(_, rest)| rest);
+    assert_eq!(
+        limitation,
+        Some(
+            "no fact carries references, so reachability is decided per module, never per call: \
+             an unused function in an imported module is not reported, and an export of an \
+             unimported module is only `dead.export` (info, low confidence) (ADR-058; a \
+             References fact is a P3 follow-up)."
+        )
     );
 }
 
@@ -261,45 +280,28 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
     let registry = registry();
     let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
     assert_eq!(
-        manifest.needs,
-        [
-            FactKind::Symbols,
-            FactKind::NormTree,
-            FactKind::ModuleGraph,
-            FactKind::Roots
-        ]
+        support::Shape::of(manifest),
+        support::Shape {
+            needs: vec![
+                FactKind::Symbols,
+                FactKind::NormTree,
+                FactKind::ModuleGraph,
+                FactKind::Roots
+            ],
+            wants: vec![],
+            tier: 0,
+            cost: CostClass::Quick,
+            kinds: vec![
+                ("dead.symbol", ActionKind::Review),
+                ("dead.export", ActionKind::Review)
+            ],
+            metrics: vec![
+                ("dead_symbols", MetricPer::Scope),
+                ("dead_exports", MetricPer::Scope)
+            ],
+            evidence: vec!["object"; 2],
+        }
     );
-    assert!(manifest.wants.is_empty());
-    assert_eq!(manifest.tier.value(), 0);
-    assert_eq!(manifest.cost, CostClass::Quick);
-    let kinds: Vec<(&str, ActionKind)> = manifest
-        .findings
-        .iter()
-        .map(|spec| (spec.kind.as_str(), spec.action))
-        .collect();
-    assert_eq!(
-        kinds,
-        [
-            ("dead.symbol", ActionKind::Review),
-            ("dead.export", ActionKind::Review)
-        ]
-    );
-    let metrics: Vec<(&str, MetricPer)> = manifest
-        .metrics
-        .iter()
-        .map(|m| (m.name.as_str(), m.per))
-        .collect();
-    assert_eq!(
-        metrics,
-        [
-            ("dead_symbols", MetricPer::Scope),
-            ("dead_exports", MetricPer::Scope)
-        ],
-        "a symbol is dead or not: nothing to rank"
-    );
-    for spec in &manifest.findings {
-        assert_eq!(spec.evidence["type"], json!("object"), "{}", spec.kind);
-    }
 }
 
 #[test]
@@ -309,7 +311,7 @@ fn of_a_root_an_export_an_imported_item_and_an_unreferenced_private_only_the_las
         private("main.x", "", "assist", 5),
         public("api.x", "api", "open", 1),
         private("api.x", "api", "check", 5),
-        symbol("util.x", "util", "::", "helper", 1, Visibility::Internal),
+        symbol("util.x", "util", "::", "helper", Visibility::Internal),
         private("orphan.x", "orphan", "forgotten", 1),
     ])
     .root(0, RootReason::EntryPoint)
@@ -406,17 +408,16 @@ fn files_sharing_a_module_namespace_keep_each_other_alive() {
     // A package whose files share a namespace: one holds the entry point, one an unimported
     // helper, one only a method whose namespace is the package plus its receiver.
     let world = World::with(vec![
-        symbol("cmd/a.x", "main", ".", "main", 1, Visibility::Internal),
-        symbol("cmd/b.x", "main", ".", "helper", 1, Visibility::Internal),
+        symbol("cmd/a.x", "main", ".", "main", Visibility::Internal),
+        symbol("cmd/b.x", "main", ".", "helper", Visibility::Internal),
         method(symbol(
             "cmd/c.x",
             "main.server",
             ".",
             "serve",
-            1,
             Visibility::Internal,
         )),
-        symbol("other/d.x", "other", ".", "stray", 1, Visibility::Internal),
+        symbol("other/d.x", "other", ".", "stray", Visibility::Internal),
     ])
     .root(0, RootReason::EntryPoint);
     let (_, findings) = run(&world);
@@ -427,21 +428,25 @@ fn files_sharing_a_module_namespace_keep_each_other_alive() {
 #[test]
 fn every_file_of_an_unreached_module_is_listed_in_evidence() {
     let world = World::with(vec![
-        symbol("pkg/a.x", "pkg", ".", "one", 1, Visibility::Internal),
-        symbol("pkg/b.x", "pkg", ".", "two", 1, Visibility::Internal),
+        symbol("pkg/a.x", "pkg", ".", "one", Visibility::Internal),
+        symbol("pkg/b.x", "pkg", ".", "two", Visibility::Internal),
     ]);
     let (_, findings) = run(&world);
     assert_eq!(
         kinds(&findings),
         pairs(&[("pkg.one", "dead.symbol"), ("pkg.two", "dead.symbol")])
     );
-    for finding in &findings {
-        assert_eq!(finding.evidence.0["module"], json!("pkg"));
-        assert_eq!(
-            finding.evidence.0["module_files"],
-            json!(["pkg/a.x", "pkg/b.x"])
-        );
-    }
+    let modules: Vec<(&Value, &Value)> = findings
+        .iter()
+        .map(|finding| {
+            (
+                &finding.evidence.0["module"],
+                &finding.evidence.0["module_files"],
+            )
+        })
+        .collect();
+    let pkg = (json!("pkg"), json!(["pkg/a.x", "pkg/b.x"]));
+    assert_eq!(modules, [(&pkg.0, &pkg.1), (&pkg.0, &pkg.1)]);
 }
 
 #[test]
@@ -463,8 +468,8 @@ fn tests_and_framework_hooks_root_their_files_but_exports_alone_do_not() {
 fn only_imports_from_other_modules_enter_one() {
     let world = World::with(vec![
         private("self.x", "selfish", "loop_back", 1),
-        symbol("pkg/a.x", "pkg", ".", "one", 1, Visibility::Internal),
-        symbol("pkg/b.x", "pkg", ".", "two", 1, Visibility::Internal),
+        symbol("pkg/a.x", "pkg", ".", "one", Visibility::Internal),
+        symbol("pkg/b.x", "pkg", ".", "two", Visibility::Internal),
         private("used.x", "used", "kept", 1),
     ])
     .import(edge("self.x", "self", file("self.x")))

@@ -263,11 +263,17 @@ fn the_manifest_states_its_known_limitation() {
         .get(&CheckId::from("static.clones"))
         .unwrap()
         .manifest();
-    assert!(
-        manifest.summary.contains("Limitation:")
-            && manifest.summary.contains("type 1 is reported as type 2"),
-        "{}",
-        manifest.summary
+    let limitation = manifest
+        .summary
+        .split_once("Limitation: ")
+        .map(|(_, rest)| rest);
+    assert_eq!(
+        limitation,
+        Some(
+            "type 1 is reported as type 2, because NormTree keeps no identifier or literal text, \
+             so two functions that differ only in literals (two lookup tables of the same shape) \
+             are reported as clones (ADR-050; a raw-token digest is a P3 follow-up)."
+        )
     );
 }
 
@@ -276,34 +282,25 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
     let registry = registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let manifest = check.manifest();
-    assert_eq!(manifest.needs, [FactKind::Symbols, FactKind::NormTree]);
-    assert_eq!(manifest.tier.value(), 0);
-    assert_eq!(manifest.cost, cupel_core::CostClass::Quick);
-    let kinds: Vec<(&str, ActionKind)> = manifest
-        .findings
-        .iter()
-        .map(|spec| (spec.kind.as_str(), spec.action))
-        .collect();
     assert_eq!(
-        kinds,
-        [
-            ("clone.pair", ActionKind::RefactorExtract),
-            ("clone.cluster", ActionKind::RefactorExtract),
-        ]
-    );
-    let metrics: Vec<(&str, MetricPer)> = manifest
-        .metrics
-        .iter()
-        .map(|m| (m.name.as_str(), m.per))
-        .collect();
-    assert_eq!(
-        metrics,
-        [
-            ("pairs", MetricPer::Scope),
-            ("clusters", MetricPer::Scope),
-            ("max_jaccard", MetricPer::Scope),
-            ("cluster_size", MetricPer::Group),
-        ]
+        support::Shape::of(manifest),
+        support::Shape {
+            needs: vec![FactKind::Symbols, FactKind::NormTree],
+            wants: vec![],
+            tier: 0,
+            cost: cupel_core::CostClass::Quick,
+            kinds: vec![
+                ("clone.pair", ActionKind::RefactorExtract),
+                ("clone.cluster", ActionKind::RefactorExtract)
+            ],
+            metrics: vec![
+                ("pairs", MetricPer::Scope),
+                ("clusters", MetricPer::Scope),
+                ("max_jaccard", MetricPer::Scope),
+                ("cluster_size", MetricPer::Group)
+            ],
+            evidence: vec!["object"; 2],
+        }
     );
     assert!(check.spans_family());
 }

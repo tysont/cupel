@@ -324,15 +324,24 @@ mod tests {
     fn labels_and_order_both_matter() {
         let ab = node("call", vec![leaf("a"), leaf("b")]);
         let ba = node("call", vec![leaf("b"), leaf("a")]);
-        assert_ne!(Fingerprints::of(&ab), Fingerprints::of(&ba));
+        let (ab, ba) = (Fingerprints::of(&ab), Fingerprints::of(&ba));
+        // Each tree has one fingerprint, the call's, and the two have none in common.
+        let shared = ab.set.iter().filter(|print| ba.set.contains(print)).count();
+        assert_eq!((ab.set.len(), ba.set.len(), shared), (1, 1, 0));
     }
 
     #[test]
     fn jaccard_is_the_share_of_the_union_in_common() {
-        assert!((jaccard(&[1, 2, 3], &[2, 3, 4]) - 0.5).abs() < 1e-12);
-        assert!((jaccard(&[1, 2], &[1, 2]) - 1.0).abs() < 1e-12);
-        assert!(jaccard(&[1], &[2]).abs() < 1e-12);
-        assert!(jaccard(&[], &[]).abs() < 1e-12);
+        let shares = [
+            jaccard(&[1, 2, 3], &[2, 3, 4]),
+            jaccard(&[1, 2], &[1, 2]),
+            jaccard(&[1], &[2]),
+            jaccard(&[], &[]),
+        ];
+        assert_eq!(
+            shares.map(|share| share.to_string()),
+            ["0.5", "1", "0", "0"]
+        );
     }
 
     #[test]
@@ -466,11 +475,11 @@ mod tests {
     /// in the symbol count, and the whole search (fingerprints included) takes under a second
     /// in a release build, about 0.2 s on an Apple M2. A debug build (`make test`) is about
     /// ten times slower, so it is held to a debug budget instead.
-    #[test]
-    fn ten_thousand_symbols_are_searched_in_linear_work_and_under_a_second() {
+    /// `count` random function trees, every hundredth an edited copy of the one before.
+    fn corpus(count: usize) -> Vec<NormNode> {
         let mut rng = Rng(7);
-        let mut trees: Vec<NormNode> = Vec::with_capacity(10_000);
-        for index in 0..10_000 {
+        let mut trees: Vec<NormNode> = Vec::with_capacity(count);
+        for index in 0..count {
             let tree = if index % 100 == 99 {
                 let mut copy = trees[index - 1].clone();
                 copy.children.push(leaf("$id"));
@@ -483,28 +492,36 @@ mod tests {
             };
             trees.push(tree);
         }
+        trees
+    }
+
+    /// Milliseconds the ten-thousand-symbol search may take: a debug build is about ten times
+    /// slower than a release build.
+    const SEARCH_BUDGET_MS: u128 = if cfg!(debug_assertions) {
+        20_000
+    } else {
+        1_000
+    };
+
+    #[test]
+    fn ten_thousand_symbols_are_searched_in_linear_work_and_under_a_second() {
+        let trees = corpus(10_000);
         let started = std::time::Instant::now();
         let sets: Vec<Fingerprints> = trees.iter().map(Fingerprints::of).collect();
         let found = search(&sets, 0.82);
         let elapsed = started.elapsed();
         let planted: Vec<(usize, usize)> = (0..100).map(|n| (n * 100 + 98, n * 100 + 99)).collect();
-        for pair in &planted {
-            assert!(
-                found.pairs.iter().any(|p| (p.left, p.right) == *pair),
-                "missed planted pair {pair:?}"
-            );
-        }
+        let missed: Vec<&(usize, usize)> = planted
+            .iter()
+            .filter(|pair| !found.pairs.iter().any(|p| (p.left, p.right) == **pair))
+            .collect();
+        assert_eq!(missed, Vec::<&(usize, usize)>::new());
         assert!(
             found.compared <= 2 * sets.len(),
             "{} exact comparisons",
             found.compared
         );
-        let budget = if cfg!(debug_assertions) {
-            20_000
-        } else {
-            1_000
-        };
-        assert!(elapsed.as_millis() < budget, "took {elapsed:?}");
+        assert!(elapsed.as_millis() < SEARCH_BUDGET_MS, "took {elapsed:?}");
     }
 
     proptest! {

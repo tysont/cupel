@@ -1,5 +1,5 @@
 // ABOUTME: Helpers shared by the cupel-checks integration tests: a sink that keeps findings and measurements,
-// ABOUTME: and per-language results to combine `scope` metrics over. Each test file includes it with `mod support;`.
+// ABOUTME: per-language results to combine `scope` metrics over, and a manifest's shape. Each test file includes it with `mod support;`.
 #![allow(
     dead_code,
     reason = "each test crate uses a different subset of the helpers"
@@ -8,7 +8,8 @@
 use std::collections::BTreeMap;
 
 use cupel_core::{
-    Check, CheckResult, CheckStatus, CostClass, Event, EventSink, Finding, Measurement, Score, Tier,
+    ActionKind, Check, CheckResult, CheckStatus, CostClass, Event, EventSink, FactKind, Finding,
+    Manifest, Measurement, MetricPer, Score, Tier,
 };
 
 /// Keeps every finding and measurement a check reports.
@@ -71,4 +72,43 @@ pub fn combined(check: &dyn Check, name: &str, results: &[CheckResult]) -> Optio
         .filter(|result| result.metrics.contains_key(name))
         .collect();
     check.combine_metric(name, &reported)
+}
+
+/// What a manifest declares: the facts it needs and wants, its tier and cost, each finding kind
+/// with its action, each metric with what it is per, and the JSON type of each kind's evidence.
+#[derive(Debug, PartialEq)]
+pub struct Shape<'a> {
+    pub needs: Vec<FactKind>,
+    pub wants: Vec<FactKind>,
+    pub tier: u8,
+    pub cost: CostClass,
+    pub kinds: Vec<(&'a str, ActionKind)>,
+    pub metrics: Vec<(&'a str, MetricPer)>,
+    pub evidence: Vec<&'a str>,
+}
+
+impl<'a> Shape<'a> {
+    pub fn of(manifest: &'a Manifest) -> Self {
+        Self {
+            needs: manifest.needs.clone(),
+            wants: manifest.wants.clone(),
+            tier: manifest.tier.value(),
+            cost: manifest.cost,
+            kinds: manifest
+                .findings
+                .iter()
+                .map(|spec| (spec.kind.as_str(), spec.action))
+                .collect(),
+            metrics: manifest
+                .metrics
+                .iter()
+                .map(|metric| (metric.name.as_str(), metric.per))
+                .collect(),
+            evidence: manifest
+                .findings
+                .iter()
+                .map(|spec| spec.evidence["type"].as_str().unwrap_or("?"))
+                .collect(),
+        }
+    }
 }

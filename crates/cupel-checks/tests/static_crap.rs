@@ -209,42 +209,24 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
     let registry = registry();
     let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
     assert_eq!(
-        manifest.needs,
-        [FactKind::Symbols, FactKind::Decisions, FactKind::NormTree]
+        support::Shape::of(manifest),
+        support::Shape {
+            needs: vec![FactKind::Symbols, FactKind::Decisions, FactKind::NormTree],
+            wants: vec![FactKind::CoverageMap, FactKind::TestConventions],
+            tier: 0,
+            cost: cupel_core::CostClass::Quick,
+            kinds: vec![
+                ("crap.high", ActionKind::WriteTest),
+                ("crap.watch", ActionKind::Review)
+            ],
+            metrics: vec![
+                ("max", MetricPer::Scope),
+                ("mean", MetricPer::Scope),
+                ("crap", MetricPer::Symbol)
+            ],
+            evidence: vec!["object"; 2],
+        }
     );
-    assert_eq!(
-        manifest.wants,
-        [FactKind::CoverageMap, FactKind::TestConventions]
-    );
-    assert_eq!(manifest.tier.value(), 0);
-    let kinds: Vec<(&str, ActionKind)> = manifest
-        .findings
-        .iter()
-        .map(|spec| (spec.kind.as_str(), spec.action))
-        .collect();
-    assert_eq!(
-        kinds,
-        [
-            ("crap.high", ActionKind::WriteTest),
-            ("crap.watch", ActionKind::Review),
-        ]
-    );
-    let metrics: Vec<(&str, MetricPer)> = manifest
-        .metrics
-        .iter()
-        .map(|m| (m.name.as_str(), m.per))
-        .collect();
-    assert_eq!(
-        metrics,
-        [
-            ("max", MetricPer::Scope),
-            ("mean", MetricPer::Scope),
-            ("crap", MetricPer::Symbol),
-        ]
-    );
-    for spec in &manifest.findings {
-        assert_eq!(spec.evidence["type"], json!("object"), "{}", spec.kind);
-    }
 }
 
 #[test]

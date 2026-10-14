@@ -166,44 +166,30 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
         .unwrap()
         .manifest();
     assert_eq!(
-        manifest.needs,
-        [FactKind::Symbols, FactKind::Decisions, FactKind::NormTree]
+        support::Shape::of(manifest),
+        support::Shape {
+            needs: vec![FactKind::Symbols, FactKind::Decisions, FactKind::NormTree],
+            wants: vec![],
+            tier: 0,
+            cost: cupel_core::CostClass::Quick,
+            kinds: vec![
+                ("complexity.high", ActionKind::ReduceComplexity),
+                ("nesting.deep", ActionKind::ReduceComplexity),
+                ("params.many", ActionKind::RefactorExtract),
+                ("function.long", ActionKind::RefactorExtract)
+            ],
+            metrics: vec![
+                ("cyclomatic_max", MetricPer::Scope),
+                ("cognitive_max", MetricPer::Scope),
+                ("nesting_max", MetricPer::Scope),
+                ("params_max", MetricPer::Scope),
+                ("length_max", MetricPer::Scope),
+                ("cyclomatic", MetricPer::Symbol),
+                ("cognitive", MetricPer::Symbol)
+            ],
+            evidence: vec!["object"; 4],
+        }
     );
-    assert_eq!(manifest.tier.value(), 0);
-    let kinds: Vec<(&str, ActionKind)> = manifest
-        .findings
-        .iter()
-        .map(|spec| (spec.kind.as_str(), spec.action))
-        .collect();
-    assert_eq!(
-        kinds,
-        [
-            ("complexity.high", ActionKind::ReduceComplexity),
-            ("nesting.deep", ActionKind::ReduceComplexity),
-            ("params.many", ActionKind::RefactorExtract),
-            ("function.long", ActionKind::RefactorExtract),
-        ]
-    );
-    let metrics: Vec<(&str, MetricPer)> = manifest
-        .metrics
-        .iter()
-        .map(|m| (m.name.as_str(), m.per))
-        .collect();
-    assert_eq!(
-        metrics,
-        [
-            ("cyclomatic_max", MetricPer::Scope),
-            ("cognitive_max", MetricPer::Scope),
-            ("nesting_max", MetricPer::Scope),
-            ("params_max", MetricPer::Scope),
-            ("length_max", MetricPer::Scope),
-            ("cyclomatic", MetricPer::Symbol),
-            ("cognitive", MetricPer::Symbol),
-        ]
-    );
-    for spec in &manifest.findings {
-        assert_eq!(spec.evidence["type"], json!("object"), "{}", spec.kind);
-    }
 }
 
 #[test]

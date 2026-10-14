@@ -365,68 +365,58 @@ fn pairs(expected: &[(&str, &str)]) -> Vec<(String, String)> {
 use AssertionKind::{Custom, Equality, NotNull, Throws, Truthiness};
 use AssertionStrength::{Strong, Weak};
 
+/// How each finding kind's evidence schema falls short: it must inline its enums, require
+/// `remediation_mode` and `actionability`, and spell out the actionability levels.
+fn evidence_problems(manifest: &cupel_core::Manifest) -> Vec<String> {
+    let mut problems = Vec::new();
+    for spec in &manifest.findings {
+        let schema = Value::Object(spec.evidence.clone());
+        if schema.to_string().contains("$ref") {
+            problems.push(format!("{} refers to a definition", spec.kind));
+        }
+        let required = schema["required"].as_array().cloned().unwrap_or_default();
+        for field in ["remediation_mode", "actionability"] {
+            if !required.contains(&json!(field)) {
+                problems.push(format!("{} does not require {field}", spec.kind));
+            }
+        }
+        if schema["properties"]["actionability"]["enum"]
+            != json!(["mechanical", "guided", "judgment"])
+        {
+            problems.push(format!("{} misspells actionability", spec.kind));
+        }
+    }
+    problems
+}
+
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
     let registry = registry();
     let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
     assert_eq!(
-        manifest.needs,
-        [FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree]
-    );
-    assert_eq!(manifest.wants, [FactKind::Decisions]);
-    assert_eq!(manifest.tier.value(), 2);
-    assert_eq!(manifest.cost, cupel_core::CostClass::Quick);
-    let kinds: Vec<(&str, ActionKind)> = manifest
-        .findings
-        .iter()
-        .map(|spec| (spec.kind.as_str(), spec.action))
-        .collect();
-    assert_eq!(
-        kinds,
-        [
-            ("test.weak-assertion", ActionKind::StrengthenAssertion),
-            ("test.no-assertion", ActionKind::WriteTest),
-            ("test.mock-heavy", ActionKind::Review),
-            ("test.logic", ActionKind::RefactorExtract),
-            ("test.duplicate-setup", ActionKind::RefactorExtract),
-        ]
-    );
-    let metrics: Vec<(&str, MetricPer)> = manifest
-        .metrics
-        .iter()
-        .map(|m| (m.name.as_str(), m.per))
-        .collect();
-    assert_eq!(
-        metrics,
-        [
-            ("assertion_density", MetricPer::Scope),
-            ("weak_ratio", MetricPer::Scope),
-            ("no_assertion", MetricPer::Scope),
-            ("mock_density", MetricPer::Symbol),
-        ]
-    );
-    for spec in &manifest.findings {
-        let schema = Value::Object(spec.evidence.clone());
-        assert_eq!(schema["type"], json!("object"), "{}", spec.kind);
-        let text = schema.to_string();
-        assert!(!text.contains("$ref"), "{} inlines its enums", spec.kind);
-        for field in ["remediation_mode", "actionability"] {
-            assert!(
-                schema["required"]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!(field)),
-                "{} requires {field}",
-                spec.kind
-            );
+        support::Shape::of(manifest),
+        support::Shape {
+            needs: vec![FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree],
+            wants: vec![FactKind::Decisions],
+            tier: 2,
+            cost: cupel_core::CostClass::Quick,
+            kinds: vec![
+                ("test.weak-assertion", ActionKind::StrengthenAssertion),
+                ("test.no-assertion", ActionKind::WriteTest),
+                ("test.mock-heavy", ActionKind::Review),
+                ("test.logic", ActionKind::RefactorExtract),
+                ("test.duplicate-setup", ActionKind::RefactorExtract)
+            ],
+            metrics: vec![
+                ("assertion_density", MetricPer::Scope),
+                ("weak_ratio", MetricPer::Scope),
+                ("no_assertion", MetricPer::Scope),
+                ("mock_density", MetricPer::Symbol)
+            ],
+            evidence: vec!["object"; 5],
         }
-        assert_eq!(
-            schema["properties"]["actionability"]["enum"],
-            json!(["mechanical", "guided", "judgment"]),
-            "{}",
-            spec.kind
-        );
-    }
+    );
+    assert_eq!(evidence_problems(manifest), Vec::<String>::new());
 }
 
 #[test]
