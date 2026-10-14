@@ -8,7 +8,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix check clean-check install
+.PHONY: build test lint fmt doc matrix check clean-check dogfood install
 
 build:
 	$(CARGO) build --workspace
@@ -49,6 +49,15 @@ clean-check:
 		git status --porcelain --untracked-files=all >&2; \
 		exit 1; \
 	fi
+
+# Cupel grades itself with its own cupel.toml (plan §2.3, P2.10). The default is the changed
+# gate: everything that differs from the merge base with `main`. On `main` itself there is
+# nothing to diff against, so CI runs the tree gate there with `make dogfood DOGFOOD_SCOPE=tree`.
+# `--changed` needs a local `main` branch and the history back to the merge base.
+DOGFOOD_SCOPE ?= changed
+
+dogfood:
+	$(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed) --gate --format text
 
 install:
 	$(CARGO) install --path crates/cupel-cli
