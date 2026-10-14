@@ -8,7 +8,7 @@
       "id": "static.deps",
       "oracle": null,
       "score": {
-        "n": 19,
+        "n": 20,
         "unit": "cycles",
         "value": 1.0
       },
@@ -168,7 +168,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 27,
+      "files": 28,
       "languages": [
         "javascript"
       ],
@@ -176,7 +176,7 @@
       "roots": [
         "."
       ],
-      "symbols": 62
+      "symbols": 70
     },
     "seed": "<seed>",
     "started": "<timestamp>",

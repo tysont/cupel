@@ -219,6 +219,214 @@
               "span": {
                 "col": 5,
                 "end_col": 30,
+                "end_line": 7,
+                "line": 7
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "adds exactly",
+          "skip": null,
+          "span": {
+            "col": 22,
+            "end_col": 4,
+            "end_line": 8,
+            "line": 6
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 5,
+                "end_col": 57,
+                "end_line": 11,
+                "line": 11
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "rejects blank amounts",
+          "skip": null,
+          "span": {
+            "col": 31,
+            "end_col": 4,
+            "end_line": 12,
+            "line": 10
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 5,
+                "end_col": 35,
+                "end_line": 15,
+                "line": 15
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "returns something",
+          "skip": null,
+          "span": {
+            "col": 27,
+            "end_col": 4,
+            "end_line": 16,
+            "line": 14
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "runs without checking",
+          "skip": null,
+          "span": {
+            "col": 31,
+            "end_col": 4,
+            "end_line": 20,
+            "line": 18
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 30,
+                "end_line": 26,
+                "line": 26
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 17,
+                "end_col": 24,
+                "end_line": 23,
+                "line": 23
+              },
+              "target": "vi.fn"
+            },
+            {
+              "span": {
+                "col": 18,
+                "end_col": 25,
+                "end_line": 24,
+                "line": 24
+              },
+              "target": "vi.fn"
+            },
+            {
+              "span": {
+                "col": 19,
+                "end_col": 26,
+                "end_line": 25,
+                "line": 25
+              },
+              "target": "vi.fn"
+            }
+          ],
+          "name": "logs and mails every sum",
+          "skip": null,
+          "span": {
+            "col": 34,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 22
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 7,
+                "end_col": 40,
+                "end_line": 31,
+                "line": 31
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "counts every value in a range",
+          "skip": null,
+          "span": {
+            "col": 39,
+            "end_col": 4,
+            "end_line": 33,
+            "line": 29
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 41,
+                "end_line": 39,
+                "line": 39
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "keeps values in order",
+          "skip": null,
+          "span": {
+            "col": 31,
+            "end_col": 4,
+            "end_line": 40,
+            "line": 35
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 26,
+                "end_line": 47,
+                "line": 47
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "ends with the last sum",
+          "skip": null,
+          "span": {
+            "col": 32,
+            "end_col": 4,
+            "end_line": 48,
+            "line": 42
+          }
+        }
+      ],
+      "file": "test/math.quality.test.js",
+      "framework": "vitest",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 30,
                 "end_line": 15,
                 "line": 15
               },

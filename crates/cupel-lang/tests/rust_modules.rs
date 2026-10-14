@@ -58,8 +58,13 @@ fn the_fixture_graph_is_exactly_its_mod_and_use_edges() {
     let graph: ModuleGraph = produce("rust", &fixture("rust"));
     let roots: Vec<&str> = graph.roots.iter().map(|r| r.root.as_str()).collect();
     assert_eq!(roots, [".", "shapes"]);
+    // The integration test `QUALITY` has a test of its own.
+    let others: Vec<Row> = rows(&graph)
+        .into_iter()
+        .filter(|row| row.1 != QUALITY)
+        .collect();
     assert_eq!(
-        without_deps(rows(&graph)),
+        without_deps(others),
         [
             row(".", "src/account.rs", 1, "std::fmt", "external:std", false),
             row(
@@ -148,6 +153,30 @@ fn the_fixture_graph_is_exactly_its_mod_and_use_edges() {
                 "src/pricing.rs",
                 false
             ),
+        ]
+    );
+}
+
+const QUALITY: &str = "tests/quality_signals.rs";
+
+#[test]
+fn an_integration_test_imports_through_the_library_crate() {
+    let graph: ModuleGraph = produce("rust", &fixture("rust"));
+    let quality = |line: u32, specifier: &str, target: &str| {
+        row(".", QUALITY, line, specifier, target, false)
+    };
+    let edges: Vec<Row> = rows(&graph)
+        .into_iter()
+        .filter(|row| row.1 == QUALITY)
+        .collect();
+    assert_eq!(
+        edges,
+        [
+            quality(1, "ledger::balance", "src/lib.rs"),
+            quality(2, "ledger::decide::classify", "src/decide.rs"),
+            quality(3, "ledger::pricing::discounted", "src/pricing.rs"),
+            quality(3, "ledger::pricing::tally", "src/pricing.rs"),
+            quality(4, "ledger::Account", "src/lib.rs"),
         ]
     );
 }

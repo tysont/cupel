@@ -530,6 +530,182 @@
     },
     {
       "body": {
+        "col": 28,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
+      },
+      "display": "math.quality.adds exactly",
+      "file": "src/math.quality.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "adds exactly",
+      "namespace": "math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 22,
+        "end_col": 4,
+        "end_line": 7,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 4,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "math.quality.rejects non-finite sums",
+      "file": "src/math.quality.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "rejects non-finite sums",
+      "namespace": "math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 33,
+        "end_col": 4,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 4,
+        "end_line": 15,
+        "line": 13
+      },
+      "display": "math.quality.returns something",
+      "file": "src/math.quality.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "returns something",
+      "namespace": "math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 27,
+        "end_col": 4,
+        "end_line": 15,
+        "line": 13
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 19,
+        "line": 17
+      },
+      "display": "math.quality.runs without checking",
+      "file": "src/math.quality.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "runs without checking",
+      "namespace": "math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 19,
+        "line": 17
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 4,
+        "end_line": 26,
+        "line": 21
+      },
+      "display": "math.quality.logs and mails every sum",
+      "file": "src/math.quality.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "logs and mails every sum",
+      "namespace": "math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 34,
+        "end_col": 4,
+        "end_line": 26,
+        "line": 21
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 4,
+        "end_line": 32,
+        "line": 28
+      },
+      "display": "math.quality.counts every value in a range",
+      "file": "src/math.quality.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "counts every value in a range",
+      "namespace": "math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 39,
+        "end_col": 4,
+        "end_line": 32,
+        "line": 28
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 39,
+        "line": 34
+      },
+      "display": "math.quality.keeps values in order",
+      "file": "src/math.quality.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "keeps values in order",
+      "namespace": "math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 39,
+        "line": 34
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 4,
+        "end_line": 47,
+        "line": 41
+      },
+      "display": "math.quality.ends with the last sum",
+      "file": "src/math.quality.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "ends with the last sum",
+      "namespace": "math.quality",
+      "parameters": 0,
+      "span": {
+        "col": 32,
+        "end_col": 4,
+        "end_line": 47,
+        "line": 41
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 32,
         "end_col": 4,
         "end_line": 9,

@@ -195,7 +195,14 @@ fn testify_files_have_testify_assertions_snapshots_and_mocks() {
 fn files_without_test_cases_have_no_frames() {
     let frames = frames();
     let files: Vec<&str> = frames.files.iter().map(|f| f.file.as_str()).collect();
-    assert_eq!(files, ["ledger_test.go", "pricing_test.go"]);
+    assert_eq!(
+        files,
+        [
+            "ledger_quality_test.go",
+            "ledger_test.go",
+            "pricing_test.go"
+        ]
+    );
 }
 
 #[test]

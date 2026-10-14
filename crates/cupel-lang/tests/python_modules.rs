@@ -58,8 +58,12 @@ fn the_fixture_graph_is_exactly_its_import_edges() {
     let r = |from: &str, line: u32, specifier: &str, target: &str, relative: bool| {
         row(".", from, line, specifier, target, relative)
     };
+    let others: Vec<Row> = rows(&graph)
+        .into_iter()
+        .filter(|row| row.1 != QUALITY)
+        .collect();
     assert_eq!(
-        rows(&graph),
+        others,
         [
             r(
                 "src/deps_cycle/alpha.py",
@@ -127,6 +131,45 @@ fn the_fixture_graph_is_exactly_its_import_edges() {
             r(
                 pricing,
                 4,
+                "ledger.pricing.tally",
+                "src/ledger/pricing.py",
+                false
+            ),
+        ]
+    );
+}
+
+const QUALITY: &str = "tests/test_quality_signals.py";
+
+#[test]
+fn the_quality_test_module_imports_through_the_package() {
+    let graph: ModuleGraph = produce("python", &fixture("python"));
+    let (init, decide) = ("src/ledger/__init__.py", "src/ledger/decide.py");
+    let r = |from: &str, line: u32, specifier: &str, target: &str, relative: bool| {
+        row(".", from, line, specifier, target, relative)
+    };
+    let edges: Vec<Row> = rows(&graph)
+        .into_iter()
+        .filter(|row| row.1 == QUALITY)
+        .collect();
+    assert_eq!(
+        edges,
+        [
+            r(QUALITY, 1, "pytest", "external:pytest", false),
+            r(QUALITY, 3, "ledger.Account", init, false),
+            r(QUALITY, 3, "ledger.balance", init, false),
+            r(QUALITY, 4, "ledger.decide.classify", decide, false),
+            r(QUALITY, 4, "ledger.decide.require_positive", decide, false),
+            r(
+                QUALITY,
+                5,
+                "ledger.pricing.discounted",
+                "src/ledger/pricing.py",
+                false
+            ),
+            r(
+                QUALITY,
+                5,
                 "ledger.pricing.tally",
                 "src/ledger/pricing.py",
                 false

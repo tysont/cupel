@@ -29,6 +29,12 @@
         "support": {
           "status": "supported"
         }
+      },
+      {
+        "check": "tests.quality",
+        "support": {
+          "status": "supported"
+        }
       }
     ],
     "extensions": [

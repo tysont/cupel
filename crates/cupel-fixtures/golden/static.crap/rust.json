@@ -770,7 +770,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 22,
+      "files": 23,
       "languages": [
         "rust"
       ],
@@ -778,7 +778,7 @@
       "roots": [
         "."
       ],
-      "symbols": 52
+      "symbols": 60
     },
     "seed": "<seed>",
     "started": "<timestamp>",

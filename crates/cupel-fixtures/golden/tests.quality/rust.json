@@ -1,0 +1,631 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 11,
+      "id": "tests.quality",
+      "oracle": null,
+      "score": {
+        "n": 18,
+        "unit": "assertion_density",
+        "value": 0.8888888888888888
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `the_log_is_written_once` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 1,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_2ab704",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 59,
+        "file": "src/pricing.rs",
+        "line": 55
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_f3f073b792009390",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_2ab704 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "pricing::tests::the_log_is_written_once",
+        "hash": "sh_f3f073b792009390",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`pricing::tests::the_log_is_written_once` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `members_get_a_discount` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_0d973b",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 14,
+        "file": "tests/ledger.rs",
+        "line": 12
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_feba635c69be7992",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0d973b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::ledger::members_get_a_discount",
+        "hash": "sh_feba635c69be7992",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::ledger::members_get_a_discount` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `statements_mention_the_balance` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "not-null"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_ac5dc8",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "tests/ledger.rs",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_64ec2d6e500d357c",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ac5dc8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::ledger::statements_mention_the_balance",
+        "hash": "sh_64ec2d6e500d357c",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::ledger::statements_mention_the_balance` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `parsing_garbage_fails` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_241eb4",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "file": "tests/ledger.rs",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_9573d945b064949a",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_241eb4 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::ledger::parsing_garbage_fails",
+        "hash": "sh_9573d945b064949a",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::ledger::parsing_garbage_fails` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `statement_is_mailed` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_bfac6b",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 39,
+        "file": "tests/ledger.rs",
+        "line": 36
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_b52ab40661ec5ef5",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_bfac6b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::ledger::statement_is_mailed",
+        "hash": "sh_b52ab40661ec5ef5",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::ledger::statement_is_mailed` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `opening_an_account_does_not_panic` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_4747b2",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 44,
+        "file": "tests/ledger.rs",
+        "line": 42
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_a16ad1cddf1bae3b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_4747b2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::ledger::opening_an_account_does_not_panic",
+        "hash": "sh_a16ad1cddf1bae3b",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::ledger::opening_an_account_does_not_panic` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `statements_are_not_empty` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_f8901d",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 20,
+        "file": "tests/quality_signals.rs",
+        "line": 18
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_1a29af48e67df567",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_f8901d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::quality_signals::statements_are_not_empty",
+        "hash": "sh_1a29af48e67df567",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::quality_signals::statements_are_not_empty` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `classifying_runs` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_0ade5a",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 25,
+        "file": "tests/quality_signals.rs",
+        "line": 23
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_c78640804f6179a6",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0ade5a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::quality_signals::classifying_runs",
+        "hash": "sh_c78640804f6179a6",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::quality_signals::classifying_runs` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `tallies_are_logged_and_mailed`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 75,
+        "mock_density_max": 50,
+        "mocks": 3,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "MockLog",
+          "MockMailer",
+          "MockClock"
+        ]
+      },
+      "id": "fnd_54d6c2",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 33,
+        "file": "tests/quality_signals.rs",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_c2ac5a60bb987fc8",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_54d6c2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::quality_signals::tallies_are_logged_and_mailed",
+        "hash": "sh_c2ac5a60bb987fc8",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::quality_signals::tallies_are_logged_and_mailed` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `every_entry_counts_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 0,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 1,
+        "remediation_mode": "simplify"
+      },
+      "id": "fnd_73dbaa",
+      "kind": "test.logic",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 40,
+        "file": "tests/quality_signals.rs",
+        "line": 36
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_4bc3114da72a23bb",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_73dbaa --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::quality_signals::every_entry_counts_toward_the_balance",
+        "hash": "sh_4bc3114da72a23bb",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::quality_signals::every_entry_counts_toward_the_balance` contains logic: 1 loop(s) or branch(es) (max 0)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `display_shows_owner_and_balance`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          43,
+          51
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 3,
+        "statements": 3,
+        "tests": [
+          "tests::quality_signals::display_shows_owner_and_balance",
+          "tests::quality_signals::statements_show_the_balance"
+        ]
+      },
+      "id": "fnd_deba8c",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "tests/quality_signals.rs",
+        "line": 43
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_737418a87a261c83",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_deba8c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::quality_signals::display_shows_owner_and_balance",
+        "hash": "sh_737418a87a261c83",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::quality_signals::display_shows_owner_and_balance` and 1 other test(s) repeat the same 3 leading statements"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_2ab704",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Add an assertion to `the_log_is_written_once` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_0d973b",
+      "kind": "strengthen_assertion",
+      "priority": 2,
+      "summary": "Replace the truthiness, presence, or inequality checks in `members_get_a_discount` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ac5dc8",
+      "kind": "strengthen_assertion",
+      "priority": 3,
+      "summary": "Replace the truthiness, presence, or inequality checks in `statements_mention_the_balance` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_241eb4",
+      "kind": "strengthen_assertion",
+      "priority": 4,
+      "summary": "Replace the truthiness, presence, or inequality checks in `parsing_garbage_fails` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_bfac6b",
+      "kind": "strengthen_assertion",
+      "priority": 5,
+      "summary": "Replace the truthiness, presence, or inequality checks in `statement_is_mailed` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_4747b2",
+      "kind": "write_test",
+      "priority": 6,
+      "summary": "Add an assertion to `opening_an_account_does_not_panic` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_f8901d",
+      "kind": "strengthen_assertion",
+      "priority": 7,
+      "summary": "Replace the truthiness, presence, or inequality checks in `statements_are_not_empty` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_0ade5a",
+      "kind": "write_test",
+      "priority": 8,
+      "summary": "Add an assertion to `classifying_runs` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_54d6c2",
+      "kind": "review",
+      "priority": 9,
+      "summary": "Use real collaborators or simple fakes for some of the doubles in `tallies_are_logged_and_mailed`, or split it, so it checks behavior rather than wiring."
+    },
+    {
+      "command": null,
+      "finding": "fnd_73dbaa",
+      "kind": "refactor_extract",
+      "priority": 10,
+      "summary": "Split `every_entry_counts_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+    }
+  ],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.crap": {
+            "no_coverage": true
+          },
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 23,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 60
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 11
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 11,
+  "truncated": false
+}

@@ -387,6 +387,214 @@
           "line": 8
         }
       ]
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 41,
+                "end_line": 9,
+                "line": 9
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_members_pay_exactly_the_discounted_price",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 41,
+            "end_line": 9,
+            "line": 8
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 10,
+                "end_col": 35,
+                "end_line": 13,
+                "line": 13
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_negative_amounts_are_rejected",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 29,
+            "end_line": 14,
+            "line": 12
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 5,
+                "end_col": 38,
+                "end_line": 18,
+                "line": 18
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "test_statements_are_not_empty",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 38,
+            "end_line": 18,
+            "line": 17
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "test_classifying_runs",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 25,
+            "end_line": 22,
+            "line": 21
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 39,
+                "end_line": 29,
+                "line": 29
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 5,
+                "end_col": 45,
+                "end_line": 26,
+                "line": 26
+              },
+              "target": "ledger.pricing.log_total"
+            },
+            {
+              "span": {
+                "col": 5,
+                "end_col": 46,
+                "end_line": 27,
+                "line": 27
+              },
+              "target": "ledger.pricing.mail_total"
+            },
+            {
+              "span": {
+                "col": 5,
+                "end_col": 41,
+                "end_line": 28,
+                "line": 28
+              },
+              "target": "ledger.pricing.clock"
+            }
+          ],
+          "name": "test_tallies_are_logged_and_mailed",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 39,
+            "end_line": 29,
+            "line": 25
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 41,
+                "end_line": 34,
+                "line": 34
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_every_entry_counts_toward_the_balance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 41,
+            "end_line": 34,
+            "line": 32
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 34,
+                "end_line": 41,
+                "line": 41
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_deposits_keep_the_owner",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 34,
+            "end_line": 41,
+            "line": 37
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 24,
+                "end_line": 49,
+                "line": 49
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_deposits_accumulate",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 24,
+            "end_line": 49,
+            "line": 44
+          }
+        }
+      ],
+      "file": "tests/test_quality_signals.py",
+      "framework": "pytest",
+      "setup": []
     }
   ]
 }

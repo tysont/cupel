@@ -839,6 +839,102 @@
         "end_line": 23,
         "line": 21
       }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_members_pay_exactly_the_discounted_price",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 9,
+        "line": 8
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_negative_amounts_are_rejected",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 14,
+        "line": 12
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_statements_are_not_empty",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 38,
+        "end_line": 18,
+        "line": 17
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_classifying_runs",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 22,
+        "line": 21
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_tallies_are_logged_and_mailed",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 25
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_every_entry_counts_toward_the_balance",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 34,
+        "line": 32
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_deposits_keep_the_owner",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 34,
+        "end_line": 41,
+        "line": 37
+      }
+    },
+    {
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "path": "tests.test_quality_signals.test_deposits_accumulate",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 49,
+        "line": 44
+      }
     }
   ]
 }

@@ -256,6 +256,214 @@
       "file": "tests/ledger.rs",
       "framework": "rust-test",
       "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 48,
+                "end_line": 8,
+                "line": 8
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "members_pay_exactly_the_discounted_price",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 9,
+            "line": 7
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 1,
+                "end_col": 39,
+                "end_line": 12,
+                "line": 12
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "overflowing_balances_panic",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 15,
+            "line": 13
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 5,
+                "end_col": 57,
+                "end_line": 19,
+                "line": 19
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "statements_are_not_empty",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 20,
+            "line": 18
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "classifying_runs",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 25,
+            "line": 23
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 43,
+                "end_line": 32,
+                "line": 32
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 16,
+                "end_col": 30,
+                "end_line": 29,
+                "line": 29
+              },
+              "target": "MockLog"
+            },
+            {
+              "span": {
+                "col": 19,
+                "end_col": 36,
+                "end_line": 30,
+                "line": 30
+              },
+              "target": "MockMailer"
+            },
+            {
+              "span": {
+                "col": 18,
+                "end_col": 34,
+                "end_line": 31,
+                "line": 31
+              },
+              "target": "MockClock"
+            }
+          ],
+          "name": "tallies_are_logged_and_mailed",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 33,
+            "line": 28
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 45,
+                "end_line": 38,
+                "line": 38
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "every_entry_counts_toward_the_balance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 40,
+            "line": 36
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 49,
+                "end_line": 47,
+                "line": 47
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "display_shows_owner_and_balance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 48,
+            "line": 43
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 58,
+                "end_line": 56,
+                "line": 56
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "statements_show_the_balance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 57,
+            "line": 51
+          }
+        }
+      ],
+      "file": "tests/quality_signals.rs",
+      "framework": "rust-test",
+      "setup": []
     }
   ]
 }

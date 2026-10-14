@@ -371,6 +371,70 @@
     {
       "reason": "test",
       "symbol": {
+        "col": 22,
+        "file": "test/math.quality.test.js",
+        "line": 6
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 10
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 27,
+        "file": "test/math.quality.test.js",
+        "line": 14
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 18
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 34,
+        "file": "test/math.quality.test.js",
+        "line": 22
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 39,
+        "file": "test/math.quality.test.js",
+        "line": 29
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 31,
+        "file": "test/math.quality.test.js",
+        "line": 35
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 32,
+        "file": "test/math.quality.test.js",
+        "line": 42
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
         "col": 26,
         "file": "test/math.test.js",
         "line": 14

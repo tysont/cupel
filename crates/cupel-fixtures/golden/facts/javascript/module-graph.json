@@ -212,6 +212,36 @@
           }
         },
         {
+          "from": "test/math.quality.test.js",
+          "line": 1,
+          "relative": false,
+          "specifier": "vitest",
+          "target": {
+            "kind": "external",
+            "package": "vitest"
+          }
+        },
+        {
+          "from": "test/math.quality.test.js",
+          "line": 2,
+          "relative": true,
+          "specifier": "../src/math.js",
+          "target": {
+            "kind": "file",
+            "path": "src/math.js"
+          }
+        },
+        {
+          "from": "test/math.quality.test.js",
+          "line": 3,
+          "relative": true,
+          "specifier": "../src/decide.js",
+          "target": {
+            "kind": "file",
+            "path": "src/decide.js"
+          }
+        },
+        {
           "from": "test/math.test.js",
           "line": 1,
           "relative": false,

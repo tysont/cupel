@@ -23,6 +23,7 @@ checks
   static.crap        supported
   static.dead-code   supported
   static.deps        supported
+  tests.quality      supported
 
 toolchain
   launchers

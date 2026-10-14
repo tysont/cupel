@@ -8,7 +8,8 @@
     "consumers": [
       "static.complexity",
       "static.crap",
-      "static.dead-code"
+      "static.dead-code",
+      "tests.quality"
     ],
     "kind": "symbols",
     "producers": [

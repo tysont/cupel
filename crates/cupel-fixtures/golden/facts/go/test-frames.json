@@ -7,6 +7,214 @@
             {
               "kind": "equality",
               "span": {
+                "col": 2,
+                "end_col": 57,
+                "end_line": 10,
+                "line": 10
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestMembersPayExactlyTheDiscountedPrice",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 11,
+            "line": 9
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 2,
+                "end_col": 34,
+                "end_line": 15,
+                "line": 15
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestBlankAmountsAreRejected",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 16,
+            "line": 13
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 2,
+                "end_col": 51,
+                "end_line": 19,
+                "line": 19
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "TestStatementsAreNotEmpty",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 20,
+            "line": 18
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "TestClassifyingRuns",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 24,
+            "line": 22
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 2,
+                "end_col": 48,
+                "end_line": 30,
+                "line": 30
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 14,
+                "end_col": 28,
+                "end_line": 27,
+                "line": 27
+              },
+              "target": "MockNotifier"
+            },
+            {
+              "span": {
+                "col": 13,
+                "end_col": 27,
+                "end_line": 28,
+                "line": 28
+              },
+              "target": "MockNotifier"
+            },
+            {
+              "span": {
+                "col": 12,
+                "end_col": 26,
+                "end_line": 29,
+                "line": 29
+              },
+              "target": "MockNotifier"
+            }
+          ],
+          "name": "TestMailGoesThroughEveryNotifier",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 32,
+            "line": 26
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 50,
+                "end_line": 36,
+                "line": 36
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestEveryEntryCountsTowardTheBalance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 38,
+            "line": 34
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 2,
+                "end_col": 39,
+                "end_line": 44,
+                "line": 44
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestDepositsKeepTheOwner",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 45,
+            "line": 40
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 2,
+                "end_col": 36,
+                "end_line": 52,
+                "line": 52
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "TestDepositsAccumulate",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 53,
+            "line": 47
+          }
+        }
+      ],
+      "file": "ledger_quality_test.go",
+      "framework": "testify",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
                 "col": 3,
                 "end_col": 47,
                 "end_line": 18,

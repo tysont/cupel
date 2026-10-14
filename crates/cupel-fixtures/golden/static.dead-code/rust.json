@@ -8,7 +8,7 @@
       "id": "static.dead-code",
       "oracle": null,
       "score": {
-        "n": 52,
+        "n": 60,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -586,7 +586,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 22,
+      "files": 23,
       "languages": [
         "rust"
       ],
@@ -594,7 +594,7 @@
       "roots": [
         "."
       ],
-      "symbols": 52
+      "symbols": 60
     },
     "seed": "<seed>",
     "started": "<timestamp>",

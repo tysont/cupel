@@ -172,6 +172,26 @@
           }
         },
         {
+          "from": "src/math.quality.test.ts",
+          "line": 1,
+          "relative": false,
+          "specifier": "vitest",
+          "target": {
+            "kind": "external",
+            "package": "vitest"
+          }
+        },
+        {
+          "from": "src/math.quality.test.ts",
+          "line": 2,
+          "relative": true,
+          "specifier": "./math",
+          "target": {
+            "kind": "file",
+            "path": "src/math.ts"
+          }
+        },
+        {
           "from": "src/math.test.ts",
           "line": 1,
           "relative": false,

@@ -1451,6 +1451,182 @@
         "line": 21
       },
       "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 41,
+        "end_line": 9,
+        "line": 9
+      },
+      "display": "tests.test_quality_signals.test_members_pay_exactly_the_discounted_price",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_members_pay_exactly_the_discounted_price",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 9,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 29,
+        "end_line": 14,
+        "line": 13
+      },
+      "display": "tests.test_quality_signals.test_negative_amounts_are_rejected",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_negative_amounts_are_rejected",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 14,
+        "line": 12
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 38,
+        "end_line": 18,
+        "line": 18
+      },
+      "display": "tests.test_quality_signals.test_statements_are_not_empty",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_statements_are_not_empty",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 38,
+        "end_line": 18,
+        "line": 17
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 25,
+        "end_line": 22,
+        "line": 22
+      },
+      "display": "tests.test_quality_signals.test_classifying_runs",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_classifying_runs",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 22,
+        "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 26
+      },
+      "display": "tests.test_quality_signals.test_tallies_are_logged_and_mailed",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_tallies_are_logged_and_mailed",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 41,
+        "end_line": 34,
+        "line": 33
+      },
+      "display": "tests.test_quality_signals.test_every_entry_counts_toward_the_balance",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_every_entry_counts_toward_the_balance",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 34,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 34,
+        "end_line": 41,
+        "line": 38
+      },
+      "display": "tests.test_quality_signals.test_deposits_keep_the_owner",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_deposits_keep_the_owner",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 34,
+        "end_line": 41,
+        "line": 37
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 24,
+        "end_line": 49,
+        "line": 45
+      },
+      "display": "tests.test_quality_signals.test_deposits_accumulate",
+      "file": "tests/test_quality_signals.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_deposits_accumulate",
+      "namespace": "tests.test_quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 49,
+        "line": 44
+      },
+      "visibility": "public"
     }
   ]
 }

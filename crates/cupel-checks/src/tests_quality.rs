@@ -1,0 +1,672 @@
+// ABOUTME: `tests.quality`: SCRAP-style test-code quality from TestFrames, Symbols, NormTree, and Decisions:
+// ABOUTME: weak or missing assertions, mock-heavy tests, logic in tests, and duplicated setup (ADR-054/055).
+use std::collections::{BTreeMap, BTreeSet, HashMap};
+
+use cupel_core::syntax::{
+    AssertionStrength, Decision, DecisionKind, Decisions, NormNode, NormTree, SymbolDef, SymbolKey,
+    Symbols, TestCase, TestFile, TestFrames,
+};
+use cupel_core::{
+    ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Error, Event,
+    EventSink, FactKind, Facts, Finding, FindingKindSpec, Manifest, MetricSpec, Plan, Result,
+    Scope, Score, Severity, Stability, SymbolHash, Tier,
+};
+use schemars::JsonSchema;
+use serde::Serialize;
+use serde_json::{Map, Value};
+
+use crate::finding::SymbolFinding;
+use crate::settings::Limits;
+
+const ID: &str = "tests.quality";
+
+/// The settings and their defaults (ADR-054). A finding fires when a value exceeds its maximum.
+const LIMITS: Limits = Limits::new(&[
+    ("mock_density_max", 50),
+    ("mocks_min", 2),
+    ("logic_max", 0),
+    ("setup_statements_min", 3),
+]);
+
+/// How a finding is fixed, after SCRAP's remediation modes.
+#[derive(Clone, Copy, Serialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+#[schemars(inline)]
+enum RemediationMode {
+    Strengthen,
+    AddAssertion,
+    Decouple,
+    Simplify,
+    ExtractFixture,
+}
+
+/// How much understanding the fix needs, after SCRAP's actionability classes for an assistant.
+#[derive(Clone, Copy, Serialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+#[schemars(inline)]
+enum Actionability {
+    Mechanical,
+    Guided,
+    Judgment,
+}
+
+/// Evidence of `test.weak-assertion`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct WeakAssertion {
+    remediation_mode: RemediationMode,
+    actionability: Actionability,
+    /// Assertions in the test.
+    assertions: u32,
+    /// Of those, the weak ones: every one.
+    weak: u32,
+    /// The distinct semantic kinds of its assertions.
+    kinds: Vec<String>,
+}
+
+/// Evidence of `test.no-assertion`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct NoAssertion {
+    remediation_mode: RemediationMode,
+    actionability: Actionability,
+    /// Test doubles in the test.
+    mocks: u32,
+    /// Whether the test is marked skipped.
+    skipped: bool,
+}
+
+/// Evidence of `test.mock-heavy`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct MockHeavy {
+    remediation_mode: RemediationMode,
+    actionability: Actionability,
+    mocks: u32,
+    assertions: u32,
+    /// Doubles as a percentage of doubles plus assertions, rounded down.
+    density: u32,
+    mock_density_max: u32,
+    mocks_min: u32,
+    /// What each double replaces, as written.
+    targets: Vec<String>,
+}
+
+/// Evidence of `test.logic`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct TestLogic {
+    remediation_mode: RemediationMode,
+    actionability: Actionability,
+    /// Loops, plus alternatives, plus branches beyond the guards.
+    logic: u32,
+    logic_max: u32,
+    loops: u32,
+    /// `if` and `else if` branches.
+    branches: u32,
+    /// Switch cases, conditional expressions, and exception handlers.
+    alternatives: u32,
+    /// Branches that may be guarded failure calls or skips: one per assertion and skip marker.
+    guards: u32,
+}
+
+/// Evidence of `test.duplicate-setup`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct DuplicateSetup {
+    remediation_mode: RemediationMode,
+    actionability: Actionability,
+    /// Leading statements every test in the group repeats.
+    statements: u32,
+    setup_statements_min: u32,
+    /// Each test in the group, in file order.
+    tests: Vec<String>,
+    /// The first line of each test in the group.
+    lines: Vec<u32>,
+}
+
+pub struct TestsQuality {
+    manifest: Manifest,
+}
+
+impl TestsQuality {
+    pub fn new() -> Self {
+        Self {
+            manifest: Manifest {
+                id: CheckId::from(ID),
+                version: 1,
+                tier: Tier::try_from(2).expect("tier 2 exists"),
+                cost: CostClass::Quick,
+                needs: vec![FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree],
+                wants: vec![FactKind::Decisions],
+                findings: vec![
+                    kind::<WeakAssertion>(
+                        "test.weak-assertion",
+                        ActionKind::StrengthenAssertion,
+                        "Every assertion in the test is weak: truthiness, presence, inequality, or \
+                         a partial match.",
+                    ),
+                    kind::<NoAssertion>(
+                        "test.no-assertion",
+                        ActionKind::WriteTest,
+                        "The test asserts nothing; an expected panic, raise, or throw counts as an \
+                         assertion.",
+                    ),
+                    kind::<MockHeavy>(
+                        "test.mock-heavy",
+                        ActionKind::Review,
+                        "At least mocks_min test doubles, making up more than mock_density_max \
+                         percent of the test's doubles and assertions.",
+                    ),
+                    kind::<TestLogic>(
+                        "test.logic",
+                        ActionKind::RefactorExtract,
+                        "More than logic_max loops, alternatives, and branches beyond guarded \
+                         assertions inside a test body.",
+                    ),
+                    kind::<DuplicateSetup>(
+                        "test.duplicate-setup",
+                        ActionKind::RefactorExtract,
+                        "Tests in one file repeat the same setup_statements_min or more leading \
+                         statements.",
+                    ),
+                ],
+                metrics: vec![
+                    metric(
+                        "assertion_density",
+                        "Assertions per test in scope; the score.",
+                    ),
+                    metric(
+                        "weak_ratio",
+                        "Weak assertions as a share of all assertions in scope.",
+                    ),
+                    metric("no_assertion", "Tests in scope that assert nothing."),
+                ],
+                stability: Stability::Experimental,
+                summary: "SCRAP-style test quality: assertion density, weak and missing \
+                          assertions, mock density, logic in tests, and duplicated setup."
+                    .to_owned(),
+            },
+        }
+    }
+}
+
+impl Check for TestsQuality {
+    fn manifest(&self) -> &Manifest {
+        &self.manifest
+    }
+
+    fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
+        LIMITS.read(&self.manifest.id, &ctx.config)?;
+        let targets = scope.symbols.as_ref().map_or(0, |keys| keys.len() as u64);
+        Ok(Plan::estimate(self.manifest.cost, targets))
+    }
+
+    #[expect(
+        clippy::cast_precision_loss,
+        reason = "assertion and test counts stay far below 2^52, where f64 is exact"
+    )]
+    fn run(
+        &self,
+        ctx: &CheckCtx,
+        facts: &Facts,
+        _: &Plan,
+        sink: &mut dyn EventSink,
+    ) -> Result<CheckResult> {
+        let limits = Settings::read(&self.manifest.id, &ctx.config)?;
+        let symbols: HashMap<SymbolKey, &SymbolDef> = facts
+            .get::<Symbols>()?
+            .symbols
+            .iter()
+            .map(|symbol| (symbol.key(), symbol))
+            .collect();
+        let trees: HashMap<&SymbolKey, (&SymbolHash, &NormNode)> = facts
+            .get::<NormTree>()?
+            .symbols
+            .iter()
+            .map(|entry| (&entry.symbol, (&entry.hash, &entry.root)))
+            .collect();
+        // Decisions are wanted: without them every kind but `test.logic` still reports.
+        let decisions: Option<HashMap<&SymbolKey, &[Decision]>> = match facts.get::<Decisions>() {
+            Ok(decisions) => Some(
+                decisions
+                    .symbols
+                    .iter()
+                    .map(|entry| (&entry.symbol, entry.decisions.as_slice()))
+                    .collect(),
+            ),
+            Err(Error::AbsentFact { .. }) => None,
+            Err(error) => return Err(error),
+        };
+        let mut tests = 0_u64;
+        let mut assertions = 0_u64;
+        let mut findings = 0;
+        let mut emit = |finding: Finding| {
+            findings += 1;
+            sink.emit(Event::Finding(Box::new(finding)));
+        };
+        for file in &facts.get::<TestFrames>()?.files {
+            let mut candidates = Vec::new();
+            for case in &file.cases {
+                let key = key_of(file, case);
+                if !ctx.scope.includes(&key) {
+                    continue;
+                }
+                ctx.cancel.checkpoint()?;
+                tests += 1;
+                assertions += case.assertions.len() as u64;
+                // A case without a symbol or structural hash cannot be identified, so it is
+                // measured but not reported; every language's test cases are symbols (ADR-054).
+                let (Some(symbol), Some((hash, root))) = (symbols.get(&key), trees.get(&key))
+                else {
+                    continue;
+                };
+                let subject = Subject { symbol, hash };
+                let logic = decisions.as_ref().map(|by_symbol| {
+                    LogicCount::of(case, by_symbol.get(&key).copied().unwrap_or_default())
+                });
+                for finding in self.case_findings(&subject, case, logic.as_ref(), &limits) {
+                    emit(finding);
+                }
+                candidates.push((subject, statements(root)));
+            }
+            for finding in self.duplicate_setup(&candidates, &limits) {
+                emit(finding);
+            }
+        }
+        Ok(CheckResult {
+            id: self.manifest.id.clone(),
+            status: if findings == 0 {
+                CheckStatus::Pass
+            } else {
+                CheckStatus::Fail
+            },
+            tier: self.manifest.tier,
+            cost: self.manifest.cost,
+            score: Some(Score {
+                value: if tests == 0 {
+                    0.0
+                } else {
+                    assertions as f64 / tests as f64
+                },
+                unit: "assertion_density".to_owned(),
+                n: tests,
+            }),
+            delta: None,
+            findings,
+            duration_ms: 0,
+            skipped: None,
+            oracle: None,
+        })
+    }
+}
+
+/// The key of the symbol a test case is: the case's node is the symbol's node (ADR-030, ADR-054).
+fn key_of(file: &TestFile, case: &TestCase) -> SymbolKey {
+    SymbolKey {
+        file: file.file.clone(),
+        line: case.span.line,
+        col: case.span.col,
+    }
+}
+
+/// The configured thresholds (ADR-054).
+struct Settings {
+    mock_density_max: u32,
+    mocks_min: u32,
+    logic_max: u32,
+    setup_statements_min: u32,
+}
+
+impl Settings {
+    fn read(check: &CheckId, config: &Map<String, Value>) -> Result<Self> {
+        let values = LIMITS.read(check, config)?;
+        let value = |name: &str| values.get(name).copied().unwrap_or(u32::MAX);
+        Ok(Self {
+            mock_density_max: value("mock_density_max"),
+            mocks_min: value("mocks_min"),
+            logic_max: value("logic_max"),
+            setup_statements_min: value("setup_statements_min"),
+        })
+    }
+}
+
+/// The test symbol a finding is about.
+struct Subject<'a> {
+    symbol: &'a SymbolDef,
+    hash: &'a SymbolHash,
+}
+
+/// A test's control flow, from its decisions (ADR-054).
+struct LogicCount {
+    loops: u32,
+    branches: u32,
+    alternatives: u32,
+    guards: u32,
+}
+
+impl LogicCount {
+    fn of(case: &TestCase, decisions: &[Decision]) -> Self {
+        let of_kinds = |kinds: &[DecisionKind]| {
+            count(
+                decisions
+                    .iter()
+                    .filter(|decision| kinds.contains(&decision.kind)),
+            )
+        };
+        Self {
+            loops: of_kinds(&[DecisionKind::Loop]),
+            branches: of_kinds(&[DecisionKind::Branch]),
+            alternatives: of_kinds(&[
+                DecisionKind::Case,
+                DecisionKind::Ternary,
+                DecisionKind::Catch,
+            ]),
+            guards: count(case.assertions.iter()) + u32::from(case.skip.is_some()),
+        }
+    }
+
+    /// Loops and alternatives, plus the branches that cannot all be guarded failure calls or
+    /// guarded skips.
+    fn logic(&self) -> u32 {
+        self.loops + self.alternatives + self.branches.saturating_sub(self.guards)
+    }
+}
+
+impl TestsQuality {
+    fn case_findings(
+        &self,
+        subject: &Subject<'_>,
+        case: &TestCase,
+        logic: Option<&LogicCount>,
+        limits: &Settings,
+    ) -> Vec<Finding> {
+        [
+            self.weak_assertion(subject, case),
+            self.no_assertion(subject, case),
+            self.mock_heavy(subject, case, limits),
+            logic.and_then(|logic| self.logic(subject, logic, limits)),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
+    }
+
+    fn weak_assertion(&self, subject: &Subject<'_>, case: &TestCase) -> Option<Finding> {
+        let weak = case
+            .assertions
+            .iter()
+            .all(|assertion| assertion.strength == AssertionStrength::Weak);
+        (weak && !case.assertions.is_empty()).then(|| {
+            let kinds: BTreeSet<String> = case
+                .assertions
+                .iter()
+                .filter_map(|assertion| match serde_json::to_value(assertion.kind) {
+                    Ok(Value::String(kind)) => Some(kind),
+                    _ => None,
+                })
+                .collect();
+            let assertions = count(case.assertions.iter());
+            self.report(
+                subject,
+                "test.weak-assertion",
+                format!(
+                    "`{}` asserts only weakly: {assertions} weak assertion(s), none pinning a value",
+                    subject.symbol.display
+                ),
+                evidence(&WeakAssertion {
+                    remediation_mode: RemediationMode::Strengthen,
+                    actionability: Actionability::Guided,
+                    assertions,
+                    weak: assertions,
+                    kinds: kinds.into_iter().collect(),
+                }),
+                format!(
+                    "Replace the truthiness, presence, or inequality checks in `{}` with an \
+                     assertion that pins the expected value.",
+                    subject.symbol.name
+                ),
+            )
+        })
+    }
+
+    fn no_assertion(&self, subject: &Subject<'_>, case: &TestCase) -> Option<Finding> {
+        case.assertions.is_empty().then(|| {
+            self.report(
+                subject,
+                "test.no-assertion",
+                format!("`{}` asserts nothing", subject.symbol.display),
+                evidence(&NoAssertion {
+                    remediation_mode: RemediationMode::AddAssertion,
+                    actionability: Actionability::Guided,
+                    mocks: count(case.mocks.iter()),
+                    skipped: case.skip.is_some(),
+                }),
+                format!(
+                    "Add an assertion to `{}` that pins the outcome it exercises.",
+                    subject.symbol.name
+                ),
+            )
+        })
+    }
+
+    fn mock_heavy(
+        &self,
+        subject: &Subject<'_>,
+        case: &TestCase,
+        limits: &Settings,
+    ) -> Option<Finding> {
+        let mocks = count(case.mocks.iter());
+        let assertions = count(case.assertions.iter());
+        let density = (100 * mocks).checked_div(mocks + assertions).unwrap_or(0);
+        (mocks >= limits.mocks_min && density > limits.mock_density_max).then(|| {
+            self.report(
+                subject,
+                "test.mock-heavy",
+                format!(
+                    "`{}` is mock-heavy: {mocks} doubles and {assertions} assertion(s), {density}% \
+                     doubles (max {}%)",
+                    subject.symbol.display, limits.mock_density_max
+                ),
+                evidence(&MockHeavy {
+                    remediation_mode: RemediationMode::Decouple,
+                    actionability: Actionability::Judgment,
+                    mocks,
+                    assertions,
+                    density,
+                    mock_density_max: limits.mock_density_max,
+                    mocks_min: limits.mocks_min,
+                    targets: case.mocks.iter().map(|mock| mock.target.clone()).collect(),
+                }),
+                format!(
+                    "Use real collaborators or simple fakes for some of the doubles in `{}`, or \
+                     split it, so it checks behavior rather than wiring.",
+                    subject.symbol.name
+                ),
+            )
+        })
+    }
+
+    fn logic(
+        &self,
+        subject: &Subject<'_>,
+        logic: &LogicCount,
+        limits: &Settings,
+    ) -> Option<Finding> {
+        let total = logic.logic();
+        (total > limits.logic_max).then(|| {
+            self.report(
+                subject,
+                "test.logic",
+                format!(
+                    "`{}` contains logic: {total} loop(s) or branch(es) (max {})",
+                    subject.symbol.display, limits.logic_max
+                ),
+                evidence(&TestLogic {
+                    remediation_mode: RemediationMode::Simplify,
+                    actionability: Actionability::Guided,
+                    logic: total,
+                    logic_max: limits.logic_max,
+                    loops: logic.loops,
+                    branches: logic.branches,
+                    alternatives: logic.alternatives,
+                    guards: logic.guards,
+                }),
+                format!(
+                    "Split `{}` into one test per path, or parametrize it, so the test body \
+                     neither loops nor branches.",
+                    subject.symbol.name
+                ),
+            )
+        })
+    }
+
+    /// One finding per group of a file's tests that repeat the same leading statements, about
+    /// the group's first test (ADR-055).
+    fn duplicate_setup(
+        &self,
+        candidates: &[(Subject<'_>, &[NormNode])],
+        limits: &Settings,
+    ) -> Vec<Finding> {
+        let min = limits.setup_statements_min as usize;
+        let mut groups: BTreeMap<String, Vec<&(Subject<'_>, &[NormNode])>> = BTreeMap::new();
+        for candidate in candidates {
+            let body = candidate.1;
+            // Something must follow the repeated part, and an empty prefix repeats trivially.
+            if min == 0 || body.len() <= min {
+                continue;
+            }
+            let prefix = serde_json::to_string(&body[..min]).unwrap_or_default();
+            groups.entry(prefix).or_default().push(candidate);
+        }
+        let mut groups: Vec<_> = groups
+            .into_values()
+            .filter(|members| members.len() > 1)
+            .collect();
+        groups.sort_by_key(|members| members[0].0.symbol.span.line);
+        groups
+            .into_iter()
+            .map(|mut members| {
+                members.sort_by_key(|(subject, _)| subject.symbol.span.line);
+                let shortest = members
+                    .iter()
+                    .map(|(_, body)| body.len())
+                    .min()
+                    .unwrap_or(0);
+                let first = members[0].1;
+                let shared = (min..shortest - 1)
+                    .take_while(|&at| members.iter().all(|(_, body)| body[at] == first[at]))
+                    .count()
+                    + min;
+                let statements = u32::try_from(shared).unwrap_or(u32::MAX);
+                let subject = &members[0].0;
+                let others = members.len() - 1;
+                self.report(
+                    subject,
+                    "test.duplicate-setup",
+                    format!(
+                        "`{}` and {others} other test(s) repeat the same {statements} leading \
+                         statements",
+                        subject.symbol.display
+                    ),
+                    evidence(&DuplicateSetup {
+                        remediation_mode: RemediationMode::ExtractFixture,
+                        actionability: Actionability::Mechanical,
+                        statements,
+                        setup_statements_min: limits.setup_statements_min,
+                        tests: members
+                            .iter()
+                            .map(|(member, _)| member.symbol.display.clone())
+                            .collect(),
+                        lines: members
+                            .iter()
+                            .map(|(member, _)| member.symbol.span.line)
+                            .collect(),
+                    }),
+                    format!(
+                        "Extract the {statements} leading statements these tests share into a \
+                         fixture or setup helper, starting from `{}`.",
+                        subject.symbol.name
+                    ),
+                )
+            })
+            .collect()
+    }
+
+    /// A `warn` finding of `kind` about the subject, with the action its manifest maps it to.
+    fn report(
+        &self,
+        subject: &Subject<'_>,
+        kind: &'static str,
+        title: String,
+        evidence: Value,
+        summary: String,
+    ) -> Finding {
+        let action = self
+            .manifest
+            .findings
+            .iter()
+            .find(|spec| spec.kind == kind)
+            .map_or(ActionKind::Review, |spec| spec.action);
+        SymbolFinding {
+            check: &self.manifest.id,
+            kind,
+            symbol: subject.symbol,
+            hash: subject.hash,
+            severity: Severity::Warn,
+            tier: self.manifest.tier,
+            title,
+            evidence,
+            action,
+            summary,
+        }
+        .finding()
+    }
+}
+
+/// The top-level statements of a symbol's body (ADR-055): the children of the tree's last child,
+/// or of that child's only child when the body wraps its statements in one list node. A list
+/// holding a leaf is a single statement's parts, not statements, and yields none.
+fn statements(root: &NormNode) -> &[NormNode] {
+    let Some(body) = root.children.last() else {
+        return &[];
+    };
+    let list = match body.children.as_slice() {
+        [only] => only.children.as_slice(),
+        all => all,
+    };
+    if list.iter().any(|node| node.children.is_empty()) {
+        &[]
+    } else {
+        list
+    }
+}
+
+fn count<T>(items: impl Iterator<Item = T>) -> u32 {
+    u32::try_from(items.count()).unwrap_or(u32::MAX)
+}
+
+fn evidence<T: Serialize>(value: &T) -> Value {
+    serde_json::to_value(value).unwrap_or(Value::Null)
+}
+
+/// A finding kind whose evidence is `T`'s JSON Schema (ADR-012).
+fn kind<T: JsonSchema>(kind: &str, action: ActionKind, summary: &str) -> FindingKindSpec {
+    let schema = match schemars::schema_for!(T).to_value() {
+        Value::Object(schema) => schema,
+        _ => Map::new(),
+    };
+    FindingKindSpec {
+        kind: kind.to_owned(),
+        action,
+        summary: summary.to_owned(),
+        evidence: schema,
+    }
+}
+
+fn metric(name: &str, summary: &str) -> MetricSpec {
+    MetricSpec {
+        name: name.to_owned(),
+        summary: summary.to_owned(),
+    }
+}
