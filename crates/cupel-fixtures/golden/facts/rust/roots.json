@@ -52,6 +52,54 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "src/complexity.rs",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 34
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 51
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 63
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 130
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/complexity.rs",
+        "line": 141
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "src/decide.rs",
         "line": 1
       }

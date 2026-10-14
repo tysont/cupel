@@ -9,6 +9,54 @@
       }
     },
     {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 35
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 52
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 57
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 124
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 134
+      }
+    },
+    {
       "reason": "framework-hook",
       "symbol": {
         "col": 1,

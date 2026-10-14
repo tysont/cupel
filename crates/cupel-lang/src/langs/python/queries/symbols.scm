@@ -92,3 +92,26 @@
 ; Classes namespace their methods and nested classes.
 (class_definition
   name: (identifier) @scope.name) @scope
+
+; Parameters: each declared parameter of a function or lambda. `self` and `cls` are receivers;
+; the bare `*` and `/` separators are not parameters.
+(parameters
+  (identifier) @symbol.parameter
+  (#not-any-of? @symbol.parameter "self" "cls"))
+
+(parameters
+  [
+    (typed_parameter)
+    (default_parameter)
+    (typed_default_parameter)
+    (list_splat_pattern)
+    (dictionary_splat_pattern)
+  ] @symbol.parameter)
+
+(lambda_parameters
+  [
+    (identifier)
+    (default_parameter)
+    (list_splat_pattern)
+    (dictionary_splat_pattern)
+  ] @symbol.parameter)

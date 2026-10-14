@@ -36,6 +36,62 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/complexity.ts",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 31
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 47
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 58
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 124
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.ts",
+        "line": 131
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.ts",
+        "line": 135
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/decide.ts",
         "line": 5
       }

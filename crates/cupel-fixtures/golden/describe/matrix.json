@@ -5,8 +5,46 @@
     "version": "<version>"
   },
   "description": {
-    "cells": [],
-    "checks": [],
+    "cells": [
+      {
+        "check": "static.complexity",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.complexity",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
+    "checks": [
+      "static.complexity"
+    ],
     "languages": [
       "go",
       "javascript",

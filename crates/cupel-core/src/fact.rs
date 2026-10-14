@@ -3,6 +3,7 @@
 use std::any::Any;
 use std::collections::{BTreeSet, HashMap};
 use std::fmt;
+use std::sync::Arc;
 
 use schemars::JsonSchema;
 use serde::de::DeserializeOwned;
@@ -10,6 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::check::Manifest;
 use crate::error::{Error, Result};
+use crate::producer::SharedFact;
 
 /// One row of the fact catalog (design §8.3.2). Adding a kind requires an ADR.
 #[derive(
@@ -119,9 +121,10 @@ pub trait Fact: Serialize + DeserializeOwned + JsonSchema + Send + Sync + 'stati
 }
 
 /// The facts a check may read: exactly the kinds its manifest declares in `needs` and `wants`.
+/// Facts are shared, so one production serves every check that declares the kind.
 pub struct Facts {
     declared: BTreeSet<FactKind>,
-    values: HashMap<FactKind, Box<dyn Any + Send + Sync>>,
+    values: HashMap<FactKind, Arc<dyn Any + Send + Sync>>,
 }
 
 impl Facts {
@@ -140,8 +143,21 @@ impl Facts {
     /// Adds a produced fact. Refuses kinds the manifest does not declare.
     pub fn insert<F: Fact>(&mut self, fact: F) -> Result<()> {
         self.check_declared(F::KIND)?;
-        self.values.insert(F::KIND, Box::new(fact));
+        self.values.insert(F::KIND, Arc::new(fact));
         Ok(())
+    }
+
+    /// Adds a fact the scheduler produced once for several checks. Refuses kinds the manifest
+    /// does not declare.
+    pub fn insert_shared(&mut self, fact: &SharedFact) -> Result<()> {
+        self.check_declared(fact.kind())?;
+        self.values.insert(fact.kind(), fact.value());
+        Ok(())
+    }
+
+    /// The kinds the manifest declares, in catalog order.
+    pub fn declared(&self) -> impl Iterator<Item = FactKind> + '_ {
+        self.declared.iter().copied()
     }
 
     /// The fact of type `F`. Errors when `F` is undeclared or was not produced.

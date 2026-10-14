@@ -6,7 +6,9 @@ use cupel_core::{BaselineRef, Envelope, RunId, Writer, deltas};
 use cupel_store::Store;
 
 use crate::error::CupelError;
-use crate::{git, persist};
+use cupel_core::git::Git;
+
+use crate::persist;
 
 /// The baseline `--against` names when it is absent or says `baseline` without `--name`.
 pub const DEFAULT_BASELINE: &str = "default";
@@ -49,12 +51,14 @@ pub fn resolve(
         })?;
         (run, spec.to_owned(), spec.to_owned())
     } else {
-        let commit = git::commit(root, spec).ok_or_else(|| {
-            refuse(
-                format!("git cannot resolve `{spec}` to a commit"),
-                "Pass --against baseline, run:ID, or a git ref that names a commit.",
-            )
-        })?;
+        let commit = Git::open(root)
+            .and_then(|git| git.commit(spec).ok())
+            .ok_or_else(|| {
+                refuse(
+                    format!("git cannot resolve `{spec}` to a commit"),
+                    "Pass --against baseline, run:ID, or a git ref that names a commit.",
+                )
+            })?;
         let run = store
             .last_result_run_at(&commit)
             .map_err(stored)?

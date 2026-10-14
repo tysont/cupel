@@ -1,12 +1,12 @@
-// ABOUTME: Text rendering of `describe` payloads: the CLI, one command with its sub-verbs, a schema,
-// ABOUTME: or all of them, laid out as readable sections rather than JSON (ADR-019).
+// ABOUTME: Text rendering of `describe` payloads: the CLI, commands, schemas, languages, facts, checks,
+// ABOUTME: finding kinds, and the matrix, laid out as readable sections rather than JSON (ADR-019).
 use std::fmt::Write as _;
 
 use cupel_core::{
-    AllDescription, ArgDescription, CliDescription, CommandDescription, Description,
-    FactDescription, LanguageDescription, LanguagesDescription, MatrixDescription,
-    ProducerDescription, SchemaDescription, Stability, SupportDescription, ToolDescription,
-    ToolchainDescription, ValueType,
+    AllDescription, ArgDescription, CheckDescription, CliDescription, CommandDescription,
+    Description, FactDescription, FindingDescription, LanguageDescription, LanguagesDescription,
+    MatrixDescription, ProducerDescription, SchemaDescription, Stability, SupportDescription,
+    ToolDescription, ToolchainDescription, ValueType,
 };
 
 use super::{Paint, continued, name};
@@ -28,7 +28,96 @@ pub fn render(description: &Description, paint: &Paint) -> String {
         Description::Languages(languages) => render_languages(languages, paint),
         Description::Fact(fact) => render_fact(fact, paint),
         Description::Matrix(matrix) => render_matrix(matrix, paint),
+        Description::Check(check) => render_check(check, paint),
+        Description::Finding(finding) => render_finding(finding, paint),
     }
+}
+
+fn render_check(check: &CheckDescription, paint: &Paint) -> String {
+    let manifest = &check.manifest;
+    let mut out = format!(
+        "{} · tier {} · cost {} · version {} · {}
+  {}
+",
+        paint.bold(&format!("check {}", manifest.id)),
+        manifest.tier.value(),
+        name(manifest.cost),
+        manifest.version,
+        name(manifest.stability),
+        manifest.summary
+    );
+    let kinds = |list: &[cupel_core::FactKind]| {
+        let names: Vec<String> = list.iter().map(ToString::to_string).collect();
+        none_if_empty(&names.join(", "))
+    };
+    let _ = writeln!(
+        out,
+        "
+{}",
+        paint.bold("facts")
+    );
+    let _ = writeln!(out, "  needs  {}", kinds(&manifest.needs));
+    let _ = writeln!(out, "  wants  {}", kinds(&manifest.wants));
+    let _ = writeln!(
+        out,
+        "
+{}",
+        paint.bold("findings")
+    );
+    let width = column(manifest.findings.iter().map(|f| f.kind.len()));
+    for finding in &manifest.findings {
+        let _ = writeln!(
+            out,
+            "  {:<width$}  {} · {}",
+            finding.kind,
+            name(finding.action),
+            finding.summary
+        );
+    }
+    let _ = writeln!(
+        out,
+        "
+{}",
+        paint.bold("metrics")
+    );
+    let width = column(manifest.metrics.iter().map(|m| m.name.len()));
+    for metric in &manifest.metrics {
+        let _ = writeln!(out, "  {:<width$}  {}", metric.name, metric.summary);
+    }
+    let _ = writeln!(
+        out,
+        "
+{}",
+        paint.bold("languages")
+    );
+    let width = column(check.languages.iter().map(|l| l.lang.as_str().len()));
+    for language in &check.languages {
+        let _ = writeln!(
+            out,
+            "  {:<width$}  {}",
+            language.lang.as_str(),
+            support(&language.support)
+        );
+    }
+    out
+}
+
+fn render_finding(finding: &FindingDescription, paint: &Paint) -> String {
+    let body = serde_json::to_string_pretty(&finding.evidence).unwrap_or_default();
+    format!(
+        "{} · from {} · action {} · {}
+  {}
+
+{}
+{body}
+",
+        paint.bold(&format!("finding {}", finding.kind)),
+        finding.check,
+        name(finding.action),
+        name(finding.stability),
+        finding.summary,
+        paint.bold("evidence")
+    )
 }
 
 fn render_languages(languages: &LanguagesDescription, paint: &Paint) -> String {

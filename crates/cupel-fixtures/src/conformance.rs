@@ -501,9 +501,7 @@ pub fn produce_fixture_fact(
         writer,
         cancel: Cancellation::new(),
     };
-    let scope = Scope {
-        files: walk(&root, languages, &ProjectInfo::default()),
-    };
+    let scope = Scope::of_files(walk(&root, languages, &ProjectInfo::default()));
     let mut events = Vec::new();
     let fact = producer
         .produce(&ctx, &scope, &mut events)

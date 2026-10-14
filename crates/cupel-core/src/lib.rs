@@ -15,14 +15,17 @@ mod event;
 mod explanation;
 mod fact;
 mod finding;
+pub mod git;
 mod grade;
 mod hash;
 mod id;
 mod lang;
 mod matrix;
 mod producer;
+mod schedule;
 pub mod schema;
 mod scope;
+mod select;
 mod suppression;
 pub mod syntax;
 mod writer;
@@ -33,11 +36,12 @@ pub use check::{
 };
 pub use delta::{Deltas, deltas};
 pub use describe::{
-    AllDescription, ArgDescription, CheckSupport, CliDescription, CommandDescription,
-    CommandSummary, CommandTemplate, Description, Example, ExitCodeDescription, FactDescription,
-    FactProducers, LanguageDescription, LanguageProducers, LanguageSummary, LanguagesDescription,
-    LauncherDescription, MatrixCell, MatrixDescription, ProducerDescription, SchemaDescription,
-    SchemaRef, SupportDescription, ToolDescription, ToolchainDescription, ValueType,
+    AllDescription, ArgDescription, CheckDescription, CheckSupport, CliDescription,
+    CommandDescription, CommandSummary, CommandTemplate, Description, Example, ExitCodeDescription,
+    FactDescription, FactProducers, FindingDescription, LanguageDescription, LanguageProducers,
+    LanguageSummary, LanguageSupport, LanguagesDescription, LauncherDescription, MatrixCell,
+    MatrixDescription, ProducerDescription, SchemaDescription, SchemaRef, SupportDescription,
+    ToolDescription, ToolchainDescription, ValueType,
 };
 pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPlan};
 pub use envelope::{
@@ -45,7 +49,7 @@ pub use envelope::{
     ExitCode, GateOutcome, GateResult, GateRule, GitInfo, NextAction, RunInfo, ScopeInfo,
     ScopeMode, Score, SeverityCounts, SkipReason, Skipped, Status, Summary, ToolchainInfo, Verb,
 };
-pub use error::{Error, Result};
+pub use error::{ArgumentError, Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
 pub use explanation::{Excerpt, ExcerptLine, ExplainSubject, Explanation, Metric};
 pub use fact::{Fact, FactKind, Facts};
@@ -57,7 +61,10 @@ pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
 pub use producer::{
     Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
+    SharedFact,
 };
-pub use scope::Scope;
+pub use schedule::{Job, Outcome, Scheduler, next_actions};
+pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
+pub use select::Selection;
 pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};
 pub use writer::{WriteError, Writer};

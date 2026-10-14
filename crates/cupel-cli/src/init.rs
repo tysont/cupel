@@ -5,13 +5,14 @@ use std::fmt::Write as _;
 use std::path::Path;
 
 use cupel_core::config::FILE_NAME;
+use cupel_core::git::Git;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{ActionKind, NextAction, Severity, Writer};
 use serde_json::json;
 
 use crate::error::{CupelError, Usage};
 use crate::problem::Problem;
-use crate::{git, project};
+use crate::project;
 
 /// Writes the configuration for the repository at `writer`'s root, refusing to replace an
 /// existing `cupel.toml` unless `force` is set. Returns what the user should know about the
@@ -24,7 +25,9 @@ pub fn write(writer: &Writer, force: bool) -> Result<Vec<Problem>, CupelError> {
     let text = config_text(
         writer.root(),
         &info,
-        git::default_branch(writer.root()).as_deref(),
+        Git::open(writer.root())
+            .and_then(|git| git.default_branch())
+            .as_deref(),
     );
     writer
         .write(Path::new(FILE_NAME), text.as_bytes())

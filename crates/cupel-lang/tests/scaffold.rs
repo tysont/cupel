@@ -26,6 +26,7 @@ fn one_symbol_per_file(source: &Source<'_>) -> Symbols {
                 end_col: 1,
             },
             body: None,
+            parameters: 0,
         }],
     }
 }
@@ -52,9 +53,7 @@ fn rust_producer(registry: &LanguageRegistry) -> QueryProducer<Symbols> {
 }
 
 fn scope(files: &[&str]) -> Scope {
-    Scope {
-        files: files.iter().map(|f| (*f).to_owned()).collect(),
-    }
+    Scope::of_files(files.iter().map(|f| (*f).to_owned()).collect())
 }
 
 #[test]

@@ -45,7 +45,7 @@ pub struct SymbolKey {
 pub struct Symbols {
     pub symbols: Vec<SymbolDef>,
 }
-fact!(Symbols, Symbols);
+fact!(Symbols, Symbols, 2);
 
 /// One function, method, or named closure.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -62,6 +62,8 @@ pub struct SymbolDef {
     pub span: Span,
     /// The body, when the symbol has one separate from its signature.
     pub body: Option<Span>,
+    /// Declared parameters, not counting a receiver (`self`, `cls`, `this`, a Go receiver).
+    pub parameters: u32,
 }
 
 impl SymbolDef {

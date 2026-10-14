@@ -64,6 +64,1024 @@
           "span": {
             "col": 5,
             "end_col": 15,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "!(amount < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "9e6ef2f0a3005e5b",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b3a7431f20c55065",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "be2da822855db571",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "label = \"refund\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "cde1e95818df3bd4",
+          "span": {
+            "col": 3,
+            "end_col": 19,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount == 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "031482b82b02a26c",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "!(amount == 0)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "333dc266e024e72d",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4a8f752fad8d7fde",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "label = \"empty\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "10e8abfe0bf01bb7",
+          "span": {
+            "col": 3,
+            "end_col": 18,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit*100",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b84804fd054c296e",
+          "span": {
+            "col": 12,
+            "end_col": 30,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "!(amount > limit*100)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "577da35217f96e18",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "20eac27e7cd8aad5",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "402ab50a9e926ea0",
+          "span": {
+            "col": 27,
+            "end_col": 30,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"huge\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab4c4f8331d46baf",
+          "span": {
+            "col": 3,
+            "end_col": 17,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit*10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "e2ea2f60479cd96c",
+          "span": {
+            "col": 12,
+            "end_col": 29,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "!(amount > limit*10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "057bf91a6e8b52ec",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "23faa594c1b37013",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bfb622998d73adc0",
+          "span": {
+            "col": 27,
+            "end_col": 29,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"large\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "88a5685f9fcaca5e",
+          "span": {
+            "col": 3,
+            "end_col": 18,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "15e0d62ee5909297",
+          "span": {
+            "col": 12,
+            "end_col": 26,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "!(amount > limit)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "cd1af9eaa13a594b",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "label = \"over\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "43db5e0c0cff2192",
+          "span": {
+            "col": 3,
+            "end_col": 17,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount == limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "3a3e603aa38bd997",
+          "span": {
+            "col": 12,
+            "end_col": 27,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "!(amount == limit)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "ce23a3604d679966",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "label = \"at-limit\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "af61e166563a5367",
+          "span": {
+            "col": 3,
+            "end_col": 21,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit/2",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "25381df7e4353e4f",
+          "span": {
+            "col": 12,
+            "end_col": 28,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "!(amount > limit/2)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "d862812747b8455f",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "feb05cda21b9cfb3",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "19e5d2755ceaaa6e",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"high\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a525ca23a231879c",
+          "span": {
+            "col": 3,
+            "end_col": 17,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit/4",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "13e1dd1e586a69a8",
+          "span": {
+            "col": 12,
+            "end_col": 28,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "!(amount > limit/4)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "93d50ddcdbf7879d",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f0567886a5b2198d",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "aeacf0dba132cdc9",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"medium\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "1aeba764141b87ee",
+          "span": {
+            "col": 3,
+            "end_col": 19,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit/10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "51f8c35657cad210",
+          "span": {
+            "col": 12,
+            "end_col": 29,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "!(amount > limit/10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8931f2b9d7512460",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "cfc662dea5929883",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "73452021367ac50b",
+          "span": {
+            "col": 27,
+            "end_col": 29,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"low\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6b3d1441189ee748",
+          "span": {
+            "col": 3,
+            "end_col": 16,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > 1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "a9f62bac47c7179a",
+          "span": {
+            "col": 12,
+            "end_col": 22,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "!(amount > 1)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "490d4519234973d0",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d1076633c0d4a37e",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "6c53b67303806d57",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "1 + 1",
+            "1 - 1"
+          ]
+        },
+        {
+          "from": "label = \"tiny\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "388eee30cc9cabb2",
+          "span": {
+            "col": 3,
+            "end_col": 17,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "label = \"unit\"",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b4839f5aecc8a1f8",
+          "span": {
+            "col": 3,
+            "end_col": 17,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "label",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "8cd86a66fc4271ac",
+          "span": {
+            "col": 9,
+            "end_col": 14,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 6
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "len(batch) > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "cfb19e39746730b3",
+          "span": {
+            "col": 6,
+            "end_col": 20,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "!(len(batch) > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "34bf1abf4a97b0b4",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "15a88a099edc0855",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "3d528a91aeecad4a",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "amount > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "7b2e3ac934a164c7",
+          "span": {
+            "col": 8,
+            "end_col": 18,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "!(amount > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "dc2b79e3ba96b7f3",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "a1564eb92dd99fd0",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "74810bec62974eed",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "settled < limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "aea7b6a15688c69d",
+          "span": {
+            "col": 10,
+            "end_col": 25,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "!(settled < limit)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "270dc7414947acd6",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "settled += amount",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "765ebfccaa378342",
+          "span": {
+            "col": 7,
+            "end_col": 24,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b5a83187af22471c",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "settled",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "8cd86a66fc4271ac",
+          "span": {
+            "col": 9,
+            "end_col": 16,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 35
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "fmt.Sprintf(\"%s/%s/%d/%t/%d/%d\", owner, currency, limit, overdraft, branch, opened)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "77316a94f41c7067",
+          "span": {
+            "col": 9,
+            "end_col": 92,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 52
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "[]string{\n\t\t\"ACME LEDGER\",\n\t\t\"===========\",\n\t\t\"\",\n\t\t\"Account holder:\",\n\t\t\"Account number:\",\n\t\t\"Branch:\",\n\t\t\"Currency:\",\n\t\t\"Statement period:\",\n\t\t\"\",\n\t\t\"Opening balance\",\n\t\t\"---------------\",\n\t\t\"Balance brought forward:\",\n\t\t\"Pending credits:\",\n\t\t\"Pending debits:\",\n\t\t\"\",\n\t\t\"Credits\",\n\t\t\"-------\",\n\t\t\"Deposits:\",\n\t\t\"Transfers in:\",\n\t\t\"Interest:\",\n\t\t\"Refunds:\",\n\t\t\"Adjustments:\",\n\t\t\"\",\n\t\t\"Debits\",\n\t\t\"------\",\n\t\t\"Withdrawals:\",\n\t\t\"Transfers out:\",\n\t\t\"Card payments:\",\n\t\t\"Direct debits:\",\n\t\t\"Standing orders:\",\n\t\t\"Fees:\",\n\t\t\"Charges:\",\n\t\t\"\",\n\t\t\"Closing balance\",\n\t\t\"---------------\",\n\t\t\"Balance carried forward:\",\n\t\t\"Available balance:\",\n\t\t\"Overdraft limit:\",\n\t\t\"Overdraft used:\",\n\t\t\"\",\n\t\t\"Notices\",\n\t\t\"-------\",\n\t\t\"Rates changed this period.\",\n\t\t\"Fees are listed above.\",\n\t\t\"Keep this statement for your records.\",\n\t\t\"Report errors within thirty days.\",\n\t\t\"\",\n\t\t\"Contact\",\n\t\t\"-------\",\n\t\t\"Telephone:\",\n\t\t\"Email:\",\n\t\t\"Post:\",\n\t\t\"\",\n\t\t\"Opening hours\",\n\t\t\"-------------\",\n\t\t\"Weekdays: 9 to 5\",\n\t\t\"Saturday: 9 to 12\",\n\t\t\"Sunday: closed\",\n\t\t\"\",\n\t\t\"Page 1 of 1\",\n\t\t\"End of statement\",\n\t}",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "3722d975f2602c08",
+          "span": {
+            "col": 9,
+            "end_col": 3,
+            "end_line": 120,
+            "line": 58
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 57
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "01676c33fab87d15",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 125,
+            "line": 125
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 124
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "fmt.Sprintf(\"%s: %d\", s.Owner, amount)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "043e2fba8e941f93",
+          "span": {
+            "col": 9,
+            "end_col": 47,
+            "end_line": 135,
+            "line": 135
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 134
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "84464cc3566638dc",
+          "span": {
+            "col": 5,
+            "end_col": 15,
             "end_line": 14,
             "line": 14
           },

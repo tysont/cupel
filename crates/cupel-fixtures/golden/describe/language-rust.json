@@ -5,7 +5,14 @@
     "version": "<version>"
   },
   "description": {
-    "checks": [],
+    "checks": [
+      {
+        "check": "static.complexity",
+        "support": {
+          "status": "supported"
+        }
+      }
+    ],
     "extensions": [
       ".rs"
     ],

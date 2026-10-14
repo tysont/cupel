@@ -19,7 +19,7 @@ facts
   project-info      lang.typescript (quick)
 
 checks
-  none registered
+  static.complexity  supported
 
 toolchain
   launchers

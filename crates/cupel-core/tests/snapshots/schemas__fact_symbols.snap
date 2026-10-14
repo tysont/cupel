@@ -19,7 +19,7 @@ expression: pretty(&schema)
   "required": [
     "symbols"
   ],
-  "x-cupel-fact-version": 1,
+  "x-cupel-fact-version": 2,
   "$defs": {
     "LangId": {
       "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
@@ -92,6 +92,12 @@ expression: pretty(&schema)
           "description": "Enclosing namespace, such as `module::Type`; empty at top level.",
           "type": "string"
         },
+        "parameters": {
+          "description": "Declared parameters, not counting a receiver (`self`, `cls`, `this`, a Go receiver).",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
         "span": {
           "$ref": "#/$defs/Span"
         },
@@ -107,6 +113,7 @@ expression: pretty(&schema)
         "lang",
         "name",
         "namespace",
+        "parameters",
         "span",
         "visibility"
       ]

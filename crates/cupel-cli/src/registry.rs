@@ -276,13 +276,20 @@ fn check_verb() -> CommandDescription {
     verb(
         "check",
         "Run checks over a scope at a depth and evaluate the gate.",
-        Some("P2.1"),
+        None,
         scope_flags(),
-        vec![example(
-            "cupel check --changed --depth standard --gate",
-            "Grade the working tree's changes against the gate.",
-            ExitCode::Usage,
-        )],
+        vec![
+            example(
+                "cupel check --only static.complexity",
+                "Measure every function's complexity in the whole tree.",
+                ExitCode::Pass,
+            ),
+            example(
+                "cupel check --depth quick --dry-run",
+                "Show which checks a quick run would run and skip, with estimates.",
+                ExitCode::Pass,
+            ),
+        ],
     )
 }
 
@@ -642,38 +649,33 @@ fn scope_what_flags() -> Vec<ArgDescription> {
         switch(
             "--changed",
             "Scope to changes since the merge base, including the working tree.",
-        )
-        .pending("P2.1"),
+        ),
         valued(
             "--base",
             ValueType::String,
             "REF",
             "Start of an explicit range.",
-        )
-        .pending("P2.1"),
+        ),
         valued(
             "--head",
             ValueType::String,
             "REF",
             "End of an explicit range; defaults to the working tree.",
-        )
-        .pending("P2.1"),
+        ),
         valued(
             "--paths",
             ValueType::String,
             "P",
             "Files, directories, or globs.",
         )
-        .repeated()
-        .pending("P2.1"),
+        .repeated(),
         valued(
             "--symbols",
             ValueType::String,
             "S",
             "Symbols by ns::name or structural hash.",
         )
-        .repeated()
-        .pending("P2.1"),
+        .repeated(),
         switch(
             "--since-baseline",
             "Symbols whose structural hash changed since the baseline.",
@@ -692,8 +694,7 @@ fn scope_how_much_flags() -> Vec<ArgDescription> {
             "How much evidence to gather.",
         )
         .env(Setting::Depth.env_var())
-        .default_value("standard")
-        .pending("P2.1"),
+        .default_value("standard"),
         valued(
             "--budget",
             ValueType::Duration,
@@ -714,23 +715,20 @@ fn scope_which_flags() -> Vec<ArgDescription> {
             "ID",
             "Run only these checks or groups.",
         )
-        .repeated()
-        .pending("P2.1"),
+        .repeated(),
         valued(
             "--skip",
             ValueType::String,
             "ID",
             "Skip these checks or groups.",
         )
-        .repeated()
-        .pending("P2.1"),
+        .repeated(),
         valued(
             "--tier",
             ValueType::String,
             "N+",
             "Run only checks at or above tier N.",
-        )
-        .pending("P2.1"),
+        ),
         switch(
             "--gate",
             "Evaluate the gate; the default when the config has one.",

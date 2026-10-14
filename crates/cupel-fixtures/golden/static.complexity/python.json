@@ -1,0 +1,265 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "oracle": null,
+      "score": {
+        "n": 60,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_da1290",
+      "kind": "complexity.high",
+      "location": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 27,
+        "file": "src/ledger/complexity.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_b9016df6df5687e8",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_da1290 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.label",
+        "hash": "sh_b9016df6df5687e8",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_1d8c00",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 38,
+        "file": "src/ledger/complexity.py",
+        "line": 30
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_dcb5b60ff46aec47",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1d8c00 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.settle",
+        "hash": "sh_dcb5b60ff46aec47",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `open_account` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_41b8e4",
+      "kind": "params.many",
+      "location": {
+        "col": 1,
+        "end_col": 71,
+        "end_line": 42,
+        "file": "src/ledger/complexity.py",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_cd4ed36360bc34e5",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_41b8e4 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.open_account",
+        "hash": "sh_cd4ed36360bc34e5",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.open_account` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `statement_template` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 64
+      },
+      "id": "fnd_e7b427",
+      "kind": "function.long",
+      "location": {
+        "col": 1,
+        "end_col": 6,
+        "end_line": 108,
+        "file": "src/ledger/complexity.py",
+        "line": 45
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_83ff38ce267758aa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e7b427 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity.statement_template",
+        "hash": "sh_83ff38ce267758aa",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity.statement_template` is 64 lines long (max 60)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_da1290",
+      "kind": "reduce_complexity",
+      "priority": 1,
+      "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+    },
+    {
+      "command": null,
+      "finding": "fnd_1d8c00",
+      "kind": "reduce_complexity",
+      "priority": 2,
+      "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+    },
+    {
+      "command": null,
+      "finding": "fnd_41b8e4",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Group related parameters of `open_account` into a type, or split it so each part needs at most 5."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e7b427",
+      "kind": "refactor_extract",
+      "priority": 4,
+      "summary": "Extract cohesive blocks of `statement_template` into named functions until it is at most 60 lines."
+    }
+  ],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 13,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 60
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 4
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 4,
+  "truncated": false
+}

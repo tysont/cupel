@@ -29,8 +29,13 @@ const SHARED: &[(QueryFile, &str)] = &[
 
 /// JavaScript-only queries: patterns the TypeScript grammars reject, such as a bare identifier
 /// as a parameter. They are placed before the shared queries of the same file.
-const JAVASCRIPT_ONLY: &[(QueryFile, &str)] =
-    &[(QueryFile::Api, include_str!("queries/javascript/api.scm"))];
+const JAVASCRIPT_ONLY: &[(QueryFile, &str)] = &[
+    (
+        QueryFile::Symbols,
+        include_str!("queries/javascript/symbols.scm"),
+    ),
+    (QueryFile::Api, include_str!("queries/javascript/api.scm")),
+];
 
 /// TypeScript-only queries. They are placed before the shared queries of the same file, so
 /// their patterns win where both match one definition.

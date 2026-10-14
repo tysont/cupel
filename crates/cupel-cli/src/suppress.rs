@@ -2,13 +2,15 @@
 // ABOUTME: into the store, and applies it to finished runs with expiry by date or git ref (ADR-047).
 use std::io::ErrorKind;
 
+use std::path::Path;
+
+use cupel_core::git::Git;
 use cupel_core::{
     Envelope, ExitCode, FindingId, Severity, Status, Suppression, Suppressions, Until, Writer,
     apply_suppressions,
 };
 
 use crate::error::CupelError;
-use crate::git;
 use crate::persist;
 use crate::run::Run;
 
@@ -114,7 +116,7 @@ pub fn apply(envelope: &mut Envelope, writer: &Writer) -> Result<(), CupelError>
     let today = today(envelope);
     apply_suppressions(envelope, suppressions.entries(), |until| match until {
         Until::Date(_) => until.date_passed(&today),
-        Until::Ref(reference) => git::head_contains(writer.root(), reference),
+        Until::Ref(reference) => head_contains(writer.root(), reference),
     });
     let fails = envelope
         .findings
@@ -135,4 +137,16 @@ fn today(envelope: &Envelope) -> String {
         .get(..10)
         .unwrap_or_default()
         .to_owned()
+}
+
+/// Whether `HEAD` contains the commit `reference` names: it is `HEAD` or an ancestor of it.
+fn head_contains(root: &Path, reference: &str) -> bool {
+    let Some(git) = Git::open(root) else {
+        return false;
+    };
+    let Ok(commit) = git.commit(reference) else {
+        return false;
+    };
+    git.merge_base(&commit, "HEAD")
+        .is_ok_and(|base| base == commit)
 }

@@ -38,6 +38,16 @@ file = "src/ledger/report/format.py"
 name = "ledger.report.format.render"
 expect = { namespace = "ledger.report.format" }
 
+[symbols.parameters]
+file = "src/ledger/complexity.py"
+name = "ledger.complexity.open_account"
+expect = { parameters = 6 }
+
+[symbols.receiver]
+file = "src/ledger/complexity.py"
+name = "ledger.complexity.Statement.line"
+expect = { parameters = 1 }
+
 [decisions.if]
 file = "src/ledger/decide.py"
 name = "ledger.decide.classify"

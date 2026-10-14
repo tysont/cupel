@@ -104,7 +104,7 @@ fn the_contract_rejects_unknown_and_missing_captures() {
     );
     assert!(
         contract(QueryFile::Symbols)
-            .check(&["symbol.method", "symbol.name", "_t"])
+            .check(&["symbol.method", "symbol.name", "symbol.parameter", "_t"])
             .is_ok()
     );
 }

@@ -276,12 +276,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "cupel-checks"
+version = "0.1.0"
+dependencies = [
+ "cupel-core",
+ "schemars",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
 name = "cupel-cli"
 version = "0.1.0"
 dependencies = [
  "assert_cmd",
  "clap",
  "cupel-adapt",
+ "cupel-checks",
  "cupel-core",
  "cupel-lang",
  "cupel-store",
@@ -318,6 +330,7 @@ name = "cupel-fixtures"
 version = "0.1.0"
 dependencies = [
  "assert_cmd",
+ "cupel-checks",
  "cupel-core",
  "cupel-lang",
  "serde",

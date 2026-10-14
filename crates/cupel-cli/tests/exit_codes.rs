@@ -125,8 +125,8 @@ fn exit_2_for_every_unimplemented_verb_names_its_plan_step() {
         assert!(detail.contains(step), "{example}: {detail}");
     }
     assert_eq!(
-        pending, 5,
-        "every verb but describe, init, doctor, explain, baseline, and suppress is pending"
+        pending, 4,
+        "every verb but describe, init, doctor, check, explain, baseline, and suppress is pending"
     );
 }
 

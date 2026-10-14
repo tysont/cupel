@@ -29,6 +29,16 @@
           "specifier": "example.com/ledger",
           "target": {
             "kind": "file",
+            "path": "complexity.go"
+          }
+        },
+        {
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
             "path": "decide.go"
           }
         },
@@ -60,6 +70,16 @@
           "target": {
             "kind": "file",
             "path": "twins.go"
+          }
+        },
+        {
+          "from": "complexity.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "fmt",
+          "target": {
+            "kind": "external",
+            "package": "std"
           }
         },
         {

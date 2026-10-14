@@ -11,6 +11,7 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+cupel-checks.workspace = true
 cupel-core.workspace = true
 cupel-lang.workspace = true
 serde.workspace = true
@@ -19,8 +20,6 @@ toml.workspace = true
 thiserror.workspace = true
 assert_cmd.workspace = true
 similar.workspace = true
-
-[dev-dependencies]
 tempfile.workspace = true
 
 [lints]

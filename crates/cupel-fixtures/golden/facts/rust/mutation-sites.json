@@ -133,6 +133,915 @@
           "from": "amount < 0",
           "operator": "negation",
           "set": "extended",
+          "site_hash": "f2a96430f10ef354",
+          "span": {
+            "col": 8,
+            "end_col": 18,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "!(amount < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "6e23f5728fb7b3d1",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "db3207e43372da1a",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "fcc28f22f0b9dd42",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "label = \"refund\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "9d05695746503022",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount == 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d171c2099d3afb56",
+          "span": {
+            "col": 15,
+            "end_col": 26,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "!(amount == 0)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "759ca33488c858bf",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "10f58bb957fd1c30",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "label = \"empty\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "87fe2442a5514aa8",
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit * 100",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "67c3629608cbc1be",
+          "span": {
+            "col": 15,
+            "end_col": 35,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "!(amount > limit * 100)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "ae86ca545a6c5fb4",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "117458e77f494350",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c70e26afb2072aff",
+          "span": {
+            "col": 32,
+            "end_col": 35,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"huge\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "14270053f057e0fd",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit * 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "728e2cfe2cf9fdbf",
+          "span": {
+            "col": 15,
+            "end_col": 34,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "!(amount > limit * 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "79fd9bf5b8111806",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "9f521274428734b5",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "92755df348ba02c4",
+          "span": {
+            "col": 32,
+            "end_col": 34,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"large\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a8c997c3d85cb6dd",
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "24e4c0a35e4aec3e",
+          "span": {
+            "col": 15,
+            "end_col": 29,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "!(amount > limit)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "e89ee3472b07c7e9",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "label = \"over\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ded874f4567603ad",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount == limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d53e0c689f0d53e6",
+          "span": {
+            "col": 15,
+            "end_col": 30,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "!(amount == limit)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "2299b2f2f17768c8",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "label = \"at-limit\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b20198d7d0e36986",
+          "span": {
+            "col": 9,
+            "end_col": 28,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 2",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "df9204fa54360637",
+          "span": {
+            "col": 15,
+            "end_col": 33,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "!(amount > limit / 2)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "33e170abef6f1fff",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "4118ebf5c644234a",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3eb9bc42d8aaf9fd",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"high\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "fa8060dadaac3237",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 4",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b7d6576d631e1859",
+          "span": {
+            "col": 15,
+            "end_col": 33,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "!(amount > limit / 4)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "ccbb7678d1ec5935",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f43f690d7d9ef9b0",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "be28cb0d35761727",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"medium\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7555949869ad2866",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "9f214c8ad1fdd87c",
+          "span": {
+            "col": 15,
+            "end_col": 34,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "!(amount > limit / 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "c9815f5da3f1d386",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "054e23690e4933b2",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "8c0697bd3a93e257",
+          "span": {
+            "col": 32,
+            "end_col": 34,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"low\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6eb4b896753ed2bb",
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > 1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f15c6d4115cece1b",
+          "span": {
+            "col": 15,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "!(amount > 1)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "db7c90d4e964ec10",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "72401495bcbcb65a",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "926ddcb49e7f98ca",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "1 + 1",
+            "1 - 1"
+          ]
+        },
+        {
+          "from": "label = \"tiny\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "864a7ac2b693ee3f",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "label = \"unit\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "2b973a4b48ef78d1",
+          "span": {
+            "col": 9,
+            "end_col": 24,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9373a348e4ae3b48",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "!batch.is_empty()",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "5876e1c4ebd22526",
+          "span": {
+            "col": 12,
+            "end_col": 29,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "!(!batch.is_empty())"
+          ]
+        },
+        {
+          "from": "*amount > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b887e5fe77ba6e71",
+          "span": {
+            "col": 20,
+            "end_col": 31,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "!(*amount > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8f0a123cc0a3ecaa",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "3d8e483563a0c555",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "066e228238355e5f",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "settled < limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "e009b32fe487521c",
+          "span": {
+            "col": 27,
+            "end_col": 42,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "!(settled < limit)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "df40d700d3d2fa5f",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "settled += *amount;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "f56d18e9f50b4c0f",
+          "span": {
+            "col": 25,
+            "end_col": 44,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e0ad57d5b141185b",
+          "span": {
+            "col": 33,
+            "end_col": 35,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "-="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 34
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 51
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 63
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "a97c95d795e0a69c",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 130
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/complexity.rs",
+        "line": 141
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < 0",
+          "operator": "negation",
+          "set": "extended",
           "site_hash": "20ad5ab612d2c447",
           "span": {
             "col": 8,

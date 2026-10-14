@@ -613,6 +613,7 @@ fn symbol(name: &str) -> SymbolDef {
             end_col: 2,
         },
         body: None,
+        parameters: 0,
     }
 }
 

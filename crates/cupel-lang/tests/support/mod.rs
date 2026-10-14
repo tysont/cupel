@@ -43,9 +43,7 @@ pub fn produce_with_events<F: Fact>(lang: &str, root: &Path) -> (F, Vec<Event>) 
         writer,
         cancel: Cancellation::new(),
     };
-    let scope = Scope {
-        files: walk(root, &languages, &ProjectInfo::default()),
-    };
+    let scope = Scope::of_files(walk(root, &languages, &ProjectInfo::default()));
     let mut events = Vec::new();
     let fact = producer
         .produce(&ctx, &scope, &mut events)

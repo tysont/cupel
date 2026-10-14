@@ -234,6 +234,1078 @@
     {
       "sites": [
         {
+          "from": "amount < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b84b9d9a604f4ffa",
+          "span": {
+            "col": 7,
+            "end_col": 17,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "!(amount < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "11a34b42a9d7c7ec",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c305aec1e7adb011",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "34676b2aad5f5f46",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "name = \"refund\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "17e9eb3c49db67e0",
+          "span": {
+            "col": 5,
+            "end_col": 21,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount === 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6ac9ed50bbcf5f19",
+          "span": {
+            "col": 14,
+            "end_col": 26,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "!(amount === 0)"
+          ]
+        },
+        {
+          "from": "===",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "86d3b703c570a43c",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "!=="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "1173f3aa06388808",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "name = \"empty\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "1fc9250a369152b5",
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit * 100",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "0675a114d61eeb90",
+          "span": {
+            "col": 14,
+            "end_col": 34,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "!(amount > limit * 100)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "e5e6b7a6daad245a",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f1ac32ba3866ea28",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3aba18498f65afff",
+          "span": {
+            "col": 31,
+            "end_col": 34,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"huge\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "79cbb3441f6bd725",
+          "span": {
+            "col": 5,
+            "end_col": 19,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit * 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "689981d51f9cc0cf",
+          "span": {
+            "col": 14,
+            "end_col": 33,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "!(amount > limit * 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "aa4f1d665e076bcd",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "8e97d05d70aeab9c",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "13da3c9b78595802",
+          "span": {
+            "col": 31,
+            "end_col": 33,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"large\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b1e9bf4997f725f5",
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "59549b4ddfedcf98",
+          "span": {
+            "col": 14,
+            "end_col": 28,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "!(amount > limit)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "db0a0344ed807412",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "name = \"over\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e3b73ae520e10a3d",
+          "span": {
+            "col": 5,
+            "end_col": 19,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount === limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "85cf432089d732ff",
+          "span": {
+            "col": 14,
+            "end_col": 30,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "!(amount === limit)"
+          ]
+        },
+        {
+          "from": "===",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "3039341ecacd3b78",
+          "span": {
+            "col": 21,
+            "end_col": 24,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "!=="
+          ]
+        },
+        {
+          "from": "name = \"at-limit\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "553905fee8eaae1f",
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 2",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6f6e058a76ae9720",
+          "span": {
+            "col": 14,
+            "end_col": 32,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "!(amount > limit / 2)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "1f628b4b21b36b24",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "5fceb6a6a8bd6bd9",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e3c9445c89cca1e3",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"high\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b9045897861d549e",
+          "span": {
+            "col": 5,
+            "end_col": 19,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 4",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "70e080c25ed39ee1",
+          "span": {
+            "col": 14,
+            "end_col": 32,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "!(amount > limit / 4)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "293623b794289f7a",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "86590a650fc28b87",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "8034feee8d11a4d3",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"medium\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "45ed829863c2bd2d",
+          "span": {
+            "col": 5,
+            "end_col": 21,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "8aa7e15f379e3f6a",
+          "span": {
+            "col": 14,
+            "end_col": 33,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "!(amount > limit / 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "9f8930f1febf57c5",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "0d629dcb37febac5",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "315c7959464907a7",
+          "span": {
+            "col": 31,
+            "end_col": 33,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "name = \"low\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "486bde8d73a4ac80",
+          "span": {
+            "col": 5,
+            "end_col": 18,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > 1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "f769e748e12f3e2c",
+          "span": {
+            "col": 14,
+            "end_col": 24,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "!(amount > 1)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "c80a43850b8ca2bb",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "bc0554c2ffe44ec9",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "a1686f3dbf29e17b",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "1 + 1",
+            "1 - 1"
+          ]
+        },
+        {
+          "from": "name = \"tiny\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ae0445f5446fb23d",
+          "span": {
+            "col": 5,
+            "end_col": 19,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "name = \"unit\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "9b64d405dbb5a803",
+          "span": {
+            "col": 5,
+            "end_col": 19,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "name",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "53e5ef68cd3b9a39",
+          "span": {
+            "col": 10,
+            "end_col": 14,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 3
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "5b40c5f94d83d34b",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "batch.length > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "5400ecfebc5f382b",
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "!(batch.length > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "272a32ca51e7ec82",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "bb5658f3170ace6a",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "17634fc778644a9d",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "amount > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b0877ef249972dbc",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "!(amount > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "4908730b0ba50657",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "8afa841ba12b49d8",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "c7ba649960f679cc",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "settled < limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "c084a1d1c89a7e7a",
+          "span": {
+            "col": 18,
+            "end_col": 33,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "!(settled < limit)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "ec397415234490e9",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "settled += amount;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e982748c53c9f4bb",
+          "span": {
+            "col": 13,
+            "end_col": 31,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "572a74782d5bb20b",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "settled",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "53e5ef68cd3b9a39",
+          "span": {
+            "col": 10,
+            "end_col": 17,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 31
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "`${owner}/${currency}/${limit}/${overdraft}/${branch}/${opened}`",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "e8741b66b895abf7",
+          "span": {
+            "col": 10,
+            "end_col": 74,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 47
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "[\n    \"ACME LEDGER\",\n    \"===========\",\n    \"\",\n    \"Account holder:\",\n    \"Account number:\",\n    \"Branch:\",\n    \"Currency:\",\n    \"Statement period:\",\n    \"\",\n    \"Opening balance\",\n    \"---------------\",\n    \"Balance brought forward:\",\n    \"Pending credits:\",\n    \"Pending debits:\",\n    \"\",\n    \"Credits\",\n    \"-------\",\n    \"Deposits:\",\n    \"Transfers in:\",\n    \"Interest:\",\n    \"Refunds:\",\n    \"Adjustments:\",\n    \"\",\n    \"Debits\",\n    \"------\",\n    \"Withdrawals:\",\n    \"Transfers out:\",\n    \"Card payments:\",\n    \"Direct debits:\",\n    \"Standing orders:\",\n    \"Fees:\",\n    \"Charges:\",\n    \"\",\n    \"Closing balance\",\n    \"---------------\",\n    \"Balance carried forward:\",\n    \"Available balance:\",\n    \"Overdraft limit:\",\n    \"Overdraft used:\",\n    \"\",\n    \"Notices\",\n    \"-------\",\n    \"Rates changed this period.\",\n    \"Fees are listed above.\",\n    \"Keep this statement for your records.\",\n    \"Report errors within thirty days.\",\n    \"\",\n    \"Contact\",\n    \"-------\",\n    \"Telephone:\",\n    \"Email:\",\n    \"Post:\",\n    \"\",\n    \"Opening hours\",\n    \"-------------\",\n    \"Weekdays: 9 to 5\",\n    \"Saturday: 9 to 12\",\n    \"Sunday: closed\",\n    \"\",\n    \"Page 1 of 1\",\n    \"End of statement\",\n  ]",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "e27bf1c0c8b5c740",
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 121,
+            "line": 59
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 58
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "credits - debits",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d430bad8a61f4434",
+          "span": {
+            "col": 10,
+            "end_col": 26,
+            "end_line": 125,
+            "line": 125
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "aff2d9fb822331b3",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 125,
+            "line": 125
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/complexity.ts",
+        "line": 124
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "this.owner = owner;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 132,
+            "line": 132
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.ts",
+        "line": 131
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "`${this.owner}: ${amount}`",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7dc94ee0c9cc20ca",
+          "span": {
+            "col": 12,
+            "end_col": 38,
+            "end_line": 136,
+            "line": 136
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "src/complexity.ts",
+        "line": 135
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "balance < 0 && limit > 0",
           "operator": "negation",
           "set": "extended",
