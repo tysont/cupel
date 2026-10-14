@@ -24,6 +24,7 @@
 //! right before a closing bracket or at the end is dropped.
 use std::collections::BTreeMap;
 
+use cupel_core::FactKind;
 use cupel_core::syntax::{ApiItem, ApiItemKind, ApiSurface};
 use serde_json::Value;
 use tree_sitter::Node;
@@ -31,12 +32,20 @@ use tree_sitter::Node;
 use crate::contract::capture;
 use crate::namespace::{Namespaces, Scope};
 use crate::parse::Parsed;
-use crate::producer::Source;
+use crate::producer::{QueryProducer, Source};
 use crate::query::{Match, matches, span};
 use crate::spec::QueryFile;
 
 /// What a local name becomes in a signature.
 const LOCAL: &str = "_";
+
+inventory::submit!(crate::generic::GenericProducer {
+    kind: FactKind::ApiSurface,
+    drives: |spec| spec.has(QueryFile::Api),
+    attach: |language, cache, reg| {
+        reg.register::<ApiSurface, _>(QueryProducer::new(language, cache, extract));
+    },
+});
 
 /// The `ApiSurface` extractor.
 ///

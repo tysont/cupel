@@ -23,16 +23,25 @@
 //!   of cases written in place; the loop's decision has `table: true` (ADR-069).
 use std::collections::HashSet;
 
+use cupel_core::FactKind;
 use cupel_core::syntax::{Decision, DecisionKind, Decisions, SymbolDecisions};
 use serde_json::Value;
 use tree_sitter::Node;
 
 use crate::contract::capture;
-use crate::producer::Source;
+use crate::producer::{QueryProducer, Source};
 use crate::query::matches;
 use crate::spec::QueryFile;
 use crate::symbols::{Definition, definitions};
 use crate::tables::DecisionRules;
+
+inventory::submit!(crate::generic::GenericProducer {
+    kind: FactKind::Decisions,
+    drives: |spec| spec.has(QueryFile::Symbols) && spec.has(QueryFile::Decisions),
+    attach: |language, cache, reg| {
+        reg.register::<Decisions, _>(QueryProducer::new(language, cache, extract));
+    },
+});
 
 /// The `Decisions` extractor.
 ///

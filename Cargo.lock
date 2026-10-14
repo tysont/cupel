@@ -269,6 +269,7 @@ version = "0.1.0"
 dependencies = [
  "cupel-core",
  "globset",
+ "inventory",
  "serde",
  "serde_json",
  "tempfile",
@@ -333,6 +334,7 @@ name = "cupel-fixtures"
 version = "0.1.0"
 dependencies = [
  "assert_cmd",
+ "cupel-adapt",
  "cupel-checks",
  "cupel-core",
  "cupel-lang",
@@ -352,6 +354,7 @@ dependencies = [
  "cupel-core",
  "globset",
  "ignore",
+ "inventory",
  "proptest",
  "rayon",
  "serde",

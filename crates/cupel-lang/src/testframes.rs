@@ -24,12 +24,13 @@
 //! belongs to every case in the file. Only files with at least one case are reported.
 use std::collections::{BTreeMap, HashSet};
 
+use cupel_core::FactKind;
 use cupel_core::syntax::{Assertion, Mock, SkipMarker, Span, TestCase, TestFile, TestFrames};
 use tree_sitter::Node;
 
 use crate::contract::capture;
 use crate::parse::Parsed;
-use crate::producer::Source;
+use crate::producer::{QueryProducer, Source};
 use crate::query::{Match, matches, span};
 use crate::spec::QueryFile;
 use crate::tables::TestRules;
@@ -45,6 +46,14 @@ struct Case<'t> {
 
 /// Cases by node ID.
 type Cases<'t> = BTreeMap<usize, Case<'t>>;
+
+inventory::submit!(crate::generic::GenericProducer {
+    kind: FactKind::TestFrames,
+    drives: |spec| spec.has(QueryFile::Tests),
+    attach: |language, cache, reg| {
+        reg.register::<TestFrames, _>(QueryProducer::new(language, cache, extract));
+    },
+});
 
 /// The `TestFrames` extractor.
 ///

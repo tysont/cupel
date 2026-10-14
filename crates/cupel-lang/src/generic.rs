@@ -1,88 +1,29 @@
 // ABOUTME: Attaches the generic producers to a language: each is registered exactly when the
-// ABOUTME: language's spec has what drives it (its query file, and for NormTree a `[normalize]` table).
+// ABOUTME: language's spec has what drives it; each fact module submits its own (ADR-074).
 use std::sync::Arc;
 
-use cupel_core::syntax::{
-    ApiSurface, Decisions, MutationSites, NormTree, Roots, Symbols, TestConventions, TestFrames,
-};
-use cupel_core::{Fact, FactKind, ProducerRegistry};
+use cupel_core::{FactKind, ProducerRegistry};
 
-use crate::conventions::GlobTestConventions;
 use crate::language::Language;
 use crate::parse::ParseCache;
-use crate::producer::QueryProducer;
-use crate::spec::{LanguageSpec, QueryFile};
-use crate::{api, decisions, mutations, normalize, roots, symbols, testframes};
+use crate::spec::LanguageSpec;
 
 /// Whether a language's spec can drive a generic producer.
-type Drives = fn(&LanguageSpec) -> bool;
+pub(crate) type Drives = fn(&LanguageSpec) -> bool;
 
 /// Registers one generic producer for a language.
-type Attach = fn(Arc<dyn Language>, Arc<ParseCache>, &mut ProducerRegistry);
+pub(crate) type Attach = fn(Arc<dyn Language>, Arc<ParseCache>, &mut ProducerRegistry);
 
-/// Each generic producer, the fact it makes, and what drives it, in fact-catalog order.
-const GENERIC: &[(FactKind, Drives, Attach)] = &[
-    (
-        Symbols::KIND,
-        |spec| spec.has(QueryFile::Symbols),
-        |language, cache, reg| {
-            reg.register::<Symbols, _>(QueryProducer::new(language, cache, symbols::extract));
-        },
-    ),
-    (
-        Decisions::KIND,
-        |spec| spec.has(QueryFile::Symbols) && spec.has(QueryFile::Decisions),
-        |language, cache, reg| {
-            reg.register::<Decisions, _>(QueryProducer::new(language, cache, decisions::extract));
-        },
-    ),
-    (
-        NormTree::KIND,
-        |spec| spec.has(QueryFile::Symbols) && spec.tables().normalize.is_some(),
-        |language, cache, reg| {
-            reg.register::<NormTree, _>(QueryProducer::new(language, cache, normalize::extract));
-        },
-    ),
-    (
-        MutationSites::KIND,
-        |spec| spec.has(QueryFile::Symbols) && spec.has(QueryFile::Mutations),
-        |language, cache, reg| {
-            reg.register::<MutationSites, _>(QueryProducer::new(
-                language,
-                cache,
-                mutations::extract,
-            ));
-        },
-    ),
-    (
-        TestFrames::KIND,
-        |spec| spec.has(QueryFile::Tests),
-        |language, cache, reg| {
-            reg.register::<TestFrames, _>(QueryProducer::new(language, cache, testframes::extract));
-        },
-    ),
-    (
-        TestConventions::KIND,
-        |spec| spec.tables().conventions.is_some(),
-        |language, _, reg| {
-            reg.register::<TestConventions, _>(GlobTestConventions::new(language));
-        },
-    ),
-    (
-        ApiSurface::KIND,
-        |spec| spec.has(QueryFile::Api),
-        |language, cache, reg| {
-            reg.register::<ApiSurface, _>(QueryProducer::new(language, cache, api::extract));
-        },
-    ),
-    (
-        Roots::KIND,
-        |spec| spec.has(QueryFile::Symbols) && spec.tables().roots.is_some(),
-        |language, cache, reg| {
-            reg.register::<Roots, _>(QueryProducer::new(language, cache, roots::extract));
-        },
-    ),
-];
+/// A generic producer: the fact it makes, what in a language's spec drives it, and how it
+/// attaches to a language. The module that extracts the fact submits it with
+/// `inventory::submit!`, so adding a generic producer edits no shared list.
+pub(crate) struct GenericProducer {
+    pub kind: FactKind,
+    pub drives: Drives,
+    pub attach: Attach,
+}
+
+inventory::collect!(GenericProducer);
 
 /// Registers every generic producer `language`'s spec drives.
 pub fn register(language: &Arc<dyn Language>, cache: &Arc<ParseCache>, reg: &mut ProducerRegistry) {
@@ -90,16 +31,20 @@ pub fn register(language: &Arc<dyn Language>, cache: &Arc<ParseCache>, reg: &mut
 }
 
 /// Registers every generic producer `language`'s spec drives except those making `replaced`,
-/// for a language that registers its own producer of those facts.
+/// for a language that registers its own producer of those facts. Producers attach in
+/// fact-catalog order.
 pub fn register_except(
     language: &Arc<dyn Language>,
     cache: &Arc<ParseCache>,
     reg: &mut ProducerRegistry,
     replaced: &[FactKind],
 ) {
-    for (kind, drives, attach) in GENERIC {
-        if !replaced.contains(kind) && drives(language.spec()) {
-            attach(Arc::clone(language), Arc::clone(cache), reg);
+    let mut generic: Vec<&GenericProducer> =
+        inventory::iter::<GenericProducer>.into_iter().collect();
+    generic.sort_by_key(|producer| producer.kind);
+    for producer in generic {
+        if !replaced.contains(&producer.kind) && (producer.drives)(language.spec()) {
+            (producer.attach)(Arc::clone(language), Arc::clone(cache), reg);
         }
     }
 }

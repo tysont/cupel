@@ -34,7 +34,8 @@ impl Pair {
     }
 }
 
-/// The registries the binary uses: compiled-in languages, their producers, the native checks.
+/// The registries the binary uses: compiled-in languages, their producers, the tool producers,
+/// and the native checks.
 pub struct Registries {
     pub languages: LanguageRegistry,
     pub producers: ProducerRegistry,
@@ -46,6 +47,7 @@ impl Registries {
         let languages = LanguageRegistry::builtin();
         let mut producers = ProducerRegistry::default();
         languages.register_producers(&mut producers);
+        cupel_adapt::register(&mut producers);
         let mut checks = CheckRegistry::default();
         cupel_checks::register(&mut checks);
         Self {
