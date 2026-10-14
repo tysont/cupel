@@ -305,18 +305,7 @@ impl Store {
                 )?;
             }
             for check in &envelope.checks {
-                tx.execute(
-                    "INSERT OR REPLACE INTO checks (run_id, check_id, json) VALUES (?1, ?2, ?3)",
-                    params![run, check.id.as_str(), serde_json::to_string(check)?],
-                )?;
-                if let Some(score) = &check.score {
-                    let metric = Metric {
-                        symbol: None,
-                        key: "score".to_owned(),
-                        value: score.value,
-                    };
-                    insert_metric(tx, &run, &check.id, &metric)?;
-                }
+                insert_check(tx, &run, check)?;
             }
             Ok(())
         })
@@ -644,6 +633,23 @@ fn repeats_other_runs(envelope: &Envelope) -> bool {
         envelope.run.verb,
         Some(Verb::Explain | Verb::Baseline | Verb::Suppress)
     )
+}
+
+/// Stores one check's result in `run`, and its score as a metric.
+fn insert_check(tx: &Connection, run: &str, check: &CheckResult) -> Result<()> {
+    tx.execute(
+        "INSERT OR REPLACE INTO checks (run_id, check_id, json) VALUES (?1, ?2, ?3)",
+        params![run, check.id.as_str(), serde_json::to_string(check)?],
+    )?;
+    if let Some(score) = &check.score {
+        let metric = Metric {
+            symbol: None,
+            key: "score".to_owned(),
+            value: score.value,
+        };
+        insert_metric(tx, run, &check.id, &metric)?;
+    }
+    Ok(())
 }
 
 fn insert_metric(tx: &Connection, run: &str, check: &CheckId, metric: &Metric) -> Result<()> {

@@ -114,52 +114,85 @@ pub fn definitions<'t>(parsed: &'t Parsed, language: &dyn Language) -> Vec<Defin
             })
         })
         .collect();
-    let rules = &spec.tables().visibility;
     let exported: HashSet<&str> = found
         .iter()
         .flat_map(|m| m.nodes(capture::EXPORT_NAME).collect::<Vec<_>>())
         .map(|node| parsed.text(node))
         .collect();
-    let file_namespace = namespaces.of(parsed.root(), &[], None);
     let parameters = parameter_counts(&found, &picked);
+    let context = Context {
+        parsed,
+        language,
+        namespaces: &namespaces,
+        enclosing: &enclosing,
+        exported: &exported,
+        file_namespace: namespaces.of(parsed.root(), &[], None),
+    };
     picked
         .into_iter()
         .zip(parameters)
-        .filter_map(|((m, kind, node), parameters)| {
-            let name_node = m.node(capture::SYMBOL_NAME)?;
-            let name = parsed.text(name_node);
-            let extra = m.node(capture::SCOPE_NAME).map(|n| parsed.text(n));
-            let namespace = namespaces.of(node, &enclosing, extra);
-            let modifier = m.node(capture::SYMBOL_VISIBILITY).map(|n| parsed.text(n));
-            let exported_by_name =
-                modifier.is_none() && namespace == file_namespace && exported.contains(name);
-            let visibility = fixed_visibility(m).unwrap_or_else(|| {
-                if exported_by_name {
-                    Visibility::Public
-                } else {
-                    rules.resolve(name, modifier)
-                }
-            });
-            let body = m.node(capture::SYMBOL_BODY);
-            Some(Definition {
-                node,
-                name: name_node,
-                body,
-                symbol: SymbolDef {
-                    name: name.to_owned(),
-                    display: namespaces.display(&namespace, name),
-                    namespace,
-                    kind,
-                    visibility,
-                    lang: language.id(),
-                    file: parsed.file.clone(),
-                    span: span(node),
-                    body: body.map(span),
-                    parameters,
-                },
-            })
-        })
+        .filter_map(|((m, kind, node), parameters)| context.definition(m, kind, node, parameters))
         .collect()
+}
+
+/// What turning a match into a definition reads besides the match.
+struct Context<'c, 't> {
+    parsed: &'t Parsed,
+    language: &'c dyn Language,
+    namespaces: &'c Namespaces<'c>,
+    enclosing: &'c [Scope<'t>],
+    /// Names the file exports by name (`export { a }`, `__all__`).
+    exported: &'c HashSet<&'t str>,
+    file_namespace: String,
+}
+
+impl<'t> Context<'_, 't> {
+    /// The definition the match `m` names: its namespace, display name, and visibility.
+    fn definition(
+        &self,
+        m: &Match<'_, 't>,
+        kind: SymbolKind,
+        node: Node<'t>,
+        parameters: u32,
+    ) -> Option<Definition<'t>> {
+        let parsed = self.parsed;
+        let name_node = m.node(capture::SYMBOL_NAME)?;
+        let name = parsed.text(name_node);
+        let extra = m.node(capture::SCOPE_NAME).map(|n| parsed.text(n));
+        let namespace = self.namespaces.of(node, self.enclosing, extra);
+        let modifier = m.node(capture::SYMBOL_VISIBILITY).map(|n| parsed.text(n));
+        let exported_by_name =
+            modifier.is_none() && namespace == self.file_namespace && self.exported.contains(name);
+        let visibility = fixed_visibility(m).unwrap_or_else(|| {
+            if exported_by_name {
+                Visibility::Public
+            } else {
+                self.language
+                    .spec()
+                    .tables()
+                    .visibility
+                    .resolve(name, modifier)
+            }
+        });
+        let body = m.node(capture::SYMBOL_BODY);
+        Some(Definition {
+            node,
+            name: name_node,
+            body,
+            symbol: SymbolDef {
+                name: name.to_owned(),
+                display: self.namespaces.display(&namespace, name),
+                namespace,
+                kind,
+                visibility,
+                lang: self.language.id(),
+                file: parsed.file.clone(),
+                span: span(node),
+                body: body.map(span),
+                parameters,
+            },
+        })
+    }
 }
 
 /// How many `@symbol.parameter` nodes each picked definition declares: a parameter counts for

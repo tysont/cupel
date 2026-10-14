@@ -541,31 +541,47 @@ impl UseTree {
     fn tree(&mut self, prefix: &[String]) {
         let mut path = prefix.to_vec();
         loop {
-            match self.peek() {
+            let token = self.peek().map(str::to_owned);
+            match token.as_deref() {
                 Some("::") => self.position += 1,
                 Some("{") => return self.group(&path),
-                Some("*") => {
-                    self.position += 1;
-                    path.push("*".to_owned());
-                    return self.paths.push(path);
-                }
-                Some("self") if !path.is_empty() && path.len() == prefix.len() => {
-                    self.position += 1;
-                    return self.end(path);
-                }
-                Some(word) if word != "," && word != "}" => {
-                    path.push(word.to_owned());
-                    self.position += 1;
-                    if self.peek() != Some("::") {
-                        return self.end(path);
-                    }
-                }
-                _ => {
+                None | Some("," | "}") => {
                     if path.len() > prefix.len() {
                         self.paths.push(path);
                     }
                     return;
                 }
+                Some(segment) => {
+                    let at_start = !path.is_empty() && path.len() == prefix.len();
+                    if self.segment(&mut path, segment, at_start) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    /// Reads `segment` onto `path`; true when it ends the path (a glob, a `self` at the start of
+    /// a group, or a name no `::` follows), which is then recorded.
+    fn segment(&mut self, path: &mut Vec<String>, segment: &str, at_start: bool) -> bool {
+        self.position += 1;
+        match segment {
+            "*" => {
+                path.push("*".to_owned());
+                self.paths.push(std::mem::take(path));
+                true
+            }
+            "self" if at_start => {
+                self.end(std::mem::take(path));
+                true
+            }
+            _ => {
+                path.push(segment.to_owned());
+                let ends = self.peek() != Some("::");
+                if ends {
+                    self.end(std::mem::take(path));
+                }
+                ends
             }
         }
     }
