@@ -588,7 +588,7 @@ Each step below delivers **one fact kind** through a generic producer plus any h
 
 **Goal:** The `check` and `survey` verbs run real checks over a resolved scope, persist to the fact store, compare to baselines, honor suppressions, evaluate gates, and explain findings. Each check is a complete vertical slice.
 
-**Status:** in progress (2026-10-13)
+**Status:** complete (2026-10-14, 24165fd)
 
 Each check step (P2.3–P2.8) follows the same recipe and is not done until all of it is:
 
