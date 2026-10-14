@@ -159,9 +159,9 @@
         "norm-tree"
       ],
       "stability": "experimental",
-      "summary": "CRAP per function: cyclomatic complexity weighted by missing test coverage. Limitation: CRAP exists only where coverage was measured; without a coverage map (no coverage producer exists until P3.2) the check passes with no score, no metrics, and no findings, and a function with no instrumented line is not scored. `static.complexity` reports cyclomatic complexity alone.",
+      "summary": "CRAP per function: cyclomatic complexity weighted by missing test coverage. Limitation: CRAP exists only where coverage was measured; without a coverage map (no `[lang.<id>] coverage` command and no fresh report) the check passes with no score, no metrics, and no findings, and a function with no instrumented line is not scored. `static.complexity` reports cyclomatic complexity alone.",
       "tier": 0,
-      "version": 2,
+      "version": 3,
       "wants": [
         "coverage-map",
         "test-conventions"

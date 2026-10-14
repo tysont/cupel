@@ -1,0 +1,150 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "tests.coverage",
+      "metrics": {
+        "line": 0.44,
+        "lines": 25.0,
+        "uncovered": 1.0
+      },
+      "notes": [
+        "branches: unavailable (go)"
+      ],
+      "oracle": null,
+      "score": {
+        "n": 25,
+        "unit": "line_ratio",
+        "value": 0.44
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "grade_test.go"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that calls `Refund`."
+      },
+      "check": "tests.coverage",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "covered": 0,
+        "lines": 13
+      },
+      "id": "fnd_9f74d5",
+      "kind": "coverage.uncovered-symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 39,
+        "file": "grade.go",
+        "line": 25
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.coverage --symbols sh_75cd1115bd666199",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_9f74d5 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "grade.Refund",
+        "hash": "sh_75cd1115bd666199",
+        "lang": "go"
+      },
+      "tier": 2,
+      "title": "`grade.Refund` never ran under test: none of its 13 instrumented lines"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_9f74d5",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Write a test that calls `Refund`."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "go": {
+            "coverage": "go test -coverprofile={out} ./..."
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 5
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 1,
+  "truncated": false
+}

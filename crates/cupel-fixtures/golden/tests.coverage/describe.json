@@ -1,0 +1,222 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "languages": [
+      {
+        "lang": "go",
+        "support": {
+          "key": "lang.go.coverage",
+          "status": "unconfigured"
+        }
+      },
+      {
+        "lang": "javascript",
+        "support": {
+          "key": "lang.javascript.coverage",
+          "status": "unconfigured"
+        }
+      },
+      {
+        "lang": "python",
+        "support": {
+          "key": "lang.python.coverage",
+          "status": "unconfigured"
+        }
+      },
+      {
+        "lang": "rust",
+        "support": {
+          "key": "lang.rust.coverage",
+          "status": "unconfigured"
+        }
+      },
+      {
+        "lang": "typescript",
+        "support": {
+          "key": "lang.javascript.coverage",
+          "status": "unconfigured"
+        }
+      }
+    ],
+    "manifest": {
+      "cost": "standard",
+      "findings": [
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `coverage.uncovered-symbol`.",
+            "properties": {
+              "covered": {
+                "description": "Of those, the ones that ran: none.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines": {
+                "description": "The symbol's instrumented lines.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "lines",
+              "covered"
+            ],
+            "title": "UncoveredSymbol",
+            "type": "object"
+          },
+          "kind": "coverage.uncovered-symbol",
+          "summary": "No test ran any instrumented line of the function."
+        },
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `coverage.uncovered-branch`.",
+            "properties": {
+              "branches": {
+                "description": "The branches the coverage map measured in the symbol.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines": {
+                "description": "The line of each branch no test took, in order, each once.",
+                "items": {
+                  "format": "uint32",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              "uncovered": {
+                "description": "Of those, the ones no test took.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "branches",
+              "uncovered",
+              "lines"
+            ],
+            "title": "UncoveredBranch",
+            "type": "object"
+          },
+          "kind": "coverage.uncovered-branch",
+          "summary": "Tests ran the function but never took some of its branches."
+        }
+      ],
+      "id": "tests.coverage",
+      "metrics": [
+        {
+          "name": "line",
+          "per": "scope",
+          "summary": "The share of the scored functions' instrumented lines that ran; the score."
+        },
+        {
+          "name": "branch",
+          "per": "scope",
+          "summary": "The share of the scored functions' branches that were taken; only when measured."
+        },
+        {
+          "name": "lines",
+          "per": "scope",
+          "summary": "Instrumented lines in the scored functions."
+        },
+        {
+          "name": "branches",
+          "per": "scope",
+          "summary": "Measured branches in the scored functions."
+        },
+        {
+          "name": "uncovered",
+          "per": "scope",
+          "summary": "Functions in scope no test ran."
+        },
+        {
+          "name": "uncovered_lines",
+          "per": "symbol",
+          "summary": "Instrumented lines of the function that never ran."
+        }
+      ],
+      "needs": [
+        "symbols",
+        "coverage-map"
+      ],
+      "stability": "experimental",
+      "summary": "Line and branch coverage per function, from the coverage tool the language's `[lang.<id>] coverage` command runs (or a fresh report it left). Branch findings only where the tool measured branches; otherwise the result notes `branches: unavailable`. A function with no instrumented line is not scored.",
+      "tier": 2,
+      "version": 1,
+      "wants": [
+        "norm-tree",
+        "test-conventions"
+      ]
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 0,
+  "truncated": false
+}

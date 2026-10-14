@@ -1,0 +1,436 @@
+// ABOUTME: tests.coverage over synthetic facts: uncovered symbols, uncovered branches only where the map measured
+// ABOUTME: branches (else the `branches: unavailable` note), test code and unmeasured symbols, metrics (ADR-077).
+mod support;
+
+use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage, LineHits};
+use cupel_core::syntax::{
+    NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, TestConventions,
+    TestPairing, Visibility,
+};
+use cupel_core::{
+    ActionKind, Check, CheckId, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts,
+    Finding, FindingId, LangId, MetricPer, Scope, Severity,
+};
+use serde_json::{Value, json};
+use support::{Recorded, combined, language};
+
+const ID: &str = "tests.coverage";
+
+/// A function `name` in `file` on lines `line` to `line + 4`.
+fn symbol(name: &str, file: &str, line: u32) -> SymbolDef {
+    SymbolDef {
+        name: name.to_owned(),
+        namespace: "m".to_owned(),
+        display: format!("m::{name}"),
+        kind: SymbolKind::Function,
+        visibility: Visibility::Public,
+        lang: LangId::from("x"),
+        file: file.to_owned(),
+        span: Span {
+            line,
+            col: 1,
+            end_line: line + 4,
+            end_col: 2,
+        },
+        body: None,
+        parameters: 0,
+    }
+}
+
+/// Line hits for `lines`, each `(line, hits)`.
+fn lines(hits: &[(u32, u64)]) -> Vec<LineHits> {
+    hits.iter()
+        .map(|&(line, hits)| LineHits { line, hits })
+        .collect()
+}
+
+/// Branch hits for `branches`, each `(line, hits)`, numbered in order on their line.
+fn branches(hits: &[(u32, u64)]) -> Vec<BranchHits> {
+    let mut numbered: Vec<BranchHits> = Vec::new();
+    for &(line, hits) in hits {
+        let branch =
+            u32::try_from(numbered.iter().filter(|seen| seen.line == line).count()).unwrap();
+        numbered.push(BranchHits { line, branch, hits });
+    }
+    numbered
+}
+
+fn file(name: &str, line_hits: &[(u32, u64)], branch_hits: Option<&[(u32, u64)]>) -> FileCoverage {
+    FileCoverage {
+        file: name.to_owned(),
+        lines: lines(line_hits),
+        branches: branch_hits.map(branches),
+    }
+}
+
+/// The symbols, coverage, and optionally test conventions a run sees.
+struct World {
+    symbols: Vec<SymbolDef>,
+    coverage: Option<CoverageMap>,
+    conventions: Option<TestConventions>,
+}
+
+impl World {
+    fn new(symbols: Vec<SymbolDef>, coverage: CoverageMap) -> Self {
+        Self {
+            symbols,
+            coverage: Some(coverage),
+            conventions: None,
+        }
+    }
+
+    fn facts(&self, check: &dyn Check) -> Facts {
+        let mut facts = Facts::for_manifest(check.manifest());
+        facts
+            .insert(Symbols {
+                symbols: self.symbols.clone(),
+            })
+            .unwrap();
+        facts
+            .insert(NormTree {
+                symbols: self
+                    .symbols
+                    .iter()
+                    .map(|symbol| NormalizedSymbol {
+                        symbol: symbol.key(),
+                        hash: support::hash_of_line(symbol.span.line),
+                        root: NormNode {
+                            label: "fn".to_owned(),
+                            children: Vec::new(),
+                        },
+                    })
+                    .collect(),
+            })
+            .unwrap();
+        if let Some(coverage) = &self.coverage {
+            facts.insert(coverage.clone()).unwrap();
+        }
+        if let Some(conventions) = &self.conventions {
+            facts.insert(conventions.clone()).unwrap();
+        }
+        facts
+    }
+
+    fn scope(&self) -> Scope {
+        let mut files: Vec<String> = self.symbols.iter().map(|s| s.file.clone()).collect();
+        files.dedup();
+        Scope {
+            files,
+            symbols: Some(self.symbols.iter().map(SymbolDef::key).collect()),
+        }
+    }
+}
+
+fn run_in(world: &World, scope: Scope) -> cupel_core::Result<(CheckResult, Recorded)> {
+    let check = support::check(ID);
+    support::recorded(check, &world.facts(check), scope, json!({}))
+}
+
+fn run(world: &World) -> (CheckResult, Vec<Finding>) {
+    let (result, recorded) = run_in(world, world.scope()).unwrap();
+    (result, recorded.findings)
+}
+
+/// `a` (lines 1–5) never ran; `b` (lines 10–14) ran but one of its two branches never did;
+/// `c` (lines 20–24) ran fully. Each has its declaration line and two body lines instrumented.
+/// Branches are measured when `measured`.
+fn three_symbols(measured: bool) -> World {
+    let branch_hits: &[(u32, u64)] = &[(11, 3), (11, 0), (21, 1), (21, 1)];
+    World::new(
+        vec![
+            symbol("a", "f.x", 1),
+            symbol("b", "f.x", 10),
+            symbol("c", "f.x", 20),
+        ],
+        CoverageMap::new(vec![file(
+            "f.x",
+            &[
+                (1, 0),
+                (2, 0),
+                (3, 0),
+                (10, 3),
+                (11, 3),
+                (12, 0),
+                (20, 1),
+                (21, 1),
+                (22, 1),
+            ],
+            measured.then_some(branch_hits),
+        )]),
+    )
+}
+
+#[test]
+fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
+    let manifest = support::check(ID).manifest();
+    assert_eq!(
+        support::Shape::of(manifest),
+        support::Shape {
+            needs: vec![FactKind::Symbols, FactKind::CoverageMap],
+            wants: vec![FactKind::NormTree, FactKind::TestConventions],
+            tier: 2,
+            cost: CostClass::Standard,
+            kinds: vec![
+                ("coverage.uncovered-symbol", ActionKind::WriteTest),
+                ("coverage.uncovered-branch", ActionKind::WriteTest),
+            ],
+            metrics: vec![
+                ("line", MetricPer::Scope),
+                ("branch", MetricPer::Scope),
+                ("lines", MetricPer::Scope),
+                ("branches", MetricPer::Scope),
+                ("uncovered", MetricPer::Scope),
+                ("uncovered_lines", MetricPer::Symbol),
+            ],
+            evidence: vec!["object"; 2],
+        }
+    );
+}
+
+#[test]
+fn a_symbol_none_of_whose_lines_ran_is_an_uncovered_symbol_warning() {
+    let (result, findings) = run(&three_symbols(true));
+    let uncovered: Vec<&Finding> = findings
+        .iter()
+        .filter(|f| f.kind == "coverage.uncovered-symbol")
+        .collect();
+    let [finding] = uncovered.as_slice() else {
+        panic!("one uncovered symbol: {findings:?}");
+    };
+    assert_eq!(finding.symbol.as_ref().unwrap().display, "m::a");
+    assert_eq!(finding.severity, Severity::Warn);
+    assert_eq!(finding.action.kind, ActionKind::WriteTest);
+    assert_eq!(
+        finding.id,
+        FindingId::compute(
+            &CheckId::from(ID),
+            "coverage.uncovered-symbol",
+            &support::hash_of_line(1),
+            None
+        )
+    );
+    assert_eq!(
+        Value::Object(finding.evidence.0.clone()),
+        json!({"lines": 2, "covered": 0})
+    );
+    assert_eq!(
+        result.status,
+        CheckStatus::Fail,
+        "an uncovered symbol fails"
+    );
+}
+
+#[test]
+fn a_symbol_that_ran_with_a_branch_that_never_did_is_an_uncovered_branch_note() {
+    let (_, findings) = run(&three_symbols(true));
+    let branches: Vec<&Finding> = findings
+        .iter()
+        .filter(|f| f.kind == "coverage.uncovered-branch")
+        .collect();
+    let [finding] = branches.as_slice() else {
+        panic!("one uncovered branch: {findings:?}");
+    };
+    assert_eq!(finding.symbol.as_ref().unwrap().display, "m::b");
+    assert_eq!(finding.severity, Severity::Info);
+    assert_eq!(
+        Value::Object(finding.evidence.0.clone()),
+        json!({"branches": 2, "uncovered": 1, "lines": [11]})
+    );
+}
+
+#[test]
+fn without_measured_branches_there_are_no_branch_findings_and_the_result_says_so() {
+    let (result, findings) = run(&three_symbols(false));
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("m::a", "coverage.uncovered-symbol")])
+    );
+    assert_eq!(result.notes, ["branches: unavailable"]);
+    assert!(
+        !result.metrics.contains_key("branch"),
+        "{:?}",
+        result.metrics
+    );
+    assert!(!result.metrics.contains_key("branches"));
+    let (measured, _) = run(&three_symbols(true));
+    assert!(measured.notes.is_empty(), "{:?}", measured.notes);
+}
+
+#[test]
+fn a_declaration_line_that_ran_without_its_body_is_not_coverage() {
+    // A Python `def` line runs when the module is imported; the function ran only if its body did.
+    let world = World::new(
+        vec![symbol("imported", "f.x", 1), symbol("one_line", "f.x", 10)],
+        CoverageMap::new(vec![file("f.x", &[(1, 1), (2, 0), (3, 0), (10, 1)], None)]),
+    );
+    let (result, findings) = run(&world);
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("m::imported", "coverage.uncovered-symbol")])
+    );
+    assert_eq!(
+        Value::Object(findings[0].evidence.0.clone()),
+        json!({"lines": 2, "covered": 0})
+    );
+    assert_eq!(
+        result.score.unwrap().n,
+        3,
+        "a one-line function is measured by its one line"
+    );
+}
+
+#[test]
+fn branch_findings_need_branches_measured_in_the_symbols_own_file() {
+    let mut world = World::new(
+        vec![symbol("b", "f.x", 10), symbol("g", "g.x", 1)],
+        CoverageMap::new(vec![
+            file("f.x", &[(10, 1), (11, 1)], None),
+            file("g.x", &[(1, 1), (2, 1)], Some(&[(2, 1), (2, 0)])),
+        ]),
+    );
+    world.symbols[0].span.end_line = 12;
+    let (result, findings) = run(&world);
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("m::g", "coverage.uncovered-branch")])
+    );
+    assert!(result.notes.is_empty());
+}
+
+#[test]
+fn the_result_measures_line_and_branch_coverage_of_the_scored_symbols() {
+    let (result, recorded) = run_in(&three_symbols(true), three_symbols(true).scope()).unwrap();
+    // Body lines: a 0/2, b 1/2, c 2/2 → 3/6. Branches: b 1/2, c 2/2 → 3/4.
+    let score = result.score.as_ref().unwrap();
+    assert_eq!(
+        (score.value, score.unit.as_str(), score.n),
+        (0.5, "line_ratio", 6)
+    );
+    assert_eq!(
+        result.metrics,
+        [
+            ("branch", 0.75),
+            ("branches", 4.0),
+            ("line", 0.5),
+            ("lines", 6.0),
+            ("uncovered", 1.0)
+        ]
+        .map(|(name, value)| (name.to_owned(), value))
+        .into()
+    );
+    assert_eq!(result.findings, 2);
+    assert_eq!(
+        recorded.measured(),
+        [
+            ("uncovered_lines", "m::a", 2.0),
+            ("uncovered_lines", "m::b", 1.0),
+            ("uncovered_lines", "m::c", 0.0)
+        ]
+    );
+}
+
+#[test]
+fn symbols_without_an_instrumented_line_or_in_test_files_are_not_scored() {
+    let mut world = World::new(
+        vec![
+            symbol("unmeasured", "f.x", 40),
+            symbol("a", "f.x", 1),
+            symbol("a_test", "f_test.x", 1),
+        ],
+        CoverageMap::new(vec![
+            file("f.x", &[(1, 0)], None),
+            file("f_test.x", &[(1, 0)], None),
+        ]),
+    );
+    world.conventions = Some(TestConventions {
+        test_globs: vec!["**/*_test.x".to_owned(), "*_test.x".to_owned()],
+        pairs: vec![TestPairing {
+            source: "f.x".to_owned(),
+            tests: vec!["f_test.x".to_owned()],
+        }],
+    });
+    let (result, findings) = run(&world);
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("m::a", "coverage.uncovered-symbol")])
+    );
+    assert_eq!(
+        findings[0].action.hints["nearest_test_file"],
+        json!("f_test.x")
+    );
+    assert_eq!(result.score.unwrap().n, 1, "one instrumented line scored");
+}
+
+#[test]
+fn only_symbols_in_scope_are_scored() {
+    let world = three_symbols(true);
+    let mut scope = world.scope();
+    scope.symbols = Some(world.symbols[2..].iter().map(SymbolDef::key).collect());
+    let (result, recorded) = run_in(&world, scope).unwrap();
+    assert!(recorded.findings.is_empty());
+    assert_eq!(result.status, CheckStatus::Pass);
+    assert_eq!(result.metrics.get("line"), Some(&1.0));
+}
+
+#[test]
+fn nothing_scored_passes_with_a_score_over_no_lines() {
+    let world = World::new(vec![symbol("a", "f.x", 1)], CoverageMap::default());
+    let (result, findings) = run(&world);
+    assert!(findings.is_empty());
+    assert_eq!(result.status, CheckStatus::Pass);
+    let score = result.score.unwrap();
+    assert_eq!((score.value, score.n), (0.0, 0));
+}
+
+#[test]
+fn without_a_coverage_map_the_check_cannot_run() {
+    let mut world = three_symbols(true);
+    world.coverage = None;
+    let error = run_in(&world, world.scope()).err();
+    assert_eq!(
+        error,
+        Some(Error::AbsentFact {
+            kind: FactKind::CoverageMap
+        })
+    );
+}
+
+#[test]
+fn any_setting_is_a_configuration_error() {
+    let (key, valid) = support::setting_error(support::check(ID), json!({"threshold": 80}));
+    assert_eq!(key, "threshold");
+    assert!(valid.is_empty());
+}
+
+#[test]
+fn ratios_combine_weighted_by_what_they_are_ratios_of_and_counts_add_up() {
+    let check = support::check(ID);
+    let results = [
+        language(
+            check,
+            &[
+                ("line", 1.0),
+                ("lines", 30.0),
+                ("uncovered", 0.0),
+                ("branch", 0.5),
+                ("branches", 4.0),
+            ],
+            30,
+        ),
+        language(
+            check,
+            &[("line", 0.5), ("lines", 10.0), ("uncovered", 2.0)],
+            10,
+        ),
+    ];
+    assert_eq!(combined(check, "line", &results), Some(0.875));
+    assert_eq!(combined(check, "branch", &results), Some(0.5));
+    assert_eq!(combined(check, "lines", &results), Some(40.0));
+    assert_eq!(combined(check, "uncovered", &results), Some(2.0));
+    let scores = [
+        support::score(1.0, "line_ratio", 30),
+        support::score(0.5, "line_ratio", 10),
+    ];
+    let score = check.combine(&scores).unwrap();
+    assert_eq!((score.value, score.n), (0.875, 40));
+}

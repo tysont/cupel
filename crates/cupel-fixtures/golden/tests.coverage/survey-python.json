@@ -1,0 +1,34 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.coverage",
+      "metrics": {},
+      "oracle": null,
+      "score": null,
+      "skipped": {
+        "fact": null,
+        "lang": "python",
+        "reason": "unconfigured",
+        "see": "cupel describe matrix",
+        "tool": null
+      },
+      "status": "skipped",
+      "tier": 2
+    }
+  ],
+  "findings": [],
+  "rankings": [
+    {
+      "check": "tests.coverage",
+      "entries": [],
+      "measured": 0,
+      "metric": "uncovered_lines",
+      "per": "symbol",
+      "summary": "Instrumented lines of the function that never ran."
+    }
+  ]
+}

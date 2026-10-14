@@ -206,6 +206,14 @@ impl Resolution {
         let Some(producer) = chosen else {
             return;
         };
+        // A producer waiting for configuration (a coverage producer without a
+        // `[lang.<id>] coverage` command, ADR-077) runs nothing, so it needs no tool yet.
+        if matches!(
+            producer.availability(walk.ctx),
+            Availability::Unconfigured { .. }
+        ) {
+            return;
+        }
         if let Some(tool) = producer.tool(walk.ctx) {
             let purpose = format!("{purpose} via {}", producer.id());
             match self
@@ -667,10 +675,10 @@ mod tests {
         );
     }
 
-    /// A check that needs `TestResults` and is never run.
-    struct NeedsTestResults(cupel_core::Manifest);
+    /// A check that needs one fact kind and is never run.
+    struct Needs(cupel_core::Manifest);
 
-    impl Check for NeedsTestResults {
+    impl Check for Needs {
         fn manifest(&self) -> &cupel_core::Manifest {
             &self.0
         }
@@ -694,19 +702,19 @@ mod tests {
         }
     }
 
-    /// What doctor resolves for a check needing `TestResults` in the python test-results fixture
-    /// with `[lang.python]` holding `table`: each requirement's shape, then each problem's kind
-    /// and subject.
+    /// What doctor resolves for a check needing `need` in the python test-results fixture with
+    /// `[lang.python]` holding `table`: each requirement's shape, then each problem's kind and
+    /// subject.
     /// A requirement as `(tool, needed_for, required, probe)`.
     type Shape = (String, String, bool, String);
 
-    fn resolved(table: &serde_json::Value) -> (Vec<Shape>, Vec<String>) {
-        let check = NeedsTestResults(cupel_core::Manifest {
+    fn resolved_for(need: FactKind, table: &serde_json::Value) -> (Vec<Shape>, Vec<String>) {
+        let check = Needs(cupel_core::Manifest {
             id: cupel_core::CheckId::from("t.needs"),
             version: 1,
             tier: cupel_core::Tier::try_from(2).unwrap(),
             cost: cupel_core::CostClass::Standard,
-            needs: vec![FactKind::TestResults],
+            needs: vec![need],
             wants: Vec::new(),
             findings: Vec::new(),
             metrics: Vec::new(),
@@ -733,6 +741,32 @@ mod tests {
             .map(|problem| format!("{} {}", problem.kind, problem.subject))
             .collect();
         (shape(&resolution.requirements), problems)
+    }
+
+    fn resolved(table: &serde_json::Value) -> (Vec<Shape>, Vec<String>) {
+        resolved_for(FactKind::TestResults, table)
+    }
+
+    #[test]
+    fn a_coverage_tool_is_required_only_where_a_coverage_command_is_configured() {
+        let unconfigured = resolved_for(FactKind::CoverageMap, &json!({}));
+        let configured = resolved_for(
+            FactKind::CoverageMap,
+            &json!({"coverage": "pytest --cov --cov-report=lcov:{out}"}),
+        );
+        assert_eq!(unconfigured, (vec![], vec![]));
+        assert_eq!(
+            configured,
+            (
+                vec![(
+                    "pytest".to_owned(),
+                    "t.needs (coverage-map for python) via tool.pytest-cov".to_owned(),
+                    true,
+                    "pytest --version".to_owned()
+                )],
+                vec![]
+            )
+        );
     }
 
     #[test]

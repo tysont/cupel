@@ -1,0 +1,15 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p3-2/gen/rust",
+  "skip_dirs": [
+    "target"
+  ],
+  "report": "4d692814c58b11b4cd9b895513b4a2e69cbba6e66538a7a2961ecdc49b00e144",
+  "files": {
+    "Cargo.lock": "470c637d7e1b652e749a00946ede95c135d6a827c593497c24aab88b2f49faba",
+    "Cargo.toml": "602fa2eb639702c0221e2be38aceea61c707d281ae2fd2ecbb0b7f8008873bea",
+    "cupel.toml": "8181bca32b35598337d25272c1effd5e985d5b6d0bda325cd7c14761f701d559",
+    "src/lib.rs": "a861b769fcf1eee96b40a75cf0854b53b172154b228587892e635d4f8505b7a6",
+    "tests/grade.rs": "6be48fe35e70cce6a84a2dcb7ca1d860a1c021ec3af22034fd9e28d5623c82b2"
+  }
+}

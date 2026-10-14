@@ -17,7 +17,7 @@ fn every_pair_has_its_golden_or_its_skip_and_no_golden_is_stale() {
 fn every_check_runs_given_only_its_declared_facts() {
     let registries = Registries::builtin();
     let supported: Vec<_> = registries
-        .pairs()
+        .fixture_pairs()
         .into_iter()
         .filter(|pair| pair.support == Support::Supported)
         .collect();

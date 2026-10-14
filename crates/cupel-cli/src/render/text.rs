@@ -259,6 +259,7 @@ fn checks_block(checks: &[CheckResult], paint: &Paint) -> String {
         if let Some(skipped) = &check.skipped {
             facts.push(format!("skipped: {}", skip_reason(skipped)));
         }
+        facts.extend(check.notes.iter().map(|note| format!("note: {note}")));
         let _ = writeln!(
             out,
             "  {:<width$}  {:<8} {}",

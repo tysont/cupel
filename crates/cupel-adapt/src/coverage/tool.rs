@@ -12,7 +12,7 @@ use cupel_core::{
 };
 use serde_json::json;
 
-use super::fresh::{REPORT, SOURCES, Sources, Tree};
+use super::fresh::{REPORT, SOURCES, Sources, Tree, hash};
 use super::{parse, placed};
 use crate::runner::{installed, probe, roots};
 use crate::toolchain;
@@ -130,16 +130,16 @@ impl Producer<CoverageMap> for CoverageTool {
         _: &Scope,
         sink: &mut dyn EventSink,
     ) -> Result<CoverageMap> {
-        let skip_dirs = skip_dirs(ctx);
         let mut files = Vec::new();
-        for (index, (dir, _)) in roots(ctx).into_iter().enumerate() {
+        for (dir, _) in roots(ctx) {
+            let skip_dirs = self.skip_dirs(ctx, &dir);
             let tree = Tree {
                 repo: &ctx.ctx.root,
                 dir: &dir,
-                skip_dirs: skip_dirs.get(&dir).map_or(&[], Vec::as_slice),
+                skip_dirs: &skip_dirs,
                 exclude: &ctx.ctx.exclude,
             };
-            files.extend(self.root(ctx, index, &tree, sink)?.files);
+            files.extend(self.root(ctx, &tree, sink)?.files);
         }
         Ok(CoverageMap::new(files))
     }
@@ -151,11 +151,10 @@ impl CoverageTool {
     fn root(
         &self,
         ctx: &ProduceCtx,
-        index: usize,
         tree: &Tree<'_>,
         sink: &mut dyn EventSink,
     ) -> Result<CoverageMap> {
-        let entry = cache(&ctx.ctx.root, self.0.id).join(index.to_string());
+        let entry = cache(&ctx.ctx.root, self.0.id).join(entry_name(tree.dir));
         if let Some(map) = self.cached(&entry, tree) {
             return Ok(map);
         }
@@ -163,7 +162,7 @@ impl CoverageTool {
         if let Some(map) = self.existing(&root, tree) {
             return Ok(map);
         }
-        self.run(ctx, index, &root, tree, sink)
+        self.run(ctx, &root, tree, sink)
     }
 
     /// The report in the cache entry `entry`, when it was made for this root and is fresh.
@@ -197,7 +196,6 @@ impl CoverageTool {
     fn run(
         &self,
         ctx: &ProduceCtx,
-        index: usize,
         root: &Path,
         tree: &Tree<'_>,
         sink: &mut dyn EventSink,
@@ -213,7 +211,7 @@ impl CoverageTool {
                 .cache_dir()
                 .join("coverage")
                 .join(self.0.id)
-                .join(index.to_string()),
+                .join(entry_name(tree.dir)),
         )?;
         let out = area.join(REPORT);
         let _ = fs::remove_file(area.join(SOURCES));
@@ -269,6 +267,24 @@ impl CoverageTool {
         .map(str::to_owned)
     }
 
+    /// The directories skipped below the root `dir` when hashing it: the generated ones its
+    /// `ProjectInfo` root names, and the one the tool writes its default report in.
+    fn skip_dirs(&self, ctx: &ProduceCtx, dir: &str) -> Vec<String> {
+        let mut skip: Vec<String> = ctx
+            .upstream
+            .get::<ProjectInfo>()
+            .and_then(|info| info.roots.iter().find(|root| root.path == dir))
+            .map(|root| root.skip_dirs.clone())
+            .unwrap_or_default();
+        let output = self
+            .0
+            .default_report
+            .and_then(|report| report.split_once('/'))
+            .map(|(dir, _)| dir.to_owned());
+        skip.extend(output.filter(|output| !skip.contains(output)));
+        skip
+    }
+
     /// Whether a fresh cached report can be ingested: this producer has cache entries, and
     /// every one is fresh.
     fn ingestible(&self, ctx: &Ctx) -> bool {
@@ -305,17 +321,10 @@ fn cache(repo: &Path, id: &str) -> PathBuf {
         .join(id)
 }
 
-/// Each project root's generated directories, by root path.
-fn skip_dirs(ctx: &ProduceCtx) -> std::collections::BTreeMap<String, Vec<String>> {
-    ctx.upstream
-        .get::<ProjectInfo>()
-        .map(|info| {
-            info.roots
-                .iter()
-                .map(|root| (root.path.clone(), root.skip_dirs.clone()))
-                .collect()
-        })
-        .unwrap_or_default()
+/// The cache entry of the project root `dir`: one per root whatever language asked, so two
+/// languages sharing a root (JavaScript and TypeScript) run the tool once.
+fn entry_name(dir: &str) -> String {
+    hash(dir.as_bytes())[..16].to_owned()
 }
 
 fn canonical(path: &Path) -> PathBuf {

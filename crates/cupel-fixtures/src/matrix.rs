@@ -1,7 +1,7 @@
 // ABOUTME: The matrix test's engine (design §8.3.7, ADR-043): every (check, language) from the registries,
 // ABOUTME: a golden per supported pair, a skip per unsupported pair, and checks run on declared facts only.
 // ABOUTME: Fixtures run as whole trees, so a check that compares a range's two sides records its skip.
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::Path;
 
@@ -76,7 +76,8 @@ impl Registries {
         }
     }
 
-    /// Every (check, language) with its support, ordered by check, then language.
+    /// Every (check, language) with its support outside any repository, as `describe matrix`
+    /// computes it, ordered by check, then language.
     pub fn pairs(&self) -> Vec<Pair> {
         let matrix = SupportMatrix::compute(
             &self.checks,
@@ -94,6 +95,39 @@ impl Registries {
             .collect()
     }
 
+    /// Every (check, language) with its support in the fixture repository it runs on, which is
+    /// what the matrix test verifies: support is per repository, and a fresh coverage report
+    /// committed in a fixture is part of it (ADR-077). Ordered by check, then language.
+    pub fn fixture_pairs(&self) -> Vec<Pair> {
+        let repos = repo_path(".");
+        let langs = self.languages.langs();
+        let mut matrices: BTreeMap<String, SupportMatrix> = BTreeMap::new();
+        let mut pairs = Vec::new();
+        for check in self.checks.iter() {
+            for lang in &langs {
+                let id = &check.manifest().id;
+                let fixture = fixture_repo(&repos, id, &lang.id);
+                let matrix = matrices.entry(fixture.clone()).or_insert_with(|| {
+                    SupportMatrix::compute(
+                        &self.checks,
+                        &self.producers,
+                        &langs,
+                        &Ctx::new(repo_path(&fixture)),
+                    )
+                });
+                pairs.push(Pair {
+                    check: id.clone(),
+                    lang: lang.id.clone(),
+                    support: matrix
+                        .get(id, &lang.id)
+                        .cloned()
+                        .unwrap_or(Support::Supported),
+                });
+            }
+        }
+        pairs
+    }
+
     fn check(&self, id: &CheckId) -> &dyn Check {
         self.checks
             .get(id)
@@ -105,7 +139,7 @@ impl Registries {
 /// that is not skipped with its reason, invalid evidence, and goldens no supported pair claims.
 pub fn verify(goldens: &Goldens) -> Vec<String> {
     let registries = Registries::builtin();
-    let pairs = registries.pairs();
+    let pairs = registries.fixture_pairs();
     let mut problems = Vec::new();
     for pair in &pairs {
         let check = registries.check(&pair.check);

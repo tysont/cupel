@@ -4,13 +4,20 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 0,
+      "findings": 1,
       "id": "static.crap",
-      "metrics": {},
+      "metrics": {
+        "max": 42.0,
+        "mean": 15.690666666666669
+      },
       "oracle": null,
-      "score": null,
+      "score": {
+        "n": 3,
+        "unit": "max",
+        "value": 42.0
+      },
       "skipped": null,
-      "status": "pass",
+      "status": "fail",
       "tier": 0
     }
   ],
@@ -21,8 +28,58 @@
   "description": null,
   "exit_code": 0,
   "explanation": null,
-  "findings": [],
-  "next_actions": [],
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "src/grade.test.ts"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write tests that cover every branch of `refund` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": 0.0,
+        "crap": 42.0,
+        "cyclomatic": 6,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_ea6676",
+      "kind": "crap.high",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 36,
+        "file": "src/grade.ts",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_23b481a0b2129bac",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ea6676 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "grade.refund",
+        "hash": "sh_23b481a0b2129bac",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`grade.refund` has CRAP 42.0 (high at 30): cyclomatic 6 with 0% coverage"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_ea6676",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Write tests that cover every branch of `refund` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+    }
+  ],
   "plan": null,
   "rankings": null,
   "run": {
@@ -31,20 +88,7 @@
     "config": {
       "effective": {
         "budget": null,
-        "checks": {
-          "static.deps": {
-            "layers": {
-              "map": {
-                "domain": "**/deps_layers/domain/**",
-                "infra": "**/deps_layers/infra/**"
-              },
-              "order": [
-                "domain",
-                "infra"
-              ]
-            }
-          }
-        },
+        "checks": {},
         "default_branch": null,
         "depth": "standard",
         "format": "json",
@@ -52,7 +96,11 @@
           "changed": null,
           "tree": null
         },
-        "lang": {},
+        "lang": {
+          "typescript": {
+            "coverage": "vitest run --coverage --coverage.reporter=lcov"
+          }
+        },
         "oracles": {},
         "profile": null,
         "required_version": null,
@@ -69,15 +117,16 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 29,
+      "files": 3,
       "languages": [
+        "javascript",
         "typescript"
       ],
       "mode": "tree",
       "roots": [
         "."
       ],
-      "symbols": 73
+      "symbols": 5
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -89,13 +138,13 @@
     "findings": {
       "fail": 0,
       "info": 0,
-      "warn": 0
+      "warn": 1
     },
     "gate": null,
     "new": 0,
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 0,
+  "total_findings": 1,
   "truncated": false
 }

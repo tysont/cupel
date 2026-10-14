@@ -100,7 +100,8 @@ impl Tree<'_> {
     }
 
     /// Every file under the root, by its path relative to the root, `/`-separated: hidden
-    /// entries, `.gitignore`d paths, `skip_dirs`, and excluded paths are left out.
+    /// entries, paths a `.gitignore` inside the root ignores, `skip_dirs`, and excluded paths
+    /// are left out.
     pub fn files(&self) -> BTreeMap<String, PathBuf> {
         let root = self.root();
         let prefix = if self.dir == "." {
@@ -112,8 +113,13 @@ impl Tree<'_> {
         let exclude = self.exclude.clone();
         let base = root.clone();
         let mut files = BTreeMap::new();
+        // Only ignore files inside the root count: a parent's, the user's global one, or
+        // `.git/info/exclude` would make freshness differ between machines and checkouts.
         let walk = WalkBuilder::new(&root)
             .require_git(false)
+            .parents(false)
+            .git_global(false)
+            .git_exclude(false)
             .filter_entry(move |entry| {
                 let Some(name) = relative(&base, entry.path()) else {
                     return true;
