@@ -2,7 +2,7 @@
 // ABOUTME: how many have been applied (ADR-045 §4). Append new scripts; never edit an applied one.
 
 /// Every migration, in order. Migration `n` (1-based) moves the store from version `n - 1` to `n`.
-pub const MIGRATIONS: &[&str] = &[V1];
+pub const MIGRATIONS: &[&str] = &[V1, V2];
 
 /// Every table of design §8.8, with the ADR-045 §5 additions.
 const V1: &str = "
@@ -109,4 +109,20 @@ CREATE TABLE suppressions (
     until TEXT,
     created TEXT NOT NULL
 );
+";
+
+/// The `test_results` index of P3.1 (ADR-076 §7): language, runner, and file per row, and a
+/// duration that runners which measure none leave null. The V1 table was never written.
+const V2: &str = "
+DROP TABLE test_results;
+CREATE TABLE test_results (
+    run_id TEXT NOT NULL,
+    lang TEXT NOT NULL,
+    runner TEXT NOT NULL,
+    test_id TEXT NOT NULL,
+    file TEXT,
+    outcome TEXT NOT NULL,
+    duration_ms INTEGER
+);
+CREATE INDEX test_results_by_run ON test_results (run_id, lang, test_id);
 ";
