@@ -56,6 +56,7 @@ use std::fmt;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
     Cancellation, Ctx, Event, FactKind, LangId, ProduceCtx, ProducerRegistry, Scope, Writer,
 };
@@ -501,7 +502,7 @@ pub fn produce_fixture_fact(
         cancel: Cancellation::new(),
     };
     let scope = Scope {
-        files: walk(&root, languages),
+        files: walk(&root, languages, &ProjectInfo::default()),
     };
     let mut events = Vec::new();
     let fact = producer

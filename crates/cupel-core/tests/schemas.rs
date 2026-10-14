@@ -102,7 +102,11 @@ fn fact_schemas() {
             value["$id"],
             json!(format!("https://cupel.dev/schema/v1/fact/{kind}.json"))
         );
-        assert_eq!(value["x-cupel-fact-version"], json!(1));
+        assert_eq!(
+            value["x-cupel-fact-version"],
+            json!(schema::fact_version(kind)),
+            "{kind}"
+        );
         insta::assert_snapshot!(format!("fact_{kind}"), pretty(&schema));
     }
 }

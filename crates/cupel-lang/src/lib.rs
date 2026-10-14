@@ -12,6 +12,7 @@
 //! ```text
 //! src/langs/<dir>/
 //! ├── mod.rs        # the `Language` impl: identity, grammars, `register()`, hand-written producers
+//! ├── project.rs    # its build ecosystem for `ProjectInfo` (see `project`)
 //! ├── queries/      # symbols.scm decisions.scm mutations.scm tests.scm imports.scm api.scm
 //! └── tables.toml   # data the generic producers read (see `Tables`)
 //! ```
@@ -56,6 +57,7 @@ mod namespace;
 pub mod normalize;
 mod parse;
 mod producer;
+pub mod project;
 mod query;
 pub mod roots;
 mod spec;

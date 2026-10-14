@@ -118,18 +118,17 @@ fn a_method_hashes_like_the_free_function_with_its_body_once_self_or_cls_is_drop
 }
 
 /// Python's `NormTree` override replaces the table-driven one (`generic::register_except`);
-/// every syntactic fact but `ProjectInfo` (P1.9) must still have exactly one producer, so the
-/// override neither doubles `NormTree` nor drops another generic producer.
+/// every syntactic fact must still have exactly one producer, so the override neither doubles
+/// `NormTree` nor drops another generic producer.
 #[test]
-fn python_has_one_producer_for_every_syntactic_fact_but_project_info() {
+fn python_has_one_producer_for_every_syntactic_fact() {
     let languages = cupel_lang::LanguageRegistry::builtin();
     let mut producers = cupel_core::ProducerRegistry::default();
     languages.register_producers(&mut producers);
     let python = cupel_lang::lang(languages.get(&"python".into()).unwrap().as_ref());
     for kind in cupel_core::FactKind::SYNTACTIC {
-        let expected = usize::from(kind != cupel_core::FactKind::ProjectInfo);
         let count = producers.producers_for(kind, &python).count();
-        assert_eq!(count, expected, "{kind}");
+        assert_eq!(count, 1, "{kind}");
     }
 }
 

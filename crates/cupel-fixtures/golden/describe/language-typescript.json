@@ -102,6 +102,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "project-info",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.typescript",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "ecma",

@@ -19,7 +19,8 @@
           "module-graph",
           "api-surface",
           "roots",
-          "test-conventions"
+          "test-conventions",
+          "project-info"
         ],
         "family": "go",
         "id": "go",
@@ -41,7 +42,8 @@
           "module-graph",
           "api-surface",
           "roots",
-          "test-conventions"
+          "test-conventions",
+          "project-info"
         ],
         "family": "ecma",
         "id": "javascript",
@@ -60,7 +62,8 @@
           "module-graph",
           "api-surface",
           "roots",
-          "test-conventions"
+          "test-conventions",
+          "project-info"
         ],
         "family": "python",
         "id": "python",
@@ -79,7 +82,8 @@
           "module-graph",
           "api-surface",
           "roots",
-          "test-conventions"
+          "test-conventions",
+          "project-info"
         ],
         "family": "rust",
         "id": "rust",
@@ -101,7 +105,8 @@
           "module-graph",
           "api-surface",
           "roots",
-          "test-conventions"
+          "test-conventions",
+          "project-info"
         ],
         "family": "ecma",
         "id": "typescript",

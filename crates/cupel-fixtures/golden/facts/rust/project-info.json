@@ -1,0 +1,19 @@
+{
+  "roots": [
+    {
+      "build_files": [
+        "Cargo.toml",
+        "shapes/Cargo.toml"
+      ],
+      "lang": "rust",
+      "members": [
+        "shapes"
+      ],
+      "packages": [],
+      "path": ".",
+      "skip_dirs": [
+        "target"
+      ]
+    }
+  ]
+}

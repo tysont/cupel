@@ -3,6 +3,7 @@
 use std::fs;
 
 use cupel_core::Cancellation;
+use cupel_core::syntax::ProjectInfo;
 use cupel_lang::{CacheStats, LanguageRegistry, walk};
 
 #[test]
@@ -13,7 +14,7 @@ fn a_second_parse_of_an_unchanged_tree_hits_the_cache_for_every_file() {
     fs::write(dir.path().join("src/b.rs"), "fn b() {}\n").unwrap();
     fs::write(dir.path().join("c.py"), "def c():\n    pass\n").unwrap();
     let registry = LanguageRegistry::builtin();
-    let files = walk(dir.path(), &registry);
+    let files = walk(dir.path(), &registry, &ProjectInfo::default());
     let cancel = Cancellation::new();
 
     let first = registry.parse_all(dir.path(), &files, &cancel);

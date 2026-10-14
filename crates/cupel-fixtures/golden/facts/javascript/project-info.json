@@ -1,0 +1,21 @@
+{
+  "roots": [
+    {
+      "build_files": [
+        "package.json",
+        "packages/shapes/package.json"
+      ],
+      "lang": "javascript",
+      "members": [
+        "packages/shapes"
+      ],
+      "packages": [],
+      "path": ".",
+      "skip_dirs": [
+        "node_modules",
+        "dist",
+        "coverage"
+      ]
+    }
+  ]
+}

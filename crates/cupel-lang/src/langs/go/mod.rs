@@ -1,16 +1,18 @@
 // ABOUTME: Go: one grammar for `.go`, the queries and tables under this directory, and the
 // ABOUTME: producers it registers, including hand-written module resolution.
+pub mod project;
 mod resolve;
 
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::ModuleGraph;
+use cupel_core::syntax::{ModuleGraph, ProjectInfo};
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
+use crate::project::ProjectRoots;
 use crate::spec::LanguageSpec;
 
 use crate::spec::QueryFile;
@@ -69,6 +71,11 @@ impl Language for Go {
     fn register(&self, reg: &mut ProducerRegistry) {
         let language: Arc<dyn Language> = Arc::new(self.clone());
         crate::generic::register(&language, &self.cache, reg);
+        // Project roots come from build manifests on disk, which queries cannot see.
+        reg.register::<ProjectInfo, _>(ProjectRoots::new(
+            Arc::clone(&language),
+            &project::ECOSYSTEM,
+        ));
         // Module resolution needs go.mod and go.work, which queries cannot see.
         reg.register::<ModuleGraph, _>(ImportGraph::new(
             language,

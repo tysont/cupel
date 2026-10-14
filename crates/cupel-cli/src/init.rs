@@ -1,29 +1,73 @@
-// ABOUTME: The `init` verb: detects the project and writes `cupel.toml` and `.cupel/.gitignore` through
-// ABOUTME: a `Writer`; without `--write` the writer only records, so `init` previews (ADR-021).
+// ABOUTME: The `init` verb: detects project roots and writes `cupel.toml` and `.cupel/.gitignore` through
+// ABOUTME: a `Writer`; without `--write` the writer only records, so `init` previews (ADR-021, ADR-037).
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::Path;
 
 use cupel_core::config::FILE_NAME;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
-use cupel_core::{ActionKind, NextAction, Writer};
+use cupel_core::{ActionKind, NextAction, Severity, Writer};
+use serde_json::json;
 
 use crate::error::{CupelError, Usage};
-use crate::{detect, git};
+use crate::problem::Problem;
+use crate::{git, project};
 
 /// Writes the configuration for the repository at `writer`'s root, refusing to replace an
-/// existing `cupel.toml` unless `force` is set.
-pub fn write(writer: &Writer, force: bool) -> Result<(), CupelError> {
+/// existing `cupel.toml` unless `force` is set. Returns what the user should know about the
+/// repository that the configuration leaves out.
+pub fn write(writer: &Writer, force: bool) -> Result<Vec<Problem>, CupelError> {
     if writer.root().join(FILE_NAME).exists() && !force {
         return Err(exists());
     }
-    let info = detect::project(writer.root());
-    let text = config_text(&info, git::default_branch(writer.root()).as_deref());
+    let info = project::detect(writer);
+    let text = config_text(
+        writer.root(),
+        &info,
+        git::default_branch(writer.root()).as_deref(),
+    );
     writer
         .write(Path::new(FILE_NAME), text.as_bytes())
         .map_err(|error| unwritable(&error))?;
     writer.gitignore().map_err(|error| unwritable(&error))?;
-    Ok(())
+    Ok(cupel_lang::project::unregistered_roots(writer.root())
+        .iter()
+        .map(unsupported_root)
+        .collect())
+}
+
+/// The `info` finding for a root of a language Cupel recognizes but has not registered, which
+/// `cupel.toml` leaves out so that it validates (ADR-038).
+fn unsupported_root(root: &ProjectRoot) -> Problem {
+    let at = if root.path == "." {
+        ".".to_owned()
+    } else {
+        format!("./{}", root.path)
+    };
+    Problem {
+        check: "init",
+        kind: "init.unsupported-root",
+        subject: format!("{}:{}", root.lang, root.path),
+        severity: Severity::Info,
+        title: format!(
+            "unsupported language root: {} at {at} — supported in a later release",
+            root.lang
+        ),
+        detail: Some(
+            "cupel.toml leaves this root out of [roots] until its language is registered."
+                .to_owned(),
+        ),
+        evidence: json!({
+            "lang": root.lang,
+            "path": root.path,
+            "build_files": root.build_files,
+        }),
+        action: ActionKind::Review,
+        fix: format!(
+            "Nothing to do now; {} roots join [roots] once Cupel supports {}.",
+            root.lang, root.lang
+        ),
+    }
 }
 
 /// What to run to apply a preview or dry run of `init`.
@@ -42,8 +86,9 @@ pub fn apply(force: bool) -> NextAction {
     }
 }
 
-/// The `cupel.toml` for `info` (design §6.7, ADR-021 §4).
-pub fn config_text(info: &ProjectInfo, default_branch: Option<&str>) -> String {
+/// The `cupel.toml` for `info`, the roots of the repository at `repo`, with each language's
+/// commands chosen by the toolchain table for its first root (design §6.7, ADR-021 §4).
+pub fn config_text(repo: &Path, info: &ProjectInfo, default_branch: Option<&str>) -> String {
     let mut text = String::from(
         "# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents \
          every key.\n",
@@ -70,10 +115,11 @@ pub fn config_text(info: &ProjectInfo, default_branch: Option<&str>) -> String {
         languages.entry(root.lang.as_str()).or_insert(root);
     }
     for (lang, root) in languages {
+        let commands = project::commands(repo, root);
         let commands = [
-            ("test", &root.commands.test),
-            ("coverage", &root.commands.coverage),
-            ("bench", &root.commands.bench),
+            ("test", &commands.test),
+            ("coverage", &commands.coverage),
+            ("bench", &commands.bench),
         ];
         if commands.iter().all(|(_, command)| command.is_none()) {
             continue;
@@ -176,7 +222,6 @@ mod tests {
 
     use cupel_core::LangId;
     use cupel_core::config::{Config, ConfigRequest};
-    use cupel_core::syntax::DefaultCommands;
 
     use super::*;
 
@@ -184,6 +229,11 @@ mod tests {
         Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("../cupel-fixtures/repos/detect")
             .join(case)
+    }
+
+    /// The registered roots of a detect fixture, through the `ProjectInfo` producers.
+    fn detect(case: &str) -> ProjectInfo {
+        project::detect(&Writer::new(&fixture(case), false).unwrap())
     }
 
     /// Writes `text` as `cupel.toml` in a fresh directory and loads it.
@@ -211,8 +261,8 @@ mod tests {
             "maven",
             "empty",
         ] {
-            let info = detect::project(&fixture(case));
-            let config = load(&config_text(&info, Some("main")));
+            let info = detect(case);
+            let config = load(&config_text(&fixture(case), &info, Some("main")));
             assert_eq!(
                 config.file.default_branch.as_deref(),
                 Some("main"),
@@ -234,7 +284,7 @@ mod tests {
                 let test = table.and_then(|table| table.get("test"));
                 assert_eq!(
                     test.and_then(|value| value.as_str()),
-                    root.commands.test.as_deref(),
+                    project::commands(&fixture(case), root).test.as_deref(),
                     "{case}: {}",
                     root.lang
                 );
@@ -244,7 +294,7 @@ mod tests {
 
     #[test]
     fn the_monorepo_config_has_four_named_roots_and_one_table_per_language() {
-        let text = config_text(&detect::project(&fixture("monorepo")), None);
+        let text = config_text(&fixture("monorepo"), &detect("monorepo"), None);
         assert_eq!(
             text,
             "# Cupel configuration, written by `cupel init`; `cupel describe schema config` \
@@ -277,16 +327,13 @@ coverage = \"npx vitest run --coverage --coverage.reporter=lcov\"
         );
     }
 
-    fn root(path: &str, lang: &str, test: Option<&str>) -> ProjectRoot {
+    fn root(path: &str, lang: &str, packages: &[&str]) -> ProjectRoot {
         ProjectRoot {
             path: path.to_owned(),
             lang: LangId::from(lang),
             build_files: Vec::new(),
-            commands: DefaultCommands {
-                test: test.map(str::to_owned),
-                coverage: None,
-                bench: None,
-            },
+            members: Vec::new(),
+            packages: packages.iter().map(|p| (*p).to_owned()).collect(),
             skip_dirs: Vec::new(),
         }
     }
@@ -295,14 +342,15 @@ coverage = \"npx vitest run --coverage --coverage.reporter=lcov\"
     fn colliding_and_unusual_root_names_stay_unique_and_valid() {
         let info = ProjectInfo {
             roots: vec![
-                root(".", "javascript", Some("node --test")),
-                root(".", "rust", Some("cargo test --workspace")),
-                root("a/app", "go", Some("go test ./...")),
-                root("b/app", "go", Some("go test ./b/...")),
-                root("svc.v2", "java", None),
+                root(".", "javascript", &[]),
+                root(".", "rust", &[]),
+                root("a/app", "go", &["./..."]),
+                root("b/app", "go", &["./b/..."]),
+                root("svc.v2", "python", &[]),
             ],
         };
-        let text = config_text(&info, Some("we\"ird"));
+        let repo = tempfile::tempdir().unwrap();
+        let text = config_text(repo.path(), &info, Some("we\"ird"));
         let config = load(&text);
         let names: Vec<&str> = config.file.roots.keys().map(String::as_str).collect();
         assert_eq!(
@@ -313,18 +361,18 @@ coverage = \"npx vitest run --coverage --coverage.reporter=lcov\"
         assert_eq!(config.file.default_branch.as_deref(), Some("we\"ird"));
         let go = &config.file.lang[&LangId::from("go")];
         assert_eq!(
-            go["test"], "go test ./...",
+            go["test"], "go test -json ./...",
             "the first root of a language wins"
         );
-        assert!(!config.file.lang.contains_key(&LangId::from("java")));
     }
 
     #[test]
     fn a_single_root_below_the_top_is_still_listed_in_roots() {
         let info = ProjectInfo {
-            roots: vec![root("web", "javascript", Some("node --test"))],
+            roots: vec![root("web", "javascript", &[])],
         };
-        let config = load(&config_text(&info, None));
+        let repo = tempfile::tempdir().unwrap();
+        let config = load(&config_text(repo.path(), &info, None));
         assert_eq!(config.file.roots["web"].path, "web");
     }
 

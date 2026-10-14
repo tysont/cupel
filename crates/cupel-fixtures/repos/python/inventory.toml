@@ -297,3 +297,18 @@ name = "tests.test_ledger.test_deposit_adds_to_the_balance"
 [roots.hook]
 file = "src/ledger/account.py"
 name = "ledger.account.Account.__init__"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "python", build_files = ["pyproject.toml", "libs/units/pyproject.toml"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["libs/units"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = [".venv", "venv", "__pycache__", ".tox"] }
+
+[project-info.packages]
+not-applicable = "Python runners collect tests from the project directory; their commands take no package patterns."

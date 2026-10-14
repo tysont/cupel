@@ -298,3 +298,18 @@ name = "tests::ledger::deposit_adds_to_the_balance"
 [roots.hook]
 file = "src/main.rs"
 name = "ledger_version"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "rust", build_files = ["Cargo.toml", "shapes/Cargo.toml"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["shapes"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = ["target"] }
+
+[project-info.packages]
+not-applicable = "Cargo commands select packages with `--workspace`, not path patterns."

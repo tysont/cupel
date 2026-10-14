@@ -1,8 +1,8 @@
-// ABOUTME: Go roots (`go.mod`, `go.work`) and their default commands over every package of the
-// ABOUTME: module, or of each module a `go.work` uses (ADR-021).
-use cupel_core::syntax::{DefaultCommands, ProjectRoot};
+// ABOUTME: Go roots for `ProjectInfo`: `go.work` or `go.mod`, and the package patterns commands cover:
+// ABOUTME: every package of the module, or of each module a `go.work` uses (ADR-021, ADR-037).
+use cupel_core::syntax::ProjectRoot;
 
-use super::{Candidate, Ecosystem};
+use crate::project::{Candidate, Ecosystem};
 
 pub const ECOSYSTEM: Ecosystem = Ecosystem {
     manifests: &["go.work", "go.mod"],
@@ -11,28 +11,24 @@ pub const ECOSYSTEM: Ecosystem = Ecosystem {
 };
 
 fn describe(candidate: &Candidate) -> ProjectRoot {
-    let packages = candidate
+    let used = candidate
         .read("go.work")
         .map(|work| used_modules(&work))
-        .filter(|modules| !modules.is_empty())
-        .map_or_else(
-            || "./...".to_owned(),
-            |modules| {
-                modules
-                    .iter()
-                    .map(|module| format!("./{}/...", module.trim_start_matches("./")))
-                    .collect::<Vec<_>>()
-                    .join(" ")
-            },
-        );
-    candidate.root(
-        "go",
-        DefaultCommands {
-            test: Some(format!("go test -json {packages}")),
-            coverage: Some(format!("go test -coverprofile={{out}} {packages}")),
-            bench: Some(format!("go test -run=^$ -bench=. {packages}")),
-        },
-    )
+        .unwrap_or_default();
+    let packages = if used.is_empty() {
+        vec!["./...".to_owned()]
+    } else {
+        used.iter().map(|module| packages_of(module)).collect()
+    };
+    candidate.root("go", packages)
+}
+
+/// The pattern for every package of the module in `dir` (a `use` directive's directory).
+fn packages_of(dir: &str) -> String {
+    match dir.trim_start_matches("./").trim_end_matches('/') {
+        "" | "." => "./...".to_owned(),
+        dir => format!("./{dir}/..."),
+    }
 }
 
 /// The directories a `go.work` file's `use` directives name, in order: `use ./a` or a
@@ -68,5 +64,13 @@ mod tests {
         let work = "go 1.23\n\nuse ./single // one\n\nuse (\n\t./a\n\n\t./b // two\n)\n";
         assert_eq!(used_modules(work), ["./single", "./a", "./b"]);
         assert!(used_modules("go 1.23\n").is_empty());
+    }
+
+    #[test]
+    fn a_used_directory_becomes_its_package_pattern() {
+        assert_eq!(packages_of("./api"), "./api/...");
+        assert_eq!(packages_of("api/"), "./api/...");
+        assert_eq!(packages_of("."), "./...");
+        assert_eq!(packages_of("./"), "./...");
     }
 }

@@ -99,6 +99,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "project-info",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.rust",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "rust",

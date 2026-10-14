@@ -1,18 +1,26 @@
-// ABOUTME: The file walk: every source file of a registered language under a root, in parallel,
-// ABOUTME: honoring `.gitignore` (inside or outside a git repository) and skipping hidden entries.
+// ABOUTME: The file walk: every source file of a registered language under a root, in parallel, honoring
+// ABOUTME: `.gitignore` (in or out of a git repository), skipping hidden and project-generated directories.
 use std::path::Path;
 use std::sync::{Mutex, PoisonError};
 
+use cupel_core::syntax::ProjectInfo;
 use ignore::{WalkBuilder, WalkState};
 
 use crate::language::LanguageRegistry;
 
 /// Source files under `root` that some language in `languages` owns, relative to `root`,
-/// `/`-separated, sorted.
-pub fn walk(root: &Path, languages: &LanguageRegistry) -> Vec<String> {
+/// `/`-separated, sorted. Below each root of `project`, directories named in its `skip_dirs`
+/// are skipped (ADR-037).
+pub fn walk(root: &Path, languages: &LanguageRegistry, project: &ProjectInfo) -> Vec<String> {
     let found = Mutex::new(Vec::new());
+    let base = root.to_path_buf();
+    let project = project.clone();
     WalkBuilder::new(root)
         .require_git(false)
+        .filter_entry(move |entry| {
+            !entry.file_type().is_some_and(|kind| kind.is_dir())
+                || relative(&base, entry.path()).is_none_or(|dir| !generated(&project, &dir))
+        })
         .build_parallel()
         .run(|| {
             Box::new(|entry| {
@@ -47,4 +55,15 @@ pub(crate) fn relative(root: &Path, path: &Path) -> Option<String> {
         .map(|component| component.as_os_str().to_str())
         .collect();
     Some(parts?.join("/"))
+}
+
+/// Whether `dir` (relative, `/`-separated) is named in the `skip_dirs` of a project root above it.
+fn generated(project: &ProjectInfo, dir: &str) -> bool {
+    let (parent, name) = dir.rsplit_once('/').unwrap_or((".", dir));
+    project.roots.iter().any(|root| {
+        let below = root.path == "."
+            || parent == root.path
+            || parent.starts_with(&format!("{}/", root.path));
+        below && root.skip_dirs.iter().any(|skip| skip == name)
+    })
 }

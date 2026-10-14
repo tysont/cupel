@@ -1,18 +1,20 @@
 // ABOUTME: Python: one grammar for `.py`, the queries and tables under this directory, and the
 // ABOUTME: producers it registers: a NormTree override for receivers and docstrings, and module resolution.
 mod normalize;
+pub mod project;
 mod resolve;
 
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::{ModuleGraph, NormTree};
+use cupel_core::syntax::{ModuleGraph, NormTree, ProjectInfo};
 use cupel_core::{FactKind, LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::producer::QueryProducer;
+use crate::project::ProjectRoots;
 use crate::spec::LanguageSpec;
 
 use crate::spec::QueryFile;
@@ -78,6 +80,11 @@ impl Language for Python {
             Arc::clone(&language),
             Arc::clone(cache),
             normalize::extract,
+        ));
+        // Project roots come from build manifests on disk, which queries cannot see.
+        reg.register::<ProjectInfo, _>(ProjectRoots::new(
+            Arc::clone(&language),
+            &project::ECOSYSTEM,
         ));
         // Module resolution needs packages, layouts, and manifests, which queries cannot see.
         reg.register::<ModuleGraph, _>(ImportGraph::new(

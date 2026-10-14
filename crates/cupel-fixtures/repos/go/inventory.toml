@@ -289,3 +289,19 @@ name = "ledger.TestDepositAddsToTheBalance"
 [roots.hook]
 file = "ledger.go"
 name = "ledger.init"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "go", build_files = ["go.work", "go.mod", "shapes/go.mod"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["shapes"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = ["vendor"] }
+
+[project-info.packages]
+file = "."
+expect = { packages = ["./...", "./shapes/..."] }

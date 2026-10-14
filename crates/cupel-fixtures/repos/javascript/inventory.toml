@@ -295,3 +295,18 @@ name = "test.math.add.adds two numbers"
 [roots.hook]
 file = "src/plugin.js"
 name = "plugin.default"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "javascript", build_files = ["package.json", "packages/shapes/package.json"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["packages/shapes"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = ["node_modules", "dist", "coverage"] }
+
+[project-info.packages]
+not-applicable = "npm, pnpm, and yarn run a project's scripts and runners from the root; commands take no package patterns."

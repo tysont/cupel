@@ -16,6 +16,7 @@ facts
   api-surface       lang.typescript (quick)
   roots             lang.typescript (quick)
   test-conventions  lang.typescript (quick)
+  project-info      lang.typescript (quick)
 
 checks
   none registered

@@ -5,7 +5,8 @@
 use std::path::{Path, PathBuf};
 
 use cupel_core::{
-    Cancellation, Ctx, Event, Fact, ProduceCtx, ProducerRegistry, Scope, Writer, syntax::Span,
+    Cancellation, Ctx, Event, Fact, ProduceCtx, ProducerRegistry, Scope, Writer,
+    syntax::{ProjectInfo, Span},
 };
 use cupel_lang::{LanguageRegistry, walk};
 
@@ -43,7 +44,7 @@ pub fn produce_with_events<F: Fact>(lang: &str, root: &Path) -> (F, Vec<Event>) 
         cancel: Cancellation::new(),
     };
     let scope = Scope {
-        files: walk(root, &languages),
+        files: walk(root, &languages, &ProjectInfo::default()),
     };
     let mut events = Vec::new();
     let fact = producer

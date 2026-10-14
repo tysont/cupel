@@ -2,9 +2,9 @@
 // ABOUTME: Enum spellings match the construct names used by the per-fact conformance inventories.
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, Assertion, AssertionKind, AssertionStrength, Decision,
-    DecisionKind, Decisions, DefaultCommands, ImportEdge, ImportTarget, LiveRoot, Mock,
-    ModuleGraph, MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol,
-    OperatorSet, ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
+    DecisionKind, Decisions, ImportEdge, ImportTarget, LiveRoot, Mock, ModuleGraph,
+    MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol, OperatorSet,
+    ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
     SymbolDecisions, SymbolDef, SymbolKey, SymbolKind, SymbolSites, Symbols, TestCase,
     TestConventions, TestFile, TestFrames, TestPairing, Visibility,
 };
@@ -326,18 +326,17 @@ fn test_conventions_payload_shape() {
 fn project_info_payload_shape() {
     let json = assert_round_trip(&ProjectInfo {
         roots: vec![ProjectRoot {
-            path: "web".into(),
-            lang: LangId::from("typescript"),
-            build_files: vec!["web/package.json".into(), "web/tsconfig.json".into()],
-            commands: DefaultCommands {
-                test: Some("pnpm vitest run".into()),
-                coverage: None,
-                bench: None,
-            },
-            skip_dirs: vec!["web/node_modules".into()],
+            path: "svc".into(),
+            lang: LangId::from("go"),
+            build_files: vec!["go.work".into(), "api/go.mod".into()],
+            members: vec!["api".into()],
+            packages: vec!["./api/...".into()],
+            skip_dirs: vec!["vendor".into()],
         }],
     });
-    assert_eq!(json["roots"][0]["commands"]["coverage"], Value::Null);
+    assert_eq!(json["roots"][0]["members"], json!(["api"]));
+    assert_eq!(json["roots"][0]["packages"], json!(["./api/..."]));
+    assert!(json["roots"][0].get("commands").is_none());
 }
 
 #[test]
@@ -355,7 +354,7 @@ fn symbol_and_visibility_kinds() {
 }
 
 #[test]
-fn each_payload_declares_its_own_kind_at_version_1() {
+fn each_payload_declares_its_own_kind_and_version() {
     let declared = [
         (Symbols::KIND, Symbols::VERSION),
         (Decisions::KIND, Decisions::VERSION),
@@ -370,7 +369,10 @@ fn each_payload_declares_its_own_kind_at_version_1() {
     ];
     let kinds: BTreeSet<FactKind> = declared.iter().map(|(kind, _)| *kind).collect();
     assert_eq!(kinds, FactKind::SYNTACTIC.into_iter().collect());
-    assert!(declared.iter().all(|(_, version)| *version == 1));
+    for (kind, version) in declared {
+        let expected = if kind == FactKind::ProjectInfo { 2 } else { 1 };
+        assert_eq!(version, expected, "{kind}");
+    }
 }
 
 #[test]
