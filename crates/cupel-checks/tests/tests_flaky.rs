@@ -103,54 +103,46 @@ fn pair(test: &str, kind: &str) -> (String, String) {
     (test.to_owned(), kind.to_owned())
 }
 
+/// Three reruns of tests `a` and `b`: two in the declared order `[a, b]`, then reversed, with
+/// `a`'s outcome in each as given and `b` always passing.
+fn three_reruns(a: &str, b: &str, outcomes: [TestOutcome; 3]) -> TestReruns {
+    let orders = [
+        (RunOrder::Declared, [a, b]),
+        (RunOrder::Declared, [a, b]),
+        (RunOrder::Reversed, [b, a]),
+    ];
+    reruns(
+        orders
+            .iter()
+            .zip(outcomes)
+            .zip(1..)
+            .map(|(((order, executed), outcome), seed)| {
+                rerun(*order, seed, Some(executed), &[(a, outcome), (b, PASS)])
+            })
+            .collect(),
+    )
+}
+
 /// A victim that passes before the polluter and fails after it.
 fn order_dependent() -> TestReruns {
-    let (v, p) = ("t.py::test_victim", "t.py::test_polluter");
-    reruns(vec![
-        rerun(
-            RunOrder::Declared,
-            1,
-            Some(&[v, p]),
-            &[(v, PASS), (p, PASS)],
-        ),
-        rerun(
-            RunOrder::Declared,
-            2,
-            Some(&[v, p]),
-            &[(v, PASS), (p, PASS)],
-        ),
-        rerun(
-            RunOrder::Reversed,
-            3,
-            Some(&[p, v]),
-            &[(v, FAIL), (p, PASS)],
-        ),
-    ])
+    three_reruns(
+        "t.py::test_victim",
+        "t.py::test_polluter",
+        [PASS, PASS, FAIL],
+    )
 }
 
 /// A test whose outcome changes between the two declared-order reruns.
 fn flaky() -> TestReruns {
-    let (f, s) = ("t.py::test_coin", "t.py::test_steady");
-    reruns(vec![
-        rerun(
-            RunOrder::Declared,
-            1,
-            Some(&[f, s]),
-            &[(f, FAIL), (s, PASS)],
-        ),
-        rerun(
-            RunOrder::Declared,
-            2,
-            Some(&[f, s]),
-            &[(f, PASS), (s, PASS)],
-        ),
-        rerun(
-            RunOrder::Reversed,
-            3,
-            Some(&[s, f]),
-            &[(f, FAIL), (s, PASS)],
-        ),
-    ])
+    three_reruns("t.py::test_coin", "t.py::test_steady", [FAIL, PASS, FAIL])
+}
+
+/// `fact` with no file named for any test, as `go test` reports them.
+fn without_files(mut fact: TestReruns) -> TestReruns {
+    for test in fact.runs.iter_mut().flat_map(|run| &mut run.tests) {
+        test.file = None;
+    }
+    fact
 }
 
 #[test]
@@ -266,23 +258,12 @@ fn without_a_reported_order_reruns_compare_by_the_order_they_asked_for() {
 
 #[test]
 fn a_test_with_no_file_is_located_by_its_unique_name_in_test_frames() {
-    let mut fact = order_dependent();
-    for run in &mut fact.runs {
-        for test in &mut run.tests {
-            test.file = None;
-        }
-    }
-    let (_, recorded) = run_over(fact, frames(&["test_polluter", "test_victim"]));
+    let named = frames(&["test_polluter", "test_victim"]);
+    let (_, recorded) = run_over(without_files(order_dependent()), named);
     let location = recorded.findings[0].location.as_ref().unwrap();
     assert_eq!((location.file.as_str(), location.line), ("t.py", 20));
 
-    let mut fact = order_dependent();
-    for run in &mut fact.runs {
-        for test in &mut run.tests {
-            test.file = None;
-        }
-    }
-    let (_, recorded) = run_over(fact, frames(&[]));
+    let (_, recorded) = run_over(without_files(order_dependent()), frames(&[]));
     assert_eq!(recorded.findings[0].location, None);
 }
 

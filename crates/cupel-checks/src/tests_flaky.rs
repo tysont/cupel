@@ -5,9 +5,8 @@ use std::collections::BTreeMap;
 use cupel_core::syntax::{Span, TestFrames};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
-    Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest, MetricSpec,
-    Plan, Result, RunOrder, Scope, Score, Severity, Stability, TestOutcome, TestRerun, TestReruns,
-    Tier,
+    Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result, RunOrder,
+    Scope, Score, Severity, Stability, TestOutcome, TestRerun, TestReruns, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -80,8 +79,28 @@ impl TestsFlaky {
                 cost: CostClass::Standard,
                 needs: vec![FactKind::TestReruns, FactKind::TestFrames],
                 wants: Vec::new(),
-                findings: finding_kinds(),
-                metrics: metrics(),
+                findings: vec![
+                    kind::<Flaky>(
+                        "test.flaky",
+                        ActionKind::InvestigateFlake,
+                        "The test passed and failed in reruns that ran the tests in the same \
+                         order.",
+                    ),
+                    kind::<OrderDependent>(
+                        "test.order-dependent",
+                        ActionKind::InvestigateFlake,
+                        "The test's outcome follows the order the tests ran in: the same in \
+                         every rerun of one order, different between orders.",
+                    ),
+                ],
+                metrics: ["flaky", "order_dependent"]
+                    .into_iter()
+                    .zip([
+                        "Tests whose outcome changed between reruns of the same order.",
+                        "Tests whose outcome changed only with the order the tests ran in.",
+                    ])
+                    .map(|(name, summary)| metric(name, summary))
+                    .collect(),
                 stability: Stability::Experimental,
                 summary: "Reruns the tests several times with shuffled order, varied seeds, and \
                           varied parallelism; reports tests whose outcome changes."
@@ -91,43 +110,16 @@ impl TestsFlaky {
     }
 }
 
-fn finding_kinds() -> Vec<FindingKindSpec> {
-    vec![
-        kind::<Flaky>(
-            "test.flaky",
-            ActionKind::InvestigateFlake,
-            "The test passed and failed in reruns that ran the tests in the same order.",
-        ),
-        kind::<OrderDependent>(
-            "test.order-dependent",
-            ActionKind::InvestigateFlake,
-            "The test's outcome follows the order the tests ran in: the same in every rerun of \
-             one order, different between orders.",
-        ),
-    ]
-}
-
-fn metrics() -> Vec<MetricSpec> {
-    vec![
-        metric(
-            "flaky",
-            "Tests whose outcome changed between reruns of the same order.",
-        ),
-        metric(
-            "order_dependent",
-            "Tests whose outcome changed only with the order the tests ran in.",
-        ),
-    ]
-}
-
 impl Check for TestsFlaky {
     fn manifest(&self) -> &Manifest {
         &self.manifest
     }
 
+    /// One target per file in scope; the reruns' size is the engine's to know.
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        LIMITS.read(&self.manifest.id, &ctx.config)?;
-        Ok(outcome::plan_files(&self.manifest, scope))
+        LIMITS
+            .read(&self.manifest.id, &ctx.config)
+            .map(|_| outcome::plan_files(&self.manifest, scope))
     }
 
     fn run(

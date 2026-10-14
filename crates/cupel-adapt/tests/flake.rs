@@ -1,15 +1,17 @@
 // ABOUTME: The flake engine (ADR-078): its schedule from the seed, what it does with no baseline or a runner it
 // ABOUTME: cannot rerun, cancellation, and real reruns of each runner on the tests.flaky fixtures (skipped when absent).
 use std::path::Path;
+use std::sync::OnceLock;
 
 use cupel_adapt::flake::{DEFAULT_RUNS, rerun_seed, runners, schedule};
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Cancellation, Ctx, Error, FactKind, Lang, LangFamily, LangId, ProduceCtx,
-    Produced, ProducerId, ProducerRegistry, RegisteredProducer, RunOrder, Scope, TestOutcome,
-    TestReruns, TestResults, Writer,
+    Availability, Cancellation, Ctx, Error, FactKind, Lang, LangId, ProduceCtx, Produced,
+    ProducerId, ProducerRegistry, RegisteredProducer, RunOrder, Scope, TestOutcome, TestReruns,
+    TestResults, Writer,
 };
 use cupel_fixtures::copy_repo;
+use cupel_fixtures::matrix::Registries;
 use serde_json::json;
 
 use TestOutcome::{Failed, Passed};
@@ -18,22 +20,24 @@ use TestOutcome::{Failed, Passed};
 /// every shuffling runner.
 const SEED: u64 = cupel_fixtures::matrix::SEED;
 
-fn registry() -> ProducerRegistry {
-    let mut registry = ProducerRegistry::default();
-    cupel_adapt::register(&mut registry);
-    registry
+/// The producers and languages the binary registers, built once.
+fn registries() -> &'static Registries {
+    static REGISTRIES: OnceLock<Registries> = OnceLock::new();
+    REGISTRIES.get_or_init(Registries::builtin)
 }
 
+fn registry() -> &'static ProducerRegistry {
+    &registries().producers
+}
+
+/// The registered language `id`.
 fn lang(id: &str) -> Lang {
-    let family = if matches!(id, "javascript" | "typescript") {
-        "ecma"
-    } else {
-        id
-    };
-    Lang {
-        id: LangId::from(id),
-        family: LangFamily::from(family),
-    }
+    registries()
+        .languages
+        .langs()
+        .into_iter()
+        .find(|lang| lang.id.as_str() == id)
+        .unwrap_or_else(|| panic!("{id} is registered"))
 }
 
 fn producer<'a>(
@@ -91,7 +95,7 @@ fn project(lang: &str) -> Produced {
 
 fn engine_produce(ctx: &ProduceCtx, lang: &str) -> cupel_core::Result<TestReruns> {
     let registry = registry();
-    producer(&registry, FactKind::TestReruns, "engine.flake", lang)
+    producer(registry, FactKind::TestReruns, "engine.flake", lang)
         .produce(ctx, &Scope::default(), &mut Vec::new())
         .map(|fact| fact.downcast::<TestReruns>().unwrap())
 }
@@ -141,7 +145,7 @@ fn a_reversed_rerun_reverses_the_first_order_or_shuffles_without_one() {
 fn the_engine_reruns_any_language_and_needs_the_baseline() {
     let registry = registry();
     for lang in ["rust", "go", "python", "javascript", "typescript"] {
-        let engine = producer(&registry, FactKind::TestReruns, "engine.flake", lang);
+        let engine = producer(registry, FactKind::TestReruns, "engine.flake", lang);
         assert_eq!(engine.needs(), [FactKind::TestResults]);
     }
     let reruns: Vec<&str> = runners().collect();
@@ -188,9 +192,12 @@ fn a_runner_the_engine_cannot_rerun_is_an_error_naming_it() {
         vec![baseline_of("tool.cargo-nextest")],
     );
     let error = engine_produce(&ctx, "rust").unwrap_err();
-    assert!(
-        matches!(&error, Error::InvalidValue { value, .. } if value == "tool.cargo-nextest"),
-        "{error:?}"
+    let Error::InvalidValue { what, value, .. } = error else {
+        panic!("{error:?}")
+    };
+    assert_eq!(
+        (what, value.as_str()),
+        ("runner for engine.flake", "tool.cargo-nextest")
     );
 }
 
@@ -242,7 +249,7 @@ fn reruns(runner: &str, lang: &str, seed: u64) -> Option<TestReruns> {
     let dir = tempfile::tempdir().unwrap();
     copy_repo(&format!("tests.flaky/{lang}"), dir.path());
     let registry = registry();
-    let runner_producer = producer(&registry, FactKind::TestResults, runner, lang);
+    let runner_producer = producer(registry, FactKind::TestResults, runner, lang);
     if let Availability::MissingTool { name, .. } =
         runner_producer.availability(&Ctx::new(dir.path().to_path_buf()))
     {

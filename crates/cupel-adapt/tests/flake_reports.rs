@@ -39,61 +39,70 @@ fn a_shuffled_go_rerun_reports_the_order_its_tests_started_in() {
     assert_eq!(victim.outcome, Failed);
 }
 
-#[test]
-fn a_shuffled_libtest_rerun_lists_its_tests_in_the_order_they_ran() {
-    let tests = libtest::parse(&Capture::of("flake/cargo-test", "shuffled").file("output.txt"));
-    assert_eq!(
-        ran(&tests),
-        [
-            row("ledger/src/lib.rs::tests::deposit_changes_balance", Passed),
-            row("ledger/src/lib.rs::tests::balance_starts_at_zero", Failed),
-            row("settle/tests/settle.rs::settles_on_every_other_run", Failed),
-        ]
-    );
-}
+/// A rerun's tests parsed from a capture, and what they must be, in the order the parser
+/// returned them.
+type Reading = (
+    &'static str,
+    Vec<TestResult>,
+    [(&'static str, TestOutcome); 3],
+);
 
 #[test]
-fn a_reversed_pytest_rerun_reports_the_explicit_order() {
-    let tests = junit::pytest(&Capture::of("flake/pytest", "reversed").file("junit.xml")).unwrap();
-    assert_eq!(
-        ran(&tests),
-        [
-            row(
-                "tests/test_settle.py::SettleTest::test_settles_on_every_other_run",
-                Passed
-            ),
-            row(
-                "tests/test_ledger.py::LedgerTest::test_deposit_changes_balance",
-                Passed
-            ),
-            row(
-                "tests/test_ledger.py::LedgerTest::test_balance_starts_at_zero",
-                Failed
-            ),
-        ]
-    );
-}
-
-#[test]
-fn a_reversed_unittest_rerun_reports_the_explicit_order() {
-    let tests = unittest::parse(&Capture::of("flake/unittest", "reversed").file("output.txt"));
-    assert_eq!(
-        ran(&tests),
-        [
-            row(
-                "tests.test_settle.SettleTest.test_settles_on_every_other_run",
-                Passed
-            ),
-            row(
-                "tests.test_ledger.LedgerTest.test_deposit_changes_balance",
-                Passed
-            ),
-            row(
-                "tests.test_ledger.LedgerTest.test_balance_starts_at_zero",
-                Failed
-            ),
-        ]
-    );
+fn a_serial_or_reversed_rerun_lists_its_tests_in_the_order_they_ran() {
+    let readings: [Reading; 3] = [
+        (
+            "cargo test, shuffled",
+            libtest::parse(&Capture::of("flake/cargo-test", "shuffled").file("output.txt")),
+            [
+                ("ledger/src/lib.rs::tests::deposit_changes_balance", Passed),
+                ("ledger/src/lib.rs::tests::balance_starts_at_zero", Failed),
+                ("settle/tests/settle.rs::settles_on_every_other_run", Failed),
+            ],
+        ),
+        (
+            "pytest, reversed",
+            junit::pytest(&Capture::of("flake/pytest", "reversed").file("junit.xml")).unwrap(),
+            [
+                (
+                    "tests/test_settle.py::SettleTest::test_settles_on_every_other_run",
+                    Passed,
+                ),
+                (
+                    "tests/test_ledger.py::LedgerTest::test_deposit_changes_balance",
+                    Passed,
+                ),
+                (
+                    "tests/test_ledger.py::LedgerTest::test_balance_starts_at_zero",
+                    Failed,
+                ),
+            ],
+        ),
+        (
+            "unittest, reversed",
+            unittest::parse(&Capture::of("flake/unittest", "reversed").file("output.txt")),
+            [
+                (
+                    "tests.test_settle.SettleTest.test_settles_on_every_other_run",
+                    Passed,
+                ),
+                (
+                    "tests.test_ledger.LedgerTest.test_deposit_changes_balance",
+                    Passed,
+                ),
+                (
+                    "tests.test_ledger.LedgerTest.test_balance_starts_at_zero",
+                    Failed,
+                ),
+            ],
+        ),
+    ];
+    for (case, tests, expected) in readings {
+        let expected: Vec<(String, TestOutcome)> = expected
+            .iter()
+            .map(|(id, outcome)| row(id, *outcome))
+            .collect();
+        assert_eq!(ran(&tests), expected, "{case}");
+    }
 }
 
 /// The outcomes of a Jest JSON report captured as `runner`'s `case`, sorted by ID.
@@ -105,25 +114,22 @@ fn jest_outcomes(runner: &str, case: &str) -> Vec<(String, TestOutcome)> {
 }
 
 #[test]
-fn a_randomized_jest_rerun_fails_the_victim_after_its_polluter() {
+fn a_shuffled_jest_or_vitest_rerun_fails_the_victim_after_its_polluter() {
+    let jest = jest_outcomes("flake/jest", "randomized");
+    let vitest = jest_outcomes("flake/vitest", "shuffled");
     assert_eq!(
-        jest_outcomes("flake/jest", "randomized"),
-        [
-            row("ledger.test.js > balance starts at zero", Failed),
-            row("ledger.test.js > deposit changes balance", Passed),
-            row("settle.test.js > settles on every other run", Passed),
-        ]
-    );
-}
-
-#[test]
-fn a_shuffled_vitest_rerun_fails_the_victim_after_its_polluter() {
-    assert_eq!(
-        jest_outcomes("flake/vitest", "shuffled"),
-        [
-            row("src/ledger.test.ts > balance starts at zero", Failed),
-            row("src/ledger.test.ts > deposit changes balance", Passed),
-            row("src/settle.test.ts > settles on every other run", Passed),
-        ]
+        (jest, vitest),
+        (
+            vec![
+                row("ledger.test.js > balance starts at zero", Failed),
+                row("ledger.test.js > deposit changes balance", Passed),
+                row("settle.test.js > settles on every other run", Passed),
+            ],
+            vec![
+                row("src/ledger.test.ts > balance starts at zero", Failed),
+                row("src/ledger.test.ts > deposit changes balance", Passed),
+                row("src/settle.test.ts > settles on every other run", Passed),
+            ]
+        )
     );
 }

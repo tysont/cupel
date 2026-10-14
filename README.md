@@ -412,7 +412,7 @@ created = "2026-10-14"
 
 ## Checks
 
-Every check below exists, runs at `--depth quick`, and is supported in all five languages. The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists and is supported in all five languages. All run at `--depth quick` except `tests.flaky`, which runs its project's test suite and so runs from `--depth standard`, the default. The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
@@ -436,6 +436,7 @@ What each check looks for:
 - **`static.dead-code`** reports symbols and exports in modules that no import reaches and no entry point, test, or framework hook keeps alive. Reachability is decided per module, not per call, so an export of a module nothing imports is reported as `info` with low confidence: it may be public API.
 - **`tests.quality`** reads every test: tests with no assertions or only weak ones (truthiness, presence, inequality), heavy mocking, loops and branches inside tests, and duplicated setup.
 - **`tests.weakening`** compares the tests at the range's base with the tests now. It reports removed or loosened assertions, skipped or deleted tests, and rewritten snapshots. It needs `--changed` or `--base`.
+- **`tests.flaky`** reruns the test suite several times in different orders and with different seeds, and reports tests whose outcome changes: `test.flaky` when two reruns in the same order disagree, `test.order-dependent` when the outcome follows the order. See [Flakiness](#flakiness).
 
 `cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
 
@@ -484,7 +485,21 @@ A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in 
 runner = "unittest"
 ```
 
-Before any check that needs test results runs, Cupel runs the suite once in the real tree, the **baseline**. If any test fails, or the runner cannot finish (a build error), the run is refused: `status: "error"`, exit code 4, no check scores, and one `baseline.test-failed` finding per failing test (with its file, runner, and the tail of its output) or `baseline.run-incomplete` per run that did not finish. Fix the suite, then rerun. Every test of the baseline is also indexed in `.cupel/cupel.db`. The checks shipped today read only source facts, so `cupel check` runs no tests yet; the mutation and flakiness checks will.
+Before any check that needs test results runs, Cupel runs the suite once in the real tree, the **baseline**. If any test fails, or the runner cannot finish (a build error), the run is refused: `status: "error"`, exit code 4, no check scores, and one `baseline.test-failed` finding per failing test (with its file, runner, and the tail of its output) or `baseline.run-incomplete` per run that did not finish. Fix the suite, then rerun. Every test of the baseline is also indexed in `.cupel/cupel.db`. `tests.flaky` needs test results, so `cupel check` at the default depth (`standard`) runs the baseline; at `--depth quick` no test runs.
+
+### Flakiness
+
+`tests.flaky` reruns the tests the baseline ran, three times by default, with the same runner, and compares the outcomes. The reruns differ on purpose: the first two run the tests in their declared order one at a time, differing only in seed; the third runs them reversed (pytest and unittest, which take the tests in order) or in the runner's seeded shuffle (`go test -shuffle`, libtest's `--shuffle-seed`, `jest --randomize`, `vitest --sequence.shuffle`); further reruns shuffle again, alternating between the runner's default parallelism and one test at a time. Every rerun's seed is derived from the run's `--seed`, so `cupel check --only tests.flaky --seed N`, which each finding gives as its `repro`, repeats the same reruns.
+
+- `test.flaky`: the test passed and failed in two reruns that ran the tests in the same order. Something besides the code and the order decides it: time, randomness, concurrency, or the environment.
+- `test.order-dependent`: the outcome is the same in every rerun of one order and differs between orders. The evidence lists `preceded_by`, the tests that ran before it in every rerun it failed and after it in some rerun it passed, when the runner reports its order.
+
+```toml
+[lang.rust]
+flake_runs = 5      # reruns per check run; 0 turns them off
+```
+
+The reruns repeat the whole suite (impacted-test selection is not built yet), so they cost about three baseline runs. `cargo nextest` runs each test in its own process, where order cannot matter; with it as the runner, the flake engine does not rerun and `tests.flaky` ends in `error` for that language.
 
 ## Configuration
 
