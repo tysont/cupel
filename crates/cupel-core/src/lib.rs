@@ -18,6 +18,7 @@ mod event;
 mod exclude;
 mod explanation;
 mod fact;
+mod facts;
 mod finding;
 mod gate;
 pub mod git;
@@ -28,10 +29,13 @@ mod lang;
 mod matrix;
 mod producer;
 mod rank;
+mod ranking;
+mod result;
 mod schedule;
 pub mod schema;
 mod scope;
 mod select;
+mod status;
 mod suppression;
 pub mod syntax;
 mod writer;
@@ -40,9 +44,9 @@ pub use actions::{NEXT_ACTIONS, next_actions};
 pub use base::{BaseTree, Range};
 pub use cancel::Cancellation;
 pub use check::{
-    Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricPer, MetricSpec, Plan,
-    Stability,
+    Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,
 };
+pub use config::{ConfigEcho, ConfigSource};
 pub use delta::{Deltas, deltas};
 pub use describe::{
     AllDescription, ArgDescription, CheckDescription, CheckSupport, CliDescription,
@@ -54,16 +58,16 @@ pub use describe::{
 };
 pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPlan};
 pub use envelope::{
-    BaselineRef, CheckResult, CheckStatus, ConfigEcho, ConfigSource, CupelInfo, Delta, Envelope,
-    ExitCode, GateOutcome, GateResult, GateRule, GitInfo, NextAction, RuleOutcome, RunInfo,
-    ScopeInfo, ScopeMode, Score, SeverityCounts, SkipReason, Skipped, Status, Summary,
-    ToolchainInfo, Verb,
+    BaselineRef, CheckResult, CheckStatus, CupelInfo, Delta, Envelope, ExitCode, GateOutcome,
+    GateResult, GateRule, GitInfo, NextAction, RuleOutcome, RunInfo, ScopeInfo, ScopeMode, Score,
+    SeverityCounts, SkipReason, Skipped, Status, Summary, ToolchainInfo, Verb,
 };
 pub use error::{ArgumentError, Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
 pub use exclude::{ALWAYS_EXCLUDED, Exclude};
 pub use explanation::{Excerpt, ExcerptLine, ExplainSubject, Explanation, Metric};
-pub use fact::{Fact, FactKind, Facts};
+pub use fact::{Fact, FactKind};
+pub use facts::Facts;
 pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Symbol};
 pub use gate::{GATE_CHANGED, GATE_TREE, apply_gate, evaluate_gate, gate_for};
 pub use grade::{CostClass, Tier};
@@ -76,8 +80,9 @@ pub use producer::{
     SharedFact,
 };
 pub use rank::{
-    Measured, Measurement, RANKED, RankedTarget, RankingDimension, Rankings, Target, rankings,
+    Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,
 };
+pub use ranking::rankings;
 pub use schedule::{Job, Outcome, Scheduler};
 pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;

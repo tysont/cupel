@@ -7,10 +7,10 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::config::ConfigError;
+use crate::config::echo::{ConfigEcho, ConfigSource};
+use crate::config::error::ConfigError;
 use crate::config::file::{CheckConfig, ConfigFile, GateConfig, OracleConfig, RootConfig, Table};
 use crate::config::settings::{Format, PROFILE_ENV_VAR, Settings, TimeLimit};
-use crate::envelope::{ConfigEcho, ConfigSource};
 use crate::error::Result;
 use crate::grade::CostClass;
 use crate::id::{CheckId, LangId};

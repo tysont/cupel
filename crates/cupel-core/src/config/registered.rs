@@ -1,10 +1,12 @@
 // ABOUTME: Validates a resolved config against the check and language registries (ADR-017).
 // ABOUTME: Parsing checks ID syntax only; this is where unknown checks, metrics, and languages are caught.
-use crate::check::{Check, CheckRegistry, Manifest, MetricPer};
+use crate::check::{Check, CheckRegistry, Manifest};
+use crate::config::Config;
+use crate::config::error::ConfigError;
 use crate::config::file::GateSection;
-use crate::config::{Config, ConfigError};
 use crate::error::Result;
 use crate::id::{CheckId, LangId};
+use crate::rank::MetricPer;
 
 impl Config {
     /// Rejects check IDs, gate metrics, and language IDs that the registries do not know. The

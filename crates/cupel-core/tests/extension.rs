@@ -310,7 +310,7 @@ fn check_registry_finds_checks_by_id_and_rejects_duplicates() {
             .register(check("static.complexity", &[], &[]))
             .unwrap_err(),
         Error::DuplicateCheck {
-            id: CheckId::from("static.complexity")
+            id: "static.complexity".to_owned()
         }
     );
     assert_eq!(registry.iter().count(), 1);

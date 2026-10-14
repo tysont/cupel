@@ -2,10 +2,11 @@
 // ABOUTME: applied to an envelope's findings, summary, checks, and `run.baseline` (ADR-046).
 use std::collections::{BTreeMap, BTreeSet};
 
-use crate::envelope::{BaselineRef, Delta, Envelope};
+use crate::envelope::{BaselineRef, Envelope};
 use crate::finding::Finding;
 use crate::hash::FindingId;
 use crate::id::CheckId;
+use crate::result::Delta;
 
 /// How a run differs from the run it is compared with.
 #[derive(Debug, Clone, PartialEq)]

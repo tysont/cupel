@@ -1,11 +1,11 @@
 // ABOUTME: Gate evaluation (design §6.7, ADR-060): picks `[gate.changed]` or `[gate.tree]` by scope mode,
 // ABOUTME: evaluates each rule against a graded envelope's check metrics and findings, and applies the result.
 use crate::config::{Comparison, GateCondition, GateConfig, GateRuleSpec, GateSection};
-use crate::envelope::{
-    CheckResult, CheckStatus, Envelope, ExitCode, GateOutcome, GateResult, GateRule, RuleOutcome,
-    ScopeMode, Status,
-};
+use crate::envelope::{Envelope, GateOutcome, GateResult, GateRule, RuleOutcome};
 use crate::finding::Severity;
+use crate::result::{CheckResult, CheckStatus};
+use crate::scope::ScopeMode;
+use crate::status::{ExitCode, Status};
 
 /// `summary.gate.evaluated` for `[gate.changed]`.
 pub const GATE_CHANGED: &str = "gate.changed";

@@ -2,7 +2,7 @@
 // ABOUTME: Parsing only; evaluating a rule against a run's metrics belongs to the gate evaluator (P2.9).
 use std::fmt;
 
-use crate::config::ConfigError;
+use crate::config::error::ConfigError;
 use crate::id::CheckId;
 
 /// What a gate rule constrains: a check's metric (`tests.mutation.score`) or the check itself

@@ -4,12 +4,24 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 use globset::{GlobBuilder, GlobMatcher};
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-use crate::envelope::ScopeMode;
 use crate::error::{ArgumentError, Result};
 use crate::git::{Change, Git};
 use crate::hash::SymbolHash;
 use crate::syntax::{NormTree, SymbolDef, SymbolKey, Symbols};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum ScopeMode {
+    Tree,
+    Changed,
+    Range,
+    Paths,
+    Symbols,
+    SinceBaseline,
+}
 
 /// The files, and optionally the symbols, a run considers. Paths are relative to the
 /// repository root and `/`-separated.

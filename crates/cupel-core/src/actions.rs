@@ -3,11 +3,10 @@
 use std::cmp::Reverse;
 use std::collections::HashSet;
 
-use crate::envelope::{
-    CheckResult, Envelope, GateRule, NextAction, RuleOutcome, SkipReason, Skipped,
-};
+use crate::envelope::{Envelope, GateRule, NextAction, RuleOutcome};
 use crate::finding::{ActionKind, Finding, Severity};
 use crate::grade::Tier;
+use crate::result::{CheckResult, SkipReason, Skipped};
 
 /// The most actions an envelope lists (ADR-061 §5).
 pub const NEXT_ACTIONS: usize = 10;

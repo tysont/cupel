@@ -1,9 +1,9 @@
 // ABOUTME: The error type shared by cupel-core's parsing, registries, and fact access.
 // ABOUTME: Every fallible core API returns `cupel_core::Result`.
-use crate::config::ConfigError;
+use std::path::PathBuf;
+
+use crate::config::error::ConfigError;
 use crate::fact::FactKind;
-use crate::id::CheckId;
-use crate::writer::WriteError;
 
 /// Errors raised by cupel-core.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -37,7 +37,7 @@ pub enum Error {
     AbsentFact { kind: FactKind },
     /// Two checks were registered under the same ID.
     #[error("check `{id}` is already registered")]
-    DuplicateCheck { id: CheckId },
+    DuplicateCheck { id: String },
     /// The configuration is invalid; a usage error (exit 2).
     #[error(transparent)]
     Config(#[from] ConfigError),
@@ -93,3 +93,14 @@ impl From<ArgumentError> for Error {
 
 /// Result type for cupel-core APIs.
 pub type Result<T, E = Error> = std::result::Result<T, E>;
+
+/// Why a write was not made.
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
+pub enum WriteError {
+    /// The path lands outside the writer's area and `--write` was not given.
+    #[error("`{}` is outside .cupel/; pass --write to permit writing it", .path.display())]
+    Outside { path: PathBuf },
+    /// The file system refused.
+    #[error("cannot write `{}`: {message}", .path.display())]
+    Io { path: PathBuf, message: String },
+}

@@ -5,10 +5,11 @@ use std::io::Write;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::envelope::{CheckStatus, ExitCode, SkipReason, Status};
 use crate::finding::Finding;
 use crate::id::{CheckId, RunId};
 use crate::rank::Measurement;
+use crate::result::{CheckStatus, SkipReason};
+use crate::status::{ExitCode, Status};
 
 /// A progress event. Findings stream as they are discovered.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]

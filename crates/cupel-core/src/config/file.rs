@@ -11,7 +11,7 @@ use serde::ser::{SerializeMap, Serializer};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
-use crate::config::ConfigError;
+use crate::config::error::ConfigError;
 use crate::config::gate::{GateRuleSpec, is_segment, parse_check_id};
 use crate::config::settings::{Format, Settings, TimeLimit};
 use crate::error::Result;

@@ -5,13 +5,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::cancel::Cancellation;
-use crate::envelope::{CheckResult, Score};
 use crate::error::{Error, Result};
 use crate::event::EventSink;
-use crate::fact::{FactKind, Facts};
+use crate::fact::FactKind;
+use crate::facts::Facts;
 use crate::finding::ActionKind;
 use crate::grade::{CostClass, Tier};
 use crate::id::CheckId;
+use crate::rank::MetricPer;
+use crate::result::{CheckResult, Score};
 use crate::scope::Scope;
 use crate::writer::Writer;
 
@@ -52,21 +54,6 @@ pub struct MetricSpec {
     pub summary: String,
     /// What one value describes (ADR-062).
     pub per: MetricPer,
-}
-
-/// What one value of a metric describes: the whole scope, reported in `CheckResult.metrics` and
-/// usable as a gate key, or one target, reported through `EventSink::measure` and ranked by
-/// `survey`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "kebab-case")]
-pub enum MetricPer {
-    Scope,
-    /// A function or method.
-    Symbol,
-    /// A file or module.
-    Module,
-    /// A set of targets, such as a clone cluster or a dependency cycle.
-    Group,
 }
 
 /// Whether a described entity's contract may still change.
@@ -177,7 +164,7 @@ impl CheckRegistry {
     pub fn register(&mut self, check: Box<dyn Check>) -> Result<()> {
         let id = &check.manifest().id;
         if self.get(id).is_some() {
-            return Err(Error::DuplicateCheck { id: id.clone() });
+            return Err(Error::DuplicateCheck { id: id.to_string() });
         }
         self.checks.push(check);
         Ok(())
@@ -192,5 +179,12 @@ impl CheckRegistry {
 
     pub fn iter(&self) -> impl Iterator<Item = &dyn Check> {
         self.checks.iter().map(AsRef::as_ref)
+    }
+}
+
+impl Facts {
+    /// Facts declaring exactly what `manifest` needs and wants, holding none yet.
+    pub fn for_manifest(manifest: &Manifest) -> Self {
+        Self::declaring(manifest.needs.iter().chain(&manifest.wants).copied())
     }
 }

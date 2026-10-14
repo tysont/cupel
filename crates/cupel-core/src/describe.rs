@@ -7,12 +7,13 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::check::{FindingKindSpec, Manifest, Stability};
-use crate::envelope::{ConfigSource, ExitCode};
+use crate::config::ConfigSource;
 use crate::fact::FactKind;
 use crate::finding::ActionKind;
 use crate::grade::CostClass;
 use crate::id::{CheckId, LangFamily, LangId, ProducerId, ToolId};
 use crate::matrix::Support;
+use crate::status::ExitCode;
 
 /// What `describe` returns, tagged by the kind of thing described.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]

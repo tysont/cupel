@@ -4,8 +4,8 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use similar::TextDiff;
 
-use crate::envelope::Skipped;
 use crate::id::{CheckId, ToolId};
+use crate::result::Skipped;
 
 /// Everything a run would do, without doing it.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

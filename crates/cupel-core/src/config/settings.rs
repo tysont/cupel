@@ -10,7 +10,7 @@ use schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
 use serde::de::value::StrDeserializer;
 use serde::{Deserialize, Serialize};
 
-use crate::config::ConfigError;
+use crate::config::error::ConfigError;
 use crate::error::{Error, Result};
 use crate::grade::CostClass;
 

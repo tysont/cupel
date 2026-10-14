@@ -187,7 +187,7 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
         }
     }
     if keeps_run_record(run, cli) {
-        if let Err(error) = writer.run_record(&envelope) {
+        if let Err(error) = writer.run_record(&envelope.run.id, &envelope) {
             let _ = writeln!(stderr, "cupel: could not write the run record: {error}");
         }
         if let Err(error) =
