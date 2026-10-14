@@ -360,7 +360,10 @@ fn describe_language_shows_identity_facts_and_check_support() {
     assert!(description["facts"].is_array());
     assert_eq!(
         description["checks"],
-        json!([{"check": "static.complexity", "support": {"status": "supported"}}])
+        json!([
+            {"check": "static.complexity", "support": {"status": "supported"}},
+            {"check": "static.deps", "support": {"status": "supported"}},
+        ])
     );
 }
 
@@ -456,9 +459,12 @@ fn describe_matrix_has_every_language_and_a_row_per_check() {
         description["languages"],
         json!(["go", "javascript", "python", "rust", "typescript"])
     );
-    assert_eq!(description["checks"], json!(["static.complexity"]));
+    assert_eq!(
+        description["checks"],
+        json!(["static.complexity", "static.deps"])
+    );
     let cells = description["cells"].as_array().unwrap();
-    assert_eq!(cells.len(), 5);
+    assert_eq!(cells.len(), 10);
     assert!(
         cells
             .iter()

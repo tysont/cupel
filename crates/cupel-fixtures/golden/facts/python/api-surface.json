@@ -13,6 +13,78 @@
       }
     },
     {
+      "file": "src/deps_cycle/alpha.py",
+      "kind": "constant",
+      "path": "deps_cycle.alpha.ALPHA",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_cycle/beta.py",
+      "kind": "constant",
+      "path": "deps_cycle.beta.BETA",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 9,
+        "end_line": 3,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/deps_layers/domain/order.py",
+      "kind": "type",
+      "path": "deps_layers.domain.order.Order",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 5,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/deps_layers/infra/store.py",
+      "kind": "type",
+      "path": "deps_layers.infra.store.Store",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 2,
+        "line": 1
+      }
+    },
+    {
+      "file": "src/deps_layers/port.py",
+      "kind": "interface",
+      "path": "deps_layers.port.Port",
+      "signature": "(Protocol)",
+      "span": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/deps_layers/port.py",
+      "kind": "method",
+      "path": "deps_layers.port.Port.place",
+      "signature": "(self, _: Order) -> None",
+      "span": {
+        "col": 5,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 7
+      }
+    },
+    {
       "file": "src/ledger/__init__.py",
       "kind": "constant",
       "path": "ledger.MAX_ENTRIES",

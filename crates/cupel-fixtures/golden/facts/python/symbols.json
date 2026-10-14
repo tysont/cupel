@@ -24,6 +24,28 @@
     },
     {
       "body": {
+        "col": 44,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 7
+      },
+      "display": "deps_layers.port.Port.place",
+      "file": "src/deps_layers/port.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "place",
+      "namespace": "deps_layers.port.Port",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 47,
+        "end_line": 7,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 5,
         "end_col": 24,
         "end_line": 14,

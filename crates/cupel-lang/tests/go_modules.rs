@@ -43,6 +43,17 @@ fn row(root: &str, from: &str, line: u32, specifier: &str, target: &str) -> Row 
     )
 }
 
+/// Whether an edge starts or ends in the `deps_` fixtures, which `static.deps` reads and
+/// `the_deps_fixtures_are_a_package_cycle_and_a_layered_import` pins separately.
+fn is_deps(row: &Row) -> bool {
+    row.1.contains("deps_") || row.4.contains("deps_")
+}
+
+/// The fixture's rows outside the `deps_` fixtures.
+fn without_deps(rows: Vec<Row>) -> Vec<Row> {
+    rows.into_iter().filter(|row| !is_deps(row)).collect()
+}
+
 #[test]
 fn the_fixture_graph_is_exactly_its_import_edges() {
     let graph: ModuleGraph = produce("go", &fixture("go"));
@@ -126,7 +137,7 @@ fn the_fixture_graph_is_exactly_its_import_edges() {
         row(".", "report/format.go", 3, "fmt", "external:std"),
         row("shapes", "shapes/geometry.go", 3, "math", "external:std"),
     ]);
-    assert_eq!(rows(&graph), expected);
+    assert_eq!(without_deps(rows(&graph)), expected);
 }
 
 #[test]
@@ -205,5 +216,44 @@ fn files_outside_any_module_are_grouped_under_the_repository_root() {
             row(".", "loose.go", 4, "net/http", "external:std"),
             row(".", "loose.go", 5, "github.com/acme/kit", "unresolved"),
         ]
+    );
+}
+
+#[test]
+fn the_deps_fixtures_are_a_package_cycle_and_a_layered_import() {
+    let graph: ModuleGraph = produce("go", &fixture("go"));
+    let deps: Vec<Row> = rows(&graph).into_iter().filter(is_deps).collect();
+    let module = "example.com/ledger";
+    assert_eq!(
+        deps,
+        [
+            (
+                "deps_cycle/alpha/alpha.go",
+                "deps_cycle/beta",
+                "deps_cycle/beta/beta.go"
+            ),
+            (
+                "deps_cycle/beta/beta.go",
+                "deps_cycle/alpha",
+                "deps_cycle/alpha/alpha.go"
+            ),
+            (
+                "deps_layers/domain/order.go",
+                "deps_layers/infra",
+                "deps_layers/infra/store.go"
+            ),
+            (
+                "deps_layers/port/port.go",
+                "deps_layers/domain",
+                "deps_layers/domain/order.go"
+            ),
+        ]
+        .map(|(from, package, target)| row(
+            ".",
+            from,
+            3,
+            &format!("{module}/{package}"),
+            target
+        ))
     );
 }

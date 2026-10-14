@@ -61,6 +61,41 @@ fn the_fixture_graph_is_exactly_its_import_edges() {
     assert_eq!(
         rows(&graph),
         [
+            r(
+                "src/deps_cycle/alpha.py",
+                1,
+                ".beta.BETA",
+                "src/deps_cycle/beta.py",
+                true
+            ),
+            r(
+                "src/deps_cycle/beta.py",
+                1,
+                ".alpha",
+                "src/deps_cycle/alpha.py",
+                true
+            ),
+            r(
+                "src/deps_layers/domain/order.py",
+                1,
+                "..infra.store.Store",
+                "src/deps_layers/infra/store.py",
+                true
+            ),
+            r(
+                "src/deps_layers/port.py",
+                1,
+                "typing.Protocol",
+                "external:typing",
+                false
+            ),
+            r(
+                "src/deps_layers/port.py",
+                3,
+                ".domain.order.Order",
+                "src/deps_layers/domain/order.py",
+                true
+            ),
             r(init, 5, ".account.Account", account, true),
             r(init, 5, ".account.Audited", account, true),
             r(init, 6, ".generated.schema", "unresolved", true),

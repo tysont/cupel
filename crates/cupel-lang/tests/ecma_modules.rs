@@ -62,6 +62,27 @@ fn under(root: &str, edges: &[Edge]) -> Vec<Row> {
 const JAVASCRIPT_EDGES: &[Edge] = &[
     ("bin/cli.js", 2, "../src/math.js", "src/math.js", true),
     (
+        "src/deps_cycle/alpha.js",
+        1,
+        "./beta.js",
+        "src/deps_cycle/beta.js",
+        true,
+    ),
+    (
+        "src/deps_cycle/beta.js",
+        1,
+        "./alpha.js",
+        "src/deps_cycle/alpha.js",
+        true,
+    ),
+    (
+        "src/deps_layers/domain/order.js",
+        1,
+        "../infra/store.js",
+        "src/deps_layers/infra/store.js",
+        true,
+    ),
+    (
         "src/index.js",
         1,
         "./shapes/geometry.js",
@@ -178,6 +199,34 @@ const TYPESCRIPT_EDGES: &[Edge] = &[
         2,
         "../pricing",
         "src/pricing.ts",
+        true,
+    ),
+    (
+        "src/deps_cycle/alpha.ts",
+        1,
+        "./beta",
+        "src/deps_cycle/beta.ts",
+        true,
+    ),
+    (
+        "src/deps_cycle/beta.ts",
+        1,
+        "./alpha",
+        "src/deps_cycle/alpha.ts",
+        true,
+    ),
+    (
+        "src/deps_layers/domain/order.ts",
+        1,
+        "../infra/store",
+        "src/deps_layers/infra/store.ts",
+        true,
+    ),
+    (
+        "src/deps_layers/port.ts",
+        1,
+        "./domain/order",
+        "src/deps_layers/domain/order.ts",
         true,
     ),
     (

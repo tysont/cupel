@@ -113,6 +113,46 @@
           }
         },
         {
+          "from": "deps_cycle/alpha/alpha.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "example.com/ledger/deps_cycle/beta",
+          "target": {
+            "kind": "file",
+            "path": "deps_cycle/beta/beta.go"
+          }
+        },
+        {
+          "from": "deps_cycle/beta/beta.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "example.com/ledger/deps_cycle/alpha",
+          "target": {
+            "kind": "file",
+            "path": "deps_cycle/alpha/alpha.go"
+          }
+        },
+        {
+          "from": "deps_layers/domain/order.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "example.com/ledger/deps_layers/infra",
+          "target": {
+            "kind": "file",
+            "path": "deps_layers/infra/store.go"
+          }
+        },
+        {
+          "from": "deps_layers/port/port.go",
+          "line": 3,
+          "relative": false,
+          "specifier": "example.com/ledger/deps_layers/domain",
+          "target": {
+            "kind": "file",
+            "path": "deps_layers/domain/order.go"
+          }
+        },
+        {
           "from": "ledger.go",
           "line": 4,
           "relative": false,

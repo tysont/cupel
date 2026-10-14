@@ -33,6 +33,126 @@
           }
         },
         {
+          "from": "src/deps_cycle/alpha.rs",
+          "line": 1,
+          "relative": true,
+          "specifier": "super::beta::BETA",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/beta.rs"
+          }
+        },
+        {
+          "from": "src/deps_cycle/beta.rs",
+          "line": 1,
+          "relative": true,
+          "specifier": "super::alpha::ALPHA",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/alpha.rs"
+          }
+        },
+        {
+          "from": "src/deps_cycle/mod.rs",
+          "line": 1,
+          "relative": true,
+          "specifier": "alpha",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/alpha.rs"
+          }
+        },
+        {
+          "from": "src/deps_cycle/mod.rs",
+          "line": 2,
+          "relative": true,
+          "specifier": "beta",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/beta.rs"
+          }
+        },
+        {
+          "from": "src/deps_layers/domain/mod.rs",
+          "line": 1,
+          "relative": true,
+          "specifier": "money",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/domain/money.rs"
+          }
+        },
+        {
+          "from": "src/deps_layers/domain/mod.rs",
+          "line": 3,
+          "relative": true,
+          "specifier": "super::infra::Store",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/infra/mod.rs"
+          }
+        },
+        {
+          "from": "src/deps_layers/mod.rs",
+          "line": 1,
+          "relative": true,
+          "specifier": "domain",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/domain/mod.rs"
+          }
+        },
+        {
+          "from": "src/deps_layers/mod.rs",
+          "line": 2,
+          "relative": true,
+          "specifier": "infra",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/infra/mod.rs"
+          }
+        },
+        {
+          "from": "src/deps_layers/mod.rs",
+          "line": 3,
+          "relative": true,
+          "specifier": "port",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/port.rs"
+          }
+        },
+        {
+          "from": "src/deps_layers/port.rs",
+          "line": 1,
+          "relative": true,
+          "specifier": "super::domain::money::Cents",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/domain/money.rs"
+          }
+        },
+        {
+          "from": "src/deps_layers/port.rs",
+          "line": 2,
+          "relative": true,
+          "specifier": "super::domain::Order",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/domain/mod.rs"
+          }
+        },
+        {
+          "from": "src/deps_layers/port.rs",
+          "line": 3,
+          "relative": true,
+          "specifier": "super::infra::Store",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/infra/mod.rs"
+          }
+        },
+        {
           "from": "src/lib.rs",
           "line": 3,
           "relative": true,
@@ -99,6 +219,26 @@
           "target": {
             "kind": "file",
             "path": "src/account.rs"
+          }
+        },
+        {
+          "from": "src/lib.rs",
+          "line": 32,
+          "relative": true,
+          "specifier": "deps_cycle",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/mod.rs"
+          }
+        },
+        {
+          "from": "src/lib.rs",
+          "line": 33,
+          "relative": true,
+          "specifier": "deps_layers",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/mod.rs"
           }
         },
         {

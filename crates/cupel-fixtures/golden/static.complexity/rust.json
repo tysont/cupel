@@ -209,7 +209,20 @@
     "config": {
       "effective": {
         "budget": null,
-        "checks": {},
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
         "default_branch": null,
         "depth": "standard",
         "format": "json",
@@ -225,6 +238,7 @@
       },
       "sources": [
         "flags",
+        "cupel.toml",
         "defaults"
       ]
     },
@@ -233,7 +247,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 11,
+      "files": 19,
       "languages": [
         "rust"
       ],

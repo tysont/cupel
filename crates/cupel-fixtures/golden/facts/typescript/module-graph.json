@@ -33,6 +33,46 @@
           }
         },
         {
+          "from": "src/deps_cycle/alpha.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "./beta",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/beta.ts"
+          }
+        },
+        {
+          "from": "src/deps_cycle/beta.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "./alpha",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_cycle/alpha.ts"
+          }
+        },
+        {
+          "from": "src/deps_layers/domain/order.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "../infra/store",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/infra/store.ts"
+          }
+        },
+        {
+          "from": "src/deps_layers/port.ts",
+          "line": 1,
+          "relative": true,
+          "specifier": "./domain/order",
+          "target": {
+            "kind": "file",
+            "path": "src/deps_layers/domain/order.ts"
+          }
+        },
+        {
           "from": "src/index.ts",
           "line": 1,
           "relative": true,
