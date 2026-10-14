@@ -4,6 +4,8 @@
     clippy::unnecessary_wraps,
     reason = "test checks share the `Check::run` signature, which returns a Result"
 )]
+mod support;
+
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::Arc;
@@ -15,20 +17,12 @@ use cupel_core::syntax::{Decisions, Span, SymbolDef, SymbolKind, Symbols, Visibi
 use cupel_core::{
     Action, ActionKind, Availability, BaseTree, Cancellation, Check, CheckCtx, CheckId,
     CheckRegistry, CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence,
-    Fact, FactKind, Facts, Finding, FindingId, Job, Lang, LangFamily, LangId, Langs, Location,
-    Manifest, Measurement, Outcome, Plan, ProduceCtx, Producer, ProducerId, ProducerRegistry,
-    Range, Result, RunId, Scheduler, Scope, Score, Severity, SkipReason, Skipped, Stability,
-    SymbolSelector, Target, Tier, Writer,
+    Fact, FactKind, Facts, Finding, FindingId, Job, LangId, Langs, Location, Manifest, Measurement,
+    Outcome, Plan, ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result, RunId,
+    Scheduler, Scope, Score, Severity, SkipReason, Skipped, SymbolSelector, Target, Tier, Writer,
 };
 
 // ---------------------------------------------------------------- fixtures
-
-fn lang(id: &str) -> Lang {
-    Lang {
-        id: LangId::from(id),
-        family: LangFamily::from(id),
-    }
-}
 
 /// A finding about `file`, as producers and checks emit them.
 fn finding(check: &str, kind: &str, file: &str, severity: Severity, tier: u8) -> Finding {
@@ -190,22 +184,6 @@ impl Check for TestCheck {
         Some(weighted / total)
     }
 }
-
-fn manifest(id: &str, needs: &[FactKind]) -> Manifest {
-    Manifest {
-        id: CheckId::from(id),
-        version: 1,
-        tier: Tier::try_from(0).unwrap(),
-        cost: CostClass::Quick,
-        needs: needs.to_vec(),
-        wants: vec![],
-        findings: vec![],
-        metrics: vec![],
-        stability: Stability::Experimental,
-        summary: String::new(),
-    }
-}
-
 fn passing(id: &str, score: Option<Score>) -> CheckResult {
     CheckResult {
         id: CheckId::from(id),
@@ -224,7 +202,7 @@ fn passing(id: &str, score: Option<Score>) -> CheckResult {
 
 fn check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
     Box::new(TestCheck {
-        manifest: manifest(id, needs),
+        manifest: support::manifest(id, needs, &[]),
         body,
         spans_family: false,
         weighted: false,
@@ -234,19 +212,11 @@ fn check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
 /// A check that runs once per language family, over every member language's facts.
 fn family_check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
     Box::new(TestCheck {
-        manifest: manifest(id, needs),
+        manifest: support::manifest(id, needs, &[]),
         body,
         spans_family: true,
         weighted: false,
     })
-}
-
-/// `id` as a member of `family`.
-fn in_family(id: &str, family: &str) -> Lang {
-    Lang {
-        id: LangId::from(id),
-        family: LangFamily::from(family),
-    }
 }
 
 /// A world: registries, a repository directory, and its configuration.
@@ -322,7 +292,7 @@ impl World {
             cancel: Cancellation::new(),
             config: &self.config,
             selected: self.checks.iter().collect(),
-            langs: langs.iter().map(|id| lang(id)).collect(),
+            langs: langs.iter().map(|id| support::lang(id, id)).collect(),
             files: vec!["a.x".to_owned(), "b.x".to_owned()],
             selectors: Vec::new(),
             selectors_must_match: true,
@@ -379,7 +349,7 @@ impl Check for BaseCheck {
 
 fn base_check(id: &str, body: Body) -> Box<dyn Check> {
     Box::new(BaseCheck {
-        manifest: manifest(id, &[FactKind::Symbols]),
+        manifest: support::manifest(id, &[FactKind::Symbols], &[]),
         body,
     })
 }
@@ -625,7 +595,7 @@ fn a_family_wide_check_runs_once_per_family_with_every_member_languages_facts() 
         "",
     );
     let (outcome, events) = world.run(&["go", "rust"], |job| {
-        job.langs = vec![in_family("go", "pair"), in_family("rust", "pair")];
+        job.langs = vec![support::lang("go", "pair"), support::lang("rust", "pair")];
     });
     let outcome = outcome.unwrap();
     assert_eq!(outcome.checks.len(), 1, "{:?}", outcome.checks);
@@ -688,7 +658,7 @@ fn an_unsupported_family_member_is_skipped_and_the_rest_of_the_family_runs() {
         "",
     );
     let (outcome, _) = world.run(&["go", "rust"], |job| {
-        job.langs = vec![in_family("go", "pair"), in_family("rust", "pair")];
+        job.langs = vec![support::lang("go", "pair"), support::lang("rust", "pair")];
     });
     let checks = outcome.unwrap().checks;
     assert_eq!(checks.len(), 1, "{checks:?}");
@@ -698,7 +668,7 @@ fn an_unsupported_family_member_is_skipped_and_the_rest_of_the_family_runs() {
 
 #[test]
 fn facts_of_other_family_members_are_served_only_when_declared() {
-    let mut facts = Facts::for_manifest(&manifest("t.family", &[FactKind::Symbols]));
+    let mut facts = Facts::for_manifest(&support::manifest("t.family", &[FactKind::Symbols], &[]));
     facts.insert(Symbols::default()).unwrap();
     facts.insert_sibling(Symbols::default()).unwrap();
     assert_eq!(facts.family::<Symbols>().unwrap().len(), 2);
@@ -826,7 +796,7 @@ fn measuring_over_n(ctx: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<
 fn a_check_combines_its_metrics_from_each_languages_whole_result() {
     let world = World::new(
         vec![Box::new(TestCheck {
-            manifest: manifest("t.weighted", &[FactKind::Symbols]),
+            manifest: support::manifest("t.weighted", &[FactKind::Symbols], &[]),
             body: measuring_over_n,
             spans_family: false,
             weighted: true,

@@ -1,6 +1,6 @@
 // ABOUTME: Shared test support for cupel-core integration tests: throwaway git repositories built with
-// ABOUTME: the real `git`, so git access and scope resolution are tested against real repositories.
-// ABOUTME: Also lists the files a test left under a directory.
+// ABOUTME: the real `git`, the files a test left under a directory, and the languages, manifests, and
+// ABOUTME: manifest-only checks the registry and scheduler tests build.
 #![allow(
     dead_code,
     reason = "each test binary uses a different subset of the helpers"
@@ -9,6 +9,56 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+
+use cupel_core::{
+    Check, CheckCtx, CheckId, CheckResult, CostClass, EventSink, FactKind, Facts, Lang, LangFamily,
+    LangId, Manifest, Plan, Result, Scope, Stability, Tier,
+};
+
+/// The language `id` as a member of `family`.
+pub fn lang(id: &str, family: &str) -> Lang {
+    Lang {
+        id: LangId::from(id),
+        family: LangFamily::from(family),
+    }
+}
+
+/// A tier-0, quick manifest for `id` that needs `needs` and wants `wants`, with no finding
+/// kinds or metrics; tests change the rest with struct-update syntax.
+pub fn manifest(id: &str, needs: &[FactKind], wants: &[FactKind]) -> Manifest {
+    Manifest {
+        id: CheckId::from(id),
+        version: 1,
+        tier: Tier::try_from(0).unwrap(),
+        cost: CostClass::Quick,
+        needs: needs.to_vec(),
+        wants: wants.to_vec(),
+        findings: vec![],
+        metrics: vec![],
+        stability: Stability::Experimental,
+        summary: String::new(),
+    }
+}
+
+/// A registered check that plans nothing and is never run; only its manifest matters.
+pub struct Declared(pub Manifest);
+
+impl Check for Declared {
+    fn manifest(&self) -> &Manifest {
+        &self.0
+    }
+
+    fn plan(&self, _: &CheckCtx, _: &Scope) -> Result<Plan> {
+        Ok(Plan {
+            targets: 0,
+            est_ms: 0,
+        })
+    }
+
+    fn run(&self, _: &CheckCtx, _: &Facts, _: &Plan, _: &mut dyn EventSink) -> Result<CheckResult> {
+        panic!("a declared check is never run")
+    }
+}
 
 /// Every file under `root`, relative to it and sorted.
 pub fn files_under(root: &Path) -> Vec<String> {

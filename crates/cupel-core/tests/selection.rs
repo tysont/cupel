@@ -1,25 +1,10 @@
 // ABOUTME: Check selection: depth against cost class, --only/--skip with IDs and groups, --tier N+,
 // ABOUTME: and the usage errors for unknown IDs and malformed tiers (ADR-040).
-use cupel_core::{
-    Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CostClass, Error, EventSink, Facts,
-    Manifest, Plan, Result, Scope, Selection, Stability, Tier,
-};
+mod support;
 
-struct Named(Manifest);
+use support::Declared;
 
-impl Check for Named {
-    fn manifest(&self) -> &Manifest {
-        &self.0
-    }
-
-    fn plan(&self, _: &CheckCtx, _: &Scope) -> Result<Plan> {
-        unreachable!("selection never plans")
-    }
-
-    fn run(&self, _: &CheckCtx, _: &Facts, _: &Plan, _: &mut dyn EventSink) -> Result<CheckResult> {
-        unreachable!("selection never runs")
-    }
-}
+use cupel_core::{CheckRegistry, CostClass, Error, Manifest, Selection, Tier};
 
 fn registry() -> CheckRegistry {
     let mut registry = CheckRegistry::default();
@@ -32,17 +17,10 @@ fn registry() -> CheckRegistry {
         ("gen.fuzz", 4, CostClass::Deep),
     ] {
         registry
-            .register(Box::new(Named(Manifest {
-                id: CheckId::from(id),
-                version: 1,
+            .register(Box::new(Declared(Manifest {
                 tier: Tier::try_from(tier).unwrap(),
                 cost,
-                needs: vec![],
-                wants: vec![],
-                findings: vec![],
-                metrics: vec![],
-                stability: Stability::Experimental,
-                summary: String::new(),
+                ..support::manifest(id, &[], &[])
             })))
             .unwrap();
     }

@@ -10,57 +10,33 @@ use cupel_core::{
     ActionKind, Availability, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult,
     CheckStatus, CostClass, Ctx, Error, Event, EventSink, Fact, FactKind, Facts, FindingKindSpec,
     Lang, LangFamily, LangId, Langs, Manifest, MetricPer, MetricSpec, Plan, ProduceCtx, Producer,
-    ProducerId, ProducerRegistry, Result, RunId, Scope, Stability, Support, SupportMatrix, Tier,
-    ToolId, WriteError, Writer,
+    ProducerId, ProducerRegistry, Result, RunId, Scope, Support, SupportMatrix, ToolId, WriteError,
+    Writer,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 // ---------------------------------------------------------------- fixtures
-
-fn lang(id: &str, family: &str) -> Lang {
-    Lang {
-        id: LangId::from(id),
-        family: LangFamily::from(family),
-    }
-}
-
 fn rust() -> Lang {
-    lang("rust", "rust")
+    support::lang("rust", "rust")
 }
 
 fn go() -> Lang {
-    lang("go", "go")
+    support::lang("go", "go")
 }
 
 fn javascript() -> Lang {
-    lang("javascript", "ecma")
+    support::lang("javascript", "ecma")
 }
 
 fn typescript() -> Lang {
-    lang("typescript", "ecma")
+    support::lang("typescript", "ecma")
 }
 
 fn ctx() -> Ctx {
     Ctx::new(PathBuf::from("."))
 }
-
-fn manifest(id: &str, needs: &[FactKind], wants: &[FactKind]) -> Manifest {
-    Manifest {
-        id: CheckId::from(id),
-        version: 1,
-        tier: Tier::try_from(0).unwrap(),
-        cost: CostClass::Quick,
-        needs: needs.to_vec(),
-        wants: wants.to_vec(),
-        findings: vec![],
-        metrics: vec![],
-        stability: Stability::Experimental,
-        summary: format!("{id} test check"),
-    }
-}
-
 /// A check that reports one result and never reads facts.
 struct ReportingCheck(Manifest);
 
@@ -94,7 +70,7 @@ impl Check for ReportingCheck {
 }
 
 fn check(id: &str, needs: &[FactKind], wants: &[FactKind]) -> Box<dyn Check> {
-    Box::new(ReportingCheck(manifest(id, needs, wants)))
+    Box::new(ReportingCheck(support::manifest(id, needs, wants)))
 }
 
 /// An execution fact standing in for `MutationOutcomes`, whose payload lands in P3.
@@ -229,7 +205,7 @@ fn fact_kinds_are_the_catalog_rows_in_kebab_case() {
 
 #[test]
 fn facts_serves_a_declared_fact_that_was_inserted() {
-    let mut facts = Facts::for_manifest(&manifest("c", &[FactKind::Symbols], &[]));
+    let mut facts = Facts::for_manifest(&support::manifest("c", &[FactKind::Symbols], &[]));
     facts.insert(Symbols { symbols: vec![] }).unwrap();
     assert_eq!(
         facts.get::<Symbols>().unwrap(),
@@ -239,7 +215,7 @@ fn facts_serves_a_declared_fact_that_was_inserted() {
 
 #[test]
 fn facts_get_of_an_undeclared_kind_is_an_error() {
-    let facts = Facts::for_manifest(&manifest("c", &[FactKind::Symbols], &[]));
+    let facts = Facts::for_manifest(&support::manifest("c", &[FactKind::Symbols], &[]));
     assert_eq!(
         facts.get::<Decisions>().unwrap_err(),
         Error::UndeclaredFact {
@@ -250,7 +226,7 @@ fn facts_get_of_an_undeclared_kind_is_an_error() {
 
 #[test]
 fn facts_get_of_a_declared_but_absent_kind_is_an_error() {
-    let facts = Facts::for_manifest(&manifest("c", &[FactKind::Symbols], &[]));
+    let facts = Facts::for_manifest(&support::manifest("c", &[FactKind::Symbols], &[]));
     assert_eq!(
         facts.get::<Symbols>().unwrap_err(),
         Error::AbsentFact {
@@ -261,7 +237,7 @@ fn facts_get_of_a_declared_but_absent_kind_is_an_error() {
 
 #[test]
 fn facts_refuses_to_hold_an_undeclared_kind() {
-    let mut facts = Facts::for_manifest(&manifest("c", &[FactKind::Symbols], &[]));
+    let mut facts = Facts::for_manifest(&support::manifest("c", &[FactKind::Symbols], &[]));
     assert_eq!(
         facts.insert(Decisions { symbols: vec![] }).unwrap_err(),
         Error::UndeclaredFact {
@@ -272,8 +248,11 @@ fn facts_refuses_to_hold_an_undeclared_kind() {
 
 #[test]
 fn facts_serves_wanted_kinds_too() {
-    let mut facts =
-        Facts::for_manifest(&manifest("c", &[FactKind::Symbols], &[FactKind::Decisions]));
+    let mut facts = Facts::for_manifest(&support::manifest(
+        "c",
+        &[FactKind::Symbols],
+        &[FactKind::Decisions],
+    ));
     facts.insert(Decisions { symbols: vec![] }).unwrap();
     assert_eq!(facts.get::<Decisions>(), Ok(&Decisions { symbols: vec![] }));
 }
@@ -360,7 +339,7 @@ fn producer_registry_selects_by_kind_and_language_in_registration_order() {
 
 #[test]
 fn manifest_round_trips_with_kebab_fact_kinds() {
-    let mut m = manifest(
+    let mut m = support::manifest(
         "tests.mutation",
         &[FactKind::MutationOutcomes],
         &[FactKind::TestConventions],
