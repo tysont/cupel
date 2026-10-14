@@ -590,7 +590,7 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `ApiSurface` | public items with normalized signatures | language | `static.api-surface` |
 | `Roots` | symbols live by convention (entry points, exports, tests, framework hooks) | language | `static.dead-code` |
 | `TestConventions` | test files for a source file; is-test predicate | language | `write_test` hints, scope |
-| `ProjectInfo` | roots, build files, default commands, dirs to skip | language | `init`, `doctor`, toolchain selection |
+| `ProjectInfo` | detected roots: path, language, build files, workspace members, dirs to skip — no commands; the CLI joins it with the toolchain table (§8.7, ADR-037) | language | `init`, `doctor`, toolchain selection |
 | `TestResults` | per test: outcome, duration | runner tool | baseline/exit 4, `tests.flaky`, mutation engine |
 | `CoverageMap` | line + optional branch hits; `branches: Option<_>` says whether the producer measures branches | coverage tool | `tests.coverage`, `static.crap`, mutation engine |
 | `PerTestMap` | `test_id → lines` | coverage tool | `tests --impacted`, mutation engine |
