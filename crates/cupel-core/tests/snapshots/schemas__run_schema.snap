@@ -32,6 +32,17 @@ expression: pretty(&schema)
     "exit_code": {
       "$ref": "#/$defs/ExitCode"
     },
+    "explanation": {
+      "description": "What `explain` adds to the finding or check result it returns; null for every other verb.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Explanation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "findings": {
       "type": "array",
       "items": {
@@ -79,6 +90,7 @@ expression: pretty(&schema)
     "cupel",
     "description",
     "exit_code",
+    "explanation",
     "findings",
     "next_actions",
     "plan",
@@ -771,6 +783,49 @@ expression: pretty(&schema)
         "summary"
       ]
     },
+    "Excerpt": {
+      "description": "Lines of one file around a location.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Relative to the repository root.",
+          "type": "string"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExcerptLine"
+          }
+        }
+      },
+      "required": [
+        "file",
+        "lines"
+      ]
+    },
+    "ExcerptLine": {
+      "type": "object",
+      "properties": {
+        "focus": {
+          "description": "Whether the line is inside the finding's location.",
+          "type": "boolean"
+        },
+        "line": {
+          "description": "1-based.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "focus",
+        "line",
+        "text"
+      ]
+    },
     "ExitCode": {
       "description": "0 pass · 1 fail · 2 usage · 3 environment · 4 unevaluable · 5 partial · 6 internal",
       "type": "integer",
@@ -805,6 +860,72 @@ expression: pretty(&schema)
         "meaning",
         "name",
         "stability"
+      ]
+    },
+    "ExplainSubject": {
+      "description": "What `explain` was asked about.",
+      "type": "string",
+      "enum": [
+        "finding",
+        "check"
+      ]
+    },
+    "Explanation": {
+      "description": "Context for one finding or one check result, read from the fact store. The finding or check\nresult itself is in the envelope's `findings` or `checks`.",
+      "type": "object",
+      "properties": {
+        "covering_tests": {
+          "description": "Tests that cover the finding's site, from `action.hints.covering_tests`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excerpt": {
+          "description": "The source around the finding's location; null when it has no location or the file is\ngone.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Excerpt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metrics": {
+          "description": "The check's metrics in that run, per symbol; empty for a finding.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          }
+        },
+        "nearest_test_file": {
+          "description": "The test file nearest to the finding's site, from `action.hints.nearest_test_file`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "run": {
+          "description": "The stored run the explanation comes from: the latest run that produced the finding, or\nthe latest run of the check.",
+          "$ref": "#/$defs/RunId"
+        },
+        "subject": {
+          "$ref": "#/$defs/ExplainSubject"
+        },
+        "target": {
+          "description": "The finding ID or check ID that was asked about.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "covering_tests",
+        "excerpt",
+        "metrics",
+        "nearest_test_file",
+        "run",
+        "subject",
+        "target"
       ]
     },
     "FactDescription": {
@@ -1336,6 +1457,36 @@ expression: pretty(&schema)
         "cells",
         "checks",
         "languages"
+      ]
+    },
+    "Metric": {
+      "description": "One measured value of a check, for a symbol or for the check as a whole.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "The metric's name, such as `cyclomatic` or `score`.",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "Null for a value about the whole check, such as its score.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolHash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "key",
+        "symbol",
+        "value"
       ]
     },
     "NextAction": {

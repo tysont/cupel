@@ -4,8 +4,6 @@ use std::fs::{self, File};
 use std::path::{Component, Path, PathBuf};
 use std::sync::{Arc, Mutex, PoisonError};
 
-use similar::TextDiff;
-
 use crate::dry_run::PlannedWrite;
 use crate::envelope::Envelope;
 use crate::error::{Error, Result};
@@ -90,6 +88,11 @@ impl Writer {
             outside: false,
             ..self.clone()
         }
+    }
+
+    /// Whether this is a dry run's writer, which records writes instead of making them.
+    pub fn is_recording(&self) -> bool {
+        self.recorded.is_some()
     }
 
     pub fn root(&self) -> &Path {
@@ -261,24 +264,8 @@ impl Writer {
         let shown = target.strip_prefix(&self.root).unwrap_or(target);
         let shown = shown.display().to_string();
         let current = fs::read(target).ok();
-        let old = current
-            .as_deref()
-            .map(String::from_utf8_lossy)
-            .unwrap_or_default();
+        let old = current.as_deref().map(String::from_utf8_lossy);
         let new = String::from_utf8_lossy(contents);
-        let old_header = if current.is_some() {
-            format!("a/{shown}")
-        } else {
-            "/dev/null".to_owned()
-        };
-        let diff = TextDiff::from_lines(old.as_ref(), new.as_ref())
-            .unified_diff()
-            .context_radius(3)
-            .header(&old_header, &format!("b/{shown}"))
-            .to_string();
-        PlannedWrite {
-            path: shown,
-            diff: Some(diff),
-        }
+        PlannedWrite::change(&shown, &shown, old.as_deref(), &new)
     }
 }

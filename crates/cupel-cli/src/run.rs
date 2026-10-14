@@ -156,6 +156,7 @@ impl Run {
             next_actions: Vec::new(),
             description,
             plan: None,
+            explanation: None,
             truncated: false,
             total_findings,
         }

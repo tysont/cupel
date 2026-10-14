@@ -419,6 +419,47 @@ expression: out
     ],
     "est_total_ms": 140900
   },
+  "explanation": {
+    "subject": "finding",
+    "target": "fnd_7c2e1a",
+    "run": "run_01J9ZZZZZZZZZZZZZZZZZZZZZZ",
+    "excerpt": {
+      "file": "src/rewrite/planner.rs",
+      "lines": [
+        {
+          "line": 141,
+          "text": "fn push_limit(limit: u64, offset: u64) -> bool {",
+          "focus": false
+        },
+        {
+          "line": 142,
+          "text": "    limit <= offset",
+          "focus": true
+        },
+        {
+          "line": 143,
+          "text": "}",
+          "focus": false
+        }
+      ]
+    },
+    "covering_tests": [
+      "rewrite::limit_tests::pushes_through_sort"
+    ],
+    "nearest_test_file": "tests/rewrite/limit_tests.rs",
+    "metrics": [
+      {
+        "symbol": "sh_4b1d9e0c4b1d9e00",
+        "key": "cyclomatic",
+        "value": 7.0
+      },
+      {
+        "symbol": null,
+        "key": "score",
+        "value": 0.71
+      }
+    ]
+  },
   "truncated": false,
   "total_findings": 3
 }

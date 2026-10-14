@@ -2,6 +2,7 @@
 // ABOUTME: and be written, with an estimate. Carried in the envelope's nullable `plan` (ADR-020).
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use similar::TextDiff;
 
 use crate::envelope::Skipped;
 use crate::id::{CheckId, ToolId};
@@ -53,4 +54,23 @@ pub struct PlannedWrite {
     /// A unified diff from the current content; null when the content is only known once the
     /// run happens, such as a run record.
     pub diff: Option<String>,
+}
+
+impl PlannedWrite {
+    /// A write to `path` that changes the text named `label` from `before` (`None` when it does
+    /// not exist yet) to `after`, as a unified diff with three lines of context and headers
+    /// `a/<label>` (or `/dev/null`) and `b/<label>` (ADR-020 §6). `label` is the file itself for
+    /// ordinary writes, or a part of it, such as a store row, for writes that are not text.
+    pub fn change(path: &str, label: &str, before: Option<&str>, after: &str) -> Self {
+        let old_header = before.map_or_else(|| "/dev/null".to_owned(), |_| format!("a/{label}"));
+        let diff = TextDiff::from_lines(before.unwrap_or_default(), after)
+            .unified_diff()
+            .context_radius(3)
+            .header(&old_header, &format!("b/{label}"))
+            .to_string();
+        Self {
+            path: path.to_owned(),
+            diff: Some(diff),
+        }
+    }
 }

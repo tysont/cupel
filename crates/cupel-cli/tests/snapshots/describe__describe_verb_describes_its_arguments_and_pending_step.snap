@@ -275,6 +275,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "summary": "Run checks over a scope at a depth and evaluate the gate."
   },
   "exit_code": 0,
+  "explanation": null,
   "findings": [],
   "next_actions": [],
   "plan": null,

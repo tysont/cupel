@@ -222,6 +222,30 @@ fn envelopes_without_a_plan_carry_a_null_plan() {
 }
 
 #[test]
+fn envelopes_without_an_explanation_carry_a_null_explanation() {
+    let output = assert_round_trip::<Envelope>(&design_envelope());
+    assert_eq!(output["explanation"], Value::Null);
+}
+
+#[test]
+fn an_explanation_round_trips_inside_an_envelope() {
+    let mut example = design_envelope();
+    example["explanation"] = json!({
+        "subject": "finding", "target": "fnd_7c2e1a", "run": "run_01JA2B3C4D5E6F7G8H9JKMNPQR",
+        "excerpt": {"file": "src/rewrite/planner.rs", "lines": [
+            {"line": 141, "text": "fn push_limit() {", "focus": false},
+            {"line": 142, "text": "    if limit <= offset {", "focus": true}
+        ]},
+        "covering_tests": ["pushes_through_sort"],
+        "nearest_test_file": "tests/rewrite/limit_tests.rs",
+        "metrics": [{"symbol": "sh_4b1d9e0c4b1d9e0c", "key": "cyclomatic", "value": 7.0},
+                    {"symbol": null, "key": "score", "value": 0.5}]
+    });
+    let output = assert_round_trip::<Envelope>(&example);
+    assert_eq!(output["explanation"], example["explanation"]);
+}
+
+#[test]
 fn unknown_event_tag_is_rejected() {
     assert!(serde_json::from_value::<Event>(json!({"ev": "run.start"})).is_err());
 }

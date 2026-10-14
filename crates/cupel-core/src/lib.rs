@@ -6,11 +6,13 @@
 mod cancel;
 mod check;
 pub mod config;
+mod delta;
 mod describe;
 mod dry_run;
 mod envelope;
 mod error;
 mod event;
+mod explanation;
 mod fact;
 mod finding;
 mod grade;
@@ -21,6 +23,7 @@ mod matrix;
 mod producer;
 pub mod schema;
 mod scope;
+mod suppression;
 pub mod syntax;
 mod writer;
 
@@ -28,6 +31,7 @@ pub use cancel::Cancellation;
 pub use check::{
     Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,
 };
+pub use delta::{Deltas, deltas};
 pub use describe::{
     AllDescription, ArgDescription, CheckSupport, CliDescription, CommandDescription,
     CommandSummary, CommandTemplate, Description, Example, ExitCodeDescription, FactDescription,
@@ -43,6 +47,7 @@ pub use envelope::{
 };
 pub use error::{Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
+pub use explanation::{Excerpt, ExcerptLine, ExplainSubject, Explanation, Metric};
 pub use fact::{Fact, FactKind, Facts};
 pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Symbol};
 pub use grade::{CostClass, Tier};
@@ -54,4 +59,5 @@ pub use producer::{
     Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
 };
 pub use scope::Scope;
+pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};
 pub use writer::{WriteError, Writer};

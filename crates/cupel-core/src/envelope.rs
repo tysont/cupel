@@ -10,6 +10,7 @@ use serde_json::{Map, Value};
 use crate::describe::Description;
 use crate::dry_run::RunPlan;
 use crate::error::{Error, Result};
+use crate::explanation::Explanation;
 use crate::fact::FactKind;
 use crate::finding::{ActionKind, Finding};
 use crate::grade::{CostClass, Tier};
@@ -31,6 +32,8 @@ pub struct Envelope {
     pub description: Option<Description>,
     /// What a `--dry-run` would do; null unless `status` is `plan` (ADR-020).
     pub plan: Option<RunPlan>,
+    /// What `explain` adds to the finding or check result it returns; null for every other verb.
+    pub explanation: Option<Explanation>,
     /// True when paging (`--limit`/`--offset`) left findings out.
     pub truncated: bool,
     pub total_findings: u64,

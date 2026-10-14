@@ -5,8 +5,8 @@ mod description;
 use std::fmt::Write as _;
 
 use cupel_core::{
-    CheckResult, Envelope, Finding, GateOutcome, GateResult, Location, NextAction, RunInfo,
-    RunPlan, Severity, Skipped, Status, Summary,
+    CheckResult, Envelope, Explanation, Finding, GateOutcome, GateResult, Location, NextAction,
+    RunInfo, RunPlan, Severity, Skipped, Status, Summary,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -31,6 +31,11 @@ pub fn render(envelope: &Envelope, color: bool) -> String {
             .plan
             .as_ref()
             .map(|plan| plan_block(plan, &paint))
+            .unwrap_or_default(),
+        envelope
+            .explanation
+            .as_ref()
+            .map(|explanation| explanation_block(explanation, &envelope.findings, &paint))
             .unwrap_or_default(),
         envelope
             .summary
@@ -343,6 +348,79 @@ fn plan_block(plan: &RunPlan, paint: &Paint) -> String {
             for line in write.diff.iter().flat_map(|diff| diff.lines()) {
                 let _ = writeln!(out, "    {}", paint.dim(line));
             }
+        }
+    }
+    out
+}
+
+/// What `explain` adds: where it came from, the source excerpt with the location's lines marked,
+/// the full evidence of the explained finding (the one place evidence bodies are printed),
+/// test hints, and metrics.
+fn explanation_block(explanation: &Explanation, findings: &[Finding], paint: &Paint) -> String {
+    let mut out = String::new();
+    labeled(
+        &mut out,
+        "explain",
+        &format!(
+            "{} {} from {}",
+            name(explanation.subject),
+            explanation.target,
+            explanation.run
+        ),
+        paint,
+    );
+    if let Some(excerpt) = &explanation.excerpt {
+        let width = excerpt
+            .lines
+            .iter()
+            .map(|line| line.line.to_string().len())
+            .max()
+            .unwrap_or(0);
+        let _ = writeln!(out, "  {}", paint.bold(&excerpt.file));
+        for line in &excerpt.lines {
+            let marker = if line.focus { ">" } else { " " };
+            let _ = writeln!(out, "  {marker} {:>width$} | {}", line.line, line.text);
+        }
+    }
+    let explained = findings
+        .iter()
+        .find(|finding| finding.id.as_str() == explanation.target);
+    if let Some(finding) = explained.filter(|finding| !finding.evidence.0.is_empty()) {
+        let evidence = serde_json::to_string_pretty(&finding.evidence).unwrap_or_default();
+        let _ = writeln!(out, "  {}", paint.bold("evidence"));
+        for line in evidence.lines() {
+            let _ = writeln!(out, "    {line}");
+        }
+    }
+    if !explanation.covering_tests.is_empty() {
+        let _ = writeln!(
+            out,
+            "  {}  {}",
+            paint.bold("covering tests"),
+            explanation.covering_tests.join(", ")
+        );
+    }
+    if let Some(file) = &explanation.nearest_test_file {
+        let _ = writeln!(out, "  {}  {file}", paint.bold("nearest test file"));
+    }
+    if !explanation.metrics.is_empty() {
+        let _ = writeln!(out, "  {}", paint.bold("metrics"));
+        let width = explanation
+            .metrics
+            .iter()
+            .map(|metric| metric.key.len())
+            .max()
+            .unwrap_or(0);
+        for metric in &explanation.metrics {
+            let symbol = metric
+                .symbol
+                .as_ref()
+                .map_or_else(|| "(check)".to_owned(), ToString::to_string);
+            let _ = writeln!(
+                out,
+                "    {symbol:<19}  {:<width$}  {}",
+                metric.key, metric.value
+            );
         }
     }
     out

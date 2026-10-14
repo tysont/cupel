@@ -464,6 +464,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "version": "[version]"
   },
   "exit_code": 0,
+  "explanation": null,
   "findings": [],
   "next_actions": [],
   "plan": null,

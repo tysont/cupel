@@ -5,10 +5,11 @@ use std::collections::BTreeMap;
 use cupel_core::{
     Action, ActionKind, ArgDescription, BaselineRef, CheckId, CheckResult, CheckStatus,
     CommandDescription, ConfigEcho, ConfigSource, CostClass, CupelInfo, Delta, Description,
-    Envelope, Evidence, Example, ExitCode, FactKind, Finding, GateOutcome, GateResult, GateRule,
-    GitInfo, LangId, Location, NextAction, PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite,
-    RunInfo, RunPlan, ScopeInfo, ScopeMode, Score, Severity, SeverityCounts, SkipReason, Skipped,
-    Stability, Status, Summary, Symbol, Tier, ToolId, ToolchainInfo, ValueType, Verb,
+    Envelope, Evidence, Example, Excerpt, ExcerptLine, ExitCode, ExplainSubject, Explanation,
+    FactKind, Finding, GateOutcome, GateResult, GateRule, GitInfo, LangId, Location, Metric,
+    NextAction, PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunInfo, RunPlan,
+    ScopeInfo, ScopeMode, Score, Severity, SeverityCounts, SkipReason, Skipped, Stability, Status,
+    Summary, Symbol, Tier, ToolId, ToolchainInfo, ValueType, Verb,
 };
 use serde_json::{Map, Value, json};
 
@@ -158,6 +159,7 @@ pub fn envelope() -> Envelope {
         next_actions: next_actions(),
         description: Some(description()),
         plan: Some(plan()),
+        explanation: Some(explanation()),
         truncated: false,
         total_findings: 3,
     }
@@ -303,6 +305,52 @@ fn next_actions() -> Vec<NextAction> {
             command: Some("cupel check --changed --depth deep --only gen.differential".to_owned()),
         },
     ]
+}
+
+/// An explanation with an excerpt (one focused line), test hints, and two metrics, one of them
+/// for the whole check.
+fn explanation() -> Explanation {
+    Explanation {
+        subject: ExplainSubject::Finding,
+        target: "fnd_7c2e1a".to_owned(),
+        run: "run_01J9ZZZZZZZZZZZZZZZZZZZZZZ"
+            .parse()
+            .expect("valid run ID"),
+        excerpt: Some(Excerpt {
+            file: "src/rewrite/planner.rs".to_owned(),
+            lines: vec![
+                ExcerptLine {
+                    line: 141,
+                    text: "fn push_limit(limit: u64, offset: u64) -> bool {".to_owned(),
+                    focus: false,
+                },
+                ExcerptLine {
+                    line: 142,
+                    text: "    limit <= offset".to_owned(),
+                    focus: true,
+                },
+                ExcerptLine {
+                    line: 143,
+                    text: "}".to_owned(),
+                    focus: false,
+                },
+            ],
+        }),
+        covering_tests: vec!["rewrite::limit_tests::pushes_through_sort".to_owned()],
+        nearest_test_file: Some("tests/rewrite/limit_tests.rs".to_owned()),
+        metrics: vec![
+            Metric {
+                symbol: Some("sh_4b1d9e0c4b1d9e00".parse().expect("valid symbol hash")),
+                key: "cyclomatic".to_owned(),
+                value: 7.0,
+            },
+            Metric {
+                symbol: None,
+                key: "score".to_owned(),
+                value: 0.71,
+            },
+        ],
+    }
 }
 
 /// A plan with two checks to run (one with a note), a skip, an install, and two writes (one

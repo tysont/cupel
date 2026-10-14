@@ -460,6 +460,7 @@
     "version": "<version>"
   },
   "exit_code": 0,
+  "explanation": null,
   "findings": [],
   "next_actions": [],
   "plan": null,

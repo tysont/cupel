@@ -401,3 +401,26 @@ fn a_recording_probe_touches_nothing() {
     assert!(repo.files().is_empty());
     assert!(!repo.path(".cupel").exists());
 }
+
+#[test]
+fn only_a_recording_writer_says_it_is_recording() {
+    let repo = Repo::new();
+    assert!(!repo.writer(false).is_recording());
+    assert!(repo.writer(false).recording().is_recording());
+    assert!(repo.writer(true).recording().confined().is_recording());
+}
+
+#[test]
+fn a_planned_change_is_a_unified_diff_from_the_old_text() {
+    let changed = PlannedWrite::change(".cupel/cupel.db", "baselines/default", Some("a\n"), "b\n");
+    assert_eq!(changed.path, ".cupel/cupel.db");
+    assert_eq!(
+        changed.diff.as_deref(),
+        Some("--- a/baselines/default\n+++ b/baselines/default\n@@ -1 +1 @@\n-a\n+b\n")
+    );
+    let created = PlannedWrite::change(".cupel/cupel.db", "baselines/default", None, "b\n");
+    assert_eq!(
+        created.diff.as_deref(),
+        Some("--- /dev/null\n+++ b/baselines/default\n@@ -0,0 +1 @@\n+b\n")
+    );
+}

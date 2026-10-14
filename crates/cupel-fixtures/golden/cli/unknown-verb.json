@@ -6,6 +6,7 @@
   },
   "description": null,
   "exit_code": 2,
+  "explanation": null,
   "findings": [
     {
       "action": {
