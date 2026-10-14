@@ -112,8 +112,13 @@ impl Scheduler<'_> {
                 let mut run = CheckRun::start(*check, &tasks, sink);
                 for task in tasks {
                     let result = Self::run_task(job, &mut store, task, &mut run.sink(sink));
-                    interrupted |=
-                        matches!(result.status, CheckStatus::Partial | CheckStatus::Skipped);
+                    // A check may skip itself for its own reasons (ADR-048); only a cut-short
+                    // check or a timeout skip makes the run partial.
+                    interrupted |= result.status == CheckStatus::Partial
+                        || result
+                            .skipped
+                            .as_ref()
+                            .is_some_and(|skipped| skipped.reason == SkipReason::Timeout);
                     run.record(task, result, sink);
                 }
                 let (results, check_findings) = run.finish(sink);

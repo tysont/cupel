@@ -15,7 +15,7 @@ use cupel_core::{
     CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence, Fact, FactKind,
     Facts, Finding, FindingId, Job, Lang, LangFamily, LangId, Langs, Location, Manifest, Outcome,
     Plan, ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, RunId, Scheduler, Scope,
-    Score, Severity, SkipReason, Stability, SymbolSelector, Tier, Writer, next_actions,
+    Score, Severity, SkipReason, Skipped, Stability, SymbolSelector, Tier, Writer, next_actions,
 };
 
 // ---------------------------------------------------------------- fixtures
@@ -561,6 +561,34 @@ fn a_cancelled_run_skips_unstarted_work_with_reason_timeout() {
         assert_eq!(skipped.reason, SkipReason::Timeout);
         assert_eq!(skipped.lang, Some(LangId::from(lang)));
     }
+}
+
+#[test]
+fn a_check_that_skips_itself_is_reported_without_interrupting_the_run() {
+    fn unconfigured(_: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+        Ok(CheckResult {
+            status: CheckStatus::Skipped,
+            skipped: Some(Skipped {
+                reason: SkipReason::Unconfigured,
+                fact: Some(FactKind::CoverageMap),
+                lang: Some(LangId::from("rust")),
+                tool: None,
+                see: None,
+            }),
+            ..passing("t.unconfigured", None)
+        })
+    }
+    let world = World::new(
+        vec![check("t.unconfigured", &[FactKind::Symbols], unconfigured)],
+        "",
+    );
+    let (outcome, _) = world.run(&["rust"], |_| {});
+    let outcome = outcome.unwrap();
+    assert!(!outcome.interrupted, "only a timeout interrupts a run");
+    assert_eq!(outcome.checks.len(), 1);
+    assert_eq!(outcome.checks[0].status, CheckStatus::Skipped);
+    let skipped = outcome.checks[0].skipped.as_ref().unwrap();
+    assert_eq!(skipped.reason, SkipReason::Unconfigured);
 }
 
 // ---------------------------------------------------------------- planning
