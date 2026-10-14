@@ -4,20 +4,7 @@ mod support;
 
 use cupel_core::syntax::{NormTree, Symbols};
 use proptest::prelude::*;
-use support::{assert_distinct, fixture, produce, sexp, tree};
-
-/// The normalized tree and hash of the only symbol in `source`, a `lang` file at `path`.
-fn normalize_at(lang: &str, path: &str, source: &str) -> (String, String) {
-    let dir = tree(&[(path, source)]);
-    let norm: NormTree = produce(lang, dir.path());
-    let symbols: Symbols = produce(lang, dir.path());
-    assert_eq!(norm.symbols.len(), 1, "{source}");
-    assert_eq!(norm.symbols[0].symbol, symbols.symbols[0].key());
-    (
-        sexp(&norm.symbols[0].root),
-        norm.symbols[0].hash.to_string(),
-    )
-}
+use support::{assert_distinct, fixture, normalize_at, produce};
 
 fn js(source: &str) -> (String, String) {
     normalize_at("javascript", "src/a.js", source)

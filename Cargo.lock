@@ -268,6 +268,7 @@ name = "cupel-adapt"
 version = "0.1.0"
 dependencies = [
  "cupel-core",
+ "cupel-fixtures",
  "globset",
  "inventory",
  "serde",
@@ -299,6 +300,7 @@ dependencies = [
  "cupel-adapt",
  "cupel-checks",
  "cupel-core",
+ "cupel-fixtures",
  "cupel-lang",
  "cupel-store",
  "insta",
@@ -352,6 +354,7 @@ version = "0.1.0"
 dependencies = [
  "blake3",
  "cupel-core",
+ "cupel-fixtures",
  "globset",
  "ignore",
  "inventory",

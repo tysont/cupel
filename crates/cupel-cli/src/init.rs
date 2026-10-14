@@ -231,9 +231,7 @@ mod tests {
     use super::*;
 
     fn fixture(case: &str) -> PathBuf {
-        Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../cupel-fixtures/repos/detect")
-            .join(case)
+        cupel_fixtures::repo_path("detect").join(case)
     }
 
     /// The registered roots of a detect fixture, through the `ProjectInfo` producers.

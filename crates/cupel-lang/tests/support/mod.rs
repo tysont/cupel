@@ -17,9 +17,7 @@ use cupel_lang::{LanguageRegistry, walk_excluding};
 
 /// The fixture repository for `lang` in cupel-fixtures.
 pub fn fixture(lang: &str) -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../cupel-fixtures/repos")
-        .join(lang)
+    cupel_fixtures::repo_path(lang)
 }
 
 /// Produces `F` for language `lang` over every source file under `root`, panicking on any

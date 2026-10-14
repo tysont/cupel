@@ -8,9 +8,7 @@ use cupel_adapt::toolchain::{self, Commands, Root};
 use cupel_core::{LangId, ProducerId};
 
 fn fixture(case: &str) -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../cupel-fixtures/repos/detect")
-        .join(case)
+    cupel_fixtures::repo_path("detect").join(case)
 }
 
 /// The commands the table chooses for `lang` at `dir` with `members` (relative) and `packages`.
