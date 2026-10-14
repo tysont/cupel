@@ -58,9 +58,17 @@
 //! Beside the module file, it adds its `mod <name>;` line here and edits nothing else in this
 //! file; [`register`], which the CLI and the matrix harness already call, picks it up.
 
+mod cargo_nextest;
+mod cargo_test;
+mod go_test;
+mod jest;
+mod pytest;
 pub mod report;
 mod rules;
+mod runner;
 pub mod toolchain;
+mod unittest;
+mod vitest;
 
 use cupel_core::ProducerRegistry;
 
@@ -77,15 +85,16 @@ pub struct ToolProducer {
 
 inventory::collect!(ToolProducer);
 
-/// Adds every tool producer to `registry`, in ID order. Which producer of a fact a run uses is
-/// the toolchain table's and the configuration's choice, not this order.
+/// Adds every tool producer to `registry`: those the toolchain table lists in its order (its
+/// default order, ADR-076), then the rest by ID. A `[lang.<id>]` pin and the table's detection
+/// rules then choose among them.
 ///
 /// # Panics
 ///
 /// When two submissions share an ID: tool producer IDs are unique.
 pub fn register(registry: &mut ProducerRegistry) {
     let mut tools: Vec<&ToolProducer> = inventory::iter::<ToolProducer>.into_iter().collect();
-    tools.sort_by_key(|tool| tool.id);
+    tools.sort_by_key(|tool| (toolchain::position(tool.id), tool.id));
     if let Some(pair) = tools.windows(2).find(|pair| pair[0].id == pair[1].id) {
         panic!(
             "tool producer IDs are unique: `{}` is submitted twice",

@@ -1,7 +1,7 @@
 // ABOUTME: The toolchain table (design §8.7): per language, launchers and tool producers in default order
 // ABOUTME: with detection rules and command templates, selection for a root, and its `describe` form.
 use std::collections::BTreeMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
 use cupel_core::{
@@ -115,6 +115,32 @@ pub fn for_lang(lang: &LangId) -> Option<&'static Row> {
     rows().iter().find(|row| row.langs.contains(lang))
 }
 
+/// Where the producer `id` stands in the table's default order: its row, then its place among
+/// the row's runners, coverage, and bench producers; after every listed producer when the table
+/// does not list it.
+pub fn position(id: &str) -> (usize, usize) {
+    rows()
+        .iter()
+        .enumerate()
+        .find_map(|(row_index, row)| {
+            row.tools()
+                .position(|tool| tool.id.as_str() == id)
+                .map(|index| (row_index, index))
+        })
+        .unwrap_or((usize::MAX, usize::MAX))
+}
+
+/// Whether the producer `id`'s detection rules hold at the repository root `root` (a tool with
+/// no rules always holds; a tool the table does not list never does).
+pub fn detects(id: &ProducerId, root: &Path) -> bool {
+    let dirs = Dirs { root, members: &[] };
+    rows()
+        .iter()
+        .flat_map(Row::tools)
+        .find(|tool| tool.id == *id)
+        .is_some_and(|tool| detected(&tool.detect, &dirs))
+}
+
 /// A command that exits 0 when `program` is installed: `[probes]`, else `<program> --version`.
 pub fn probe(program: &str) -> Vec<String> {
     TOOLCHAIN.probes.get(program).map_or_else(
@@ -145,6 +171,11 @@ fn detected(rules: &[Rule], dirs: &Dirs<'_>) -> bool {
 }
 
 impl Row {
+    /// Every tool producer of the row: runners, then coverage, then bench producers.
+    fn tools(&self) -> impl Iterator<Item = &Tool> {
+        self.runners.iter().chain(&self.coverage).chain(&self.bench)
+    }
+
     /// The first launcher and runner whose rules hold at `root`, then the first coverage and
     /// bench producers whose rules hold and that have a command for that runner.
     pub fn select<'a>(&'a self, root: &Root) -> Selection<'a> {
