@@ -235,11 +235,18 @@ fn describe_check_shows_its_manifest_and_support_per_language() {
 #[test]
 fn describe_finding_shows_its_check_action_and_evidence_schema() {
     let description = assert_described(&["describe", "finding", "complexity.high"], "finding");
-    assert_eq!(description["check"], json!("static.complexity"));
-    assert_eq!(description["action"], json!("reduce_complexity"));
+    let required = json!(["cyclomatic", "cognitive", "cyclomatic_max", "cognitive_max"]);
     assert_eq!(
-        description["evidence"]["required"],
-        json!(["cyclomatic", "cognitive", "cyclomatic_max", "cognitive_max"])
+        (
+            &description["check"],
+            &description["action"],
+            &description["evidence"]["required"]
+        ),
+        (
+            &json!("static.complexity"),
+            &json!("reduce_complexity"),
+            &required
+        )
     );
 }
 
@@ -381,9 +388,14 @@ fn describe_languages_lists_every_language_with_its_family_and_extensions() {
 #[test]
 fn describe_language_shows_identity_facts_and_check_support() {
     let description = assert_described(&["describe", "language", "rust"], "language");
-    assert_eq!(description["id"], json!("rust"));
-    assert_eq!(description["family"], json!("rust"));
-    assert_eq!(description["extensions"], json!([".rs"]));
+    assert_eq!(
+        (
+            &description["id"],
+            &description["family"],
+            &description["extensions"]
+        ),
+        (&json!("rust"), &json!("rust"), &json!([".rs"]))
+    );
     assert!(description["facts"].is_array());
     assert_eq!(
         description["checks"],
@@ -440,8 +452,10 @@ fn describe_language_with_an_unknown_id_is_a_usage_error_listing_languages() {
 #[test]
 fn describe_fact_shows_version_schema_and_producers_for_every_language() {
     let description = assert_described(&["describe", "fact", "norm-tree"], "fact");
-    assert_eq!(description["kind"], json!("norm-tree"));
-    assert_eq!(description["syntactic"], json!(true));
+    assert_eq!(
+        (&description["kind"], &description["syntactic"]),
+        (&json!("norm-tree"), &json!(true))
+    );
     assert!(description["version"].as_u64().is_some());
     assert_eq!(
         description["schema"]["$id"],

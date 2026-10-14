@@ -266,40 +266,15 @@ fn every_launch_language_has_one_row_and_unknown_languages_none() {
 }
 
 /// How `row` breaks the table's rules: every producer is `tool.<name>`, unique in its row, and
-/// has a command; every runner a command map names is a runner of the row; every
-/// `<placeholder>` is `<packages>` or a value every launcher sets; the last runner is the
-/// fallback, detecting nothing.
+/// passes `tool_problems`; the last runner is the fallback, detecting nothing.
 fn inconsistencies(row: &toolchain::Row) -> Vec<String> {
-    let runners: Vec<&ProducerId> = row.runners.iter().map(|tool| &tool.id).collect();
     let mut problems = Vec::new();
     let mut ids = BTreeSet::new();
     for tool in row.runners.iter().chain(&row.coverage).chain(&row.bench) {
-        if !tool.id.as_str().starts_with("tool.") {
-            problems.push(format!("{} is not tool.<name>", tool.id));
-        }
         if !ids.insert(tool.id.clone()) {
             problems.push(format!("{} is listed twice", tool.id));
         }
-        if tool.command.is_none() && tool.commands.is_empty() {
-            problems.push(format!("{} has no command", tool.id));
-        }
-        for runner in tool
-            .commands
-            .keys()
-            .filter(|runner| !runners.contains(runner))
-        {
-            problems.push(format!("{}: unknown runner {runner}", tool.id));
-        }
-        for template in tool.command.iter().chain(tool.commands.values()) {
-            for name in placeholders(template) {
-                if name != "packages" && !set_by_every_launcher(row, &name) {
-                    problems.push(format!(
-                        "{}: <{name}> is not set by every launcher",
-                        tool.id
-                    ));
-                }
-            }
-        }
+        problems.extend(tool_problems(row, tool));
     }
     if !row
         .runners
@@ -309,6 +284,39 @@ fn inconsistencies(row: &toolchain::Row) -> Vec<String> {
         problems.push(format!(
             "the last runner of {:?} is not the fallback",
             row.langs
+        ));
+    }
+    problems
+}
+
+/// How one producer of `row` breaks the table's rules: it is `tool.<name>` and has a command;
+/// every runner its command map names is a runner of the row; every `<placeholder>` is
+/// `<packages>` or a value every launcher sets.
+fn tool_problems(row: &toolchain::Row, tool: &toolchain::Tool) -> Vec<String> {
+    let mut problems = Vec::new();
+    if !tool.id.as_str().starts_with("tool.") {
+        problems.push(format!("{} is not tool.<name>", tool.id));
+    }
+    if tool.command.is_none() && tool.commands.is_empty() {
+        problems.push(format!("{} has no command", tool.id));
+    }
+    let runners: Vec<&ProducerId> = row.runners.iter().map(|runner| &runner.id).collect();
+    for runner in tool
+        .commands
+        .keys()
+        .filter(|runner| !runners.contains(runner))
+    {
+        problems.push(format!("{}: unknown runner {runner}", tool.id));
+    }
+    let names = tool
+        .command
+        .iter()
+        .chain(tool.commands.values())
+        .flat_map(|template| placeholders(template));
+    for name in names.filter(|name| name != "packages" && !set_by_every_launcher(row, name)) {
+        problems.push(format!(
+            "{}: <{name}> is not set by every launcher",
+            tool.id
         ));
     }
     problems

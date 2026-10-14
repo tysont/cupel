@@ -61,6 +61,14 @@ fn doctor_with(file: &str, text: &str) -> Outcome {
     repo.run(&["doctor"])
 }
 
+/// The envelope of `cupel doctor` in a fresh repository holding `file` with `text`, asserting
+/// it passes.
+fn passing_doctor_with(file: &str, text: &str) -> Value {
+    let outcome = doctor_with(file, text);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    outcome.envelope()
+}
+
 #[test]
 fn an_unsatisfied_required_version_exits_3_asking_to_install_cupel() {
     let finding = assert_environment(
@@ -81,9 +89,7 @@ fn an_unsatisfied_required_version_exits_3_asking_to_install_cupel() {
 
 #[test]
 fn a_satisfied_required_version_is_not_a_finding() {
-    let outcome = doctor_with("cupel.toml", "required_version = \">=0.1, <99\"\n");
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let envelope = outcome.envelope();
+    let envelope = passing_doctor_with("cupel.toml", "required_version = \">=0.1, <99\"\n");
     let kinds: Vec<&Value> = envelope["findings"]
         .as_array()
         .unwrap()
@@ -217,18 +223,16 @@ fn doctor_describes_fix_as_pending_p3_1() {
 
 #[test]
 fn a_configured_runner_that_is_not_installed_warns_without_failing() {
-    let outcome = doctor_with(
+    let envelope = passing_doctor_with(
         "cupel.toml",
         "[lang.rust]\ntest = \"cupel-test-no-such-runner --all\"\n",
     );
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let envelope = outcome.envelope();
     let finding = envelope["findings"]
         .as_array()
         .unwrap()
         .iter()
         .find(|finding| finding["evidence"]["tool"] == json!("cupel-test-no-such-runner"))
-        .unwrap_or_else(|| panic!("{}", outcome.stdout))
+        .unwrap_or_else(|| panic!("{envelope}"))
         .clone();
     assert_eq!(finding["kind"], json!("doctor.tool-missing"));
     assert_eq!(finding["severity"], json!("warn"));

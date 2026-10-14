@@ -70,6 +70,15 @@ fn raw(repo: &Repo) -> rusqlite::Connection {
     rusqlite::Connection::open(repo.root().join(".cupel/cupel.db")).unwrap()
 }
 
+/// A metric `key` of `value`, about `symbol` or the whole check.
+fn metric(symbol: Option<SymbolHash>, key: &str, value: f64) -> Metric {
+    Metric {
+        symbol,
+        key: key.to_owned(),
+        value,
+    }
+}
+
 /// The symbol hash ending in `n`.
 fn symbol_hash(n: u8) -> SymbolHash {
     format!("sh_{n:016x}").parse().unwrap()
@@ -374,15 +383,13 @@ fn a_finding_is_read_from_its_latest_run() {
 fn bookkeeping_runs_are_stored_but_their_findings_and_checks_are_not_indexed() {
     let repo = Repo::new();
     let store = repo.store();
-    store
-        .record_run(&envelope(
-            &run_id(1),
-            "check",
-            0,
-            &[finding("fnd_00000a", "static.complexity", "produced")],
-            &[check("static.complexity", Some(0.5))],
-        ))
-        .unwrap();
+    record(
+        &store,
+        1,
+        "check",
+        &[finding("fnd_00000a", "static.complexity", "produced")],
+        &[check("static.complexity", Some(0.5))],
+    );
     for (n, verb) in [(2, "explain"), (3, "baseline"), (4, "suppress")] {
         store
             .record_run(&envelope(
@@ -411,18 +418,16 @@ fn bookkeeping_runs_are_stored_but_their_findings_and_checks_are_not_indexed() {
 fn a_run_with_a_repeated_finding_keeps_the_first() {
     let repo = Repo::new();
     let store = repo.store();
-    store
-        .record_run(&envelope(
-            &run_id(1),
-            "check",
-            0,
-            &[
-                finding("fnd_00000a", "static.complexity", "first"),
-                finding("fnd_00000a", "static.complexity", "second"),
-            ],
-            &[],
-        ))
-        .unwrap();
+    record(
+        &store,
+        1,
+        "check",
+        &[
+            finding("fnd_00000a", "static.complexity", "first"),
+            finding("fnd_00000a", "static.complexity", "second"),
+        ],
+        &[],
+    );
     let (found, _) = store
         .finding(&"fnd_00000a".parse().unwrap())
         .unwrap()
@@ -435,70 +440,41 @@ fn the_last_run_of_a_check_has_its_result_findings_and_metrics() {
     let repo = Repo::new();
     let store = repo.store();
     let complexity = CheckId::from("static.complexity");
+    record(
+        &store,
+        1,
+        "check",
+        &[finding("fnd_00000a", "static.complexity", "old")],
+        &[check("static.complexity", Some(0.25))],
+    );
+    record(
+        &store,
+        2,
+        "check",
+        &[
+            finding("fnd_00000b", "static.complexity", "new"),
+            finding("fnd_00000c", "static.clones", "other check"),
+        ],
+        &[
+            check("static.complexity", Some(0.75)),
+            check("static.clones", None),
+        ],
+    );
+    let cyclomatic = metric(Some(symbol_hash(0xaa)), "cyclomatic", 12.0);
     store
-        .record_run(&envelope(
-            &run_id(1),
-            "check",
-            0,
-            &[finding("fnd_00000a", "static.complexity", "old")],
-            &[check("static.complexity", Some(0.25))],
-        ))
-        .unwrap();
-    store
-        .record_run(&envelope(
-            &run_id(2),
-            "check",
-            0,
-            &[
-                finding("fnd_00000b", "static.complexity", "new"),
-                finding("fnd_00000c", "static.clones", "other check"),
-            ],
-            &[
-                check("static.complexity", Some(0.75)),
-                check("static.clones", None),
-            ],
-        ))
-        .unwrap();
-    let symbol: SymbolHash = "sh_00000000000000aa".parse().unwrap();
-    store
-        .record_metrics(
-            &run_id(2),
-            &complexity,
-            &[Metric {
-                symbol: Some(symbol.clone()),
-                key: "cyclomatic".to_owned(),
-                value: 12.0,
-            }],
-        )
+        .record_metrics(&run_id(2), &complexity, std::slice::from_ref(&cyclomatic))
         .unwrap();
     record(&store, 3, "doctor", &[], &[]);
 
     let last = store.last_run_for_check(&complexity).unwrap().unwrap();
-    assert_eq!(last.run, run_id(2));
-    assert_eq!(last.result.id, complexity);
+    assert_eq!((&last.run, &last.result.id), (&run_id(2), &complexity));
     let titles: Vec<&str> = last.findings.iter().map(|f| f.title.as_str()).collect();
     assert_eq!(titles, ["new"]);
-    assert_eq!(
-        last.metrics,
-        [
-            Metric {
-                symbol: None,
-                key: "score".to_owned(),
-                value: 0.75,
-            },
-            Metric {
-                symbol: Some(symbol),
-                key: "cyclomatic".to_owned(),
-                value: 12.0,
-            },
-        ]
-    );
-    assert!(
-        store
-            .last_run_for_check(&CheckId::from("static.deps"))
-            .unwrap()
-            .is_none()
-    );
+    assert_eq!(last.metrics, [metric(None, "score", 0.75), cyclomatic]);
+    let deps = store
+        .last_run_for_check(&CheckId::from("static.deps"))
+        .unwrap();
+    assert_eq!(deps.map(|last| last.run), None);
 }
 
 #[test]
