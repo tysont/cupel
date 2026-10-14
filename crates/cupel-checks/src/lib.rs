@@ -35,6 +35,7 @@
 mod finding;
 mod settings;
 mod static_complexity;
+mod tests_quality;
 
 use cupel_core::CheckRegistry;
 
@@ -46,5 +47,8 @@ use cupel_core::CheckRegistry;
 pub fn register(registry: &mut CheckRegistry) {
     registry
         .register(Box::new(static_complexity::StaticComplexity::new()))
+        .expect("native check IDs are unique");
+    registry
+        .register(Box::new(tests_quality::TestsQuality::new()))
         .expect("native check IDs are unique");
 }

@@ -1,0 +1,744 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 14,
+      "id": "tests.quality",
+      "oracle": null,
+      "score": {
+        "n": 27,
+        "unit": "assertion_density",
+        "value": 0.925925925925926
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `does not call an empty balance rich` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_7836df",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 45,
+        "end_col": 2,
+        "end_line": 11,
+        "file": "test/decide.test.js",
+        "line": 9
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_7d1b0833554ede31",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_7836df --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.decide.does not call an empty balance rich",
+        "hash": "sh_7d1b0833554ede31",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.decide.does not call an empty balance rich` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `labels through a stub` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_c68fe9",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 16,
+        "file": "test/decide.test.js",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_28e4dbb5c64f2d1e",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c68fe9 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.decide.labels through a stub",
+        "hash": "sh_28e4dbb5c64f2d1e",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.decide.labels through a stub` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `is not called by accident` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_856cac",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 35,
+        "end_col": 4,
+        "end_line": 13,
+        "file": "test/format.spec.js",
+        "line": 10
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_5b1225ff4dc742c4",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_856cac --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.format.money.is not called by accident",
+        "hash": "sh_5b1225ff4dc742c4",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.format.money.is not called by accident` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `returns something` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_f3fa9c",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 27,
+        "end_col": 4,
+        "end_line": 16,
+        "file": "test/math.quality.test.js",
+        "line": 14
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_ca5f5692309acbb6",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_f3fa9c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.quality.returns something",
+        "hash": "sh_ca5f5692309acbb6",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.quality.returns something` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `runs without checking` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_5d3c04",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 20,
+        "file": "test/math.quality.test.js",
+        "line": 18
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_bf0343c3ce7d69fa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_5d3c04 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.quality.runs without checking",
+        "hash": "sh_bf0343c3ce7d69fa",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.quality.runs without checking` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `logs and mails every sum`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 75,
+        "mock_density_max": 50,
+        "mocks": 3,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "vi.fn",
+          "vi.fn",
+          "vi.fn"
+        ]
+      },
+      "id": "fnd_7546fc",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 34,
+        "end_col": 4,
+        "end_line": 27,
+        "file": "test/math.quality.test.js",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_540d2f7dd8f1673c",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_7546fc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.quality.logs and mails every sum",
+        "hash": "sh_540d2f7dd8f1673c",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.quality.logs and mails every sum` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `counts every value in a range` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 0,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 1,
+        "remediation_mode": "simplify"
+      },
+      "id": "fnd_7ea052",
+      "kind": "test.logic",
+      "location": {
+        "col": 39,
+        "end_col": 4,
+        "end_line": 33,
+        "file": "test/math.quality.test.js",
+        "line": 29
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_63be49d0160c50ca",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_7ea052 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.quality.counts every value in a range",
+        "hash": "sh_63be49d0160c50ca",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.quality.counts every value in a range` contains logic: 1 loop(s) or branch(es) (max 0)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `keeps values in order`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          35,
+          42
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 3,
+        "statements": 3,
+        "tests": [
+          "test.math.quality.keeps values in order",
+          "test.math.quality.ends with the last sum"
+        ]
+      },
+      "id": "fnd_b9dc1b",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 31,
+        "end_col": 4,
+        "end_line": 40,
+        "file": "test/math.quality.test.js",
+        "line": 35
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_ae506c0e3aac27f9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b9dc1b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.quality.keeps values in order",
+        "hash": "sh_ae506c0e3aac27f9",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.quality.keeps values in order` and 1 other test(s) repeat the same 3 leading statements"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `is truthy for non-zero sums` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_ecc65a",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 37,
+        "end_col": 4,
+        "end_line": 20,
+        "file": "test/math.test.js",
+        "line": 18
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_fef9afb424924459",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ecc65a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.add.is truthy for non-zero sums",
+        "hash": "sh_fef9afb424924459",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.add.is truthy for non-zero sums` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `returns a defined value` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "not-null"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_b4238a",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 33,
+        "end_col": 4,
+        "end_line": 24,
+        "file": "test/math.test.js",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_3b17a5b2b135ff52",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b4238a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.add.returns a defined value",
+        "hash": "sh_3b17a5b2b135ff52",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.add.returns a defined value` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `does not return zero` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_93908d",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 28,
+        "file": "test/math.test.js",
+        "line": 26
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_402ad96ffaca78ce",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_93908d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.add.does not return zero",
+        "hash": "sh_402ad96ffaca78ce",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.add.does not return zero` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `can be called without checking` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 1,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_5d3c04",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 40,
+        "end_col": 4,
+        "end_line": 36,
+        "file": "test/math.test.js",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_bf0343c3ce7d69fa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_5d3c04 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.add.can be called without checking",
+        "hash": "sh_bf0343c3ce7d69fa",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.add.can be called without checking` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `throws on nothing` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_5cac0a",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 27,
+        "end_col": 4,
+        "end_line": 46,
+        "file": "test/math.test.js",
+        "line": 44
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_191786f58d469e46",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_5cac0a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.parseCents.throws on nothing",
+        "hash": "sh_191786f58d469e46",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.parseCents.throws on nothing` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `reports what it parsed`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 66,
+        "mock_density_max": 50,
+        "mocks": 2,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "../src/report.cjs",
+          "vi.fn"
+        ]
+      },
+      "id": "fnd_dacf0c",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 32,
+        "end_col": 4,
+        "end_line": 56,
+        "file": "test/math.test.js",
+        "line": 52
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_153cb3730cef98a6",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_dacf0c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "test.math.parseCents.reports what it parsed",
+        "hash": "sh_153cb3730cef98a6",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`test.math.parseCents.reports what it parsed` is mock-heavy: 2 doubles and 1 assertion(s), 66% doubles (max 50%)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_7836df",
+      "kind": "strengthen_assertion",
+      "priority": 1,
+      "summary": "Replace the truthiness, presence, or inequality checks in `does not call an empty balance rich` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c68fe9",
+      "kind": "strengthen_assertion",
+      "priority": 2,
+      "summary": "Replace the truthiness, presence, or inequality checks in `labels through a stub` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_856cac",
+      "kind": "strengthen_assertion",
+      "priority": 3,
+      "summary": "Replace the truthiness, presence, or inequality checks in `is not called by accident` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_f3fa9c",
+      "kind": "strengthen_assertion",
+      "priority": 4,
+      "summary": "Replace the truthiness, presence, or inequality checks in `returns something` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_5d3c04",
+      "kind": "write_test",
+      "priority": 5,
+      "summary": "Add an assertion to `runs without checking` that pins the outcome it exercises."
+    },
+    {
+      "command": null,
+      "finding": "fnd_7546fc",
+      "kind": "review",
+      "priority": 6,
+      "summary": "Use real collaborators or simple fakes for some of the doubles in `logs and mails every sum`, or split it, so it checks behavior rather than wiring."
+    },
+    {
+      "command": null,
+      "finding": "fnd_7ea052",
+      "kind": "refactor_extract",
+      "priority": 7,
+      "summary": "Split `counts every value in a range` into one test per path, or parametrize it, so the test body neither loops nor branches."
+    },
+    {
+      "command": null,
+      "finding": "fnd_b9dc1b",
+      "kind": "refactor_extract",
+      "priority": 8,
+      "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `keeps values in order`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ecc65a",
+      "kind": "strengthen_assertion",
+      "priority": 9,
+      "summary": "Replace the truthiness, presence, or inequality checks in `is truthy for non-zero sums` with an assertion that pins the expected value."
+    },
+    {
+      "command": null,
+      "finding": "fnd_b4238a",
+      "kind": "strengthen_assertion",
+      "priority": 10,
+      "summary": "Replace the truthiness, presence, or inequality checks in `returns a defined value` with an assertion that pins the expected value."
+    }
+  ],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 21,
+      "languages": [
+        "javascript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 65
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 14
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 14,
+  "truncated": false
+}

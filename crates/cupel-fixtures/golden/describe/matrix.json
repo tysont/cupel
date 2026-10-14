@@ -40,10 +40,46 @@
         "support": {
           "status": "supported"
         }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "tests.quality",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
       }
     ],
     "checks": [
-      "static.complexity"
+      "static.complexity",
+      "tests.quality"
     ],
     "languages": [
       "go",
