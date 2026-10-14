@@ -20,6 +20,9 @@ ulid.workspace = true
 thiserror.workspace = true
 similar.workspace = true
 
+[target.'cfg(unix)'.dependencies]
+nix.workspace = true
+
 [dev-dependencies]
 insta.workspace = true
 proptest.workspace = true

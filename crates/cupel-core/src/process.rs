@@ -139,14 +139,18 @@ fn wait(child: &mut Child, cancel: &Cancellation) -> Result<Option<i32>> {
     }
 }
 
-/// Kills `child` and, on Unix, every process in its group, then reaps it.
+/// Kills `child` and, on Unix, every process in its group, then reaps it. The group is the
+/// child's own (`process_group(0)` above), so its descendants die with it and cannot keep the
+/// output pipes open after it is gone.
 fn kill(child: &mut Child) {
     #[cfg(unix)]
-    let _ = Command::new("kill")
-        .args(["-KILL", &format!("-{}", child.id())])
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status();
+    {
+        use nix::sys::signal::{Signal, killpg};
+        use nix::unistd::Pid;
+        if let Ok(pid) = i32::try_from(child.id()) {
+            let _ = killpg(Pid::from_raw(pid), Signal::SIGKILL);
+        }
+    }
     let _ = child.kill();
     let _ = child.wait();
 }
