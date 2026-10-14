@@ -23,7 +23,9 @@ use crate::format::{self, Rendering};
 use crate::page::Page;
 use crate::problem::Problem;
 use crate::run::Run;
-use crate::{describe, doctor, init, registry, render};
+use crate::{
+    against, baseline, describe, doctor, explain, init, persist, registry, render, suppress,
+};
 
 /// Everything an invocation reads from its process. `main` gathers it once; nothing else looks
 /// at the process environment or working directory.
@@ -183,16 +185,23 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
             let _ = writeln!(stderr, "cupel: could not write events: {problem}");
         }
     }
-    if keeps_run_record(run, cli)
-        && let Err(error) = writer.run_record(&envelope)
-    {
-        let _ = writeln!(stderr, "cupel: could not write the run record: {error}");
+    if keeps_run_record(run, cli) {
+        if let Err(error) = writer.run_record(&envelope) {
+            let _ = writeln!(stderr, "cupel: could not write the run record: {error}");
+        }
+        if let Err(error) = persist::record(&writer, &envelope) {
+            let _ = writeln!(
+                stderr,
+                "cupel: could not record the run in the fact store: {error}"
+            );
+        }
     }
     output(envelope, &presentation(rendering), stderr)
 }
 
-/// Every parsed run of a verb other than `describe` keeps its envelope under `.cupel/runs/`,
-/// except a dry run or an `init` preview, which write nothing (ADR-020 §3, ADR-021 §5).
+/// Every parsed run of a verb other than `describe` keeps its envelope under `.cupel/runs/` and
+/// in the fact store, except a dry run or a preview, which write nothing (ADR-020 §3,
+/// ADR-021 §5, ADR-045 §8).
 fn keeps_run_record(run: &Run, cli: &Cli) -> bool {
     !cli.plans_only() && !cli.global.describe && run.verb.is_some_and(|verb| verb != Verb::Describe)
 }
@@ -345,6 +354,30 @@ fn execute(
                 Ok(run.reported(Status::Pass, ExitCode::Pass, findings))
             }
         }
+        Some(VerbArgs::Explain { target, .. }) => {
+            if dry_run {
+                // `explain` only reads the store; its plan is empty.
+                Ok(plan(run, RunPlan::default(), writer, events, Vec::new()))
+            } else {
+                explain::run(run, writer, target)
+            }
+        }
+        Some(VerbArgs::Baseline { name, action }) => {
+            baseline::run(run, writer, events, name.as_deref(), action)
+        }
+        Some(VerbArgs::Suppress {
+            finding,
+            reason,
+            until,
+        }) => {
+            let reason = reason.as_deref().unwrap_or_default();
+            let envelope = suppress::run(run, writer, finding, reason, until.as_deref())?;
+            if dry_run {
+                Ok(plan(run, RunPlan::default(), writer, events, Vec::new()))
+            } else {
+                Ok(envelope)
+            }
+        }
         Some(verb) => {
             let words = verb.words();
             let step = registry::find(&words[..1])
@@ -353,11 +386,32 @@ fn execute(
             Err(CupelError::pending_verb(&words, &step))
         }
     }?;
+    let envelope = graded(envelope, cli, writer)?;
     Ok(if cut_short {
         Run::interrupted(envelope)
     } else {
         envelope
     })
+}
+
+/// A finished run of a verb that grades the repository with the repository's suppressions
+/// applied (ADR-047 §5) and, for `check` and `survey`, deltas against `--against` or the
+/// default baseline (ADR-046 §5). Plans and the bookkeeping verbs pass through unchanged.
+fn graded(mut envelope: Envelope, cli: &Cli, writer: &Writer) -> Result<Envelope, CupelError> {
+    if envelope.status == Status::Plan {
+        return Ok(envelope);
+    }
+    match &cli.verb {
+        Some(VerbArgs::Init { .. } | VerbArgs::Doctor { .. } | VerbArgs::Tests { .. }) => {
+            suppress::apply(&mut envelope, writer)?;
+        }
+        Some(VerbArgs::Check { scope } | VerbArgs::Survey { scope }) => {
+            suppress::apply(&mut envelope, writer)?;
+            against::compare(&mut envelope, writer, scope.against.as_deref())?;
+        }
+        _ => {}
+    }
+    Ok(envelope)
 }
 
 /// `problems` as findings of `run`.
@@ -370,7 +424,7 @@ fn findings(run: &Run, problems: Vec<Problem>) -> Vec<Finding> {
 
 /// The plan envelope for a dry run: the verb's plan plus every write its recording writer
 /// recorded, announced by one `plan` event.
-fn plan(
+pub(crate) fn plan(
     run: &Run,
     mut plan: RunPlan,
     writer: &Writer,

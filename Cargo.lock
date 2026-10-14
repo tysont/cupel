@@ -284,6 +284,7 @@ dependencies = [
  "cupel-adapt",
  "cupel-core",
  "cupel-lang",
+ "cupel-store",
  "insta",
  "predicates",
  "proptest",

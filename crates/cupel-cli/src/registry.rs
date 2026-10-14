@@ -304,7 +304,7 @@ fn explain_verb() -> CommandDescription {
     verb(
         "explain",
         "Give full context and remediation for one finding or check result.",
-        Some("P2.2"),
+        None,
         [positional(
             "TARGET",
             ValueType::String,
@@ -326,7 +326,7 @@ fn baseline_verb() -> CommandDescription {
         subcommands: vec![
             sub(
                 "baseline set",
-                "Name the current run, or a given run, as the baseline.",
+                "Name the latest result run, or a given run, as the baseline; previews without --write.",
                 vec![valued(
                     "--from",
                     ValueType::String,
@@ -348,7 +348,7 @@ fn baseline_verb() -> CommandDescription {
                     "--against",
                     ValueType::String,
                     "run:ID|REF",
-                    "The run or git ref to compare with.",
+                    "baseline, run:ID, or a git ref to compare the latest result run with; default baseline.",
                 )],
                 "cupel baseline diff",
             ),
@@ -364,7 +364,7 @@ fn baseline_verb() -> CommandDescription {
             ),
             sub(
                 "baseline import",
-                "Read a baseline from a JSON file.",
+                "Read a baseline from a JSON file; previews without --write.",
                 vec![positional("FILE", ValueType::Path, "The baseline to read.")],
                 "cupel baseline import baseline.json",
             ),
@@ -372,7 +372,7 @@ fn baseline_verb() -> CommandDescription {
         ..verb(
             "baseline",
             "Set, show, diff, export, or import the baseline runs are compared with.",
-            Some("P2.2"),
+            None,
             vec![valued(
                 "--name",
                 ValueType::String,
@@ -489,7 +489,7 @@ fn suppress_verb() -> CommandDescription {
     verb(
         "suppress",
         "Suppress a finding, with a reason and an optional expiry.",
-        Some("P2.2"),
+        None,
         vec![
             positional(
                 "FINDING",
@@ -678,7 +678,7 @@ fn scope_what_flags() -> Vec<ArgDescription> {
             "--since-baseline",
             "Symbols whose structural hash changed since the baseline.",
         )
-        .pending("P2.2"),
+        .pending("P2.1"),
     ]
 }
 
@@ -745,8 +745,7 @@ fn scope_which_flags() -> Vec<ArgDescription> {
             ValueType::String,
             "baseline|REF|run:ID",
             "What deltas are computed against.",
-        )
-        .pending("P2.2"),
+        ),
         valued(
             "--oracle",
             ValueType::String,

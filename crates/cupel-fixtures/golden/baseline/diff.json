@@ -1,0 +1,127 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "install_tool",
+        "priority": 1,
+        "summary": "Install `cupel-test-missing-b` and put it on PATH."
+      },
+      "check": "doctor",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "needed_for": "[lang.rust] test",
+        "probe": "cupel-test-missing-b --version",
+        "required": false,
+        "tool": "cupel-test-missing-b"
+      },
+      "id": "fnd_9392bc",
+      "kind": "doctor.tool-missing",
+      "location": null,
+      "new_since_baseline": true,
+      "repro": "cupel doctor --format json",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_9392bc --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`cupel-test-missing-b` is not installed; [lang.rust] test needs it"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "install_tool",
+        "priority": 1,
+        "summary": "Install `cupel-test-missing-a` and put it on PATH."
+      },
+      "check": "doctor",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "needed_for": "[lang.rust] test",
+        "probe": "cupel-test-missing-a --version",
+        "required": false,
+        "tool": "cupel-test-missing-a"
+      },
+      "id": "fnd_93accf",
+      "kind": "doctor.tool-missing",
+      "location": null,
+      "new_since_baseline": false,
+      "repro": "cupel doctor --format json",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_93accf --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`cupel-test-missing-a` is not installed; [lang.rust] test needs it"
+    }
+  ],
+  "next_actions": [],
+  "plan": null,
+  "run": {
+    "baseline": {
+      "id": "<run-id>",
+      "name": "default"
+    },
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "rust": {
+            "test": "cupel-test-missing-b --all"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "baseline"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 2
+    },
+    "gate": null,
+    "new": 1,
+    "resolved": 1,
+    "suppressed": 0
+  },
+  "total_findings": 2,
+  "truncated": false
+}

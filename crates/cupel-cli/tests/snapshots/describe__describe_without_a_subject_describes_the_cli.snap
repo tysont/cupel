@@ -426,13 +426,13 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       },
       {
         "name": "explain",
-        "pending_step": "P2.2",
+        "pending_step": null,
         "stability": "experimental",
         "summary": "Give full context and remediation for one finding or check result."
       },
       {
         "name": "baseline",
-        "pending_step": "P2.2",
+        "pending_step": null,
         "stability": "experimental",
         "summary": "Set, show, diff, export, or import the baseline runs are compared with."
       },
@@ -450,7 +450,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       },
       {
         "name": "suppress",
-        "pending_step": "P2.2",
+        "pending_step": null,
         "stability": "experimental",
         "summary": "Suppress a finding, with a reason and an optional expiry."
       },

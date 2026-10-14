@@ -97,6 +97,20 @@ impl CupelError {
         })
     }
 
+    /// A usage error about `argument` (a flag or positional name, which is also the subject),
+    /// given `value`.
+    pub fn bad_argument(argument: &str, value: Option<&str>, title: String, fix: String) -> Self {
+        Self::from(Usage {
+            subject: argument.to_owned(),
+            title,
+            fix,
+            detail: None,
+            argument: Some(argument.to_owned()),
+            value: value.map(str::to_owned),
+            valid: Vec::new(),
+        })
+    }
+
     /// The command line named no verb.
     pub fn missing_verb(verbs: Vec<String>) -> Self {
         Self::from(Usage {

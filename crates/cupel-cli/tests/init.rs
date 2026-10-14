@@ -79,7 +79,7 @@ fn init_dry_run_plans_exactly_what_the_preview_shows() {
 }
 
 #[test]
-fn init_write_creates_exactly_the_previewed_files_and_its_run_record() {
+fn init_write_creates_exactly_the_previewed_files_its_run_record_and_the_store() {
     let repo = cargo_repo();
     let preview = would_write(&repo.run(&["init"]));
     let outcome = repo.run(&["init", "--write"]);
@@ -93,6 +93,8 @@ fn init_write_creates_exactly_the_previewed_files_and_its_run_record() {
         [
             ".cupel/".to_owned(),
             ".cupel/.gitignore".to_owned(),
+            ".cupel/cupel.db".to_owned(),
+            ".cupel/cupel.lock".to_owned(),
             ".cupel/runs/".to_owned(),
             format!(".cupel/runs/{id}.json"),
             "Cargo.toml".to_owned(),

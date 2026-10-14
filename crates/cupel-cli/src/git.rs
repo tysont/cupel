@@ -30,6 +30,36 @@ pub fn default_branch(root: &Path) -> Option<String> {
         .or_else(|| git(root, &["symbolic-ref", "--short", "HEAD"]))
 }
 
+/// The full SHA of the commit `reference` names; `None` when it names none, outside a
+/// repository, or without git.
+pub fn commit(root: &Path, reference: &str) -> Option<String> {
+    git(
+        root,
+        &[
+            "rev-parse",
+            "--verify",
+            "--quiet",
+            "--end-of-options",
+            &format!("{reference}^{{commit}}"),
+        ],
+    )
+}
+
+/// Whether `HEAD` contains the commit `reference` names (it is `HEAD` or an ancestor of it).
+pub fn head_contains(root: &Path, reference: &str) -> bool {
+    let Some(commit) = commit(root, reference) else {
+        return false;
+    };
+    Command::new("git")
+        .args(["merge-base", "--is-ancestor", &commit, "HEAD"])
+        .current_dir(root)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .is_ok_and(|status| status.success())
+}
+
 /// The trimmed standard output of `git <args>` run in `root`, when it succeeds with output.
 fn git(root: &Path, args: &[&str]) -> Option<String> {
     let output = Command::new("git")
