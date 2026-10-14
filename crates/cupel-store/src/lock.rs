@@ -4,7 +4,7 @@ use std::fs::{File, OpenOptions, TryLockError};
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
-use crate::StoreError;
+use crate::error::StoreError;
 
 /// How long a writer waits for another to finish.
 const WAIT: Duration = Duration::from_secs(5);

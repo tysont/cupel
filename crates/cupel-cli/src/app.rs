@@ -190,7 +190,9 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
         if let Err(error) = writer.run_record(&envelope) {
             let _ = writeln!(stderr, "cupel: could not write the run record: {error}");
         }
-        if let Err(error) = persist::record(&writer, &envelope) {
+        if let Err(error) =
+            persist::record(&writer, &envelope, suppress::load(&writer).ok().as_ref())
+        {
             let _ = writeln!(
                 stderr,
                 "cupel: could not record the run in the fact store: {error}"
@@ -331,7 +333,7 @@ fn execute(
             let described = describe::run(run, args, writer.root())?;
             if dry_run {
                 // `describe` runs nothing and writes nothing; its plan is empty.
-                Ok(plan(run, RunPlan::default(), writer, events, Vec::new()))
+                Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()))
             } else {
                 Ok(described)
             }
@@ -339,7 +341,7 @@ fn execute(
         Some(VerbArgs::Doctor { fix }) => {
             if dry_run {
                 // `doctor` writes only its probe and run record; its plan is empty (ADR-022 §6).
-                Ok(plan(run, RunPlan::default(), writer, events, Vec::new()))
+                Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()))
             } else {
                 Ok(doctor::run(run, config, writer, *fix))
             }
@@ -350,7 +352,8 @@ fn execute(
                 // writes outside `.cupel/`; it never writes anything.
                 let preview = Writer::new(writer.root(), true)?.recording();
                 let findings = findings(run, init::write(&preview, *force)?);
-                let mut envelope = plan(run, RunPlan::default(), &preview, events, findings);
+                let mut envelope =
+                    run.plan_envelope(RunPlan::default(), &preview, events, findings);
                 envelope.next_actions.push(init::apply(*force));
                 Ok(envelope)
             } else {
@@ -365,7 +368,7 @@ fn execute(
         Some(VerbArgs::Explain { target, .. }) => {
             if dry_run {
                 // `explain` only reads the store; its plan is empty.
-                Ok(plan(run, RunPlan::default(), writer, events, Vec::new()))
+                Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()))
             } else {
                 explain::run(run, writer, target)
             }
@@ -381,7 +384,7 @@ fn execute(
             let reason = reason.as_deref().unwrap_or_default();
             let envelope = suppress::run(run, writer, finding, reason, until.as_deref())?;
             if dry_run {
-                Ok(plan(run, RunPlan::default(), writer, events, Vec::new()))
+                Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()))
             } else {
                 Ok(envelope)
             }
@@ -437,25 +440,6 @@ fn findings(run: &Run, problems: Vec<Problem>) -> Vec<Finding> {
         .into_iter()
         .map(|problem| problem.finding(&run.repro()))
         .collect()
-}
-
-/// The plan envelope for a dry run: the verb's plan plus every write its recording writer
-/// recorded, announced by one `plan` event.
-pub(crate) fn plan(
-    run: &Run,
-    mut plan: RunPlan,
-    writer: &Writer,
-    events: &mut dyn EventSink,
-    findings: Vec<Finding>,
-) -> Envelope {
-    plan.would_write.extend(writer.planned());
-    plan.est_total_ms = plan.would_run.iter().map(|check| check.est_ms).sum();
-    events.emit(Event::Plan {
-        run: run.id(),
-        checks: u32::try_from(plan.would_run.len()).unwrap_or(u32::MAX),
-        est_ms: plan.est_total_ms,
-    });
-    run.planned(plan, findings)
 }
 
 /// A command line clap rejected: help and version print as usual; everything else becomes a

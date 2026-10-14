@@ -9,7 +9,6 @@ use cupel_core::{
 use cupel_store::Store;
 
 use crate::against::{self, DEFAULT_BASELINE};
-use crate::app;
 use crate::cli::BaselineArgs;
 use crate::error::CupelError;
 use crate::persist;
@@ -53,13 +52,9 @@ pub fn run(
             store.set_baseline(name, &target).map_err(stored)?;
             show(run, &store, name)
         }
-        BaselineArgs::Show | BaselineArgs::Diff { .. } if preview => Ok(app::plan(
-            run,
-            RunPlan::default(),
-            writer,
-            events,
-            Vec::new(),
-        )),
+        BaselineArgs::Show | BaselineArgs::Diff { .. } if preview => {
+            Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()))
+        }
         BaselineArgs::Show => show(run, &persist::open(writer)?, name),
         BaselineArgs::Diff { against } => diff(
             run,
@@ -78,13 +73,7 @@ pub fn run(
                 .write(file, json.as_bytes())
                 .map_err(|error| refused(file, &error))?;
             if preview {
-                return Ok(app::plan(
-                    run,
-                    RunPlan::default(),
-                    writer,
-                    events,
-                    Vec::new(),
-                ));
+                return Ok(run.plan_envelope(RunPlan::default(), writer, events, Vec::new()));
             }
             let mut exported = run.reported(Status::Pass, ExitCode::Pass, Vec::new());
             exported.run.baseline = Some(BaselineRef {
@@ -190,7 +179,7 @@ fn previewed(
         would_write: vec![change],
         ..RunPlan::default()
     };
-    let mut envelope = app::plan(run, plan, writer, events, Vec::new());
+    let mut envelope = run.plan_envelope(plan, writer, events, Vec::new());
     envelope.next_actions.push(NextAction {
         priority: 1,
         finding: None,

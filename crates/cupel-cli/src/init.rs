@@ -34,7 +34,7 @@ pub fn write(writer: &Writer, force: bool) -> Result<Vec<Problem>, CupelError> {
         .map_err(|error| unwritable(&error))?;
     writer.gitignore().map_err(|error| unwritable(&error))?;
     Ok(
-        cupel_lang::project::unregistered_roots(writer.root(), &Exclude::default())
+        cupel_lang::unregistered_roots(writer.root(), &Exclude::default())
             .iter()
             .map(unsupported_root)
             .collect(),

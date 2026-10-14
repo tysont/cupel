@@ -123,7 +123,7 @@ fn the_monorepo_yields_four_roots_with_the_right_languages() {
 fn maven_gradle_and_deps_edn_roots_are_unregistered() {
     assert!(all_roots(&detect_fixture("maven")).is_empty());
     assert_eq!(
-        cupel_lang::project::unregistered_roots(&detect_fixture("maven"), &Exclude::default()),
+        cupel_lang::unregistered_roots(&detect_fixture("maven"), &Exclude::default()),
         [plain(
             ".",
             "java",
@@ -132,7 +132,7 @@ fn maven_gradle_and_deps_edn_roots_are_unregistered() {
         )]
     );
     let dir = tree(&[("android/build.gradle.kts", ""), ("tools/deps.edn", "{}\n")]);
-    let roots = cupel_lang::project::unregistered_roots(dir.path(), &Exclude::default());
+    let roots = cupel_lang::unregistered_roots(dir.path(), &Exclude::default());
     let shape: Vec<(&str, &str)> = roots
         .iter()
         .map(|root| (root.path.as_str(), root.lang.as_str()))

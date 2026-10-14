@@ -138,6 +138,7 @@ impl Language for Ecma {
         reg.register::<ProjectInfo, _>(ProjectRoots::new(
             Arc::clone(&language),
             &project::ECOSYSTEM,
+            &super::ecosystems::KNOWN,
         ));
         // Module resolution needs package manifests and tsconfig, which queries cannot see.
         let resolve = match self.dialect {

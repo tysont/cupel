@@ -3,9 +3,9 @@
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::{
-    Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, ExitCode, Finding,
-    RunId, RunInfo, RunPlan, Severity, SeverityCounts, Status, Summary, ToolchainInfo, Verb,
-    schema,
+    Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, Event, EventSink,
+    ExitCode, Finding, RunId, RunInfo, RunPlan, Severity, SeverityCounts, Status, Summary,
+    ToolchainInfo, Verb, Writer, schema,
 };
 
 use crate::error::CupelError;
@@ -71,6 +71,25 @@ impl Run {
         findings: Vec<Finding>,
     ) -> Envelope {
         self.envelope(status, exit_code, findings, None)
+    }
+
+    /// The plan envelope for a dry run: the verb's plan plus every write its recording writer
+    /// recorded, announced by one `plan` event.
+    pub fn plan_envelope(
+        &self,
+        mut plan: RunPlan,
+        writer: &Writer,
+        events: &mut dyn EventSink,
+        findings: Vec<Finding>,
+    ) -> Envelope {
+        plan.would_write.extend(writer.planned());
+        plan.est_total_ms = plan.would_run.iter().map(|check| check.est_ms).sum();
+        events.emit(Event::Plan {
+            run: self.id(),
+            checks: u32::try_from(plan.would_run.len()).unwrap_or(u32::MAX),
+            est_ms: plan.est_total_ms,
+        });
+        self.planned(plan, findings)
     }
 
     /// The envelope of a `--dry-run`: the plan, what planning found, and nothing done.

@@ -85,6 +85,7 @@ impl Language for Python {
         reg.register::<ProjectInfo, _>(ProjectRoots::new(
             Arc::clone(&language),
             &project::ECOSYSTEM,
+            &super::ecosystems::KNOWN,
         ));
         // Module resolution needs packages, layouts, and manifests, which queries cannot see.
         reg.register::<ModuleGraph, _>(ImportGraph::new(

@@ -1,12 +1,11 @@
-// ABOUTME: The `Language` trait (design §8.4.1) and the registry of compiled-in languages, found by
-// ABOUTME: ID or by file extension; the registry also owns the parse cache its languages share.
+// ABOUTME: The `Language` trait (design §8.4.1) and the registry of languages, found by ID or by file
+// ABOUTME: extension; the registry owns the parse cache its languages share (`langs` builds it).
 use std::path::Path;
 use std::sync::Arc;
 
 use cupel_core::{Cancellation, Lang, LangFamily, LangId, ProducerRegistry, Stability};
 use rayon::prelude::*;
 
-use crate::langs::{ecma::Ecma, go::Go, python::Python, rust::Rust};
 use crate::parse::{ParseCache, ParseProblem, Parsed};
 use crate::spec::LanguageSpec;
 
@@ -50,23 +49,15 @@ fn extension(path: &str) -> Option<String> {
         .map(|ext| format!(".{ext}"))
 }
 
-/// The compiled-in languages, ordered by ID.
+/// The compiled-in languages, ordered by ID; `LanguageRegistry::builtin` (in `langs`) makes it.
 pub struct LanguageRegistry {
     languages: Vec<Arc<dyn Language>>,
     cache: Arc<ParseCache>,
 }
 
 impl LanguageRegistry {
-    /// The five launch languages, sharing one parse cache.
-    pub fn builtin() -> Self {
-        let cache = Arc::new(ParseCache::default());
-        let mut languages: Vec<Arc<dyn Language>> = vec![
-            Arc::new(Ecma::javascript(Arc::clone(&cache))),
-            Arc::new(Ecma::typescript(Arc::clone(&cache))),
-            Arc::new(Rust::new(Arc::clone(&cache))),
-            Arc::new(Go::new(Arc::clone(&cache))),
-            Arc::new(Python::new(Arc::clone(&cache))),
-        ];
+    /// A registry of `languages` sharing `cache`, ordered by ID.
+    pub(crate) fn of(mut languages: Vec<Arc<dyn Language>>, cache: Arc<ParseCache>) -> Self {
         languages.sort_by_key(|language| language.id());
         Self { languages, cache }
     }
@@ -151,5 +142,10 @@ pub(crate) fn parse_one(
             reason: "the run was cancelled".to_owned(),
         });
     }
-    cache.parse(root, file, language)
+    cache.parse(
+        root,
+        file,
+        &language.id(),
+        language.grammar(Path::new(file)),
+    )
 }

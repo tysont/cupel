@@ -13,7 +13,6 @@ use cupel_core::{
 };
 use cupel_lang::LanguageRegistry;
 
-use crate::app;
 use crate::catalog::Catalog;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
@@ -195,7 +194,7 @@ impl CheckRun {
         match self.take_plan() {
             Some(plan) => {
                 let findings = self.outcome.findings.clone();
-                self.place(app::plan(run, plan, writer, events, findings))
+                self.place(run.plan_envelope(plan, writer, events, findings))
             }
             None => self.envelope(run),
         }

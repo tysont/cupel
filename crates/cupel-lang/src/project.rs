@@ -3,9 +3,9 @@
 //!
 //! An [`Ecosystem`] is a language's build files: the manifests that mark its roots, the
 //! directories it generates, and how a root is described. Each language defines its ecosystem
-//! in `langs/<dir>/project.rs` and registers [`ProjectRoots`] with it. The walk visits
-//! directories in sorted order, skipping hidden ones and every known ecosystem's generated
-//! directories, so a language's roots do not depend on which other languages exist. A
+//! in `langs/<dir>/project.rs` and registers [`ProjectRoots`] with it and the list of every
+//! known ecosystem (`langs::ecosystems::KNOWN`). The walk visits directories in sorted order,
+//! skipping hidden ones and every known ecosystem's generated directories, so a language's roots do not depend on which other languages exist. A
 //! directory with one of the ecosystem's manifests is a root, or a member of the root above it
 //! when there is one (ADR-021 §2).
 use std::fs;
@@ -18,7 +18,6 @@ use cupel_core::{
     Producer, ProducerId, Result, Scope,
 };
 
-use crate::langs::{ecma, go, python, rust};
 use crate::language::Language;
 use crate::producer::producer_id;
 
@@ -29,36 +28,6 @@ pub struct Ecosystem {
     pub skip_dirs: &'static [&'static str],
     pub describe: fn(&Candidate) -> ProjectRoot,
 }
-
-/// Maven and Gradle roots. Java is not registered until P6; `init` reports these (ADR-038).
-const JAVA: Ecosystem = Ecosystem {
-    manifests: &[
-        "pom.xml",
-        "build.gradle",
-        "build.gradle.kts",
-        "settings.gradle",
-        "settings.gradle.kts",
-    ],
-    skip_dirs: &["target", "build", ".gradle"],
-    describe: |candidate| candidate.root("java", Vec::new()),
-};
-
-/// `deps.edn` roots. Clojure is not registered until P6; `init` reports these (ADR-038).
-const CLOJURE: Ecosystem = Ecosystem {
-    manifests: &["deps.edn"],
-    skip_dirs: &["target", ".cpcache"],
-    describe: |candidate| candidate.root("clojure", Vec::new()),
-};
-
-/// Every ecosystem, whose generated directories every walk skips.
-const ECOSYSTEMS: [&Ecosystem; 6] = [
-    &rust::project::ECOSYSTEM,
-    &go::project::ECOSYSTEM,
-    &ecma::project::ECOSYSTEM,
-    &python::project::ECOSYSTEM,
-    &JAVA,
-    &CLOJURE,
-];
 
 /// A directory holding an ecosystem's manifest, with the directories below it that hold that
 /// ecosystem's manifests too (workspace members).
@@ -114,24 +83,20 @@ impl Candidate {
     }
 }
 
-/// Every root of `ecosystem` under `root` outside `exclude`, ordered by path, then language.
-pub fn roots(root: &Path, ecosystem: &'static Ecosystem, exclude: &Exclude) -> Vec<ProjectRoot> {
+/// Every root of `ecosystem` under `root` outside `exclude`, ordered by path, then language. The
+/// walk skips the generated directories of every ecosystem in `known`.
+pub fn roots(
+    root: &Path,
+    ecosystem: &'static Ecosystem,
+    known: &[&Ecosystem],
+    exclude: &Exclude,
+) -> Vec<ProjectRoot> {
     let mut candidates = Vec::new();
-    walk(root, root, ecosystem, exclude, &mut candidates);
+    let skip = Skip { known, exclude };
+    walk(root, root, ecosystem, &skip, &mut candidates);
     let mut roots: Vec<ProjectRoot> = candidates
         .iter()
         .map(|candidate| (ecosystem.describe)(candidate))
-        .collect();
-    roots.sort_by(|a, b| (&a.path, &a.lang).cmp(&(&b.path, &b.lang)));
-    roots
-}
-
-/// Roots of languages that are recognized but not registered (Java, Clojure) outside
-/// `exclude`, ordered by path, then language.
-pub fn unregistered_roots(root: &Path, exclude: &Exclude) -> Vec<ProjectRoot> {
-    let mut roots: Vec<ProjectRoot> = [&JAVA, &CLOJURE]
-        .into_iter()
-        .flat_map(|ecosystem| roots(root, ecosystem, exclude))
         .collect();
     roots.sort_by(|a, b| (&a.path, &a.lang).cmp(&(&b.path, &b.lang)));
     roots
@@ -144,7 +109,7 @@ fn walk(
     root: &Path,
     dir: &Path,
     ecosystem: &'static Ecosystem,
-    exclude: &Exclude,
+    skip: &Skip<'_>,
     candidates: &mut Vec<Candidate>,
 ) {
     if ecosystem
@@ -174,22 +139,31 @@ fn walk(
         .filter(|entry| {
             let name = entry.file_name();
             let name = name.to_string_lossy();
-            !name.starts_with('.') && !generated(&name)
+            !name.starts_with('.') && !skip.generated(&name)
         })
         .map(|entry| entry.path())
-        .filter(|subdir| !exclude.excludes(&relative(subdir, root)))
+        .filter(|subdir| !skip.exclude.excludes(&relative(subdir, root)))
         .collect();
     subdirs.sort();
     for subdir in subdirs {
-        walk(root, &subdir, ecosystem, exclude, candidates);
+        walk(root, &subdir, ecosystem, skip, candidates);
     }
 }
 
-/// Whether some ecosystem generates directories named `name`.
-fn generated(name: &str) -> bool {
-    ECOSYSTEMS
-        .iter()
-        .any(|ecosystem| ecosystem.skip_dirs.contains(&name))
+/// The directories a project-root walk does not enter.
+struct Skip<'a> {
+    /// Every known ecosystem, whose generated directories are skipped wherever they are.
+    known: &'a [&'a Ecosystem],
+    exclude: &'a Exclude,
+}
+
+impl Skip<'_> {
+    /// Whether some known ecosystem generates directories named `name`.
+    fn generated(&self, name: &str) -> bool {
+        self.known
+            .iter()
+            .any(|ecosystem| ecosystem.skip_dirs.contains(&name))
+    }
 }
 
 /// `path` relative to `base`, `/`-separated; `.` when they are the same.
@@ -212,13 +186,20 @@ fn relative(path: &Path, base: &Path) -> String {
 pub struct ProjectRoots {
     language: Arc<dyn Language>,
     ecosystem: &'static Ecosystem,
+    /// Every known ecosystem, whose generated directories the walk skips.
+    known: &'static [&'static Ecosystem],
 }
 
 impl ProjectRoots {
-    pub fn new(language: Arc<dyn Language>, ecosystem: &'static Ecosystem) -> Self {
+    pub fn new(
+        language: Arc<dyn Language>,
+        ecosystem: &'static Ecosystem,
+        known: &'static [&'static Ecosystem],
+    ) -> Self {
         Self {
             language,
             ecosystem,
+            known,
         }
     }
 }
@@ -247,7 +228,7 @@ impl Producer<ProjectInfo> for ProjectRoots {
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<ProjectInfo> {
         ctx.cancel.checkpoint()?;
         let lang = self.language.id();
-        let roots = roots(&ctx.ctx.root, self.ecosystem, &ctx.ctx.exclude)
+        let roots = roots(&ctx.ctx.root, self.ecosystem, self.known, &ctx.ctx.exclude)
             .into_iter()
             .filter(|root| root.lang == lang)
             .collect();
