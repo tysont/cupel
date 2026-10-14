@@ -517,6 +517,25 @@ fn cell<'a>(matrix: &'a Value, check: &str, lang: &str) -> &'a Value {
     found[0]
 }
 
+/// For every registered check and language, how many cells the matrix has for the pair, where
+/// that is not exactly one.
+fn pairs_without_one_cell(matrix: &Value) -> Vec<String> {
+    let cells = matrix["cells"].as_array().unwrap();
+    let mut problems = Vec::new();
+    for check in check_ids() {
+        for lang in language_ids() {
+            let count = cells
+                .iter()
+                .filter(|cell| cell["check"] == check.as_str() && cell["lang"] == lang.as_str())
+                .count();
+            if count != 1 {
+                problems.push(format!("{check} × {lang}: {count} cells"));
+            }
+        }
+    }
+    problems
+}
+
 #[test]
 fn describe_matrix_has_a_cell_for_every_registered_check_and_language() {
     let description = assert_described(&["describe", "matrix"], "matrix");
@@ -526,53 +545,76 @@ fn describe_matrix_has_a_cell_for_every_registered_check_and_language() {
     assert_eq!(description["checks"], json!(checks));
     let cells = description["cells"].as_array().unwrap();
     assert_eq!(cells.len(), checks.len() * languages.len());
-    for check in &checks {
-        for lang in &languages {
-            assert!(cell(&description, check, lang)["support"]["status"].is_string());
-        }
-    }
+    assert_eq!(pairs_without_one_cell(&description), Vec::<String>::new());
+}
+
+/// Every registered check as `describe <check>` shows it (subject, manifest, languages), and as
+/// the registry and the matrix say it should be.
+fn check_descriptions() -> (Vec<Value>, Vec<Value>) {
+    let matrix = described(&["matrix"]);
+    let registry = registered_checks();
+    let shown = registry
+        .iter()
+        .map(|check| {
+            let description = described(&[check.manifest().id.as_str()]);
+            json!([
+                description["subject"],
+                description["manifest"],
+                description["languages"]
+            ])
+        })
+        .collect();
+    let expected = registry
+        .iter()
+        .map(|check| {
+            let id = check.manifest().id.as_str();
+            let row: Vec<Value> = language_ids()
+                .iter()
+                .map(|lang| json!({"lang": lang, "support": cell(&matrix, id, lang)["support"]}))
+                .collect();
+            json!(["check", check.manifest(), row])
+        })
+        .collect();
+    (shown, expected)
 }
 
 #[test]
 fn every_registered_check_is_described_with_its_manifest_and_its_matrix_row() {
-    let matrix = described(&["matrix"]);
-    for check in registered_checks().iter() {
-        let id = check.manifest().id.as_str();
-        let description = assert_described(&["describe", id], "check");
-        assert_eq!(
-            description["manifest"],
-            serde_json::to_value(check.manifest()).unwrap(),
-            "{id}"
-        );
-        let row: Vec<Value> = language_ids()
-            .iter()
-            .map(|lang| json!({"lang": lang, "support": cell(&matrix, id, lang)["support"]}))
-            .collect();
-        assert_eq!(description["languages"], Value::Array(row), "{id}");
-    }
+    let (shown, expected) = check_descriptions();
+    assert!(!expected.is_empty());
+    assert_eq!(shown, expected);
+}
+
+/// Every finding kind in a registered manifest with the check and action `describe finding`
+/// attributes to it, and with the ones its manifest declares.
+fn finding_attributions() -> (Vec<Value>, Vec<Value>) {
+    let registry = registered_checks();
+    let kinds: Vec<(&cupel_core::Manifest, &cupel_core::FindingKindSpec)> = registry
+        .iter()
+        .flat_map(|check| {
+            let manifest = check.manifest();
+            manifest.findings.iter().map(move |spec| (manifest, spec))
+        })
+        .collect();
+    let shown = kinds
+        .iter()
+        .map(|(_, spec)| {
+            let description = described(&["finding", spec.kind.as_str()]);
+            json!([spec.kind, description["check"], description["action"]])
+        })
+        .collect();
+    let declared = kinds
+        .iter()
+        .map(|(manifest, spec)| json!([spec.kind, manifest.id, spec.action]))
+        .collect();
+    (shown, declared)
 }
 
 #[test]
 fn every_registered_finding_kind_is_described_and_attributed_to_its_check() {
-    let mut kinds = 0;
-    for check in registered_checks().iter() {
-        let manifest = check.manifest();
-        for spec in &manifest.findings {
-            let description =
-                assert_described(&["describe", "finding", spec.kind.as_str()], "finding");
-            assert_eq!(
-                (&description["check"], &description["action"]),
-                (
-                    &json!(manifest.id),
-                    &serde_json::to_value(spec.action).unwrap()
-                ),
-                "{}",
-                spec.kind
-            );
-            kinds += 1;
-        }
-    }
-    assert!(kinds > 0);
+    let (shown, declared) = finding_attributions();
+    assert!(!declared.is_empty());
+    assert_eq!(shown, declared);
 }
 
 /// How the text renderer shows a matrix cell's support: `supported`, or the status with the
@@ -592,37 +634,45 @@ fn words(line: &str) -> Vec<String> {
     line.split_whitespace().map(str::to_owned).collect()
 }
 
+/// The rows of the matrix table after its `title` line, up to the blank line, as words.
+fn matrix_text_rows(text: &str, title: &str) -> Vec<Vec<String>> {
+    let lines: Vec<&str> = text.lines().collect();
+    let at = lines
+        .iter()
+        .position(|line| *line == title)
+        .unwrap_or_else(|| panic!("no `{title}` line:\n{text}"));
+    lines[at + 1..]
+        .iter()
+        .take_while(|line| !line.is_empty())
+        .map(|line| words(line))
+        .collect()
+}
+
 #[test]
 fn describe_matrix_renders_as_text_with_a_row_per_registered_check() {
     let outcome = run(["describe", "matrix", "--format", "text"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let matrix = described(&["matrix"]);
     let (checks, languages) = (check_ids(), language_ids());
-    let lines: Vec<&str> = outcome.stdout.lines().collect();
     let title = format!(
         "matrix · {} checks × {} languages",
         checks.len(),
         languages.len()
     );
-    let at = lines
-        .iter()
-        .position(|line| *line == title)
-        .unwrap_or_else(|| panic!("no `{title}` line:\n{}", outcome.stdout));
     let header: Vec<String> = std::iter::once("check".to_owned())
         .chain(languages.iter().cloned())
         .collect();
-    assert_eq!(words(lines[at + 1]), header);
-    for (row, check) in checks.iter().enumerate() {
-        let expected: Vec<String> = std::iter::once(check.clone())
+    let rows = checks.iter().map(|check| {
+        std::iter::once(check.clone())
             .chain(
                 languages
                     .iter()
                     .map(|lang| support_text(&cell(&matrix, check, lang)["support"])),
             )
-            .collect();
-        assert_eq!(words(lines[at + 2 + row]), expected);
-    }
-    assert_eq!(lines[at + 2 + checks.len()], "");
+            .collect::<Vec<String>>()
+    });
+    let expected: Vec<Vec<String>> = std::iter::once(header).chain(rows).collect();
+    assert_eq!(matrix_text_rows(&outcome.stdout, &title), expected);
 }
 
 /// A language's text description split into what the language owns and what grows with the

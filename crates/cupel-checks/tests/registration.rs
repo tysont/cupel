@@ -12,25 +12,35 @@ fn module_of(id: &str) -> String {
     id.replace(['.', '-'], "_")
 }
 
+/// Each registered check with the lines of code in `lib.rs` that name its module.
+fn mentions_in_lib() -> Vec<(String, Vec<String>)> {
+    support::registry()
+        .iter()
+        .map(|check| {
+            let module = module_of(check.manifest().id.as_str());
+            let lines = LIB
+                .lines()
+                .filter(|line| !line.trim_start().starts_with("//"))
+                .filter(|line| line.contains(module.as_str()))
+                .map(str::to_owned)
+                .collect();
+            (module, lines)
+        })
+        .collect()
+}
+
 #[test]
 fn lib_names_each_check_only_on_its_mod_line() {
-    let registry = support::registry();
-    let mut checked = 0;
-    for check in registry.iter() {
-        let module = module_of(check.manifest().id.as_str());
-        let mentions: Vec<&str> = LIB
-            .lines()
-            .filter(|line| !line.trim_start().starts_with("//") && line.contains(module.as_str()))
-            .collect();
-        assert_eq!(
-            mentions,
-            [format!("mod {module};")],
-            "{}: a check joins the registry from its own module, so lib.rs names it only in `mod {module};`",
-            check.manifest().id
-        );
-        checked += 1;
-    }
-    assert!(checked > 0, "no checks are registered");
+    let mentions = mentions_in_lib();
+    let only_mod_lines: Vec<(String, Vec<String>)> = mentions
+        .iter()
+        .map(|(module, _)| (module.clone(), vec![format!("mod {module};")]))
+        .collect();
+    assert!(!mentions.is_empty(), "no checks are registered");
+    assert_eq!(
+        mentions, only_mod_lines,
+        "a check joins the registry from its own module, so lib.rs names it only in its `mod` line"
+    );
 }
 
 #[test]
