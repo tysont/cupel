@@ -27,6 +27,7 @@ mod hash;
 mod id;
 mod lang;
 mod matrix;
+mod per_test;
 mod process;
 mod producer;
 mod rank;
@@ -77,6 +78,7 @@ pub use hash::{FindingId, SiteHash, SymbolHash};
 pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
+pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
     Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
