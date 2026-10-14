@@ -41,9 +41,7 @@ fn typescript() -> Lang {
 }
 
 fn ctx() -> Ctx {
-    Ctx {
-        root: PathBuf::from("."),
-    }
+    Ctx::new(PathBuf::from("."))
 }
 
 fn manifest(id: &str, needs: &[FactKind], wants: &[FactKind]) -> Manifest {
@@ -620,9 +618,7 @@ fn produce_ctx(root: &std::path::Path, cancel: Cancellation) -> ProduceCtx {
     // `--write` was given, yet producers only ever get the confined writer.
     let writer = Writer::new(root, true).unwrap().confined();
     ProduceCtx {
-        ctx: Ctx {
-            root: writer.root().to_path_buf(),
-        },
+        ctx: Ctx::new(writer.root().to_path_buf()),
         config: serde_json::Map::new(),
         writer,
         cancel,

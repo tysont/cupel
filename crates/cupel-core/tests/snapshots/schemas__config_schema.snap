@@ -99,6 +99,13 @@ expression: pretty(&schema)
         "$ref": "#/$defs/RootConfig"
       },
       "default": {}
+    },
+    "scope": {
+      "description": "Which paths a run considers (ADR-065).",
+      "$ref": "#/$defs/ScopeConfig",
+      "default": {
+        "exclude": []
+      }
     }
   },
   "additionalProperties": false,
@@ -125,6 +132,13 @@ expression: pretty(&schema)
         "deep",
         "exhaustive"
       ]
+    },
+    "Exclude": {
+      "description": "Gitignore-style globs relative to the repository root: a pattern with a `/` is anchored at the root, one without matches a name at any depth; an excluded directory excludes everything below it.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "Format": {
       "description": "An output format (design §6.3).",
@@ -244,6 +258,18 @@ expression: pretty(&schema)
         "path",
         "lang"
       ]
+    },
+    "ScopeConfig": {
+      "description": "`[scope]`: paths no run considers.",
+      "type": "object",
+      "properties": {
+        "exclude": {
+          "description": "Excluded from the file walk, project-root detection, and range scopes.",
+          "$ref": "#/$defs/Exclude",
+          "default": []
+        }
+      },
+      "additionalProperties": false
     },
     "Settings": {
       "description": "One layer's settings; unset values fall through to the next layer.",

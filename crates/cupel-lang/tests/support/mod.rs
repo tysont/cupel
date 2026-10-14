@@ -5,10 +5,10 @@
 use std::path::{Path, PathBuf};
 
 use cupel_core::{
-    Cancellation, Ctx, Event, Fact, ProduceCtx, ProducerRegistry, Scope, Writer,
+    Cancellation, Ctx, Event, Exclude, Fact, ProduceCtx, ProducerRegistry, Scope, Writer,
     syntax::{ProjectInfo, Span},
 };
-use cupel_lang::{LanguageRegistry, walk};
+use cupel_lang::{LanguageRegistry, walk_excluding};
 
 /// The fixture repository for `lang` in cupel-fixtures.
 pub fn fixture(lang: &str) -> PathBuf {
@@ -26,6 +26,17 @@ pub fn produce<F: Fact>(lang: &str, root: &Path) -> F {
 }
 
 pub fn produce_with_events<F: Fact>(lang: &str, root: &Path) -> (F, Vec<Event>) {
+    produce_in::<F>(lang, root, &Exclude::default())
+}
+
+/// Produces `F` for `lang` over `root` with `exclude` applied, panicking on any event.
+pub fn produce_excluding<F: Fact>(lang: &str, root: &Path, exclude: &Exclude) -> F {
+    let (fact, events) = produce_in::<F>(lang, root, exclude);
+    assert!(events.is_empty(), "{events:?}");
+    fact
+}
+
+fn produce_in<F: Fact>(lang: &str, root: &Path, exclude: &Exclude) -> (F, Vec<Event>) {
     let languages = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
     languages.register_producers(&mut producers);
@@ -38,12 +49,18 @@ pub fn produce_with_events<F: Fact>(lang: &str, root: &Path) -> (F, Vec<Event>) 
     let ctx = ProduceCtx {
         ctx: Ctx {
             root: writer.root().to_path_buf(),
+            exclude: exclude.clone(),
         },
         config: serde_json::Map::new(),
         writer,
         cancel: Cancellation::new(),
     };
-    let scope = Scope::of_files(walk(root, &languages, &ProjectInfo::default()));
+    let scope = Scope::of_files(walk_excluding(
+        root,
+        &languages,
+        &ProjectInfo::default(),
+        exclude,
+    ));
     let mut events = Vec::new();
     let fact = producer
         .produce(&ctx, &scope, &mut events)

@@ -102,10 +102,14 @@ pub fn run(
 ) -> Result<CheckRun, CupelError> {
     let catalog = Catalog::builtin();
     let root = writer.root();
-    let info = project::detect(writer);
-    let tree = cupel_lang::walk(root, catalog.language_registry(), &info);
+    let exclude = &config.file.scope.exclude;
+    let info = project::detect(writer, exclude);
+    let tree = cupel_lang::walk_excluding(root, catalog.language_registry(), &info, exclude);
     let request = scope_request(args);
-    let resolved = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
+    let mut resolved = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
+    resolved
+        .changes
+        .retain(|change| !exclude.excludes(&change.path));
     let selected = Selection {
         depth: config.effective.depth,
         only: args.only.clone(),

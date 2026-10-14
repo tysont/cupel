@@ -14,6 +14,7 @@ mod dry_run;
 mod envelope;
 mod error;
 mod event;
+mod exclude;
 mod explanation;
 mod fact;
 mod finding;
@@ -59,6 +60,7 @@ pub use envelope::{
 };
 pub use error::{ArgumentError, Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
+pub use exclude::{ALWAYS_EXCLUDED, Exclude};
 pub use explanation::{Excerpt, ExcerptLine, ExplainSubject, Explanation, Metric};
 pub use fact::{Fact, FactKind, Facts};
 pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Symbol};

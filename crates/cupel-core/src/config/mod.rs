@@ -7,7 +7,8 @@ mod resolve;
 mod settings;
 
 pub use file::{
-    CheckConfig, ConfigFile, GateConfig, GateSection, OracleConfig, OracleKind, RootConfig, Table,
+    CheckConfig, ConfigFile, GateConfig, GateSection, OracleConfig, OracleKind, RootConfig,
+    ScopeConfig, Table,
 };
 pub use gate::{Comparison, GateCondition, GateKey, GateRuleSpec, Threshold};
 pub use resolve::{Config, ConfigRequest, Effective, FILE_NAME, discover};

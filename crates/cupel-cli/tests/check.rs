@@ -275,3 +275,39 @@ fn changed_on_a_clean_tree_passes_with_no_symbols_and_then_sees_edits() {
     assert_eq!(kinds(&edited), ["params.many"]);
     assert_eq!(edited["run"]["git"]["dirty"], json!(true));
 }
+
+#[test]
+fn scope_exclude_keeps_nested_projects_out_of_files_roots_languages_and_ranges() {
+    let repo = repo_with_code();
+    repo.write("Cargo.toml", "[package]\nname = \"x\"\n");
+    repo.write("fixtures/repos/go/go.mod", "module x\n");
+    repo.write(
+        "fixtures/repos/go/main.go",
+        "package main\n\nfunc main() {}\n",
+    );
+    repo.write("fixtures/repos/py/pyproject.toml", "");
+    repo.write("fixtures/repos/py/app.py", "def f():\n    return 1\n");
+    repo.write(".gitignore", ".cupel/\n");
+    repo.write(
+        "cupel.toml",
+        "[scope]\nexclude = [\"fixtures/**\", \"web\"]\n",
+    );
+    let tree = repo
+        .run(&["check", "--only", "static.complexity"])
+        .envelope();
+    assert_eq!(tree["run"]["scope"]["files"], json!(2), "{tree:#}");
+    assert_eq!(tree["run"]["scope"]["roots"], json!(["."]));
+    assert_eq!(tree["run"]["scope"]["languages"], json!(["rust"]));
+    if !git(&repo, &["init", "--quiet", "--initial-branch", "main"]) {
+        eprintln!("SKIPPED: git not installed");
+        return;
+    }
+    assert!(git(&repo, &["add", "--all"]));
+    assert!(git(&repo, &["commit", "--quiet", "-m", "first"]));
+    repo.write("fixtures/repos/py/app.py", "def g():\n    return 2\n");
+    let changed = repo
+        .run(&["check", "--only", "static.complexity", "--changed"])
+        .envelope();
+    assert_eq!(changed["run"]["scope"]["files"], json!(0), "{changed:#}");
+    assert_eq!(changed["run"]["scope"]["languages"], json!([]));
+}

@@ -14,8 +14,8 @@ use std::sync::Arc;
 
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, CostClass, Ctx, EventSink, FactKind, LangId, Langs, ProduceCtx, Producer,
-    ProducerId, Result, Scope,
+    Availability, CostClass, Ctx, EventSink, Exclude, FactKind, LangId, Langs, ProduceCtx,
+    Producer, ProducerId, Result, Scope,
 };
 
 use crate::langs::{ecma, go, python, rust};
@@ -114,10 +114,10 @@ impl Candidate {
     }
 }
 
-/// Every root of `ecosystem` under `root`, ordered by path, then language.
-pub fn roots(root: &Path, ecosystem: &'static Ecosystem) -> Vec<ProjectRoot> {
+/// Every root of `ecosystem` under `root` outside `exclude`, ordered by path, then language.
+pub fn roots(root: &Path, ecosystem: &'static Ecosystem, exclude: &Exclude) -> Vec<ProjectRoot> {
     let mut candidates = Vec::new();
-    walk(root, root, ecosystem, &mut candidates);
+    walk(root, root, ecosystem, exclude, &mut candidates);
     let mut roots: Vec<ProjectRoot> = candidates
         .iter()
         .map(|candidate| (ecosystem.describe)(candidate))
@@ -126,20 +126,27 @@ pub fn roots(root: &Path, ecosystem: &'static Ecosystem) -> Vec<ProjectRoot> {
     roots
 }
 
-/// Roots of languages that are recognized but not registered (Java, Clojure), ordered by
-/// path, then language.
-pub fn unregistered_roots(root: &Path) -> Vec<ProjectRoot> {
+/// Roots of languages that are recognized but not registered (Java, Clojure) outside
+/// `exclude`, ordered by path, then language.
+pub fn unregistered_roots(root: &Path, exclude: &Exclude) -> Vec<ProjectRoot> {
     let mut roots: Vec<ProjectRoot> = [&JAVA, &CLOJURE]
         .into_iter()
-        .flat_map(|ecosystem| roots(root, ecosystem))
+        .flat_map(|ecosystem| roots(root, ecosystem, exclude))
         .collect();
     roots.sort_by(|a, b| (&a.path, &a.lang).cmp(&(&b.path, &b.lang)));
     roots
 }
 
-/// Visits `dir` and the directories below it in sorted order. A directory with one of the
-/// ecosystem's manifests becomes a root, or a member of the root above it when there is one.
-fn walk(root: &Path, dir: &Path, ecosystem: &'static Ecosystem, candidates: &mut Vec<Candidate>) {
+/// Visits `dir` and the directories below it in sorted order, never entering one `exclude`
+/// excludes. A directory with one of the ecosystem's manifests becomes a root, or a member of
+/// the root above it when there is one.
+fn walk(
+    root: &Path,
+    dir: &Path,
+    ecosystem: &'static Ecosystem,
+    exclude: &Exclude,
+    candidates: &mut Vec<Candidate>,
+) {
     if ecosystem
         .manifests
         .iter()
@@ -170,10 +177,11 @@ fn walk(root: &Path, dir: &Path, ecosystem: &'static Ecosystem, candidates: &mut
             !name.starts_with('.') && !generated(&name)
         })
         .map(|entry| entry.path())
+        .filter(|subdir| !exclude.excludes(&relative(subdir, root)))
         .collect();
     subdirs.sort();
     for subdir in subdirs {
-        walk(root, &subdir, ecosystem, candidates);
+        walk(root, &subdir, ecosystem, exclude, candidates);
     }
 }
 
@@ -239,7 +247,7 @@ impl Producer<ProjectInfo> for ProjectRoots {
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<ProjectInfo> {
         ctx.cancel.checkpoint()?;
         let lang = self.language.id();
-        let roots = roots(&ctx.ctx.root, self.ecosystem)
+        let roots = roots(&ctx.ctx.root, self.ecosystem, &ctx.ctx.exclude)
             .into_iter()
             .filter(|root| root.lang == lang)
             .collect();

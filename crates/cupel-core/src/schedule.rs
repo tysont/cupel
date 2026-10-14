@@ -233,6 +233,7 @@ impl Scheduler<'_> {
             &job.langs,
             &Ctx {
                 root: job.writer.root().to_path_buf(),
+                exclude: job.config.file.scope.exclude.clone(),
             },
         );
         let mut tasks = Vec::new();
@@ -532,7 +533,10 @@ impl<'a> FactStore<'a> {
     ) -> Self {
         Self {
             producers,
-            root: Ctx { root },
+            root: Ctx {
+                root,
+                exclude: job.config.file.scope.exclude.clone(),
+            },
             writer: job.writer.confined(),
             cancel: job.cancel.clone(),
             config: job.config,

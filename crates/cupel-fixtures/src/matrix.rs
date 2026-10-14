@@ -61,9 +61,7 @@ impl Registries {
             &self.checks,
             &self.producers,
             &self.languages.langs(),
-            &Ctx {
-                root: repo_path("."),
-            },
+            &Ctx::new(repo_path(".")),
         );
         matrix
             .cells()
@@ -262,7 +260,7 @@ pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
     let scratch = tempfile::tempdir().map_err(|error| error.to_string())?;
     let files = walk(&root, &registries.languages, &ProjectInfo::default());
     let produce_ctx = ProduceCtx {
-        ctx: Ctx { root: root.clone() },
+        ctx: Ctx::new(root.clone()),
         config: serde_json::Map::new(),
         writer: Writer::new(scratch.path(), false)
             .map_err(|error| error.to_string())?

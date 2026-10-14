@@ -7,7 +7,7 @@ use std::path::Path;
 use cupel_core::config::FILE_NAME;
 use cupel_core::git::Git;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
-use cupel_core::{ActionKind, NextAction, Severity, Writer};
+use cupel_core::{ActionKind, Exclude, NextAction, Severity, Writer};
 use serde_json::json;
 
 use crate::error::{CupelError, Usage};
@@ -21,7 +21,7 @@ pub fn write(writer: &Writer, force: bool) -> Result<Vec<Problem>, CupelError> {
     if writer.root().join(FILE_NAME).exists() && !force {
         return Err(exists());
     }
-    let info = project::detect(writer);
+    let info = project::detect(writer, &Exclude::default());
     let text = config_text(
         writer.root(),
         &info,
@@ -33,10 +33,12 @@ pub fn write(writer: &Writer, force: bool) -> Result<Vec<Problem>, CupelError> {
         .write(Path::new(FILE_NAME), text.as_bytes())
         .map_err(|error| unwritable(&error))?;
     writer.gitignore().map_err(|error| unwritable(&error))?;
-    Ok(cupel_lang::project::unregistered_roots(writer.root())
-        .iter()
-        .map(unsupported_root)
-        .collect())
+    Ok(
+        cupel_lang::project::unregistered_roots(writer.root(), &Exclude::default())
+            .iter()
+            .map(unsupported_root)
+            .collect(),
+    )
 }
 
 /// The `info` finding for a root of a language Cupel recognizes but has not registered, which
@@ -236,7 +238,10 @@ mod tests {
 
     /// The registered roots of a detect fixture, through the `ProjectInfo` producers.
     fn detect(case: &str) -> ProjectInfo {
-        project::detect(&Writer::new(&fixture(case), false).unwrap())
+        project::detect(
+            &Writer::new(&fixture(case), false).unwrap(),
+            &Exclude::default(),
+        )
     }
 
     /// Writes `text` as `cupel.toml` in a fresh directory and loads it.

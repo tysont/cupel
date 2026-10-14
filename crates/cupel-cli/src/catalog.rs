@@ -193,9 +193,7 @@ impl Catalog {
             &self.checks,
             &self.producers,
             &self.languages.langs(),
-            &Ctx {
-                root: root.to_path_buf(),
-            },
+            &Ctx::new(root.to_path_buf()),
         )
     }
 

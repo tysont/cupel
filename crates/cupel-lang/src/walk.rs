@@ -3,6 +3,7 @@
 use std::path::Path;
 use std::sync::{Mutex, PoisonError};
 
+use cupel_core::Exclude;
 use cupel_core::syntax::ProjectInfo;
 use ignore::{WalkBuilder, WalkState};
 
@@ -10,16 +11,31 @@ use crate::language::LanguageRegistry;
 
 /// Source files under `root` that some language in `languages` owns, relative to `root`,
 /// `/`-separated, sorted. Below each root of `project`, directories named in its `skip_dirs`
-/// are skipped (ADR-037).
+/// are skipped (ADR-037); so are the directories every run excludes (ADR-065).
 pub fn walk(root: &Path, languages: &LanguageRegistry, project: &ProjectInfo) -> Vec<String> {
+    walk_excluding(root, languages, project, &Exclude::default())
+}
+
+/// [`walk`], never entering or returning a path `exclude` excludes (`[scope] exclude`).
+pub fn walk_excluding(
+    root: &Path,
+    languages: &LanguageRegistry,
+    project: &ProjectInfo,
+    exclude: &Exclude,
+) -> Vec<String> {
     let found = Mutex::new(Vec::new());
     let base = root.to_path_buf();
     let project = project.clone();
+    let excluded = exclude.clone();
     WalkBuilder::new(root)
         .require_git(false)
         .filter_entry(move |entry| {
-            !entry.file_type().is_some_and(|kind| kind.is_dir())
-                || relative(&base, entry.path()).is_none_or(|dir| !generated(&project, &dir))
+            let Some(path) = relative(&base, entry.path()) else {
+                return true;
+            };
+            let is_dir = entry.file_type().is_some_and(|kind| kind.is_dir());
+            let kept = path.is_empty() || !excluded.excludes(&path);
+            kept && !(is_dir && generated(&project, &path))
         })
         .build_parallel()
         .run(|| {

@@ -74,4 +74,4 @@ pub use producer::{Extract, Merge, QueryProducer, Source, parse_scope, producer_
 pub use query::{Match, matches, span};
 pub use spec::{LanguageSpec, QueryFile, SpecError};
 pub use tables::{DecisionRules, NameRule, NamespaceRules, Tables, VisibilityRules, Weight};
-pub use walk::walk;
+pub use walk::{walk, walk_excluding};

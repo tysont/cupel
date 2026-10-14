@@ -494,9 +494,7 @@ pub fn produce_fixture_fact(
         .map_err(|e| e.to_string())?
         .confined();
     let ctx = ProduceCtx {
-        ctx: Ctx {
-            root: writer.root().to_path_buf(),
-        },
+        ctx: Ctx::new(writer.root().to_path_buf()),
         config: Map::new(),
         writer,
         cancel: Cancellation::new(),

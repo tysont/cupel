@@ -6,4 +6,4 @@ invalid configuration in `/repo/cupel.toml`: TOML parse error at line 2, column 
   |
 2 | colour = "never"
   | ^^^^^^
-unknown field `colour`, expected one of `required_version`, `default_branch`, `depth`, `format`, `budget`, `roots`, `lang`, `checks`, `oracles`, `gate`, `profile`
+unknown field `colour`, expected one of `required_version`, `default_branch`, `depth`, `format`, `budget`, `scope`, `roots`, `lang`, `checks`, `oracles`, `gate`, `profile`

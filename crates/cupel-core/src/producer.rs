@@ -12,6 +12,7 @@ use serde_json::{Map, Value};
 use crate::cancel::Cancellation;
 use crate::error::Result;
 use crate::event::EventSink;
+use crate::exclude::Exclude;
 use crate::fact::{Fact, FactKind};
 use crate::grade::CostClass;
 use crate::id::{ProducerId, ToolId};
@@ -24,6 +25,19 @@ use crate::writer::Writer;
 pub struct Ctx {
     /// The repository root (`--cwd`).
     pub root: PathBuf,
+    /// Paths the run never considers (`[scope] exclude`, ADR-065); producers that read the
+    /// repository rather than the scope (project roots) must not descend into them.
+    pub exclude: Exclude,
+}
+
+impl Ctx {
+    /// The context of the repository at `root`, excluding only what every run excludes.
+    pub fn new(root: PathBuf) -> Self {
+        Self {
+            root,
+            exclude: Exclude::default(),
+        }
+    }
 }
 
 /// What a producer can see while producing.

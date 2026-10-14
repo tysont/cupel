@@ -46,7 +46,11 @@ pub fn run(
         }
     }
     problems.extend(cupel_dir(writer));
-    let info = project::detect(writer);
+    let exclude = config
+        .ok()
+        .map(|config| config.file.scope.exclude.clone())
+        .unwrap_or_default();
+    let info = project::detect(writer, &exclude);
     problems.extend(tools(
         &requirements(config.ok(), writer.root(), &info),
         installed,
