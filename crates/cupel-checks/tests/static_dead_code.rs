@@ -242,6 +242,21 @@ fn pairs(expected: &[(&str, &str)]) -> Vec<(String, String)> {
 }
 
 #[test]
+fn the_manifest_states_its_known_limitation() {
+    let registry = registry();
+    let manifest = registry
+        .get(&CheckId::from("static.dead-code"))
+        .unwrap()
+        .manifest();
+    assert!(
+        manifest.summary.contains("Limitation:")
+            && manifest.summary.contains("no fact carries references"),
+        "{}",
+        manifest.summary
+    );
+}
+
+#[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
     let registry = registry();
     let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();

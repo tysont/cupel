@@ -257,6 +257,21 @@ fn assert_pairs(result: &CheckResult, pairs: u32) {
 // ---------------------------------------------------------------- tests
 
 #[test]
+fn the_manifest_states_its_known_limitation() {
+    let registry = registry();
+    let manifest = registry
+        .get(&CheckId::from("static.clones"))
+        .unwrap()
+        .manifest();
+    assert!(
+        manifest.summary.contains("Limitation:")
+            && manifest.summary.contains("type 1 is reported as type 2"),
+        "{}",
+        manifest.summary
+    );
+}
+
+#[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
     let registry = registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();

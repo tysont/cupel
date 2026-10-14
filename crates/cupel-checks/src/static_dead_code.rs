@@ -95,7 +95,11 @@ impl StaticDeadCode {
                 ],
                 stability: Stability::Experimental,
                 summary: "Symbols and exports in modules that no import reaches and no entry \
-                          point, test, or framework hook keeps alive."
+                          point, test, or framework hook keeps alive. Limitation: no fact carries \
+                          references, so reachability is decided per module, never per call: an \
+                          unused function in an imported module is not reported, and an export \
+                          of an unimported module is only `dead.export` (info, low confidence) \
+                          (ADR-058; a References fact is a P3 follow-up)."
                     .to_owned(),
             },
         }

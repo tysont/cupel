@@ -172,7 +172,11 @@ impl StaticClones {
                 ],
                 stability: Stability::Experimental,
                 summary: "Type 1, 2, and 3 clones: functions whose normalized syntax trees share \
-                          most subtree fingerprints, compared within a language family."
+                          most subtree fingerprints, compared within a language family. \
+                          Limitation: type 1 is reported as type 2, because NormTree keeps no \
+                          identifier or literal text, so two functions that differ only in \
+                          literals (two lookup tables of the same shape) are reported as clones \
+                          (ADR-050; a raw-token digest is a P3 follow-up)."
                     .to_owned(),
             },
         }
