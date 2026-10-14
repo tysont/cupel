@@ -1,6 +1,6 @@
 # CUPEL_DECISION_001: One `cupel-checks` crate with a module per check
 
-**Date:** 2026-10-10 · **Status:** accepted · **Phase:** P0.1
+**Date:** 2026-10-10 · **Status:** accepted; its registration consequence superseded by [074](CUPEL_DECISION_074.md) · **Phase:** P0.1
 
 ## Context
 

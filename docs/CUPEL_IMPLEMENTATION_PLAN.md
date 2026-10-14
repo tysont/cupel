@@ -786,9 +786,25 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 **Goal:** Tier 2–3 evidence: real test execution, coverage ingestion, per-test maps, impacted-test selection, coverage-gated differential mutation testing, flakiness detection, and the mandatory exit-4 refusal when the baseline suite is red.
 
-**Status:** not started
+**Status:** in progress (2026-10-14)
 
 External tools used here (`cargo-llvm-cov`, `cargo-nextest`, `go`, `pytest`, `pytest-cov`, `vitest`, `jest`) are exercised for real in integration tests when present and reported as skipped when absent. Parsers are always tested against captured real output committed as fixtures.
+
+#### P3.0 Decentralized registration and registry-derived tests
+
+**Status:** in progress (2026-10-14) · [ADR-074](adr/CUPEL_DECISION_074.md)
+
+P3 fans out to parallel worktrees, each adding a check or a producer. Before it does, remove every line that two such additions would both edit: the `register()` list in `cupel-checks`, the generic-producer table in `cupel-lang`, hand-maintained lists of check IDs, finding kinds, fact kinds, and producers in tests, goldens that render every check at once, and duplicated test helpers. Afterwards, adding a check is literally one module plus goldens (§2.8), and adding a tool producer is one module in `cupel-adapt`.
+
+- Checks register themselves from their own module (`inventory::submit!`); `cupel_checks::register` is derived from the inventory, sorted by check ID, and still panics on a duplicate ID. Write **ADR-074** (supersedes ADR-001's registration consequence): the mechanism, the trade-offs, and what a new check may touch.
+- The same mechanism for producers: `cupel-lang`'s generic producers submit themselves from their fact modules; `cupel-adapt` gains `register(&mut ProducerRegistry)` over its own inventory, which every registry builder (CLI catalog, matrix harness) calls now, so a P3 tool producer is one file.
+- Tests derive their expectations from the registries: every registered check and finding kind describes; every `supported` cell has a golden; `cells.len() == checks × languages`. No test lists check IDs, finding kinds, fact kinds, or producers.
+- One golden directory per check: everything a golden pins about one check lives under `golden/<check-id>/`; goldens that render the whole registry (survey, describe matrix and language) keep only what no single check owns.
+- Test helpers duplicated across test files (facts, contexts, fixture paths, temporary git repositories, running the binary) move into one shared module per crate, or `cupel-fixtures` where several crates use them. Clone counts before and after go in Notes; the `static.clones` tree ratchets may only go down.
+
+*Tests first:* a test that `lib.rs` names no check type (fails while `register()` lists them); a duplicate submission panics with "native check IDs are unique"; a producer submitted from a test binary reaches `cupel_adapt::register`; registry-derived describe coverage fails when a registered check is not described.
+
+*Done when:* a new check touches only its module file, its `mod` line, its fixtures, and `golden/<check-id>/`; a new tool producer touches only its module file and its `mod` line; `make check` and `make dogfood DOGFOOD_SCOPE=tree` exit 0.
 
 #### P3.1 Fact: `TestResults` — runner producers and baseline test run (exit 4)
 
