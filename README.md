@@ -85,7 +85,7 @@ cupel init --write --force   # replace an existing cupel.toml
 
 ### `cupel doctor`
 
-`doctor` verifies the binary against `required_version`, the validity of `cupel.toml`, and write access to `.cupel/`. Every problem is a finding with a `configure` or `install_tool` action. Exit 3 means something required is missing.
+`doctor` verifies the binary against `required_version`, the validity of `cupel.toml`, and write access to `.cupel/`. For every tool a configured check needs through its facts (a test runner, for a check that needs test results), it checks the tool is on `PATH` and reports its version under `run.toolchain`; a `[lang.<id>] runner` that names no runner is a finding listing the valid ones. Every problem is a finding with a `configure` or `install_tool` action. Exit 3 means something required is missing.
 
 ### `cupel describe`
 
@@ -464,6 +464,26 @@ cupel describe fact norm-tree      # a fact's schema, version, producers per lan
 
 JS and TS form one family: `static.clones` reports a TypeScript function copied from JavaScript. Languages in different families are never compared. Every language is held to the same conformance inventory, a shared list of constructs per fact that each language must exhibit in its fixture repository and detect, or mark not applicable with a reason.
 
+## Test runners
+
+Checks that depend on running the test suite read a `test-results` fact, which Cupel makes by running the project's own test runner and reading its machine-readable output:
+
+| Language | Runners, in default order | Reads |
+| --- | --- | --- |
+| Rust | `cargo nextest` (when `.config/nextest.toml` exists), `cargo test` | JUnit through a nextest tool profile; libtest output |
+| Go | `go test -json` | test2json events |
+| Python | `pytest` (when the project mentions it), `unittest` | JUnit XML; `unittest -v` output |
+| JavaScript, TypeScript | `vitest`, `jest` (whichever `package.json` depends on) | the Jest JSON report |
+
+A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in the root's `node_modules/.bin`); otherwise checks that need test results are skipped as `unavailable` with the tool named, and `cupel doctor` says what to install. `[lang.<id>] runner` chooses one explicitly, by its name with or without the `tool.` prefix:
+
+```toml
+[lang.python]
+runner = "unittest"
+```
+
+Before any check that needs test results runs, Cupel runs the suite once in the real tree, the **baseline**. If any test fails, or the runner cannot finish (a build error), the run is refused: `status: "error"`, exit code 4, no check scores, and one `baseline.test-failed` finding per failing test (with its file, runner, and the tail of its output) or `baseline.run-incomplete` per run that did not finish. Fix the suite, then rerun. Every test of the baseline is also indexed in `.cupel/cupel.db`. The checks shipped today read only source facts, so `cupel check` runs no tests yet; the mutation and flakiness checks will.
+
 ## Configuration
 
 `cupel.toml` is found by walking up from `--cwd`. Precedence is flags, then `CUPEL_*` environment variables (`CUPEL_DEPTH`, `CUPEL_FORMAT`, `CUPEL_PROFILE`), then `--profile`, then `cupel.toml`, then defaults. The envelope echoes the effective configuration and the layers that contributed under `run.config`. Unknown keys are usage errors (exit 2) that list the valid keys, and `cupel describe schema config` is the full schema.
@@ -482,6 +502,7 @@ exclude = ["generated/**", "*.pb.go"]   # gitignore-style; a pattern without "/"
 [lang.rust]                        # tools for one language, chosen by init
 test = "cargo test --workspace"
 coverage = "cargo llvm-cov --lcov --output-path {out}"
+runner = "cargo-nextest"           # the test runner Cupel uses; see Test runners
 
 [checks."static.complexity"]       # check settings, for every language
 cyclomatic_max = 10
