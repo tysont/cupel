@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="nextest-run" tests="3" skipped="0" failures="1" errors="0" uuid="82e840e0-1d38-4b65-a5c3-306692e10e26" timestamp="2026-10-14T08:28:18.987-07:00" time="0.009">
+    <testsuite name="tally" tests="1" skipped="0" errors="0" failures="0">
+        <testcase name="tests::totals_a_list" classname="tally" timestamp="2026-10-14T08:28:18.987-07:00" time="0.009"/>
+    </testsuite>
+    <testsuite name="tally::totals" tests="1" skipped="0" errors="0" failures="0">
+        <testcase name="an_empty_list_totals_zero" classname="tally::totals" timestamp="2026-10-14T08:28:18.987-07:00" time="0.009"/>
+    </testsuite>
+    <testsuite name="tally::red" tests="1" skipped="0" errors="0" failures="1">
+        <testcase name="reports_a_wrong_total" classname="tally::red" timestamp="2026-10-14T08:28:18.987-07:00" time="0.009">
+            <failure message="thread &apos;reports_a_wrong_total&apos; (19120668) panicked at tests/red.rs:6:5" type="test failure with exit code 101">thread &apos;reports_a_wrong_total&apos; (19120668) panicked at tests/red.rs:6:5:
+assertion `left == right` failed
+  left: 4
+ right: 5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</failure>
+            <system-out>
+running 1 test
+totalling 2 and 2
+test reports_a_wrong_total ... FAILED
+
+failures:
+
+failures:
+    reports_a_wrong_total
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+</system-out>
+            <system-err>
+thread &apos;reports_a_wrong_total&apos; (19120668) panicked at tests/red.rs:6:5:
+assertion `left == right` failed
+  left: 4
+ right: 5
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</system-err>
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="nextest-run" tests="2" skipped="0" failures="0" errors="0" uuid="4b62e065-c11a-4b41-8ae0-ebce242f9d38" timestamp="2026-10-14T08:28:14.120-07:00" time="0.014">
+    <testsuite name="tally" tests="1" skipped="0" errors="0" failures="0">
+        <testcase name="tests::totals_a_list" classname="tally" timestamp="2026-10-14T08:28:14.121-07:00" time="0.013"/>
+    </testsuite>
+    <testsuite name="tally::totals" tests="1" skipped="0" errors="0" failures="0">
+        <testcase name="an_empty_list_totals_zero" classname="tally::totals" timestamp="2026-10-14T08:28:14.121-07:00" time="0.013"/>
+    </testsuite>
+</testsuites>

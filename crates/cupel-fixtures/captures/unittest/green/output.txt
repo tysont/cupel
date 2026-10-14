@@ -1,0 +1,7 @@
+test_totals_a_huge_list (tests.test_tally.TotalTest.test_totals_a_huge_list) ... skipped 'kept to show a skipped test'
+test_totals_a_list (tests.test_tally.TotalTest.test_totals_a_list) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.000s
+
+OK (skipped=1)

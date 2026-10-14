@@ -1,0 +1,3 @@
+{"Time":"2026-10-14T08:27:12.83843-07:00","Action":"start","Package":"example.com/tally"}
+{"Time":"2026-10-14T08:27:12.838495-07:00","Action":"output","Package":"example.com/tally","Output":"FAIL\texample.com/tally [build failed]\n"}
+{"Time":"2026-10-14T08:27:12.838505-07:00","Action":"fail","Package":"example.com/tally","Elapsed":0}
