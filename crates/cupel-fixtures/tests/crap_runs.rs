@@ -1,7 +1,5 @@
-// ABOUTME: `static.crap` through the binary on the fixture repositories: the skip without `no_coverage`,
-// ABOUTME: `describe` of the check and its kinds, `explain` with excerpt and test hint, one-line text evidence.
-use std::fs;
-
+// ABOUTME: `static.crap` through the binary on the fixture repositories: without coverage it reports no CRAP,
+// ABOUTME: and `describe` shows the check, its limitation, and its finding kinds from the manifest (ADR-067).
 use cupel_fixtures::{copy_repo, run_cupel};
 use serde_json::{Value, json};
 
@@ -20,29 +18,22 @@ fn json(dir: &std::path::Path, args: &[&str]) -> Value {
 }
 
 #[test]
-fn without_no_coverage_the_check_is_skipped_saying_how_to_run_it() {
-    let dir = fixture("rust");
-    fs::remove_file(dir.path().join("cupel.toml")).unwrap();
-    let envelope = json(
-        dir.path(),
-        &["check", "--only", "static.crap", "--format", "json"],
-    );
-    assert_eq!(envelope["status"], json!("pass"));
-    assert_eq!(envelope["findings"], json!([]));
-    let checks = envelope["checks"].as_array().unwrap();
-    assert_eq!(checks.len(), 1, "{checks:#?}");
-    assert_eq!(checks[0]["id"], json!("static.crap"));
-    assert_eq!(checks[0]["status"], json!("skipped"));
-    assert_eq!(
-        checks[0]["skipped"],
-        json!({
-            "reason": "unconfigured",
-            "fact": "coverage-map",
-            "lang": "rust",
-            "tool": null,
-            "see": "cupel describe static.crap"
-        })
-    );
+fn without_coverage_the_check_passes_with_no_crap_in_every_language() {
+    for lang in ["go", "javascript", "python", "rust", "typescript"] {
+        let dir = fixture(lang);
+        let envelope = json(
+            dir.path(),
+            &["check", "--only", "static.crap", "--format", "json"],
+        );
+        assert_eq!(envelope["status"], json!("pass"), "{lang}");
+        assert_eq!(envelope["findings"], json!([]), "{lang}");
+        let checks = envelope["checks"].as_array().unwrap();
+        assert_eq!(checks.len(), 1, "{lang}: {checks:#?}");
+        assert_eq!(checks[0]["status"], json!("pass"), "{lang}");
+        assert_eq!(checks[0]["score"], Value::Null, "{lang}");
+        assert_eq!(checks[0]["metrics"], json!({}), "{lang}");
+        assert_eq!(checks[0]["skipped"], Value::Null, "{lang}");
+    }
 }
 
 #[test]
@@ -80,63 +71,13 @@ fn describe_shows_the_check_and_its_finding_kinds_from_the_manifest() {
     let mut fields: Vec<&str> = properties.keys().map(String::as_str).collect();
     fields.sort_unstable();
     assert_eq!(fields, ["coverage", "crap", "cyclomatic", "high", "watch"]);
+    assert!(
+        manifest["summary"]
+            .as_str()
+            .unwrap()
+            .contains("CRAP exists only where coverage was measured"),
+        "{manifest}"
+    );
     let watch = json(dir.path(), &["describe", "finding", "crap.watch"])["description"].clone();
     assert_eq!(watch["action"], json!("review"));
-}
-
-#[test]
-fn explain_shows_the_excerpt_evidence_and_nearest_test_file_of_a_high_finding() {
-    let dir = fixture("javascript");
-    let envelope = json(
-        dir.path(),
-        &["check", "--only", "static.crap", "--format", "json"],
-    );
-    let finding = envelope["findings"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|finding| finding["symbol"]["display"] == json!("decide.classify"))
-        .expect("decide.classify is crap.high")
-        .clone();
-    assert_eq!(finding["kind"], json!("crap.high"));
-    let id = finding["id"].as_str().unwrap();
-    let explained = json(dir.path(), &["explain", id, "--format", "json"]);
-    let explanation = &explained["explanation"];
-    assert_eq!(
-        explanation["nearest_test_file"],
-        json!("test/decide.test.js")
-    );
-    let excerpt = &explanation["excerpt"];
-    assert_eq!(excerpt["file"], json!("src/decide.js"));
-    assert_eq!(
-        excerpt["lines"][0]["text"],
-        json!("export function classify(balance, limit) {")
-    );
-    assert_eq!(
-        explained["findings"][0]["evidence"],
-        json!({"crap": 30.0, "cyclomatic": 5, "coverage": null, "watch": 5, "high": 30})
-    );
-}
-
-#[test]
-fn text_output_summarizes_the_evidence_on_one_line() {
-    let dir = fixture("go");
-    let outcome = run_cupel(
-        &["check", "--only", "static.crap", "--format", "text"],
-        dir.path(),
-    );
-    assert_eq!(outcome.code, Some(0), "{}", outcome.stdout);
-    let lines: Vec<&str> = outcome.stdout.lines().collect();
-    let title = lines
-        .iter()
-        .position(|line| line.contains("`ledger.Overdue` has CRAP 42.0"))
-        .expect("the Overdue finding is listed");
-    let evidence = lines[title..]
-        .iter()
-        .find(|line| line.trim_start().starts_with("evidence:"))
-        .unwrap();
-    assert!(
-        evidence.contains("crap 42.0 · cyclomatic 6 · high 30 · watch 5"),
-        "{evidence}"
-    );
 }

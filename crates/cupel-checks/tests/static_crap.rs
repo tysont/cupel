@@ -1,11 +1,12 @@
-// ABOUTME: static.crap over synthetic facts: CRAP from cyclomatic complexity with coverage counted as zero,
-// ABOUTME: its bands, the skip without `no_coverage`, test-file hints, settings, scope, and the score (ADR-048).
+// ABOUTME: static.crap over synthetic facts: CRAP from cyclomatic complexity and a hand-built CoverageMap, its
+// ABOUTME: bands, no CRAP at all without coverage, test-file hints, settings, scope, and the score (ADR-067).
 mod support;
 
 use std::collections::BTreeSet;
 
 use cupel_checks::register;
 use cupel_core::config::ConfigError;
+use cupel_core::coverage::{CoverageMap, FileCoverage, LineHits};
 use cupel_core::syntax::{
     Decision, DecisionKind, Decisions, NormNode, NormTree, NormalizedSymbol, Span, SymbolDecisions,
     SymbolDef, SymbolKind, Symbols, TestConventions, TestPairing, Visibility,
@@ -13,7 +14,7 @@ use cupel_core::syntax::{
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
     Error, FactKind, Facts, Finding, FindingId, LangId, MetricPer, Plan, Scope, Score, Severity,
-    SkipReason, SymbolHash, Writer,
+    SymbolHash, Writer,
 };
 use serde_json::{Map, Value, json};
 use support::{Recorded, combined, language};
@@ -57,17 +58,23 @@ fn hash_of(line: u32) -> SymbolHash {
     format!("sh_{line:016x}").parse().unwrap()
 }
 
-/// Facts for `symbols`, each with its decisions, and optionally the language's test conventions.
+/// Facts for `symbols`, each with its decisions, optionally the language's test conventions,
+/// and optionally a coverage map.
 struct World {
     symbols: Vec<(SymbolDef, Vec<Decision>)>,
     conventions: Option<TestConventions>,
+    coverage: Option<CoverageMap>,
 }
 
 impl World {
+    /// `symbols` with a coverage map in which every line of every symbol is instrumented and
+    /// never run: coverage 0, so CRAP is `CC² + CC`.
     fn of(symbols: Vec<(SymbolDef, Vec<Decision>)>) -> Self {
+        let coverage = uncovered(symbols.iter().map(|(symbol, _)| symbol));
         Self {
             symbols,
             conventions: None,
+            coverage: Some(coverage),
         }
     }
 
@@ -109,6 +116,9 @@ impl World {
         if let Some(conventions) = &self.conventions {
             facts.insert(conventions.clone()).unwrap();
         }
+        if let Some(coverage) = &self.coverage {
+            facts.insert(coverage.clone()).unwrap();
+        }
         facts
     }
 
@@ -118,6 +128,27 @@ impl World {
             symbols: Some(self.symbols.iter().map(|(s, _)| s.key()).collect()),
         }
     }
+}
+
+/// A coverage map with every line of `symbols` instrumented and run `hits` times.
+fn covered<'a>(symbols: impl Iterator<Item = &'a SymbolDef>, hits: u64) -> CoverageMap {
+    let mut files: Vec<FileCoverage> = Vec::new();
+    for symbol in symbols {
+        let lines = (symbol.span.line..=symbol.span.end_line).map(|line| LineHits { line, hits });
+        match files.iter_mut().find(|file| file.file == symbol.file) {
+            Some(file) => file.lines.extend(lines),
+            None => files.push(FileCoverage {
+                file: symbol.file.clone(),
+                lines: lines.collect(),
+                branches: None,
+            }),
+        }
+    }
+    CoverageMap { files }
+}
+
+fn uncovered<'a>(symbols: impl Iterator<Item = &'a SymbolDef>) -> CoverageMap {
+    covered(symbols, 0)
 }
 
 fn registry() -> CheckRegistry {
@@ -139,15 +170,6 @@ fn ctx(scope: Scope, config: Value) -> (CheckCtx, tempfile::TempDir) {
         cancel: Cancellation::new(),
     };
     (ctx, dir)
-}
-
-/// The configuration that scores cyclomatic complexity alone, plus `extra`.
-fn cc_only(extra: Value) -> Value {
-    let mut config = json!({"no_coverage": true});
-    if let (Value::Object(config), Value::Object(extra)) = (&mut config, extra) {
-        config.extend(extra);
-    }
-    config
 }
 
 /// Runs the check over `world` with `config`; its result and findings.
@@ -224,19 +246,66 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
 }
 
 #[test]
-fn without_coverage_or_no_coverage_the_check_skips_and_says_how_to_run() {
-    let world = World::of(vec![(symbol("risky", 1), branches(6))]);
-    for config in [json!({}), json!({"no_coverage": false})] {
-        let (result, findings) = run(&world, config);
-        assert!(findings.is_empty());
-        assert_eq!(result.status, CheckStatus::Skipped);
-        assert_eq!(result.score, None);
-        let skipped = result.skipped.expect("a skipped object");
-        assert_eq!(skipped.reason, SkipReason::Unconfigured);
-        assert_eq!(skipped.fact, Some(FactKind::CoverageMap));
-        assert_eq!(skipped.lang, Some(LangId::from("x")));
-        assert_eq!(skipped.see.as_deref(), Some("cupel describe static.crap"));
-    }
+fn without_coverage_crap_is_null_and_nothing_is_reported() {
+    let mut world = World::of(vec![(symbol("risky", 1), branches(6))]);
+    world.coverage = None;
+    let (result, recorded) = recorded_in(&world, world.scope(), json!({}));
+    assert!(recorded.findings.is_empty(), "{:?}", recorded.findings);
+    assert!(recorded.measurements.is_empty());
+    assert_eq!(result.status, CheckStatus::Pass);
+    assert_eq!(result.skipped, None);
+    assert_eq!(result.score, None);
+    assert!(result.metrics.is_empty(), "{:?}", result.metrics);
+    assert_eq!(result.findings, 0);
+}
+
+#[test]
+fn coverage_lowers_crap_toward_cyclomatic_complexity() {
+    // CRAP = CC² × (1 − coverage)³ + CC: CC 6 fully covered is 6; half covered 6 × 6 / 8 + 6.
+    let full = symbol("full", 1);
+    let half = symbol("half", 10);
+    let mut coverage = covered([&full].into_iter(), 3);
+    coverage.files[0].lines.extend([
+        LineHits { line: 10, hits: 1 },
+        LineHits { line: 11, hits: 0 },
+    ]);
+    let mut world = World::of(vec![(full, branches(6)), (half, branches(6))]);
+    world.coverage = Some(coverage);
+    let (_, recorded) = recorded_in(&world, world.scope(), json!({}));
+    assert_eq!(
+        recorded.measured(),
+        [("crap", "m::full", 6.0), ("crap", "m::half", 10.5)]
+    );
+    let evidence: Vec<(Value, Value)> = recorded
+        .findings
+        .iter()
+        .map(|f| {
+            (
+                f.evidence.0["crap"].clone(),
+                f.evidence.0["coverage"].clone(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        evidence,
+        [(json!(6.0), json!(1.0)), (json!(10.5), json!(0.5))]
+    );
+}
+
+#[test]
+fn a_symbol_with_no_instrumented_line_has_no_crap() {
+    let measured = symbol("measured", 1);
+    let mut world = World::of(vec![
+        (measured.clone(), branches(6)),
+        (symbol("unmeasured", 10), branches(6)),
+    ]);
+    world.coverage = Some(uncovered([&measured].into_iter()));
+    let (result, findings) = run(&world, json!({}));
+    assert_eq!(
+        kinds(&findings),
+        [("m::measured".to_owned(), "crap.high".to_owned())]
+    );
+    assert_eq!(result.score.map(|score| score.n), Some(1));
 }
 
 #[test]
@@ -249,7 +318,7 @@ fn crap_is_cyclomatic_squared_plus_cyclomatic_in_bands_at_their_defaults() {
         (symbol("lowest_high", 30), branches(5)),
         (symbol("risky", 40), branches(6)),
     ]);
-    let (result, findings) = run(&world, cc_only(json!({})));
+    let (result, findings) = run(&world, json!({}));
     let expected: Vec<(String, String)> = [
         ("m::lowest_watch", "crap.watch"),
         ("m::highest_watch", "crap.watch"),
@@ -280,7 +349,7 @@ fn crap_is_cyclomatic_squared_plus_cyclomatic_in_bands_at_their_defaults() {
 #[test]
 fn a_high_finding_is_a_warning_to_write_tests_identified_by_its_symbol_hash() {
     let world = World::of(vec![(symbol("risky", 7), branches(6))]);
-    let (_, findings) = run(&world, cc_only(json!({})));
+    let (_, findings) = run(&world, json!({}));
     let [finding] = findings.as_slice() else {
         panic!("one finding expected: {findings:?}")
     };
@@ -299,7 +368,7 @@ fn a_high_finding_is_a_warning_to_write_tests_identified_by_its_symbol_hash() {
     );
     assert_eq!(
         finding.evidence.0,
-        *json!({"crap": 42.0, "cyclomatic": 6, "coverage": null, "watch": 5, "high": 30})
+        *json!({"crap": 42.0, "cyclomatic": 6, "coverage": 0.0, "watch": 5, "high": 30})
             .as_object()
             .unwrap()
     );
@@ -310,7 +379,7 @@ fn a_high_finding_is_a_warning_to_write_tests_identified_by_its_symbol_hash() {
 #[test]
 fn a_watch_finding_is_information_to_review_and_alone_leaves_the_check_passing() {
     let world = World::of(vec![(symbol("branchy", 1), branches(3))]);
-    let (result, findings) = run(&world, cc_only(json!({})));
+    let (result, findings) = run(&world, json!({}));
     let [finding] = findings.as_slice() else {
         panic!("one finding expected: {findings:?}")
     };
@@ -335,7 +404,7 @@ fn a_high_finding_names_the_nearest_test_file_when_conventions_pair_one() {
             tests: vec!["f_test.x".to_owned(), "g_test.x".to_owned()],
         }],
     });
-    let (_, findings) = run(&world, cc_only(json!({})));
+    let (_, findings) = run(&world, json!({}));
     let high = findings.iter().find(|f| f.kind == "crap.high").unwrap();
     assert_eq!(
         Value::Object(high.action.hints.clone()),
@@ -354,7 +423,7 @@ fn symbols_in_test_files_are_not_scored() {
         test_globs: vec!["**/*_test.x".to_owned()],
         pairs: vec![],
     });
-    let (result, findings) = run(&world, cc_only(json!({})));
+    let (result, findings) = run(&world, json!({}));
     assert_eq!(
         kinds(&findings),
         [("m::risky".to_owned(), "crap.high".to_owned())]
@@ -366,7 +435,7 @@ fn symbols_in_test_files_are_not_scored() {
 fn bands_come_from_the_configuration_the_context_carries() {
     let world = World::of(vec![(symbol("branchy", 1), branches(3))]);
     let kind = |config| {
-        let (_, findings) = run(&world, cc_only(config));
+        let (_, findings) = run(&world, config);
         findings.first().map(|f| f.kind.clone())
     };
     assert_eq!(kind(json!({"high": 12})), Some("crap.high".to_owned()));
@@ -384,7 +453,7 @@ fn only_symbols_in_scope_are_scored() {
         files: vec!["f.x".to_owned()],
         symbols: Some(BTreeSet::from([world.symbols[0].0.key()])),
     };
-    let (result, findings) = run_in(&world, scope, cc_only(json!({})));
+    let (result, findings) = run_in(&world, scope, json!({}));
     assert_eq!(
         kinds(&findings),
         [("m::inside".to_owned(), "crap.high".to_owned())]
@@ -394,7 +463,7 @@ fn only_symbols_in_scope_are_scored() {
 }
 
 #[test]
-fn nothing_in_scope_passes_without_needing_coverage() {
+fn nothing_in_scope_passes_with_no_symbols_scored() {
     let world = World::of(vec![]);
     let (result, findings) = run(&world, json!({}));
     assert!(findings.is_empty());
@@ -409,7 +478,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
     let check = registry.get(&CheckId::from(ID)).unwrap();
     for (config, key) in [
         (json!({"threshold": 3}), "threshold"),
-        (json!({"no_coverage": "yes"}), "no_coverage"),
+        (json!({"no_coverage": true}), "no_coverage"),
         (json!({"high": -1}), "high"),
         (json!({"watch": 2.5}), "watch"),
     ] {
@@ -422,7 +491,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
             panic!("expected a check-setting error, got {error:?}")
         };
         assert_eq!(named, key);
-        assert_eq!(valid, ["high", "watch", "no_coverage"]);
+        assert_eq!(valid, ["high", "watch"]);
     }
 }
 
@@ -473,21 +542,22 @@ fn the_result_reports_the_largest_and_mean_crap_of_the_scored_symbols() {
         test_globs: vec!["**/*_test.x".to_owned()],
         pairs: vec![],
     });
-    let (result, _) = run(&world, cc_only(json!({})));
+    let (result, _) = run(&world, json!({}));
     assert_eq!(
         result.metrics,
         [("max".to_owned(), 42.0), ("mean".to_owned(), 22.0)].into(),
         "CRAP 42 and 2; the test file is not scored"
     );
-    let (empty, _) = run(&World::of(vec![]), cc_only(json!({})));
+    let (empty, _) = run(&World::of(vec![]), json!({}));
     assert_eq!(
         empty.metrics,
         [("max".to_owned(), 0.0), ("mean".to_owned(), 0.0)].into()
     );
-    let (skipped, _) = run(&world, json!({}));
+    world.coverage = None;
+    let (unmeasured, _) = run(&world, json!({}));
     assert!(
-        skipped.metrics.is_empty(),
-        "a skipped language measured nothing"
+        unmeasured.metrics.is_empty(),
+        "without coverage there is no CRAP to report"
     );
 }
 
@@ -497,7 +567,7 @@ fn each_scored_symbol_is_measured_for_the_crap_ranking() {
         (symbol("risky", 1), branches(6)),
         (symbol("straight", 10), branches(1)),
     ]);
-    let (_, recorded) = recorded_in(&world, world.scope(), cc_only(json!({})));
+    let (_, recorded) = recorded_in(&world, world.scope(), json!({}));
     assert_eq!(
         recorded.measured(),
         [("crap", "m::risky", 42.0), ("crap", "m::straight", 2.0)]

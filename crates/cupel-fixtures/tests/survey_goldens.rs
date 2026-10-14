@@ -37,18 +37,20 @@ fn survey_matches_its_golden_for_every_language_fixture() {
                 .filter(|d| d.check == manifest.id && !d.entries.is_empty())
                 .map(|d| d.metric.as_str())
                 .collect();
-            let per_target = declared(|per| per != MetricPer::Scope);
-            assert!(
-                per_target.is_empty() || !ranked.is_empty(),
-                "{lang}: {} declares {per_target:?} but ranks nothing",
-                manifest.id
-            );
             let result = envelope
                 .checks
                 .iter()
                 .find(|result| result.id == manifest.id)
                 .expect("every check has an entry");
-            if result.status != CheckStatus::Skipped {
+            // A check that scored nothing (static.crap without coverage) measures nothing.
+            let scored = result.status != CheckStatus::Skipped && result.score.is_some();
+            let per_target = declared(|per| per != MetricPer::Scope);
+            assert!(
+                !scored || per_target.is_empty() || !ranked.is_empty(),
+                "{lang}: {} declares {per_target:?} but ranks nothing",
+                manifest.id
+            );
+            if scored {
                 let reported: BTreeSet<&str> = result.metrics.keys().map(String::as_str).collect();
                 assert_eq!(
                     reported,

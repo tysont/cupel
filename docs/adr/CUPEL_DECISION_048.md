@@ -1,6 +1,6 @@
 # CUPEL_DECISION_048: `static.crap` in CC-only mode: the `no_coverage` switch, bands, findings, and score
 
-**Date:** 2026-10-14 · **Status:** accepted · **Phase:** P2.3
+**Date:** 2026-10-14 · **Status:** accepted; the `no_coverage` mode and the `unconfigured` skip superseded by [067](CUPEL_DECISION_067.md) · **Phase:** P2.3
 
 ## Context
 

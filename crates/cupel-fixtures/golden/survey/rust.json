@@ -48,20 +48,13 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 20,
+      "findings": 0,
       "id": "static.crap",
-      "metrics": {
-        "max": 132.0,
-        "mean": 8.938775510204081
-      },
+      "metrics": {},
       "oracle": null,
-      "score": {
-        "n": 49,
-        "unit": "max",
-        "value": 132.0
-      },
+      "score": null,
       "skipped": null,
-      "status": "fail",
+      "status": "pass",
       "tier": 0
     },
     {
@@ -220,45 +213,6 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Review `settle_invoices` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 12.0,
-        "cyclomatic": 3,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_c22477",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 19,
-        "file": "src/clones_settlement.rs",
-        "line": 8
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_b8cee6ed2fdf44c6",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_c22477 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "clones_settlement::settle_invoices",
-        "hash": "sh_b8cee6ed2fdf44c6",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`clones_settlement::settle_invoices` has CRAP 12.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
         "summary": "Delete `settle_invoices` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `settle_invoices` is meant to be called."
       },
       "check": "static.dead-code",
@@ -293,45 +247,6 @@
       },
       "tier": 0,
       "title": "`clones_settlement::settle_invoices` is exported but no import resolves to src/clones_settlement.rs"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `reconcile_payments` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 12.0,
-        "cyclomatic": 3,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_c22477",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 32,
-        "file": "src/clones_settlement.rs",
-        "line": 21
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_b8cee6ed2fdf44c6",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_c22477 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "clones_settlement::reconcile_payments",
-        "hash": "sh_b8cee6ed2fdf44c6",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`clones_settlement::reconcile_payments` has CRAP 12.0 (watch at 5, high at 30)"
     },
     {
       "action": {
@@ -439,45 +354,6 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Review `order_lines` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 6.0,
-        "cyclomatic": 2,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_baeb12",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 48,
-        "file": "src/clones_settlement.rs",
-        "line": 34
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_0e8fd0a2e4ec138c",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_baeb12 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "clones_settlement::order_lines",
-        "hash": "sh_0e8fd0a2e4ec138c",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`clones_settlement::order_lines` has CRAP 6.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
         "summary": "Delete `order_lines` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `order_lines` is meant to be called."
       },
       "check": "static.dead-code",
@@ -512,45 +388,6 @@
       },
       "tier": 0,
       "title": "`clones_settlement::order_lines` is exported but no import resolves to src/clones_settlement.rs"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `refund_lines` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 6.0,
-        "cyclomatic": 2,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_e68fe2",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 65,
-        "file": "src/clones_settlement.rs",
-        "line": 50
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_32c95fbbf1e82a6f",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_e68fe2 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "clones_settlement::refund_lines",
-        "hash": "sh_32c95fbbf1e82a6f",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`clones_settlement::refund_lines` has CRAP 6.0 (watch at 5, high at 30)"
     },
     {
       "action": {
@@ -633,45 +470,6 @@
     {
       "action": {
         "hints": {},
-        "kind": "write_test",
-        "priority": 2,
-        "summary": "Write tests that cover every branch of `label` (fully covered, its CRAP is its cyclomatic complexity, 11), or split it until CRAP is below 30."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 132.0,
-        "cyclomatic": 11,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_b61f4f",
-      "kind": "crap.high",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 31,
-        "file": "src/complexity.rs",
-        "line": 5
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_db4ad54fcd2339ec",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_b61f4f --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "complexity::label",
-        "hash": "sh_db4ad54fcd2339ec",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`complexity::label` has CRAP 132.0 (high at 30): cyclomatic 11 with coverage not measured"
-    },
-    {
-      "action": {
-        "hints": {},
         "kind": "review",
         "priority": 2,
         "summary": "Delete `label` from src/complexity.rs if nothing outside the repository uses it, or import src/complexity.rs where `label` is meant to be called."
@@ -744,45 +542,6 @@
       },
       "tier": 0,
       "title": "`complexity::settle` nests 5 levels deep (max 4)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "write_test",
-        "priority": 2,
-        "summary": "Write tests that cover every branch of `settle` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 42.0,
-        "cyclomatic": 6,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_d96df8",
-      "kind": "crap.high",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 48,
-        "file": "src/complexity.rs",
-        "line": 34
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_a8c48e8629d07c43",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_d96df8 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "complexity::settle",
-        "hash": "sh_a8c48e8629d07c43",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`complexity::settle` has CRAP 42.0 (high at 30): cyclomatic 6 with coverage not measured"
     },
     {
       "action": {
@@ -1059,45 +818,6 @@
     {
       "action": {
         "hints": {},
-        "kind": "write_test",
-        "priority": 2,
-        "summary": "Write tests that cover every branch of `overdue` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 42.0,
-        "cyclomatic": 6,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_709707",
-      "kind": "crap.high",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 19,
-        "file": "src/crap_scores.rs",
-        "line": 7
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_94c9e5223808665a",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_709707 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "crap_scores::overdue",
-        "hash": "sh_94c9e5223808665a",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`crap_scores::overdue` has CRAP 42.0 (high at 30): cyclomatic 6 with coverage not measured"
-    },
-    {
-      "action": {
-        "hints": {},
         "kind": "review",
         "priority": 2,
         "summary": "Delete `overdue` from src/crap_scores.rs if nothing outside the repository uses it, or import src/crap_scores.rs where `overdue` is meant to be called."
@@ -1134,45 +854,6 @@
       },
       "tier": 0,
       "title": "`crap_scores::overdue` is exported but no import resolves to src/crap_scores.rs"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `clamp` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 12.0,
-        "cyclomatic": 3,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_c9dfcf",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 30,
-        "file": "src/crap_scores.rs",
-        "line": 22
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_6afe1b62767601cc",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_c9dfcf --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "crap_scores::clamp",
-        "hash": "sh_6afe1b62767601cc",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`crap_scores::clamp` has CRAP 12.0 (watch at 5, high at 30)"
     },
     {
       "action": {
@@ -1337,123 +1018,6 @@
     {
       "action": {
         "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `classify` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 20.0,
-        "cyclomatic": 4,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_9a0b81",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 9,
-        "file": "src/decide.rs",
-        "line": 1
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_9af72524d406775c",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_9a0b81 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "decide::classify",
-        "hash": "sh_9af72524d406775c",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`decide::classify` has CRAP 20.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `first_overdraft` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 12.0,
-        "cyclomatic": 3,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_1cc8ce",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 18,
-        "file": "src/decide.rs",
-        "line": 11
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_eaef9a5badf8e0e7",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_1cc8ce --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "decide::first_overdraft",
-        "hash": "sh_eaef9a5badf8e0e7",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`decide::first_overdraft` has CRAP 12.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `describe` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 12.0,
-        "cyclomatic": 3,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_da7d76",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 31,
-        "file": "src/decide.rs",
-        "line": 25
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_762e7dea9e94549d",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_da7d76 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "decide::describe",
-        "hash": "sh_762e7dea9e94549d",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`decide::describe` has CRAP 12.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
         "kind": "break_cycle",
         "priority": 2,
         "summary": "Break the cycle src/deps_cycle/alpha.rs → src/deps_cycle/beta.rs → src/deps_cycle/alpha.rs: move what the modules share into a module that imports none of them, or invert one import through an interface."
@@ -1567,84 +1131,6 @@
       "symbol": null,
       "tier": 0,
       "title": "`src/deps_layers/port.rs` is abstract but unstable: distance 0.75 from the main sequence (max 0.70)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `discounted` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 12.0,
-        "cyclomatic": 3,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_925ca9",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 7,
-        "file": "src/pricing.rs",
-        "line": 1
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_ab795fad8627ab43",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_925ca9 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "pricing::discounted",
-        "hash": "sh_ab795fad8627ab43",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`pricing::discounted` has CRAP 12.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `tally` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 12.0,
-        "cyclomatic": 3,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_b48d27",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 20,
-        "file": "src/pricing.rs",
-        "line": 9
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_5483cb3aa0e9b437",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_b48d27 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "pricing::tally",
-        "hash": "sh_5483cb3aa0e9b437",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`pricing::tally` has CRAP 12.0 (watch at 5, high at 30)"
     },
     {
       "action": {
@@ -1771,279 +1257,6 @@
       },
       "tier": 0,
       "title": "`twins::net_total` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `net_total` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 6.0,
-        "cyclomatic": 2,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_b71cf0",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 6,
-        "file": "src/twins.rs",
-        "line": 3
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_78f9041af099be12",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_b71cf0 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "twins::net_total",
-        "hash": "sh_78f9041af099be12",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`twins::net_total` has CRAP 6.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `sum_after_charge` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 6.0,
-        "cyclomatic": 2,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_b71cf0",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 11,
-        "file": "src/twins.rs",
-        "line": 8
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_78f9041af099be12",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_b71cf0 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "twins::sum_after_charge",
-        "hash": "sh_78f9041af099be12",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`twins::sum_after_charge` has CRAP 6.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `net_total_floor` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 6.0,
-        "cyclomatic": 2,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_b71cf0",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 16,
-        "file": "src/twins.rs",
-        "line": 13
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_78f9041af099be12",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_b71cf0 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "twins::net_total_floor",
-        "hash": "sh_78f9041af099be12",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`twins::net_total_floor` has CRAP 6.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `net_total_laid_out` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 6.0,
-        "cyclomatic": 2,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_b71cf0",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 28,
-        "file": "src/twins.rs",
-        "line": 18
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_78f9041af099be12",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_b71cf0 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "twins::net_total_laid_out",
-        "hash": "sh_78f9041af099be12",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`twins::net_total_laid_out` has CRAP 6.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `net_total_plus` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 6.0,
-        "cyclomatic": 2,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_23d796",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 33,
-        "file": "src/twins.rs",
-        "line": 30
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_438b3c0288c33d2e",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_23d796 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "twins::net_total_plus",
-        "hash": "sh_438b3c0288c33d2e",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`twins::net_total_plus` has CRAP 6.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `net_total_capped` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 12.0,
-        "cyclomatic": 3,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_bb8536",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 44,
-        "file": "src/twins.rs",
-        "line": 35
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_4628e6d6aecc66ce",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_bb8536 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "twins::net_total_capped",
-        "hash": "sh_4628e6d6aecc66ce",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`twins::net_total_capped` has CRAP 12.0 (watch at 5, high at 30)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `net_total_product` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-      },
-      "check": "static.crap",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "coverage": null,
-        "crap": 6.0,
-        "cyclomatic": 2,
-        "high": 30,
-        "watch": 5
-      },
-      "id": "fnd_7d44ac",
-      "kind": "crap.watch",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 49,
-        "file": "src/twins.rs",
-        "line": 46
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.crap --symbols sh_7ab963bb5efd830c",
-      "severity": "info",
-      "suppress": "cupel suppress fnd_7d44ac --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "twins::net_total_product",
-        "hash": "sh_7ab963bb5efd830c",
-        "lang": "rust"
-      },
-      "tier": 0,
-      "title": "`twins::net_total_product` has CRAP 6.0 (watch at 5, high at 30)"
     },
     {
       "action": {
@@ -2933,169 +2146,8 @@
       },
       {
         "check": "static.crap",
-        "entries": [
-          {
-            "lang": "rust",
-            "rank": 1,
-            "target": {
-              "display": "complexity::label",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 31,
-                "file": "src/complexity.rs",
-                "line": 5
-              },
-              "symbol": "sh_db4ad54fcd2339ec"
-            },
-            "value": 132.0
-          },
-          {
-            "lang": "rust",
-            "rank": 2,
-            "target": {
-              "display": "complexity::settle",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 48,
-                "file": "src/complexity.rs",
-                "line": 34
-              },
-              "symbol": "sh_a8c48e8629d07c43"
-            },
-            "value": 42.0
-          },
-          {
-            "lang": "rust",
-            "rank": 3,
-            "target": {
-              "display": "crap_scores::overdue",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 19,
-                "file": "src/crap_scores.rs",
-                "line": 7
-              },
-              "symbol": "sh_94c9e5223808665a"
-            },
-            "value": 42.0
-          },
-          {
-            "lang": "rust",
-            "rank": 4,
-            "target": {
-              "display": "decide::classify",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 9,
-                "file": "src/decide.rs",
-                "line": 1
-              },
-              "symbol": "sh_9af72524d406775c"
-            },
-            "value": 20.0
-          },
-          {
-            "lang": "rust",
-            "rank": 5,
-            "target": {
-              "display": "clones_settlement::reconcile_payments",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 32,
-                "file": "src/clones_settlement.rs",
-                "line": 21
-              },
-              "symbol": "sh_b8cee6ed2fdf44c6"
-            },
-            "value": 12.0
-          },
-          {
-            "lang": "rust",
-            "rank": 6,
-            "target": {
-              "display": "clones_settlement::settle_invoices",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 19,
-                "file": "src/clones_settlement.rs",
-                "line": 8
-              },
-              "symbol": "sh_b8cee6ed2fdf44c6"
-            },
-            "value": 12.0
-          },
-          {
-            "lang": "rust",
-            "rank": 7,
-            "target": {
-              "display": "crap_scores::clamp",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 30,
-                "file": "src/crap_scores.rs",
-                "line": 22
-              },
-              "symbol": "sh_6afe1b62767601cc"
-            },
-            "value": 12.0
-          },
-          {
-            "lang": "rust",
-            "rank": 8,
-            "target": {
-              "display": "decide::describe",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 31,
-                "file": "src/decide.rs",
-                "line": 25
-              },
-              "symbol": "sh_762e7dea9e94549d"
-            },
-            "value": 12.0
-          },
-          {
-            "lang": "rust",
-            "rank": 9,
-            "target": {
-              "display": "decide::first_overdraft",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 18,
-                "file": "src/decide.rs",
-                "line": 11
-              },
-              "symbol": "sh_eaef9a5badf8e0e7"
-            },
-            "value": 12.0
-          },
-          {
-            "lang": "rust",
-            "rank": 10,
-            "target": {
-              "display": "pricing::discounted",
-              "location": {
-                "col": 1,
-                "end_col": 2,
-                "end_line": 7,
-                "file": "src/pricing.rs",
-                "line": 1
-              },
-              "symbol": "sh_ab795fad8627ab43"
-            },
-            "value": 12.0
-          }
-        ],
-        "measured": 49,
+        "entries": [],
+        "measured": 0,
         "metric": "crap",
         "per": "symbol",
         "summary": "CRAP per function."
@@ -3578,9 +2630,6 @@
       "effective": {
         "budget": null,
         "checks": {
-          "static.crap": {
-            "no_coverage": true
-          },
           "static.deps": {
             "layers": {
               "map": {
@@ -3637,14 +2686,14 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 31,
-      "warn": 25
+      "info": 14,
+      "warn": 22
     },
     "gate": null,
     "new": 0,
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 56,
+  "total_findings": 36,
   "truncated": false
 }

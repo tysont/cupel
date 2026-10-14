@@ -8,6 +8,7 @@ mod base;
 mod cancel;
 mod check;
 pub mod config;
+pub mod coverage;
 mod delta;
 mod describe;
 mod dry_run;

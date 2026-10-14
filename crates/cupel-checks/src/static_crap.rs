@@ -1,14 +1,15 @@
-// ABOUTME: `static.crap`: per-symbol CRAP, `CC² × (1 − coverage)³ + CC`, from Symbols, Decisions, and NormTree;
-// ABOUTME: until a CoverageMap exists it scores with coverage 0 only when `no_coverage` is set (ADR-048).
+// ABOUTME: `static.crap`: per-symbol CRAP, `CC² × (1 − coverage)³ + CC`, from Symbols, Decisions, NormTree, and
+// ABOUTME: a CoverageMap; without coverage CRAP is null and nothing is reported (ADR-048, ADR-067).
 use std::collections::{BTreeMap, HashMap};
 
+use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{
     Decision, Decisions, NormTree, SymbolDef, SymbolKey, Symbols, TestConventions,
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
-    FactKind, Facts, Finding, LangId, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score,
-    Severity, SkipReason, Skipped, Stability, SymbolHash, Tier,
+    FactKind, Facts, Finding, Manifest, Measurement, MetricPer, Plan, Result, Scope, Score,
+    Severity, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -23,21 +24,18 @@ const ID: &str = "static.crap";
 
 /// The settings and their defaults (ADR-048). A symbol whose CRAP is at least `high` is
 /// `crap.high`; at least `watch` but below `high`, `crap.watch`.
-const SETTINGS: Limits = Limits::new(&[("high", 30), ("watch", 5)]).with_flags(&[NO_COVERAGE]);
-
-/// Score with coverage counted as 0 when no coverage map is available.
-const NO_COVERAGE: &str = "no_coverage";
+const SETTINGS: Limits = Limits::new(&[("high", 30), ("watch", 5)]);
 
 /// Evidence of `crap.high` and `crap.watch`.
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 struct CrapScore {
-    /// `cyclomatic² × (1 − coverage)³ + cyclomatic`, with coverage 0 when it was not measured.
+    /// `cyclomatic² × (1 − coverage)³ + cyclomatic`.
     crap: f64,
     /// 1 plus the cyclomatic weight of every decision.
     cyclomatic: u32,
-    /// The fraction of the symbol's lines that tests cover; null when not measured.
-    coverage: Option<f64>,
+    /// The fraction of the symbol's instrumented lines that tests ran.
+    coverage: f64,
     watch: u32,
     high: u32,
 }
@@ -51,7 +49,7 @@ impl StaticCrap {
         Self {
             manifest: Manifest {
                 id: CheckId::from(ID),
-                version: 1,
+                version: 2,
                 tier: Tier::try_from(0).expect("tier 0 exists"),
                 cost: CostClass::Quick,
                 needs: vec![FactKind::Symbols, FactKind::Decisions, FactKind::NormTree],
@@ -75,9 +73,11 @@ impl StaticCrap {
                 ],
                 stability: Stability::Experimental,
                 summary: "CRAP per function: cyclomatic complexity weighted by missing test \
-                          coverage. Until coverage is measured, set `no_coverage = true` under \
-                          [checks.\"static.crap\"] to score with coverage 0; otherwise the check \
-                          is skipped."
+                          coverage. Limitation: CRAP exists only where coverage was measured; \
+                          without a coverage map (no coverage producer exists until P3.2) the \
+                          check passes with no score, no metrics, and no findings, and a function \
+                          with no instrumented line is not scored. `static.complexity` reports \
+                          cyclomatic complexity alone."
                     .to_owned(),
             },
         }
@@ -91,7 +91,6 @@ impl Check for StaticCrap {
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
-        SETTINGS.flag(&self.manifest.id, &ctx.config, NO_COVERAGE)?;
         let targets = scope.symbols.as_ref().map_or(0, |keys| keys.len() as u64);
         Ok(Plan::estimate(self.manifest.cost, targets))
     }
@@ -104,21 +103,12 @@ impl Check for StaticCrap {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         let limits = SETTINGS.read(&self.manifest.id, &ctx.config)?;
-        let no_coverage = SETTINGS.flag(&self.manifest.id, &ctx.config, NO_COVERAGE)?;
+        // Without coverage CRAP is undefined, not CC alone (ADR-067).
+        let Ok(coverage) = facts.get::<CoverageMap>() else {
+            return Ok(self.result(CheckStatus::Pass, None, BTreeMap::new(), 0));
+        };
         let symbols = facts.get::<Symbols>()?;
         let conventions = facts.get::<TestConventions>().ok();
-        // Test code is what lowers CRAP, not what it scores (ADR-048).
-        let in_scope: Vec<&SymbolDef> = symbols
-            .symbols
-            .iter()
-            .filter(|symbol| ctx.scope.includes(&symbol.key()))
-            .filter(|symbol| !conventions.is_some_and(|c| c.is_test(&symbol.file)))
-            .collect();
-        // No producer makes a CoverageMap until P3.2, so coverage is never measured yet. Scoring
-        // CC alone must be asked for, never silently assumed (ADR-048).
-        if let Some(first) = in_scope.first().filter(|_| !no_coverage) {
-            return Ok(self.skipped(&first.lang));
-        }
         let decisions: HashMap<&SymbolKey, &[Decision]> = facts
             .get::<Decisions>()?
             .symbols
@@ -132,17 +122,24 @@ impl Check for StaticCrap {
             .map(|entry| (&entry.symbol, &entry.hash))
             .collect();
         let bands = Bands::of(&limits);
-        let mut worst: f64 = 0.0;
-        let mut total: f64 = 0.0;
-        let mut findings = 0;
-        let mut flagged = false;
-        for symbol in &in_scope {
+        let mut tally = Tally::default();
+        // Test code is what lowers CRAP, not what it scores (ADR-048).
+        for symbol in symbols
+            .symbols
+            .iter()
+            .filter(|symbol| ctx.scope.includes(&symbol.key()))
+            .filter(|symbol| !conventions.is_some_and(|c| c.is_test(&symbol.file)))
+        {
             ctx.cancel.checkpoint()?;
             let key = symbol.key();
+            let Some(covered) =
+                coverage.line_coverage(&symbol.file, symbol.span.line, symbol.span.end_line)
+            else {
+                continue;
+            };
             let cyclomatic = cyclomatic(decisions.get(&key).copied().unwrap_or_default());
-            let crap = crap(cyclomatic, None);
-            worst = worst.max(crap);
-            total += crap;
+            let crap = crap(cyclomatic, covered);
+            tally.add(crap);
             sink.measure(Measurement {
                 metric: "crap".to_owned(),
                 value: crap,
@@ -156,47 +153,30 @@ impl Check for StaticCrap {
             let score = CrapScore {
                 crap,
                 cyclomatic,
-                coverage: None,
+                coverage: covered,
                 watch: bands.watch,
                 high: bands.high,
             };
-            let finding = if crap >= f64::from(bands.high) {
-                flagged = true;
-                Some(self.high(Subject { symbol, hash }, score, conventions))
-            } else if crap >= f64::from(bands.watch) {
-                Some(self.watch(Subject { symbol, hash }, score))
-            } else {
-                None
-            };
-            if let Some(finding) = finding {
-                findings += 1;
+            if let Some(finding) = self.band(Subject { symbol, hash }, score, &bands, conventions) {
+                tally.report(&finding);
                 sink.emit(Event::Finding(Box::new(finding)));
             }
         }
-        Ok(CheckResult {
-            id: self.manifest.id.clone(),
-            status: if flagged {
-                CheckStatus::Fail
-            } else {
-                CheckStatus::Pass
-            },
-            tier: self.manifest.tier,
-            cost: self.manifest.cost,
-            score: Some(Score {
-                value: worst,
-                unit: "max".to_owned(),
-                n: in_scope.len() as u64,
-            }),
-            metrics: BTreeMap::from([
-                ("max".to_owned(), worst),
-                ("mean".to_owned(), mean(total, in_scope.len())),
-            ]),
-            delta: None,
-            findings,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-        })
+        let status = if tally.flagged {
+            CheckStatus::Fail
+        } else {
+            CheckStatus::Pass
+        };
+        let score = Score {
+            value: tally.worst,
+            unit: "max".to_owned(),
+            n: tally.scored,
+        };
+        let metrics = BTreeMap::from([
+            ("max".to_owned(), tally.worst),
+            ("mean".to_owned(), tally.mean()),
+        ]);
+        Ok(self.result(status, Some(score), metrics, tally.findings))
     }
 
     /// The largest value, over the symbols of every language (ADR-048).
@@ -219,16 +199,40 @@ impl Check for StaticCrap {
     }
 }
 
-/// `total` over `count` symbols; 0 for none.
-#[allow(
-    clippy::cast_precision_loss,
-    reason = "symbol counts stay far below 2^52, where f64 is exact"
-)]
-fn mean(total: f64, count: usize) -> f64 {
-    if count == 0 {
-        0.0
-    } else {
-        total / count as f64
+/// What the scored symbols added up to.
+#[derive(Default)]
+struct Tally {
+    scored: u64,
+    worst: f64,
+    total: f64,
+    findings: u64,
+    /// Some symbol is `crap.high`.
+    flagged: bool,
+}
+
+impl Tally {
+    fn add(&mut self, crap: f64) {
+        self.scored += 1;
+        self.worst = self.worst.max(crap);
+        self.total += crap;
+    }
+
+    fn report(&mut self, finding: &Finding) {
+        self.findings += 1;
+        self.flagged |= finding.severity != Severity::Info;
+    }
+
+    /// The mean CRAP of the scored symbols; 0 for none.
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "symbol counts stay far below 2^52, where f64 is exact"
+    )]
+    fn mean(&self) -> f64 {
+        if self.scored == 0 {
+            0.0
+        } else {
+            self.total / self.scored as f64
+        }
     }
 }
 
@@ -255,34 +259,51 @@ struct Subject<'a> {
     hash: &'a SymbolHash,
 }
 
-/// `cyclomatic² × (1 − coverage)³ + cyclomatic`, with unmeasured coverage counted as 0.
-fn crap(cyclomatic: u32, coverage: Option<f64>) -> f64 {
+/// `cyclomatic² × (1 − coverage)³ + cyclomatic`.
+fn crap(cyclomatic: u32, coverage: f64) -> f64 {
     let cyclomatic = f64::from(cyclomatic);
-    let uncovered = 1.0 - coverage.unwrap_or(0.0);
+    let uncovered = 1.0 - coverage;
     cyclomatic * cyclomatic * uncovered.powi(3) + cyclomatic
 }
 
 impl StaticCrap {
-    /// The result for a language whose symbols cannot be scored without coverage.
-    fn skipped(&self, lang: &LangId) -> CheckResult {
+    /// This check's result for one language.
+    fn result(
+        &self,
+        status: CheckStatus,
+        score: Option<Score>,
+        metrics: BTreeMap<String, f64>,
+        findings: u64,
+    ) -> CheckResult {
         CheckResult {
             id: self.manifest.id.clone(),
-            status: CheckStatus::Skipped,
+            status,
             tier: self.manifest.tier,
             cost: self.manifest.cost,
-            score: None,
-            metrics: BTreeMap::new(),
+            score,
+            metrics,
             delta: None,
-            findings: 0,
+            findings,
             duration_ms: 0,
-            skipped: Some(Skipped {
-                reason: SkipReason::Unconfigured,
-                fact: Some(FactKind::CoverageMap),
-                lang: Some(lang.clone()),
-                tool: None,
-                see: Some(format!("cupel describe {ID}")),
-            }),
+            skipped: None,
             oracle: None,
+        }
+    }
+
+    /// The finding for a scored symbol in the band its CRAP falls in; none below `watch`.
+    fn band(
+        &self,
+        subject: Subject<'_>,
+        score: CrapScore,
+        bands: &Bands,
+        conventions: Option<&TestConventions>,
+    ) -> Option<Finding> {
+        if score.crap >= f64::from(bands.high) {
+            Some(self.high(subject, score, conventions))
+        } else if score.crap >= f64::from(bands.watch) {
+            Some(self.watch(subject, score))
+        } else {
+            None
         }
     }
 
@@ -364,9 +385,6 @@ impl StaticCrap {
     }
 }
 
-fn coverage_text(coverage: Option<f64>) -> String {
-    coverage.map_or_else(
-        || "coverage not measured".to_owned(),
-        |coverage| format!("{:.0}% coverage", coverage * 100.0),
-    )
+fn coverage_text(coverage: f64) -> String {
+    format!("{:.0}% coverage", coverage * 100.0)
 }

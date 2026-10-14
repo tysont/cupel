@@ -180,9 +180,6 @@
       "effective": {
         "budget": null,
         "checks": {
-          "static.crap": {
-            "no_coverage": true
-          },
           "static.deps": {
             "layers": {
               "map": {

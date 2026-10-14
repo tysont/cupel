@@ -162,20 +162,14 @@ fn a_changed_scope_uses_gate_changed_and_an_unchanged_one_passes_it() {
 /// `risky` has cyclomatic complexity 6: CRAP 42 at coverage 0.
 const RISKY: &str = "def risky(a):\n    if a == 1:\n        return 1\n    if a == 2:\n        return 2\n    if a == 3:\n        return 3\n    if a == 4:\n        return 4\n    if a == 5:\n        return 5\n    return 0\n";
 
-/// `risky` with cyclomatic complexity 2: CRAP 6.
-const CALM: &str = "def risky(a):\n    if a == 1:\n        return 1\n    return 0\n";
-
-/// A Python project scored without coverage, with `config` appended.
+/// A Python project with `config` as its `cupel.toml`.
 fn python(config: &str) -> Repo {
     let repo = Repo::new();
     repo.write(
         "pyproject.toml",
         "[project]\nname = \"pkg\"\nversion = \"0.1.0\"\n",
     );
-    repo.write(
-        "cupel.toml",
-        &format!("[checks.\"static.crap\"]\nno_coverage = true\n{config}"),
-    );
+    repo.write("cupel.toml", config);
     repo.write("src/pkg/__init__.py", "");
     repo
 }
@@ -201,10 +195,8 @@ fn rule(text: &str, actual: Value, result: &str) -> (String, Value, String) {
 }
 
 #[test]
-fn crap_and_cycle_rules_fail_on_the_tree_and_pass_once_it_is_fixed() {
-    let repo =
-        python("[gate.tree]\n\"static.crap.max\" = \"< 30\"\n\"static.deps.cycles\" = \"== 0\"\n");
-    repo.write("src/pkg/risky.py", RISKY);
+fn a_cycle_rule_fails_on_the_tree_and_passes_once_it_is_fixed() {
+    let repo = python("[gate.tree]\n\"static.deps.cycles\" = \"== 0\"\n");
     repo.write(
         "src/pkg/alpha.py",
         "from .beta import BETA\n\nALPHA = BETA + 1\n",
@@ -216,24 +208,37 @@ fn crap_and_cycle_rules_fail_on_the_tree_and_pass_once_it_is_fixed() {
     assert_eq!(envelope["status"], json!("fail"));
     assert_eq!(
         rules(&envelope),
-        [
-            rule("static.crap.max < 30", json!(42.0), "fail"),
-            rule("static.deps.cycles == 0", json!(1.0), "fail"),
-        ]
+        [rule("static.deps.cycles == 0", json!(1.0), "fail")]
     );
-    repo.write("src/pkg/risky.py", CALM);
     repo.write("src/pkg/beta.py", "BETA = 2\n");
     let passed = repo.run(&["check"]);
     assert_eq!(passed.code, 0, "{}", passed.stdout);
-    let envelope = passed.envelope();
-    assert_eq!(gate(&envelope)["result"], json!("pass"));
+    assert_eq!(
+        rules(&passed.envelope()),
+        [rule("static.deps.cycles == 0", json!(0.0), "pass")]
+    );
+}
+
+#[test]
+fn a_crap_rule_cannot_pass_without_coverage_because_crap_is_not_measured() {
+    let repo = python("[gate.tree]\n\"static.crap.max\" = \"< 30\"\n");
+    repo.write("src/pkg/risky.py", RISKY);
+    let outcome = repo.run(&["check"]);
+    assert_eq!(outcome.code, 1, "{}", outcome.stdout);
+    let envelope = outcome.envelope();
     assert_eq!(
         rules(&envelope),
-        [
-            rule("static.crap.max < 30", json!(6.0), "pass"),
-            rule("static.deps.cycles == 0", json!(0.0), "pass"),
-        ]
+        [rule("static.crap.max < 30", Value::Null, "skipped")]
     );
+    let crap = envelope["checks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|check| check["id"] == json!("static.crap"))
+        .unwrap();
+    assert_eq!(crap["status"], json!("pass"));
+    assert_eq!(crap["score"], Value::Null);
+    assert_eq!(crap["metrics"], json!({}));
 }
 
 #[test]

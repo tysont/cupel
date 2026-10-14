@@ -7,6 +7,7 @@ use serde_json::{Value, json};
 
 use crate::check::Manifest;
 use crate::config::ConfigFile;
+use crate::coverage::CoverageMap;
 use crate::envelope::Envelope;
 use crate::event::Event;
 use crate::fact::{Fact, FactKind};
@@ -77,8 +78,8 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
         FactKind::Roots => Some(fact_schema::<Roots>()),
         FactKind::TestConventions => Some(fact_schema::<TestConventions>()),
         FactKind::ProjectInfo => Some(fact_schema::<ProjectInfo>()),
+        FactKind::CoverageMap => Some(fact_schema::<CoverageMap>()),
         FactKind::TestResults
-        | FactKind::CoverageMap
         | FactKind::PerTestMap
         | FactKind::MutationOutcomes
         | FactKind::BenchSamples
