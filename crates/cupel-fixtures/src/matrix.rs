@@ -7,9 +7,9 @@ use std::path::Path;
 
 use cupel_core::syntax::{ProjectInfo, SymbolDef, Symbols};
 use cupel_core::{
-    Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus, Ctx, Envelope,
-    Facts, LangId, ProduceCtx, ProducerRegistry, Range, RunId, Scope, SkipReason, Support,
-    SupportMatrix, Writer,
+    Availability, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
+    Ctx, Envelope, Facts, LangId, ProduceCtx, ProducerRegistry, Range, RunId, Scope, SkipReason,
+    Support, SupportMatrix, Writer,
 };
 use cupel_lang::{LanguageRegistry, walk};
 use serde_json::Value;
@@ -297,8 +297,15 @@ pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
         Cancellation::new(),
     );
     let scope = Scope::of_files(files.clone());
+    // The producer the scheduler would choose: the first ready candidate; a want with none is
+    // not served, as in a run.
     let produce = |kind| {
-        let producer = registries.producers.producers_for(kind, &lang).next()?;
+        let producer = registries
+            .producers
+            .candidates(kind, &lang, &produce_ctx.ctx)
+            .ok()?
+            .into_iter()
+            .find(|producer| producer.availability(&produce_ctx.ctx) == Availability::Ready)?;
         let mut events = Vec::new();
         Some(
             producer

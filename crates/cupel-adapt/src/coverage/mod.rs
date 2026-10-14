@@ -13,11 +13,20 @@
 //! let map = cupel_adapt::coverage::placed(map, &[ran_in], "web"); // relative to the repository
 //! ```
 
+mod c8;
+mod cargo_llvm_cov;
 mod cobertura;
+mod coverage_py;
 mod coverprofile;
+mod fresh;
+mod go_coverprofile;
 mod istanbul;
 mod jacoco;
+mod jest_coverage;
 mod lcov;
+mod pytest_cov;
+mod tool;
+mod vitest_coverage;
 
 use std::fmt;
 use std::path::Path;
