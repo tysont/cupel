@@ -1,5 +1,5 @@
-// ABOUTME: Helpers shared by the CLI integration tests: invoking the binary and reading envelopes.
-// ABOUTME: Each test file includes this module with `mod support;`.
+// ABOUTME: Helpers shared by the CLI integration tests: invoking the binary, reading envelopes, and the
+// ABOUTME: registries tests derive their expectations from. Each test file includes it with `mod support;`.
 #![allow(
     dead_code,
     reason = "each test crate uses a different subset of the helpers"
@@ -9,7 +9,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use assert_cmd::Command;
-use cupel_core::{CheckId, Envelope, FindingId, Writer};
+use cupel_core::{CheckId, CheckRegistry, Envelope, FindingId, Writer};
 use cupel_store::Store;
 use serde_json::{Value, json};
 use tempfile::TempDir;
@@ -84,6 +84,42 @@ where
         stdout: String::from_utf8(output.stdout).expect("stdout is UTF-8"),
         stderr: String::from_utf8(output.stderr).expect("stderr is UTF-8"),
     }
+}
+
+/// The `description` of `cupel describe <args>`, which must pass.
+pub fn described(args: &[&str]) -> Value {
+    let outcome = run(["describe"].into_iter().chain(args.iter().copied()));
+    assert_eq!(
+        outcome.code, 0,
+        "cupel describe {args:?}: {}",
+        outcome.stdout
+    );
+    outcome.envelope()["description"].clone()
+}
+
+/// Every native check, registered as the binary registers them. Tests derive the set of checks
+/// from here and assert the binary covers it, so a registered check `describe` leaves out fails.
+pub fn registered_checks() -> CheckRegistry {
+    let mut registry = CheckRegistry::default();
+    cupel_checks::register(&mut registry);
+    registry
+}
+
+/// The registered checks' IDs, in registration (ID) order.
+pub fn check_ids() -> Vec<String> {
+    registered_checks()
+        .iter()
+        .map(|check| check.manifest().id.to_string())
+        .collect()
+}
+
+/// The compiled-in languages' IDs, in the order `describe` lists them.
+pub fn language_ids() -> Vec<String> {
+    cupel_lang::LanguageRegistry::builtin()
+        .ids()
+        .iter()
+        .map(ToString::to_string)
+        .collect()
 }
 
 /// The envelope with run-specific values replaced, for snapshots.

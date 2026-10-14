@@ -6,27 +6,13 @@ mod support;
 use std::path::PathBuf;
 
 use serde_json::Value;
-use support::run;
+use support::described;
 
 /// The command that rewrites the generated sections; failures name it.
 const UPDATE_COMMAND: &str = "make readme";
 
 fn readme_path() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../README.md")
-}
-
-/// The `description` of a `cupel describe <args> --format json` that must exit 0.
-fn described(args: &[&str]) -> Value {
-    let outcome = run(["describe"]
-        .into_iter()
-        .chain(args.iter().copied())
-        .chain(["--format", "json"]));
-    assert_eq!(
-        outcome.code, 0,
-        "cupel describe {args:?}: {}",
-        outcome.stdout
-    );
-    outcome.envelope()["description"].clone()
 }
 
 fn strings(value: &Value) -> Vec<String> {
@@ -206,19 +192,6 @@ fn with_sections(readme: &str, sections: &[(&str, String)]) -> String {
         })
 }
 
-/// Finding kinds named in any manifest that `describe finding` does not attribute to their check.
-fn undescribed_finding_kinds(manifests: &[Value]) -> Vec<String> {
-    manifests
-        .iter()
-        .flat_map(|manifest| {
-            let check = manifest["id"].clone();
-            finding_kinds(manifest)
-                .into_iter()
-                .filter(move |kind| described(&["finding", kind.as_str()])["check"] != check)
-        })
-        .collect()
-}
-
 #[test]
 fn the_readme_generated_sections_match_describe() {
     let path = readme_path();
@@ -231,14 +204,5 @@ fn the_readme_generated_sections_match_describe() {
     assert!(
         readme == expected,
         "README.md's generated sections are stale; run `{UPDATE_COMMAND}` and review the diff"
-    );
-}
-
-#[test]
-fn every_finding_kind_in_the_check_table_is_described() {
-    let matrix = described(&["matrix"]);
-    assert_eq!(
-        undescribed_finding_kinds(&manifests(&matrix)),
-        Vec::<String>::new()
     );
 }

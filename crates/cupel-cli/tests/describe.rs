@@ -1,10 +1,12 @@
 // ABOUTME: Integration tests for `cupel describe` and `<verb> --describe`: what each subject returns,
-// ABOUTME: snapshots of the CLI and verb descriptions, and stability on every described entity.
+// ABOUTME: snapshots, stability, and coverage of every registered check, finding kind, and language.
 mod support;
 
 use cupel_core::{Verb, schema};
 use serde_json::{Value, json};
-use support::{cli_finding_id, redacted, run};
+use support::{
+    check_ids, cli_finding_id, described, language_ids, redacted, registered_checks, run,
+};
 
 fn verb_names() -> Vec<String> {
     Verb::ALL
@@ -224,7 +226,7 @@ fn describe_check_shows_its_manifest_and_support_per_language() {
         json!(["symbols", "decisions", "norm-tree"])
     );
     let languages = description["languages"].as_array().unwrap();
-    assert_eq!(languages.len(), 5);
+    assert_eq!(languages.len(), language_ids().len());
     assert!(
         languages
             .iter()
@@ -374,8 +376,11 @@ fn describe_languages_lists_every_language_with_its_family_and_extensions() {
         .iter()
         .map(|language| language["id"].as_str().unwrap())
         .collect();
-    assert_eq!(ids, ["go", "javascript", "python", "rust", "typescript"]);
-    let typescript = &languages[4];
+    assert_eq!(ids, language_ids());
+    let typescript = languages
+        .iter()
+        .find(|language| language["id"] == "typescript")
+        .unwrap();
     assert_eq!(typescript["family"], json!("ecma"));
     assert_eq!(
         typescript["extensions"],
@@ -397,18 +402,12 @@ fn describe_language_shows_identity_facts_and_check_support() {
         (&json!("rust"), &json!("rust"), &json!([".rs"]))
     );
     assert!(description["facts"].is_array());
-    assert_eq!(
-        description["checks"],
-        json!([
-            {"check": "static.clones", "support": {"status": "supported"}},
-            {"check": "static.complexity", "support": {"status": "supported"}},
-            {"check": "static.crap", "support": {"status": "supported"}},
-            {"check": "static.dead-code", "support": {"status": "supported"}},
-            {"check": "static.deps", "support": {"status": "supported"}},
-            {"check": "tests.quality", "support": {"status": "supported"}},
-            {"check": "tests.weakening", "support": {"status": "supported"}}
-        ])
-    );
+    let matrix = described(&["matrix"]);
+    let column: Vec<Value> = check_ids()
+        .iter()
+        .map(|check| json!({"check": check, "support": cell(&matrix, check, "rust")["support"]}))
+        .collect();
+    assert_eq!(description["checks"], Value::Array(column));
 }
 
 #[test]
@@ -442,10 +441,7 @@ fn describe_language_shows_its_toolchain_row_in_default_order() {
 #[test]
 fn describe_language_with_an_unknown_id_is_a_usage_error_listing_languages() {
     let finding = assert_rejected(&["describe", "language", "cobol"], "cli.usage");
-    assert_eq!(
-        finding["evidence"]["valid"],
-        json!(["go", "javascript", "python", "rust", "typescript"])
-    );
+    assert_eq!(finding["evidence"]["valid"], json!(language_ids()));
     assert_eq!(finding["evidence"]["value"], json!("cobol"));
 }
 
@@ -467,17 +463,18 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
         .iter()
         .map(|entry| entry["lang"].as_str().unwrap())
         .collect();
-    assert_eq!(langs, ["go", "javascript", "python", "rust", "typescript"]);
-    assert_eq!(
-        description["consumers"],
-        json!([
-            "static.clones",
-            "static.complexity",
-            "static.crap",
-            "static.dead-code",
-            "tests.quality"
-        ])
-    );
+    assert_eq!(langs, language_ids());
+    let consumers: Vec<String> = registered_checks()
+        .iter()
+        .map(cupel_core::Check::manifest)
+        .filter(|manifest| {
+            let kind = cupel_core::FactKind::NormTree;
+            manifest.needs.contains(&kind) || manifest.wants.contains(&kind)
+        })
+        .map(|manifest| manifest.id.to_string())
+        .collect();
+    assert!(!consumers.is_empty());
+    assert_eq!(description["consumers"], json!(consumers));
 }
 
 #[test]
@@ -508,47 +505,162 @@ fn describe_fact_with_an_unknown_kind_is_a_usage_error_listing_kinds() {
     assert_eq!(valid[0], json!("symbols"));
 }
 
-#[test]
-fn describe_matrix_has_every_language_and_a_row_per_check() {
-    let description = assert_described(&["describe", "matrix"], "matrix");
-    assert_eq!(
-        description["languages"],
-        json!(["go", "javascript", "python", "rust", "typescript"])
-    );
-    assert_eq!(
-        description["checks"],
-        json!([
-            "static.clones",
-            "static.complexity",
-            "static.crap",
-            "static.dead-code",
-            "static.deps",
-            "tests.quality",
-            "tests.weakening"
-        ])
-    );
-    let cells = description["cells"].as_array().unwrap();
-    let checks = description["checks"].as_array().unwrap().len();
-    assert_eq!(cells.len(), checks * 5, "one cell per check per language");
-    assert!(
-        cells
-            .iter()
-            .all(|cell| cell["support"]["status"] == json!("supported"))
-    );
+/// The matrix cell for `check` and `lang`, which must exist exactly once.
+fn cell<'a>(matrix: &'a Value, check: &str, lang: &str) -> &'a Value {
+    let found: Vec<&Value> = matrix["cells"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|cell| cell["check"] == check && cell["lang"] == lang)
+        .collect();
+    assert_eq!(found.len(), 1, "one cell for {check} × {lang}");
+    found[0]
 }
 
 #[test]
-fn describe_matrix_renders_as_text() {
+fn describe_matrix_has_a_cell_for_every_registered_check_and_language() {
+    let description = assert_described(&["describe", "matrix"], "matrix");
+    let (checks, languages) = (check_ids(), language_ids());
+    assert!(!checks.is_empty());
+    assert_eq!(description["languages"], json!(languages));
+    assert_eq!(description["checks"], json!(checks));
+    let cells = description["cells"].as_array().unwrap();
+    assert_eq!(cells.len(), checks.len() * languages.len());
+    for check in &checks {
+        for lang in &languages {
+            assert!(cell(&description, check, lang)["support"]["status"].is_string());
+        }
+    }
+}
+
+#[test]
+fn every_registered_check_is_described_with_its_manifest_and_its_matrix_row() {
+    let matrix = described(&["matrix"]);
+    for check in registered_checks().iter() {
+        let id = check.manifest().id.as_str();
+        let description = assert_described(&["describe", id], "check");
+        assert_eq!(
+            description["manifest"],
+            serde_json::to_value(check.manifest()).unwrap(),
+            "{id}"
+        );
+        let row: Vec<Value> = language_ids()
+            .iter()
+            .map(|lang| json!({"lang": lang, "support": cell(&matrix, id, lang)["support"]}))
+            .collect();
+        assert_eq!(description["languages"], Value::Array(row), "{id}");
+    }
+}
+
+#[test]
+fn every_registered_finding_kind_is_described_and_attributed_to_its_check() {
+    let mut kinds = 0;
+    for check in registered_checks().iter() {
+        let manifest = check.manifest();
+        for spec in &manifest.findings {
+            let description =
+                assert_described(&["describe", "finding", spec.kind.as_str()], "finding");
+            assert_eq!(
+                (&description["check"], &description["action"]),
+                (
+                    &json!(manifest.id),
+                    &serde_json::to_value(spec.action).unwrap()
+                ),
+                "{}",
+                spec.kind
+            );
+            kinds += 1;
+        }
+    }
+    assert!(kinds > 0);
+}
+
+/// How the text renderer shows a matrix cell's support: `supported`, or the status with the
+/// fact, tool, or key it lacks, such as `unsupported(coverage-map)`.
+fn support_text(support: &Value) -> String {
+    let status = support["status"].as_str().unwrap();
+    ["fact", "tool", "key"]
+        .iter()
+        .find_map(|key| support[key].as_str())
+        .map_or_else(
+            || status.to_owned(),
+            |missing| format!("{status}({missing})"),
+        )
+}
+
+fn words(line: &str) -> Vec<String> {
+    line.split_whitespace().map(str::to_owned).collect()
+}
+
+#[test]
+fn describe_matrix_renders_as_text_with_a_row_per_registered_check() {
     let outcome = run(["describe", "matrix", "--format", "text"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    insta::assert_snapshot!(support::redacted_text(&outcome.stdout));
+    let matrix = described(&["matrix"]);
+    let (checks, languages) = (check_ids(), language_ids());
+    let lines: Vec<&str> = outcome.stdout.lines().collect();
+    let title = format!(
+        "matrix · {} checks × {} languages",
+        checks.len(),
+        languages.len()
+    );
+    let at = lines
+        .iter()
+        .position(|line| *line == title)
+        .unwrap_or_else(|| panic!("no `{title}` line:\n{}", outcome.stdout));
+    let header: Vec<String> = std::iter::once("check".to_owned())
+        .chain(languages.iter().cloned())
+        .collect();
+    assert_eq!(words(lines[at + 1]), header);
+    for (row, check) in checks.iter().enumerate() {
+        let expected: Vec<String> = std::iter::once(check.clone())
+            .chain(
+                languages
+                    .iter()
+                    .map(|lang| support_text(&cell(&matrix, check, lang)["support"])),
+            )
+            .collect();
+        assert_eq!(words(lines[at + 2 + row]), expected);
+    }
+    assert_eq!(lines[at + 2 + checks.len()], "");
+}
+
+/// A language's text description split into what the language owns and what grows with the
+/// registries: the rows under `checks` (returned, as words) and `facts` rows that no language
+/// producer makes (dropped; tool producers add them).
+fn language_text_and_check_rows(text: &str) -> (String, Vec<Vec<String>>) {
+    let mut section = "";
+    let mut kept = Vec::new();
+    let mut rows = Vec::new();
+    for line in text.lines() {
+        if !line.starts_with(' ') {
+            section = line;
+        } else if section == "checks" {
+            rows.push(words(line));
+            continue;
+        } else if section == "facts" && !line.contains("lang.") {
+            continue;
+        }
+        kept.push(line);
+    }
+    (kept.join("\n") + "\n", rows)
 }
 
 #[test]
 fn describe_language_renders_as_text() {
     let outcome = run(["describe", "language", "typescript", "--format", "text"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    insta::assert_snapshot!(support::redacted_text(&outcome.stdout));
+    let (text, rows) = language_text_and_check_rows(&outcome.stdout);
+    let matrix = described(&["matrix"]);
+    let expected: Vec<Vec<String>> = check_ids()
+        .into_iter()
+        .map(|check| {
+            let support = support_text(&cell(&matrix, &check, "typescript")["support"]);
+            vec![check, support]
+        })
+        .collect();
+    assert_eq!(rows, expected);
+    insta::assert_snapshot!(support::redacted_text(&text));
 }
 
 #[test]
