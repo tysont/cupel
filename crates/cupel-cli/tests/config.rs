@@ -240,3 +240,37 @@ fn an_invalid_budget_flag_is_a_usage_error_about_budget() {
     assert_eq!(finding["kind"], json!("cli.usage"));
     assert_eq!(finding["evidence"]["argument"], json!("--budget"));
 }
+
+#[test]
+fn an_unregistered_language_in_the_config_is_a_usage_error_listing_the_languages() {
+    let dir = repo("[lang.cobol]\ntest = \"make test\"\n");
+    let outcome = run_with(&mut cupel(), ["describe", "--cwd", &cwd(dir.path())]);
+    assert_eq!(outcome.code, 2, "{}", outcome.stdout);
+    let finding = outcome.finding();
+    assert_eq!(finding["kind"], json!("cli.usage"));
+    let text = finding.to_string();
+    assert!(text.contains("cobol"), "{finding:#}");
+    assert!(
+        text.contains("typescript"),
+        "registered languages listed: {finding:#}"
+    );
+}
+
+#[test]
+fn doctor_reports_an_unregistered_language_and_init_force_replaces_it() {
+    let dir = repo("[roots.svc]\npath = \"svc\"\nlang = \"java\"\n");
+    let doctor = run_with(&mut cupel(), ["doctor", "--cwd", &cwd(dir.path())]);
+    let envelope = doctor.envelope();
+    let kinds: Vec<&str> = envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter_map(|finding| finding["kind"].as_str())
+        .collect();
+    assert!(kinds.contains(&"doctor.config-invalid"), "{kinds:?}");
+    let init = run_with(
+        &mut cupel(),
+        ["init", "--force", "--write", "--cwd", &cwd(dir.path())],
+    );
+    assert_eq!(init.code, 0, "{}", init.stdout);
+}

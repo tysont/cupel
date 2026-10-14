@@ -207,7 +207,7 @@ fn configured(
     events: &mut Events,
     stderr: &mut String,
 ) -> (Envelope, Rendering) {
-    let config = match Config::load(&config_request(environment, cli, writer.root().to_owned())) {
+    let config = match load_config(&config_request(environment, cli, writer.root().to_owned())) {
         Ok(config) => config,
         Err(error) if runs_without_configuration(cli) => {
             let envelope = guarded(run, stderr, cli.global.quiet, || {
@@ -242,6 +242,14 @@ fn configured(
         execute(run, cli, environment, writer, events, Ok(&config))
     });
     (envelope, rendering)
+}
+
+/// The configuration, rejected when it names a language no registered language has. Check IDs
+/// and gate keys are validated once checks register (P2.1, ADR-038).
+fn load_config(request: &ConfigRequest) -> Result<Config, cupel_core::Error> {
+    let config = Config::load(request)?;
+    config.validate_languages(&cupel_lang::LanguageRegistry::builtin().ids())?;
+    Ok(config)
 }
 
 /// `init` and `doctor` run even when configuration does not load: `init` replaces a broken
