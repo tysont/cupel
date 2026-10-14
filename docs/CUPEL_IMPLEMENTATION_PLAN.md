@@ -152,6 +152,7 @@ All build, test, lint, and run steps go through `make`. Agents and CI never call
 | `make test` | `cargo test --workspace` |
 | `make lint` | `cargo fmt --check` + `cargo clippy --workspace --all-targets -- -D warnings` (with `disallowed_methods` forbidding `std::process` and `std::fs` in `cupel-checks`) |
 | `make matrix` | `cargo run -- describe matrix --format text` — the current checks × languages support table |
+| `make readme` | rewrites the README's generated sections (exit codes, check table, support matrix) from `cupel describe`; `make test` fails while they are stale ([ADR-073](adr/CUPEL_DECISION_073.md)) |
 | `make fmt` | `cargo fmt` |
 | `make doc` | `cargo doc --workspace --no-deps` with `-D warnings` on rustdoc |
 | `make check` | `lint` + `test` + `doc` + `make clean-check` — the pre-commit bar |

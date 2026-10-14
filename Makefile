@@ -8,7 +8,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix check clean-check dogfood install
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood install
 
 build:
 	$(CARGO) build --workspace
@@ -30,6 +30,11 @@ doc:
 # The current checks × languages support table, derived from the registries (design §8.3.5).
 matrix:
 	@$(CARGO) run --quiet --package cupel-cli -- describe matrix --format text
+
+# Rewrites the README's generated sections (exit codes, check table, support matrix) from
+# `cupel describe`. `make test` fails while they are stale (ADR-073).
+readme:
+	UPDATE_README=1 $(CARGO) test --package cupel-cli --test readme
 
 # The pre-commit bar. The tree is fingerprinted before the build so clean-check can
 # verify the build itself wrote nothing outside .gitignore (see ADR-010).
