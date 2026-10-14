@@ -129,7 +129,7 @@ fn while_loop_let_else_and_wildcard_arms() {
 }
 
 #[test]
-fn loops_over_literal_arrays_vectors_and_slices_are_tables_and_others_are_not() {
+fn loops_over_literal_arrays_vectors_slices_and_constants_are_tables_and_others_are_not() {
     let dir = tree(&[
         ("Cargo.toml", "[package]\nname = \"t\"\n"),
         (
@@ -148,13 +148,17 @@ fn loops_over_literal_arrays_vectors_and_slices_are_tables_and_others_are_not() 
              \x20   while g() { f(1); }\n\
              \x20   let late = [1];\n\
              \x20   for x in late.iter() { f(*x) }\n\
+             \x20   for x in CASES { f(x); }\n\
+             \x20   for x in Kind::ALL.iter() { f(x); }\n\
+             \x20   for x in &schema::PUBLISHED { f(x); }\n\
+             \x20   for x in Kind::all() { f(x); }\n\
              }\n",
         ),
     ]);
     assert_eq!(
         loop_tables("rust", dir.path(), "cases"),
         [
-            true, true, true, true, true, true, false, false, false, true
+            true, true, true, true, true, true, false, false, false, true, true, true, true, false
         ]
     );
 }

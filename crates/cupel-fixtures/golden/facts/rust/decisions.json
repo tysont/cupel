@@ -960,6 +960,22 @@
         "file": "tests/quality_signals.rs",
         "line": 76
       }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 83
+      }
     }
   ]
 }

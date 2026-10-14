@@ -10959,6 +10959,100 @@
         "file": "tests/quality_signals.rs",
         "line": 76
       }
+    },
+    {
+      "hash": "sh_0552cf27b0f480a8",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "assert_eq"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "!"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "&"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id"
+                                              }
+                                            ],
+                                            "label": "token_tree"
+                                          }
+                                        ],
+                                        "label": "token_tree"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "token_tree"
+                                  }
+                                ],
+                                "label": "macro_invocation"
+                              }
+                            ],
+                            "label": "expression_statement"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "for_expression"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_item"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 83
+      }
     }
   ]
 }

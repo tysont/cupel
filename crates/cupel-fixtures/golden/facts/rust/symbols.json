@@ -1539,6 +1539,28 @@
         "line": 76
       },
       "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 51,
+        "end_col": 2,
+        "end_line": 87,
+        "line": 83
+      },
+      "display": "tests::quality_signals::every_listed_entry_counts_toward_the_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "every_listed_entry_counts_toward_the_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 87,
+        "line": 83
+      },
+      "visibility": "private"
     }
   ]
 }

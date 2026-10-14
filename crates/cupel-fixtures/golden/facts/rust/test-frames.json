@@ -528,6 +528,29 @@
             "end_line": 78,
             "line": 76
           }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 45,
+                "end_line": 85,
+                "line": 85
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "every_listed_entry_counts_toward_the_balance",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 87,
+            "line": 83
+          }
         }
       ],
       "file": "tests/quality_signals.rs",

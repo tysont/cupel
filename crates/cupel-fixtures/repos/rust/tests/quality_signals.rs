@@ -76,3 +76,12 @@ fn assert_balanced(entries: &[i64], expected: i64) {
 fn an_assertion_helper_is_an_assertion() {
     assert_balanced(&[2, 3], 5);
 }
+
+const LISTED: [i64; 3] = [5, 50, 500];
+
+#[test]
+fn every_listed_entry_counts_toward_the_balance() {
+    for cents in LISTED {
+        assert_eq!(balance(&[cents]), cents);
+    }
+}

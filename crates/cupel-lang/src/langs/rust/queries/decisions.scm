@@ -25,7 +25,8 @@
 ] @decision.early-return
 
 ; Table-driven loops: over an array, a slice of one, `vec![…]`, or `.iter()`/`.into_iter()` of
-; one, written in place or bound by `let` earlier in the same block.
+; one, written in place or bound by `let` earlier in the same block, or over a constant (a
+; SCREAMING_CASE `const` or `static` item, as rustc's naming lint requires; `Kind::ALL`).
 (for_expression
   value: [
     (array_expression)
@@ -61,3 +62,23 @@
           (#any-of? @_iter "iter" "into_iter"))
       ]) @loop.table)
   (#eq? @_table @_cases))
+
+(for_expression
+  value: [
+    (identifier) @_constant
+    (scoped_identifier name: (identifier) @_constant)
+    (reference_expression
+      value: [
+        (identifier) @_constant
+        (scoped_identifier name: (identifier) @_constant)
+      ])
+    (call_expression
+      function: (field_expression
+        value: [
+          (identifier) @_constant
+          (scoped_identifier name: (identifier) @_constant)
+        ]
+        field: (field_identifier) @_iter)
+      (#any-of? @_iter "iter" "into_iter"))
+  ]
+  (#match? @_constant "^[A-Z][A-Z0-9_]*$")) @loop.table

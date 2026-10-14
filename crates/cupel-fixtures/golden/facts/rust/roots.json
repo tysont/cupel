@@ -503,6 +503,14 @@
         "file": "tests/quality_signals.rs",
         "line": 76
       }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 83
+      }
     }
   ]
 }

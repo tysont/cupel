@@ -4972,6 +4972,30 @@
         "file": "tests/quality_signals.rs",
         "line": 76
       }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(balance(&[cents]), cents);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "47755e7b1ed9ca37",
+          "span": {
+            "col": 9,
+            "end_col": 46,
+            "end_line": 85,
+            "line": 85
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 83
+      }
     }
   ]
 }
