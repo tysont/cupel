@@ -37,6 +37,16 @@ file = "src/shapes/geometry.js"
 name = "shapes.geometry.perimeter"
 expect = { namespace = "shapes.geometry" }
 
+[symbols.parameters]
+file = "src/complexity.js"
+name = "complexity.openAccount"
+expect = { parameters = 6 }
+
+[symbols.receiver]
+file = "src/complexity.js"
+name = "complexity.Statement.line"
+expect = { parameters = 1 }
+
 [decisions.if]
 file = "src/decide.js"
 name = "decide.classify"

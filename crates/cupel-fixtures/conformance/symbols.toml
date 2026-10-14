@@ -45,3 +45,11 @@ expect = { visibility = "private" }
 [[constructs]]
 id = "file-namespace"
 summary = "A symbol in a nested module or package file; its namespace comes from the file's module path or package. The mapping's `expect` names the namespace."
+
+[[constructs]]
+id = "parameters"
+summary = "A function's declared parameters, each counted once whatever its form (typed, defaulted, rest, destructured, a name in a grouped declaration). The mapping's `expect` gives the count."
+
+[[constructs]]
+id = "receiver"
+summary = "A method's receiver (`self`, `cls`, `this`, a Go receiver) is not a parameter. The mapping's `expect` gives the method's count without it."

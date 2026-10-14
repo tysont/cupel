@@ -97,6 +97,90 @@
       }
     },
     {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::label",
+      "signature": "(_: i64, _: i64) -> &'static str",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::settle",
+      "signature": "(_: &[Vec<i64>], _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::open_account",
+      "signature": "(_: &str, _: &str, _: i64, _: bool, _: u32, _: u64) -> String",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 60,
+        "line": 51
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::statement_template",
+      "signature": "() -> Vec<&'static str>",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 127,
+        "line": 63
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::net",
+      "signature": "(_: i64, _: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 132,
+        "line": 130
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "type",
+      "path": "complexity::Statement",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 137,
+        "line": 135
+      }
+    },
+    {
+      "file": "src/complexity.rs",
+      "kind": "method",
+      "path": "complexity::Statement::line",
+      "signature": "(&self, _: i64) -> String",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 143,
+        "line": 141
+      }
+    },
+    {
       "file": "src/decide.rs",
       "kind": "function",
       "path": "decide::classify",

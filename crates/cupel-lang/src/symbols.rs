@@ -16,6 +16,11 @@
 //!   node of the match) fixes the visibility outright, such as for trait-impl methods.
 //! - `@scope.name` (optional) inside a symbol's match adds one innermost namespace segment that
 //!   is not lexical, such as a Go method's receiver type.
+//! - `@symbol.parameter` (in patterns of its own) on each declared parameter: one capture per
+//!   parameter, never on a receiver (`self`, `cls`, a Go receiver). A parameter belongs to the
+//!   innermost symbol whose node contains it and counts only outside that symbol's body, so the
+//!   parameters of an anonymous closure in a body never count toward the enclosing function
+//!   (ADR-039).
 //! - `@export.name` (in a pattern of its own) on a node whose text names a symbol the file
 //!   exports apart from its definition (`export { a }`, `module.exports = { a }`). A top-level
 //!   symbol so named whose match fixes no visibility and captures no modifier is public.
@@ -111,9 +116,11 @@ pub fn definitions<'t>(parsed: &'t Parsed, language: &dyn Language) -> Vec<Defin
         .map(|node| parsed.text(node))
         .collect();
     let file_namespace = namespaces.of(parsed.root(), &[], None);
+    let parameters = parameter_counts(&found, &picked);
     picked
         .into_iter()
-        .filter_map(|(m, kind, node)| {
+        .zip(parameters)
+        .filter_map(|((m, kind, node), parameters)| {
             let name_node = m.node(capture::SYMBOL_NAME)?;
             let name = parsed.text(name_node);
             let extra = m.node(capture::SCOPE_NAME).map(|n| parsed.text(n));
@@ -143,10 +150,43 @@ pub fn definitions<'t>(parsed: &'t Parsed, language: &dyn Language) -> Vec<Defin
                     file: parsed.file.clone(),
                     span: span(node),
                     body: body.map(span),
+                    parameters,
                 },
             })
         })
         .collect()
+}
+
+/// How many `@symbol.parameter` nodes each picked definition declares: a parameter counts for
+/// the innermost definition containing it, unless it lies inside that definition's body.
+fn parameter_counts<'t>(
+    found: &[Match<'_, 't>],
+    picked: &[(&Match<'_, 't>, SymbolKind, Node<'t>)],
+) -> Vec<u32> {
+    let mut seen = HashSet::new();
+    let mut counts = vec![0; picked.len()];
+    let parameters = found
+        .iter()
+        .flat_map(|m| m.nodes(capture::SYMBOL_PARAMETER).collect::<Vec<_>>())
+        .filter(|node| seen.insert(node.id()));
+    for parameter in parameters {
+        let owner = picked
+            .iter()
+            .enumerate()
+            .filter(|(_, (_, _, node))| contains(*node, parameter))
+            .min_by_key(|(_, (_, _, node))| node.end_byte() - node.start_byte());
+        if let Some((index, (m, _, _))) = owner
+            && m.node(capture::SYMBOL_BODY)
+                .is_none_or(|body| !contains(body, parameter))
+        {
+            counts[index] += 1;
+        }
+    }
+    counts
+}
+
+fn contains(outer: Node<'_>, inner: Node<'_>) -> bool {
+    outer.start_byte() <= inner.start_byte() && inner.end_byte() <= outer.end_byte()
 }
 
 fn definition_capture<'t>(m: &Match<'_, 't>) -> Option<(SymbolKind, Node<'t>)> {

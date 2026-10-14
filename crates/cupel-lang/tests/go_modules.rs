@@ -49,101 +49,84 @@ fn the_fixture_graph_is_exactly_its_import_edges() {
     let roots: Vec<&str> = graph.roots.iter().map(|r| r.root.as_str()).collect();
     assert_eq!(roots, [".", "shapes"]);
     let testify = "external:github.com/stretchr/testify";
-    assert_eq!(
-        rows(&graph),
-        [
-            row(".", "cmd/ledger/main.go", 4, "fmt", "external:std"),
-            row(".", "cmd/ledger/main.go", 5, "os", "external:std"),
-            row(
-                ".",
-                "cmd/ledger/main.go",
-                7,
-                "example.com/ledger",
-                "decide.go"
-            ),
-            row(
-                ".",
-                "cmd/ledger/main.go",
-                7,
-                "example.com/ledger",
-                "ledger.go"
-            ),
-            row(
-                ".",
-                "cmd/ledger/main.go",
-                7,
-                "example.com/ledger",
-                "pricing.go"
-            ),
-            row(
-                ".",
-                "cmd/ledger/main.go",
-                7,
-                "example.com/ledger",
-                "twins.go"
-            ),
-            row(".", "decide.go", 4, "errors", "external:std"),
-            row(".", "decide.go", 5, "strconv", "external:std"),
-            row(".", "decide.go", 6, "strings", "external:std"),
-            row(".", "ledger.go", 4, "fmt", "external:std"),
-            row(
-                ".",
-                "ledger.go",
-                6,
-                "github.com/google/uuid",
-                "external:github.com/google/uuid"
-            ),
-            row(".", "ledger.go", 8, "example.com/ledger/gen", "unresolved"),
-            row(
-                ".",
-                "ledger.go",
-                9,
-                "example.com/ledger/report",
-                "report/format.go"
-            ),
-            row(
-                ".",
-                "ledger.go",
-                10,
-                "example.com/shapes",
-                "shapes/geometry.go"
-            ),
-            row(".", "ledger_test.go", 4, "os", "external:std"),
-            row(".", "ledger_test.go", 5, "testing", "external:std"),
-            row(".", "pricing.go", 3, "log", "external:std"),
-            row(".", "pricing_test.go", 4, "testing", "external:std"),
-            row(
-                ".",
-                "pricing_test.go",
-                6,
-                "github.com/gkampitakis/go-snaps/snaps",
-                "external:github.com/gkampitakis/go-snaps"
-            ),
-            row(
-                ".",
-                "pricing_test.go",
-                7,
-                "github.com/stretchr/testify/assert",
-                testify
-            ),
-            row(
-                ".",
-                "pricing_test.go",
-                8,
-                "github.com/stretchr/testify/mock",
-                testify
-            ),
-            row(
-                ".",
-                "pricing_test.go",
-                9,
-                "github.com/stretchr/testify/require",
-                testify
-            ),
-            row(".", "report/format.go", 3, "fmt", "external:std"),
-            row("shapes", "shapes/geometry.go", 3, "math", "external:std"),
-        ]
-    );
+    // The command imports the root package, which is an edge to each of its files.
+    let package_files = [
+        "complexity.go",
+        "decide.go",
+        "ledger.go",
+        "pricing.go",
+        "twins.go",
+    ]
+    .map(|file| row(".", "cmd/ledger/main.go", 7, "example.com/ledger", file));
+    let mut expected = vec![
+        row(".", "cmd/ledger/main.go", 4, "fmt", "external:std"),
+        row(".", "cmd/ledger/main.go", 5, "os", "external:std"),
+    ];
+    expected.extend(package_files);
+    expected.extend([
+        row(".", "complexity.go", 3, "fmt", "external:std"),
+        row(".", "decide.go", 4, "errors", "external:std"),
+        row(".", "decide.go", 5, "strconv", "external:std"),
+        row(".", "decide.go", 6, "strings", "external:std"),
+        row(".", "ledger.go", 4, "fmt", "external:std"),
+        row(
+            ".",
+            "ledger.go",
+            6,
+            "github.com/google/uuid",
+            "external:github.com/google/uuid",
+        ),
+        row(".", "ledger.go", 8, "example.com/ledger/gen", "unresolved"),
+        row(
+            ".",
+            "ledger.go",
+            9,
+            "example.com/ledger/report",
+            "report/format.go",
+        ),
+        row(
+            ".",
+            "ledger.go",
+            10,
+            "example.com/shapes",
+            "shapes/geometry.go",
+        ),
+        row(".", "ledger_test.go", 4, "os", "external:std"),
+        row(".", "ledger_test.go", 5, "testing", "external:std"),
+        row(".", "pricing.go", 3, "log", "external:std"),
+        row(".", "pricing_test.go", 4, "testing", "external:std"),
+        row(
+            ".",
+            "pricing_test.go",
+            6,
+            "github.com/gkampitakis/go-snaps/snaps",
+            "external:github.com/gkampitakis/go-snaps",
+        ),
+        row(
+            ".",
+            "pricing_test.go",
+            7,
+            "github.com/stretchr/testify/assert",
+            testify,
+        ),
+        row(
+            ".",
+            "pricing_test.go",
+            8,
+            "github.com/stretchr/testify/mock",
+            testify,
+        ),
+        row(
+            ".",
+            "pricing_test.go",
+            9,
+            "github.com/stretchr/testify/require",
+            testify,
+        ),
+        row(".", "report/format.go", 3, "fmt", "external:std"),
+        row("shapes", "shapes/geometry.go", 3, "math", "external:std"),
+    ]);
+    assert_eq!(rows(&graph), expected);
 }
 
 #[test]

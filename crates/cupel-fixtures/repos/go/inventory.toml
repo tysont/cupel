@@ -35,6 +35,16 @@ file = "report/format.go"
 name = "report.Render"
 expect = { namespace = "report" }
 
+[symbols.parameters]
+file = "complexity.go"
+name = "ledger.OpenAccount"
+expect = { parameters = 6 }
+
+[symbols.receiver]
+file = "complexity.go"
+name = "ledger.Statement.Line"
+expect = { parameters = 1 }
+
 [decisions.if]
 file = "decide.go"
 name = "ledger.classify"

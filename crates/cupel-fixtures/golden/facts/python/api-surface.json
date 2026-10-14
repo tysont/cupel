@@ -169,6 +169,102 @@
       }
     },
     {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.label",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 27,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.settle",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 38,
+        "line": 30
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.open_account",
+      "signature": "(_, _, _, _, _, _)",
+      "span": {
+        "col": 1,
+        "end_col": 71,
+        "end_line": 42,
+        "line": 41
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.statement_template",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 6,
+        "end_line": 108,
+        "line": 45
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.net",
+      "signature": "(_, _)",
+      "span": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 112,
+        "line": 111
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "type",
+      "path": "ledger.complexity.Statement",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 120,
+        "line": 115
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "method",
+      "path": "ledger.complexity.Statement.__init__",
+      "signature": "(self, _)",
+      "span": {
+        "col": 5,
+        "end_col": 27,
+        "end_line": 117,
+        "line": 116
+      }
+    },
+    {
+      "file": "src/ledger/complexity.py",
+      "kind": "method",
+      "path": "ledger.complexity.Statement.line",
+      "signature": "(self, _)",
+      "span": {
+        "col": 5,
+        "end_col": 41,
+        "end_line": 120,
+        "line": 119
+      }
+    },
+    {
       "file": "src/ledger/decide.py",
       "kind": "function",
       "path": "ledger.decide.classify",

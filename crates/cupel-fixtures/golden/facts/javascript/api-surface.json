@@ -13,6 +13,102 @@
       }
     },
     {
+      "file": "src/complexity.js",
+      "kind": "function",
+      "path": "complexity.label",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/complexity.js",
+      "kind": "function",
+      "path": "complexity.settle",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "line": 31
+      }
+    },
+    {
+      "file": "src/complexity.js",
+      "kind": "function",
+      "path": "complexity.openAccount",
+      "signature": "(_, _, _, _, _, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 56,
+        "line": 47
+      }
+    },
+    {
+      "file": "src/complexity.js",
+      "kind": "function",
+      "path": "complexity.statementTemplate",
+      "signature": "()",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 122,
+        "line": 58
+      }
+    },
+    {
+      "file": "src/complexity.js",
+      "kind": "function",
+      "path": "complexity.net",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      }
+    },
+    {
+      "file": "src/complexity.js",
+      "kind": "type",
+      "path": "complexity.Statement",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 136,
+        "line": 128
+      }
+    },
+    {
+      "file": "src/complexity.js",
+      "kind": "method",
+      "path": "complexity.Statement.constructor",
+      "signature": "(_)",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 131,
+        "line": 129
+      }
+    },
+    {
+      "file": "src/complexity.js",
+      "kind": "method",
+      "path": "complexity.Statement.line",
+      "signature": "(_)",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 135,
+        "line": 133
+      }
+    },
+    {
       "file": "src/decide.js",
       "kind": "function",
       "path": "decide.classify",

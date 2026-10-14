@@ -38,6 +38,16 @@ file = "src/report/format.rs"
 name = "report::format::render"
 expect = { namespace = "report::format" }
 
+[symbols.parameters]
+file = "src/complexity.rs"
+name = "complexity::open_account"
+expect = { parameters = 6 }
+
+[symbols.receiver]
+file = "src/complexity.rs"
+name = "complexity::Statement::line"
+expect = { parameters = 1 }
+
 [decisions.if]
 file = "src/decide.rs"
 name = "decide::classify"

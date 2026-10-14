@@ -61,6 +61,7 @@ fn symbol_def() -> SymbolDef {
             end_col: 2,
         },
         body: Some(span(11)),
+        parameters: 2,
     }
 }
 
@@ -76,7 +77,8 @@ fn symbols_payload_shape() {
             "display": "rewrite::Planner::push_limit", "kind": "method", "visibility": "public",
             "lang": "rust", "file": "src/lib.rs",
             "span": {"line": 10, "col": 1, "end_line": 30, "end_col": 2},
-            "body": {"line": 11, "col": 1, "end_line": 13, "end_col": 2}
+            "body": {"line": 11, "col": 1, "end_line": 13, "end_col": 2},
+            "parameters": 2
         })
     );
 }
@@ -370,7 +372,10 @@ fn each_payload_declares_its_own_kind_and_version() {
     let kinds: BTreeSet<FactKind> = declared.iter().map(|(kind, _)| *kind).collect();
     assert_eq!(kinds, FactKind::SYNTACTIC.into_iter().collect());
     for (kind, version) in declared {
-        let expected = if kind == FactKind::ProjectInfo { 2 } else { 1 };
+        let expected = match kind {
+            FactKind::ProjectInfo | FactKind::Symbols => 2,
+            _ => 1,
+        };
         assert_eq!(version, expected, "{kind}");
     }
 }

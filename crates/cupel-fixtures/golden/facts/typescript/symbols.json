@@ -13,6 +13,7 @@
       "lang": "typescript",
       "name": "main",
       "namespace": "bin.cli",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -34,6 +35,7 @@
       "lang": "typescript",
       "name": "square",
       "namespace": "",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -55,6 +57,7 @@
       "lang": "typescript",
       "name": "members pay less",
       "namespace": "__tests__.pricing.discounted",
+      "parameters": 0,
       "span": {
         "col": 28,
         "end_col": 4,
@@ -76,6 +79,7 @@
       "lang": "typescript",
       "name": "tallies stay within bounds",
       "namespace": "__tests__.pricing.discounted",
+      "parameters": 0,
       "span": {
         "col": 38,
         "end_col": 4,
@@ -83,6 +87,160 @@
         "line": 9
       },
       "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 62,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 3
+      },
+      "display": "complexity.label",
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "label",
+      "namespace": "complexity",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 29,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 68,
+        "end_col": 2,
+        "end_line": 45,
+        "line": 31
+      },
+      "display": "complexity.settle",
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "settle",
+      "namespace": "complexity",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 45,
+        "line": 31
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 11,
+        "end_col": 2,
+        "end_line": 56,
+        "line": 54
+      },
+      "display": "complexity.openAccount",
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "openAccount",
+      "namespace": "complexity",
+      "parameters": 6,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 56,
+        "line": 47
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 122,
+        "line": 58
+      },
+      "display": "complexity.statementTemplate",
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "statementTemplate",
+      "namespace": "complexity",
+      "parameters": 0,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 122,
+        "line": 58
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 62,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      },
+      "display": "complexity.net",
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "net",
+      "namespace": "complexity",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 30,
+        "end_col": 4,
+        "end_line": 133,
+        "line": 131
+      },
+      "display": "complexity.Statement.constructor",
+      "file": "src/complexity.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "constructor",
+      "namespace": "complexity.Statement",
+      "parameters": 1,
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 133,
+        "line": 131
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 4,
+        "end_line": 137,
+        "line": 135
+      },
+      "display": "complexity.Statement.line",
+      "file": "src/complexity.ts",
+      "kind": "method",
+      "lang": "typescript",
+      "name": "line",
+      "namespace": "complexity.Statement",
+      "parameters": 1,
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 137,
+        "line": 135
+      },
+      "visibility": "public"
     },
     {
       "body": {
@@ -97,6 +255,7 @@
       "lang": "typescript",
       "name": "classify",
       "namespace": "decide",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -118,6 +277,7 @@
       "lang": "typescript",
       "name": "firstOverdraft",
       "namespace": "decide",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -139,6 +299,7 @@
       "lang": "typescript",
       "name": "label",
       "namespace": "decide",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -160,6 +321,7 @@
       "lang": "typescript",
       "name": "parseCents",
       "namespace": "decide",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -181,6 +343,7 @@
       "lang": "typescript",
       "name": "double",
       "namespace": "inline",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -202,6 +365,7 @@
       "lang": "typescript",
       "name": "doubles",
       "namespace": "inline",
+      "parameters": 0,
       "span": {
         "col": 17,
         "end_col": 4,
@@ -223,6 +387,7 @@
       "lang": "typescript",
       "name": "load",
       "namespace": "ledger",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -244,6 +409,7 @@
       "lang": "typescript",
       "name": "round",
       "namespace": "legacy.Legacy",
+      "parameters": 1,
       "span": {
         "col": 10,
         "end_col": 4,
@@ -265,6 +431,7 @@
       "lang": "typescript",
       "name": "adds two numbers",
       "namespace": "math.add",
+      "parameters": 0,
       "span": {
         "col": 26,
         "end_col": 4,
@@ -286,6 +453,7 @@
       "lang": "typescript",
       "name": "is truthy for non-zero sums",
       "namespace": "math.add",
+      "parameters": 0,
       "span": {
         "col": 37,
         "end_col": 4,
@@ -307,6 +475,7 @@
       "lang": "typescript",
       "name": "returns a defined value",
       "namespace": "math.add",
+      "parameters": 0,
       "span": {
         "col": 33,
         "end_col": 4,
@@ -328,6 +497,7 @@
       "lang": "typescript",
       "name": "does not return zero",
       "namespace": "math.add",
+      "parameters": 0,
       "span": {
         "col": 30,
         "end_col": 4,
@@ -349,6 +519,7 @@
       "lang": "typescript",
       "name": "handles huge numbers",
       "namespace": "math.add",
+      "parameters": 0,
       "span": {
         "col": 35,
         "end_col": 4,
@@ -370,6 +541,7 @@
       "lang": "typescript",
       "name": "can be called without checking",
       "namespace": "math.add",
+      "parameters": 0,
       "span": {
         "col": 40,
         "end_col": 4,
@@ -391,6 +563,7 @@
       "lang": "typescript",
       "name": "matches its snapshot",
       "namespace": "math.range",
+      "parameters": 0,
       "span": {
         "col": 30,
         "end_col": 4,
@@ -412,6 +585,7 @@
       "lang": "typescript",
       "name": "is consumed by a spy",
       "namespace": "math.range",
+      "parameters": 0,
       "span": {
         "col": 30,
         "end_col": 4,
@@ -433,6 +607,7 @@
       "lang": "typescript",
       "name": "add",
       "namespace": "math",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -454,6 +629,7 @@
       "lang": "typescript",
       "name": "range",
       "namespace": "math",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -475,6 +651,7 @@
       "lang": "typescript",
       "name": "default",
       "namespace": "plugin",
+      "parameters": 1,
       "span": {
         "col": 16,
         "end_col": 2,
@@ -496,6 +673,7 @@
       "lang": "typescript",
       "name": "discounted",
       "namespace": "pricing",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -517,6 +695,7 @@
       "lang": "typescript",
       "name": "tally",
       "namespace": "pricing",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -538,6 +717,7 @@
       "lang": "typescript",
       "name": "logTotal",
       "namespace": "pricing",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -559,6 +739,7 @@
       "lang": "typescript",
       "name": "describe",
       "namespace": "shapes.geometry.Shape",
+      "parameters": 0,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -580,6 +761,7 @@
       "lang": "typescript",
       "name": "constructor",
       "namespace": "shapes.geometry.Circle",
+      "parameters": 1,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -601,6 +783,7 @@
       "lang": "typescript",
       "name": "area",
       "namespace": "shapes.geometry.Circle",
+      "parameters": 0,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -622,6 +805,7 @@
       "lang": "typescript",
       "name": "unit",
       "namespace": "shapes.geometry.Circle",
+      "parameters": 0,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -643,6 +827,7 @@
       "lang": "typescript",
       "name": "isValid",
       "namespace": "shapes.geometry.Circle",
+      "parameters": 0,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -664,6 +849,7 @@
       "lang": "typescript",
       "name": "#cache",
       "namespace": "shapes.geometry.Circle",
+      "parameters": 0,
       "span": {
         "col": 3,
         "end_col": 20,
@@ -685,6 +871,7 @@
       "lang": "typescript",
       "name": "scale",
       "namespace": "shapes.geometry",
+      "parameters": 2,
       "span": {
         "col": 14,
         "end_col": 37,
@@ -706,6 +893,7 @@
       "lang": "typescript",
       "name": "perimeter",
       "namespace": "shapes.geometry",
+      "parameters": 1,
       "span": {
         "col": 1,
         "end_col": 2,
@@ -727,6 +915,7 @@
       "lang": "typescript",
       "name": "twice",
       "namespace": "shapes.geometry.perimeter",
+      "parameters": 1,
       "span": {
         "col": 3,
         "end_col": 4,
@@ -748,6 +937,7 @@
       "lang": "typescript",
       "name": "netTotal",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -769,6 +959,7 @@
       "lang": "typescript",
       "name": "sumAfterCharge",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -790,6 +981,7 @@
       "lang": "typescript",
       "name": "netTotalFloor",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -811,6 +1003,7 @@
       "lang": "typescript",
       "name": "netTotalLaidOut",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -832,6 +1025,7 @@
       "lang": "typescript",
       "name": "netTotalPlus",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -853,6 +1047,7 @@
       "lang": "typescript",
       "name": "netTotalCapped",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -874,6 +1069,7 @@
       "lang": "typescript",
       "name": "netTotalProduct",
       "namespace": "twins",
+      "parameters": 2,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -895,6 +1091,7 @@
       "lang": "typescript",
       "name": "renders a count",
       "namespace": "widget",
+      "parameters": 0,
       "span": {
         "col": 23,
         "end_col": 2,
@@ -916,6 +1113,7 @@
       "lang": "typescript",
       "name": "Badge",
       "namespace": "widget",
+      "parameters": 1,
       "span": {
         "col": 8,
         "end_col": 2,
@@ -937,6 +1135,7 @@
       "lang": "typescript",
       "name": "classifies overdrawn balances",
       "namespace": "test.decide",
+      "parameters": 0,
       "span": {
         "col": 39,
         "end_col": 2,
@@ -958,6 +1157,7 @@
       "lang": "typescript",
       "name": "rejects empty amounts",
       "namespace": "test.decide",
+      "parameters": 0,
       "span": {
         "col": 31,
         "end_col": 2,
@@ -979,6 +1179,7 @@
       "lang": "typescript",
       "name": "waits for the ledger server",
       "namespace": "test.decide",
+      "parameters": 1,
       "span": {
         "col": 37,
         "end_col": 2,

@@ -24,3 +24,11 @@
 
 (module
   name: (_) @scope.name) @scope
+
+; Parameters: each declared parameter; a `this` parameter types the receiver and is not one.
+(formal_parameters
+  (required_parameter) @symbol.parameter
+  (#not-match? @symbol.parameter "^this\\b"))
+
+(formal_parameters
+  (optional_parameter) @symbol.parameter)

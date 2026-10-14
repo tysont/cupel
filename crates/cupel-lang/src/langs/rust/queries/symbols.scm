@@ -50,3 +50,11 @@
 
 (trait_item
   name: (type_identifier) @scope.name) @scope
+
+; Parameters: each declared parameter of a function or closure. `self` is a receiver, so
+; `self_parameter` is never captured.
+(parameters
+  (parameter) @symbol.parameter)
+
+(closure_parameters
+  (_) @symbol.parameter)

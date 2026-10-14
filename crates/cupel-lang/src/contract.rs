@@ -15,6 +15,7 @@ pub mod capture {
     pub const VISIBILITY_INTERNAL: &str = "visibility.internal";
     pub const VISIBILITY_PRIVATE: &str = "visibility.private";
     pub const EXPORT_NAME: &str = "export.name";
+    pub const SYMBOL_PARAMETER: &str = "symbol.parameter";
     // Shared by symbols.scm and api.scm: namespace contributors.
     pub const SCOPE: &str = "scope";
     pub const SCOPE_NAME: &str = "scope.name";
@@ -132,6 +133,7 @@ const SYMBOLS: Contract = Contract {
     required: &[
         &[c::SYMBOL_FUNCTION, c::SYMBOL_METHOD, c::SYMBOL_CLOSURE],
         &[c::SYMBOL_NAME],
+        &[c::SYMBOL_PARAMETER],
     ],
     optional: &[
         c::SYMBOL_BODY,

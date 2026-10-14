@@ -1,6 +1,90 @@
 {
   "items": [
     {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.Label",
+      "signature": "(_, _ int64) string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 6
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.Settle",
+      "signature": "(_ [][]int64, _ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 35
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.OpenAccount",
+      "signature": "(_, _ string, _ int64, _ bool, _ uint32, _ uint64) string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 54,
+        "line": 52
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.StatementTemplate",
+      "signature": "() []string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 121,
+        "line": 57
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.Net",
+      "signature": "(_, _ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 126,
+        "line": 124
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "type",
+      "path": "ledger.Statement",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 131,
+        "line": 129
+      }
+    },
+    {
+      "file": "complexity.go",
+      "kind": "method",
+      "path": "ledger.Statement.Line",
+      "signature": "(_ Statement) Line(_ int64) string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 136,
+        "line": 134
+      }
+    },
+    {
       "file": "decide.go",
       "kind": "variable",
       "path": "ledger.ErrEmpty",
