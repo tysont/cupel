@@ -33,6 +33,7 @@ mod producer;
 mod rank;
 mod ranking;
 mod result;
+mod runner;
 mod schedule;
 pub mod schema;
 mod scope;
@@ -88,6 +89,7 @@ pub use rank::{
     Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,
 };
 pub use ranking::rankings;
+pub use runner::{Runner, RunnerCommand, TestSelection};
 pub use schedule::{Job, Outcome, Scheduler};
 pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;

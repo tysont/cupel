@@ -1,13 +1,13 @@
 // ABOUTME: The `go test -json` runner producer: the root's packages (`./...` by default) run with test2json
 // ABOUTME: events on standard output and build errors on standard error, read by the test2json parser.
-use cupel_core::{LangId, Langs, TestResult, TestResults};
+use cupel_core::{LangId, Langs, TestResult};
 
-use crate::report::test2json;
-use crate::runner::{Ran, Root, Runner, RunnerSpec};
+use crate::report::{listing, test2json};
+use crate::runner::{Lister, Ran, Root, Runner, RunnerSpec, Selected};
 
 const ID: &str = "tool.go-test";
 
-static GO_TEST: RunnerSpec = RunnerSpec {
+pub(crate) static GO_TEST: RunnerSpec = RunnerSpec {
     id: ID,
     languages: || Langs::Only(vec![LangId::from("go")]),
     tool: "go",
@@ -17,24 +17,33 @@ static GO_TEST: RunnerSpec = RunnerSpec {
     env: &[],
     merged: false,
     read,
+    select,
+    list: Some(Lister {
+        command: list_command,
+        parse: listing::go,
+    }),
     completed_codes: &[0],
 };
 
 inventory::submit!(crate::ToolProducer {
     id: ID,
-    register: |registry| registry.register::<TestResults, _>(Runner(&GO_TEST)),
+    register: |registry| registry.register_runner(Runner(&GO_TEST)),
 });
 
 fn command(root: &Root) -> Vec<String> {
-    let packages = if root.packages.is_empty() {
+    [root.program.clone(), "test".to_owned(), "-json".to_owned()]
+        .into_iter()
+        .chain(packages(root))
+        .collect()
+}
+
+/// The root's package patterns, `./...` when it names none.
+pub(crate) fn packages(root: &Root) -> Vec<String> {
+    if root.packages.is_empty() {
         vec!["./...".to_owned()]
     } else {
         root.packages.clone()
-    };
-    [root.program.clone(), "test".to_owned(), "-json".to_owned()]
-        .into_iter()
-        .chain(packages)
-        .collect()
+    }
 }
 
 #[allow(
@@ -43,4 +52,34 @@ fn command(root: &Root) -> Vec<String> {
 )]
 fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
     Some(test2json::parse(&ran.captured.stdout, &ran.captured.stderr))
+}
+
+/// Tests by ID (`<package>/<Test>`), as one `-run` pattern of their top-level names; packages
+/// named by files are not selectable after the root's package patterns.
+fn select(selected: &Selected<'_>) -> Option<Vec<String>> {
+    let Selected::Tests(ids) = selected else {
+        return None;
+    };
+    Some(vec!["-run".to_owned(), run_pattern(ids)])
+}
+
+/// The `-run` pattern matching exactly the top-level tests of `ids`.
+pub(crate) fn run_pattern(ids: &[String]) -> String {
+    let mut names: Vec<&str> = ids.iter().filter_map(|id| id.rsplit('/').next()).collect();
+    names.sort_unstable();
+    names.dedup();
+    format!("^({})$", names.join("|"))
+}
+
+fn list_command(root: &Root) -> Vec<String> {
+    [
+        root.program.clone(),
+        "test".to_owned(),
+        "-list".to_owned(),
+        "^Test".to_owned(),
+        "-json".to_owned(),
+    ]
+    .into_iter()
+    .chain(packages(root))
+    .collect()
 }

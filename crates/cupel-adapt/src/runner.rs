@@ -1,12 +1,13 @@
-// ABOUTME: What every runner producer shares (ADR-076): a `RunnerSpec` names the tool, builds the command
-// ABOUTME: for a project root, and reads its report; `Runner` runs it once per root into `TestResults`.
+// ABOUTME: What every runner producer shares (ADR-076, ADR-077): a `RunnerSpec` names the tool, builds the
+// ABOUTME: command for a project root, narrows it, and reads its report; `Runner` runs it per root.
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    Availability, Captured, CostClass, Ctx, EventSink, FactKind, Langs, Process, ProduceCtx,
-    Producer, ProducerId, Result, RunnerInvocation, Scope, TestResult, TestResults, ToolId,
-    ToolProbe, find_program, output_tail,
+    Availability, Cancellation, Captured, CostClass, Ctx, Error, EventSink, FactKind, Langs,
+    Process, ProduceCtx, Producer, ProducerId, Result, RunnerCommand, RunnerInvocation, Scope,
+    TestResult, TestResults, TestSelection, ToolId, ToolProbe, find_program, output_tail,
 };
 
 use crate::toolchain;
@@ -33,6 +34,32 @@ pub struct RunnerSpec {
     pub read: fn(&Ran) -> Option<Vec<TestResult>>,
     /// Exit codes that mean the suite ran to its end even with no failing test.
     pub completed_codes: &'static [i32],
+    /// The arguments appended to the command to run only a selection in one root; `None` when
+    /// the runner cannot narrow to it.
+    pub select: fn(&Selected<'_>) -> Option<Vec<String>>,
+    /// How the runner lists its tests; `None` when it cannot.
+    pub list: Option<Lister>,
+}
+
+/// What one root runs of a selection, relative to that root.
+pub enum Selected<'a> {
+    /// Test IDs, as the runner reports them.
+    Tests(&'a [String]),
+    /// Test files.
+    Files(&'a [String]),
+}
+
+/// How a runner lists its tests without running them.
+pub struct Lister {
+    /// The command line for one root.
+    pub command: fn(&Root) -> Vec<String>,
+    /// The test IDs in its standard output, relative to the root.
+    pub parse: fn(&str) -> Vec<String>,
+}
+
+/// A spec's `select` for runners that cannot narrow.
+pub fn whole_suite(_: &Selected<'_>) -> Option<Vec<String>> {
+    None
 }
 
 /// A project root a runner runs in.
@@ -58,6 +85,7 @@ pub struct Ran<'a> {
 }
 
 /// A runner producer: `spec` run once per project root of its language.
+#[derive(Clone)]
 pub struct Runner(pub &'static RunnerSpec);
 
 impl Producer<TestResults> for Runner {
@@ -112,10 +140,52 @@ impl Producer<TestResults> for Runner {
     }
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<TestResults> {
+        cupel_core::Runner::run(self, ctx, &TestSelection::All, &[], None)
+    }
+}
+
+impl cupel_core::Runner for Runner {
+    fn list(&self, ctx: &ProduceCtx) -> Result<Vec<String>> {
+        let Some(lister) = &self.0.list else {
+            return Err(Error::InvalidValue {
+                what: "runner",
+                value: self.0.id.to_owned(),
+                expected: "a runner that lists its tests: tool.cargo-nextest, tool.go-test, tool.pytest",
+            });
+        };
+        let mut ids = Vec::new();
+        for (index, (dir, packages)) in roots(ctx).into_iter().enumerate() {
+            let root = self.root(ctx, index, &dir, packages)?;
+            let command = (lister.command)(&root);
+            let captured = self.process(&root, &command, &[]).run(&ctx.cancel)?;
+            ids.extend(
+                (lister.parse)(&captured.stdout)
+                    .into_iter()
+                    .map(|id| placed_id(&id, &dir)),
+            );
+        }
+        Ok(ids)
+    }
+
+    fn run(
+        &self,
+        ctx: &ProduceCtx,
+        selection: &TestSelection,
+        env: &[(String, String)],
+        timeout: Option<Duration>,
+    ) -> Result<TestResults> {
+        let cancel = timeout.map_or_else(|| ctx.cancel.clone(), |limit| ctx.cancel.child(limit));
         let mut invocations = Vec::new();
         let mut tests = Vec::new();
-        for (index, (dir, packages)) in roots(ctx).into_iter().enumerate() {
-            let (invocation, found) = self.run_root(ctx, index, &dir, packages)?;
+        for (index, (dir, packages), narrowing) in self.narrowed(ctx, selection)? {
+            let root = self.root(ctx, index, &dir, packages)?;
+            let run = Run {
+                narrowing: &narrowing,
+                env,
+                cancel: &cancel,
+                timeout,
+            };
+            let (invocation, found) = self.run_root(ctx, &root, &dir, &run)?;
             invocations.push(invocation);
             tests.extend(found.into_iter().map(|test| placed(test, &dir)));
         }
@@ -126,18 +196,88 @@ impl Producer<TestResults> for Runner {
             &ctx.ctx.root,
         ))
     }
+
+    fn commands(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Option<Vec<RunnerCommand>> {
+        let narrowed = self.narrowed(ctx, selection).ok()?;
+        Some(
+            narrowed
+                .into_iter()
+                .map(|(_, (dir, packages), narrowing)| {
+                    let root = toolchain::Root::new(ctx.ctx.root.join(&dir), Vec::new(), packages);
+                    let base = toolchain::runner_command(&self.id(), &root)
+                        .unwrap_or_else(|| self.0.tool.to_owned());
+                    let words: Vec<String> = narrowing.iter().map(|word| quote(word)).collect();
+                    RunnerCommand {
+                        dir,
+                        command: std::iter::once(base)
+                            .chain(words)
+                            .collect::<Vec<_>>()
+                            .join(" "),
+                    }
+                })
+                .collect(),
+        )
+    }
 }
 
+/// How one root's run differs from the whole suite's.
+struct Run<'a> {
+    /// Arguments appended to the command.
+    narrowing: &'a [String],
+    env: &'a [(String, String)],
+    cancel: &'a Cancellation,
+    timeout: Option<Duration>,
+}
+
+/// A root to run in: its index, its directory and packages, and the arguments that narrow it.
+type Narrowed = (usize, (String, Vec<String>), Vec<String>);
+
 impl Runner {
-    /// Runs the suite in the project root `dir` (the `index`th root) and reads what it reported,
-    /// relative to that root.
-    fn run_root(
+    /// The roots `selection` reaches, each with the arguments that narrow its run; an error
+    /// when the runner cannot narrow to it.
+    fn narrowed(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Result<Vec<Narrowed>> {
+        let roots = roots(ctx);
+        let dirs: Vec<String> = roots.iter().map(|(dir, _)| dir.clone()).collect();
+        let mut narrowed = Vec::new();
+        for (index, root) in roots.into_iter().enumerate() {
+            let narrowing = match selection {
+                TestSelection::All => Vec::new(),
+                TestSelection::Tests(ids) => {
+                    let own = owned(ids, &root.0, &dirs, ": ");
+                    if own.is_empty() {
+                        continue;
+                    }
+                    self.select(&Selected::Tests(&own))?
+                }
+                TestSelection::Files(files) => {
+                    let own = owned(files, &root.0, &dirs, "/");
+                    if own.is_empty() {
+                        continue;
+                    }
+                    self.select(&Selected::Files(&own))?
+                }
+            };
+            narrowed.push((index, root, narrowing));
+        }
+        Ok(narrowed)
+    }
+
+    fn select(&self, selected: &Selected<'_>) -> Result<Vec<String>> {
+        (self.0.select)(selected).ok_or_else(|| Error::InvalidValue {
+            what: "test selection",
+            value: self.0.id.to_owned(),
+            expected: "a selection the runner can narrow its suite to",
+        })
+    }
+
+    /// The `index`th project root, at `dir`, with its report area under `.cupel/`.
+    fn root(
         &self,
         ctx: &ProduceCtx,
         index: usize,
         dir: &str,
         packages: Vec<String>,
-    ) -> Result<(RunnerInvocation, Vec<TestResult>)> {
+    ) -> Result<Root> {
         let absolute = ctx.ctx.root.join(dir);
         let absolute = absolute.canonicalize().unwrap_or(absolute);
         let area = ctx.writer.create_dir(
@@ -147,7 +287,7 @@ impl Runner {
                 .join(self.0.id)
                 .join(index.to_string()),
         )?;
-        let root = Root {
+        Ok(Root {
             program: self
                 .program(&absolute)
                 .unwrap_or_else(|| self.0.tool.to_owned()),
@@ -155,12 +295,33 @@ impl Runner {
             packages,
             report: area.join("report"),
             config: area.join("config.toml"),
-        };
+        })
+    }
+
+    /// Runs the suite, narrowed by `run`, in `root` (at `dir`) and reads what it reported,
+    /// relative to that root. A run its own timeout ended is an incomplete invocation.
+    fn run_root(
+        &self,
+        ctx: &ProduceCtx,
+        root: &Root,
+        dir: &str,
+        run: &Run<'_>,
+    ) -> Result<(RunnerInvocation, Vec<TestResult>)> {
         let _ = std::fs::remove_file(&root.report);
-        let process = self.process(&root);
-        let captured = process.run(&ctx.cancel)?;
+        let command: Vec<String> = (self.0.command)(root)
+            .into_iter()
+            .chain(run.narrowing.iter().cloned())
+            .collect();
+        let process = self.process(root, &command, run.env);
+        let captured = match process.run(run.cancel) {
+            Err(Error::Cancelled) if !ctx.cancel.is_cancelled() => {
+                let limit = run.timeout.unwrap_or_default();
+                return Ok((timed_out(dir, process.command_line(), limit), Vec::new()));
+            }
+            ran => ran?,
+        };
         let found = (self.0.read)(&Ran {
-            root: &root,
+            root,
             captured: &captured,
             report: std::fs::read_to_string(&root.report).ok(),
         });
@@ -182,12 +343,14 @@ impl Runner {
         Ok((invocation, found.unwrap_or_default()))
     }
 
-    /// The process that runs the suite in `root`.
-    fn process(&self, root: &Root) -> Process {
-        let command = (self.0.command)(root);
+    /// The process that runs `command` in `root`, with the spec's environment and `env`.
+    fn process(&self, root: &Root, command: &[String], env: &[(String, String)]) -> Process {
         let (program, args) = command.split_first().unwrap_or((&root.program, &[]));
         let mut process = Process::new(program, &root.dir).args(args.iter().cloned());
         for (key, value) in self.0.env {
+            process = process.env(key, value);
+        }
+        for (key, value) in env {
             process = process.env(key, value);
         }
         if self.0.merged {
@@ -207,9 +370,56 @@ impl Runner {
     }
 }
 
+/// The invocation of a run that its own timeout ended after `limit`.
+fn timed_out(dir: &str, command: Vec<String>, limit: Duration) -> RunnerInvocation {
+    RunnerInvocation {
+        dir: dir.to_owned(),
+        command,
+        exit_code: None,
+        completed: false,
+        output: Some(format!("timed out after {} ms", limit.as_millis())),
+    }
+}
+
+/// The entries of `paths` (test IDs joined to their root by `separator`, or files) that belong
+/// to the root at `dir` among `dirs`, made relative to it: the deepest root naming them, `.`
+/// for those no other root names.
+fn owned(paths: &[String], dir: &str, dirs: &[String], separator: &str) -> Vec<String> {
+    let owner = |path: &str| {
+        dirs.iter()
+            .filter(|candidate| *candidate != ".")
+            .filter(|candidate| path.starts_with(&format!("{candidate}{separator}")))
+            .max_by_key(|candidate| candidate.len())
+            .map_or(".", String::as_str)
+    };
+    paths
+        .iter()
+        .filter(|path| owner(path) == dir)
+        .map(|path| {
+            if dir == "." {
+                path.clone()
+            } else {
+                path[dir.len() + separator.len()..].to_owned()
+            }
+        })
+        .collect()
+}
+
+/// `word` as one shell word.
+fn quote(word: &str) -> String {
+    let plain = word
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || "-_./:=+,@%".contains(c));
+    if plain && !word.is_empty() {
+        word.to_owned()
+    } else {
+        format!("'{}'", word.replace('\'', r"'\''"))
+    }
+}
+
 /// The project roots of the language being produced, each with its packages; the repository
 /// root alone when `ProjectInfo` names none.
-fn roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
+pub(crate) fn roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
     let roots: Vec<(String, Vec<String>)> = ctx
         .upstream
         .get::<ProjectInfo>()
@@ -241,9 +451,25 @@ pub fn jest_report_command(root: &Root, args: &[&str]) -> Vec<String> {
 
 /// `test`, reported relative to the root at `dir`, made relative to the repository root.
 fn placed(mut test: TestResult, dir: &str) -> TestResult {
-    if dir != "." {
-        test.id = format!("{dir}: {}", test.id);
-        test.file = test.file.map(|file| format!("{dir}/{file}"));
-    }
+    test.id = placed_id(&test.id, dir);
+    test.file = test.file.map(|file| placed_file(&file, dir));
     test
+}
+
+/// A test ID of the root at `dir`, unique across roots (ADR-075).
+pub(crate) fn placed_id(id: &str, dir: &str) -> String {
+    if dir == "." {
+        id.to_owned()
+    } else {
+        format!("{dir}: {id}")
+    }
+}
+
+/// A file relative to the root at `dir`, made relative to the repository root.
+pub(crate) fn placed_file(file: &str, dir: &str) -> String {
+    if dir == "." {
+        file.to_owned()
+    } else {
+        format!("{dir}/{file}")
+    }
 }

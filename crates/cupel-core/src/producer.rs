@@ -18,7 +18,9 @@ use crate::fact::{Fact, FactKind};
 use crate::grade::CostClass;
 use crate::id::{LangId, ProducerId, ToolId};
 use crate::lang::{Lang, Langs};
+use crate::runner::Runner;
 use crate::scope::Scope;
+use crate::test_results::TestResults;
 use crate::writer::Writer;
 
 /// What a producer can see when reporting whether it can run here.
@@ -302,6 +304,8 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
 #[derive(Default)]
 pub struct ProducerRegistry {
     by_kind: BTreeMap<FactKind, Vec<Box<dyn RegisteredProducer>>>,
+    /// The `TestResults` producers registered as runners, by ID (ADR-077).
+    runners: BTreeMap<ProducerId, Box<dyn Runner>>,
 }
 
 impl ProducerRegistry {
@@ -313,6 +317,17 @@ impl ProducerRegistry {
                 producer,
                 fact: PhantomData,
             }));
+    }
+
+    /// Registers `runner` as a `TestResults` producer and keeps it for [`runner`](Self::runner).
+    pub fn register_runner<R: Runner + Clone + 'static>(&mut self, runner: R) {
+        self.runners.insert(runner.id(), Box::new(runner.clone()));
+        self.register::<TestResults, _>(runner);
+    }
+
+    /// The runner registered as `id`.
+    pub fn runner(&self, id: &ProducerId) -> Option<&dyn Runner> {
+        self.runners.get(id).map(AsRef::as_ref)
     }
 
     /// Producers of `kind` that serve `lang`, in selection order.

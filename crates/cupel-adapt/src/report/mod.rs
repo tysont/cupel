@@ -10,6 +10,7 @@
 pub mod jest_json;
 pub mod junit;
 pub mod libtest;
+pub mod listing;
 pub mod test2json;
 pub mod unittest;
 

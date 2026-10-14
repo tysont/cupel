@@ -1,0 +1,6 @@
+# Captured from the real tool on the per-test/rust fixture (P3.3); the other files here are its
+# unedited output. `dir` is where it ran, which parsers strip from absolute paths.
+tool = "cargo-llvm-cov 0.9.1, cargo-nextest 0.9.148, rustc 1.92.0"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p33/work/rust"
+command = "cargo llvm-cov nextest --no-clean --lcov --output-path <report> --workspace -E '(binary_id(=calc) & test(=tests::scales))'"
+exit_code = 0

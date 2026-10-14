@@ -1,13 +1,13 @@
 // ABOUTME: The `cargo nextest` runner producer: `cargo nextest run` with a tool configuration file whose `cupel`
 // ABOUTME: profile writes a JUnit report under the target directory, read by the JUnit parser.
-use cupel_core::{LangId, Langs, TestResult, TestResults};
+use cupel_core::{LangId, Langs, TestResult};
 
-use crate::report::junit;
-use crate::runner::{Ran, Root, Runner, RunnerSpec};
+use crate::report::{junit, listing};
+use crate::runner::{Lister, Ran, Root, Runner, RunnerSpec, Selected};
 
 const ID: &str = "tool.cargo-nextest";
 
-static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
+pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
     id: ID,
     languages: || Langs::Only(vec![LangId::from("rust")]),
     tool: "cargo-nextest",
@@ -17,12 +17,17 @@ static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
     env: &[("CARGO_TERM_COLOR", "never")],
     merged: false,
     read,
+    select,
+    list: Some(Lister {
+        command: list_command,
+        parse: listing::nextest,
+    }),
     completed_codes: &[0],
 };
 
 inventory::submit!(crate::ToolProducer {
     id: ID,
-    register: |registry| registry.register::<TestResults, _>(Runner(&CARGO_NEXTEST)),
+    register: |registry| registry.register_runner(Runner(&CARGO_NEXTEST)),
 });
 
 /// The `cupel` profile: a `JUnit` report that keeps the output of failures.
@@ -58,4 +63,36 @@ fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
     )
     .ok()?;
     junit::nextest(&report)
+}
+
+/// Tests by ID, as a filterset naming each binary and test exactly; files are not selectable.
+fn select(selected: &Selected<'_>) -> Option<Vec<String>> {
+    let Selected::Tests(ids) = selected else {
+        return None;
+    };
+    Some(vec!["-E".to_owned(), filterset(ids)])
+}
+
+/// The filterset that matches exactly the nextest tests `ids` (`<binary-id> <test path>`).
+pub(crate) fn filterset(ids: &[String]) -> String {
+    ids.iter()
+        .map(|id| match id.split_once(' ') {
+            Some((binary, test)) => format!("(binary_id(={binary}) & test(={test}))"),
+            None => format!("test(={id})"),
+        })
+        .collect::<Vec<_>>()
+        .join(" | ")
+}
+
+fn list_command(_: &Root) -> Vec<String> {
+    [
+        "cargo",
+        "nextest",
+        "list",
+        "--workspace",
+        "--message-format",
+        "json",
+    ]
+    .map(str::to_owned)
+    .to_vec()
 }

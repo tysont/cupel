@@ -1,33 +1,15 @@
 // ABOUTME: The runner producers as the registry holds them: table order, detection, pins, and real runs of
 // ABOUTME: each runner on the test-results fixtures, skipped with a reason when the tool is not installed.
-use std::path::Path;
-
-use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Cancellation, Ctx, Error, FactKind, Lang, LangFamily, LangId, ProduceCtx,
-    Produced, ProducerRegistry, RegisteredProducer, Scope, TestOutcome, TestResults, Writer,
+    Availability, Cancellation, Ctx, Error, FactKind, LangId, ProducerRegistry, Scope, TestOutcome,
+    TestResults,
 };
 use cupel_fixtures::copy_repo;
+use support::{lang, produce_ctx, registry, runner};
+
+mod support;
 
 use TestOutcome::{Passed, Skipped};
-
-fn registry() -> ProducerRegistry {
-    let mut registry = ProducerRegistry::default();
-    cupel_adapt::register(&mut registry);
-    registry
-}
-
-fn lang(id: &str) -> Lang {
-    let family = if matches!(id, "javascript" | "typescript") {
-        "ecma"
-    } else {
-        id
-    };
-    Lang {
-        id: LangId::from(id),
-        family: LangFamily::from(family),
-    }
-}
 
 /// The `TestResults` producers for `lang` at `root` in preference order, under `ctx`'s pins.
 fn preferred(registry: &ProducerRegistry, lang: &str, ctx: &Ctx) -> Vec<String> {
@@ -122,40 +104,6 @@ fn run(id: &str, lang: &str, repo: &str, red: bool) -> Option<TestResults> {
         )
         .unwrap();
     Some(fact.downcast::<TestResults>().unwrap())
-}
-
-fn runner<'a>(registry: &'a ProducerRegistry, id: &str, lang: &str) -> &'a dyn RegisteredProducer {
-    registry
-        .producers_for(FactKind::TestResults, &self::lang(lang))
-        .find(|producer| producer.id().as_str() == id)
-        .unwrap()
-}
-
-/// The context a runner gets for the repository at `root`: one project root, `.`.
-fn produce_ctx(root: &Path, lang: &str, cancel: Cancellation) -> ProduceCtx {
-    let mut ctx = ProduceCtx::new(
-        Ctx::new(root.to_path_buf()),
-        Writer::new(root, false).unwrap().confined(),
-        cancel,
-    );
-    ctx.upstream.insert(
-        Produced::new(ProjectInfo {
-            roots: vec![ProjectRoot {
-                path: ".".to_owned(),
-                lang: LangId::from(lang),
-                build_files: Vec::new(),
-                members: Vec::new(),
-                packages: if lang == "go" {
-                    vec!["./...".to_owned()]
-                } else {
-                    Vec::new()
-                },
-                skip_dirs: Vec::new(),
-            }],
-        })
-        .share(),
-    );
-    ctx
 }
 
 /// Each test's ID and outcome.

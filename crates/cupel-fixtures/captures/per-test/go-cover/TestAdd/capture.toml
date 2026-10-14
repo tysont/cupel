@@ -1,0 +1,6 @@
+# Captured from the real tool on the per-test/go fixture (P3.3); the other files here are its
+# unedited output. `dir` is where it ran, which parsers strip from absolute paths.
+tool = "go1.23.2"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p33/work/go"
+command = "go test -coverprofile=<report> -coverpkg=./... -run '^(TestAdd)$' example.com/calc"
+exit_code = 0
