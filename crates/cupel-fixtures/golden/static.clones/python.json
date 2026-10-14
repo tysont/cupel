@@ -1,0 +1,339 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.clones",
+      "oracle": null,
+      "score": {
+        "n": 27,
+        "unit": "pairs",
+        "value": 8.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settle_invoices` and `reconcile_payments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 31,
+          "end_line": 12,
+          "file": "src/ledger/clones_settlement.py",
+          "hash": "sh_46a99291992c7f37",
+          "lang": "python",
+          "line": 4,
+          "lines": 9,
+          "nodes": 55,
+          "symbol": "ledger.clones_settlement.settle_invoices"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 30,
+          "end_line": 23,
+          "file": "src/ledger/clones_settlement.py",
+          "hash": "sh_46a99291992c7f37",
+          "lang": "python",
+          "line": 15,
+          "lines": 9,
+          "nodes": 55,
+          "symbol": "ledger.clones_settlement.reconcile_payments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_388503",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 12,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_46a99291992c7f37",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_388503 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.settle_invoices",
+        "hash": "sh_46a99291992c7f37",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.settle_invoices` and `ledger.clones_settlement.reconcile_payments` (src/ledger/clones_settlement.py:15) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `order_lines` and `refund_lines` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "jaccard": 0.844,
+        "left": {
+          "col": 1,
+          "end_col": 17,
+          "end_line": 38,
+          "file": "src/ledger/clones_settlement.py",
+          "hash": "sh_b9460912628dfe49",
+          "lang": "python",
+          "line": 26,
+          "lines": 13,
+          "nodes": 88,
+          "symbol": "ledger.clones_settlement.order_lines"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 17,
+          "end_line": 54,
+          "file": "src/ledger/clones_settlement.py",
+          "hash": "sh_1b6aceb19c1d15c1",
+          "lang": "python",
+          "line": 41,
+          "lines": 14,
+          "nodes": 94,
+          "symbol": "ledger.clones_settlement.refund_lines"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_ca0ec3",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 38,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_b9460912628dfe49",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ca0ec3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.order_lines",
+        "hash": "sh_b9460912628dfe49",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.order_lines` and `ledger.clones_settlement.refund_lines` (src/ledger/clones_settlement.py:41) are type-3 clones (jaccard 0.84)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `net_total` shares with 3 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 1,
+            "end_col": 13,
+            "end_line": 5,
+            "file": "src/ledger/twins.py",
+            "hash": "sh_16373b1ddd86c11d",
+            "lang": "python",
+            "line": 1,
+            "lines": 5,
+            "nodes": 26,
+            "symbol": "ledger.twins.net_total"
+          },
+          {
+            "col": 1,
+            "end_col": 13,
+            "end_line": 12,
+            "file": "src/ledger/twins.py",
+            "hash": "sh_16373b1ddd86c11d",
+            "lang": "python",
+            "line": 8,
+            "lines": 5,
+            "nodes": 26,
+            "symbol": "ledger.twins.sum_after_charge"
+          },
+          {
+            "col": 1,
+            "end_col": 14,
+            "end_line": 19,
+            "file": "src/ledger/twins.py",
+            "hash": "sh_16373b1ddd86c11d",
+            "lang": "python",
+            "line": 15,
+            "lines": 5,
+            "nodes": 26,
+            "symbol": "ledger.twins.net_total_floor"
+          },
+          {
+            "col": 1,
+            "end_col": 13,
+            "end_line": 30,
+            "file": "src/ledger/twins.py",
+            "hash": "sh_16373b1ddd86c11d",
+            "lang": "python",
+            "line": 22,
+            "lines": 9,
+            "nodes": 26,
+            "symbol": "ledger.twins.net_total_laid_out"
+          }
+        ],
+        "min_jaccard": 1.0,
+        "pairs": 6,
+        "threshold": 0.82
+      },
+      "id": "fnd_715226",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 5,
+        "file": "src/ledger/twins.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_16373b1ddd86c11d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_715226 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins.net_total",
+        "hash": "sh_16373b1ddd86c11d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.twins.net_total` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_388503",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract what `settle_invoices` and `reconcile_payments` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ca0ec3",
+      "kind": "refactor_extract",
+      "priority": 2,
+      "summary": "Extract what `order_lines` and `refund_lines` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_715226",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Extract the structure `net_total` shares with 3 other symbols into one function and call it from each."
+    }
+  ],
+  "plan": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.crap": {
+            "no_coverage": true
+          },
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 27,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 78
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 3
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "total_findings": 3,
+  "truncated": false
+}

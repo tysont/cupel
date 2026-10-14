@@ -1,6 +1,18 @@
 {
   "items": [
     {
+      "file": "clones_settlement.go",
+      "kind": "type",
+      "path": "ledger.Invoice",
+      "signature": "",
+      "span": {
+        "col": 6,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 5
+      }
+    },
+    {
       "file": "complexity.go",
       "kind": "function",
       "path": "ledger.Label",

@@ -138,6 +138,7 @@ type Body = fn(&CheckCtx, &Facts, &mut dyn EventSink) -> Result<CheckResult>;
 struct TestCheck {
     manifest: Manifest,
     body: Body,
+    spans_family: bool,
 }
 
 impl Check for TestCheck {
@@ -158,6 +159,10 @@ impl Check for TestCheck {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         (self.body)(ctx, facts, sink)
+    }
+
+    fn spans_family(&self) -> bool {
+        self.spans_family
     }
 }
 
@@ -195,7 +200,25 @@ fn check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
     Box::new(TestCheck {
         manifest: manifest(id, needs),
         body,
+        spans_family: false,
     })
+}
+
+/// A check that runs once per language family, over every member language's facts.
+fn family_check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
+    Box::new(TestCheck {
+        manifest: manifest(id, needs),
+        body,
+        spans_family: true,
+    })
+}
+
+/// `id` as a member of `family`.
+fn in_family(id: &str, family: &str) -> Lang {
+    Lang {
+        id: LangId::from(id),
+        family: LangFamily::from(family),
+    }
 }
 
 /// A world: registries, a repository directory, and its configuration.
@@ -394,6 +417,131 @@ fn producer_findings_are_kept_once_by_id() {
         .filter(|event| matches!(event, Event::Finding(_)))
         .count();
     assert_eq!(streamed, 1);
+}
+
+// ---------------------------------------------------------------- family-wide checks
+
+/// Reports, as its score, how many languages' `Symbols` it saw (`value`) and how many symbols
+/// are in its scope (`n`).
+fn family_symbols(ctx: &CheckCtx, facts: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+    let seen = facts.family::<Symbols>()?;
+    let n = ctx
+        .scope
+        .symbols
+        .as_ref()
+        .map_or(0, |keys| keys.len() as u64);
+    Ok(passing(
+        "t.family",
+        Some(Score {
+            value: f64::from(u32::try_from(seen.len()).unwrap()),
+            unit: "languages".to_owned(),
+            n,
+        }),
+    ))
+}
+
+#[test]
+fn a_family_wide_check_runs_once_per_family_with_every_member_languages_facts() {
+    let world = World::new(
+        vec![family_check(
+            "t.family",
+            &[FactKind::Symbols],
+            family_symbols,
+        )],
+        "",
+    );
+    let (outcome, events) = world.run(&["go", "rust"], |job| {
+        job.langs = vec![in_family("go", "pair"), in_family("rust", "pair")];
+    });
+    let outcome = outcome.unwrap();
+    assert_eq!(outcome.checks.len(), 1, "{:?}", outcome.checks);
+    let score = outcome.checks[0].score.as_ref().unwrap();
+    assert!((score.value - 2.0).abs() < f64::EPSILON, "{score:?}");
+    let progress = events
+        .iter()
+        .filter(|event| matches!(event, Event::Progress { .. }))
+        .count();
+    assert_eq!(progress, 1, "one task for the family");
+}
+
+#[test]
+fn languages_of_different_families_run_as_separate_tasks() {
+    let world = World::new(
+        vec![family_check(
+            "t.family",
+            &[FactKind::Symbols],
+            family_symbols,
+        )],
+        "",
+    );
+    let (outcome, events) = world.run(&["go", "rust"], |_| {});
+    let outcome = outcome.unwrap();
+    let score = outcome.checks[0].score.as_ref().unwrap();
+    assert!(
+        (score.value - 1.0).abs() < f64::EPSILON,
+        "mean of one language each"
+    );
+    let progress = events
+        .iter()
+        .filter(|event| matches!(event, Event::Progress { .. }))
+        .count();
+    assert_eq!(progress, 2, "one task per family");
+}
+
+#[test]
+fn an_unsupported_family_member_is_skipped_and_the_rest_of_the_family_runs() {
+    fn decisions_of_family(
+        _: &CheckCtx,
+        facts: &Facts,
+        _: &mut dyn EventSink,
+    ) -> Result<CheckResult> {
+        let seen = facts.family::<Decisions>()?;
+        Ok(passing(
+            "t.family",
+            Some(Score {
+                value: f64::from(u32::try_from(seen.len()).unwrap()),
+                unit: "languages".to_owned(),
+                n: 1,
+            }),
+        ))
+    }
+    let world = World::new(
+        vec![family_check(
+            "t.family",
+            &[FactKind::Symbols, FactKind::Decisions],
+            decisions_of_family,
+        )],
+        "",
+    );
+    let (outcome, _) = world.run(&["go", "rust"], |job| {
+        job.langs = vec![in_family("go", "pair"), in_family("rust", "pair")];
+    });
+    let checks = outcome.unwrap().checks;
+    assert_eq!(checks.len(), 2, "{checks:?}");
+    assert!((checks[0].score.as_ref().unwrap().value - 1.0).abs() < f64::EPSILON);
+    let skipped = checks[1].skipped.as_ref().unwrap();
+    assert_eq!(skipped.lang, Some(LangId::from("go")));
+    assert_eq!(skipped.fact, Some(FactKind::Decisions));
+}
+
+#[test]
+fn facts_of_other_family_members_are_served_only_when_declared() {
+    let mut facts = Facts::for_manifest(&manifest("t.family", &[FactKind::Symbols]));
+    facts.insert(Symbols::default()).unwrap();
+    facts.insert_sibling(Symbols::default()).unwrap();
+    assert_eq!(facts.family::<Symbols>().unwrap().len(), 2);
+    assert_eq!(
+        facts.insert_sibling(Decisions::default()).unwrap_err(),
+        Error::UndeclaredFact {
+            kind: FactKind::Decisions
+        }
+    );
+    assert_eq!(
+        facts.family::<Decisions>().unwrap_err(),
+        Error::UndeclaredFact {
+            kind: FactKind::Decisions
+        }
+    );
 }
 
 // ---------------------------------------------------------------- results and events

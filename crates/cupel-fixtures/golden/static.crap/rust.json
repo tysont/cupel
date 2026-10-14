@@ -4,11 +4,11 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 16,
+      "findings": 20,
       "id": "static.crap",
       "oracle": null,
       "score": {
-        "n": 45,
+        "n": 49,
         "unit": "max",
         "value": 132.0
       },
@@ -25,6 +25,162 @@
   "exit_code": 0,
   "explanation": null,
   "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `settle_invoices` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_c22477",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "src/clones_settlement.rs",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_b8cee6ed2fdf44c6",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_c22477 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::settle_invoices",
+        "hash": "sh_b8cee6ed2fdf44c6",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::settle_invoices` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `reconcile_payments` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_c22477",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "src/clones_settlement.rs",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_b8cee6ed2fdf44c6",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_c22477 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::reconcile_payments",
+        "hash": "sh_b8cee6ed2fdf44c6",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::reconcile_payments` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `order_lines` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_baeb12",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "src/clones_settlement.rs",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_0e8fd0a2e4ec138c",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_baeb12 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::order_lines",
+        "hash": "sh_0e8fd0a2e4ec138c",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::order_lines` has CRAP 6.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `refund_lines` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 6.0,
+        "cyclomatic": 2,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_e68fe2",
+      "kind": "crap.watch",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 65,
+        "file": "src/clones_settlement.rs",
+        "line": 50
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_32c95fbbf1e82a6f",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_e68fe2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::refund_lines",
+        "hash": "sh_32c95fbbf1e82a6f",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::refund_lines` has CRAP 6.0 (watch at 5, high at 30)"
+    },
     {
       "action": {
         "hints": {},
@@ -674,52 +830,52 @@
     },
     {
       "command": null,
-      "finding": "fnd_c9dfcf",
+      "finding": "fnd_c22477",
       "kind": "review",
       "priority": 4,
+      "summary": "Review `settle_invoices` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c22477",
+      "kind": "review",
+      "priority": 5,
+      "summary": "Review `reconcile_payments` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_baeb12",
+      "kind": "review",
+      "priority": 6,
+      "summary": "Review `order_lines` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e68fe2",
+      "kind": "review",
+      "priority": 7,
+      "summary": "Review `refund_lines` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c9dfcf",
+      "kind": "review",
+      "priority": 8,
       "summary": "Review `clamp` when changing it: keep its CRAP below 30 with tests or simpler control flow."
     },
     {
       "command": null,
       "finding": "fnd_9a0b81",
       "kind": "review",
-      "priority": 5,
+      "priority": 9,
       "summary": "Review `classify` when changing it: keep its CRAP below 30 with tests or simpler control flow."
     },
     {
       "command": null,
       "finding": "fnd_1cc8ce",
       "kind": "review",
-      "priority": 6,
-      "summary": "Review `first_overdraft` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-    },
-    {
-      "command": null,
-      "finding": "fnd_da7d76",
-      "kind": "review",
-      "priority": 7,
-      "summary": "Review `describe` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-    },
-    {
-      "command": null,
-      "finding": "fnd_925ca9",
-      "kind": "review",
-      "priority": 8,
-      "summary": "Review `discounted` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-    },
-    {
-      "command": null,
-      "finding": "fnd_b48d27",
-      "kind": "review",
-      "priority": 9,
-      "summary": "Review `tally` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-    },
-    {
-      "command": null,
-      "finding": "fnd_b71cf0",
-      "kind": "review",
       "priority": 10,
-      "summary": "Review `net_total` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      "summary": "Review `first_overdraft` when changing it: keep its CRAP below 30 with tests or simpler control flow."
     }
   ],
   "plan": null,
@@ -770,7 +926,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 23,
+      "files": 24,
       "languages": [
         "rust"
       ],
@@ -778,7 +934,7 @@
       "roots": [
         "."
       ],
-      "symbols": 60
+      "symbols": 64
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -789,7 +945,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 13,
+      "info": 17,
       "warn": 3
     },
     "gate": null,
@@ -797,6 +953,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 16,
+  "total_findings": 20,
   "truncated": false
 }

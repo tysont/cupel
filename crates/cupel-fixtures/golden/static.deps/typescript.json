@@ -214,7 +214,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 28,
+      "files": 29,
       "languages": [
         "typescript"
       ],
@@ -222,7 +222,7 @@
       "roots": [
         "."
       ],
-      "symbols": 67
+      "symbols": 71
     },
     "seed": "<seed>",
     "started": "<timestamp>",

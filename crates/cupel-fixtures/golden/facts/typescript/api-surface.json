@@ -13,6 +13,66 @@
       }
     },
     {
+      "file": "src/clones_settlement.ts",
+      "kind": "interface",
+      "path": "clones_settlement.Invoice",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/clones_settlement.ts",
+      "kind": "function",
+      "path": "clones_settlement.settleInvoices",
+      "signature": "(_: Invoice[], _: number): [number, number]",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/clones_settlement.ts",
+      "kind": "function",
+      "path": "clones_settlement.reconcilePayments",
+      "signature": "(_: readonly Invoice[], _: number): [number, number]",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 21
+      }
+    },
+    {
+      "file": "src/clones_settlement.ts",
+      "kind": "function",
+      "path": "clones_settlement.orderLines",
+      "signature": "(_: number[], _: number[], _: number): string[]",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      }
+    },
+    {
+      "file": "src/clones_settlement.ts",
+      "kind": "function",
+      "path": "clones_settlement.refundLines",
+      "signature": "(_: number[], _: number[], _: number): string[]",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 65,
+        "line": 50
+      }
+    },
+    {
       "file": "src/complexity.ts",
       "kind": "function",
       "path": "complexity.label",

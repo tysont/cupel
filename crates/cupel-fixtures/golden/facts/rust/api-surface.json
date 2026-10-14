@@ -97,6 +97,66 @@
       }
     },
     {
+      "file": "src/clones_settlement.rs",
+      "kind": "type",
+      "path": "clones_settlement::Invoice",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "path": "clones_settlement::settle_invoices",
+      "signature": "(_: &[Invoice], _: i64) ->(i64, usize)",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "path": "clones_settlement::reconcile_payments",
+      "signature": "(_: &[Invoice], _: i64) ->(i64, usize)",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "line": 21
+      }
+    },
+    {
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "path": "clones_settlement::order_lines",
+      "signature": "(_: &[i64], _: &[i64], _: i64) -> Vec<String>",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "line": 34
+      }
+    },
+    {
+      "file": "src/clones_settlement.rs",
+      "kind": "function",
+      "path": "clones_settlement::refund_lines",
+      "signature": "(_: &[i64], _: &[i64], _: i64) -> Vec<String>",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 65,
+        "line": 50
+      }
+    },
+    {
       "file": "src/complexity.rs",
       "kind": "function",
       "path": "complexity::label",

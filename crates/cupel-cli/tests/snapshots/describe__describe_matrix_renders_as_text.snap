@@ -4,8 +4,9 @@ expression: "support::redacted_text(&outcome.stdout)"
 ---
 cupel describe: pass (exit 0)
 
-matrix · 5 checks × 5 languages
+matrix · 6 checks × 5 languages
   check              go         javascript  python     rust       typescript
+  static.clones      supported  supported   supported  supported  supported
   static.complexity  supported  supported   supported  supported  supported
   static.crap        supported  supported   supported  supported  supported
   static.dead-code   supported  supported   supported  supported  supported

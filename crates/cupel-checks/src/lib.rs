@@ -35,6 +35,7 @@
 mod finding;
 mod metrics;
 mod settings;
+mod static_clones;
 mod static_complexity;
 mod static_crap;
 mod static_dead_code;
@@ -49,6 +50,10 @@ use cupel_core::CheckRegistry;
 ///
 /// When a check is already registered under one of these IDs: native check IDs are unique.
 pub fn register(registry: &mut CheckRegistry) {
+    // Alphabetical by check ID: describe and the envelope list checks in this order.
+    registry
+        .register(Box::new(static_clones::StaticClones::new()))
+        .expect("native check IDs are unique");
     registry
         .register(Box::new(static_complexity::StaticComplexity::new()))
         .expect("native check IDs are unique");

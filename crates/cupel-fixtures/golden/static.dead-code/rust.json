@@ -4,11 +4,11 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 11,
+      "findings": 15,
       "id": "static.dead-code",
       "oracle": null,
       "score": {
-        "n": 60,
+        "n": 64,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -25,6 +25,166 @@
   "exit_code": 0,
   "explanation": null,
   "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settle_invoices` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `settle_invoices` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle_invoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.rs",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.rs"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_fea98c",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "src/clones_settlement.rs",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_b8cee6ed2fdf44c6",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_fea98c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::settle_invoices",
+        "hash": "sh_b8cee6ed2fdf44c6",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::settle_invoices` is exported but no import resolves to src/clones_settlement.rs"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `reconcile_payments` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `reconcile_payments` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcile_payments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.rs",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.rs"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_fea98c",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "src/clones_settlement.rs",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_b8cee6ed2fdf44c6",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_fea98c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::reconcile_payments",
+        "hash": "sh_b8cee6ed2fdf44c6",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::reconcile_payments` is exported but no import resolves to src/clones_settlement.rs"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `order_lines` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `order_lines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `order_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.rs",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.rs"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_806642",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "src/clones_settlement.rs",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_0e8fd0a2e4ec138c",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_806642 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::order_lines",
+        "hash": "sh_0e8fd0a2e4ec138c",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::order_lines` is exported but no import resolves to src/clones_settlement.rs"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `refund_lines` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `refund_lines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refund_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.rs",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.rs"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_87b20b",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 65,
+        "file": "src/clones_settlement.rs",
+        "line": 50
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_32c95fbbf1e82a6f",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_87b20b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement::refund_lines",
+        "hash": "sh_32c95fbbf1e82a6f",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`clones_settlement::refund_lines` is exported but no import resolves to src/clones_settlement.rs"
+    },
     {
       "action": {
         "hints": {},
@@ -476,66 +636,66 @@
     },
     {
       "command": null,
-      "finding": "fnd_118cf2",
+      "finding": "fnd_fea98c",
       "kind": "review",
       "priority": 2,
+      "summary": "Delete `settle_invoices` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `settle_invoices` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_fea98c",
+      "kind": "review",
+      "priority": 3,
+      "summary": "Delete `reconcile_payments` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `reconcile_payments` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_806642",
+      "kind": "review",
+      "priority": 4,
+      "summary": "Delete `order_lines` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `order_lines` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_87b20b",
+      "kind": "review",
+      "priority": 5,
+      "summary": "Delete `refund_lines` from src/clones_settlement.rs if nothing outside the repository uses it, or import src/clones_settlement.rs where `refund_lines` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_118cf2",
+      "kind": "review",
+      "priority": 6,
       "summary": "Delete `label` from src/complexity.rs if nothing outside the repository uses it, or import src/complexity.rs where `label` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_2ffced",
       "kind": "review",
-      "priority": 3,
+      "priority": 7,
       "summary": "Delete `settle` from src/complexity.rs if nothing outside the repository uses it, or import src/complexity.rs where `settle` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_fb9843",
       "kind": "review",
-      "priority": 4,
+      "priority": 8,
       "summary": "Delete `open_account` from src/complexity.rs if nothing outside the repository uses it, or import src/complexity.rs where `open_account` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_f22dc2",
       "kind": "review",
-      "priority": 5,
+      "priority": 9,
       "summary": "Delete `statement_template` from src/complexity.rs if nothing outside the repository uses it, or import src/complexity.rs where `statement_template` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_fd75b1",
       "kind": "review",
-      "priority": 6,
-      "summary": "Delete `net` from src/complexity.rs if nothing outside the repository uses it, or import src/complexity.rs where `net` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_2fde55",
-      "kind": "review",
-      "priority": 7,
-      "summary": "Delete `line` from src/complexity.rs if nothing outside the repository uses it, or import src/complexity.rs where `line` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_d383ed",
-      "kind": "review",
-      "priority": 8,
-      "summary": "Delete `overdue` from src/crap_scores.rs if nothing outside the repository uses it, or import src/crap_scores.rs where `overdue` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_1c92f7",
-      "kind": "review",
-      "priority": 9,
-      "summary": "Delete `clamp` from src/crap_scores.rs if nothing outside the repository uses it, or import src/crap_scores.rs where `clamp` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_3ed392",
-      "kind": "review",
       "priority": 10,
-      "summary": "Delete `to_cents` from src/crap_scores.rs if nothing outside the repository uses it, or import src/crap_scores.rs where `to_cents` is meant to be called."
+      "summary": "Delete `net` from src/complexity.rs if nothing outside the repository uses it, or import src/complexity.rs where `net` is meant to be called."
     }
   ],
   "plan": null,
@@ -586,7 +746,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 23,
+      "files": 24,
       "languages": [
         "rust"
       ],
@@ -594,7 +754,7 @@
       "roots": [
         "."
       ],
-      "symbols": 60
+      "symbols": 64
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -605,7 +765,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 10,
+      "info": 14,
       "warn": 1
     },
     "gate": null,
@@ -613,6 +773,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 11,
+  "total_findings": 15,
   "truncated": false
 }

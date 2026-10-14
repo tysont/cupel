@@ -7,6 +7,12 @@
   "description": {
     "checks": [
       {
+        "check": "static.clones",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
         "check": "static.complexity",
         "support": {
           "status": "supported"

@@ -4,11 +4,11 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 22,
+      "findings": 26,
       "id": "static.dead-code",
       "oracle": null,
       "score": {
-        "n": 70,
+        "n": 74,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -25,6 +25,166 @@
   "exit_code": 0,
   "explanation": null,
   "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settleInvoices` from src/clones_settlement.js if nothing outside the repository uses it, or import src/clones_settlement.js where `settleInvoices` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settleInvoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.js",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.js"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_5fce63",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "file": "src/clones_settlement.js",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_62494e6c882826e9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_5fce63 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.settleInvoices",
+        "hash": "sh_62494e6c882826e9",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.settleInvoices` is exported but no import resolves to src/clones_settlement.js"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `reconcilePayments` from src/clones_settlement.js if nothing outside the repository uses it, or import src/clones_settlement.js where `reconcilePayments` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcilePayments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.js",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.js"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_5fce63",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 27,
+        "file": "src/clones_settlement.js",
+        "line": 16
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_62494e6c882826e9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_5fce63 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.reconcilePayments",
+        "hash": "sh_62494e6c882826e9",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.reconcilePayments` is exported but no import resolves to src/clones_settlement.js"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `orderLines` from src/clones_settlement.js if nothing outside the repository uses it, or import src/clones_settlement.js where `orderLines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `orderLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.js",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.js"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_e909c8",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 43,
+        "file": "src/clones_settlement.js",
+        "line": 29
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_12d53eb58fe5b4c7",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_e909c8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.orderLines",
+        "hash": "sh_12d53eb58fe5b4c7",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.orderLines` is exported but no import resolves to src/clones_settlement.js"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `refundLines` from src/clones_settlement.js if nothing outside the repository uses it, or import src/clones_settlement.js where `refundLines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refundLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.js",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.js"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_59eb19",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 60,
+        "file": "src/clones_settlement.js",
+        "line": 45
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_14e8af00fe08c7cd",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_59eb19 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.refundLines",
+        "hash": "sh_14e8af00fe08c7cd",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.refundLines` is exported but no import resolves to src/clones_settlement.js"
+    },
     {
       "action": {
         "hints": {},
@@ -916,66 +1076,66 @@
     },
     {
       "command": null,
-      "finding": "fnd_fa80dc",
+      "finding": "fnd_5fce63",
       "kind": "review",
       "priority": 2,
+      "summary": "Delete `settleInvoices` from src/clones_settlement.js if nothing outside the repository uses it, or import src/clones_settlement.js where `settleInvoices` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_5fce63",
+      "kind": "review",
+      "priority": 3,
+      "summary": "Delete `reconcilePayments` from src/clones_settlement.js if nothing outside the repository uses it, or import src/clones_settlement.js where `reconcilePayments` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e909c8",
+      "kind": "review",
+      "priority": 4,
+      "summary": "Delete `orderLines` from src/clones_settlement.js if nothing outside the repository uses it, or import src/clones_settlement.js where `orderLines` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_59eb19",
+      "kind": "review",
+      "priority": 5,
+      "summary": "Delete `refundLines` from src/clones_settlement.js if nothing outside the repository uses it, or import src/clones_settlement.js where `refundLines` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_fa80dc",
+      "kind": "review",
+      "priority": 6,
       "summary": "Delete `label` from src/complexity.js if nothing outside the repository uses it, or import src/complexity.js where `label` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_d1fac3",
       "kind": "review",
-      "priority": 3,
+      "priority": 7,
       "summary": "Delete `settle` from src/complexity.js if nothing outside the repository uses it, or import src/complexity.js where `settle` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_5df0ed",
       "kind": "review",
-      "priority": 4,
+      "priority": 8,
       "summary": "Delete `openAccount` from src/complexity.js if nothing outside the repository uses it, or import src/complexity.js where `openAccount` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_227423",
       "kind": "review",
-      "priority": 5,
+      "priority": 9,
       "summary": "Delete `statementTemplate` from src/complexity.js if nothing outside the repository uses it, or import src/complexity.js where `statementTemplate` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_080dc3",
       "kind": "review",
-      "priority": 6,
-      "summary": "Delete `net` from src/complexity.js if nothing outside the repository uses it, or import src/complexity.js where `net` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_ebdf22",
-      "kind": "review",
-      "priority": 7,
-      "summary": "Delete `constructor` from src/complexity.js if nothing outside the repository uses it, or import src/complexity.js where `constructor` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_bfc6d3",
-      "kind": "review",
-      "priority": 8,
-      "summary": "Delete `line` from src/complexity.js if nothing outside the repository uses it, or import src/complexity.js where `line` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_d7b5d9",
-      "kind": "review",
-      "priority": 9,
-      "summary": "Delete `overdue` from src/crap_scores.js if nothing outside the repository uses it, or import src/crap_scores.js where `overdue` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_0e0a9a",
-      "kind": "review",
       "priority": 10,
-      "summary": "Delete `clamp` from src/crap_scores.js if nothing outside the repository uses it, or import src/crap_scores.js where `clamp` is meant to be called."
+      "summary": "Delete `net` from src/complexity.js if nothing outside the repository uses it, or import src/complexity.js where `net` is meant to be called."
     }
   ],
   "plan": null,
@@ -1026,7 +1186,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 28,
+      "files": 29,
       "languages": [
         "javascript"
       ],
@@ -1034,7 +1194,7 @@
       "roots": [
         "."
       ],
-      "symbols": 70
+      "symbols": 74
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -1045,7 +1205,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 21,
+      "info": 25,
       "warn": 1
     },
     "gate": null,
@@ -1053,6 +1213,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 22,
+  "total_findings": 26,
   "truncated": false
 }

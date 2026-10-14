@@ -4,11 +4,11 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 21,
+      "findings": 25,
       "id": "static.dead-code",
       "oracle": null,
       "score": {
-        "n": 67,
+        "n": 71,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -25,6 +25,166 @@
   "exit_code": 0,
   "explanation": null,
   "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settleInvoices` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `settleInvoices` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settleInvoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_94d863",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "src/clones_settlement.ts",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_23cb9891c1a627f9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_94d863 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.settleInvoices",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.settleInvoices` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `reconcilePayments` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `reconcilePayments` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcilePayments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_94d863",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "src/clones_settlement.ts",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_23cb9891c1a627f9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_94d863 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.reconcilePayments",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.reconcilePayments` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `orderLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `orderLines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `orderLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_600b6d",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "src/clones_settlement.ts",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_7891e7c5f5b05589",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_600b6d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.orderLines",
+        "hash": "sh_7891e7c5f5b05589",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.orderLines` is exported but no import resolves to src/clones_settlement.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `refundLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `refundLines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refundLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/clones_settlement.ts",
+        "module": "clones_settlement",
+        "module_files": [
+          "src/clones_settlement.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_932338",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 65,
+        "file": "src/clones_settlement.ts",
+        "line": 50
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_09c333581982e793",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_932338 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.refundLines",
+        "hash": "sh_09c333581982e793",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.refundLines` is exported but no import resolves to src/clones_settlement.ts"
+    },
     {
       "action": {
         "hints": {},
@@ -876,66 +1036,66 @@
     },
     {
       "command": null,
-      "finding": "fnd_45aa29",
+      "finding": "fnd_94d863",
       "kind": "review",
       "priority": 2,
+      "summary": "Delete `settleInvoices` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `settleInvoices` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_94d863",
+      "kind": "review",
+      "priority": 3,
+      "summary": "Delete `reconcilePayments` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `reconcilePayments` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_600b6d",
+      "kind": "review",
+      "priority": 4,
+      "summary": "Delete `orderLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `orderLines` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_932338",
+      "kind": "review",
+      "priority": 5,
+      "summary": "Delete `refundLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `refundLines` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_45aa29",
+      "kind": "review",
+      "priority": 6,
       "summary": "Delete `label` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `label` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_61fd12",
       "kind": "review",
-      "priority": 3,
+      "priority": 7,
       "summary": "Delete `settle` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `settle` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_9da0ce",
       "kind": "review",
-      "priority": 4,
+      "priority": 8,
       "summary": "Delete `openAccount` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `openAccount` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_081666",
       "kind": "review",
-      "priority": 5,
+      "priority": 9,
       "summary": "Delete `statementTemplate` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `statementTemplate` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_fe644a",
       "kind": "review",
-      "priority": 6,
-      "summary": "Delete `net` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `net` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_21c390",
-      "kind": "review",
-      "priority": 7,
-      "summary": "Delete `constructor` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `constructor` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_7dc904",
-      "kind": "review",
-      "priority": 8,
-      "summary": "Delete `line` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `line` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_452a2b",
-      "kind": "review",
-      "priority": 9,
-      "summary": "Delete `overdue` from src/crap_scores.ts if nothing outside the repository uses it, or import src/crap_scores.ts where `overdue` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_7f8f65",
-      "kind": "review",
       "priority": 10,
-      "summary": "Delete `clamp` from src/crap_scores.ts if nothing outside the repository uses it, or import src/crap_scores.ts where `clamp` is meant to be called."
+      "summary": "Delete `net` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `net` is meant to be called."
     }
   ],
   "plan": null,
@@ -986,7 +1146,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 28,
+      "files": 29,
       "languages": [
         "typescript"
       ],
@@ -994,7 +1154,7 @@
       "roots": [
         "."
       ],
-      "symbols": 67
+      "symbols": 71
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -1005,7 +1165,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 20,
+      "info": 24,
       "warn": 1
     },
     "gate": null,
@@ -1013,6 +1173,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 21,
+  "total_findings": 25,
   "truncated": false
 }

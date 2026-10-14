@@ -62,6 +62,7 @@ fn the_fixture_graph_is_exactly_its_import_edges() {
     let testify = "external:github.com/stretchr/testify";
     // The command imports the root package, which is an edge to each of its files.
     let package_files = [
+        "clones_settlement.go",
         "complexity.go",
         "crap_scores.go",
         "decide.go",

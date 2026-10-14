@@ -13,6 +13,54 @@
       }
     },
     {
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "path": "clones_settlement.settleInvoices",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "path": "clones_settlement.reconcilePayments",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 16
+      }
+    },
+    {
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "path": "clones_settlement.orderLines",
+      "signature": "(_, _, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 43,
+        "line": 29
+      }
+    },
+    {
+      "file": "src/clones_settlement.js",
+      "kind": "function",
+      "path": "clones_settlement.refundLines",
+      "signature": "(_, _, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 60,
+        "line": 45
+      }
+    },
+    {
       "file": "src/complexity.js",
       "kind": "function",
       "path": "complexity.label",

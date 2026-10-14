@@ -7,6 +7,41 @@
   "description": {
     "cells": [
       {
+        "check": "static.clones",
+        "lang": "go",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.clones",
+        "lang": "javascript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.clones",
+        "lang": "python",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.clones",
+        "lang": "rust",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
+        "check": "static.clones",
+        "lang": "typescript",
+        "support": {
+          "status": "supported"
+        }
+      },
+      {
         "check": "static.complexity",
         "lang": "go",
         "support": {
@@ -183,6 +218,7 @@
       }
     ],
     "checks": [
+      "static.clones",
       "static.complexity",
       "static.crap",
       "static.dead-code",

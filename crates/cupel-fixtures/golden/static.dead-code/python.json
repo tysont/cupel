@@ -4,11 +4,11 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 14,
+      "findings": 18,
       "id": "static.dead-code",
       "oracle": null,
       "score": {
-        "n": 74,
+        "n": 78,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -64,6 +64,166 @@
       },
       "tier": 0,
       "title": "`deps_layers.port.Port.place` is exported but no import resolves to src/deps_layers/port.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settle_invoices` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `settle_invoices` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle_invoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/clones_settlement.py",
+        "module": "ledger.clones_settlement",
+        "module_files": [
+          "src/ledger/clones_settlement.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_f60f33",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 12,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_46a99291992c7f37",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_f60f33 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.settle_invoices",
+        "hash": "sh_46a99291992c7f37",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.settle_invoices` is exported but no import resolves to src/ledger/clones_settlement.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `reconcile_payments` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `reconcile_payments` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcile_payments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/clones_settlement.py",
+        "module": "ledger.clones_settlement",
+        "module_files": [
+          "src/ledger/clones_settlement.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_f60f33",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 23,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_46a99291992c7f37",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_f60f33 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.reconcile_payments",
+        "hash": "sh_46a99291992c7f37",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.reconcile_payments` is exported but no import resolves to src/ledger/clones_settlement.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `order_lines` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `order_lines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `order_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/clones_settlement.py",
+        "module": "ledger.clones_settlement",
+        "module_files": [
+          "src/ledger/clones_settlement.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_e9c8a4",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 38,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 26
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_b9460912628dfe49",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_e9c8a4 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.order_lines",
+        "hash": "sh_b9460912628dfe49",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.order_lines` is exported but no import resolves to src/ledger/clones_settlement.py"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `refund_lines` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `refund_lines` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refund_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/clones_settlement.py",
+        "module": "ledger.clones_settlement",
+        "module_files": [
+          "src/ledger/clones_settlement.py"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_ed3d1f",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 54,
+        "file": "src/ledger/clones_settlement.py",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_1b6aceb19c1d15c1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_ed3d1f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones_settlement.refund_lines",
+        "hash": "sh_1b6aceb19c1d15c1",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.clones_settlement.refund_lines` is exported but no import resolves to src/ledger/clones_settlement.py"
     },
     {
       "action": {
@@ -603,59 +763,59 @@
     },
     {
       "command": null,
-      "finding": "fnd_92445d",
+      "finding": "fnd_f60f33",
       "kind": "review",
       "priority": 3,
+      "summary": "Delete `settle_invoices` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `settle_invoices` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_f60f33",
+      "kind": "review",
+      "priority": 4,
+      "summary": "Delete `reconcile_payments` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `reconcile_payments` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e9c8a4",
+      "kind": "review",
+      "priority": 5,
+      "summary": "Delete `order_lines` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `order_lines` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ed3d1f",
+      "kind": "review",
+      "priority": 6,
+      "summary": "Delete `refund_lines` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `refund_lines` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_92445d",
+      "kind": "review",
+      "priority": 7,
       "summary": "Delete `overdue` from src/ledger/crap_scores.py if nothing outside the repository uses it, or import src/ledger/crap_scores.py where `overdue` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_13315f",
       "kind": "review",
-      "priority": 4,
+      "priority": 8,
       "summary": "Delete `clamp` from src/ledger/crap_scores.py if nothing outside the repository uses it, or import src/ledger/crap_scores.py where `clamp` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_bc039e",
       "kind": "review",
-      "priority": 5,
+      "priority": 9,
       "summary": "Delete `to_cents` from src/ledger/crap_scores.py if nothing outside the repository uses it, or import src/ledger/crap_scores.py where `to_cents` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_31c7aa",
       "kind": "review",
-      "priority": 6,
-      "summary": "Delete `unused_total` from src/ledger/dead_export.py if nothing outside the repository uses it, or import src/ledger/dead_export.py where `unused_total` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_1d35f1",
-      "kind": "review",
-      "priority": 7,
-      "summary": "Delete `summary` from src/ledger/report/__init__.py if nothing outside the repository uses it, or import src/ledger/report/__init__.py where `summary` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_ff8e35",
-      "kind": "review",
-      "priority": 8,
-      "summary": "Delete `net_total` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_ff8e35",
-      "kind": "review",
-      "priority": 9,
-      "summary": "Delete `sum_after_charge` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `sum_after_charge` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_ff8e35",
-      "kind": "review",
       "priority": 10,
-      "summary": "Delete `net_total_floor` from src/ledger/twins.py if nothing outside the repository uses it, or import src/ledger/twins.py where `net_total_floor` is meant to be called."
+      "summary": "Delete `unused_total` from src/ledger/dead_export.py if nothing outside the repository uses it, or import src/ledger/dead_export.py where `unused_total` is meant to be called."
     }
   ],
   "plan": null,
@@ -706,7 +866,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 26,
+      "files": 27,
       "languages": [
         "python"
       ],
@@ -714,7 +874,7 @@
       "roots": [
         "."
       ],
-      "symbols": 74
+      "symbols": 78
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -725,7 +885,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 13,
+      "info": 17,
       "warn": 1
     },
     "gate": null,
@@ -733,6 +893,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 14,
+  "total_findings": 18,
   "truncated": false
 }

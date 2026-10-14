@@ -2,6 +2,94 @@
   "symbols": [
     {
       "body": {
+        "col": 68,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 10
+      },
+      "display": "ledger.settleInvoices",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "settleInvoices",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 21,
+        "line": 10
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 74,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 23
+      },
+      "display": "ledger.reconcilePayments",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "reconcilePayments",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 34,
+        "line": 23
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 77,
+        "end_col": 2,
+        "end_line": 50,
+        "line": 36
+      },
+      "display": "ledger.orderLines",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "orderLines",
+      "namespace": "ledger",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 50,
+        "line": 36
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 78,
+        "end_col": 2,
+        "end_line": 67,
+        "line": 52
+      },
+      "display": "ledger.refundLines",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "refundLines",
+      "namespace": "ledger",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 67,
+        "line": 52
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
         "col": 13,
         "end_col": 2,
         "end_line": 14,

@@ -4,11 +4,11 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 15,
+      "findings": 17,
       "id": "static.crap",
       "oracle": null,
       "score": {
-        "n": 45,
+        "n": 49,
         "unit": "max",
         "value": 132.0
       },
@@ -25,6 +25,84 @@
   "exit_code": 0,
   "explanation": null,
   "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `settleInvoices` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_102501",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "src/clones_settlement.ts",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_23cb9891c1a627f9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_102501 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.settleInvoices",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.settleInvoices` has CRAP 12.0 (watch at 5, high at 30)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `reconcilePayments` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": null,
+        "crap": 12.0,
+        "cyclomatic": 3,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_102501",
+      "kind": "crap.watch",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 32,
+        "file": "src/clones_settlement.ts",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_23cb9891c1a627f9",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_102501 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "clones_settlement.reconcilePayments",
+        "hash": "sh_23cb9891c1a627f9",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`clones_settlement.reconcilePayments` has CRAP 12.0 (watch at 5, high at 30)"
+    },
     {
       "action": {
         "hints": {},
@@ -644,45 +722,45 @@
     },
     {
       "command": null,
-      "finding": "fnd_650682",
+      "finding": "fnd_102501",
       "kind": "review",
       "priority": 5,
+      "summary": "Review `settleInvoices` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_102501",
+      "kind": "review",
+      "priority": 6,
+      "summary": "Review `reconcilePayments` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+    },
+    {
+      "command": null,
+      "finding": "fnd_650682",
+      "kind": "review",
+      "priority": 7,
       "summary": "Review `clamp` when changing it: keep its CRAP below 30 with tests or simpler control flow."
     },
     {
       "command": null,
       "finding": "fnd_001a6f",
       "kind": "review",
-      "priority": 6,
+      "priority": 8,
       "summary": "Review `firstOverdraft` when changing it: keep its CRAP below 30 with tests or simpler control flow."
     },
     {
       "command": null,
       "finding": "fnd_1ab130",
       "kind": "review",
-      "priority": 7,
+      "priority": 9,
       "summary": "Review `label` when changing it: keep its CRAP below 30 with tests or simpler control flow."
     },
     {
       "command": null,
       "finding": "fnd_b6cafd",
       "kind": "review",
-      "priority": 8,
-      "summary": "Review `parseCents` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-    },
-    {
-      "command": null,
-      "finding": "fnd_085fd9",
-      "kind": "review",
-      "priority": 9,
-      "summary": "Review `load` when changing it: keep its CRAP below 30 with tests or simpler control flow."
-    },
-    {
-      "command": null,
-      "finding": "fnd_f6d948",
-      "kind": "review",
       "priority": 10,
-      "summary": "Review `range` when changing it: keep its CRAP below 30 with tests or simpler control flow."
+      "summary": "Review `parseCents` when changing it: keep its CRAP below 30 with tests or simpler control flow."
     }
   ],
   "plan": null,
@@ -733,7 +811,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 28,
+      "files": 29,
       "languages": [
         "typescript"
       ],
@@ -741,7 +819,7 @@
       "roots": [
         "."
       ],
-      "symbols": 67
+      "symbols": 71
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -752,7 +830,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 11,
+      "info": 13,
       "warn": 4
     },
     "gate": null,
@@ -760,6 +838,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 15,
+  "total_findings": 17,
   "truncated": false
 }

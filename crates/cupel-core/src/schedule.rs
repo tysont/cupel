@@ -66,6 +66,8 @@ pub struct Outcome {
 struct Task<'a> {
     check: &'a dyn Check,
     lang: Lang,
+    /// The family's other supported languages, for a family-wide check (ADR-051).
+    siblings: Vec<Lang>,
     scope: Scope,
     plan: Plan,
 }
@@ -218,24 +220,33 @@ impl Scheduler<'_> {
         let mut skips = Vec::new();
         for check in &job.selected {
             let manifest = check.manifest();
+            let mut supported = Vec::new();
             for lang in &job.langs {
                 let support = matrix
                     .get(&manifest.id, &lang.id)
                     .cloned()
                     .unwrap_or(Support::Supported);
-                if support != Support::Supported {
+                if support == Support::Supported {
+                    supported.push(lang.clone());
+                } else {
                     skips.push(Skip {
                         check: *check,
                         skipped: unsupported(&support, &lang.id),
                     });
-                    continue;
                 }
-                let scope = scopes.get(&lang.id).cloned().unwrap_or_default();
+            }
+            for mut langs in task_groups(*check, supported) {
+                let lang = langs.remove(0);
+                let scope = langs.iter().fold(
+                    scopes.get(&lang.id).cloned().unwrap_or_default(),
+                    |scope, sibling| union(scope, scopes.get(&sibling.id)),
+                );
                 let ctx = check_ctx(job, *check, &lang.id, scope.clone());
                 let plan = check.plan(&ctx, &scope)?;
                 tasks.push(Task {
                     check: *check,
-                    lang: lang.clone(),
+                    lang,
+                    siblings: langs,
                     scope,
                     plan,
                 });
@@ -292,6 +303,23 @@ impl Scheduler<'_> {
                 let _ = facts.insert_shared(&fact);
             }
         }
+        for sibling in &task.siblings {
+            for kind in &manifest.needs {
+                match store.ensure(*kind, sibling, &mut *sink.forward) {
+                    Ok(fact) => {
+                        if let Err(error) = facts.insert_shared_sibling(&fact) {
+                            return result(status_of(&error), None);
+                        }
+                    }
+                    Err(error) => return result(status_of(&error), None),
+                }
+            }
+            for kind in &manifest.wants {
+                if let Ok(fact) = store.ensure(*kind, sibling, &mut *sink.forward) {
+                    let _ = facts.insert_shared_sibling(&fact);
+                }
+            }
+        }
         let ctx = check_ctx(job, task.check, &task.lang.id, task.scope.clone());
         match task.check.run(&ctx, &facts, &task.plan, sink) {
             Ok(mut ran) => {
@@ -301,6 +329,36 @@ impl Scheduler<'_> {
             Err(error) => result(status_of(&error), None),
         }
     }
+}
+
+/// The languages each task of `check` covers: one per language, or one group per family for a
+/// family-wide check (ADR-051), each in language-ID order as `languages` is.
+fn task_groups(check: &dyn Check, languages: Vec<Lang>) -> Vec<Vec<Lang>> {
+    if !check.spans_family() {
+        return languages.into_iter().map(|lang| vec![lang]).collect();
+    }
+    let mut groups: Vec<Vec<Lang>> = Vec::new();
+    for lang in languages {
+        match groups
+            .iter_mut()
+            .find(|group| group[0].family == lang.family)
+        {
+            Some(group) => group.push(lang),
+            None => groups.push(vec![lang]),
+        }
+    }
+    groups
+}
+
+/// `scope` widened by `other`'s symbols; both cover the same files.
+fn union(mut scope: Scope, other: Option<&Scope>) -> Scope {
+    if let (Some(keys), Some(more)) = (
+        scope.symbols.as_mut(),
+        other.and_then(|other| other.symbols.as_ref()),
+    ) {
+        keys.extend(more.iter().cloned());
+    }
+    scope
 }
 
 struct Prepared<'a> {

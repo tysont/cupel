@@ -6,6 +6,7 @@
   },
   "description": {
     "consumers": [
+      "static.clones",
       "static.complexity",
       "static.crap",
       "static.dead-code",

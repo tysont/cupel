@@ -20,6 +20,38 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/clones_settlement.js",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.js",
+        "line": 16
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.js",
+        "line": 29
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/clones_settlement.js",
+        "line": 45
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/complexity.js",
         "line": 3
       }
