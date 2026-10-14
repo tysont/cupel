@@ -4,16 +4,14 @@ mod support;
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
     Decision, DecisionKind, Decisions, NormNode, NormTree, NormalizedSymbol, Span, SymbolDecisions,
     SymbolDef, SymbolKind, Symbols, Visibility,
 };
 use cupel_core::{
-    ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    Error, Event, FactKind, Facts, Finding, FindingId, LangId, MetricPer, Plan, Scope, Score,
-    Severity, SymbolHash, Writer,
+    ActionKind, Check, CheckId, CheckResult, CheckStatus, Error, Event, FactKind, Facts, Finding,
+    FindingId, LangId, MetricPer, Plan, Scope, Score, Severity, SymbolHash,
 };
 use serde_json::{Map, Value, json};
 use support::Recorded;
@@ -106,36 +104,15 @@ impl World {
     }
 }
 
-fn complexity() -> CheckRegistry {
-    let mut registry = CheckRegistry::default();
-    register(&mut registry);
-    registry
-}
-
-fn ctx(scope: Scope, config: Value) -> (CheckCtx, tempfile::TempDir) {
-    let dir = tempfile::tempdir().unwrap();
-    let writer = Writer::new(dir.path(), false).unwrap();
-    let Value::Object(config) = config else {
-        panic!("config is a table")
-    };
-    let ctx = CheckCtx {
-        scope,
-        config,
-        writer: writer.scratch(&cupel_core::RunId::generate()),
-        cancel: Cancellation::new(),
-    };
-    (ctx, dir)
-}
-
 /// Runs the check over `world` with `config`; its result and findings.
 fn run(world: &World, config: Value) -> (CheckResult, Vec<Finding>) {
     run_in(world, world.scope(), config)
 }
 
 fn run_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Vec<Finding>) {
-    let registry = complexity();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from("static.complexity")).unwrap();
-    let (ctx, _dir) = ctx(scope, config);
+    let (ctx, _dir) = support::ctx(scope, config);
     let plan = check.plan(&ctx, &ctx.scope).unwrap();
     let mut events = Vec::new();
     let result = check
@@ -151,16 +128,9 @@ fn run_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Vec<Findi
     (result, findings)
 }
 
-fn kinds(findings: &[Finding]) -> Vec<(String, String)> {
-    findings
-        .iter()
-        .map(|f| (f.symbol.as_ref().unwrap().display.clone(), f.kind.clone()))
-        .collect()
-}
-
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = complexity();
+    let registry = support::registry();
     let manifest = registry
         .get(&CheckId::from("static.complexity"))
         .unwrap()
@@ -276,7 +246,7 @@ fn each_kind_fires_only_above_its_default_threshold() {
     .iter()
     .map(|(s, k)| ((*s).to_owned(), (*k).to_owned()))
     .collect();
-    assert_eq!(kinds(&findings), expected);
+    assert_eq!(support::kinds(&findings), expected);
     assert_eq!(result.status, CheckStatus::Fail);
     assert_eq!(result.findings, 4);
     assert_eq!(
@@ -345,7 +315,7 @@ fn only_symbols_in_scope_are_measured() {
     };
     let (result, findings) = run_in(&world, scope, json!({}));
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         [("m::inside".to_owned(), "params.many".to_owned())]
     );
     assert_eq!(result.score.unwrap().n, 1);
@@ -362,7 +332,7 @@ fn thresholds_come_from_the_configuration_the_context_carries() {
 
 #[test]
 fn unknown_settings_and_bad_values_are_configuration_errors() {
-    let registry = complexity();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from("static.complexity")).unwrap();
     for (config, key) in [
         (json!({"cyclomatic": 3}), "cyclomatic"),
@@ -370,7 +340,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
         (json!({"length_max": "long"}), "length_max"),
         (json!({"nesting_max": 2.5}), "nesting_max"),
     ] {
-        let (ctx, _dir) = ctx(Scope::default(), config);
+        let (ctx, _dir) = support::ctx(Scope::default(), config);
         let error = check.plan(&ctx, &Scope::default()).unwrap_err();
         let Error::Config(ConfigError::CheckSetting {
             key: named, valid, ..
@@ -385,7 +355,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
 
 #[test]
 fn plans_count_the_symbols_in_scope_at_quick_cost() {
-    let registry = complexity();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from("static.complexity")).unwrap();
     let scope = Scope {
         files: vec![],
@@ -394,7 +364,7 @@ fn plans_count_the_symbols_in_scope_at_quick_cost() {
             symbol("b", 5, 1, 0).key(),
         ])),
     };
-    let (ctx, _dir) = ctx(scope.clone(), Value::Object(Map::new()));
+    let (ctx, _dir) = support::ctx(scope.clone(), Value::Object(Map::new()));
     assert_eq!(
         check.plan(&ctx, &scope).unwrap(),
         Plan {
@@ -406,7 +376,7 @@ fn plans_count_the_symbols_in_scope_at_quick_cost() {
 
 #[test]
 fn scores_combine_by_maximum_across_languages() {
-    let registry = complexity();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from("static.complexity")).unwrap();
     let score = |value: f64, n: u64| Score {
         value,
@@ -460,9 +430,9 @@ fn the_result_reports_each_scope_metric_as_the_largest_value_in_scope() {
 #[test]
 fn each_symbol_in_scope_is_measured_for_cyclomatic_and_cognitive_rankings() {
     let world = two_symbols();
-    let registry = complexity();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from("static.complexity")).unwrap();
-    let (ctx, _dir) = ctx(world.scope(), json!({}));
+    let (ctx, _dir) = support::ctx(world.scope(), json!({}));
     let plan = check.plan(&ctx, &ctx.scope).unwrap();
     let mut sink = Recorded::default();
     check

@@ -4,7 +4,6 @@ mod support;
 
 use std::collections::BTreeSet;
 
-use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
     Assertion, AssertionKind, AssertionStrength, Decision, DecisionKind, Decisions, Mock, NormNode,
@@ -12,9 +11,8 @@ use cupel_core::syntax::{
     TestCase, TestFile, TestFrames, Visibility,
 };
 use cupel_core::{
-    ActionKind, Cancellation, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus, Error,
-    FactKind, Facts, Finding, FindingId, Manifest, MetricPer, Plan, Scope, Score, Severity,
-    SymbolHash, Writer,
+    ActionKind, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding, FindingId,
+    Manifest, MetricPer, Plan, Scope, Score, Severity, SymbolHash,
 };
 use serde_json::{Value, json};
 use support::{Recorded, combined, language};
@@ -268,27 +266,6 @@ impl World {
     }
 }
 
-fn registry() -> CheckRegistry {
-    let mut registry = CheckRegistry::default();
-    register(&mut registry);
-    registry
-}
-
-fn ctx(scope: Scope, config: Value) -> (CheckCtx, tempfile::TempDir) {
-    let dir = tempfile::tempdir().unwrap();
-    let writer = Writer::new(dir.path(), false).unwrap();
-    let Value::Object(config) = config else {
-        panic!("config is a table")
-    };
-    let ctx = CheckCtx {
-        scope,
-        config,
-        writer: writer.scratch(&cupel_core::RunId::generate()),
-        cancel: Cancellation::new(),
-    };
-    (ctx, dir)
-}
-
 struct Run {
     world: World,
     scope: Option<Scope>,
@@ -328,23 +305,16 @@ impl Run {
 
     /// The result and every finding and measurement the check reported.
     fn recorded(self) -> (CheckResult, Recorded) {
-        let registry = registry();
+        let registry = support::registry();
         let check = registry.get(&CheckId::from(ID)).unwrap();
         let scope = self.scope.unwrap_or_else(|| self.world.scope());
-        let (ctx, _dir) = ctx(scope, self.config);
+        let (ctx, _dir) = support::ctx(scope, self.config);
         let plan = check.plan(&ctx, &ctx.scope).unwrap();
         let facts = self.world.facts(check.manifest(), self.decisions);
         let mut recorded = Recorded::default();
         let result = check.run(&ctx, &facts, &plan, &mut recorded).unwrap();
         (result, recorded)
     }
-}
-
-fn kinds(findings: &[Finding]) -> Vec<(String, String)> {
-    findings
-        .iter()
-        .map(|f| (f.symbol.as_ref().unwrap().display.clone(), f.kind.clone()))
-        .collect()
 }
 
 fn pairs(expected: &[(&str, &str)]) -> Vec<(String, String)> {
@@ -383,7 +353,7 @@ fn evidence_problems(manifest: &cupel_core::Manifest) -> Vec<String> {
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = registry();
+    let registry = support::registry();
     let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
     assert_eq!(
         support::Shape::of(manifest),
@@ -420,7 +390,7 @@ fn a_test_whose_every_assertion_is_weak_is_reported_and_one_strong_assertion_suf
     ])
     .go();
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         pairs(&[("t::weak_only", "test.weak-assertion")])
     );
     assert_eq!(
@@ -448,7 +418,7 @@ fn a_test_without_assertions_is_reported_but_a_thrown_error_counts_as_one() {
     ])
     .go();
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         pairs(&[("t::checks_nothing", "test.no-assertion")])
     );
     assert_eq!(
@@ -469,7 +439,7 @@ fn a_test_without_assertions_is_reported_but_a_thrown_error_counts_as_one() {
 fn a_bare_should_panic_is_a_weak_throws_assertion_not_a_missing_one() {
     let (_, findings) = Run::of(vec![case("panics_somehow", 1).asserting(&[(Throws, Weak)])]).go();
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         pairs(&[("t::panics_somehow", "test.weak-assertion")])
     );
 }
@@ -488,7 +458,7 @@ fn mock_heavy_needs_enough_doubles_and_a_density_above_the_limit() {
     ])
     .go();
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         pairs(&[
             ("t::two_doubles_one_check", "test.mock-heavy"),
             ("t::one_double_no_check", "test.no-assertion"),
@@ -527,7 +497,7 @@ fn mock_thresholds_come_from_the_configuration() {
 fn doubles_without_assertions_are_both_mock_heavy_and_assertion_free() {
     let (_, findings) = Run::of(vec![case("only_doubles", 1).asserting(&[]).mocking(3)]).go();
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         pairs(&[
             ("t::only_doubles", "test.no-assertion"),
             ("t::only_doubles", "test.mock-heavy"),
@@ -557,7 +527,7 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
     ])
     .go();
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         pairs(&[
             ("t::loops", "test.logic"),
             ("t::branches_beyond_guards", "test.logic"),
@@ -627,7 +597,7 @@ fn tests_repeating_their_leading_statements_are_one_duplicate_setup_finding() {
     ])
     .go();
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         pairs(&[("t::first", "test.duplicate-setup")])
     );
     assert_eq!(
@@ -684,7 +654,7 @@ fn statements_wrapped_in_one_list_node_are_compared_and_leaf_lists_are_not_state
     ])
     .go();
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         pairs(&[("t::wrapped_one", "test.duplicate-setup")])
     );
     let (_, longer) = Run::of(vec![
@@ -736,7 +706,7 @@ fn only_tests_in_scope_are_measured() {
         })
         .go();
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         pairs(&[("t::inside", "test.no-assertion")])
     );
     assert_eq!(result.score.unwrap().n, 1);
@@ -767,7 +737,7 @@ fn the_score_is_assertions_per_test_and_clean_tests_pass() {
 
 #[test]
 fn unknown_settings_and_bad_values_are_configuration_errors() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     for (config, key) in [
         (json!({"mock_ratio": 3}), "mock_ratio"),
@@ -775,7 +745,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
         (json!({"logic_max": "none"}), "logic_max"),
         (json!({"setup_statements_min": 2.5}), "setup_statements_min"),
     ] {
-        let (ctx, _dir) = ctx(Scope::default(), config);
+        let (ctx, _dir) = support::ctx(Scope::default(), config);
         let error = check.plan(&ctx, &Scope::default()).unwrap_err();
         let Error::Config(ConfigError::CheckSetting {
             key: named, valid, ..
@@ -798,10 +768,10 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
 
 #[test]
 fn plans_count_the_symbols_in_scope_at_quick_cost() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let scope = World::of(vec![case("a", 1), case("b", 10)]).scope();
-    let (ctx, _dir) = ctx(scope.clone(), json!({}));
+    let (ctx, _dir) = support::ctx(scope.clone(), json!({}));
     assert_eq!(
         check.plan(&ctx, &scope).unwrap(),
         Plan {
@@ -860,7 +830,7 @@ fn each_test_in_scope_is_measured_by_its_mock_density() {
 
 #[test]
 fn ratios_combine_over_every_languages_tests_and_counts_add_up() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let results = [
         language(

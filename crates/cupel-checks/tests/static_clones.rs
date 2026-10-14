@@ -2,14 +2,13 @@
 // ABOUTME: comparison, finding identity, and deterministic order (ADR-050).
 mod support;
 
-use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
     NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, Visibility,
 };
 use cupel_core::{
-    ActionKind, Cancellation, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus, Error,
-    FactKind, Facts, Finding, FindingId, LangId, MetricPer, Scope, SiteHash, SymbolHash, Writer,
+    ActionKind, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding, FindingId,
+    LangId, MetricPer, Scope, SiteHash, SymbolHash,
 };
 use serde_json::{Value, json};
 use support::{Recorded, combined, language};
@@ -161,15 +160,9 @@ fn trees(defs: &[&Def]) -> NormTree {
     }
 }
 
-fn registry() -> CheckRegistry {
-    let mut registry = CheckRegistry::default();
-    register(&mut registry);
-    registry
-}
-
 /// Facts for one language's `defs`, plus each sibling language's.
 fn facts(defs: &[Def], siblings: &[&[Def]]) -> Facts {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let mut facts = Facts::for_manifest(check.manifest());
     let own: Vec<&Def> = defs.iter().collect();
@@ -191,21 +184,6 @@ fn every_symbol(defs: &[&[Def]]) -> Scope {
     }
 }
 
-fn ctx(scope: Scope, config: Value) -> (CheckCtx, tempfile::TempDir) {
-    let dir = tempfile::tempdir().unwrap();
-    let writer = Writer::new(dir.path(), false).unwrap();
-    let Value::Object(config) = config else {
-        panic!("config is a table")
-    };
-    let ctx = CheckCtx {
-        scope,
-        config,
-        writer: writer.scratch(&cupel_core::RunId::generate()),
-        cancel: Cancellation::new(),
-    };
-    (ctx, dir)
-}
-
 /// Runs the check over `facts` in `scope` with `config`; its result and findings.
 fn run_with(
     facts: &Facts,
@@ -222,9 +200,9 @@ fn recorded_with(
     scope: Scope,
     config: Value,
 ) -> cupel_core::Result<(CheckResult, Recorded)> {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
-    let (ctx, _dir) = ctx(scope, config);
+    let (ctx, _dir) = support::ctx(scope, config);
     let plan = check.plan(&ctx, &ctx.scope)?;
     let mut recorded = Recorded::default();
     let result = check.run(&ctx, facts, &plan, &mut recorded)?;
@@ -260,7 +238,7 @@ fn assert_pairs(result: &CheckResult, pairs: u32) {
 
 #[test]
 fn the_manifest_states_its_known_limitation() {
-    let registry = registry();
+    let registry = support::registry();
     let manifest = registry
         .get(&CheckId::from("static.clones"))
         .unwrap()
@@ -281,7 +259,7 @@ fn the_manifest_states_its_known_limitation() {
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let manifest = check.manifest();
     assert_eq!(
@@ -701,7 +679,7 @@ fn each_reported_group_is_measured_by_its_members_for_the_cluster_ranking() {
 
 #[test]
 fn counts_add_up_across_families_and_similarity_takes_the_largest() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let results = [
         language(

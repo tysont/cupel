@@ -8,9 +8,11 @@
 use std::collections::BTreeMap;
 
 use cupel_core::{
-    ActionKind, Check, CheckResult, CheckStatus, CostClass, Event, EventSink, FactKind, Finding,
-    Manifest, Measurement, MetricPer, Score, Tier,
+    ActionKind, Cancellation, Check, CheckCtx, CheckRegistry, CheckResult, CheckStatus, CostClass,
+    Event, EventSink, FactKind, Finding, Manifest, Measurement, MetricPer, RunId, Scope, Score,
+    Tier, Writer,
 };
+use serde_json::Value;
 
 /// Keeps every finding and measurement a check reports.
 #[derive(Default)]
@@ -111,4 +113,44 @@ impl<'a> Shape<'a> {
                 .collect(),
         }
     }
+}
+
+/// Every native check, registered.
+pub fn registry() -> CheckRegistry {
+    let mut registry = CheckRegistry::default();
+    cupel_checks::register(&mut registry);
+    registry
+}
+
+/// A check context over `scope` with `config` (a table), writing under a temporary directory
+/// that lives as long as the returned guard.
+pub fn ctx(scope: Scope, config: Value) -> (CheckCtx, tempfile::TempDir) {
+    let dir = tempfile::tempdir().unwrap();
+    let writer = Writer::new(dir.path(), false).unwrap();
+    let Value::Object(config) = config else {
+        panic!("config is a table")
+    };
+    let ctx = CheckCtx {
+        scope,
+        config,
+        writer: writer.scratch(&RunId::generate()),
+        cancel: Cancellation::new(),
+    };
+    (ctx, dir)
+}
+
+/// Each finding as (symbol display, kind).
+pub fn kinds(findings: &[Finding]) -> Vec<(String, String)> {
+    findings
+        .iter()
+        .map(|f| (f.symbol.as_ref().unwrap().display.clone(), f.kind.clone()))
+        .collect()
+}
+
+/// `expected` as owned (display, kind) pairs, to compare with `kinds`.
+pub fn pairs(expected: &[(&str, &str)]) -> Vec<(String, String)> {
+    expected
+        .iter()
+        .map(|(display, kind)| ((*display).to_owned(), (*kind).to_owned()))
+        .collect()
 }

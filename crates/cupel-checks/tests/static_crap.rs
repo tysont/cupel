@@ -4,7 +4,6 @@ mod support;
 
 use std::collections::BTreeSet;
 
-use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::coverage::{CoverageMap, FileCoverage, LineHits};
 use cupel_core::syntax::{
@@ -12,9 +11,8 @@ use cupel_core::syntax::{
     SymbolDef, SymbolKind, Symbols, TestConventions, TestPairing, Visibility,
 };
 use cupel_core::{
-    ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    Error, FactKind, Facts, Finding, FindingId, LangId, MetricPer, Plan, Scope, Score, Severity,
-    SymbolHash, Writer,
+    ActionKind, Check, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding,
+    FindingId, LangId, MetricPer, Plan, Scope, Score, Severity, SymbolHash,
 };
 use serde_json::{Map, Value, json};
 use support::{Recorded, combined, language};
@@ -153,27 +151,6 @@ fn uncovered<'a>(symbols: impl Iterator<Item = &'a SymbolDef>) -> CoverageMap {
     covered(symbols, 0)
 }
 
-fn registry() -> CheckRegistry {
-    let mut registry = CheckRegistry::default();
-    register(&mut registry);
-    registry
-}
-
-fn ctx(scope: Scope, config: Value) -> (CheckCtx, tempfile::TempDir) {
-    let dir = tempfile::tempdir().unwrap();
-    let writer = Writer::new(dir.path(), false).unwrap();
-    let Value::Object(config) = config else {
-        panic!("config is a table")
-    };
-    let ctx = CheckCtx {
-        scope,
-        config,
-        writer: writer.scratch(&cupel_core::RunId::generate()),
-        cancel: Cancellation::new(),
-    };
-    (ctx, dir)
-}
-
 /// Runs the check over `world` with `config`; its result and findings.
 fn run(world: &World, config: Value) -> (CheckResult, Vec<Finding>) {
     run_in(world, world.scope(), config)
@@ -186,9 +163,9 @@ fn run_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Vec<Findi
 
 /// Runs the check over `world`; its result and every finding and measurement it reported.
 fn recorded_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Recorded) {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
-    let (ctx, _dir) = ctx(scope, config);
+    let (ctx, _dir) = support::ctx(scope, config);
     let plan = check.plan(&ctx, &ctx.scope).unwrap();
     let mut recorded = Recorded::default();
     let result = check
@@ -197,16 +174,9 @@ fn recorded_in(world: &World, scope: Scope, config: Value) -> (CheckResult, Reco
     (result, recorded)
 }
 
-fn kinds(findings: &[Finding]) -> Vec<(String, String)> {
-    findings
-        .iter()
-        .map(|f| (f.symbol.as_ref().unwrap().display.clone(), f.kind.clone()))
-        .collect()
-}
-
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = registry();
+    let registry = support::registry();
     let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
     assert_eq!(
         support::Shape::of(manifest),
@@ -286,7 +256,7 @@ fn a_symbol_with_no_instrumented_line_has_no_crap() {
     world.coverage = Some(uncovered([&measured].into_iter()));
     let (result, findings) = run(&world, json!({}));
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         [("m::measured".to_owned(), "crap.high".to_owned())]
     );
     assert_eq!(result.score.map(|score| score.n), Some(1));
@@ -312,7 +282,7 @@ fn crap_is_cyclomatic_squared_plus_cyclomatic_in_bands_at_their_defaults() {
     .iter()
     .map(|(s, k)| ((*s).to_owned(), (*k).to_owned()))
     .collect();
-    assert_eq!(kinds(&findings), expected);
+    assert_eq!(support::kinds(&findings), expected);
     let crap: Vec<Value> = findings
         .iter()
         .map(|f| f.evidence.0["crap"].clone())
@@ -409,7 +379,7 @@ fn symbols_in_test_files_are_not_scored() {
     });
     let (result, findings) = run(&world, json!({}));
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         [("m::risky".to_owned(), "crap.high".to_owned())]
     );
     assert_eq!(result.score.map(|score| score.n), Some(1));
@@ -439,7 +409,7 @@ fn only_symbols_in_scope_are_scored() {
     };
     let (result, findings) = run_in(&world, scope, json!({}));
     assert_eq!(
-        kinds(&findings),
+        support::kinds(&findings),
         [("m::inside".to_owned(), "crap.high".to_owned())]
     );
     let worst = result.score.unwrap();
@@ -458,7 +428,7 @@ fn nothing_in_scope_passes_with_no_symbols_scored() {
 
 #[test]
 fn unknown_settings_and_bad_values_are_configuration_errors() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     for (config, key) in [
         (json!({"threshold": 3}), "threshold"),
@@ -466,7 +436,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
         (json!({"high": -1}), "high"),
         (json!({"watch": 2.5}), "watch"),
     ] {
-        let (ctx, _dir) = ctx(Scope::default(), config);
+        let (ctx, _dir) = support::ctx(Scope::default(), config);
         let error = check.plan(&ctx, &Scope::default()).unwrap_err();
         let Error::Config(ConfigError::CheckSetting {
             key: named, valid, ..
@@ -481,13 +451,13 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
 
 #[test]
 fn plans_count_the_symbols_in_scope_at_quick_cost() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let scope = Scope {
         files: vec![],
         symbols: Some(BTreeSet::from([symbol("a", 1).key(), symbol("b", 5).key()])),
     };
-    let (ctx, _dir) = ctx(scope.clone(), Value::Object(Map::new()));
+    let (ctx, _dir) = support::ctx(scope.clone(), Value::Object(Map::new()));
     assert_eq!(
         check.plan(&ctx, &scope).unwrap(),
         Plan {
@@ -499,7 +469,7 @@ fn plans_count_the_symbols_in_scope_at_quick_cost() {
 
 #[test]
 fn scores_combine_by_maximum_across_languages() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let score = |value: f64, n: u64| Score {
         value,
@@ -564,7 +534,7 @@ fn each_scored_symbol_is_measured_for_the_crap_ranking() {
 
 #[test]
 fn max_combines_by_the_largest_and_mean_by_the_mean_over_every_symbol() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let results = [
         language(check, &[("max", 42.0), ("mean", 10.0)], 1),

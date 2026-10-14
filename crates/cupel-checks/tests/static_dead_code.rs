@@ -4,7 +4,6 @@ mod support;
 
 use std::collections::BTreeSet;
 
-use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
     EdgeKind, ImportEdge, ImportTarget, LiveRoot, ModuleGraph, NormNode, NormTree,
@@ -12,9 +11,8 @@ use cupel_core::syntax::{
     Visibility,
 };
 use cupel_core::{
-    ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    CostClass, Error, Event, FactKind, Facts, Finding, FindingId, LangId, MetricPer, Plan, Scope,
-    Score, Severity, SymbolHash, Writer,
+    ActionKind, Check, CheckId, CheckResult, CheckStatus, CostClass, Error, Event, FactKind, Facts,
+    Finding, FindingId, LangId, MetricPer, Plan, Scope, Score, Severity, SymbolHash,
 };
 use serde_json::{Map, Value, json};
 use support::{combined, language};
@@ -194,35 +192,14 @@ impl World {
     }
 }
 
-fn registry() -> CheckRegistry {
-    let mut registry = CheckRegistry::default();
-    register(&mut registry);
-    registry
-}
-
-fn ctx(scope: Scope, config: Value) -> (CheckCtx, tempfile::TempDir) {
-    let dir = tempfile::tempdir().unwrap();
-    let writer = Writer::new(dir.path(), false).unwrap();
-    let Value::Object(config) = config else {
-        panic!("config is a table")
-    };
-    let ctx = CheckCtx {
-        scope,
-        config,
-        writer: writer.scratch(&cupel_core::RunId::generate()),
-        cancel: Cancellation::new(),
-    };
-    (ctx, dir)
-}
-
 fn run(world: &World) -> (CheckResult, Vec<Finding>) {
     run_in(world, world.scope())
 }
 
 fn run_in(world: &World, scope: Scope) -> (CheckResult, Vec<Finding>) {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
-    let (ctx, _dir) = ctx(scope, json!({}));
+    let (ctx, _dir) = support::ctx(scope, json!({}));
     let plan = check.plan(&ctx, &ctx.scope).unwrap();
     let mut events = Vec::new();
     let result = check
@@ -239,23 +216,10 @@ fn run_in(world: &World, scope: Scope) -> (CheckResult, Vec<Finding>) {
 }
 
 /// Each finding as (symbol display, kind).
-fn kinds(findings: &[Finding]) -> Vec<(String, String)> {
-    findings
-        .iter()
-        .map(|f| (f.symbol.as_ref().unwrap().display.clone(), f.kind.clone()))
-        .collect()
-}
-
-fn pairs(expected: &[(&str, &str)]) -> Vec<(String, String)> {
-    expected
-        .iter()
-        .map(|(display, kind)| ((*display).to_owned(), (*kind).to_owned()))
-        .collect()
-}
 
 #[test]
 fn the_manifest_states_its_known_limitation() {
-    let registry = registry();
+    let registry = support::registry();
     let manifest = registry
         .get(&CheckId::from("static.dead-code"))
         .unwrap()
@@ -277,7 +241,7 @@ fn the_manifest_states_its_known_limitation() {
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = registry();
+    let registry = support::registry();
     let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
     assert_eq!(
         support::Shape::of(manifest),
@@ -319,8 +283,8 @@ fn of_a_root_an_export_an_imported_item_and_an_unreferenced_private_only_the_las
     .import(edge("main.x", "util::helper", file("util.x")));
     let (result, findings) = run(&world);
     assert_eq!(
-        kinds(&findings),
-        pairs(&[("orphan::forgotten", "dead.symbol")])
+        support::kinds(&findings),
+        support::pairs(&[("orphan::forgotten", "dead.symbol")])
     );
     assert_eq!(result.status, CheckStatus::Fail);
     assert_eq!(result.findings, 1);
@@ -384,7 +348,10 @@ fn an_unimported_export_is_an_info_finding_and_its_private_neighbors_are_kept() 
         private("api.x", "api", "check", 5),
     ]);
     let (result, findings) = run(&world);
-    assert_eq!(kinds(&findings), pairs(&[("api::open", "dead.export")]));
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("api::open", "dead.export")])
+    );
     let finding = &findings[0];
     assert_eq!(finding.severity, Severity::Info);
     assert!((finding.confidence - 0.4).abs() < f64::EPSILON);
@@ -421,7 +388,10 @@ fn files_sharing_a_module_namespace_keep_each_other_alive() {
     ])
     .root(0, RootReason::EntryPoint);
     let (_, findings) = run(&world);
-    assert_eq!(kinds(&findings), pairs(&[("other.stray", "dead.symbol")]));
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("other.stray", "dead.symbol")])
+    );
     assert_eq!(findings[0].evidence.0["module_files"], json!(["other/d.x"]));
 }
 
@@ -433,8 +403,8 @@ fn every_file_of_an_unreached_module_is_listed_in_evidence() {
     ]);
     let (_, findings) = run(&world);
     assert_eq!(
-        kinds(&findings),
-        pairs(&[("pkg.one", "dead.symbol"), ("pkg.two", "dead.symbol")])
+        support::kinds(&findings),
+        support::pairs(&[("pkg.one", "dead.symbol"), ("pkg.two", "dead.symbol")])
     );
     let modules: Vec<(&Value, &Value)> = findings
         .iter()
@@ -461,7 +431,10 @@ fn tests_and_framework_hooks_root_their_files_but_exports_alone_do_not() {
     .root(0, RootReason::Test)
     .root(2, RootReason::FrameworkHook);
     let (_, findings) = run(&world);
-    assert_eq!(kinds(&findings), pairs(&[("e::api", "dead.export")]));
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("e::api", "dead.export")])
+    );
 }
 
 #[test]
@@ -477,8 +450,8 @@ fn only_imports_from_other_modules_enter_one() {
     .import(edge("index.x", "./used", file("used.x")));
     let (_, findings) = run(&world);
     assert_eq!(
-        kinds(&findings),
-        pairs(&[
+        support::kinds(&findings),
+        support::pairs(&[
             ("pkg.one", "dead.symbol"),
             ("pkg.two", "dead.symbol"),
             ("selfish::loop_back", "dead.symbol"),
@@ -541,7 +514,10 @@ fn symbols_nested_in_a_dead_symbol_are_part_of_it() {
     outer.span.end_line = 10;
     let world = World::with(vec![outer, inner]);
     let (_, findings) = run(&world);
-    assert_eq!(kinds(&findings), pairs(&[("lost::outer", "dead.symbol")]));
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("lost::outer", "dead.symbol")])
+    );
 }
 
 #[test]
@@ -562,7 +538,10 @@ fn only_symbols_in_scope_are_reported_but_every_fact_is_read() {
         ])),
     };
     let (result, findings) = run_in(&world, scope);
-    assert_eq!(kinds(&findings), pairs(&[("inside::dead", "dead.symbol")]));
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("inside::dead", "dead.symbol")])
+    );
     assert_eq!(result.score.unwrap().n, 2);
 }
 
@@ -592,7 +571,7 @@ fn the_score_counts_dead_symbols_and_combines_by_sum() {
             n: 3
         }
     );
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     assert_eq!(
         check.combine(&[score.clone(), score]),
@@ -613,9 +592,9 @@ fn the_score_counts_dead_symbols_and_combines_by_sum() {
 
 #[test]
 fn the_check_has_no_settings() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
-    let (ctx, _dir) = ctx(Scope::default(), json!({"strict": true}));
+    let (ctx, _dir) = support::ctx(Scope::default(), json!({"strict": true}));
     let error = check.plan(&ctx, &Scope::default()).unwrap_err();
     let Error::Config(ConfigError::CheckSetting { key, valid, .. }) = error else {
         panic!("expected a check-setting error, got {error:?}")
@@ -626,14 +605,14 @@ fn the_check_has_no_settings() {
 
 #[test]
 fn plans_count_the_symbols_in_scope_at_quick_cost() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let scope = World::with(vec![
         private("a.x", "a", "one", 1),
         private("b.x", "b", "two", 1),
     ])
     .scope();
-    let (ctx, _dir) = ctx(scope.clone(), Value::Object(Map::new()));
+    let (ctx, _dir) = support::ctx(scope.clone(), Value::Object(Map::new()));
     assert_eq!(
         check.plan(&ctx, &scope).unwrap(),
         Plan {

@@ -2,15 +2,14 @@
 // ABOUTME: settings validation, finding identity and shape, and the score (ADR-052, ADR-053).
 mod support;
 
-use cupel_checks::register;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, RootImports,
     Span,
 };
 use cupel_core::{
-    ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    Error, FactKind, Facts, Finding, FindingId, MetricPer, Plan, Scope, Score, Severity, Writer,
+    ActionKind, Check, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding,
+    FindingId, MetricPer, Plan, Scope, Score, Severity,
 };
 use serde_json::{Value, json};
 use support::{Recorded, combined, language};
@@ -101,27 +100,6 @@ impl World {
     }
 }
 
-fn registry() -> CheckRegistry {
-    let mut registry = CheckRegistry::default();
-    register(&mut registry);
-    registry
-}
-
-fn ctx(config: Value) -> (CheckCtx, tempfile::TempDir) {
-    let dir = tempfile::tempdir().unwrap();
-    let writer = Writer::new(dir.path(), false).unwrap();
-    let Value::Object(config) = config else {
-        panic!("config is a table")
-    };
-    let ctx = CheckCtx {
-        scope: Scope::default(),
-        config,
-        writer: writer.scratch(&cupel_core::RunId::generate()),
-        cancel: Cancellation::new(),
-    };
-    (ctx, dir)
-}
-
 /// Runs the check over `world` with `config`; its result and findings.
 fn run(world: &World, config: Value) -> (CheckResult, Vec<Finding>) {
     let (result, recorded) = recorded(world, config);
@@ -130,11 +108,11 @@ fn run(world: &World, config: Value) -> (CheckResult, Vec<Finding>) {
 
 /// Runs the check; its result and every finding and measurement it reported.
 fn recorded(world: &World, config: Value) -> (CheckResult, Recorded) {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry
         .get(&CheckId::from(ID))
         .expect("static.deps is registered");
-    let (ctx, _dir) = ctx(config);
+    let (ctx, _dir) = support::ctx(Scope::default(), config);
     let plan = check.plan(&ctx, &ctx.scope).unwrap();
     let mut recorded = Recorded::default();
     let result = check
@@ -173,7 +151,7 @@ fn layers() -> Value {
 
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
-    let registry = registry();
+    let registry = support::registry();
     let manifest = registry.get(&CheckId::from(ID)).unwrap().manifest();
     assert_eq!(
         support::Shape::of(manifest),
@@ -493,7 +471,7 @@ fn external_and_unresolved_imports_are_never_violations_or_coupling() {
 
 #[test]
 fn malformed_settings_are_configuration_errors_naming_the_key() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     for (config, key) in [
         (json!({"layer": {}}), "layer"),
@@ -531,7 +509,7 @@ fn malformed_settings_are_configuration_errors_naming_the_key() {
             "layers.map.a",
         ),
     ] {
-        let (ctx, _dir) = ctx(config.clone());
+        let (ctx, _dir) = support::ctx(Scope::default(), config.clone());
         let error = check.plan(&ctx, &Scope::default()).unwrap_err();
         let Error::Config(ConfigError::CheckSetting {
             key: named, valid, ..
@@ -546,10 +524,10 @@ fn malformed_settings_are_configuration_errors_naming_the_key() {
 
 #[test]
 fn plans_count_the_files_in_scope_at_quick_cost() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let scope = Scope::of_files(vec!["a".to_owned(), "b".to_owned(), "c".to_owned()]);
-    let (ctx, _dir) = ctx(json!({}));
+    let (ctx, _dir) = support::ctx(Scope::default(), json!({}));
     assert_eq!(
         check.plan(&ctx, &scope).unwrap(),
         Plan {
@@ -561,7 +539,7 @@ fn plans_count_the_files_in_scope_at_quick_cost() {
 
 #[test]
 fn scores_sum_across_languages() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let score = |value: f64, n: u64| Score {
         value,
@@ -636,7 +614,7 @@ fn modules_are_measured_by_coupling_and_distance_and_cycles_by_size() {
 
 #[test]
 fn counts_add_up_across_languages_and_distance_takes_the_largest() {
-    let registry = registry();
+    let registry = support::registry();
     let check = registry.get(&CheckId::from(ID)).unwrap();
     let results = [
         language(
