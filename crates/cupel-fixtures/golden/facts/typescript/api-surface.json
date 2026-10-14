@@ -109,6 +109,18 @@
       }
     },
     {
+      "file": "src/dead_export.ts",
+      "kind": "function",
+      "path": "dead_export.unusedTotal",
+      "signature": "(_: number[]): number",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
       "file": "src/decide.ts",
       "kind": "interface",
       "path": "decide.Entry",

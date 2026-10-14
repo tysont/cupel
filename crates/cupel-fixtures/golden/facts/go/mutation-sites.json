@@ -1075,6 +1075,69 @@
     {
       "sites": [
         {
+          "from": "int64(len(entries))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "77316a94f41c7067",
+          "span": {
+            "col": 9,
+            "end_col": 28,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "dead_export/dead_export.go",
+        "line": 3
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d0f9527112c093aa",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c2ee142e97ca6299",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "dead_helpers/dead_helpers.go",
+        "line": 3
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "amount < 0",
           "operator": "negation",
           "set": "extended",

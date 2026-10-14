@@ -1037,6 +1037,53 @@
       }
     },
     {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_export.rs",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "3bd497618cdc220a",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "af31a8cac2b0b2ef",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_helpers.rs",
+        "line": 1
+      }
+    },
+    {
       "sites": [
         {
           "from": "amount < 0",

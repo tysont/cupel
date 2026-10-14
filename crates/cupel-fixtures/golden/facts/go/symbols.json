@@ -156,6 +156,50 @@
     },
     {
       "body": {
+        "col": 41,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "deadexport.UnusedTotal",
+      "file": "dead_export/dead_export.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "UnusedTotal",
+      "namespace": "deadexport",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "deadhelpers.forgottenRate",
+      "file": "dead_helpers/dead_helpers.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "forgottenRate",
+      "namespace": "deadhelpers",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
         "col": 43,
         "end_col": 2,
         "end_line": 20,

@@ -265,6 +265,18 @@
       }
     },
     {
+      "file": "src/ledger/dead_export.py",
+      "kind": "function",
+      "path": "ledger.dead_export.unused_total",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 2,
+        "line": 1
+      }
+    },
+    {
       "file": "src/ledger/decide.py",
       "kind": "function",
       "path": "ledger.decide.classify",

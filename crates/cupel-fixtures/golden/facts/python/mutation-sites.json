@@ -1608,6 +1608,84 @@
     {
       "sites": [
         {
+          "from": "len(entries)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "746768f05b0b8e55",
+          "span": {
+            "col": 12,
+            "end_col": 24,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_export.py",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount // 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f38c549949b0b827",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "//",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "0dbab41edae6a7e5",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "35633e40b47a49c0",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_helpers.py",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "balance < 0",
           "operator": "negation",
           "set": "extended",

@@ -172,6 +172,14 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "src/ledger/dead_export.py",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "src/ledger/decide.py",
         "line": 1
       }

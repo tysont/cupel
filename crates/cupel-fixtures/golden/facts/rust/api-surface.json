@@ -181,6 +181,18 @@
       }
     },
     {
+      "file": "src/dead_export.rs",
+      "kind": "function",
+      "path": "dead_export::unused_total",
+      "signature": "(_: &[i64]) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      }
+    },
+    {
       "file": "src/decide.rs",
       "kind": "function",
       "path": "decide::classify",

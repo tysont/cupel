@@ -92,6 +92,14 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/dead_export.ts",
+        "line": 1
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/decide.ts",
         "line": 5
       }

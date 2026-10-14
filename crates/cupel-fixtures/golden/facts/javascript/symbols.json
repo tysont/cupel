@@ -200,6 +200,50 @@
     },
     {
       "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "dead_export.unusedTotal",
+      "file": "src/dead_export.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "unusedTotal",
+      "namespace": "dead_export",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "display": "dead_helpers.forgottenRate",
+      "file": "src/dead_helpers.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "forgottenRate",
+      "namespace": "dead_helpers",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 3,
+        "line": 1
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 42,
         "end_col": 2,
         "end_line": 8,

@@ -85,6 +85,18 @@
       }
     },
     {
+      "file": "dead_export/dead_export.go",
+      "kind": "function",
+      "path": "deadexport.UnusedTotal",
+      "signature": "(_ []int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      }
+    },
+    {
       "file": "decide.go",
       "kind": "variable",
       "path": "ledger.ErrEmpty",

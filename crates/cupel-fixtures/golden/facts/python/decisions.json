@@ -284,6 +284,22 @@
       }
     },
     {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_export.py",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_helpers.py",
+        "line": 1
+      }
+    },
+    {
       "decisions": [
         {
           "cognitive": 1,

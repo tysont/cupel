@@ -20,6 +20,7 @@ facts
 
 checks
   static.complexity  supported
+  static.dead-code   supported
 
 toolchain
   launchers

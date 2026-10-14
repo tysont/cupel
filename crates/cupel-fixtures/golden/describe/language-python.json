@@ -11,6 +11,12 @@
         "support": {
           "status": "supported"
         }
+      },
+      {
+        "check": "static.dead-code",
+        "support": {
+          "status": "supported"
+        }
       }
     ],
     "extensions": [

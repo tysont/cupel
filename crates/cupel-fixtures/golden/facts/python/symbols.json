@@ -509,6 +509,50 @@
     {
       "body": {
         "col": 5,
+        "end_col": 24,
+        "end_line": 2,
+        "line": 2
+      },
+      "display": "ledger.dead_export.unused_total",
+      "file": "src/ledger/dead_export.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "unused_total",
+      "namespace": "ledger.dead_export",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 2,
+        "line": 1
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 23,
+        "end_line": 2,
+        "line": 2
+      },
+      "display": "ledger.dead_helpers._forgotten_rate",
+      "file": "src/ledger/dead_helpers.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "_forgotten_rate",
+      "namespace": "ledger.dead_helpers",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 2,
+        "line": 1
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 5,
         "end_col": 17,
         "end_line": 8,
         "line": 2

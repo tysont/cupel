@@ -1306,6 +1306,84 @@
     {
       "sites": [
         {
+          "from": "entries.length",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "912a3b99d4d1a04f",
+          "span": {
+            "col": 10,
+            "end_col": 24,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 8,
+        "file": "src/dead_export.ts",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount / 2",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "d430bad8a61f4434",
+          "span": {
+            "col": 10,
+            "end_col": 20,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "undefined"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "1fe8126f4c94fae7",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b39b88a6b0d53a45",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_helpers.ts",
+        "line": 1
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "balance < 0 && limit > 0",
           "operator": "negation",
           "set": "extended",

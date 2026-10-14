@@ -205,6 +205,22 @@
       }
     },
     {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_export.rs",
+        "line": 1
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/dead_helpers.rs",
+        "line": 1
+      }
+    },
+    {
       "decisions": [
         {
           "cognitive": 1,
