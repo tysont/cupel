@@ -33,16 +33,16 @@ inventory::submit!(crate::ToolProducer {
 fn command(root: &Root) -> Vec<String> {
     [root.program.clone(), "test".to_owned(), "-json".to_owned()]
         .into_iter()
-        .chain(packages(root))
+        .chain(packages(&root.packages))
         .collect()
 }
 
-/// The root's package patterns, `./...` when it names none.
-pub(crate) fn packages(root: &Root) -> Vec<String> {
-    if root.packages.is_empty() {
+/// A root's package patterns, `./...` when it names none.
+pub(crate) fn packages(patterns: &[String]) -> Vec<String> {
+    if patterns.is_empty() {
         vec!["./...".to_owned()]
     } else {
-        root.packages.clone()
+        patterns.to_vec()
     }
 }
 
@@ -80,6 +80,6 @@ fn list_command(root: &Root) -> Vec<String> {
         "-json".to_owned(),
     ]
     .into_iter()
-    .chain(packages(root))
+    .chain(packages(&root.packages))
     .collect()
 }
