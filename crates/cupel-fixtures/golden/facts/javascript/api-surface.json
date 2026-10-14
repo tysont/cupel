@@ -157,6 +157,18 @@
       }
     },
     {
+      "file": "src/complexity.js",
+      "kind": "function",
+      "path": "complexity.month",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      }
+    },
+    {
       "file": "src/crap_scores.js",
       "kind": "function",
       "path": "crap_scores.overdue",

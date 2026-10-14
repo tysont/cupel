@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 33,
+        "n": 34,
         "unit": "pairs",
         "value": 8.0
       },
@@ -36,7 +36,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 75,
+        "n": 76,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -61,15 +61,15 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 26,
+      "findings": 27,
       "id": "static.dead-code",
       "metrics": {
-        "dead_exports": 25.0,
+        "dead_exports": 26.0,
         "dead_symbols": 1.0
       },
       "oracle": null,
       "score": {
-        "n": 75,
+        "n": 76,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -854,6 +854,46 @@
       },
       "tier": 0,
       "title": "`complexity.Statement.line` is exported but no import resolves to src/complexity.js"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `month` from src/complexity.js if nothing outside the repository uses it, or import src/complexity.js where `month` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `month` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.js",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.js"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_31aad0",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 168,
+        "file": "src/complexity.js",
+        "line": 139
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_f1b1a2bccb3c9969",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_31aad0 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.month",
+        "hash": "sh_f1b1a2bccb3c9969",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`complexity.month` is exported but no import resolves to src/complexity.js"
     },
     {
       "action": {
@@ -2473,22 +2513,6 @@
             "lang": "javascript",
             "rank": 9,
             "target": {
-              "display": "decide.label",
-              "location": {
-                "col": 8,
-                "end_col": 2,
-                "end_line": 28,
-                "file": "src/decide.js",
-                "line": 19
-              },
-              "symbol": "sh_9a3e5711075267b2"
-            },
-            "value": 3.0
-          },
-          {
-            "lang": "javascript",
-            "rank": 10,
-            "target": {
               "display": "decide.parseCents",
               "location": {
                 "col": 8,
@@ -2500,12 +2524,28 @@
               "symbol": "sh_304d1d882875a850"
             },
             "value": 3.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 10,
+            "target": {
+              "display": "pricing.discounted",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 7,
+                "file": "src/pricing.js",
+                "line": 1
+              },
+              "symbol": "sh_3daaeda67cda1a62"
+            },
+            "value": 3.0
           }
         ],
-        "measured": 75,
+        "measured": 76,
         "metric": "cyclomatic",
         "per": "symbol",
-        "summary": "Cyclomatic complexity per function."
+        "summary": "Modified cyclomatic complexity per function (a match counts once)."
       },
       {
         "check": "static.complexity",
@@ -2530,6 +2570,22 @@
             "lang": "javascript",
             "rank": 2,
             "target": {
+              "display": "complexity.month",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 168,
+                "file": "src/complexity.js",
+                "line": 139
+              },
+              "symbol": "sh_f1b1a2bccb3c9969"
+            },
+            "value": 13.0
+          },
+          {
+            "lang": "javascript",
+            "rank": 3,
+            "target": {
               "display": "complexity.label",
               "location": {
                 "col": 8,
@@ -2544,7 +2600,7 @@
           },
           {
             "lang": "javascript",
-            "rank": 3,
+            "rank": 4,
             "target": {
               "display": "crap_scores.overdue",
               "location": {
@@ -2560,7 +2616,7 @@
           },
           {
             "lang": "javascript",
-            "rank": 4,
+            "rank": 5,
             "target": {
               "display": "decide.classify",
               "location": {
@@ -2576,7 +2632,7 @@
           },
           {
             "lang": "javascript",
-            "rank": 5,
+            "rank": 6,
             "target": {
               "display": "crap_scores.clamp",
               "location": {
@@ -2592,7 +2648,7 @@
           },
           {
             "lang": "javascript",
-            "rank": 6,
+            "rank": 7,
             "target": {
               "display": "decide.firstOverdraft",
               "location": {
@@ -2608,7 +2664,7 @@
           },
           {
             "lang": "javascript",
-            "rank": 7,
+            "rank": 8,
             "target": {
               "display": "decide.parseCents",
               "location": {
@@ -2624,7 +2680,7 @@
           },
           {
             "lang": "javascript",
-            "rank": 8,
+            "rank": 9,
             "target": {
               "display": "clones_settlement.reconcilePayments",
               "location": {
@@ -2640,7 +2696,7 @@
           },
           {
             "lang": "javascript",
-            "rank": 9,
+            "rank": 10,
             "target": {
               "display": "clones_settlement.settleInvoices",
               "location": {
@@ -2653,25 +2709,9 @@
               "symbol": "sh_62494e6c882826e9"
             },
             "value": 3.0
-          },
-          {
-            "lang": "javascript",
-            "rank": 10,
-            "target": {
-              "display": "decide.label",
-              "location": {
-                "col": 8,
-                "end_col": 2,
-                "end_line": 28,
-                "file": "src/decide.js",
-                "line": 19
-              },
-              "symbol": "sh_9a3e5711075267b2"
-            },
-            "value": 3.0
           }
         ],
-        "measured": 75,
+        "measured": 76,
         "metric": "cognitive",
         "per": "symbol",
         "summary": "Cognitive complexity per function."
@@ -3127,7 +3167,7 @@
       "roots": [
         "."
       ],
-      "symbols": 75
+      "symbols": 76
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -3138,7 +3178,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 25,
+      "info": 26,
       "warn": 24
     },
     "gate": null,
@@ -3146,6 +3186,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 49,
+  "total_findings": 50,
   "truncated": false
 }

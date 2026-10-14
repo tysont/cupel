@@ -89,6 +89,27 @@ pub fn lines(span: Span) -> (u32, u32) {
 /// Whether each loop of the `lang` symbol `display` under `root` iterates over a table of cases
 /// written in place, in document order.
 pub fn loop_tables(lang: &str, root: &Path, display: &str) -> Vec<bool> {
+    decisions_of_kind(lang, root, display, DecisionKind::Loop)
+        .iter()
+        .map(|d| d.table)
+        .collect()
+}
+
+/// Whether each `case` of the `lang` symbol `display` under `root` continues a match or switch
+/// an earlier case began, in document order.
+pub fn case_continuations(lang: &str, root: &Path, display: &str) -> Vec<bool> {
+    decisions_of_kind(lang, root, display, DecisionKind::Case)
+        .iter()
+        .map(|d| d.continues)
+        .collect()
+}
+
+fn decisions_of_kind(
+    lang: &str,
+    root: &Path,
+    display: &str,
+    kind: DecisionKind,
+) -> Vec<cupel_core::syntax::Decision> {
     let symbols: Symbols = produce(lang, root);
     let decisions: Decisions = produce(lang, root);
     let key = symbols
@@ -104,7 +125,7 @@ pub fn loop_tables(lang: &str, root: &Path, display: &str) -> Vec<bool> {
         .unwrap_or_else(|| panic!("no decisions entry for {display}"))
         .decisions
         .iter()
-        .filter(|d| d.kind == DecisionKind::Loop)
-        .map(|d| d.table)
+        .filter(|d| d.kind == kind)
+        .copied()
         .collect()
 }

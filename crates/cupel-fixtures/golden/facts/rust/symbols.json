@@ -398,6 +398,28 @@
     },
     {
       "body": {
+        "col": 43,
+        "end_col": 2,
+        "end_line": 163,
+        "line": 147
+      },
+      "display": "complexity::month",
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "month",
+      "namespace": "complexity",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 163,
+        "line": 147
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 49,
         "end_col": 2,
         "end_line": 19,

@@ -212,6 +212,14 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "src/ledger/complexity.py",
+        "line": 123
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "src/ledger/crap_scores.py",
         "line": 8
       }

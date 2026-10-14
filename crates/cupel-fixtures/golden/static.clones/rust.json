@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 35,
+        "n": 36,
         "unit": "pairs",
         "value": 8.0
       },
@@ -318,7 +318,7 @@
       "roots": [
         "."
       ],
-      "symbols": 71
+      "symbols": 72
     },
     "seed": "<seed>",
     "started": "<timestamp>",

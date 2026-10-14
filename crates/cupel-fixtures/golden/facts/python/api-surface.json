@@ -385,6 +385,18 @@
       }
     },
     {
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "path": "ledger.complexity.month",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 151,
+        "line": 123
+      }
+    },
+    {
       "file": "src/ledger/crap_scores.py",
       "kind": "function",
       "path": "ledger.crap_scores.overdue",

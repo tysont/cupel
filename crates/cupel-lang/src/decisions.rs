@@ -17,7 +17,8 @@
 //!   that parent, and neither is anything nested under it.
 //! - **Early returns** whose node is the symbol body's final statement are dropped: a return
 //!   is final when every node from it up to the body is its parent's last named child.
-//! - **Cases**: only the first `case` among siblings keeps its cognitive weight.
+//! - **Cases**: only the first `case` among siblings keeps its cognitive weight; the others
+//!   are marked `continues` (one multiway decision, ADR-072).
 //! - **Tables**: `@loop.table` (any pattern) on a loop node marks it as iterating over a table
 //!   of cases written in place; the loop's decision has `table: true` (ADR-069).
 use std::collections::HashSet;
@@ -124,6 +125,7 @@ fn weigh(
                 cyclomatic: weight.cyclomatic,
                 cognitive: if first_case { weight.cognitive } else { 0 },
                 table: *kind == DecisionKind::Loop && tables.contains(&node.id()),
+                continues: !first_case,
             }
         })
         .collect()

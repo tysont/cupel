@@ -680,7 +680,7 @@ The first end-to-end slice. Scope: make `cupel check --paths src/ --only static.
 
 #### P2.10 First dogfood
 
-**Status:** in progress (2026-10-14) · [ADR-064](adr/CUPEL_DECISION_064.md) · [ADR-065](adr/CUPEL_DECISION_065.md) · [ADR-066](adr/CUPEL_DECISION_066.md) · [ADR-067](adr/CUPEL_DECISION_067.md) · [ADR-068](adr/CUPEL_DECISION_068.md) · [ADR-069](adr/CUPEL_DECISION_069.md) · [ADR-070](adr/CUPEL_DECISION_070.md) · [ADR-071](adr/CUPEL_DECISION_071.md)
+**Status:** in progress (2026-10-14) · [ADR-064](adr/CUPEL_DECISION_064.md) · [ADR-065](adr/CUPEL_DECISION_065.md) · [ADR-066](adr/CUPEL_DECISION_066.md) · [ADR-067](adr/CUPEL_DECISION_067.md) · [ADR-068](adr/CUPEL_DECISION_068.md) · [ADR-069](adr/CUPEL_DECISION_069.md) · [ADR-070](adr/CUPEL_DECISION_070.md) · [ADR-071](adr/CUPEL_DECISION_071.md) · [ADR-072](adr/CUPEL_DECISION_072.md)
 
 - `cupel init --write` on the Cupel repo (commit the resulting `cupel.toml`); `[gate.changed]` with `tests.weakening = "none"` and `static.crap.max < 30` (CC-only until P3).
 - `make dogfood` target; CI job runs it; `cupel check --depth quick` on the whole tree is clean or every finding is either fixed or suppressed with a reason.

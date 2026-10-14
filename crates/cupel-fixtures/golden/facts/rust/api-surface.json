@@ -241,6 +241,18 @@
       }
     },
     {
+      "file": "src/complexity.rs",
+      "kind": "function",
+      "path": "complexity::month",
+      "signature": "(_: u32) -> &'static str",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 163,
+        "line": 147
+      }
+    },
+    {
       "file": "src/crap_scores.rs",
       "kind": "function",
       "path": "crap_scores::overdue",

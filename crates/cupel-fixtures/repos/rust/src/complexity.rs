@@ -142,3 +142,22 @@ impl Statement {
         format!("{}: {amount}", self.owner)
     }
 }
+
+/// Names a month by its number: one match, however many arms it has.
+pub fn month(number: u32) -> &'static str {
+    match number {
+        1 => "jan",
+        2 => "feb",
+        3 => "mar",
+        4 => "apr",
+        5 => "may",
+        6 => "jun",
+        7 => "jul",
+        8 => "aug",
+        9 => "sep",
+        10 => "oct",
+        11 => "nov",
+        12 => "dec",
+        _ => "none",
+    }
+}

@@ -46,6 +46,7 @@ fn decision(kind: DecisionKind, nesting: u32, cyclomatic: u32, cognitive: u32) -
         cyclomatic,
         cognitive,
         table: false,
+        continues: false,
     }
 }
 
@@ -234,6 +235,28 @@ fn metrics_follow_the_weights_and_nesting_the_producer_attached() {
     assert_eq!(high.evidence.0["cognitive"], json!(8));
     let deep = findings.iter().find(|f| f.kind == "nesting.deep").unwrap();
     assert_eq!(deep.evidence.0["depth"], json!(3), "the case at nesting 2");
+}
+
+#[test]
+fn a_match_counts_once_toward_cyclomatic_complexity_however_many_arms_it_has() {
+    use DecisionKind::{Branch, Case};
+    let arm = |continues| Decision {
+        continues,
+        ..decision(Case, 0, 1, u32::from(!continues))
+    };
+    let mut decisions: Vec<Decision> = std::iter::once(arm(false))
+        .chain((1..12).map(|_| arm(true)))
+        .collect();
+    decisions.push(decision(Branch, 0, 1, 1));
+    let world = World {
+        symbols: vec![(symbol("dispatch", 1, 20, 1), decisions)],
+    };
+    let (result, findings) = run(&world, json!({}));
+    assert!(
+        findings.iter().all(|f| f.kind != "complexity.high"),
+        "{findings:?}"
+    );
+    assert_eq!(result.metrics["cyclomatic_max"].to_string(), "3");
 }
 
 #[test]

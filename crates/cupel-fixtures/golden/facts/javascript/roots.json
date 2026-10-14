@@ -108,6 +108,14 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/complexity.js",
+        "line": 139
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/crap_scores.js",
         "line": 6
       }

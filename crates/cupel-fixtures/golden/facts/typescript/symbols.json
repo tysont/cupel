@@ -332,6 +332,28 @@
     },
     {
       "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 170,
+        "line": 141
+      },
+      "display": "complexity.month",
+      "file": "src/complexity.ts",
+      "kind": "function",
+      "lang": "typescript",
+      "name": "month",
+      "namespace": "complexity",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 170,
+        "line": 141
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 64,
         "end_col": 2,
         "end_line": 18,

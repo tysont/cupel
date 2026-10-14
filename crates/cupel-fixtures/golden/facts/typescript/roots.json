@@ -124,6 +124,14 @@
       "reason": "export",
       "symbol": {
         "col": 8,
+        "file": "src/complexity.ts",
+        "line": 141
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
         "file": "src/crap_scores.ts",
         "line": 6
       }

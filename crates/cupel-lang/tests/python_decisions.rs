@@ -3,7 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{fixture, loop_tables, produce, tree};
+use support::{case_continuations, fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, Catch, EarlyReturn, Loop, Ternary};
 
@@ -172,5 +172,15 @@ fn loops_over_literal_lists_and_tuples_are_tables_and_others_are_not() {
     assert_eq!(
         loop_tables("python", dir.path(), "t.cases"),
         [true, true, true, false, false]
+    );
+}
+
+#[test]
+fn every_case_after_the_first_continues_its_multiway_decision() {
+    let mut expected = vec![true; 12];
+    expected[0] = false;
+    assert_eq!(
+        case_continuations("python", &fixture("python"), "ledger.complexity.month"),
+        expected
     );
 }

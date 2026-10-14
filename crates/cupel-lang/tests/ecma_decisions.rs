@@ -5,7 +5,7 @@ mod support;
 use std::path::Path;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{fixture, loop_tables, produce, tree};
+use support::{case_continuations, fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, Catch, EarlyReturn, Loop, Ternary};
 
@@ -170,5 +170,15 @@ fn for_of_over_literal_arrays_is_a_table_and_other_loops_are_not() {
     assert_eq!(
         loop_tables("javascript", dir.path(), "t.cases"),
         [true, true, false, false, false]
+    );
+}
+
+#[test]
+fn every_case_after_the_first_continues_its_multiway_decision() {
+    let mut expected = vec![true; 12];
+    expected[0] = false;
+    assert_eq!(
+        case_continuations("javascript", &fixture("javascript"), "complexity.month"),
+        expected
     );
 }

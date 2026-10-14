@@ -288,6 +288,28 @@
     },
     {
       "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      },
+      "display": "complexity.month",
+      "file": "src/complexity.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "month",
+      "namespace": "complexity",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 38,
         "end_col": 2,
         "end_line": 18,

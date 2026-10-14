@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 33,
+        "n": 34,
         "unit": "pairs",
         "value": 8.0
       },
@@ -36,7 +36,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 72,
+        "n": 73,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -61,15 +61,15 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 25,
+      "findings": 26,
       "id": "static.dead-code",
       "metrics": {
-        "dead_exports": 24.0,
+        "dead_exports": 25.0,
         "dead_symbols": 1.0
       },
       "oracle": null,
       "score": {
-        "n": 72,
+        "n": 73,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -896,6 +896,46 @@
       },
       "tier": 0,
       "title": "`complexity.Statement.line` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `month` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `month` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `month` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_4119bc",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 170,
+        "file": "src/complexity.ts",
+        "line": 141
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6ecd57017ef786b1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_4119bc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.month",
+        "hash": "sh_6ecd57017ef786b1",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.month` is exported but no import resolves to src/complexity.ts"
     },
     {
       "action": {
@@ -2391,22 +2431,6 @@
             "lang": "typescript",
             "rank": 9,
             "target": {
-              "display": "decide.label",
-              "location": {
-                "col": 8,
-                "end_col": 2,
-                "end_line": 32,
-                "file": "src/decide.ts",
-                "line": 23
-              },
-              "symbol": "sh_da40a6e006646248"
-            },
-            "value": 3.0
-          },
-          {
-            "lang": "typescript",
-            "rank": 10,
-            "target": {
               "display": "decide.parseCents",
               "location": {
                 "col": 8,
@@ -2418,12 +2442,28 @@
               "symbol": "sh_a286265a5f4e1c81"
             },
             "value": 3.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 10,
+            "target": {
+              "display": "pricing.discounted",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 7,
+                "file": "src/pricing.ts",
+                "line": 1
+              },
+              "symbol": "sh_13d81a7dbe1b7234"
+            },
+            "value": 3.0
           }
         ],
-        "measured": 72,
+        "measured": 73,
         "metric": "cyclomatic",
         "per": "symbol",
-        "summary": "Cyclomatic complexity per function."
+        "summary": "Modified cyclomatic complexity per function (a match counts once)."
       },
       {
         "check": "static.complexity",
@@ -2448,6 +2488,22 @@
             "lang": "typescript",
             "rank": 2,
             "target": {
+              "display": "complexity.month",
+              "location": {
+                "col": 8,
+                "end_col": 2,
+                "end_line": 170,
+                "file": "src/complexity.ts",
+                "line": 141
+              },
+              "symbol": "sh_6ecd57017ef786b1"
+            },
+            "value": 13.0
+          },
+          {
+            "lang": "typescript",
+            "rank": 3,
+            "target": {
               "display": "complexity.label",
               "location": {
                 "col": 8,
@@ -2462,7 +2518,7 @@
           },
           {
             "lang": "typescript",
-            "rank": 3,
+            "rank": 4,
             "target": {
               "display": "crap_scores.overdue",
               "location": {
@@ -2478,7 +2534,7 @@
           },
           {
             "lang": "typescript",
-            "rank": 4,
+            "rank": 5,
             "target": {
               "display": "decide.classify",
               "location": {
@@ -2494,7 +2550,7 @@
           },
           {
             "lang": "typescript",
-            "rank": 5,
+            "rank": 6,
             "target": {
               "display": "crap_scores.clamp",
               "location": {
@@ -2510,7 +2566,7 @@
           },
           {
             "lang": "typescript",
-            "rank": 6,
+            "rank": 7,
             "target": {
               "display": "decide.firstOverdraft",
               "location": {
@@ -2526,7 +2582,7 @@
           },
           {
             "lang": "typescript",
-            "rank": 7,
+            "rank": 8,
             "target": {
               "display": "decide.parseCents",
               "location": {
@@ -2542,7 +2598,7 @@
           },
           {
             "lang": "typescript",
-            "rank": 8,
+            "rank": 9,
             "target": {
               "display": "clones_settlement.reconcilePayments",
               "location": {
@@ -2558,7 +2614,7 @@
           },
           {
             "lang": "typescript",
-            "rank": 9,
+            "rank": 10,
             "target": {
               "display": "clones_settlement.settleInvoices",
               "location": {
@@ -2571,25 +2627,9 @@
               "symbol": "sh_23cb9891c1a627f9"
             },
             "value": 3.0
-          },
-          {
-            "lang": "typescript",
-            "rank": 10,
-            "target": {
-              "display": "decide.label",
-              "location": {
-                "col": 8,
-                "end_col": 2,
-                "end_line": 32,
-                "file": "src/decide.ts",
-                "line": 23
-              },
-              "symbol": "sh_da40a6e006646248"
-            },
-            "value": 3.0
           }
         ],
-        "measured": 72,
+        "measured": 73,
         "metric": "cognitive",
         "per": "symbol",
         "summary": "Cognitive complexity per function."
@@ -3141,7 +3181,7 @@
       "roots": [
         "."
       ],
-      "symbols": 72
+      "symbols": 73
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -3152,7 +3192,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 24,
+      "info": 25,
       "warn": 23
     },
     "gate": null,
@@ -3160,6 +3200,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 47,
+  "total_findings": 48,
   "truncated": false
 }

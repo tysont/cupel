@@ -256,6 +256,7 @@ impl World {
                                     cyclomatic: 1,
                                     cognitive: 1,
                                     table,
+                                    continues: false,
                                 })
                                 .collect(),
                         })

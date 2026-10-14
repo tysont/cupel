@@ -14,7 +14,7 @@ use serde_json::Value;
 
 use crate::finding::SymbolFinding;
 use crate::manifest::{evidence, kind, metric, ranked};
-use crate::metrics::{cyclomatic, decisions_by_symbol, hashes_by_symbol, symbol_target};
+use crate::metrics::{decisions_by_symbol, hashes_by_symbol, symbol_target};
 use crate::outcome;
 use crate::settings::Limits;
 
@@ -33,7 +33,8 @@ const LIMITS: Limits = Limits::new(&[
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 struct ComplexityHigh {
-    /// 1 plus the cyclomatic weight of every decision.
+    /// Modified cyclomatic complexity: 1 plus the cyclomatic weight of every decision, a match or
+    /// switch counting once (ADR-072).
     cyclomatic: u32,
     /// The cognitive weight of every decision, structural ones increased by their nesting.
     cognitive: u32,
@@ -77,7 +78,7 @@ impl StaticComplexity {
         Self {
             manifest: Manifest {
                 id: CheckId::from(ID),
-                version: 1,
+                version: 2,
                 tier: Tier::try_from(0).expect("tier 0 exists"),
                 cost: CostClass::Quick,
                 needs: vec![FactKind::Symbols, FactKind::Decisions, FactKind::NormTree],
@@ -86,7 +87,9 @@ impl StaticComplexity {
                 metrics: metrics(),
                 stability: Stability::Experimental,
                 summary: "Cyclomatic and cognitive complexity, nesting depth, parameter count, \
-                          and length per function, against configurable limits."
+                          and length per function, against configurable limits. Cyclomatic \
+                          complexity is the modified form: a match or switch counts as one \
+                          decision however many arms it has."
                     .to_owned(),
             },
         }
@@ -125,7 +128,7 @@ fn metrics() -> Vec<MetricSpec> {
     vec![
         metric(
             "cyclomatic_max",
-            "The largest cyclomatic complexity in scope.",
+            "The largest modified cyclomatic complexity in scope (a match counts once).",
         ),
         metric(
             "cognitive_max",
@@ -140,7 +143,7 @@ fn metrics() -> Vec<MetricSpec> {
         ranked(
             "cyclomatic",
             MetricPer::Symbol,
-            "Cyclomatic complexity per function.",
+            "Modified cyclomatic complexity per function (a match counts once).",
         ),
         ranked(
             "cognitive",
@@ -369,7 +372,12 @@ struct Metrics {
 
 impl Metrics {
     fn of(symbol: &SymbolDef, decisions: &[Decision]) -> Self {
-        let cyclomatic = cyclomatic(decisions);
+        // A match or switch is one multiway decision however many arms it has (ADR-072).
+        let cyclomatic = 1 + decisions
+            .iter()
+            .filter(|d| !d.continues)
+            .map(|d| d.cyclomatic)
+            .sum::<u32>();
         let cognitive = decisions
             .iter()
             .map(|d| {

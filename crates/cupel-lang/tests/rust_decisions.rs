@@ -3,7 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{fixture, loop_tables, produce, tree};
+use support::{case_continuations, fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, EarlyReturn, Loop};
 
@@ -160,5 +160,15 @@ fn loops_over_literal_arrays_vectors_slices_and_constants_are_tables_and_others_
         [
             true, true, true, true, true, true, false, false, false, true, true, true, true, false
         ]
+    );
+}
+
+#[test]
+fn every_case_after_the_first_continues_its_multiway_decision() {
+    let mut expected = vec![true; 12];
+    expected[0] = false;
+    assert_eq!(
+        case_continuations("rust", &fixture("rust"), "complexity::month"),
+        expected
     );
 }

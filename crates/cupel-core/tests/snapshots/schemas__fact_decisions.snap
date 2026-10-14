@@ -30,6 +30,10 @@ expression: pretty(&schema)
           "format": "uint32",
           "minimum": 0
         },
+        "continues": {
+          "description": "A `case` arm after the first of its match or switch: the same multiway decision, which\nmodified cyclomatic complexity counts once (ADR-072). Always false for other kinds.",
+          "type": "boolean"
+        },
         "cyclomatic": {
           "description": "Weight toward cyclomatic complexity.",
           "type": "integer",
@@ -52,6 +56,7 @@ expression: pretty(&schema)
       },
       "required": [
         "cognitive",
+        "continues",
         "cyclomatic",
         "kind",
         "nesting",

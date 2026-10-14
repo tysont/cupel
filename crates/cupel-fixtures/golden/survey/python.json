@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 27,
+        "n": 28,
         "unit": "pairs",
         "value": 8.0
       },
@@ -36,7 +36,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 79,
+        "n": 80,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -69,7 +69,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 79,
+        "n": 80,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -2008,22 +2008,6 @@
             "lang": "python",
             "rank": 8,
             "target": {
-              "display": "ledger.decide.describe",
-              "location": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 41,
-                "file": "src/ledger/decide.py",
-                "line": 34
-              },
-              "symbol": "sh_11bab2571f50aaff"
-            },
-            "value": 3.0
-          },
-          {
-            "lang": "python",
-            "rank": 9,
-            "target": {
               "display": "ledger.decide.first_overdraft",
               "location": {
                 "col": 1,
@@ -2038,7 +2022,7 @@
           },
           {
             "lang": "python",
-            "rank": 10,
+            "rank": 9,
             "target": {
               "display": "ledger.decide.positives",
               "location": {
@@ -2051,12 +2035,28 @@
               "symbol": "sh_1219c9850a0c4998"
             },
             "value": 3.0
+          },
+          {
+            "lang": "python",
+            "rank": 10,
+            "target": {
+              "display": "ledger.pricing.discounted",
+              "location": {
+                "col": 1,
+                "end_col": 17,
+                "end_line": 5,
+                "file": "src/ledger/pricing.py",
+                "line": 1
+              },
+              "symbol": "sh_8fc1bb6040aba10b"
+            },
+            "value": 3.0
           }
         ],
-        "measured": 79,
+        "measured": 80,
         "metric": "cyclomatic",
         "per": "symbol",
-        "summary": "Cyclomatic complexity per function."
+        "summary": "Modified cyclomatic complexity per function (a match counts once)."
       },
       {
         "check": "static.complexity",
@@ -2081,6 +2081,22 @@
             "lang": "python",
             "rank": 2,
             "target": {
+              "display": "ledger.complexity.month",
+              "location": {
+                "col": 1,
+                "end_col": 26,
+                "end_line": 151,
+                "file": "src/ledger/complexity.py",
+                "line": 123
+              },
+              "symbol": "sh_d30a5bb4e5e29b4b"
+            },
+            "value": 13.0
+          },
+          {
+            "lang": "python",
+            "rank": 3,
+            "target": {
               "display": "ledger.complexity.label",
               "location": {
                 "col": 1,
@@ -2095,7 +2111,7 @@
           },
           {
             "lang": "python",
-            "rank": 3,
+            "rank": 4,
             "target": {
               "display": "ledger.crap_scores.overdue",
               "location": {
@@ -2111,7 +2127,7 @@
           },
           {
             "lang": "python",
-            "rank": 4,
+            "rank": 5,
             "target": {
               "display": "ledger.crap_scores.clamp",
               "location": {
@@ -2127,7 +2143,7 @@
           },
           {
             "lang": "python",
-            "rank": 5,
+            "rank": 6,
             "target": {
               "display": "ledger.decide.first_overdraft",
               "location": {
@@ -2143,7 +2159,7 @@
           },
           {
             "lang": "python",
-            "rank": 6,
+            "rank": 7,
             "target": {
               "display": "ledger.twins.net_total_capped",
               "location": {
@@ -2159,7 +2175,7 @@
           },
           {
             "lang": "python",
-            "rank": 7,
+            "rank": 8,
             "target": {
               "display": "ledger.clones_settlement.reconcile_payments",
               "location": {
@@ -2175,7 +2191,7 @@
           },
           {
             "lang": "python",
-            "rank": 8,
+            "rank": 9,
             "target": {
               "display": "ledger.clones_settlement.settle_invoices",
               "location": {
@@ -2191,7 +2207,7 @@
           },
           {
             "lang": "python",
-            "rank": 9,
+            "rank": 10,
             "target": {
               "display": "ledger.decide.classify",
               "location": {
@@ -2204,25 +2220,9 @@
               "symbol": "sh_df63a716d8770847"
             },
             "value": 3.0
-          },
-          {
-            "lang": "python",
-            "rank": 10,
-            "target": {
-              "display": "ledger.decide.describe",
-              "location": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 41,
-                "file": "src/ledger/decide.py",
-                "line": 34
-              },
-              "symbol": "sh_11bab2571f50aaff"
-            },
-            "value": 3.0
           }
         ],
-        "measured": 79,
+        "measured": 80,
         "metric": "cognitive",
         "per": "symbol",
         "summary": "Cognitive complexity per function."
@@ -2742,7 +2742,7 @@
       "roots": [
         "."
       ],
-      "symbols": 79
+      "symbols": 80
     },
     "seed": "<seed>",
     "started": "<timestamp>",

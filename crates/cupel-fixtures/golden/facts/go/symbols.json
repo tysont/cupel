@@ -244,6 +244,28 @@
     },
     {
       "body": {
+        "col": 31,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      },
+      "display": "ledger.Month",
+      "file": "complexity.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Month",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 45,
         "end_col": 2,
         "end_line": 20,

@@ -1780,6 +1780,195 @@
     {
       "sites": [
         {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "0e59ba0b253aabaf",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 149,
+            "line": 149
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0f34f1f2cb22aa9c",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 150,
+            "line": 150
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "257f8913b6b74a3d",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 151,
+            "line": 151
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c86c254e8f31b8d2",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 152,
+            "line": 152
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "58782ff0fcc4cca2",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 153,
+            "line": 153
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "6",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "923febb71713f43e",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 154,
+            "line": 154
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "7",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "24834a6e5ae1e0d0",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 155,
+            "line": 155
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "8",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ebfc1d19635ff850",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 156,
+            "line": 156
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "9",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "42750111b7d01bf2",
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 157,
+            "line": 157
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "75be629b4150f6e4",
+          "span": {
+            "col": 9,
+            "end_col": 11,
+            "end_line": 158,
+            "line": 158
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "11",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9c45e9c9e872534b",
+          "span": {
+            "col": 9,
+            "end_col": 11,
+            "end_line": 159,
+            "line": 159
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "12",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f52b0ec5d9e0fd33",
+          "span": {
+            "col": 9,
+            "end_col": 11,
+            "end_line": 160,
+            "line": 160
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/complexity.rs",
+        "line": 147
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "0",
           "operator": "zero-one",
           "set": "default",

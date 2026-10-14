@@ -60,6 +60,14 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "complexity.go",
+        "line": 139
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "crap_scores.go",
         "line": 8
       }

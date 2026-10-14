@@ -99,12 +99,13 @@ fn decisions_payload_shape() {
                 cyclomatic: 1,
                 cognitive: 3,
                 table: false,
+                continues: false,
             }],
         }],
     });
     assert_eq!(
         json["symbols"][0]["decisions"][0],
-        json!({"kind": "early-return", "nesting": 2, "cyclomatic": 1, "cognitive": 3, "table": false})
+        json!({"kind": "early-return", "nesting": 2, "cyclomatic": 1, "cognitive": 3, "table": false, "continues": false})
     );
 }
 

@@ -619,6 +619,28 @@
     {
       "body": {
         "col": 5,
+        "end_col": 26,
+        "end_line": 151,
+        "line": 124
+      },
+      "display": "ledger.complexity.month",
+      "file": "src/ledger/complexity.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "month",
+      "namespace": "ledger.complexity",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 151,
+        "line": 123
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
         "end_col": 17,
         "end_line": 21,
         "line": 9

@@ -4,15 +4,15 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 25,
+      "findings": 26,
       "id": "static.dead-code",
       "metrics": {
-        "dead_exports": 24.0,
+        "dead_exports": 25.0,
         "dead_symbols": 1.0
       },
       "oracle": null,
       "score": {
-        "n": 72,
+        "n": 73,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -468,6 +468,46 @@
       },
       "tier": 0,
       "title": "`complexity.Statement.line` is exported but no import resolves to src/complexity.ts"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `month` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `month` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `month` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.ts",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.ts"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_4119bc",
+      "kind": "dead.export",
+      "location": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 170,
+        "file": "src/complexity.ts",
+        "line": 141
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6ecd57017ef786b1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_4119bc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity.month",
+        "hash": "sh_6ecd57017ef786b1",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`complexity.month` is exported but no import resolves to src/complexity.ts"
     },
     {
       "action": {
@@ -1156,7 +1196,7 @@
       "roots": [
         "."
       ],
-      "symbols": 72
+      "symbols": 73
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -1167,7 +1207,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 24,
+      "info": 25,
       "warn": 1
     },
     "gate": null,
@@ -1175,6 +1215,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 25,
+  "total_findings": 26,
   "truncated": false
 }

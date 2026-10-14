@@ -4,15 +4,15 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 15,
+      "findings": 16,
       "id": "static.dead-code",
       "metrics": {
-        "dead_exports": 14.0,
+        "dead_exports": 15.0,
         "dead_symbols": 1.0
       },
       "oracle": null,
       "score": {
-        "n": 71,
+        "n": 72,
         "unit": "dead_symbols",
         "value": 1.0
       },
@@ -434,6 +434,46 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
+        "summary": "Delete `month` from src/complexity.rs if nothing outside the repository uses it, or import src/complexity.rs where `month` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/complexity.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `month` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/complexity.rs",
+        "module": "complexity",
+        "module_files": [
+          "src/complexity.rs"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_16d597",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 163,
+        "file": "src/complexity.rs",
+        "line": 147
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6e00dfba848529af",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_16d597 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "complexity::month",
+        "hash": "sh_6e00dfba848529af",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`complexity::month` is exported but no import resolves to src/complexity.rs"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
         "summary": "Delete `overdue` from src/crap_scores.rs if nothing outside the repository uses it, or import src/crap_scores.rs where `overdue` is meant to be called."
       },
       "check": "static.dead-code",
@@ -756,7 +796,7 @@
       "roots": [
         "."
       ],
-      "symbols": 71
+      "symbols": 72
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -767,7 +807,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 14,
+      "info": 15,
       "warn": 1
     },
     "gate": null,
@@ -775,6 +815,6 @@
     "resolved": 0,
     "suppressed": 0
   },
-  "total_findings": 15,
+  "total_findings": 16,
   "truncated": false
 }

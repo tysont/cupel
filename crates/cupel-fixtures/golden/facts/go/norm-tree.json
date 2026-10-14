@@ -4108,6 +4108,480 @@
       }
     },
     {
+      "hash": "sh_c4ec510a9caf4017",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "expression_case"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$lit"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "default_case"
+                      }
+                    ],
+                    "label": "expression_switch_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "complexity.go",
+        "line": 139
+      }
+    },
+    {
       "hash": "sh_79fbe60bd9ea14a3",
       "root": {
         "children": [

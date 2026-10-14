@@ -118,3 +118,34 @@ class Statement:
 
     def line(self, amount):
         return f"{self.owner}: {amount}"
+
+
+def month(number):
+    """Names a month by its number: one match, however many cases it has."""
+    match number:
+        case 1:
+            return "jan"
+        case 2:
+            return "feb"
+        case 3:
+            return "mar"
+        case 4:
+            return "apr"
+        case 5:
+            return "may"
+        case 6:
+            return "jun"
+        case 7:
+            return "jul"
+        case 8:
+            return "aug"
+        case 9:
+            return "sep"
+        case 10:
+            return "oct"
+        case 11:
+            return "nov"
+        case 12:
+            return "dec"
+        case _:
+            return "none"

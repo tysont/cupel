@@ -3,7 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{fixture, loop_tables, produce, tree};
+use support::{case_continuations, fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, EarlyReturn, Loop};
 
@@ -146,5 +146,15 @@ fn the_fixtures_table_driven_test_ranges_over_a_table() {
     assert_eq!(
         loop_tables("go", &fixture("go"), "ledger.TestClassify"),
         [true]
+    );
+}
+
+#[test]
+fn every_case_after_the_first_continues_its_multiway_decision() {
+    let mut expected = vec![true; 12];
+    expected[0] = false;
+    assert_eq!(
+        case_continuations("go", &fixture("go"), "ledger.Month"),
+        expected
     );
 }

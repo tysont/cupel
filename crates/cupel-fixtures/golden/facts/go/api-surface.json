@@ -97,6 +97,18 @@
       }
     },
     {
+      "file": "complexity.go",
+      "kind": "function",
+      "path": "ledger.Month",
+      "signature": "(_ int) string",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 168,
+        "line": 139
+      }
+    },
+    {
       "file": "crap_scores.go",
       "kind": "function",
       "path": "ledger.Overdue",

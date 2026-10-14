@@ -15,7 +15,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 79,
+        "n": 80,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -263,7 +263,7 @@
       "roots": [
         "."
       ],
-      "symbols": 79
+      "symbols": 80
     },
     "seed": "<seed>",
     "started": "<timestamp>",

@@ -119,6 +119,9 @@ pub struct Decision {
     /// tuple, iterated directly or through a local bound to one in the same body (ADR-069).
     /// Always false for other kinds.
     pub table: bool,
+    /// A `case` arm after the first of its match or switch: the same multiway decision, which
+    /// modified cyclomatic complexity counts once (ADR-072). Always false for other kinds.
+    pub continues: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
