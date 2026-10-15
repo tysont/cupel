@@ -502,6 +502,12 @@ fn describe_language_shows_its_toolchain_row_in_default_order() {
         toolchain["coverage"][0]["commands"],
         json!([{"runner": "tool.pytest", "command": "<m> pytest --cov --cov-report=lcov:{out}"}])
     );
+    assert_eq!(toolchain["runners"][0]["install"], json!("<add> pytest"));
+    assert_eq!(toolchain["runners"][1]["install"], Value::Null);
+    assert_eq!(
+        toolchain["launchers"][2]["values"]["add"],
+        json!("python -m pip install")
+    );
     assert_eq!(ids("bench", "producer"), ["tool.pytest-benchmark"]);
     assert_eq!(toolchain["property"], json!(["hypothesis"]));
     assert_eq!(toolchain["fuzz"], json!(["atheris"]));

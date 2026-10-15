@@ -17,6 +17,7 @@ mod events;
 mod explain;
 mod format;
 mod init;
+mod install;
 mod page;
 mod persist;
 mod problem;

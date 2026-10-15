@@ -64,8 +64,9 @@ DOGFOOD_SCOPE ?= changed
 # `tests.flaky` and `tests.mutation` are skipped: the flake engine reruns Cupel's whole suite three
 # times, one test at a time, which takes tens of minutes (P3.5 Notes), and every mutant reruns it
 # once more after rebuilding (P3.4 Notes); `make check` runs that suite on every commit.
+# `--no-install`: grading Cupel never asks to install a tool, even from a terminal (ADR-081).
 dogfood:
-	$(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed) --gate --skip tests.flaky --skip tests.mutation --format text
+	$(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed) --gate --no-install --skip tests.flaky --skip tests.mutation --format text
 
 install:
 	$(CARGO) install --path crates/cupel-cli

@@ -7,15 +7,17 @@ use cupel_core::config::Config;
 use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, GitInfo, Job, Lang, Outcome,
-    PlannedWrite, RANKED, Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection,
-    Status, Verb, Writer, apply_gate, evaluate_gate, gate_for, next_actions, rankings,
+    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, Finding, GitInfo, Job, Lang,
+    Outcome, PlannedInstall, PlannedWrite, ProducerRegistry, RANKED, Range, ResolvedFiles,
+    Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Verb, Writer, apply_gate, evaluate_gate,
+    gate_for, next_actions, rankings,
 };
 use cupel_lang::LanguageRegistry;
 
 use crate::catalog::Catalog;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
+use crate::install::{self, Permission};
 use crate::project;
 use crate::run::{Executions, Invocation, Run, shell_quote};
 
@@ -148,6 +150,30 @@ pub fn run(
     })
 }
 
+/// Before a run, the missing tools of the producers it would choose for the job's checks and
+/// languages, installed as far as the invocation may (ADR-081): the installs a dry run would
+/// attempt, and the findings of the installs a real run made or was refused at the terminal's
+/// question.
+fn install_tools(
+    invocation: &Invocation<'_>,
+    producers: &ProducerRegistry,
+    job: &Job<'_>,
+) -> (Vec<PlannedInstall>, Vec<Finding>) {
+    let (run, root) = (invocation.run, invocation.writer.root());
+    let planned = crate::doctor::installs(&job.selected, producers, &job.langs, job.config, root);
+    if invocation.dry_run {
+        return (invocation.installs.would_install(&planned), Vec::new());
+    }
+    if matches!(invocation.installs, Permission::Never(_)) {
+        return (Vec::new(), Vec::new());
+    }
+    let findings = install::problems(&install::attempt(invocation, &planned))
+        .into_iter()
+        .map(|problem| problem.finding(&run.repro()))
+        .collect();
+    (Vec::new(), findings)
+}
+
 /// The lines a range scope changed per file; `None` without a range.
 pub(crate) fn changed_lines(
     root: &Path,
@@ -183,11 +209,16 @@ fn schedule(
     invocation: &Invocation<'_>,
     events: &mut dyn EventSink,
 ) -> Result<Outcome, CupelError> {
+    let (would_install, installed) = install_tools(invocation, scheduler.producers, job);
     let mut outcome = if invocation.dry_run {
         scheduler.plan(job, events)?
     } else {
         scheduler.run(job, events)?
     };
+    outcome.findings.splice(0..0, installed);
+    if let Some(plan) = &mut outcome.plan {
+        plan.would_install = would_install;
+    }
     invocation.run.keep(Executions {
         test_results: std::mem::take(&mut outcome.test_results),
         mutation_outcomes: std::mem::take(&mut outcome.mutation_outcomes),

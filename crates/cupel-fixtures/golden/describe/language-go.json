@@ -125,6 +125,7 @@
           ],
           "detect": [],
           "format": null,
+          "install": null,
           "producer": "tool.go-bench"
         }
       ],
@@ -138,6 +139,7 @@
           ],
           "detect": [],
           "format": "coverprofile",
+          "install": null,
           "producer": "tool.go-coverprofile"
         }
       ],
@@ -162,6 +164,7 @@
           ],
           "detect": [],
           "format": null,
+          "install": null,
           "producer": "tool.go-test"
         }
       ]

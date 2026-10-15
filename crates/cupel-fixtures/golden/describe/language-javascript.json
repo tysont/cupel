@@ -130,6 +130,7 @@
             "`package.json` has `scripts.bench`"
           ],
           "format": null,
+          "install": null,
           "producer": "tool.bench-script"
         }
       ],
@@ -143,6 +144,7 @@
           ],
           "detect": [],
           "format": "lcov",
+          "install": "<add> vitest @vitest/coverage-v8",
           "producer": "tool.vitest-coverage"
         },
         {
@@ -154,6 +156,7 @@
           ],
           "detect": [],
           "format": "lcov",
+          "install": "<add> jest",
           "producer": "tool.jest-coverage"
         },
         {
@@ -169,6 +172,7 @@
           ],
           "detect": [],
           "format": "lcov",
+          "install": "<add> c8",
           "producer": "tool.c8"
         }
       ],
@@ -184,6 +188,7 @@
           ],
           "tool": "pnpm",
           "values": {
+            "add": "pnpm add --save-dev",
             "run": "pnpm run",
             "x": "pnpm"
           }
@@ -195,6 +200,7 @@
           ],
           "tool": "yarn",
           "values": {
+            "add": "yarn add --dev",
             "run": "yarn run",
             "x": "yarn"
           }
@@ -203,6 +209,7 @@
           "detect": [],
           "tool": "npm",
           "values": {
+            "add": "npm install --save-dev",
             "run": "npm run",
             "x": "npx"
           }
@@ -225,6 +232,7 @@
             "`package.json` in the root or a member has `devDependencies.vitest`"
           ],
           "format": null,
+          "install": "<add> vitest",
           "producer": "tool.vitest"
         },
         {
@@ -239,6 +247,7 @@
             "`package.json` in the root or a member has `devDependencies.jest`"
           ],
           "format": null,
+          "install": "<add> jest",
           "producer": "tool.jest"
         },
         {
@@ -253,6 +262,7 @@
             "`package.json` in the root or a member has `devDependencies.mocha`"
           ],
           "format": null,
+          "install": null,
           "producer": "tool.mocha"
         },
         {
@@ -264,6 +274,7 @@
           ],
           "detect": [],
           "format": null,
+          "install": null,
           "producer": "tool.node-test"
         }
       ]

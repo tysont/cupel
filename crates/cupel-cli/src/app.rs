@@ -20,6 +20,7 @@ use crate::cli::{Cli, VerbArgs, verb_name};
 use crate::error::{BugReport, CupelError, Usage};
 use crate::events::Events;
 use crate::format::{self, Rendering};
+use crate::install::Permission;
 use crate::page::Page;
 use crate::problem::Problem;
 use crate::run::{Invocation, Run};
@@ -237,13 +238,7 @@ fn configured(
         Ok(config) => config,
         Err(error) if runs_without_configuration(cli) => {
             let envelope = guarded(run, stderr, cli.global.quiet, || {
-                let invocation = Invocation {
-                    run,
-                    writer,
-                    config: Err(&error),
-                    dry_run: cli.global.dry_run,
-                };
-                execute(&invocation, cli, environment, events)
+                invoke((run, writer), Err(&error), cli, environment, events)
             });
             return (envelope, recovered_rendering(environment), said);
         }
@@ -273,15 +268,32 @@ fn configured(
         let _ = writeln!(stderr, "cupel: format: {}", format.as_str());
     }
     let envelope = guarded(run, stderr, cli.global.quiet, || {
-        let invocation = Invocation {
-            run,
-            writer,
-            config: Ok(&config),
-            dry_run: cli.global.dry_run,
-        };
-        execute(&invocation, cli, environment, events)
+        invoke((run, writer), Ok(&config), cli, environment, events)
     });
     (envelope, rendering, said)
+}
+
+/// Runs the verb of `run` with `config`, the loaded configuration or why it did not load. The
+/// run may install tools as the flags say, else as whether stdout is a terminal says (ADR-081).
+fn invoke(
+    (run, writer): (&Run, &Writer),
+    config: Result<&Config, &cupel_core::Error>,
+    cli: &Cli,
+    environment: &Environment,
+    events: &mut dyn EventSink,
+) -> Result<Envelope, CupelError> {
+    let invocation = Invocation {
+        run,
+        writer,
+        config,
+        dry_run: cli.global.dry_run,
+        installs: Permission::of(
+            cli.global.install,
+            cli.global.no_install,
+            environment.stdout_is_terminal,
+        ),
+    };
+    execute(&invocation, cli, environment, events)
 }
 
 /// The configuration, rejected when it names a check, gate metric, or language the registries
@@ -383,11 +395,11 @@ fn run_verb(
                 described
             })
         }
-        // `doctor` writes only its probe and run record; its plan is empty (ADR-022 §6).
-        VerbArgs::Doctor { .. } | VerbArgs::Explain { .. } if dry_run => {
-            Ok(invocation.nothing_planned(events))
-        }
-        VerbArgs::Doctor { fix } => Ok(doctor::run(run, invocation.config, writer, *fix)),
+        // `doctor` writes only its probe and run record; its plan lists only what `--fix` would
+        // install (ADR-022 §6, ADR-081).
+        VerbArgs::Doctor { fix } if dry_run => Ok(doctor::plan(invocation, *fix, events)),
+        VerbArgs::Explain { .. } if dry_run => Ok(invocation.nothing_planned(events)),
+        VerbArgs::Doctor { fix } => Ok(doctor::run(invocation, *fix)),
         VerbArgs::Init { force } => init_verb(invocation, cli, *force, events),
         VerbArgs::Check { scope } => check::verb(invocation, scope, events),
         VerbArgs::Survey { scope } => survey::verb(invocation, scope, events),

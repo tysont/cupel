@@ -175,13 +175,11 @@ fn doctor_verb() -> CommandDescription {
         "doctor",
         "Verify the binary's version, the configuration, .cupel/ write access, and needed tools.",
         None,
-        vec![
-            switch(
-                "--fix",
-                "Install missing tools; with --install, without asking.",
-            )
-            .pending("P3.7"),
-        ],
+        vec![switch(
+            "--fix",
+            "Install the missing tools that have an install command: asking first on a \
+                 terminal, without asking with --install, never with --no-install.",
+        )],
         examples(&[
             (
                 "cupel doctor",
@@ -190,7 +188,17 @@ fn doctor_verb() -> CommandDescription {
             ),
             (
                 "cupel doctor --dry-run",
-                "A dry run; doctor writes nothing worth planning, so the plan is empty.",
+                "A dry run; without --fix doctor would install nothing, so the plan is empty.",
+                ExitCode::Pass,
+            ),
+            (
+                "cupel doctor --fix --install",
+                "Install every missing tool that has an install command, then check again.",
+                ExitCode::Pass,
+            ),
+            (
+                "cupel doctor --fix --install --dry-run",
+                "List the installs --fix --install would run, in the plan's would_install.",
                 ExitCode::Pass,
             ),
         ]),
@@ -609,13 +617,14 @@ fn run_control_flags() -> Vec<ArgDescription> {
         switch("--no-color", "Render text without color.").env("NO_COLOR"),
         switch(
             "--no-install",
-            "Never install tools; the default unless stdout is a terminal.",
+            "Never install tools; the default unless stdout is a terminal, where Cupel asks.",
         )
-        .pending("P3.7")
         .conflicts(&["--install"]),
-        switch("--install", "Install missing tools that producers need.")
-            .pending("P3.7")
-            .conflicts(&["--no-install"]),
+        switch(
+            "--install",
+            "Install the missing tools producers need, without asking.",
+        )
+        .conflicts(&["--no-install"]),
         switch("--write", "Permit writes outside .cupel/."),
         switch("--help", "Print help and exit."),
     ]
@@ -846,54 +855,43 @@ trait Refine {
 
 impl Refine for ArgDescription {
     fn pending(self, step: &str) -> Self {
-        Self {
-            pending_step: Some(step.to_owned()),
-            ..self
-        }
+        self.with(|arg| arg.pending_step = Some(step.to_owned()))
     }
 
     fn env(self, variable: &str) -> Self {
-        Self {
-            env: Some(variable.to_owned()),
-            ..self
-        }
+        self.with(|arg| arg.env = Some(variable.to_owned()))
     }
 
     fn default_value(self, value: &str) -> Self {
-        Self {
-            default: Some(value.to_owned()),
-            ..self
-        }
+        self.with(|arg| arg.default = Some(value.to_owned()))
     }
 
     fn conflicts(self, names: &[&str]) -> Self {
-        Self {
-            conflicts: names.iter().map(|n| (*n).to_owned()).collect(),
-            ..self
-        }
+        self.with(|arg| arg.conflicts = names.iter().map(|n| (*n).to_owned()).collect())
     }
 
     fn required(self) -> Self {
-        Self {
-            required: true,
-            ..self
-        }
+        self.with(|arg| arg.required = true)
     }
 
     fn optional(self) -> Self {
-        Self {
-            required: false,
-            ..self
-        }
+        self.with(|arg| arg.required = false)
     }
 
     fn repeated(self) -> Self {
-        Self {
-            repeated: true,
-            ..self
-        }
+        self.with(|arg| arg.repeated = true)
     }
 }
+
+/// An argument description changed by `change`.
+trait With: Sized {
+    fn with(mut self, change: impl FnOnce(&mut Self)) -> Self {
+        change(&mut self);
+        self
+    }
+}
+
+impl With for ArgDescription {}
 
 #[cfg(test)]
 mod tests {

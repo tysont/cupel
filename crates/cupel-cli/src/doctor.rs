@@ -1,22 +1,22 @@
-// ABOUTME: The `doctor` verb: checks configuration, `required_version`, write access to `.cupel/`, and
-// ABOUTME: the tools the configuration needs; one finding per problem, exit 3 for any `fail` (ADR-022).
+// ABOUTME: The `doctor` verb: checks configuration, `required_version`, write access to `.cupel/`, and the
+// ABOUTME: tools the configuration needs, installing them with `--fix` (ADR-022, ADR-081); exit 3 for any `fail`.
 use std::path::Path;
-use std::process::{Command, Stdio};
 
 use cupel_core::config::Config;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    ActionKind, Availability, Check, Ctx, Envelope, ExitCode, FactKind, Lang, LangId,
-    ProducerRegistry, Selection, Severity, Status, ToolId, ToolProbe, Writer,
+    ActionKind, Availability, Check, Ctx, Envelope, EventSink, ExitCode, FactKind, Install, Lang,
+    LangId, ProducerRegistry, RunPlan, Selection, Severity, Status, ToolId, ToolProbe, Writer,
 };
 use semver::{Version, VersionReq};
 use serde_json::json;
 
 use crate::catalog::Catalog;
 use crate::error::Usage;
+use crate::install::{self, Planned, probe};
 use crate::problem::Problem;
 use crate::project;
-use crate::run::Run;
+use crate::run::Invocation;
 
 /// The configuration key `required_version` findings are about.
 const REQUIRED_VERSION: &str = "required_version";
@@ -33,15 +33,14 @@ pub struct Requirement {
     /// Whether the probe prints the tool's version, which the envelope's `run.toolchain` reports
     /// (the tools of producers, ADR-076).
     pub versioned: bool,
+    /// How to install the tool, when its producer said it is missing (ADR-081).
+    pub install: Option<Install>,
 }
 
-/// Runs every check. `config` is the loaded configuration, or why it did not load.
-pub fn run(
-    run: &Run,
-    config: Result<&Config, &cupel_core::Error>,
-    writer: &Writer,
-    fix: bool,
-) -> Envelope {
+/// Runs every check; with `fix`, first installs the missing tools the invocation may install,
+/// then probes again (ADR-081).
+pub fn run(invocation: &Invocation<'_>, fix: bool) -> Envelope {
+    let (run, writer, config) = (invocation.run, invocation.writer, invocation.config);
     let mut problems = Vec::new();
     match config {
         Ok(config) => problems.extend(version(
@@ -53,22 +52,17 @@ pub fn run(
         }
     }
     problems.extend(cupel_dir(writer));
-    let exclude = config
-        .ok()
-        .map(|config| config.file.scope.exclude.clone())
-        .unwrap_or_default();
-    let info = project::detect(writer, &exclude);
-    let mut requirements = requirements(config.ok(), writer.root(), &info);
-    if let Ok(config) = config {
-        let resolved = Resolution::of(&Catalog::builtin(), config, writer.root(), &info);
-        problems.extend(resolved.problems);
-        requirements.extend(resolved.requirements);
-    }
-    let probed: Vec<Option<String>> = requirements.iter().map(probe).collect();
-    problems.extend(missing(&requirements, &probed));
+    let (requirements, unresolved) = needed(config, writer);
+    problems.extend(unresolved);
+    let mut probed = probe_all(&requirements);
     if fix {
-        problems.push(fix_pending());
+        let planned = installable(&requirements, &probed);
+        problems.extend(install::problems(&install::attempt(invocation, &planned)));
+        if !planned.is_empty() {
+            probed = probe_all(&requirements);
+        }
     }
+    problems.extend(missing(&requirements, &probed));
     let required_missing = problems
         .iter()
         .any(|problem| problem.severity == Severity::Fail);
@@ -87,6 +81,95 @@ pub fn run(
         .0
         .extend(versions(&requirements, probed));
     envelope
+}
+
+/// The plan of `doctor --dry-run`: with `fix`, the installs `--fix` would attempt.
+pub fn plan(invocation: &Invocation<'_>, fix: bool, events: &mut dyn EventSink) -> Envelope {
+    let mut plan = RunPlan::default();
+    if fix {
+        let (requirements, _) = needed(invocation.config, invocation.writer);
+        let planned = installable(&requirements, &probe_all(&requirements));
+        plan.would_install = invocation.installs.would_install(&planned);
+    }
+    invocation
+        .run
+        .plan_envelope(plan, invocation.writer, events, Vec::new())
+}
+
+/// The tools the repository needs, and the problems resolving its producers found.
+fn needed(
+    config: Result<&Config, &cupel_core::Error>,
+    writer: &Writer,
+) -> (Vec<Requirement>, Vec<Problem>) {
+    let exclude = config
+        .ok()
+        .map(|config| config.file.scope.exclude.clone())
+        .unwrap_or_default();
+    let info = project::detect(writer, &exclude);
+    let mut requirements = requirements(config.ok(), writer.root(), &info);
+    let mut problems = Vec::new();
+    if let Ok(config) = config {
+        let resolved = Resolution::of(&Catalog::builtin(), config, writer.root(), &info);
+        problems.extend(resolved.problems);
+        requirements.extend(resolved.requirements);
+    }
+    (requirements, problems)
+}
+
+/// What each requirement's probe printed, in the same order; `None` for a missing tool.
+fn probe_all(requirements: &[Requirement]) -> Vec<Option<String>> {
+    requirements
+        .iter()
+        .map(|requirement| probe(&requirement.probe))
+        .collect()
+}
+
+/// The installs of the missing requirements (by `probed`) that have an install command.
+fn installable(requirements: &[Requirement], probed: &[Option<String>]) -> Vec<Planned> {
+    requirements
+        .iter()
+        .zip(probed)
+        .filter(|(_, version)| version.is_none())
+        .filter_map(|(requirement, _)| planned(requirement))
+        .collect()
+}
+
+/// The install of `requirement`, when its producer gave a command for it.
+fn planned(requirement: &Requirement) -> Option<Planned> {
+    match &requirement.install {
+        Some(Install::Command(command)) => Some(Planned {
+            tool: requirement.tool.clone(),
+            command: command.clone(),
+            probe: requirement.probe.clone(),
+        }),
+        _ => None,
+    }
+}
+
+/// The installs a run of `checks` in `langs` of the repository at `repo` needs: the missing
+/// tools, with an install command, of the producers the scheduler would choose (ADR-081).
+pub fn installs(
+    checks: &[&dyn Check],
+    producers: &ProducerRegistry,
+    langs: &[Lang],
+    config: &Config,
+    repo: &Path,
+) -> Vec<Planned> {
+    Resolution::over(checks, producers, langs, &resolution_ctx(config, repo))
+        .requirements
+        .iter()
+        .filter(|requirement| requirement.required)
+        .filter_map(planned)
+        .collect()
+}
+
+/// The context producers are resolved in: the repository, its exclusions, and its pins.
+fn resolution_ctx(config: &Config, repo: &Path) -> Ctx {
+    Ctx {
+        exclude: config.file.scope.exclude.clone(),
+        lang: config.file.lang.clone(),
+        ..Ctx::new(repo.to_path_buf())
+    }
 }
 
 /// The problems of the `requirements` whose probe (`probed`, in the same order) found nothing.
@@ -149,12 +232,12 @@ impl Resolution {
                     || config.file.lang.contains_key(&lang.id)
             })
             .collect();
-        let ctx = Ctx {
-            exclude: config.file.scope.exclude.clone(),
-            lang: config.file.lang.clone(),
-            ..Ctx::new(repo.to_path_buf())
-        };
-        Self::over(&checks, catalog.producers(), &langs, &ctx)
+        Self::over(
+            &checks,
+            catalog.producers(),
+            &langs,
+            &resolution_ctx(config, repo),
+        )
     }
 
     fn over(
@@ -215,17 +298,16 @@ impl Resolution {
         let Some(producer) = chosen else {
             return;
         };
-        // A producer waiting for configuration (a coverage producer without a
-        // `[lang.<id>] coverage` command, ADR-079) runs nothing, so it needs no tool yet.
-        if matches!(
-            producer.availability(walk.ctx),
-            Availability::Unconfigured { .. }
-        ) {
-            return;
-        }
+        let install = match producer.availability(walk.ctx) {
+            Availability::Ready => None,
+            Availability::MissingTool { install, .. } => install,
+            // A producer waiting for configuration (a coverage producer without a
+            // `[lang.<id>] coverage` command, ADR-079) runs nothing, so it needs no tool yet.
+            Availability::Unconfigured { .. } => return,
+        };
         if let Some(tool) = producer.tool(walk.ctx) {
             let purpose = format!("{purpose} via {}", producer.id());
-            self.require(tool, purpose, required);
+            self.require(tool, purpose, (required, install));
         }
         visiting.push(kind);
         for upstream in producer.needs() {
@@ -234,8 +316,10 @@ impl Resolution {
         visiting.pop();
     }
 
-    /// Records that `tool` is needed for `purpose`, joining a requirement already known for it.
-    fn require(&mut self, tool: ToolProbe, purpose: String, required: bool) {
+    /// Records that `tool` is needed for `purpose`, joining a requirement already known for it;
+    /// `need` is whether the checks cannot run without it and how to install it.
+    fn require(&mut self, tool: ToolProbe, purpose: String, need: (bool, Option<Install>)) {
+        let (required, install) = need;
         match self
             .requirements
             .iter_mut()
@@ -246,6 +330,9 @@ impl Resolution {
                 known.needed_for.push_str(&purpose);
                 known.required |= required;
                 known.versioned |= required;
+                if known.install.is_none() {
+                    known.install = install;
+                }
             }
             None => self.requirements.push(Requirement {
                 tool: tool.name,
@@ -254,6 +341,7 @@ impl Resolution {
                 probe: tool.version,
                 // Only what the checks need is versioned in `run.toolchain`.
                 versioned: required,
+                install,
             }),
         }
     }
@@ -346,6 +434,7 @@ fn requirements(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec
         required: false,
         probe: vec!["git".to_owned(), "--version".to_owned()],
         versioned: false,
+        install: None,
     };
     std::iter::once(git)
         .chain(toolchain(config, repo, info))
@@ -401,6 +490,7 @@ fn toolchain(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec<Re
             needed_for: needed_for.join(", "),
             required: false,
             versioned: false,
+            install: None,
         })
         .collect()
 }
@@ -469,46 +559,26 @@ fn tools(requirements: &[Requirement], installed: impl Fn(&Requirement) -> bool)
                 "needed_for": requirement.needed_for,
                 "required": requirement.required,
                 "probe": requirement.probe.join(" "),
+                "install": match &requirement.install {
+                    Some(Install::Command(text) | Install::Hint(text)) => Some(text),
+                    None => None,
+                },
             }),
             action: ActionKind::InstallTool,
-            fix: format!("Install `{}` and put it on PATH.", requirement.tool),
+            fix: how_to_install(requirement),
         })
         .collect()
 }
 
-/// What `requirement`'s probe printed first (its version, for a versioned probe), when it runs
-/// and exits 0; `None` when the tool is not installed.
-fn probe(requirement: &Requirement) -> Option<String> {
-    let (program, args) = requirement.probe.split_first()?;
-    let output = Command::new(program)
-        .args(args)
-        .stdin(Stdio::null())
-        .output()
-        .ok()
-        .filter(|output| output.status.success())?;
-    let text = String::from_utf8_lossy(&output.stdout).into_owned()
-        + &String::from_utf8_lossy(&output.stderr);
-    Some(
-        text.lines()
-            .map(str::trim)
-            .find(|line| !line.is_empty())
-            .unwrap_or_default()
-            .to_owned(),
-    )
-}
-
-/// `--fix` parses, but installing arrives with the first tool producers.
-fn fix_pending() -> Problem {
-    Problem {
-        check: "doctor",
-        kind: "doctor.fix-pending",
-        subject: "--fix".to_owned(),
-        severity: Severity::Info,
-        title: "--fix installs nothing yet".to_owned(),
-        detail: Some("Installing tools is implemented in plan step P3.7.".to_owned()),
-        evidence: json!({"step": "P3.7"}),
-        action: ActionKind::Review,
-        fix: "Install the tools named by doctor.tool-missing findings by hand.".to_owned(),
+/// What to do about `requirement`'s missing tool: its install command, its hint, or a plain
+/// request to install it.
+fn how_to_install(requirement: &Requirement) -> String {
+    match &requirement.install {
+        Some(Install::Command(command)) => {
+            format!("Run `{command}`, or `cupel doctor --fix --install` to run it.")
+        }
+        Some(Install::Hint(hint)) => hint.clone(),
+        None => format!("Install `{}` and put it on PATH.", requirement.tool),
     }
 }
 
@@ -523,6 +593,7 @@ mod tests {
             required,
             probe: vec![format!("{tool}-is-not-a-real-program")],
             versioned: false,
+            install: None,
         }
     }
 
@@ -566,7 +637,7 @@ mod tests {
             probe: Vec::new(),
             ..requirement("fake-cov", true)
         };
-        let found = [requirement("fake-cov", true), empty].map(|tool| probe(&tool));
+        let found = [requirement("fake-cov", true), empty].map(|tool| probe(&tool.probe));
         assert_eq!(found, [None, None]);
     }
 

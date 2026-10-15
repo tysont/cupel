@@ -222,6 +222,9 @@ pub struct ToolDescription {
     pub detect: Vec<String>,
     /// Default command templates.
     pub commands: Vec<CommandTemplate>,
+    /// The command template that installs it, with the launcher's values as placeholders;
+    /// null when Cupel does not install it (ADR-081).
+    pub install: Option<String>,
 }
 
 /// A default command and the runner it goes with.

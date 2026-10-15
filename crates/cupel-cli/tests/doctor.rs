@@ -184,20 +184,17 @@ fn missing_git_is_a_warning_and_doctor_still_passes() {
 }
 
 #[test]
-fn fix_reports_that_installing_arrives_in_p3_1() {
+fn fix_with_nothing_installable_reports_no_installs() {
     for args in [&["doctor", "--fix"][..], &["doctor", "--fix", "--install"]] {
         let outcome = Repo::new().run_with(cupel().env("PATH", ""), args);
         assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-        let envelope = outcome.envelope();
-        let pending: Vec<&Value> = envelope["findings"]
+        let kinds: Vec<Value> = outcome.envelope()["findings"]
             .as_array()
             .unwrap()
             .iter()
-            .filter(|finding| finding["kind"] == json!("doctor.fix-pending"))
+            .map(|finding| finding["kind"].clone())
             .collect();
-        assert_eq!(pending.len(), 1, "{args:?}");
-        assert_eq!(pending[0]["severity"], json!("info"));
-        assert_eq!(pending[0]["evidence"], json!({"step": "P3.7"}));
+        assert_eq!(kinds, [json!("doctor.tool-missing")], "{args:?}");
     }
 }
 
@@ -213,12 +210,12 @@ fn a_dry_run_plans_nothing_and_writes_nothing() {
 }
 
 #[test]
-fn doctor_describes_fix_as_pending_p3_1() {
+fn doctor_describes_fix_as_implemented() {
     let envelope = Repo::new().run(&["doctor", "--describe"]).envelope();
     let description = &envelope["description"];
     assert_eq!(description["pending_step"], Value::Null);
     assert_eq!(description["arguments"][0]["name"], json!("--fix"));
-    assert_eq!(description["arguments"][0]["pending_step"], json!("P3.7"));
+    assert_eq!(description["arguments"][0]["pending_step"], Value::Null);
 }
 
 #[test]

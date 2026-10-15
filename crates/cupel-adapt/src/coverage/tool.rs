@@ -90,7 +90,7 @@ impl Producer<CoverageMap> for CoverageTool {
         } else {
             Availability::MissingTool {
                 name: ToolId::from(self.0.tool),
-                install: None,
+                install: toolchain::install(&self.id(), self.0.tool, &ctx.root),
             }
         }
     }

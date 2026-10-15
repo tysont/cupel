@@ -213,7 +213,7 @@ impl Producer<TestResults> for Runner {
         } else {
             Availability::MissingTool {
                 name: ToolId::from(self.0.tool),
-                install: None,
+                install: toolchain::install(&self.id(), self.0.tool, &ctx.root),
             }
         }
     }
