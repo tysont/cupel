@@ -7,9 +7,9 @@ use cupel_core::config::Config;
 use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    BaseTree, Check, Envelope, EventSink, ExitCode, GitInfo, Job, Lang, Outcome, PlannedWrite,
-    RANKED, Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Verb,
-    Writer, apply_gate, evaluate_gate, gate_for, next_actions, rankings,
+    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, GitInfo, Job, Lang, Outcome,
+    PlannedWrite, RANKED, Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection,
+    Status, Verb, Writer, apply_gate, evaluate_gate, gate_for, next_actions, rankings,
 };
 use cupel_lang::LanguageRegistry;
 
@@ -17,7 +17,7 @@ use crate::catalog::Catalog;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::project;
-use crate::run::{Invocation, Run, shell_quote};
+use crate::run::{Executions, Invocation, Run, shell_quote};
 
 /// `cupel check`: the envelope of running the selected checks, or of planning them.
 pub fn verb(
@@ -126,6 +126,8 @@ pub fn run(
         selectors: request.selectors()?,
         selectors_must_match: !request.has_range(),
         seed: run.seed,
+        depth: config.effective.depth,
+        changed: changed_lines(writer.root(), &request, &resolved)?,
     };
     let scheduler = Scheduler {
         checks: catalog.checks(),
@@ -146,6 +148,33 @@ pub fn run(
     })
 }
 
+/// The lines a range scope changed per file; `None` without a range.
+pub(crate) fn changed_lines(
+    root: &Path,
+    request: &ScopeRequest,
+    resolved: &ResolvedFiles,
+) -> Result<Option<ChangedLines>, CupelError> {
+    let (Some(base), Some(git)) = (&resolved.base, Git::open(root)) else {
+        return Ok(None);
+    };
+    let hunks = git
+        .changed_lines(base, request.head.as_deref())
+        .map_err(|error| {
+            CupelError::bad_argument(
+                if request.changed {
+                    "--changed"
+                } else {
+                    "--base"
+                },
+                None,
+                format!("cannot read the changed lines: {error}"),
+                "Run in a git work tree with git installed, or scope with --paths instead."
+                    .to_owned(),
+            )
+        })?;
+    Ok(Some(hunks))
+}
+
 /// Runs (or, for a dry run, plans) `job`, keeping the test runs it made for the store; a red
 /// baseline is the exit-4 refusal (ADR-076).
 fn schedule(
@@ -159,9 +188,10 @@ fn schedule(
     } else {
         scheduler.run(job, events)?
     };
-    invocation
-        .run
-        .keep_test_results(std::mem::take(&mut outcome.test_results));
+    invocation.run.keep(Executions {
+        test_results: std::mem::take(&mut outcome.test_results),
+        mutation_outcomes: std::mem::take(&mut outcome.mutation_outcomes),
+    });
     match outcome.refused.take() {
         Some(red) => Err(CupelError::Unevaluable(Box::new(red))),
         None => Ok(outcome),

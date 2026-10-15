@@ -1,7 +1,7 @@
 // ABOUTME: The producer contract and registry: anything that makes a fact, and runners, which also select tests.
 // ABOUTME: The registry maps (fact kind, language) to producers in selection order (design §8.3.3, ADR-077).
 use std::any::Any;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::marker::PhantomData;
 use std::path::PathBuf;
@@ -16,10 +16,12 @@ use crate::error::Result;
 use crate::event::EventSink;
 use crate::exclude::Exclude;
 use crate::fact::{Fact, FactKind};
+use crate::flake::RunOrder;
 use crate::grade::CostClass;
 use crate::id::{LangId, ProducerId, ToolId};
 use crate::lang::{Lang, Langs};
 use crate::scope::Scope;
+use crate::syntax::SymbolKey;
 use crate::test_results::TestResults;
 use crate::writer::Writer;
 
@@ -67,6 +69,38 @@ pub struct ProduceCtx {
     /// The run's seed (`--seed`, else random), for producers that vary their work by seed
     /// (ADR-078); 0 outside a scheduled run.
     pub seed: u64,
+    /// The registered runners, for engines that run tests (ADR-080); none outside a scheduled
+    /// run unless a caller adds them.
+    pub runners: Runners,
+    /// What the run asked to look at, for producers that narrow their work to it (ADR-080).
+    pub focus: Focus,
+}
+
+/// What a run asked to look at beyond its files: its depth, the symbols `--symbols` selected,
+/// and the lines a range changed. Producers that narrow their work by it (the mutation engine,
+/// ADR-080) read it; the rest produce over their scope's files.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Focus {
+    pub depth: CostClass,
+    /// The language's symbols `--symbols` selected; `None` for every symbol in scope.
+    pub symbols: Option<BTreeSet<SymbolKey>>,
+    /// Per file, the 1-based inclusive line ranges a range scope changed (`git diff -U0`);
+    /// `None` without a range.
+    pub changed: Option<ChangedLines>,
+}
+
+/// Per file, the 1-based inclusive line ranges a change touched.
+pub type ChangedLines = BTreeMap<String, Vec<(u32, u32)>>;
+
+impl Default for Focus {
+    /// The default depth, every symbol, no range.
+    fn default() -> Self {
+        Self {
+            depth: CostClass::Standard,
+            symbols: None,
+            changed: None,
+        }
+    }
 }
 
 impl ProduceCtx {
@@ -80,7 +114,26 @@ impl ProduceCtx {
             cancel,
             upstream: Upstream::default(),
             seed: 0,
+            runners: Runners::default(),
+            focus: Focus::default(),
         }
+    }
+}
+
+/// The runners a registry holds, by ID, shared with the producers it serves.
+#[derive(Clone, Default)]
+pub struct Runners(Arc<BTreeMap<ProducerId, Arc<dyn Runner>>>);
+
+impl Runners {
+    /// The runner registered as `id`.
+    pub fn get(&self, id: &ProducerId) -> Option<&dyn Runner> {
+        self.0.get(id).map(AsRef::as_ref)
+    }
+}
+
+impl fmt::Debug for Runners {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_list().entries(self.0.keys()).finish()
     }
 }
 
@@ -128,6 +181,10 @@ pub trait Producer<F: Fact>: Send + Sync {
     fn languages(&self) -> Langs;
     /// Facts this producer consumes.
     fn needs(&self) -> &[FactKind];
+    /// Facts this producer uses when they can be made, and does without otherwise (ADR-080).
+    fn wants(&self) -> &[FactKind] {
+        &[]
+    }
     fn cost(&self) -> CostClass;
     fn availability(&self, ctx: &Ctx) -> Availability;
     /// Whether the repository shows signs of using this producer (a tool producer's
@@ -162,26 +219,83 @@ pub struct RunnerCommand {
     pub command: String,
 }
 
+/// How a runner runs a selection beyond which tests: added environment, a timeout of its own,
+/// and the order, seed, and parallelism a rerun varies (ADR-078, ADR-080). The default is the
+/// baseline's run: the runner's own order, seed, and parallelism, and no timeout.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RunOptions {
+    /// Variables added to the runner's environment.
+    pub env: Vec<(String, String)>,
+    /// Ends only this run, which then reports an incomplete invocation.
+    pub timeout: Option<Duration>,
+    /// `Shuffled` asks the runner for its seeded shuffle; `Declared` and `Reversed` run a
+    /// `Tests` selection in the order given where the runner takes an explicit order.
+    pub order: RunOrder,
+    /// Handed to the runner as its shuffle seed and, where it has one, its hash seed; `None`
+    /// leaves the runner's own.
+    pub seed: Option<u64>,
+    /// Workers or threads; `None` for the runner's default.
+    pub parallelism: Option<u32>,
+}
+
+impl Default for RunOptions {
+    fn default() -> Self {
+        Self {
+            env: Vec::new(),
+            timeout: None,
+            order: RunOrder::Declared,
+            seed: None,
+            parallelism: None,
+        }
+    }
+}
+
+/// What one run of a runner reported.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TestRun {
+    pub results: TestResults,
+    /// Test IDs in the order they ran, when the runner reports it.
+    pub executed: Option<Vec<String>>,
+}
+
+/// How a runner orders the tests it runs.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum RunOrdering {
+    /// In an order nothing changes, such as one process per test (`cargo nextest`).
+    Fixed,
+    /// In its own order, or a shuffle from a seed.
+    Seeded,
+    /// In the order of the test IDs it is given (`pytest`, `unittest`).
+    Explicit,
+}
+
 /// A test runner: produces `TestResults` for the whole suite, and runs selections of it for the
-/// consumers that choose tests (`tests --impacted`, the mutation engine).
+/// consumers that choose tests (`tests --impacted`, the flake and mutation engines).
 pub trait Runner: Producer<TestResults> {
     /// The IDs of the suite's tests, without running them.
     fn list(&self, ctx: &ProduceCtx) -> Result<Vec<String>>;
 
-    /// Runs `selection` with `env` added to the runner's environment. The run's cancellation
-    /// still applies (`Error::Cancelled`); `timeout` ends only this run, which then reports an
-    /// incomplete invocation.
+    /// Runs `selection` as `options` say. The run's cancellation still applies
+    /// (`Error::Cancelled`).
     fn run(
         &self,
         ctx: &ProduceCtx,
         selection: &TestSelection,
-        env: &[(String, String)],
-        timeout: Option<Duration>,
-    ) -> Result<TestResults>;
+        options: &RunOptions,
+    ) -> Result<TestRun>;
 
     /// The command lines that run `selection`, one per project root it reaches; `None` when the
     /// runner cannot narrow its suite to it.
     fn commands(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Option<Vec<RunnerCommand>>;
+
+    /// How the runner orders what it runs.
+    fn ordering(&self) -> RunOrdering;
+
+    /// The names of the directories the runner builds into (such as `target`), which a copy of
+    /// the tree must not share with the original or another copy (ADR-080 §8).
+    fn outputs(&self) -> &'static [&'static str] {
+        &[]
+    }
 }
 
 /// A fact a producer made, with its type erased: what [`RegisteredProducer::produce`] returns.
@@ -284,6 +398,7 @@ pub trait RegisteredProducer: Send + Sync {
     fn id(&self) -> ProducerId;
     fn languages(&self) -> Langs;
     fn needs(&self) -> &[FactKind];
+    fn wants(&self) -> &[FactKind];
     fn cost(&self) -> CostClass;
     fn availability(&self, ctx: &Ctx) -> Availability;
     fn detected(&self, ctx: &Ctx) -> bool;
@@ -320,6 +435,10 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
         self.producer.needs()
     }
 
+    fn wants(&self) -> &[FactKind] {
+        self.producer.wants()
+    }
+
     fn cost(&self) -> CostClass {
         self.producer.cost()
     }
@@ -351,7 +470,7 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
 pub struct ProducerRegistry {
     by_kind: BTreeMap<FactKind, Vec<Box<dyn RegisteredProducer>>>,
     /// The `TestResults` producers registered as runners, by ID (ADR-077).
-    runners: BTreeMap<ProducerId, Box<dyn Runner>>,
+    runners: BTreeMap<ProducerId, Arc<dyn Runner>>,
 }
 
 impl ProducerRegistry {
@@ -367,13 +486,18 @@ impl ProducerRegistry {
 
     /// Registers `runner` as a `TestResults` producer and keeps it for [`runner`](Self::runner).
     pub fn register_runner<R: Runner + Clone + 'static>(&mut self, runner: R) {
-        self.runners.insert(runner.id(), Box::new(runner.clone()));
+        self.runners.insert(runner.id(), Arc::new(runner.clone()));
         self.register::<TestResults, _>(runner);
     }
 
     /// The runner registered as `id`.
     pub fn runner(&self, id: &ProducerId) -> Option<&dyn Runner> {
         self.runners.get(id).map(AsRef::as_ref)
+    }
+
+    /// Every registered runner, to hand to producers.
+    pub fn runners(&self) -> Runners {
+        Runners(Arc::new(self.runners.clone()))
     }
 
     /// Producers of `kind` that serve `lang`, in selection order.

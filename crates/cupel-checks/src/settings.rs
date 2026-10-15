@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 
 use cupel_core::config::{ConfigError, Table};
-use cupel_core::{CheckId, Result};
+use cupel_core::{CheckCtx, CheckId, Manifest, Plan, Result};
 use serde_json::Value;
 
 /// Non-negative integer settings, each name with its default.
@@ -14,6 +14,12 @@ pub struct Limits {
 impl Limits {
     pub const fn new(defaults: &'static [(&'static str, u32)]) -> Self {
         Self { defaults }
+    }
+
+    /// `plan`, once the check `manifest` describes has only valid settings in `ctx`
+    /// ([`read`](Self::read)); else the configuration error.
+    pub fn plan(&self, manifest: &Manifest, ctx: &CheckCtx, plan: Plan) -> Result<Plan> {
+        self.read(&manifest.id, &ctx.config).map(|_| plan)
     }
 
     /// The value of every setting, configured or default, by name. Any key that is not a

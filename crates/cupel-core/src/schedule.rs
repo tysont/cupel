@@ -13,10 +13,14 @@ use crate::event::{Event, EventSink};
 use crate::fact::FactKind;
 use crate::facts::Facts;
 use crate::finding::{Finding, Severity};
+use crate::grade::CostClass;
 use crate::id::{LangId, RunId};
 use crate::lang::Lang;
 use crate::matrix::{Support, SupportMatrix};
-use crate::producer::{Availability, Ctx, ProduceCtx, ProducerRegistry, SharedFact, Upstream};
+use crate::mutation::MutationOutcomes;
+use crate::producer::{
+    Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, SharedFact, Upstream,
+};
 use crate::rank::{Measured, Measurement};
 use crate::result::{CheckResult, CheckStatus, SkipReason, Skipped};
 use crate::scope::{Scope, SymbolSelector, select_symbols};
@@ -50,6 +54,10 @@ pub struct Job<'a> {
     pub base: Option<BaseTree>,
     /// The run's seed, handed to every producer (ADR-078).
     pub seed: u64,
+    /// The run's depth, handed to every producer (ADR-080).
+    pub depth: CostClass,
+    /// The lines a range scope changed, per file; `None` without a range (ADR-080).
+    pub changed: Option<ChangedLines>,
 }
 
 /// What a run (or a dry run's planning) produced.
@@ -69,6 +77,8 @@ pub struct Outcome {
     pub plan: Option<RunPlan>,
     /// Every test run the run made (the baseline), by language, for the store's index.
     pub test_results: Vec<(LangId, TestResults)>,
+    /// Every mutation outcome the run produced, by language, for the store's index (ADR-080).
+    pub mutation_outcomes: Vec<(LangId, MutationOutcomes)>,
     /// The red baseline that refused the run: no check ran, so `checks` is empty (ADR-076).
     pub refused: Option<Unevaluable>,
 }
@@ -156,6 +166,7 @@ impl Scheduler<'_> {
                 findings: execution.store.findings,
                 symbols: prepared.symbols,
                 test_results: execution.store.test_results,
+                mutation_outcomes: execution.store.mutation_outcomes,
                 refused: Some(red),
                 ..Outcome::default()
             });
@@ -175,6 +186,7 @@ impl Scheduler<'_> {
             interrupted: interrupted || store.interrupted,
             plan: None,
             test_results: store.test_results,
+            mutation_outcomes: store.mutation_outcomes,
             refused: None,
         })
     }
@@ -233,6 +245,7 @@ impl Scheduler<'_> {
                 ..RunPlan::default()
             }),
             test_results: Vec::new(),
+            mutation_outcomes: Vec::new(),
             refused: None,
         })
     }
@@ -245,6 +258,12 @@ impl Scheduler<'_> {
         sink: &mut dyn EventSink,
     ) -> Result<Prepared<'a>> {
         let scopes = resolve_symbols(job, store, sink)?;
+        if !job.selectors.is_empty() {
+            store.selected = scopes
+                .iter()
+                .map(|(lang, scope)| (lang.clone(), scope.symbols.clone().unwrap_or_default()))
+                .collect();
+        }
         let symbols = scopes
             .values()
             .map(|scope| scope.symbols.as_ref().map_or(0, BTreeSet::len) as u64)
@@ -372,6 +391,16 @@ impl Execution<'_, '_> {
                 Some(skip_reason(SkipReason::Timeout, &task.lang.id)),
             );
         }
+        if self.store.ran_no_test(&task.lang.id)
+            && reaches(
+                self.store.producers,
+                &task.check.manifest().needs,
+                &task.lang,
+                &mut Vec::new(),
+            )
+        {
+            return ended(CheckStatus::Skipped, Some(no_tests_ran(&task.lang.id)));
+        }
         let ran = self.facts_for(task, &mut *sink.forward).and_then(|facts| {
             let ctx = check_ctx(self.job, task.check, &task.lang.id, task.scope.clone());
             task.check.run(&ctx, &facts, &task.plan, sink)
@@ -381,7 +410,14 @@ impl Execution<'_, '_> {
                 ran.duration_ms = elapsed_ms(started);
                 ran
             }
-            Err(error) => ended(status_of(&error), None),
+            Err(error) => {
+                // What failed, so the run says why without a rerun; a timeout says so already.
+                let mut result = ended(status_of(&error), None);
+                if error != Error::Cancelled {
+                    result.notes.push(error.to_string());
+                }
+                result
+            }
         }
     }
 
@@ -679,6 +715,10 @@ struct FactStore<'a> {
     cancel: Cancellation,
     config: &'a Config,
     seed: u64,
+    depth: CostClass,
+    changed: Option<ChangedLines>,
+    /// Per language, the symbols `--symbols` selected; empty without selectors.
+    selected: HashMap<LangId, BTreeSet<crate::syntax::SymbolKey>>,
     files: Vec<String>,
     made: HashMap<(FactKind, LangId), std::result::Result<SharedFact, Error>>,
     /// Producers' findings, once per ID.
@@ -687,6 +727,8 @@ struct FactStore<'a> {
     interrupted: bool,
     /// Every `TestResults` produced, by language.
     test_results: Vec<(LangId, TestResults)>,
+    /// Every `MutationOutcomes` produced, by language.
+    mutation_outcomes: Vec<(LangId, MutationOutcomes)>,
     /// The first red `TestResults`, which no check may read.
     refused: Option<Unevaluable>,
 }
@@ -724,12 +766,16 @@ impl<'a> FactStore<'a> {
             cancel: job.cancel.clone(),
             config: job.config,
             seed: job.seed,
+            depth: job.depth,
+            changed: job.changed.clone(),
+            selected: HashMap::new(),
             files,
             made: HashMap::new(),
             findings: Vec::new(),
             seen: HashSet::new(),
             interrupted: false,
             test_results: Vec::new(),
+            mutation_outcomes: Vec::new(),
             refused: None,
         }
     }
@@ -757,6 +803,14 @@ impl<'a> FactStore<'a> {
             .cloned();
         if let Some(results) = results {
             made = self.gate(made, results, lang);
+        }
+        if let Some(outcomes) = made
+            .as_ref()
+            .ok()
+            .and_then(|fact| fact.downcast_ref::<MutationOutcomes>())
+        {
+            self.mutation_outcomes
+                .push((lang.id.clone(), outcomes.clone()));
         }
         self.made.insert(key, made.clone());
         made
@@ -809,14 +863,21 @@ impl<'a> FactStore<'a> {
             if !needs_met {
                 continue;
             }
+            self.ensure_wants(producer.wants(), lang, sink, visiting);
             self.cancel.checkpoint()?;
             let ctx = ProduceCtx {
                 ctx: self.root.clone(),
                 config: self.config.lang_config(&lang.id),
                 writer: self.writer.clone(),
                 cancel: self.cancel.clone(),
-                upstream: self.upstream(producer.needs(), lang),
+                upstream: self.upstream(producer.needs().iter().chain(producer.wants()), lang),
                 seed: self.seed,
+                runners: self.producers.runners(),
+                focus: Focus {
+                    depth: self.depth,
+                    symbols: self.selected.get(&lang.id).cloned(),
+                    changed: self.changed.clone(),
+                },
             };
             let mut events = Vec::new();
             let produced =
@@ -829,17 +890,47 @@ impl<'a> FactStore<'a> {
         Err(Error::AbsentFact { kind })
     }
 
-    /// The facts of `needs` already made for `lang`, for a producer that needs them.
-    fn upstream(&self, needs: &[FactKind], lang: &Lang) -> Upstream {
+    /// Makes each of `wants` for `lang` that can be made by a producer within the run's depth
+    /// (ADR-080); one that cannot is left out, so an optional fact never costs more than the
+    /// run asked for.
+    fn ensure_wants(
+        &mut self,
+        wants: &[FactKind],
+        lang: &Lang,
+        sink: &mut dyn EventSink,
+        visiting: &mut Vec<FactKind>,
+    ) {
+        for want in wants {
+            let affordable = self
+                .producers
+                .producers_for(*want, lang)
+                .any(|producer| producer.cost() <= self.depth);
+            if affordable && !visiting.contains(want) {
+                visiting.push(*want);
+                let _ = self.ensure(*want, lang, sink);
+                visiting.pop();
+            }
+        }
+    }
+
+    /// The facts of `needs` already made for `lang`, for a producer that needs or wants them.
+    fn upstream<'k>(&self, needs: impl Iterator<Item = &'k FactKind>, lang: &Lang) -> Upstream {
         let mut upstream = Upstream::default();
         for fact in needs
-            .iter()
             .filter_map(|need| self.made.get(&(*need, lang.id.clone())))
             .filter_map(|made| made.as_ref().ok())
         {
             upstream.insert(fact.clone());
         }
         upstream
+    }
+
+    /// Whether `lang`'s baseline was green and ran no test, so nothing that depends on test
+    /// execution can be measured there.
+    fn ran_no_test(&self, lang: &LangId) -> bool {
+        self.test_results
+            .iter()
+            .any(|(ran, results)| ran == lang && results.is_green() && results.ran_none())
     }
 
     /// Passes a producer's event on, keeping each finding once by ID.
@@ -1111,6 +1202,16 @@ fn needs_range(id: &crate::id::CheckId, lang: &LangId) -> Skipped {
         lang: Some(lang.clone()),
         tool: None,
         see: Some(format!("cupel check --changed --only {id}")),
+    }
+}
+
+/// The `skipped` object for a check that depends on test execution in a language whose
+/// baseline ran no test: test results are unavailable there.
+fn no_tests_ran(lang: &LangId) -> Skipped {
+    Skipped {
+        fact: Some(FactKind::TestResults),
+        see: Some("cupel describe matrix".to_owned()),
+        ..skip_reason(SkipReason::Unavailable, lang)
     }
 }
 

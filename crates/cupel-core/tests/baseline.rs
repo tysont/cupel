@@ -337,6 +337,49 @@ fn no_suite_runs_when_no_selected_check_needs_test_results() {
     );
 }
 
+/// A check's skip reason and missing fact; `None` when it ran.
+type Skip = Option<(SkipReason, Option<FactKind>)>;
+
+#[test]
+fn a_baseline_that_ran_no_test_skips_the_checks_that_reach_it_as_unavailable() {
+    let skipped_only: Runners<'static> = &[("tool.alpha", true, true, TestOutcome::Skipped)];
+    let (outcome, runs) = run(
+        vec![
+            counts("t.cheap", &[FactKind::ProjectInfo]),
+            counts("t.engine", &[FactKind::CoverageMap]),
+            counts("t.one", &[FactKind::TestResults]),
+        ],
+        skipped_only,
+        "",
+    );
+    let outcome = outcome.unwrap();
+    let skips: Vec<(String, Skip)> = outcome
+        .checks
+        .iter()
+        .map(|check| {
+            let skip = check.skipped.as_ref();
+            (
+                check.id.to_string(),
+                skip.map(|skipped| (skipped.reason, skipped.fact)),
+            )
+        })
+        .collect();
+    let unavailable = Some((SkipReason::Unavailable, Some(FactKind::TestResults)));
+    assert_eq!(
+        (skips, runs, outcome.interrupted, outcome.refused.is_none()),
+        (
+            vec![
+                ("t.cheap".to_owned(), None),
+                ("t.engine".to_owned(), unavailable),
+                ("t.one".to_owned(), unavailable),
+            ],
+            1,
+            false,
+            true
+        )
+    );
+}
+
 /// The runner a run of one `TestResults` check used, under `runners` and `toml`.
 fn runner_used(runners: Runners<'_>, toml: &str) -> String {
     let (outcome, _) = run(

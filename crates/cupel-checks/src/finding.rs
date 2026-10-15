@@ -1,9 +1,9 @@
 // ABOUTME: Builds findings about one symbol the way every native check reports them: stable ID from the
 // ABOUTME: structural hash, location from the symbol span, and repro and suppress commands.
-use cupel_core::syntax::{SymbolDef, TestConventions};
+use cupel_core::syntax::{Span, SymbolDef, TestConventions};
 use cupel_core::{
     Action, ActionKind, CheckId, Evidence, Finding, FindingId, Location, Manifest, Severity,
-    Symbol, SymbolHash, Tier,
+    SiteHash, Symbol, SymbolHash, Tier,
 };
 use serde::Serialize;
 use serde_json::Value;
@@ -67,7 +67,18 @@ impl<'a, E: Serialize> SymbolFinding<'a, E> {
     /// The finding, identified by `FindingId::compute(check, kind, hash, None)` and reproduced by
     /// running only this check on only this symbol.
     pub fn finding(self) -> Finding {
-        let id = FindingId::compute(self.check, self.kind, self.hash, None);
+        let span = self.symbol.span;
+        self.located(None, &span)
+    }
+
+    /// The finding about one site of the symbol, at `span` in the symbol's file, identified by
+    /// `FindingId::compute(check, kind, hash, Some(site))`.
+    pub fn at_site(self, site: &SiteHash, span: &Span) -> Finding {
+        self.located(Some(site), span)
+    }
+
+    fn located(self, site: Option<&SiteHash>, span: &Span) -> Finding {
+        let id = FindingId::compute(self.check, self.kind, self.hash, site);
         let evidence = match serde_json::to_value(&self.evidence) {
             Ok(Value::Object(fields)) => fields,
             _ => serde_json::Map::new(),
@@ -88,10 +99,10 @@ impl<'a, E: Serialize> SymbolFinding<'a, E> {
             }),
             location: Some(Location {
                 file: self.symbol.file.clone(),
-                line: self.symbol.span.line,
-                col: Some(self.symbol.span.col),
-                end_line: self.symbol.span.end_line,
-                end_col: Some(self.symbol.span.end_col),
+                line: span.line,
+                col: Some(span.col),
+                end_line: span.end_line,
+                end_col: Some(span.end_col),
             }),
             title: self.title,
             detail: None,

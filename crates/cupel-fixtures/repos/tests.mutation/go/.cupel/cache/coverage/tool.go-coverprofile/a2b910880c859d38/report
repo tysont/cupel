@@ -1,0 +1,5 @@
+mode: set
+example.com/discount/discount.go:5.43,6.28 1 1
+example.com/discount/discount.go:6.28,8.3 1 1
+example.com/discount/discount.go:9.2,9.18 1 1
+example.com/discount/discount.go:13.28,15.2 1 0

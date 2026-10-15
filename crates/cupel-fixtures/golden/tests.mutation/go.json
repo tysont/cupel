@@ -1,0 +1,258 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "tests.mutation",
+      "metrics": {
+        "equivalent": 1.0,
+        "executed": 5.0,
+        "killed": 3.0,
+        "reused": 0.0,
+        "score": 0.75,
+        "survived": 1.0,
+        "timeout": 0.0,
+        "uncovered": 1.0,
+        "unviable": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 4,
+        "unit": "killed_ratio",
+        "value": 0.75
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 3
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "covering_tests": [
+            "example.com/discount/TestDiscountsALargeMemberOrder",
+            "example.com/discount/TestKeepsASmallOrder"
+          ]
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add a test that fails when `>=` at discount.go:6 becomes `>`."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.95,
+      "detail": null,
+      "evidence": {
+        "covering_tests": [
+          "example.com/discount/TestDiscountsALargeMemberOrder",
+          "example.com/discount/TestKeepsASmallOrder"
+        ],
+        "mutation": {
+          "from": ">=",
+          "operator": "relational",
+          "to": ">"
+        },
+        "tests_run": 2
+      },
+      "id": "fnd_eb5caf",
+      "kind": "mutant.survived",
+      "location": {
+        "col": 11,
+        "end_col": 13,
+        "end_line": 6,
+        "file": "discount.go",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_3899bf679a1f33e6",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_eb5caf --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.Discount",
+        "hash": "sh_3899bf679a1f33e6",
+        "lang": "go"
+      },
+      "tier": 3,
+      "title": "Mutant survived: `>=` → `>` at discount.go:6"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review whether any input tells `*` → `/` apart at discount.go:9; if none does, suppress this finding."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.3,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "to": "/"
+        },
+        "reason": "the right operand is `1`, the identity of both operators"
+      },
+      "id": "fnd_177666",
+      "kind": "mutant.equivalent?",
+      "location": {
+        "col": 15,
+        "end_col": 16,
+        "end_line": 9,
+        "file": "discount.go",
+        "line": 9
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_3899bf679a1f33e6",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_177666 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.Discount",
+        "hash": "sh_3899bf679a1f33e6",
+        "lang": "go"
+      },
+      "tier": 3,
+      "title": "Mutant may be equivalent: `*` → `/` at discount.go:9"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that runs line 14 of discount.go."
+      },
+      "check": "tests.mutation",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "to": "+"
+        }
+      },
+      "id": "fnd_d44c86",
+      "kind": "mutant.uncovered",
+      "location": {
+        "col": 15,
+        "end_col": 16,
+        "end_line": 14,
+        "file": "discount.go",
+        "line": 14
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_37e2c5decf489ea6",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_d44c86 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.Refund",
+        "hash": "sh_37e2c5decf489ea6",
+        "lang": "go"
+      },
+      "tier": 3,
+      "title": "No test runs discount.go:14; its mutant `-` → `+` was not run"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_eb5caf",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Add a test that fails when `>=` at discount.go:6 becomes `>`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_177666",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Review whether any input tells `*` → `/` apart at discount.go:9; if none does, suppress this finding."
+    },
+    {
+      "command": null,
+      "finding": "fnd_d44c86",
+      "kind": "write_test",
+      "priority": 3,
+      "summary": "Write a test that runs line 14 of discount.go."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "go": {
+            "coverage": "go test -coverprofile={out} ./..."
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 2,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}

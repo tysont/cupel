@@ -1,0 +1,19 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p34/regen/typescript",
+  "skip_dirs": [
+    "node_modules",
+    "dist",
+    "coverage"
+  ],
+  "report": "fa4ee39102469a629201c0feb7525acddd18f8cf291e47a65963aa2226e8029b",
+  "files": {
+    "cupel.toml": "de942f9178234042870cd24f3dc802e44e4b6bcb885e2b45040a255f4cf06940",
+    "package.json": "f3afebd3a23a3507bc4edce7cb285ee4887f0e6282f24673466883bb2b681f46",
+    "src/discount.ts": "d59193604b613d009fdd6f59498659fccbf9608aa576c0f2e7440634b1862a7e",
+    "src/large.test.ts": "9b7f209eafa66fc7c80169c7fe77f3f738803b15f79191d6714c1b476035629b",
+    "src/small.test.ts": "82604c7b43a6eada6014c8b3dca79f1b0c4e7d7b1f6ed733feea8b7c6a8aeeba",
+    "tsconfig.json": "41373dc679ff18f7c4beffe22769116e9d65053e517289aa8d71ebb64a9c2785",
+    "vitest.config.ts": "e8711c19156fc88d38eb0c1ed84d77a54396fd9df480cc203fed9aeb26dcae2a"
+  }
+}

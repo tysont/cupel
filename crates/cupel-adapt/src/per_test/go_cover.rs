@@ -2,7 +2,8 @@
 // ABOUTME: `-coverprofile` over the root's packages and maps the profile's import paths to files via `go.mod`.
 use cupel_core::{LangId, Langs, PerTestMap, Result, TestCoverage};
 
-use super::{PerTest, PerTestSpec, Site, covered, executed_coverprofile_lines};
+use super::{PerTest, PerTestSpec, Site, covered, executed_lines};
+use crate::coverage::parse_coverprofile;
 use crate::go_test::packages;
 use crate::report::listing;
 
@@ -51,7 +52,9 @@ fn measure(site: &Site<'_>) -> Result<Vec<TestCoverage>> {
         // A failing test still measures what it ran; a run that wrote no profile measured nothing.
         site.run("go", &args, &[])?;
         let lines = std::fs::read_to_string(&report)
-            .map(|text| executed_coverprofile_lines(&text))
+            .ok()
+            .and_then(|text| parse_coverprofile(&text).ok())
+            .map(|map| executed_lines(&map))
             .unwrap_or_default();
         let file = |path: &str| file_of(module.as_deref(), path);
         tests.push(TestCoverage::new(&id, None, covered(lines, file)));

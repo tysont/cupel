@@ -1,0 +1,318 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "standard",
+      "findings": [
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `mutant.survived`.",
+            "properties": {
+              "covering_tests": {
+                "description": "The tests that ran against the mutant and passed.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "mutation": {
+                "additionalProperties": false,
+                "description": "What was mutated; inlined in each evidence schema, which has no `$defs` (ADR-043).",
+                "properties": {
+                  "from": {
+                    "description": "The source text replaced.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "The mutation operator, such as `relational`.",
+                    "type": "string"
+                  },
+                  "to": {
+                    "description": "What replaced it.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "operator"
+                ],
+                "type": "object"
+              },
+              "tests_run": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "mutation",
+              "covering_tests",
+              "tests_run"
+            ],
+            "title": "Survived",
+            "type": "object"
+          },
+          "kind": "mutant.survived",
+          "summary": "Every test that ran against the mutant passed: no test tells the mutated code from the original."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `mutant.timeout` and `mutant.uncovered`.",
+            "properties": {
+              "mutation": {
+                "additionalProperties": false,
+                "description": "What was mutated; inlined in each evidence schema, which has no `$defs` (ADR-043).",
+                "properties": {
+                  "from": {
+                    "description": "The source text replaced.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "The mutation operator, such as `relational`.",
+                    "type": "string"
+                  },
+                  "to": {
+                    "description": "What replaced it.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "operator"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "mutation"
+            ],
+            "title": "Site",
+            "type": "object"
+          },
+          "kind": "mutant.timeout",
+          "summary": "The tests ran past their timeout against the mutant, which usually means it loops."
+        },
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `mutant.timeout` and `mutant.uncovered`.",
+            "properties": {
+              "mutation": {
+                "additionalProperties": false,
+                "description": "What was mutated; inlined in each evidence schema, which has no `$defs` (ADR-043).",
+                "properties": {
+                  "from": {
+                    "description": "The source text replaced.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "The mutation operator, such as `relational`.",
+                    "type": "string"
+                  },
+                  "to": {
+                    "description": "What replaced it.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "operator"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "mutation"
+            ],
+            "title": "Site",
+            "type": "object"
+          },
+          "kind": "mutant.uncovered",
+          "summary": "No test runs the site, so its mutant was not run."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `mutant.equivalent?`.",
+            "properties": {
+              "mutation": {
+                "additionalProperties": false,
+                "description": "What was mutated; inlined in each evidence schema, which has no `$defs` (ADR-043).",
+                "properties": {
+                  "from": {
+                    "description": "The source text replaced.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "The mutation operator, such as `relational`.",
+                    "type": "string"
+                  },
+                  "to": {
+                    "description": "What replaced it.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "operator"
+                ],
+                "type": "object"
+              },
+              "reason": {
+                "description": "Why the mutant may behave exactly as the original.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "mutation",
+              "reason"
+            ],
+            "title": "Equivalent",
+            "type": "object"
+          },
+          "kind": "mutant.equivalent?",
+          "summary": "The mutant survived and may behave exactly as the original (ADR-004)."
+        }
+      ],
+      "id": "tests.mutation",
+      "metrics": [
+        {
+          "name": "score",
+          "per": "scope",
+          "summary": "Killed / (killed + survived), the score; 1 when nothing was scored."
+        },
+        {
+          "name": "killed",
+          "per": "scope",
+          "summary": "Mutants a test failed against."
+        },
+        {
+          "name": "survived",
+          "per": "scope",
+          "summary": "Mutants every test passed against, not counting possibly equivalent ones."
+        },
+        {
+          "name": "timeout",
+          "per": "scope",
+          "summary": "Mutants whose tests ran past their timeout."
+        },
+        {
+          "name": "uncovered",
+          "per": "scope",
+          "summary": "Mutants no test runs, which were not run."
+        },
+        {
+          "name": "unviable",
+          "per": "scope",
+          "summary": "Mutants that did not build or load."
+        },
+        {
+          "name": "equivalent",
+          "per": "scope",
+          "summary": "Survivors that may behave exactly as the original (ADR-004)."
+        },
+        {
+          "name": "executed",
+          "per": "scope",
+          "summary": "Mutants run this time."
+        },
+        {
+          "name": "reused",
+          "per": "scope",
+          "summary": "Mutants whose outcome came from an earlier run."
+        },
+        {
+          "name": "survivors",
+          "per": "symbol",
+          "summary": "Mutants of the function that survived."
+        }
+      ],
+      "needs": [
+        "symbols",
+        "mutation-outcomes"
+      ],
+      "stability": "experimental",
+      "summary": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived). Uncovered sites are not run; outcomes of unchanged code and tests are reused from earlier runs.",
+      "tier": 3,
+      "version": 1,
+      "wants": [
+        "test-conventions"
+      ]
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

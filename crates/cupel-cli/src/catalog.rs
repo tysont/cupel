@@ -25,6 +25,7 @@ impl Catalog {
         let mut producers = ProducerRegistry::default();
         languages.register_producers(&mut producers);
         cupel_adapt::register(&mut producers);
+        cupel_mutate::register(&mut producers);
         Self {
             languages,
             producers,

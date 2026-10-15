@@ -28,6 +28,7 @@ mod hash;
 mod id;
 mod lang;
 mod matrix;
+mod mutation;
 mod per_test;
 mod per_test_impact;
 mod process;
@@ -81,12 +82,14 @@ pub use hash::{FindingId, SiteHash, SymbolHash};
 pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
+pub use mutation::{Mutant, MutantOutcome, MutationOutcomes};
 pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
-    Availability, Ctx, ProduceCtx, Produced, Producer, ProducerRegistry, RegisteredProducer,
-    Runner, RunnerCommand, SharedFact, TestSelection, ToolProbe, Upstream,
+    Availability, ChangedLines, Ctx, Focus, ProduceCtx, Produced, Producer, ProducerRegistry,
+    RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand, Runners, SharedFact,
+    TestRun, TestSelection, ToolProbe, Upstream,
 };
 pub use rank::{
     Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,

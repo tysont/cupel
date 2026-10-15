@@ -202,6 +202,18 @@ impl Repo {
         self.dir.path().canonicalize().unwrap()
     }
 
+    /// A copy of the fixture repository `<check>/python`; `None` (reported as skipped) without
+    /// pytest, which runs its suite.
+    pub fn python_fixture(check: &str) -> Option<Self> {
+        if cupel_core::find_program("pytest").is_none() {
+            eprintln!("SKIPPED: pytest not installed; {check} was not run");
+            return None;
+        }
+        let repo = Self::new();
+        cupel_fixtures::copy_repo(&format!("{check}/python"), &repo.root());
+        Some(repo)
+    }
+
     pub fn path(&self, relative: &str) -> PathBuf {
         self.root().join(relative)
     }

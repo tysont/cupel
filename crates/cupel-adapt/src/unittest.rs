@@ -3,7 +3,7 @@
 use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::unittest;
-use crate::runner::{Ran, Root, Runner, RunnerSpec, whole_suite};
+use crate::runner::{PYTHON, Ran, Root, Runner, RunnerSpec, as_arguments};
 
 const ID: &str = "tool.unittest";
 
@@ -17,9 +17,13 @@ static UNITTEST: RunnerSpec = RunnerSpec {
     env: &[("PYTHONDONTWRITEBYTECODE", "1")],
     merged: true,
     read,
-    completed_codes: &[0],
-    select: whole_suite,
+    // 5: no tests ran (Python 3.12+), a finished run of an empty suite.
+    completed_codes: &[0, 5],
+    // Dotted test IDs are arguments unittest runs; files are not.
+    select: |selected| as_arguments(selected, false),
     list: None,
+    vary: &PYTHON,
+    outputs: &[],
 };
 
 inventory::submit!(crate::ToolProducer {
@@ -27,17 +31,15 @@ inventory::submit!(crate::ToolProducer {
     register: |registry| registry.register_runner(Runner(&UNITTEST)),
 });
 
+/// Discovery, or (narrowed) the dotted test IDs that follow, run in the order given.
 fn command(root: &Root) -> Vec<String> {
-    [
-        root.program.as_str(),
-        "-m",
-        "unittest",
-        "discover",
-        "-v",
-        "-b",
-    ]
-    .map(str::to_owned)
-    .to_vec()
+    let discover = (!root.narrowed).then_some("discover");
+    [root.program.as_str(), "-m", "unittest"]
+        .into_iter()
+        .chain(discover)
+        .chain(["-v", "-b"])
+        .map(str::to_owned)
+        .collect()
 }
 
 #[allow(

@@ -1,0 +1,16 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p34/regen/rust",
+  "skip_dirs": [
+    "target"
+  ],
+  "report": "2e2ff35af0881d31fa9d48c2885799e5dc3e1a72bfcbd3288251686c216abf14",
+  "files": {
+    "Cargo.lock": "737f756c1a1135a1e6e305959a1f0d57b6fe15103b0c91fcfe5c65b681201fae",
+    "Cargo.toml": "268cf1ebe1487f2808276db30b2e843211e5ac7f215464bd3dcc300c8370fc79",
+    "cupel.toml": "c1a72e0c8b8b207c045916e7c00204d3c520647711a1f55913e4cb3e724667db",
+    "src/lib.rs": "ee3058551160bdba275eb961ec1498510cfcfde2ca384049d074efad5b4ed3cb",
+    "tests/large.rs": "e14253ceb38cfbfc5c30e4de29e71dbcbf8019a11317b29783c1be6318aba5fd",
+    "tests/small.rs": "620ac7e2f84cbd0d52947451c36ea404aea551db3b234c707627a2e3b20ac599"
+  }
+}

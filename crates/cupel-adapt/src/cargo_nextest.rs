@@ -3,7 +3,7 @@
 use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::{junit, listing};
-use crate::runner::{Lister, Ran, Root, Runner, RunnerSpec, tests_flag};
+use crate::runner::{FIXED, Lister, Ran, Root, Runner, RunnerSpec, tests_flag};
 
 const ID: &str = "tool.cargo-nextest";
 
@@ -23,6 +23,8 @@ pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
         parse: listing::nextest,
     }),
     completed_codes: &[0],
+    vary: &FIXED,
+    outputs: &["target"],
 };
 
 inventory::submit!(crate::ToolProducer {

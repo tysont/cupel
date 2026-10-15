@@ -1,0 +1,258 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "tests.mutation",
+      "metrics": {
+        "equivalent": 1.0,
+        "executed": 5.0,
+        "killed": 3.0,
+        "reused": 0.0,
+        "score": 0.75,
+        "survived": 1.0,
+        "timeout": 0.0,
+        "uncovered": 1.0,
+        "unviable": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 4,
+        "unit": "killed_ratio",
+        "value": 0.75
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 3
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "covering_tests": [
+            "src/large.test.ts > discounts a large member order",
+            "src/small.test.ts > keeps a small order"
+          ]
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add a test that fails when `>=` at src/discount.ts:5 becomes `>`."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.95,
+      "detail": null,
+      "evidence": {
+        "covering_tests": [
+          "src/large.test.ts > discounts a large member order",
+          "src/small.test.ts > keeps a small order"
+        ],
+        "mutation": {
+          "from": ">=",
+          "operator": "relational",
+          "to": ">"
+        },
+        "tests_run": 2
+      },
+      "id": "fnd_b2a484",
+      "kind": "mutant.survived",
+      "location": {
+        "col": 13,
+        "end_col": 15,
+        "end_line": 5,
+        "file": "src/discount.ts",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_688c326295bf5e4f",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_b2a484 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.discount",
+        "hash": "sh_688c326295bf5e4f",
+        "lang": "typescript"
+      },
+      "tier": 3,
+      "title": "Mutant survived: `>=` → `>` at src/discount.ts:5"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review whether any input tells `*` → `/` apart at src/discount.ts:8; if none does, suppress this finding."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.3,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "to": "/"
+        },
+        "reason": "the right operand is `1`, the identity of both operators"
+      },
+      "id": "fnd_048632",
+      "kind": "mutant.equivalent?",
+      "location": {
+        "col": 16,
+        "end_col": 17,
+        "end_line": 8,
+        "file": "src/discount.ts",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_688c326295bf5e4f",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_048632 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.discount",
+        "hash": "sh_688c326295bf5e4f",
+        "lang": "typescript"
+      },
+      "tier": 3,
+      "title": "Mutant may be equivalent: `*` → `/` at src/discount.ts:8"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that runs line 13 of src/discount.ts."
+      },
+      "check": "tests.mutation",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "to": "+"
+        }
+      },
+      "id": "fnd_ad2709",
+      "kind": "mutant.uncovered",
+      "location": {
+        "col": 16,
+        "end_col": 17,
+        "end_line": 13,
+        "file": "src/discount.ts",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_de60112080da10aa",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_ad2709 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.refund",
+        "hash": "sh_de60112080da10aa",
+        "lang": "typescript"
+      },
+      "tier": 3,
+      "title": "No test runs src/discount.ts:13; its mutant `-` → `+` was not run"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_b2a484",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Add a test that fails when `>=` at src/discount.ts:5 becomes `>`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_048632",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Review whether any input tells `*` → `/` apart at src/discount.ts:8; if none does, suppress this finding."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ad2709",
+      "kind": "write_test",
+      "priority": 3,
+      "summary": "Write a test that runs line 13 of src/discount.ts."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "typescript": {
+            "coverage": "vitest run --coverage --coverage.reporter=lcov"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 4,
+      "languages": [
+        "typescript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 2,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}

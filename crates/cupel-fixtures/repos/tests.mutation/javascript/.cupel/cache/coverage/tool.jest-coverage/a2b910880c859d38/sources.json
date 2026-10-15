@@ -1,0 +1,17 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p34/regen/javascript",
+  "skip_dirs": [
+    "node_modules",
+    "dist",
+    "coverage"
+  ],
+  "report": "0502cc30abfb40a05d481fb45fbd5fae1629128905a79dc510feb56f06748615",
+  "files": {
+    "cupel.toml": "faef3ad7e3e1b31f308f5ddaaaec1b084f6e070f9322b111654aaeee11430afd",
+    "discount.js": "e72ab1d0ff6ef582746ebf35321aeb0d3ae645ed4eb3892036a5d65a995fb802",
+    "large.test.js": "e1c656d824aaf5b26e2fdfdd14466a90bb8501190ba49d94498bc54bd777060f",
+    "package.json": "08a4c1fbbc8092d70902a8833671a37d57447b82d40e00a3266d2be9de786fa6",
+    "small.test.js": "4dff1c3a4f8fc02ecb29ef9dd662c33214c4ec073734b41c21fbe088177e0680"
+  }
+}

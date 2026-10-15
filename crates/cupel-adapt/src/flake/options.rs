@@ -1,12 +1,11 @@
-// ABOUTME: What one rerun varies (ADR-078): `RunOptions` (order, seed, parallelism, explicit order) and the
+// ABOUTME: What one rerun varies (ADR-078): `Planned` (order, seed, parallelism, explicit order) and the
 // ABOUTME: schedule of reruns derived from the run's seed alone, so `--seed` repeats every rerun.
-use cupel_core::RunOrder;
+use cupel_core::{RunOptions, RunOrder};
 
-/// How one rerun runs the suite. P3.3's `Runner::run(selection, env, timeout)` absorbs this:
-/// `explicit` is a selection in order, and each runner turns `order`, `seed`, and
-/// `parallelism` into arguments and environment (the engine's `reruns` table).
+/// How one rerun runs the suite: `explicit` becomes a selection in order, and the rest the
+/// runner's [`RunOptions`].
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct RunOptions {
+pub struct Planned {
     pub order: RunOrder,
     /// Handed to the runner: its shuffle seed and, where it has one, its hash seed.
     pub seed: u64,
@@ -21,12 +20,12 @@ pub const DEFAULT_RUNS: u32 = 3;
 
 /// The reruns of a run with `seed`: the first two in the declared order serially (only the seed
 /// differs, so a disagreement is chance), the third reversed (a shuffle where the runner takes
-/// no explicit order, [`RunOptions::explicit`] filled in once the first rerun reported its
+/// no explicit order, [`Planned::explicit`] filled in once the first rerun reported its
 /// order), the rest seeded shuffles alternately at the runner's default parallelism and
 /// serially.
-pub fn schedule(seed: u64, runs: u32) -> Vec<RunOptions> {
+pub fn schedule(seed: u64, runs: u32) -> Vec<Planned> {
     (0..runs)
-        .map(|index| RunOptions {
+        .map(|index| Planned {
             order: match index {
                 0 | 1 => RunOrder::Declared,
                 2 => RunOrder::Reversed,
@@ -53,7 +52,7 @@ pub fn rerun_seed(seed: u64, index: u32) -> u64 {
     z ^ (z >> 31)
 }
 
-impl RunOptions {
+impl Planned {
     /// This rerun as it can run with a runner that does (`explicit_order`) or does not take an
     /// explicit order, given the order the first rerun ran in: reversed from it, or a shuffle.
     #[must_use]
@@ -67,14 +66,14 @@ impl RunOptions {
         self
     }
 
-    /// The seed in a signed 32-bit range, for runners that take no more (`jest`, `vitest`).
-    pub fn seed_i32(&self) -> i64 {
-        i64::try_from(self.seed % (1 << 31)).unwrap_or_default()
-    }
-
-    /// The seed in a signed 64-bit range (`go test -shuffle`).
-    pub fn seed_i63(&self) -> u64 {
-        self.seed >> 1
+    /// What the runner is asked for: this rerun's order, seed, and parallelism.
+    pub fn options(&self) -> RunOptions {
+        RunOptions {
+            order: self.order,
+            seed: Some(self.seed),
+            parallelism: self.parallelism,
+            ..RunOptions::default()
+        }
     }
 
     /// Whether the rerun runs one test at a time.

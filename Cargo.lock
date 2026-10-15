@@ -311,6 +311,7 @@ dependencies = [
  "cupel-core",
  "cupel-fixtures",
  "cupel-lang",
+ "cupel-mutate",
  "cupel-store",
  "insta",
  "inventory",
@@ -351,6 +352,7 @@ dependencies = [
  "cupel-checks",
  "cupel-core",
  "cupel-lang",
+ "cupel-mutate",
  "serde",
  "serde_json",
  "similar",
@@ -381,6 +383,21 @@ dependencies = [
  "tree-sitter-python",
  "tree-sitter-rust",
  "tree-sitter-typescript",
+]
+
+[[package]]
+name = "cupel-mutate"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "cupel-core",
+ "cupel-fixtures",
+ "cupel-lang",
+ "cupel-store",
+ "ignore",
+ "serde",
+ "serde_json",
+ "tempfile",
 ]
 
 [[package]]

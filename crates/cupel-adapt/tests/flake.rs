@@ -1,14 +1,13 @@
 // ABOUTME: The flake engine (ADR-078): its schedule from the seed, what it does with no baseline or a runner it
 // ABOUTME: cannot rerun, cancellation, and real reruns of each runner on the tests.flaky fixtures (skipped when absent).
 use std::path::Path;
-use std::sync::OnceLock;
 
-use cupel_adapt::flake::{DEFAULT_RUNS, rerun_seed, runners, schedule};
+use cupel_adapt::flake::{DEFAULT_RUNS, rerun_seed, schedule};
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
     Availability, Cancellation, Ctx, Error, FactKind, Lang, LangId, ProduceCtx, Produced,
-    ProducerId, ProducerRegistry, RegisteredProducer, RunOrder, Scope, TestOutcome, TestReruns,
-    TestResults, Writer,
+    ProducerId, ProducerRegistry, RegisteredProducer, RunOrder, RunOrdering, Scope, TestOutcome,
+    TestReruns, TestResults, Writer,
 };
 use cupel_fixtures::copy_repo;
 use cupel_fixtures::matrix::Registries;
@@ -20,24 +19,13 @@ use TestOutcome::{Failed, Passed};
 /// every shuffling runner.
 const SEED: u64 = cupel_fixtures::matrix::SEED;
 
-/// The producers and languages the binary registers, built once.
-fn registries() -> &'static Registries {
-    static REGISTRIES: OnceLock<Registries> = OnceLock::new();
-    REGISTRIES.get_or_init(Registries::builtin)
-}
-
 fn registry() -> &'static ProducerRegistry {
-    &registries().producers
+    &Registries::shared().producers
 }
 
 /// The registered language `id`.
 fn lang(id: &str) -> Lang {
-    registries()
-        .languages
-        .langs()
-        .into_iter()
-        .find(|lang| lang.id.as_str() == id)
-        .unwrap_or_else(|| panic!("{id} is registered"))
+    Registries::shared().lang(id)
 }
 
 fn producer<'a>(
@@ -66,6 +54,7 @@ fn produce_ctx(
         Cancellation::new(),
     );
     ctx.seed = seed;
+    ctx.runners = registry().runners();
     let serde_json::Value::Object(config) = config else {
         panic!("config is a table")
     };
@@ -147,17 +136,29 @@ fn the_engine_reruns_any_language_and_needs_the_baseline() {
     for lang in ["rust", "go", "python", "javascript", "typescript"] {
         let engine = producer(registry, FactKind::TestReruns, "engine.flake", lang);
         assert_eq!(engine.needs(), [FactKind::TestResults]);
+        assert_eq!(engine.wants(), [FactKind::ProjectInfo]);
     }
-    let reruns: Vec<&str> = runners().collect();
+    let mut reruns: Vec<String> = ["rust", "go", "python", "javascript"]
+        .into_iter()
+        .flat_map(|lang| registry.producers_for(FactKind::TestResults, &self::lang(lang)))
+        .map(RegisteredProducer::id)
+        .filter(|id| {
+            registry
+                .runner(id)
+                .is_some_and(|runner| runner.ordering() != RunOrdering::Fixed)
+        })
+        .map(|id| id.to_string())
+        .collect();
+    reruns.sort();
     assert_eq!(
         reruns,
         [
             "tool.cargo-test",
             "tool.go-test",
+            "tool.jest",
             "tool.pytest",
             "tool.unittest",
-            "tool.vitest",
-            "tool.jest"
+            "tool.vitest"
         ]
     );
 }

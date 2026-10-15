@@ -53,6 +53,7 @@ mod static_dead_code;
 mod static_deps;
 mod tests_coverage;
 mod tests_flaky;
+mod tests_mutation;
 mod tests_quality;
 mod tests_weakening;
 

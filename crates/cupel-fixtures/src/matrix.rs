@@ -71,6 +71,7 @@ impl Registries {
         let mut producers = ProducerRegistry::default();
         languages.register_producers(&mut producers);
         cupel_adapt::register(&mut producers);
+        cupel_mutate::register(&mut producers);
         let mut checks = CheckRegistry::default();
         cupel_checks::register(&mut checks);
         Self {
@@ -78,6 +79,25 @@ impl Registries {
             producers,
             checks,
         }
+    }
+
+    /// The registries, built once and shared by every test of a test binary.
+    pub fn shared() -> &'static Self {
+        static REGISTRIES: std::sync::OnceLock<Registries> = std::sync::OnceLock::new();
+        REGISTRIES.get_or_init(Self::builtin)
+    }
+
+    /// The registered language `id`.
+    ///
+    /// # Panics
+    ///
+    /// When no language `id` is registered.
+    pub fn lang(&self, id: &str) -> cupel_core::Lang {
+        self.languages
+            .langs()
+            .into_iter()
+            .find(|lang| lang.id.as_str() == id)
+            .unwrap_or_else(|| panic!("{id} is registered"))
     }
 
     /// Every (check, language) with its support outside any repository, as `describe matrix`

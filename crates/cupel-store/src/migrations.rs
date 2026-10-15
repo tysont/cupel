@@ -2,7 +2,7 @@
 // ABOUTME: how many have been applied (ADR-045 §4). Append new scripts; never edit an applied one.
 
 /// Every migration, in order. Migration `n` (1-based) moves the store from version `n - 1` to `n`.
-pub const MIGRATIONS: &[&str] = &[V1, V2];
+pub const MIGRATIONS: &[&str] = &[V1, V2, V3];
 
 /// Every table of design §8.8, with the ADR-045 §5 additions.
 const V1: &str = "
@@ -125,4 +125,25 @@ CREATE TABLE test_results (
     duration_ms INTEGER
 );
 CREATE INDEX test_results_by_run ON test_results (run_id, lang, test_id);
+";
+
+/// The `mutants` index of P3.4 (ADR-080 §10): one row per mutant of a run's `MutationOutcomes`,
+/// found again by the cache key its outcome is reused under and by its site and replacement
+/// (the last run's survivors run first). The V1 table was never written.
+const V3: &str = "
+DROP TABLE mutants;
+CREATE TABLE mutants (
+    run_id TEXT NOT NULL,
+    lang TEXT NOT NULL,
+    engine TEXT NOT NULL,
+    cache_key TEXT,
+    symbol_hash TEXT,
+    site_hash TEXT NOT NULL,
+    replacement TEXT NOT NULL,
+    outcome TEXT NOT NULL,
+    duration_ms INTEGER,
+    mutant TEXT NOT NULL
+);
+CREATE INDEX mutants_by_key ON mutants (cache_key);
+CREATE INDEX mutants_by_site ON mutants (symbol_hash, site_hash, replacement);
 ";

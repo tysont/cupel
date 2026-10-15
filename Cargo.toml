@@ -9,6 +9,7 @@ members = [
     "crates/cupel-core",
     "crates/cupel-fixtures",
     "crates/cupel-lang",
+    "crates/cupel-mutate",
     "crates/cupel-store",
 ]
 
@@ -24,6 +25,7 @@ cupel-adapt = { path = "crates/cupel-adapt" }
 cupel-checks = { path = "crates/cupel-checks" }
 cupel-core = { path = "crates/cupel-core" }
 cupel-lang = { path = "crates/cupel-lang" }
+cupel-mutate = { path = "crates/cupel-mutate" }
 cupel-store = { path = "crates/cupel-store" }
 cupel-fixtures = { path = "crates/cupel-fixtures" }
 clap = { version = "4.6.7", features = ["derive", "env"] }

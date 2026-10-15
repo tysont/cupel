@@ -1,0 +1,19 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p34/regen/python",
+  "skip_dirs": [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".tox"
+  ],
+  "report": "e6a4da24285921200b49118c0fed54759917e2bfcb8b7a113e09ce9a8f16005a",
+  "files": {
+    "cupel.toml": "de5c1a2c0375dd723b5aec49e2c66c632c93802db128c45fdf21a8533be7b1f0",
+    "discount.py": "0b207de263b3dcebf7e49cb86d60605fe0c65119976cf109aba786266c7b3a76",
+    "pyproject.toml": "2fcf89f1901655864327dc522d8ac0c4c05b919f13631a97107b01635133c615",
+    "tests/__init__.py": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
+    "tests/test_large.py": "1a446723f89e97683f4fb7a271b1cc93abb01d3fa8c0fc40d0fa0ad16dd0305a",
+    "tests/test_small.py": "7c78fc551fb8865b04f1561422480a2c39427b394cb0f4a56d4c0d8407cc3fd1"
+  }
+}

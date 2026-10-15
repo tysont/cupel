@@ -12,6 +12,7 @@ publish = false
 
 [dependencies]
 cupel-adapt.workspace = true
+cupel-mutate.workspace = true
 cupel-checks.workspace = true
 cupel-core.workspace = true
 cupel-lang.workspace = true

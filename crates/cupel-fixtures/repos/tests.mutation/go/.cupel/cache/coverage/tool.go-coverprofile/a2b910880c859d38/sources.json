@@ -1,0 +1,15 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p34/regen/go",
+  "skip_dirs": [
+    "vendor"
+  ],
+  "report": "423711728ceca8703ae61e580424d5e978bdb0a704db4eb6cbfabca81e5362ab",
+  "files": {
+    "cupel.toml": "5f3b91e364d959bfe033533a25e4212606c847f8ae3759413232b3215079a6f1",
+    "discount.go": "a51328358f87e1574d37b0eb3503a16a073b3a96df348e332dbb80cc221e02f4",
+    "go.mod": "895533b7d086b14efd5cca23c5acd877d292007383050600581449dbf8bd9d93",
+    "large_test.go": "4ac3efda56ccd5e3a6d866930b2794f503c5e3a5fc1cf737fac6f4c14f950d19",
+    "small_test.go": "6552bb448197ef6f3485b94fdc5e18dcaaf0a2eee52bb54cf6e0469fb6bacef4"
+  }
+}
