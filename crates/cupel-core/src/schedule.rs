@@ -410,7 +410,14 @@ impl Execution<'_, '_> {
                 ran.duration_ms = elapsed_ms(started);
                 ran
             }
-            Err(error) => ended(status_of(&error), None),
+            Err(error) => {
+                // What failed, so the run says why without a rerun; a timeout says so already.
+                let mut result = ended(status_of(&error), None);
+                if error != Error::Cancelled {
+                    result.notes.push(error.to_string());
+                }
+                result
+            }
         }
     }
 

@@ -1095,3 +1095,27 @@ fn under_a_range_a_check_reads_both_sides_and_the_range() {
         "once per side"
     );
 }
+
+/// Fails as a check whose producer could not run does.
+fn failing(_: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+    Err(Error::Process {
+        program: "tool.alpha".to_owned(),
+        message: "the overlay did not reproduce the baseline".to_owned(),
+    })
+}
+
+#[test]
+fn a_check_that_fails_says_why_in_its_notes() {
+    let world = World::new(vec![check("t.failing", &[FactKind::Symbols], failing)], "");
+    let result = world.run(&["go"], |_| {}).0.unwrap().checks[0].clone();
+    assert_eq!(
+        (result.status, result.notes),
+        (
+            CheckStatus::Error,
+            vec![
+                "cannot run `tool.alpha`: the overlay did not reproduce the baseline (go)"
+                    .to_owned()
+            ]
+        )
+    );
+}
