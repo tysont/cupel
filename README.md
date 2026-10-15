@@ -269,7 +269,7 @@ The same run as JSON, trimmed to two checks, one finding, and one action:
 }
 ```
 
-Every object has a fixed key set; an absent value is `null`, never a missing key. `status` is one of `pass`, `fail`, `partial`, `error`, or `plan`. `--format jsonl` writes the envelope header and then one finding per line. `cupel describe schema run` and `cupel describe schema finding` are the full schemas.
+Every object has a fixed key set; an absent value is `null`, never a missing key (a check result's `notes`, omitted when empty, is the one exception). `status` is one of `pass`, `fail`, `partial`, `error`, or `plan`. A check result in `error` says why in its `notes`, such as a tool that could not run. `--format jsonl` writes the envelope header and then one finding per line. `cupel describe schema run` and `cupel describe schema finding` are the full schemas.
 
 ### `cupel survey`
 

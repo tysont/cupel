@@ -121,19 +121,26 @@ impl Slot {
     }
 }
 
-/// What a slot keeps for itself: Cupel's and the runner's working directories.
+/// What a slot keeps for itself: the repository's `.cupel` (a `.cupel` deeper in the tree is
+/// the tree's, such as a fixture's committed cache), any `.git`, and the runner's build
+/// directories.
 #[derive(Clone)]
 struct Own(Vec<String>);
 
 impl Own {
-    fn holds(&self, name: &std::ffi::OsStr) -> bool {
-        name == ".git" || name == ".cupel" || self.0.iter().any(|output| name == output.as_str())
+    /// Whether the path `relative` to the root is the slot's own.
+    fn holds(&self, relative: &Path) -> bool {
+        let name = relative.file_name().unwrap_or_default();
+        relative == Path::new(".cupel")
+            || name == ".git"
+            || self.0.iter().any(|output| name == output.as_str())
     }
 }
 
 /// Every path a slot of `tree` should hold, relative to it.
 fn wanted(tree: &Path, own: &Own) -> io::Result<BTreeMap<PathBuf, Entry>> {
     let filter = own.clone();
+    let root = tree.to_path_buf();
     let mut kept: BTreeMap<PathBuf, Entry> = BTreeMap::new();
     let walk = ignore::WalkBuilder::new(tree)
         .hidden(false)
@@ -141,7 +148,9 @@ fn wanted(tree: &Path, own: &Own) -> io::Result<BTreeMap<PathBuf, Entry>> {
         .git_global(false)
         .git_exclude(false)
         .parents(false)
-        .filter_entry(move |entry| !filter.holds(entry.file_name()))
+        .filter_entry(move |entry| {
+            !filter.holds(entry.path().strip_prefix(&root).unwrap_or(entry.path()))
+        })
         .build();
     for entry in walk.flatten() {
         let Ok(relative) = entry.path().strip_prefix(tree) else {
@@ -170,7 +179,7 @@ fn wanted(tree: &Path, own: &Own) -> io::Result<BTreeMap<PathBuf, Entry>> {
     for dir in dirs {
         for child in fs::read_dir(tree.join(&dir))?.flatten() {
             let relative = dir.join(child.file_name());
-            if !own.holds(&child.file_name()) && !kept.contains_key(&relative) {
+            if !own.holds(&relative) && !kept.contains_key(&relative) {
                 kept.insert(relative, Entry::Link(child.path()));
             }
         }
@@ -185,7 +194,7 @@ fn prune(root: &Path, dir: &Path, wanted: &BTreeMap<PathBuf, Entry>, own: &Own) 
         let path = child.path();
         let relative = path.strip_prefix(root).unwrap_or(&path).to_path_buf();
         let kind = child.file_type()?;
-        let owned = own.holds(&child.file_name());
+        let owned = own.holds(&relative);
         let keep = match wanted.get(&relative) {
             Some(Entry::Dir) => kind.is_dir(),
             Some(Entry::Link(_)) => kind.is_symlink(),

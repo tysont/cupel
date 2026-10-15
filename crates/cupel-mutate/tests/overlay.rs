@@ -17,6 +17,7 @@ fn repository() -> tempfile::TempDir {
         ("target/build.out", "built\n"),
         (".git/HEAD", "ref: refs/heads/main\n"),
         (".cupel/cupel.db", "store\n"),
+        ("fixtures/.cupel/cache/report", "committed\n"),
     ] {
         fs::create_dir_all(root.join(path).parent().unwrap()).unwrap();
         fs::write(root.join(path), text).unwrap();
@@ -62,6 +63,8 @@ fn a_slot_mirrors_the_tree_and_links_what_the_tree_ignores() {
     assert_eq!(read(root, "target/build.out"), "built\n");
     assert!(!root.join(".git").exists());
     assert!(!root.join(".cupel").exists());
+    // Only the repository's own `.cupel` is left out; one inside it is the tree's.
+    assert_eq!(read(root, "fixtures/.cupel/cache/report"), "committed\n");
 }
 
 #[test]
