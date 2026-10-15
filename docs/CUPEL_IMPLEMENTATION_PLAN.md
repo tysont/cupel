@@ -837,7 +837,7 @@ P3 fans out to parallel worktrees, each adding a check or a producer. Before it 
 
 #### P3.4 Fact: `MutationOutcomes` — the mutation engine and `tests.mutation`
 
-**Status:** not started
+**Status:** in progress (2026-10-14)
 
 `cupel-mutate` is `Producer<MutationOutcomes>` with `needs = [MutationSites, CoverageMap, TestResults]`, `wants = [PerTestMap, ModuleGraph]`, obtaining a `Runner` from the registry. `tests.mutation` is a check with `needs = [Symbols, MutationOutcomes]`, `wants = [TestConventions]`, that only scores and writes findings. Built in sub-steps, each with its own failing test first:
 
