@@ -14,7 +14,12 @@ pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
     node_bin: false,
     version: &["cargo", "nextest", "--version"],
     command,
-    env: &[("CARGO_TERM_COLOR", "never")],
+    // nextest hands its profile to the tests it runs as `NEXTEST_PROFILE`, which a nextest run
+    // inside one of them reads; `run` names its own, and `list` takes the default.
+    env: &[
+        ("CARGO_TERM_COLOR", "never"),
+        ("NEXTEST_PROFILE", "default"),
+    ],
     merged: false,
     read,
     select: |selected| tests_flag(selected, "-E", filterset),

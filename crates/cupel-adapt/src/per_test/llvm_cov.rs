@@ -39,7 +39,12 @@ inventory::submit!(crate::ToolProducer {
     register: |registry| registry.register::<PerTestMap, _>(PerTest(&LLVM_COV)),
 });
 
-const ENV: &[(&str, &str)] = &[("CARGO_TERM_COLOR", "never")];
+/// The default nextest profile, whatever profile a nextest run around this one handed its tests
+/// (`NEXTEST_PROFILE`), as when Cupel's own suite runs under Cupel's nextest runner.
+const ENV: &[(&str, &str)] = &[
+    ("CARGO_TERM_COLOR", "never"),
+    ("NEXTEST_PROFILE", "default"),
+];
 
 /// Files no report needs: dependencies and the standard library.
 const IGNORED: &str = r"/\.cargo/registry/|/\.cargo/git/|/\.rustup/|^/rustc/";
