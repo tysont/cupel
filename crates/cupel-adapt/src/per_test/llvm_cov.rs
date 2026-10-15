@@ -288,21 +288,63 @@ fn run(site: &Site<'_>, program: &str, args: &[String]) -> Result<cupel_core::Ca
         .run(&site.ctx.cancel)
 }
 
-/// The executables the build of `binary` (`<profile>/deps/<test>`) made beside it in
-/// `<profile>/`, other than `binary` itself.
+/// The programs the build of `binary` (`<profile>/deps/<test>`) made in `<profile>/`: its
+/// executable files with no extension, not hidden (cargo's `.cargo-lock`).
 fn executables(binary: &Path) -> Vec<PathBuf> {
     let Some(profile) = binary.parent().and_then(Path::parent) else {
         return Vec::new();
     };
     crate::fresh::entries(profile)
         .into_iter()
-        .filter(|path| path.is_file() && path.extension().is_none() && path != binary)
+        .filter(|path| {
+            let hidden = path
+                .file_name()
+                .is_some_and(|name| name.to_string_lossy().starts_with('.'));
+            !hidden && path.extension().is_none() && is_executable(path)
+        })
         .collect()
+}
+
+#[cfg(unix)]
+fn is_executable(path: &Path) -> bool {
+    use std::os::unix::fs::PermissionsExt;
+    std::fs::metadata(path)
+        .is_ok_and(|meta| meta.is_file() && meta.permissions().mode() & 0o111 != 0)
+}
+
+#[cfg(not(unix))]
+fn is_executable(path: &Path) -> bool {
+    path.is_file()
 }
 
 #[cfg(test)]
 mod tests {
-    use super::runner_script;
+    use super::{executables, runner_script};
+
+    #[cfg(unix)]
+    #[test]
+    fn the_executables_beside_a_test_binary_are_the_programs_the_build_made() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let profile = dir.path().join("debug");
+        std::fs::create_dir_all(profile.join("deps")).unwrap();
+        for (name, mode) in [
+            ("cupel", 0o755),
+            ("cupel.d", 0o644),
+            (".cargo-lock", 0o644),
+            ("libcupel.rlib", 0o644),
+            ("deps/tests-0123", 0o755),
+        ] {
+            let path = profile.join(name);
+            std::fs::write(&path, "").unwrap();
+            std::fs::set_permissions(&path, std::fs::Permissions::from_mode(mode)).unwrap();
+        }
+        std::fs::create_dir_all(profile.join("build")).unwrap();
+        assert_eq!(
+            executables(&profile.join("deps/tests-0123")),
+            [profile.join("cupel")]
+        );
+    }
 
     #[test]
     fn the_runner_gives_each_test_process_its_own_profile_directory() {
