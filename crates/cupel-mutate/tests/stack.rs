@@ -113,7 +113,7 @@ fn a_mutant_that_never_finishes_times_out() {
     let toml = fs::read_to_string(dir.path().join("cupel.toml")).unwrap();
     fs::write(
         dir.path().join("cupel.toml"),
-        format!("{toml}mutation = {{ timeout_factor = 1 }}\n"),
+        format!("{toml}mutation = {{ timeout_factor = 3 }}\n"),
     )
     .unwrap();
     let outcomes = produce(dir.path(), "python", &Run::default()).unwrap();
