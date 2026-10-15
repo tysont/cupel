@@ -163,30 +163,7 @@ impl Check for TestsCoverage {
 
     /// The line ratio over every language's instrumented lines together.
     fn combine(&self, scores: &[Score]) -> Option<Score> {
-        let first = scores.first()?;
-        let lines: u64 = scores.iter().map(|score| score.n).sum();
-        #[allow(
-            clippy::cast_precision_loss,
-            reason = "line counts stay far below 2^52, where f64 is exact"
-        )]
-        let covered: f64 = scores
-            .iter()
-            .map(|score| score.value * score.n as f64)
-            .sum();
-        #[allow(
-            clippy::cast_precision_loss,
-            reason = "line counts stay far below 2^52, where f64 is exact"
-        )]
-        let value = if lines == 0 {
-            0.0
-        } else {
-            covered / lines as f64
-        };
-        Some(Score {
-            value,
-            unit: first.unit.clone(),
-            n: lines,
-        })
+        outcome::weighted(scores)
     }
 
     /// Ratios weighted by what they are ratios of; counts add up (ADR-063).

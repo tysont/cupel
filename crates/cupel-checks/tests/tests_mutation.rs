@@ -1,0 +1,353 @@
+// ABOUTME: tests.mutation over a hand-built MutationOutcomes fact, with no engine: findings per outcome, the score over
+// ABOUTME: killed and surviving mutants, ADR-004's possibly equivalent survivors, scope, IDs, and combining languages.
+mod support;
+
+use cupel_core::syntax::{
+    MutationOperator, Span, SymbolDef, SymbolKind, Symbols, TestConventions, TestPairing,
+    Visibility,
+};
+use cupel_core::{
+    ActionKind, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts, Finding, LangId,
+    MetricPer, Mutant, MutantOutcome, MutationOutcomes, ProducerId, Scope, Severity,
+};
+use serde_json::{Value, json};
+use support::{Recorded, Shape, combined, language};
+
+const ID: &str = "tests.mutation";
+
+/// `discount` in `discount.py`, lines 4–8.
+fn discount() -> SymbolDef {
+    SymbolDef {
+        name: "discount".to_owned(),
+        namespace: "discount".to_owned(),
+        display: "discount.discount".to_owned(),
+        kind: SymbolKind::Function,
+        visibility: Visibility::Public,
+        lang: LangId::from("python"),
+        file: "discount.py".to_owned(),
+        span: Span {
+            line: 4,
+            col: 1,
+            end_line: 8,
+            end_col: 21,
+        },
+        body: None,
+        parameters: 2,
+    }
+}
+
+/// A mutant of `discount` replacing `from` with `to` at `line`, column `col`.
+fn mutant(line: u32, col: u32, from: &str, to: &str, outcome: MutantOutcome) -> Mutant {
+    Mutant {
+        symbol: discount().key(),
+        symbol_hash: Some(support::hash_of_line(4)),
+        site_hash: format!("{:016x}", line * 100 + col).parse().unwrap(),
+        operator: MutationOperator::Relational,
+        from: from.to_owned(),
+        to: to.to_owned(),
+        span: Span {
+            line,
+            col,
+            end_line: line,
+            end_col: col + u32::try_from(from.len()).unwrap(),
+        },
+        outcome,
+        tests: vec!["tests/test_large.py::test_large".to_owned()],
+        killing_tests: Vec::new(),
+        duration_ms: Some(120),
+        reused: false,
+        equivalent: None,
+        cache_key: None,
+    }
+}
+
+/// Facts with `discount`, outcomes of `mutants`, and test conventions pairing its file.
+fn facts(mutants: Vec<Mutant>) -> Facts {
+    let check = support::check(ID);
+    let mut facts = Facts::for_manifest(check.manifest());
+    facts
+        .insert(Symbols {
+            symbols: vec![discount()],
+        })
+        .unwrap();
+    facts
+        .insert(MutationOutcomes::new(
+            ProducerId::from("engine.test"),
+            Some(ProducerId::from("tool.pytest")),
+            CostClass::Standard,
+            false,
+            mutants,
+        ))
+        .unwrap();
+    facts
+        .insert(TestConventions {
+            test_globs: vec!["tests/**".to_owned()],
+            pairs: vec![TestPairing {
+                source: "discount.py".to_owned(),
+                tests: vec!["tests/test_large.py".to_owned()],
+            }],
+        })
+        .unwrap();
+    facts
+}
+
+fn scope() -> Scope {
+    Scope {
+        files: vec!["discount.py".to_owned()],
+        symbols: Some([discount().key()].into()),
+    }
+}
+
+fn run(mutants: Vec<Mutant>) -> (CheckResult, Recorded) {
+    support::recorded(support::check(ID), &facts(mutants), scope(), json!({})).unwrap()
+}
+
+/// Each finding's kind, severity, and confidence.
+fn kinds(findings: &[Finding]) -> Vec<(&str, Severity, f64)> {
+    findings
+        .iter()
+        .map(|f| (f.kind.as_str(), f.severity, f.confidence))
+        .collect()
+}
+
+#[test]
+fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
+    let check = support::check(ID);
+    let shape = Shape::of(check.manifest());
+    assert_eq!(
+        (shape.needs, shape.wants, shape.tier, shape.cost),
+        (
+            vec![FactKind::Symbols, FactKind::MutationOutcomes],
+            vec![FactKind::TestConventions],
+            3,
+            CostClass::Standard
+        )
+    );
+    assert_eq!(
+        shape.kinds,
+        [
+            ("mutant.survived", ActionKind::WriteTest),
+            ("mutant.timeout", ActionKind::Review),
+            ("mutant.uncovered", ActionKind::WriteTest),
+            ("mutant.equivalent?", ActionKind::Review),
+        ]
+    );
+    assert_eq!(
+        shape.metrics,
+        [
+            ("score", MetricPer::Scope),
+            ("killed", MetricPer::Scope),
+            ("survived", MetricPer::Scope),
+            ("timeout", MetricPer::Scope),
+            ("uncovered", MetricPer::Scope),
+            ("unviable", MetricPer::Scope),
+            ("equivalent", MetricPer::Scope),
+            ("executed", MetricPer::Scope),
+            ("reused", MetricPer::Scope),
+            ("survivors", MetricPer::Symbol),
+        ]
+    );
+}
+
+#[test]
+fn a_surviving_mutant_is_a_failing_finding_at_its_site_naming_the_tests_that_missed_it() {
+    let (result, recorded) = run(vec![mutant(6, 14, ">=", ">", MutantOutcome::Survived)]);
+    let finding = &recorded.findings[0];
+    assert_eq!(
+        kinds(&recorded.findings),
+        [("mutant.survived", Severity::Fail, 0.95)]
+    );
+    assert_eq!(
+        finding.title,
+        "Mutant survived: `>=` → `>` at discount.py:6"
+    );
+    let location = finding.location.as_ref().unwrap();
+    assert_eq!(
+        (location.file.as_str(), location.line, location.col),
+        ("discount.py", 6, Some(14))
+    );
+    assert_eq!(
+        Value::Object(finding.evidence.0.clone()),
+        json!({
+            "mutation": {"from": ">=", "to": ">", "operator": "relational"},
+            "covering_tests": ["tests/test_large.py::test_large"],
+            "tests_run": 1
+        })
+    );
+    assert_eq!(
+        (
+            finding.action.kind,
+            finding.action.hints.get("nearest_test_file"),
+            finding.action.hints.get("covering_tests")
+        ),
+        (
+            ActionKind::WriteTest,
+            Some(&json!("tests/test_large.py")),
+            Some(&json!(["tests/test_large.py::test_large"]))
+        )
+    );
+    assert_eq!(
+        finding.symbol.as_ref().unwrap().display,
+        "discount.discount"
+    );
+    assert_eq!(result.status, CheckStatus::Fail);
+}
+
+#[test]
+fn the_score_is_killed_over_killed_and_surviving() {
+    let (result, _) = run(vec![
+        mutant(6, 14, ">=", ">", MutantOutcome::Survived),
+        mutant(6, 20, "and", "or", MutantOutcome::Killed),
+        mutant(7, 22, "-", "+", MutantOutcome::Killed),
+        mutant(7, 24, "10", "11", MutantOutcome::Timeout),
+        mutant(8, 12, "*", "/", MutantOutcome::Uncovered),
+        mutant(8, 14, "1", "0", MutantOutcome::Unviable),
+    ]);
+    let score = result.score.unwrap();
+    assert_eq!((score.value, score.n), (2.0 / 3.0, 3));
+    let metric = |name: &str| result.metrics.get(name).copied();
+    assert_eq!(
+        [
+            "killed",
+            "survived",
+            "timeout",
+            "uncovered",
+            "unviable",
+            "executed"
+        ]
+        .map(metric),
+        [
+            Some(2.0),
+            Some(1.0),
+            Some(1.0),
+            Some(1.0),
+            Some(1.0),
+            Some(5.0)
+        ]
+    );
+}
+
+#[test]
+fn timeouts_and_uncovered_mutants_are_notes_and_unviable_ones_are_not_reported() {
+    let (result, recorded) = run(vec![
+        mutant(7, 24, "10", "11", MutantOutcome::Timeout),
+        mutant(8, 12, "*", "/", MutantOutcome::Uncovered),
+        mutant(8, 14, "1", "0", MutantOutcome::Unviable),
+    ]);
+    assert_eq!(
+        kinds(&recorded.findings),
+        [
+            ("mutant.timeout", Severity::Info, 1.0),
+            ("mutant.uncovered", Severity::Info, 1.0)
+        ]
+    );
+    assert_eq!(result.status, CheckStatus::Pass);
+    let score = result.score.unwrap();
+    assert_eq!((score.value, score.n), (1.0, 0));
+}
+
+#[test]
+fn a_survivor_marked_possibly_equivalent_is_a_low_confidence_note_left_out_of_the_score() {
+    let mut equivalent = mutant(8, 18, "*", "/", MutantOutcome::Survived);
+    equivalent.equivalent = Some("the right operand is `1`".to_owned());
+    let mut killed_anyway = mutant(8, 20, "*", "/", MutantOutcome::Killed);
+    killed_anyway.equivalent = Some("the right operand is `1`".to_owned());
+    let (result, recorded) = run(vec![equivalent, killed_anyway]);
+    assert_eq!(
+        kinds(&recorded.findings),
+        [("mutant.equivalent?", Severity::Info, 0.3)]
+    );
+    assert_eq!(
+        recorded.findings[0].evidence.0["reason"],
+        json!("the right operand is `1`")
+    );
+    let score = result.score.unwrap();
+    assert_eq!((score.value, score.n), (1.0, 1));
+    assert_eq!(result.metrics.get("equivalent"), Some(&1.0));
+    assert_eq!(result.status, CheckStatus::Pass);
+}
+
+#[test]
+fn every_replacement_of_a_site_has_its_own_id_and_a_moved_site_keeps_it() {
+    let (_, recorded) = run(vec![
+        mutant(6, 14, ">=", ">", MutantOutcome::Survived),
+        mutant(6, 14, ">=", "<", MutantOutcome::Survived),
+    ]);
+    assert_ne!(recorded.findings[0].id, recorded.findings[1].id);
+    let mut moved = mutant(6, 14, ">=", ">", MutantOutcome::Survived);
+    moved.span.line = 16;
+    let (_, again) = run(vec![moved]);
+    let greater = recorded
+        .findings
+        .iter()
+        .find(|finding| finding.evidence.0["mutation"]["to"] == json!(">"))
+        .unwrap();
+    assert_eq!(again.findings[0].id, greater.id);
+}
+
+#[test]
+fn only_mutants_of_symbols_in_scope_are_reported_and_ranked() {
+    let check = support::check(ID);
+    let outside = Scope {
+        files: vec!["discount.py".to_owned()],
+        symbols: Some(std::collections::BTreeSet::new()),
+    };
+    let facts = facts(vec![mutant(6, 14, ">=", ">", MutantOutcome::Survived)]);
+    let (result, recorded) = support::recorded(check, &facts, outside, json!({})).unwrap();
+    assert!(recorded.findings.is_empty());
+    assert_eq!(result.score.unwrap().n, 0);
+    let (_, inside) = run(vec![mutant(6, 14, ">=", ">", MutantOutcome::Survived)]);
+    assert_eq!(inside.measured(), [("survivors", "discount.discount", 1.0)]);
+}
+
+#[test]
+fn without_mutation_outcomes_the_check_cannot_run() {
+    let check = support::check(ID);
+    let mut facts = Facts::for_manifest(check.manifest());
+    facts
+        .insert(Symbols {
+            symbols: vec![discount()],
+        })
+        .unwrap();
+    let Err(error) = support::recorded(check, &facts, scope(), json!({})) else {
+        panic!("the check ran without its outcomes")
+    };
+    assert_eq!(
+        error,
+        Error::AbsentFact {
+            kind: FactKind::MutationOutcomes
+        }
+    );
+}
+
+#[test]
+fn any_setting_is_a_configuration_error() {
+    let (key, valid) = support::setting_error(support::check(ID), json!({"timeout_factor": 10}));
+    assert_eq!((key.as_str(), valid.len()), ("timeout_factor", 0));
+}
+
+#[test]
+fn scores_combine_weighted_by_the_mutants_they_score_and_counts_add_up() {
+    let check = support::check(ID);
+    let python = language(
+        check,
+        &[("score", 0.5), ("killed", 1.0), ("survived", 1.0)],
+        2,
+    );
+    let go = language(
+        check,
+        &[("score", 1.0), ("killed", 6.0), ("survived", 0.0)],
+        6,
+    );
+    let results = [python, go];
+    assert_eq!(combined(check, "score", &results), Some(7.0 / 8.0));
+    assert_eq!(combined(check, "killed", &results), Some(7.0));
+    let scores: Vec<cupel_core::Score> = [(0.5, 2), (1.0, 6)]
+        .into_iter()
+        .map(|(value, n)| support::score(value, "killed_ratio", n))
+        .collect();
+    assert_eq!(
+        check.combine(&scores).map(|score| score.value),
+        Some(7.0 / 8.0)
+    );
+}

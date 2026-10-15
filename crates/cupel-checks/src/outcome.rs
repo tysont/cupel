@@ -58,6 +58,31 @@ pub fn maximum(scores: &[Score]) -> Option<Score> {
     combined(scores, f64::max)
 }
 
+/// Ratios combined over every language's targets together: each language's value weighted by
+/// the targets its score covers; zero when none does.
+pub fn weighted(scores: &[Score]) -> Option<Score> {
+    let first = scores.first()?;
+    let targets: u64 = scores.iter().map(|score| score.n).sum();
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "target counts stay far below 2^52, where f64 is exact"
+    )]
+    let value = if targets == 0 {
+        0.0
+    } else {
+        scores
+            .iter()
+            .map(|score| score.value * score.n as f64)
+            .sum::<f64>()
+            / targets as f64
+    };
+    Some(Score {
+        value,
+        unit: first.unit.clone(),
+        n: targets,
+    })
+}
+
 fn combined(scores: &[Score], value: fn(f64, f64) -> f64) -> Option<Score> {
     let first = scores.first()?;
     Some(Score {

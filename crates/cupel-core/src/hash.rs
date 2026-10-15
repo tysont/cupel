@@ -103,6 +103,16 @@ hex_id!(
     expected = "`fnd_` followed by six lowercase hex digits"
 );
 
+impl SiteHash {
+    /// A site within this one told apart by `detail`, such as one replacement of a mutation
+    /// site: the first 64 bits of BLAKE3 of this hash and `detail`. Structural when `detail` is.
+    #[must_use]
+    pub fn refined(&self, detail: &str) -> Self {
+        let digest = blake3::hash(format!("{}\0{detail}", self.0).as_bytes());
+        Self(digest.to_hex()[..16].to_owned())
+    }
+}
+
 impl FindingId {
     /// Derives a finding's ID from structural inputs only (design §7.2, ADR-013).
     ///
