@@ -439,7 +439,9 @@ fn producer_missing_its_tool_makes_the_check_unavailable() {
     producers.register(producer::<Outcomes>("tool.pit", Langs::Any, &[]).with(
         Availability::MissingTool {
             name: ToolId::from("pitest"),
-            install: Some("mvn dependency:get -Dartifact=org.pitest:pitest".into()),
+            install: Some(cupel_core::Install::Command(
+                "mvn dependency:get -Dartifact=org.pitest:pitest".into(),
+            )),
         },
     ));
     let m = matrix(&checks, &producers, &[rust()]);

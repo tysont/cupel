@@ -127,6 +127,7 @@
             "`pyproject.toml` or `setup.cfg` or `requirements*.txt` in the root or a member mentions `pytest-benchmark`"
           ],
           "format": null,
+          "install": null,
           "producer": "tool.pytest-benchmark"
         }
       ],
@@ -140,6 +141,7 @@
           ],
           "detect": [],
           "format": "lcov",
+          "install": "<add> pytest-cov",
           "producer": "tool.pytest-cov"
         },
         {
@@ -151,6 +153,7 @@
           ],
           "detect": [],
           "format": "lcov",
+          "install": "<add> coverage",
           "producer": "tool.coverage-py"
         }
       ],
@@ -165,6 +168,7 @@
           ],
           "tool": "uv",
           "values": {
+            "add": "uv add --dev",
             "m": "uv run python -m"
           }
         },
@@ -175,6 +179,7 @@
           ],
           "tool": "poetry",
           "values": {
+            "add": "poetry add --group dev",
             "m": "poetry run python -m"
           }
         },
@@ -182,6 +187,7 @@
           "detect": [],
           "tool": "pip",
           "values": {
+            "add": "python -m pip install",
             "m": "python -m"
           }
         }
@@ -204,6 +210,7 @@
             "file `conftest.py` exists"
           ],
           "format": null,
+          "install": "<add> pytest",
           "producer": "tool.pytest"
         },
         {
@@ -215,6 +222,7 @@
           ],
           "detect": [],
           "format": null,
+          "install": null,
           "producer": "tool.unittest"
         }
       ]

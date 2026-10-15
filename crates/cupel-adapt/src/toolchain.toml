@@ -6,6 +6,13 @@
 [probes]
 go = "go version"
 
+# What to do by hand for the programs of a language toolchain, which Cupel never installs. Every
+# other tool producer's row names an `install` command, filled with the launcher's values (ADR-081).
+[toolchains]
+cargo = "cargo is part of the Rust toolchain, which Cupel does not install: install Rust with rustup (https://rustup.rs) and put cargo on PATH."
+go = "go is the Go toolchain, which Cupel does not install: install Go from https://go.dev/dl/ and put go on PATH."
+python3 = "python3 is the Python toolchain, which Cupel does not install: install Python 3 from https://www.python.org/downloads/ or a package manager and put python3 on PATH."
+
 # --- JavaScript and TypeScript ------------------------------------------------------------------
 
 [[rows]]
@@ -21,7 +28,7 @@ detect = [
   { file = "pnpm-workspace.yaml" },
   { json = "package.json", path = ["packageManager"], prefix = "pnpm@" },
 ]
-values = { x = "pnpm", run = "pnpm run" }
+values = { x = "pnpm", run = "pnpm run", add = "pnpm add --save-dev" }
 
 [[rows.launchers]]
 tool = "yarn"
@@ -29,11 +36,11 @@ detect = [
   { file = "yarn.lock" },
   { json = "package.json", path = ["packageManager"], prefix = "yarn@" },
 ]
-values = { x = "yarn", run = "yarn run" }
+values = { x = "yarn", run = "yarn run", add = "yarn add --dev" }
 
 [[rows.launchers]]
 tool = "npm"
-values = { x = "npx", run = "npm run" }
+values = { x = "npx", run = "npm run", add = "npm install --save-dev" }
 
 [[rows.runners]]
 id = "tool.vitest"
@@ -42,6 +49,7 @@ detect = [
   { json = "package.json", path = ["devDependencies", "vitest"], members = true },
 ]
 command = "<x> vitest run"
+install = "<add> vitest"
 
 [[rows.runners]]
 id = "tool.jest"
@@ -50,6 +58,7 @@ detect = [
   { json = "package.json", path = ["devDependencies", "jest"], members = true },
 ]
 command = "<x> jest"
+install = "<add> jest"
 
 [[rows.runners]]
 id = "tool.mocha"
@@ -67,16 +76,19 @@ command = "node --test"
 id = "tool.vitest-coverage"
 format = "lcov"
 commands = { "tool.vitest" = "<x> vitest run --coverage --coverage.reporter=lcov" }
+install = "<add> vitest @vitest/coverage-v8"
 
 [[rows.coverage]]
 id = "tool.jest-coverage"
 format = "lcov"
 commands = { "tool.jest" = "<x> jest --coverage --coverageReporters=lcov" }
+install = "<add> jest"
 
 [[rows.coverage]]
 id = "tool.c8"
 format = "lcov"
 commands = { "tool.mocha" = "<x> c8 --reporter=lcov mocha", "tool.node-test" = "<x> c8 --reporter=lcov node --test" }
+install = "<add> c8"
 
 [[rows.bench]]
 id = "tool.bench-script"
@@ -94,16 +106,16 @@ race = []
 [[rows.launchers]]
 tool = "uv"
 detect = [{ file = "uv.lock" }, { contains = "[tool.uv", in = "pyproject.toml" }]
-values = { m = "uv run python -m" }
+values = { m = "uv run python -m", add = "uv add --dev" }
 
 [[rows.launchers]]
 tool = "poetry"
 detect = [{ file = "poetry.lock" }, { contains = "[tool.poetry", in = "pyproject.toml" }]
-values = { m = "poetry run python -m" }
+values = { m = "poetry run python -m", add = "poetry add --group dev" }
 
 [[rows.launchers]]
 tool = "pip"
-values = { m = "python -m" }
+values = { m = "python -m", add = "python -m pip install" }
 
 [[rows.runners]]
 id = "tool.pytest"
@@ -113,6 +125,7 @@ detect = [
   { file = "conftest.py" },
 ]
 command = "<m> pytest"
+install = "<add> pytest"
 
 [[rows.runners]]
 id = "tool.unittest"
@@ -122,11 +135,13 @@ command = "<m> unittest"
 id = "tool.pytest-cov"
 format = "lcov"
 commands = { "tool.pytest" = "<m> pytest --cov --cov-report=lcov:{out}" }
+install = "<add> pytest-cov"
 
 [[rows.coverage]]
 id = "tool.coverage-py"
 format = "lcov"
 commands = { "tool.unittest" = "<m> coverage run -m unittest && <m> coverage lcov -o {out}" }
+install = "<add> coverage"
 
 [[rows.bench]]
 id = "tool.pytest-benchmark"
@@ -147,6 +162,7 @@ race = ["miri", "loom"]
 id = "tool.cargo-nextest"
 detect = [{ file = ".config/nextest.toml" }]
 command = "cargo nextest run --workspace"
+install = "cargo install cargo-nextest --locked"
 
 [[rows.runners]]
 id = "tool.cargo-test"
@@ -156,6 +172,7 @@ command = "cargo test --workspace"
 id = "tool.cargo-llvm-cov"
 format = "lcov"
 command = "cargo llvm-cov --lcov --output-path {out}"
+install = "cargo install cargo-llvm-cov --locked && rustup component add llvm-tools-preview"
 
 [[rows.bench]]
 id = "tool.criterion"

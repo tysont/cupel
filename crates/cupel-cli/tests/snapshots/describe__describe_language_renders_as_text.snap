@@ -23,16 +23,18 @@ checks
 toolchain
   launchers
     pnpm  when file `pnpm-lock.yaml` exists; or file `pnpm-workspace.yaml` exists; or `package.json` has `packageManager` starting `pnpm@`
-      <run> = pnpm run · <x> = pnpm
+      <add> = pnpm add --save-dev · <run> = pnpm run · <x> = pnpm
     yarn  when file `yarn.lock` exists; or `package.json` has `packageManager` starting `yarn@`
-      <run> = yarn run · <x> = yarn
+      <add> = yarn add --dev · <run> = yarn run · <x> = yarn
     npm  otherwise
-      <run> = npm run · <x> = npx
+      <add> = npm install --save-dev · <run> = npm run · <x> = npx
   runners
     tool.vitest  when `package.json` in the root or a member has `dependencies.vitest`; or `package.json` in the root or a member has `devDependencies.vitest`
       <x> vitest run
+      install: <add> vitest
     tool.jest  when `package.json` in the root or a member has `dependencies.jest`; or `package.json` in the root or a member has `devDependencies.jest`
       <x> jest
+      install: <add> jest
     tool.mocha  when `package.json` in the root or a member has `dependencies.mocha`; or `package.json` in the root or a member has `devDependencies.mocha`
       <x> mocha
     tool.node-test  otherwise
@@ -40,11 +42,14 @@ toolchain
   coverage
     tool.vitest-coverage  lcov · always
       with tool.vitest: <x> vitest run --coverage --coverage.reporter=lcov
+      install: <add> vitest @vitest/coverage-v8
     tool.jest-coverage  lcov · always
       with tool.jest: <x> jest --coverage --coverageReporters=lcov
+      install: <add> jest
     tool.c8  lcov · always
       with tool.mocha: <x> c8 --reporter=lcov mocha
       with tool.node-test: <x> c8 --reporter=lcov node --test
+      install: <add> c8
   bench
     tool.bench-script  when `package.json` has `scripts.bench`
       <run> bench

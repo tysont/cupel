@@ -239,6 +239,9 @@ fn render_tool(out: &mut String, tool: &ToolDescription, fallback: &str) {
             }
         }
     }
+    if let Some(install) = &tool.install {
+        let _ = writeln!(out, "      install: {install}");
+    }
 }
 
 /// When a launcher or tool is chosen: any one of its rules, or `fallback` when it has none.

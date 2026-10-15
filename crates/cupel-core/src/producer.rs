@@ -159,14 +159,23 @@ pub struct ToolProbe {
     pub version: Vec<String>,
 }
 
+/// How a missing tool gets installed (ADR-081).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Install {
+    /// A shell command that installs the tool when run in the repository root.
+    Command(String),
+    /// What to do by hand, for a program Cupel does not install, such as a language toolchain.
+    Hint(String),
+}
+
 /// Whether a producer can run in this environment.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Availability {
     Ready,
-    /// A tool is not installed; `install` is a command or hint that installs it.
+    /// A tool is not installed; `install` says how to install it, when that is known.
     MissingTool {
         name: ToolId,
-        install: Option<String>,
+        install: Option<Install>,
     },
     /// A configuration key must be set, such as `lang.rust.test`.
     Unconfigured {

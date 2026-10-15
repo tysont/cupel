@@ -169,7 +169,11 @@ fn with_a_coverage_command_a_producer_needs_its_tool() {
         } else {
             Availability::MissingTool {
                 name: ToolId::from(tool),
-                install: None,
+                install: cupel_adapt::toolchain::install(
+                    &cupel_core::ProducerId::from(id),
+                    tool,
+                    dir.path(),
+                ),
             }
         };
         assert_eq!(found, expected, "{id}");

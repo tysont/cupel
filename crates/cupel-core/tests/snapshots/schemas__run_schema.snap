@@ -2830,6 +2830,13 @@ expression: pretty(&schema)
             "null"
           ]
         },
+        "install": {
+          "description": "The command template that installs it, with the launcher's values as placeholders;\nnull when Cupel does not install it (ADR-081).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "producer": {
           "$ref": "#/$defs/ProducerId"
         }
@@ -2838,6 +2845,7 @@ expression: pretty(&schema)
         "commands",
         "detect",
         "format",
+        "install",
         "producer"
       ]
     },

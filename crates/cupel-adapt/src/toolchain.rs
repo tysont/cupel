@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
 use cupel_core::{
-    CommandTemplate, LangId, LauncherDescription, ProducerId, ToolDescription, ToolId,
+    CommandTemplate, Install, LangId, LauncherDescription, ProducerId, ToolDescription, ToolId,
     ToolchainDescription,
 };
 use serde::Deserialize;
@@ -25,6 +25,9 @@ struct Toolchain {
     /// Presence probes for programs whose `--version` does not work.
     #[serde(default)]
     probes: BTreeMap<String, String>,
+    /// What to do by hand for programs Cupel does not install (ADR-081).
+    #[serde(default)]
+    toolchains: BTreeMap<String, String>,
     rows: Vec<Row>,
 }
 
@@ -78,6 +81,9 @@ pub struct Tool {
     /// The command per runner it works with.
     #[serde(default)]
     pub commands: BTreeMap<ProducerId, String>,
+    /// The command that installs it, filled with the launcher's values (ADR-081).
+    #[serde(default)]
+    pub install: Option<String>,
 }
 
 /// A project root on disk: its directory, its workspace members' directories, and the package
@@ -163,6 +169,25 @@ pub fn companions(id: &ProducerId) -> Vec<&'static ProducerId> {
         .unwrap_or_default()
 }
 
+/// How to install `program`, which the producer `id` runs, for the repository at `root`
+/// (ADR-081).
+/// The row's `install` command with the launcher detected at `root` filled in, else the
+/// `[toolchains]` hint for `program`; `None` when the table knows neither.
+pub fn install(id: &ProducerId, program: &str, root: &Path) -> Option<Install> {
+    let listed = rows().iter().find_map(|row| {
+        let template = row.tools().find(|tool| tool.id == *id)?.install.as_ref()?;
+        let dirs = Dirs { root, members: &[] };
+        Some(fill(template, row.launcher(&dirs), ""))
+    });
+    match listed {
+        Some(command) => Some(Install::Command(command)),
+        None => TOOLCHAIN
+            .toolchains
+            .get(program)
+            .map(|hint| Install::Hint(hint.clone())),
+    }
+}
+
 /// A command that exits 0 when `program` is installed: `[probes]`, else `<program> --version`.
 pub fn probe(program: &str) -> Vec<String> {
     TOOLCHAIN.probes.get(program).map_or_else(
@@ -198,14 +223,18 @@ impl Row {
         self.runners.iter().chain(&self.coverage).chain(&self.bench)
     }
 
+    /// The first launcher whose rules hold in `dirs`.
+    fn launcher(&self, dirs: &Dirs<'_>) -> Option<&Launcher> {
+        self.launchers
+            .iter()
+            .find(|launcher| detected(&launcher.detect, dirs))
+    }
+
     /// The first launcher and runner whose rules hold at `root`, then the first coverage and
     /// bench producers whose rules hold and that have a command for that runner.
     pub fn select<'a>(&'a self, root: &Root) -> Selection<'a> {
         let dirs = root.dirs();
-        let launcher = self
-            .launchers
-            .iter()
-            .find(|launcher| detected(&launcher.detect, &dirs));
+        let launcher = self.launcher(&dirs);
         let runner = self
             .runners
             .iter()
@@ -277,6 +306,7 @@ impl Tool {
                         }),
                 )
                 .collect(),
+            install: self.install.clone(),
         }
     }
 }
@@ -287,13 +317,7 @@ impl Selection<'_> {
         let Some(runner) = self.runner else {
             return Commands::default();
         };
-        let fill = |template: &str| {
-            let mut command = template.replace("<packages>", &self.packages);
-            for (name, value) in self.launcher.iter().flat_map(|launcher| &launcher.values) {
-                command = command.replace(&format!("<{name}>"), value);
-            }
-            command
-        };
+        let fill = |template: &str| fill(template, self.launcher, &self.packages);
         let companion =
             |tool: Option<&Tool>| tool.and_then(|tool| tool.command_for(&runner.id)).map(fill);
         Commands {
@@ -302,4 +326,13 @@ impl Selection<'_> {
             bench: companion(self.bench),
         }
     }
+}
+
+/// `template` with `<packages>` and each of the launcher's `<name>` placeholders filled in.
+fn fill(template: &str, launcher: Option<&Launcher>, packages: &str) -> String {
+    let mut command = template.replace("<packages>", packages);
+    for (name, value) in launcher.iter().flat_map(|launcher| &launcher.values) {
+        command = command.replace(&format!("<{name}>"), value);
+    }
+    command
 }

@@ -127,6 +127,7 @@
             "`Cargo.toml` in the root or a member mentions `criterion`"
           ],
           "format": null,
+          "install": null,
           "producer": "tool.criterion"
         }
       ],
@@ -140,6 +141,7 @@
           ],
           "detect": [],
           "format": "lcov",
+          "install": "cargo install cargo-llvm-cov --locked && rustup component add llvm-tools-preview",
           "producer": "tool.cargo-llvm-cov"
         }
       ],
@@ -167,6 +169,7 @@
             "file `.config/nextest.toml` exists"
           ],
           "format": null,
+          "install": "cargo install cargo-nextest --locked",
           "producer": "tool.cargo-nextest"
         },
         {
@@ -178,6 +181,7 @@
           ],
           "detect": [],
           "format": null,
+          "install": null,
           "producer": "tool.cargo-test"
         }
       ]
