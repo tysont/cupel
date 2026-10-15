@@ -566,13 +566,16 @@ Without a `coverage` command a language's `tests.coverage` is skipped as `unconf
 - `mutant.timeout` (a note): the tests ran past their timeout against the mutant, which usually means it loops.
 - `mutant.equivalent?` (a note, confidence 0.3): the mutant survived but may behave exactly as the original — today, swapping `+`/`-` before a literal `0` or `*`/`/` before a literal `1`. It is left out of the score; suppress it once you agree.
 
-The score `tests.mutation.score` is killed / (killed + survived), 1 when nothing was scored. The other gate keys count mutants by outcome (`killed`, `survived`, `timeout`, `uncovered`, `unviable` for one that did not build, `equivalent`) and say how many ran this time (`executed`) or were reused (`reused`).
+The score `tests.mutation.score` is killed / (killed + survived), 1 when nothing was scored. The other gate keys count mutants by outcome (`killed`, `survived`, `timeout`, `uncovered`, `unviable` for one that did not build, `equivalent`) and say how many ran this time (`executed`) or were reused (`reused`), and how many of those ran behind a schemata build (`schemata`) or fell back to file copies (`fallback`).
 
 How much is mutated follows the depth: at `standard` with `--changed` or `--base`, the functions the change touched; at `deep` and `exhaustive`, every function of the files in scope (the touched files with `--changed`, the tree without). Test code is never mutated. Only the `default` operators run unless the language asks for more:
 
 ```toml
 [lang.python]
 mutation = { operators = "extended", jobs = 2, timeout_factor = 10 }
+
+[lang.rust]
+mutation = { strategy = "file-copy" }   # "schemata" (the default) or "file-copy"
 ```
 
 Mutation testing is expensive, so the engine stacks every saving it can:
@@ -580,11 +583,12 @@ Mutation testing is expensive, so the engine stacks every saving it can:
 1. **Coverage gating.** A site no test runs, by the coverage report, is reported `uncovered` and never run.
 2. **Reuse.** An outcome is stored in `.cupel/cupel.db` under a key of the function's source text, the site, the replacement, the tests that cover it, and the runner's version; a later run reuses it while that key holds. A second run with nothing changed runs no mutant; changing one test file reruns only the mutants that test covers.
 3. **Per-test selection.** At `--depth deep` and beyond (measuring a per-test map runs every test once under coverage), where the language has a per-test coverage map from the baseline's runner (Go; Python with pytest-cov; Rust when cargo-nextest is the runner and cargo-llvm-cov is installed), a mutant runs only the tests that execute its line. Elsewhere it runs the whole suite.
-4. **Overlays.** Mutants run in copies of the tree outside the repository, one per worker, kept between runs so builds stay incremental: files are cloned (macOS) or hard-linked, what `.gitignore` ignores is shared through symlinks except the runner's build directory (`target/` for cargo), and the mutated file is a private copy. Mutants of one file run concurrently; files run one after another.
-5. **Timeouts.** Before its first mutant of a file, each worker times the unmutated file's tests, rebuild included; a mutant gets ten times that (`timeout_factor`), at least two seconds.
-6. **Order.** Last run's survivors run first, then mutants of functions never run before, then the rest, so a time limit cuts the least informative work.
+4. **Schemata (Rust).** Instead of one build per mutant, each Rust file is rewritten once with every mutant behind a run-time switch — the smallest whole expression around each site becomes `if cupel_mutant_id() == N { mutated } else { original }`, and a small reader of the `CUPEL_MUTANT` environment variable is appended to the file — so the file builds once and each mutant runs with `CUPEL_MUTANT=N`. Every line stays where it was. Before any mutant runs, each worker builds the rewritten file and runs its tests with no mutant selected; they must pass. Sites where an `if` cannot stand (patterns, `const` and `static` items, `const fn`, array lengths, macro arguments, attributes) and constants the compiler checks run as ordinary file copies. If the rewritten file does not compile, the sites on the lines the compiler names run as file copies and the file is rebuilt; if it still fails, the whole file runs as file copies. Nothing is lost either way: outcomes are the same under both, which the tests check on the Rust fixtures. The check reports how many mutants ran each way (`schemata`, `fallback`) and a note for each reason a mutant fell back. Other languages build per mutant (Go's builds take a fraction of a second; see [ADR-005](docs/adr/CUPEL_DECISION_005.md)).
+5. **Overlays.** Mutants run in copies of the tree outside the repository, one per worker, kept between runs so builds stay incremental: files are cloned (macOS) or hard-linked, what `.gitignore` ignores is shared through symlinks except the runner's build directory (`target/` for cargo), and the mutated file is a private copy. Mutants of one file run concurrently; files run one after another.
+6. **Timeouts.** Before its first mutant of a file, each worker times the unmutated file's tests (for Rust, its schemata build's), rebuild included; a mutant gets ten times that (`timeout_factor`), at least two seconds.
+7. **Order.** Last run's survivors run first, then mutants of functions never run before, then the rest, so a time limit cuts the least informative work.
 
-Compiled languages rebuild per mutant: a Rust mutant costs an incremental build of its crate and everything that depends on it, plus the tests. The run's `--seed` reaches every mutant run.
+A Rust file's mutants cost one build per worker plus one test run each; outside Rust, each mutant costs an incremental build of what it changes plus the tests. The run's `--seed` reaches every mutant run.
 
 ## Configuration
 
