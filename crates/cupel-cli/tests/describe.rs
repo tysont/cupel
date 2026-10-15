@@ -326,7 +326,7 @@ fn unknown_checks_and_finding_kinds_are_usage_errors_listing_the_known_ones() {
     for (args, valid) in [
         (vec!["describe", "static.complexty"], "static.complexity"),
         (
-            vec!["describe", "finding", "mutant.survived"],
+            vec!["describe", "finding", "mutant.killed"],
             "complexity.high",
         ),
     ] {
@@ -548,8 +548,7 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
 
 #[test]
 fn describe_fact_without_a_payload_type_yet_has_no_version_or_schema() {
-    let description =
-        run(["describe", "fact", "mutation-outcomes"]).envelope()["description"].clone();
+    let description = run(["describe", "fact", "bench-samples"]).envelope()["description"].clone();
     assert_eq!(description["syntactic"], json!(false));
     assert_eq!(description["version"], Value::Null);
     assert_eq!(description["schema"], Value::Null);

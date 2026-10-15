@@ -440,7 +440,7 @@ In JSON the same report is the envelope's `tests`: `per_test_map`, `impacted` (`
 
 ## Checks
 
-Every check below exists and is supported in all five languages. All run at `--depth quick` except `tests.flaky`, which runs its project's test suite and so runs from `--depth standard`, the default. The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists and is supported in all five languages. All run at `--depth quick` except `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite and so run from `--depth standard`, the default. The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
@@ -452,6 +452,7 @@ Every check below exists and is supported in all five languages. All run at `--d
 | `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | go, javascript, python, rust, typescript |
 | `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines` |  |
 | `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | go, javascript, python, rust, typescript |
+| `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.uncovered`, `mutant.equivalent?` | `score`, `killed`, `survived`, `timeout`, `uncovered`, `unviable`, `equivalent`, `executed`, `reused` | `survivors` |  |
 | `tests.quality` | 2 | quick | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | `assertion_density`, `weak_ratio`, `no_assertion` | `mock_density` | go, javascript, python, rust, typescript |
 | `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | go, javascript, python, rust, typescript |
 <!-- end:check-table -->
@@ -459,13 +460,14 @@ Every check below exists and is supported in all five languages. All run at `--d
 What each check looks for:
 
 - **`static.complexity`** measures every function's cyclomatic and cognitive complexity, nesting depth, parameter count, and length against configurable limits. A `match` or `switch` counts as one decision however many arms it has.
-- **`static.crap`** scores each function by complexity weighted by missing test coverage. It needs line coverage, and Cupel does not produce coverage, so it passes with a null score and no findings rather than guess.
+- **`static.crap`** scores each function by complexity weighted by missing test coverage, from the language's coverage report (see [Coverage](#coverage)); without one it passes with a null score and no findings rather than guess.
 - **`static.clones`** finds functions whose normalized syntax trees are mostly the same, so renamed variables and reformatting do not hide a copy. Two members are a `clone.pair`; three or more are a `clone.cluster`.
 - **`static.deps`** builds the module graph from resolved imports. It reports import cycles, modules that are both unstable and abstract, and imports that break the layering you configure.
 - **`static.dead-code`** reports symbols and exports in modules that no import reaches and no entry point, test, or framework hook keeps alive. Reachability is decided per module, not per call, so an export of a module nothing imports is reported as `info` with low confidence: it may be public API.
 - **`tests.quality`** reads every test: tests with no assertions or only weak ones (truthiness, presence, inequality), heavy mocking, loops and branches inside tests, and duplicated setup.
 - **`tests.weakening`** compares the tests at the range's base with the tests now. It reports removed or loosened assertions, skipped or deleted tests, and rewritten snapshots. It needs `--changed` or `--base`.
 - **`tests.flaky`** reruns the test suite several times in different orders and with different seeds, and reports tests whose outcome changes: `test.flaky` when two reruns in the same order disagree, `test.order-dependent` when the outcome follows the order. See [Flakiness](#flakiness).
+- **`tests.mutation`** changes the code in small ways (`<` to `<=`, `+` to `-`, `&&` to `||`, `true` to `false`, `0` to `1`) and runs the tests that cover each change. A mutant every test passes against survived: the tests do not notice that line changing. The score is killed / (killed + survived). See [Mutation testing](#mutation-testing).
 
 `cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
 
@@ -485,6 +487,7 @@ The support matrix, from `cupel describe matrix`:
 | `static.deps` | supported | supported | supported | supported | supported |
 | `tests.coverage` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
 | `tests.flaky` | supported | supported | supported | supported | supported |
+| `tests.mutation` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
 | `tests.quality` | supported | supported | supported | supported | supported |
 | `tests.weakening` | supported | supported | supported | supported | supported |
 <!-- end:support-matrix -->
@@ -515,7 +518,7 @@ A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in 
 runner = "unittest"
 ```
 
-Before any check that needs test results runs, Cupel runs the suite once in the real tree, the **baseline**. If any test fails, or the runner cannot finish (a build error), the run is refused: `status: "error"`, exit code 4, no check scores, and one `baseline.test-failed` finding per failing test (with its file, runner, and the tail of its output) or `baseline.run-incomplete` per run that did not finish. Fix the suite, then rerun. Every test of the baseline is also indexed in `.cupel/cupel.db`. `tests.flaky` needs test results, so `cupel check` at the default depth (`standard`) runs the baseline; at `--depth quick` no test runs.
+Before any check that needs test results runs, Cupel runs the suite once in the real tree, the **baseline**. If any test fails, or the runner cannot finish (a build error), the run is refused: `status: "error"`, exit code 4, no check scores, and one `baseline.test-failed` finding per failing test (with its file, runner, and the tail of its output) or `baseline.run-incomplete` per run that did not finish. Fix the suite, then rerun. A mutation or flakiness score over a red suite would mean nothing, so no mutant and no rerun runs before the baseline is green. Every test of the baseline is also indexed in `.cupel/cupel.db`. `tests.flaky` and `tests.mutation` need test results, so `cupel check` at the default depth (`standard`) runs the baseline; at `--depth quick` no test runs. A language whose baseline ran no test at all skips them as `unavailable`.
 
 ### Flakiness
 
@@ -530,7 +533,6 @@ flake_runs = 5      # reruns per check run; 0 turns them off
 ```
 
 The reruns repeat the whole suite (impacted-test selection is not built yet), so they cost about three baseline runs. `cargo nextest` runs each test in its own process, where order cannot matter; with it as the runner, the flake engine does not rerun and `tests.flaky` ends in `error` for that language.
-Before any check that needs test results runs, Cupel runs the suite once in the real tree, the **baseline**. If any test fails, or the runner cannot finish (a build error), the run is refused: `status: "error"`, exit code 4, no check scores, and one `baseline.test-failed` finding per failing test (with its file, runner, and the tail of its output) or `baseline.run-incomplete` per run that did not finish. Fix the suite, then rerun. Every test of the baseline is also indexed in `.cupel/cupel.db`. The checks shipped today need no test results, so `cupel check` runs no baseline yet; coverage runs the suite through the coverage command instead (see Coverage).
 
 ## Coverage
 
@@ -554,6 +556,35 @@ coverage = "npx vitest run --coverage --coverage.reporter=lcov"   # no {out}: co
 Without a `coverage` command a language's `tests.coverage` is skipped as `unconfigured` and `static.crap` reports no CRAP; with one but without the tool, it is `unavailable` and `cupel doctor` names the tool. A report is reused instead of rerunning the suite while it is fresh: Cupel records the hash of every file under the project root when it makes one (and trusts files not modified since), and a report the tool left at its default location is used when it is newer than every source. A command that exits non-zero gives no coverage and a `coverage.run-failed` finding, since a red suite has no meaningful coverage.
 
 `tests.coverage` reports `coverage.uncovered-symbol` for each function no test ran (a warning, which fails the check) and `coverage.uncovered-branch` for a function that ran with a branch no test took. Where the tool measured no branches (Go, Rust), there are no branch findings and the result says `notes: ["branches: unavailable (go)"]`. Its gate keys are `tests.coverage.line` and `tests.coverage.branch` (covered shares), `lines`, `branches`, and `uncovered`. `static.crap` computes `CC² × (1 − coverage)³ + CC` from the same map.
+
+## Mutation testing
+
+`tests.mutation` scores a `mutation-outcomes` fact, which the mutation engine makes from the `mutation-sites` every language produces, the coverage report, and the baseline. The engine runs each mutant with the same runner as the baseline; the check only counts and reports, so another producer of the fact (a wrapper around a mutation tool) would feed the same check. Coverage gates which mutants run, so a language without a `coverage` command skips `tests.mutation` as `unconfigured`, as it does `tests.coverage`.
+
+- `mutant.survived` (fails the check): every test that ran against the mutant passed. The finding sits at the mutated site and names the change (`from`, `to`, `operator`), the tests that missed it (`covering_tests`), and the nearest test file. Write a test that fails on the mutant.
+- `mutant.uncovered` (a note): no test runs the site, so its mutant was not run.
+- `mutant.timeout` (a note): the tests ran past their timeout against the mutant, which usually means it loops.
+- `mutant.equivalent?` (a note, confidence 0.3): the mutant survived but may behave exactly as the original — today, swapping `+`/`-` before a literal `0` or `*`/`/` before a literal `1`. It is left out of the score; suppress it once you agree.
+
+The score `tests.mutation.score` is killed / (killed + survived), 1 when nothing was scored. The other gate keys count mutants by outcome (`killed`, `survived`, `timeout`, `uncovered`, `unviable` for one that did not build, `equivalent`) and say how many ran this time (`executed`) or were reused (`reused`).
+
+How much is mutated follows the depth: at `standard` with `--changed` or `--base`, the functions the change touched; at `deep` and `exhaustive`, every function of the files in scope (the touched files with `--changed`, the tree without). Test code is never mutated. Only the `default` operators run unless the language asks for more:
+
+```toml
+[lang.python]
+mutation = { operators = "extended", jobs = 2, timeout_factor = 10 }
+```
+
+Mutation testing is expensive, so the engine stacks every saving it can:
+
+1. **Coverage gating.** A site no test runs, by the coverage report, is reported `uncovered` and never run.
+2. **Reuse.** An outcome is stored in `.cupel/cupel.db` under a key of the function's source text, the site, the replacement, the tests that cover it, and the runner's version; a later run reuses it while that key holds. A second run with nothing changed runs no mutant; changing one test file reruns only the mutants that test covers.
+3. **Per-test selection.** Where the language has a per-test coverage map from the baseline's runner (Go; Python with pytest-cov; Rust when cargo-nextest is the runner and cargo-llvm-cov is installed), a mutant runs only the tests that execute its line. Elsewhere it runs the whole suite.
+4. **Overlays.** Mutants run in copies of the tree outside the repository, one per worker, kept between runs so builds stay incremental: files are cloned (macOS) or hard-linked, what `.gitignore` ignores is shared through symlinks except the runner's build directory (`target/` for cargo), and the mutated file is a private copy. Mutants of one file run concurrently; files run one after another.
+5. **Timeouts.** Before its first mutant of a file, each worker times the unmutated file's tests, rebuild included; a mutant gets ten times that (`timeout_factor`), at least two seconds.
+6. **Order.** Last run's survivors run first, then mutants of functions never run before, then the rest, so a time limit cuts the least informative work.
+
+Compiled languages rebuild per mutant: a Rust mutant costs an incremental build of its crate and everything that depends on it, plus the tests. The run's `--seed` reaches every mutant run.
 
 ## Configuration
 
@@ -622,14 +653,14 @@ All automation goes through `make`.
 | `make build`, `make doc` | build the workspace; build its rustdoc |
 | `make matrix` | print the check × language support matrix |
 | `make readme` | regenerate this README's exit-code table, check table, check summaries, and support matrix from `cupel describe` |
-| `make dogfood` | Cupel grades itself: `cupel check --changed --gate` against `main`; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]` |
+| `make dogfood` | Cupel grades itself: `cupel check --changed --gate` against `main`; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`. Both skip `tests.flaky` and `tests.mutation`, which would rerun Cupel's whole suite many times |
 | `make install` | `cargo install --path crates/cupel-cli` |
 
 The generated README sections sit between `<!-- generated:NAME -->` and `<!-- end:NAME -->` markers. A test in `crates/cupel-cli/tests/readme.rs` renders them from the binary's `describe` output and fails when the committed text differs, so `make check` catches a stale table. Run `make readme` and review the diff.
 
 CI runs `make check` on Linux and macOS and `make dogfood` on every push: the tree gate on `main` and the changed gate on branches. Cupel's own `cupel.toml` is the example to copy.
 
-The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-cli` is the binary. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
+The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-mutate` is the mutation engine. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-cli` is the binary. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
 
 Checks and tool producers register themselves from their own modules ([ADR-074](docs/adr/CUPEL_DECISION_074.md)), so additions made in parallel never edit the same lines. Adding a check is one module in `crates/cupel-checks/src/` that submits itself with `inventory::submit!`, its `mod` line in that crate's `lib.rs`, its fixture code, and its goldens under `crates/cupel-fixtures/golden/<check-id>/` (the matrix golden per language, `describe.json`, and `survey-<lang>.json`); a check can keep its fixture code in its own `crates/cupel-fixtures/repos/<check-id>/<lang>/` so no other check's goldens change. Adding a tool producer is one module in `crates/cupel-adapt/src/` and its `mod` line. Tests derive what must be described, golden, and supported from the registries, so nothing else lists checks; `UPDATE_GOLDENS=1 make test` writes a new check's goldens and `make readme` adds its rows here.
 

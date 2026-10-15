@@ -61,10 +61,11 @@ clean-check:
 # `--changed` needs a local `main` branch and the history back to the merge base.
 DOGFOOD_SCOPE ?= changed
 
-# `tests.flaky` is skipped: its engine reruns Cupel's whole suite three times, one test at a time,
-# which takes tens of minutes, and `make check` runs that suite on every commit (P3.5 Notes).
+# `tests.flaky` and `tests.mutation` are skipped: the flake engine reruns Cupel's whole suite three
+# times, one test at a time, which takes tens of minutes (P3.5 Notes), and every mutant reruns it
+# once more after rebuilding (P3.4 Notes); `make check` runs that suite on every commit.
 dogfood:
-	$(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed) --gate --skip tests.flaky --format text
+	$(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed) --gate --skip tests.flaky --skip tests.mutation --format text
 
 install:
 	$(CARGO) install --path crates/cupel-cli
