@@ -54,9 +54,24 @@ impl Bin {
     }
 }
 
-/// A `python` that records that it ran by creating `marker`, then fails.
-fn recording_python(marker: &Path) -> String {
-    format!("touch '{}'\nexit 1", marker.display())
+/// A `PATH` whose `python` records that it ran by creating a file in the returned scratch
+/// directory, then fails.
+fn recording() -> (Bin, TempDir) {
+    let scratch = tempfile::tempdir().unwrap();
+    let script = format!("touch '{}'\nexit 1", scratch.path().join("ran").display());
+    (Bin::new(&[("python", &script)]), scratch)
+}
+
+/// How many times a recording `python` ran: 0 or 1.
+fn runs(scratch: &TempDir) -> usize {
+    fs::read_dir(scratch.path()).unwrap().count()
+}
+
+/// The `install.failed` finding of `doctor --fix --install` when `python` is `script`.
+fn failed_install(script: &str) -> Value {
+    let bin = Bin::new(&[("python", script)]);
+    let envelope = pytest_still_missing(&bin.run(&repo(), &["doctor", "--fix", "--install"]));
+    only(&envelope, "install.failed").clone()
 }
 
 /// The findings of `envelope` of `kind`.
@@ -111,9 +126,7 @@ fn doctor_names_the_install_command_of_a_missing_runner() {
 
 #[test]
 fn fix_with_no_install_leaves_the_tool_missing_and_runs_nothing() {
-    let scratch = tempfile::tempdir().unwrap();
-    let marker = scratch.path().join("ran");
-    let bin = Bin::new(&[("python", &recording_python(&marker))]);
+    let (bin, scratch) = recording();
     let envelope = pytest_still_missing(&bin.run(&repo(), &["doctor", "--fix", "--no-install"]));
     let skipped = only(&envelope, "install.skipped");
     assert_eq!(skipped["check"], json!("install"));
@@ -122,31 +135,24 @@ fn fix_with_no_install_leaves_the_tool_missing_and_runs_nothing() {
         skipped["evidence"],
         json!({"tool": "pytest", "command": PIP_INSTALL, "reason": "--no-install"})
     );
-    assert!(!marker.exists(), "the install ran");
+    assert_eq!(runs(&scratch), 0);
 }
 
 #[test]
 fn fix_on_a_pipe_without_a_flag_does_not_install() {
-    let scratch = tempfile::tempdir().unwrap();
-    let marker = scratch.path().join("ran");
-    let bin = Bin::new(&[("python", &recording_python(&marker))]);
+    let (bin, scratch) = recording();
     let envelope = pytest_still_missing(&bin.run(&repo(), &["doctor", "--fix"]));
-    let reason = only(&envelope, "install.skipped")["evidence"]["reason"].clone();
-    assert!(
-        reason.as_str().unwrap().contains("not a terminal"),
-        "{reason}"
+    assert_eq!(
+        only(&envelope, "install.skipped")["evidence"]["reason"],
+        json!("stdout is not a terminal; pass --install to install without asking")
     );
-    assert!(!marker.exists(), "the install ran");
+    assert_eq!(runs(&scratch), 0);
 }
 
 #[test]
 fn a_failed_install_fails_with_the_command_and_the_tail_of_its_stderr() {
-    let bin = Bin::new(&[(
-        "python",
-        "echo 'Collecting pytest'\necho 'ERROR: no network here' >&2\nexit 1",
-    )]);
-    let envelope = pytest_still_missing(&bin.run(&repo(), &["doctor", "--fix", "--install"]));
-    let failed = only(&envelope, "install.failed");
+    let failed =
+        failed_install("echo 'Collecting pytest'\necho 'ERROR: no network here' >&2\nexit 1");
     assert_eq!(failed["severity"], json!("fail"));
     assert_eq!(failed["action"]["kind"], json!("install_tool"));
     assert_eq!(
@@ -158,19 +164,17 @@ fn a_failed_install_fails_with_the_command_and_the_tail_of_its_stderr() {
 
 #[test]
 fn an_install_that_succeeds_without_providing_the_tool_fails() {
-    let bin = Bin::new(&[("python", "exit 0")]);
-    let envelope = pytest_still_missing(&bin.run(&repo(), &["doctor", "--fix", "--install"]));
-    let failed = only(&envelope, "install.failed");
+    let failed = failed_install("exit 0");
     assert_eq!(failed["evidence"]["exit_code"], json!(0));
-    let title = failed["title"].as_str().unwrap();
-    assert!(title.contains("still not found"), "{title}");
+    assert_eq!(
+        failed["title"],
+        json!("`python -m pip install pytest` finished, but `pytest` is still not found on PATH")
+    );
 }
 
 #[test]
 fn a_dry_run_of_fix_lists_the_installs_it_would_make_and_makes_none() {
-    let scratch = tempfile::tempdir().unwrap();
-    let marker = scratch.path().join("ran");
-    let bin = Bin::new(&[("python", &recording_python(&marker))]);
+    let (bin, scratch) = recording();
     let repo = repo();
     let planned = |args: &[&str]| {
         let outcome = bin.run(&repo, args);
@@ -185,7 +189,7 @@ fn a_dry_run_of_fix_lists_the_installs_it_would_make_and_makes_none() {
     );
     assert_eq!(planned(&["doctor", "--fix", "--dry-run"]), json!([]));
     assert_eq!(planned(&["doctor", "--install", "--dry-run"]), json!([]));
-    assert!(!marker.exists(), "the install ran");
+    assert_eq!(runs(&scratch), 0);
 }
 
 #[test]

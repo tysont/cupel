@@ -238,14 +238,7 @@ fn configured(
         Ok(config) => config,
         Err(error) if runs_without_configuration(cli) => {
             let envelope = guarded(run, stderr, cli.global.quiet, || {
-                let invocation = Invocation {
-                    run,
-                    writer,
-                    config: Err(&error),
-                    dry_run: cli.global.dry_run,
-                    installs: installs(cli, environment),
-                };
-                execute(&invocation, cli, environment, events)
+                invoke((run, writer), Err(&error), cli, environment, events)
             });
             return (envelope, recovered_rendering(environment), said);
         }
@@ -275,25 +268,32 @@ fn configured(
         let _ = writeln!(stderr, "cupel: format: {}", format.as_str());
     }
     let envelope = guarded(run, stderr, cli.global.quiet, || {
-        let invocation = Invocation {
-            run,
-            writer,
-            config: Ok(&config),
-            dry_run: cli.global.dry_run,
-            installs: installs(cli, environment),
-        };
-        execute(&invocation, cli, environment, events)
+        invoke((run, writer), Ok(&config), cli, environment, events)
     });
     (envelope, rendering, said)
 }
 
-/// Whether the run may install tools: the flags, else whether stdout is a terminal (ADR-081).
-fn installs(cli: &Cli, environment: &Environment) -> Permission {
-    Permission::of(
-        cli.global.install,
-        cli.global.no_install,
-        environment.stdout_is_terminal,
-    )
+/// Runs the verb of `run` with `config`, the loaded configuration or why it did not load. The
+/// run may install tools as the flags say, else as whether stdout is a terminal says (ADR-081).
+fn invoke(
+    (run, writer): (&Run, &Writer),
+    config: Result<&Config, &cupel_core::Error>,
+    cli: &Cli,
+    environment: &Environment,
+    events: &mut dyn EventSink,
+) -> Result<Envelope, CupelError> {
+    let invocation = Invocation {
+        run,
+        writer,
+        config,
+        dry_run: cli.global.dry_run,
+        installs: Permission::of(
+            cli.global.install,
+            cli.global.no_install,
+            environment.stdout_is_terminal,
+        ),
+    };
+    execute(&invocation, cli, environment, events)
 }
 
 /// The configuration, rejected when it names a check, gate metric, or language the registries

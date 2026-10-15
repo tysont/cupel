@@ -215,11 +215,16 @@ fn facts_serves_a_declared_fact_that_was_inserted() {
     );
 }
 
+/// The error of getting `F` from the facts of a check that declares only `Symbols`.
+fn get_error<F: Fact + std::fmt::Debug>() -> Error {
+    let facts = Facts::for_manifest(&support::manifest("c", &[FactKind::Symbols], &[]));
+    facts.get::<F>().unwrap_err()
+}
+
 #[test]
 fn facts_get_of_an_undeclared_kind_is_an_error() {
-    let facts = Facts::for_manifest(&support::manifest("c", &[FactKind::Symbols], &[]));
     assert_eq!(
-        facts.get::<Decisions>().unwrap_err(),
+        get_error::<Decisions>(),
         Error::UndeclaredFact {
             kind: FactKind::Decisions
         }
@@ -228,9 +233,8 @@ fn facts_get_of_an_undeclared_kind_is_an_error() {
 
 #[test]
 fn facts_get_of_a_declared_but_absent_kind_is_an_error() {
-    let facts = Facts::for_manifest(&support::manifest("c", &[FactKind::Symbols], &[]));
     assert_eq!(
-        facts.get::<Symbols>().unwrap_err(),
+        get_error::<Symbols>(),
         Error::AbsentFact {
             kind: FactKind::Symbols
         }

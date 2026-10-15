@@ -8,9 +8,9 @@ use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
     BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, Finding, GitInfo, Job, Lang,
-    Outcome, PlannedInstall, PlannedWrite, RANKED, Range, ResolvedFiles, Scheduler, ScopeInfo,
-    ScopeRequest, Selection, Status, Verb, Writer, apply_gate, evaluate_gate, gate_for,
-    next_actions, rankings,
+    Outcome, PlannedInstall, PlannedWrite, ProducerRegistry, RANKED, Range, ResolvedFiles,
+    Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Verb, Writer, apply_gate, evaluate_gate,
+    gate_for, next_actions, rankings,
 };
 use cupel_lang::LanguageRegistry;
 
@@ -116,8 +116,6 @@ pub fn run(
         catalog.language_registry(),
         resolved.files.iter().chain(&base_files),
     );
-    let (would_install, installed) =
-        install_tools(invocation, config, &catalog, (&selected, &langs));
     let job = Job {
         run: run.id(),
         writer,
@@ -137,11 +135,7 @@ pub fn run(
         checks: catalog.checks(),
         producers: catalog.producers(),
     };
-    let mut outcome = schedule(&scheduler, &job, invocation, events)?;
-    outcome.findings.splice(0..0, installed);
-    if let Some(plan) = &mut outcome.plan {
-        plan.would_install = would_install;
-    }
+    let outcome = schedule(&scheduler, &job, invocation, events)?;
     let scope = ScopeInfo {
         mode: request.mode(),
         files: resolved.files.len() as u64,
@@ -156,17 +150,17 @@ pub fn run(
     })
 }
 
-/// Before a run, the missing tools of the producers it would choose for `selected` in `langs`,
-/// installed as far as the invocation may (ADR-081): the installs a dry run would attempt, and
-/// the findings of the installs a real run made or was refused at the terminal's question.
+/// Before a run, the missing tools of the producers it would choose for the job's checks and
+/// languages, installed as far as the invocation may (ADR-081): the installs a dry run would
+/// attempt, and the findings of the installs a real run made or was refused at the terminal's
+/// question.
 fn install_tools(
     invocation: &Invocation<'_>,
-    config: &Config,
-    catalog: &Catalog,
-    (selected, langs): (&[&dyn Check], &[Lang]),
+    producers: &ProducerRegistry,
+    job: &Job<'_>,
 ) -> (Vec<PlannedInstall>, Vec<Finding>) {
     let (run, root) = (invocation.run, invocation.writer.root());
-    let planned = crate::doctor::installs(selected, catalog.producers(), langs, config, root);
+    let planned = crate::doctor::installs(&job.selected, producers, &job.langs, job.config, root);
     if invocation.dry_run {
         return (invocation.installs.would_install(&planned), Vec::new());
     }
@@ -215,11 +209,16 @@ fn schedule(
     invocation: &Invocation<'_>,
     events: &mut dyn EventSink,
 ) -> Result<Outcome, CupelError> {
+    let (would_install, installed) = install_tools(invocation, scheduler.producers, job);
     let mut outcome = if invocation.dry_run {
         scheduler.plan(job, events)?
     } else {
         scheduler.run(job, events)?
     };
+    outcome.findings.splice(0..0, installed);
+    if let Some(plan) = &mut outcome.plan {
+        plan.would_install = would_install;
+    }
     invocation.run.keep(Executions {
         test_results: std::mem::take(&mut outcome.test_results),
         mutation_outcomes: std::mem::take(&mut outcome.mutation_outcomes),

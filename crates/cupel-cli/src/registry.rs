@@ -855,54 +855,43 @@ trait Refine {
 
 impl Refine for ArgDescription {
     fn pending(self, step: &str) -> Self {
-        Self {
-            pending_step: Some(step.to_owned()),
-            ..self
-        }
+        self.with(|arg| arg.pending_step = Some(step.to_owned()))
     }
 
     fn env(self, variable: &str) -> Self {
-        Self {
-            env: Some(variable.to_owned()),
-            ..self
-        }
+        self.with(|arg| arg.env = Some(variable.to_owned()))
     }
 
     fn default_value(self, value: &str) -> Self {
-        Self {
-            default: Some(value.to_owned()),
-            ..self
-        }
+        self.with(|arg| arg.default = Some(value.to_owned()))
     }
 
     fn conflicts(self, names: &[&str]) -> Self {
-        Self {
-            conflicts: names.iter().map(|n| (*n).to_owned()).collect(),
-            ..self
-        }
+        self.with(|arg| arg.conflicts = names.iter().map(|n| (*n).to_owned()).collect())
     }
 
     fn required(self) -> Self {
-        Self {
-            required: true,
-            ..self
-        }
+        self.with(|arg| arg.required = true)
     }
 
     fn optional(self) -> Self {
-        Self {
-            required: false,
-            ..self
-        }
+        self.with(|arg| arg.required = false)
     }
 
     fn repeated(self) -> Self {
-        Self {
-            repeated: true,
-            ..self
-        }
+        self.with(|arg| arg.repeated = true)
     }
 }
+
+/// An argument description changed by `change`.
+trait With: Sized {
+    fn with(mut self, change: impl FnOnce(&mut Self)) -> Self {
+        change(&mut self);
+        self
+    }
+}
+
+impl With for ArgDescription {}
 
 #[cfg(test)]
 mod tests {

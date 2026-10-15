@@ -13,71 +13,73 @@ fn install(id: &str, program: &str, files: &[(&str, &str)]) -> Option<Install> {
     cupel_adapt::toolchain::install(&ProducerId::from(id), program, root.path())
 }
 
-fn command(text: &str) -> Install {
-    Install::Command(text.to_owned())
+/// A producer, its program, and the files of a root.
+type Case<'a> = (&'a str, &'a str, &'a [(&'a str, &'a str)]);
+
+/// What the table says installs each case.
+fn installs(cases: &[Case<'_>]) -> Vec<Option<Install>> {
+    cases
+        .iter()
+        .map(|(id, program, files)| install(id, program, files))
+        .collect()
 }
 
 #[test]
-fn cargo_tools_install_with_cargo_install_locked() {
+fn commands_are_cargo_install_or_a_dev_dependency_through_the_detected_launcher() {
+    let commands = installs(&[
+        ("tool.cargo-nextest", "cargo-nextest", &[]),
+        ("tool.cargo-llvm-cov", "cargo-llvm-cov", &[]),
+        ("tool.pytest", "pytest", &[]),
+        ("tool.pytest-cov", "pytest", &[("uv.lock", "")]),
+        ("tool.coverage-py", "coverage", &[("poetry.lock", "")]),
+        ("tool.vitest", "vitest", &[("package.json", "{}")]),
+        ("tool.vitest-coverage", "vitest", &[("pnpm-lock.yaml", "")]),
+        ("tool.jest", "jest", &[("yarn.lock", "")]),
+    ]);
     assert_eq!(
-        install("tool.cargo-nextest", "cargo-nextest", &[]),
-        Some(command("cargo install cargo-nextest --locked"))
-    );
-    assert_eq!(
-        install("tool.cargo-llvm-cov", "cargo-llvm-cov", &[]),
-        Some(command(
-            "cargo install cargo-llvm-cov --locked && rustup component add llvm-tools-preview"
-        ))
-    );
-}
-
-#[test]
-fn python_tools_install_through_the_detected_launcher() {
-    assert_eq!(
-        install("tool.pytest", "pytest", &[]),
-        Some(command("python -m pip install pytest"))
-    );
-    assert_eq!(
-        install("tool.pytest-cov", "pytest", &[("uv.lock", "")]),
-        Some(command("uv add --dev pytest-cov"))
-    );
-    assert_eq!(
-        install("tool.coverage-py", "coverage", &[("poetry.lock", "")]),
-        Some(command("poetry add --group dev coverage"))
-    );
-}
-
-#[test]
-fn javascript_tools_are_dev_dependencies_of_the_root() {
-    assert_eq!(
-        install("tool.vitest", "vitest", &[("package.json", "{}")]),
-        Some(command("npm install --save-dev vitest"))
-    );
-    assert_eq!(
-        install("tool.vitest-coverage", "vitest", &[("pnpm-lock.yaml", "")]),
-        Some(command("pnpm add --save-dev vitest @vitest/coverage-v8"))
-    );
-    assert_eq!(
-        install("tool.jest", "jest", &[("yarn.lock", "")]),
-        Some(command("yarn add --dev jest"))
+        commands,
+        [
+            "cargo install cargo-nextest --locked",
+            "cargo install cargo-llvm-cov --locked && rustup component add llvm-tools-preview",
+            "python -m pip install pytest",
+            "uv add --dev pytest-cov",
+            "poetry add --group dev coverage",
+            "npm install --save-dev vitest",
+            "pnpm add --save-dev vitest @vitest/coverage-v8",
+            "yarn add --dev jest",
+        ]
+        .map(|text| Some(Install::Command(text.to_owned())))
     );
 }
 
 #[test]
 fn toolchains_get_a_hint_rather_than_a_command() {
-    for (id, program) in [
-        ("tool.go-test", "go"),
-        ("tool.go-coverprofile", "go"),
-        ("tool.cargo-test", "cargo"),
-        ("tool.unittest", "python3"),
-    ] {
-        match install(id, program, &[]) {
-            Some(Install::Hint(hint)) => {
-                assert!(hint.contains("toolchain"), "{id}: {hint}");
-            }
-            other => panic!("{id}: {other:?}"),
-        }
-    }
+    let hint = |text: &str| Some(Install::Hint(text.to_owned()));
+    let go = hint(
+        "go is the Go toolchain, which Cupel does not install: install Go from \
+         https://go.dev/dl/ and put go on PATH.",
+    );
+    assert_eq!(
+        installs(&[
+            ("tool.go-test", "go", &[]),
+            ("tool.go-coverprofile", "go", &[]),
+            ("tool.cargo-test", "cargo", &[]),
+            ("tool.unittest", "python3", &[]),
+        ]),
+        [
+            go.clone(),
+            go,
+            hint(
+                "cargo is part of the Rust toolchain, which Cupel does not install: install \
+                 Rust with rustup (https://rustup.rs) and put cargo on PATH."
+            ),
+            hint(
+                "python3 is the Python toolchain, which Cupel does not install: install \
+                 Python 3 from https://www.python.org/downloads/ or a package manager and put \
+                 python3 on PATH."
+            ),
+        ]
+    );
 }
 
 #[test]
