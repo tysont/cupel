@@ -26,9 +26,10 @@ const SETTINGS: Limits = Limits::new(&[]);
 /// The confidence of a possibly equivalent survivor (ADR-004).
 const EQUIVALENT_CONFIDENCE: f64 = 0.3;
 
-/// What was mutated.
+/// What was mutated; inlined in each evidence schema, which has no `$defs` (ADR-043).
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
+#[schemars(inline)]
 struct Mutation {
     /// The source text replaced.
     from: String,

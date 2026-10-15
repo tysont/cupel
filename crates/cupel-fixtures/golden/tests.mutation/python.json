@@ -1,0 +1,258 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "tests.mutation",
+      "metrics": {
+        "equivalent": 1.0,
+        "executed": 5.0,
+        "killed": 3.0,
+        "reused": 0.0,
+        "score": 0.75,
+        "survived": 1.0,
+        "timeout": 0.0,
+        "uncovered": 1.0,
+        "unviable": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 4,
+        "unit": "killed_ratio",
+        "value": 0.75
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 3
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "covering_tests": [
+            "tests/test_large.py::test_discounts_a_large_member_order",
+            "tests/test_small.py::test_keeps_a_small_order"
+          ]
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add a test that fails when `>=` at discount.py:6 becomes `>`."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.95,
+      "detail": null,
+      "evidence": {
+        "covering_tests": [
+          "tests/test_large.py::test_discounts_a_large_member_order",
+          "tests/test_small.py::test_keeps_a_small_order"
+        ],
+        "mutation": {
+          "from": ">=",
+          "operator": "relational",
+          "to": ">"
+        },
+        "tests_run": 2
+      },
+      "id": "fnd_a05fca",
+      "kind": "mutant.survived",
+      "location": {
+        "col": 14,
+        "end_col": 16,
+        "end_line": 6,
+        "file": "discount.py",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_4113d0946517aca6",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_a05fca --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.discount",
+        "hash": "sh_4113d0946517aca6",
+        "lang": "python"
+      },
+      "tier": 3,
+      "title": "Mutant survived: `>=` → `>` at discount.py:6"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review whether any input tells `*` → `/` apart at discount.py:8; if none does, suppress this finding."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.3,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "to": "/"
+        },
+        "reason": "the right operand is `1`, the identity of both operators"
+      },
+      "id": "fnd_686c5c",
+      "kind": "mutant.equivalent?",
+      "location": {
+        "col": 18,
+        "end_col": 19,
+        "end_line": 8,
+        "file": "discount.py",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_4113d0946517aca6",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_686c5c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.discount",
+        "hash": "sh_4113d0946517aca6",
+        "lang": "python"
+      },
+      "tier": 3,
+      "title": "Mutant may be equivalent: `*` → `/` at discount.py:8"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that runs line 13 of discount.py."
+      },
+      "check": "tests.mutation",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "to": "+"
+        }
+      },
+      "id": "fnd_41c1bb",
+      "kind": "mutant.uncovered",
+      "location": {
+        "col": 18,
+        "end_col": 19,
+        "end_line": 13,
+        "file": "discount.py",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_3e18c71bec6cfc50",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_41c1bb --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.refund",
+        "hash": "sh_3e18c71bec6cfc50",
+        "lang": "python"
+      },
+      "tier": 3,
+      "title": "No test runs discount.py:13; its mutant `-` → `+` was not run"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_a05fca",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Add a test that fails when `>=` at discount.py:6 becomes `>`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_686c5c",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Review whether any input tells `*` → `/` apart at discount.py:8; if none does, suppress this finding."
+    },
+    {
+      "command": null,
+      "finding": "fnd_41c1bb",
+      "kind": "write_test",
+      "priority": 3,
+      "summary": "Write a test that runs line 13 of discount.py."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "python": {
+            "coverage": "PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider --cov=. --cov-branch --cov-report=lcov:{out}"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 4,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 2,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}

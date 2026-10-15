@@ -1,0 +1,263 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "tests.mutation",
+      "metrics": {
+        "equivalent": 1.0,
+        "executed": 5.0,
+        "killed": 3.0,
+        "reused": 0.0,
+        "score": 0.75,
+        "survived": 1.0,
+        "timeout": 0.0,
+        "uncovered": 1.0,
+        "unviable": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 4,
+        "unit": "killed_ratio",
+        "value": 0.75
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 3
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "covering_tests": [
+            "large/tests/large.rs::discounts_a_large_member_order",
+            "small/tests/small.rs::keeps_a_small_order"
+          ],
+          "nearest_test_file": "tests/large.rs"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add a test that fails when `>=` at src/lib.rs:5 becomes `>`."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.95,
+      "detail": null,
+      "evidence": {
+        "covering_tests": [
+          "large/tests/large.rs::discounts_a_large_member_order",
+          "small/tests/small.rs::keeps_a_small_order"
+        ],
+        "mutation": {
+          "from": ">=",
+          "operator": "relational",
+          "to": ">"
+        },
+        "tests_run": 2
+      },
+      "id": "fnd_7f1a40",
+      "kind": "mutant.survived",
+      "location": {
+        "col": 14,
+        "end_col": 16,
+        "end_line": 5,
+        "file": "src/lib.rs",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_36a288eb22067e4e",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_7f1a40 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount",
+        "hash": "sh_36a288eb22067e4e",
+        "lang": "rust"
+      },
+      "tier": 3,
+      "title": "Mutant survived: `>=` → `>` at src/lib.rs:5"
+    },
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "tests/large.rs"
+        },
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review whether any input tells `*` → `/` apart at src/lib.rs:8; if none does, suppress this finding."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.3,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "to": "/"
+        },
+        "reason": "the right operand is `1`, the identity of both operators"
+      },
+      "id": "fnd_baa3b3",
+      "kind": "mutant.equivalent?",
+      "location": {
+        "col": 11,
+        "end_col": 12,
+        "end_line": 8,
+        "file": "src/lib.rs",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_36a288eb22067e4e",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_baa3b3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount",
+        "hash": "sh_36a288eb22067e4e",
+        "lang": "rust"
+      },
+      "tier": 3,
+      "title": "Mutant may be equivalent: `*` → `/` at src/lib.rs:8"
+    },
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "tests/large.rs"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that runs line 13 of src/lib.rs."
+      },
+      "check": "tests.mutation",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "to": "+"
+        }
+      },
+      "id": "fnd_b83d67",
+      "kind": "mutant.uncovered",
+      "location": {
+        "col": 11,
+        "end_col": 12,
+        "end_line": 13,
+        "file": "src/lib.rs",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_5b60864024009edd",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_b83d67 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "refund",
+        "hash": "sh_5b60864024009edd",
+        "lang": "rust"
+      },
+      "tier": 3,
+      "title": "No test runs src/lib.rs:13; its mutant `-` → `+` was not run"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_7f1a40",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Add a test that fails when `>=` at src/lib.rs:5 becomes `>`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_baa3b3",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Review whether any input tells `*` → `/` apart at src/lib.rs:8; if none does, suppress this finding."
+    },
+    {
+      "command": null,
+      "finding": "fnd_b83d67",
+      "kind": "write_test",
+      "priority": 3,
+      "summary": "Write a test that runs line 13 of src/lib.rs."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "rust": {
+            "coverage": "cargo llvm-cov --lcov --output-path {out}"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 2,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}
