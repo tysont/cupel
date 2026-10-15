@@ -26,6 +26,26 @@ pub fn replacements(source: &str, site: &Site) -> Vec<(String, String)> {
         .collect()
 }
 
+/// The span of bytes `start..end` of `source`, in 1-based lines and byte columns.
+pub fn span(source: &str, start: usize, end: usize) -> Span {
+    let position = |at: usize| {
+        let before = &source[..at];
+        let line = before.matches('\n').count() + 1;
+        let col = at - before.rfind('\n').map_or(0, |newline| newline + 1) + 1;
+        (
+            u32::try_from(line).unwrap_or(u32::MAX),
+            u32::try_from(col).unwrap_or(u32::MAX),
+        )
+    };
+    let ((line, col), (end_line, end_col)) = (position(start), position(end));
+    Span {
+        line,
+        col,
+        end_line,
+        end_col,
+    }
+}
+
 /// The byte offset of 1-based `line` and 1-based byte column `col`.
 pub(crate) fn offset(source: &str, line: u32, col: u32) -> Option<usize> {
     let line = usize::try_from(line.checked_sub(1)?).ok()?;

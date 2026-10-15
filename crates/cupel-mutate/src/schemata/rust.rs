@@ -381,30 +381,16 @@ fn chain(target: &Target, original: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use cupel_core::syntax::Span;
-
     use super::*;
+    use crate::mutant::span;
 
     /// A gate on the first `from` inside the first `context` of `source`.
     fn gate<'a>(source: &str, id: u32, context: &str, from: &'a str, to: &'a str) -> Gate<'a> {
         let at = source.find(context).expect("context in source")
             + context.find(from).expect("from in context");
-        let position = |at: usize| {
-            let before = &source[..at];
-            let line = before.matches('\n').count() + 1;
-            let col = at - before.rfind('\n').map_or(0, |newline| newline + 1) + 1;
-            (u32::try_from(line).unwrap(), u32::try_from(col).unwrap())
-        };
-        let (line, col) = position(at);
-        let (end_line, end_col) = position(at + from.len());
         Gate {
             id,
-            span: Span {
-                line,
-                col,
-                end_line,
-                end_col,
-            },
+            span: span(source, at, at + from.len()),
             from,
             to,
         }
@@ -453,32 +439,25 @@ mod tests {
     }
 
     #[test]
-    fn nested_sites_keep_the_original_text_in_every_other_mutant_branch() {
-        let source = "fn f(t: i64, m: bool) -> i64 {\n    if t >= 100 && m {\n        return 1;\n    }\n    0\n}\n";
+    fn nested_sites_keep_the_original_text_in_every_other_branch_and_share_a_chain() {
+        let source = "fn f(t: i64, m: bool) -> bool {\n    t >= 100 && m\n}\n";
         let gates = [
             gate(source, 1, "t >= 100", ">=", ">"),
             gate(source, 2, "&& m", "&&", "||"),
+            gate(
+                source,
+                3,
+                "t >= 100 && m",
+                "t >= 100 && m",
+                "!(t >= 100 && m)",
+            ),
         ];
         assert_eq!(
             body(source, &gates),
-            "fn f(t: i64, m: bool) -> i64 {\n    \
-             if if cupel_mutant_id() == 2 { t >= 100 || m } else { \
-             (if cupel_mutant_id() == 1 { t > 100 } else { t >= 100 }) && m } {\n        \
-             return 1;\n    }\n    0\n}\n"
-        );
-    }
-
-    #[test]
-    fn two_mutants_of_one_expression_share_a_chain() {
-        let source = "fn f(a: i64) -> bool {\n    a > 1\n}\n";
-        let gates = [
-            gate(source, 1, "a > 1", ">", ">="),
-            gate(source, 2, "a > 1", "a > 1", "!(a > 1)"),
-        ];
-        assert_eq!(
-            body(source, &gates),
-            "fn f(a: i64) -> bool {\n    if cupel_mutant_id() == 1 { a >= 1 } else if \
-             cupel_mutant_id() == 2 { !(a > 1) } else { a > 1 }\n}\n"
+            "fn f(t: i64, m: bool) -> bool {\n    \
+             if cupel_mutant_id() == 2 { t >= 100 || m } else if cupel_mutant_id() == 3 { \
+             !(t >= 100 && m) } else { \
+             (if cupel_mutant_id() == 1 { t > 100 } else { t >= 100 }) && m }\n}\n"
         );
     }
 
@@ -574,9 +553,10 @@ mod tests {
     #[test]
     fn a_gate_in_an_inline_module_reaches_the_reader_through_super() {
         let source = "mod inner {\n    pub fn f(a: i64) -> bool {\n        a < 1\n    }\n}\n";
-        assert!(
-            body(source, &[gate(source, 1, "a < 1", "<", "<=")])
-                .contains("if super::cupel_mutant_id() == 1 { a <= 1 } else { a < 1 }")
+        assert_eq!(
+            body(source, &[gate(source, 1, "a < 1", "<", "<=")]),
+            "mod inner {\n    pub fn f(a: i64) -> bool {\n        \
+             if super::cupel_mutant_id() == 1 { a <= 1 } else { a < 1 }\n    }\n}\n"
         );
     }
 

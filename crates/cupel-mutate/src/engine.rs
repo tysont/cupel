@@ -114,22 +114,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
         };
         let root = &ctx.ctx.root;
         let mut planned = plan(&inputs, &|file| read(root, file));
-        let lang = symbols
-            .symbols
-            .first()
-            .map_or_else(String::new, |symbol| symbol.lang.to_string());
-        let running = Running {
-            ctx,
-            runner,
-            settings,
-            graph: upstream.get::<ModuleGraph>(),
-            rewriter: match settings.strategy {
-                Strategy::Schemata => schemata::rewriter(&lang),
-                Strategy::FileCopy => None,
-            },
-            lang,
-        };
-        running.run(&mut planned)?;
+        Running::new(ctx, runner, settings, symbols).run(&mut planned)?;
         let mutants = planned.into_iter().map(|planned| planned.mutant).collect();
         Ok(self.outcomes(ctx, Some(baseline), per_test.is_some(), mutants))
     }
@@ -165,7 +150,31 @@ struct Running<'a> {
     lang: String,
 }
 
-impl Running<'_> {
+impl<'a> Running<'a> {
+    /// How `ctx`'s production of `symbols`' language runs its mutants with `runner`.
+    fn new(
+        ctx: &'a ProduceCtx,
+        runner: &'a dyn Runner,
+        settings: Settings,
+        symbols: &Symbols,
+    ) -> Self {
+        let lang = symbols
+            .symbols
+            .first()
+            .map_or_else(String::new, |symbol| symbol.lang.to_string());
+        Self {
+            ctx,
+            runner,
+            settings,
+            graph: ctx.upstream.get::<ModuleGraph>(),
+            rewriter: match settings.strategy {
+                Strategy::Schemata => schemata::rewriter(&lang),
+                Strategy::FileCopy => None,
+            },
+            lang,
+        }
+    }
+
     /// Reuses what the store holds and runs the other covered mutants, file by file.
     fn run(&self, planned: &mut [Planned]) -> Result<()> {
         let history = History::load(&self.ctx.writer, planned);

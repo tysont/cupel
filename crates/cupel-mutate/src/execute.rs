@@ -12,7 +12,10 @@ use cupel_core::{
 
 use crate::overlay::Slot;
 use crate::plan::Planned;
-use crate::schemata::MUTANT_VAR;
+
+/// The environment variable that selects a schemata mutant at run time (ADR-082); `0` selects
+/// none.
+pub const MUTANT_VAR: &str = "CUPEL_MUTANT";
 
 /// The shortest timeout a mutant's run gets (design §9.3).
 const TIMEOUT_FLOOR: Duration = Duration::from_secs(2);
@@ -159,7 +162,7 @@ impl Execution<'_> {
     fn work(&self, index: usize, slot: &Slot, work: &Work<'_>) -> Result<()> {
         let (run, build) = (work.run, work.build);
         let ctx = self.slot_ctx(slot)?;
-        let (limit, mut holds) = match build {
+        let (limit, holds) = match build {
             Build::Copies => {
                 for (importer, text) in run.importers {
                     write(slot, importer, text)?;
@@ -168,41 +171,39 @@ impl Execution<'_> {
             }
             Build::Schemata { limits, .. } => (limits[index], Holds::Schemata),
         };
+        let mut worker = Worker {
+            slot,
+            ctx,
+            limit,
+            holds,
+        };
         while let Some(&mutant) = work.order.get(work.next.fetch_add(1, Ordering::SeqCst)) {
-            let ran = self.one(slot, &ctx, work, mutant, limit, &mut holds)?;
+            let ran = self.one(&mut worker, work, mutant)?;
             if let Ok(mut found) = work.found.lock() {
                 found[mutant] = Some(ran);
             }
         }
-        if holds != Holds::Original {
+        if worker.holds != Holds::Original {
             write(slot, run.file, run.original)?;
         }
         Ok(())
     }
 
-    /// Runs mutant `index` of the file in `slot`, which `holds` the schemata build or the
-    /// original: selected by its id, or written as a file copy and the original put back.
-    fn one(
-        &self,
-        slot: &Slot,
-        ctx: &ProduceCtx,
-        work: &Work<'_>,
-        index: usize,
-        limit: Duration,
-        holds: &mut Holds,
-    ) -> Result<Ran> {
-        let (run, planned) = (work.run, work.run.mutants[index]);
+    /// Runs mutant `index` of the file in `worker`'s slot: selected by its id in the schemata
+    /// build, or written as a file copy and the original put back.
+    fn one(&self, worker: &mut Worker<'_>, work: &Work<'_>, index: usize) -> Result<Ran> {
+        let (run, planned, slot) = (work.run, work.run.mutants[index], worker.slot);
         if let (Some(id), Build::Schemata { source, .. }) = (id(work.build, index), work.build) {
-            if *holds != Holds::Schemata {
+            if worker.holds != Holds::Schemata {
                 write(slot, run.file, source.as_bytes())?;
-                *holds = Holds::Schemata;
+                worker.holds = Holds::Schemata;
             }
-            return self.mutant(ctx, planned, limit, id);
+            return self.mutant(&worker.ctx, planned, worker.limit, id);
         }
         write(slot, run.file, planned.source.as_bytes())?;
-        let ran = self.mutant(ctx, planned, limit, 0);
+        let ran = self.mutant(&worker.ctx, planned, worker.limit, 0);
         write(slot, run.file, run.original)?;
-        *holds = Holds::Original;
+        worker.holds = Holds::Original;
         ran
     }
 
@@ -283,6 +284,14 @@ impl Execution<'_> {
         };
         Ok(classify(&ran, elapsed >= limit, elapsed, strategy))
     }
+}
+
+/// One slot at work on a file: where it runs, its timeout, and what the file holds now.
+struct Worker<'a> {
+    slot: &'a Slot,
+    ctx: ProduceCtx,
+    limit: Duration,
+    holds: Holds,
 }
 
 /// What the slots working on one file share.

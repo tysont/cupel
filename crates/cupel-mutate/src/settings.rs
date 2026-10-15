@@ -70,19 +70,34 @@ fn default_jobs() -> usize {
 }
 
 fn operators(value: &Value) -> Result<OperatorSet> {
-    match value.as_str() {
-        Some("default") => Ok(OperatorSet::Default),
-        Some("extended") => Ok(OperatorSet::Extended),
-        _ => Err(invalid("mutation.operators", value)),
-    }
+    choice(
+        "mutation.operators",
+        value,
+        &[
+            ("default", OperatorSet::Default),
+            ("extended", OperatorSet::Extended),
+        ],
+    )
 }
 
 fn strategy(value: &Value) -> Result<Strategy> {
-    match value.as_str() {
-        Some("schemata") => Ok(Strategy::Schemata),
-        Some("file-copy") => Ok(Strategy::FileCopy),
-        _ => Err(invalid("mutation.strategy", value)),
-    }
+    choice(
+        "mutation.strategy",
+        value,
+        &[
+            ("schemata", Strategy::Schemata),
+            ("file-copy", Strategy::FileCopy),
+        ],
+    )
+}
+
+/// `value`, the setting `what`, as the choice it names.
+fn choice<T: Copy>(what: &'static str, value: &Value, choices: &[(&str, T)]) -> Result<T> {
+    choices
+        .iter()
+        .find(|(name, _)| value.as_str() == Some(*name))
+        .map(|(_, choice)| *choice)
+        .ok_or_else(|| invalid(what, value))
 }
 
 /// `value`, the setting `what`, as a positive integer.

@@ -13,9 +13,6 @@ mod rust;
 /// the lines its errors name, before the whole file runs as file copies.
 const REBUILDS: usize = 2;
 
-/// The environment variable that selects a schemata mutant at run time; `0` selects none.
-pub const MUTANT_VAR: &str = "CUPEL_MUTANT";
-
 /// One mutant to gate: its id, and its site's span, text, and replacement.
 #[derive(Debug, Clone, Copy)]
 pub struct Gate<'a> {
@@ -64,7 +61,6 @@ pub fn run_file(
     let Some(rewriter) = rewriter else {
         return execution.run_file(run, &Build::Copies);
     };
-    let text = String::from_utf8_lossy(run.original);
     let gates: Vec<Gate<'_>> = (1..)
         .zip(&run.mutants)
         .map(|(id, planned)| Gate {
@@ -74,59 +70,97 @@ pub fn run_file(
             to: &planned.mutant.to,
         })
         .collect();
-    let mut fallback: BTreeMap<u32, String> = BTreeMap::new();
-    let mut failed = None;
-    for _ in 0..=REBUILDS {
-        let open: Vec<Gate<'_>> = gates
-            .iter()
-            .filter(|gate| !fallback.contains_key(&gate.id))
-            .copied()
-            .collect();
-        let rewritten = rewriter.rewrite(&text, &open);
-        fallback.extend(rewritten.excluded);
-        let Some(source) = rewritten.source else {
-            break;
-        };
-        let (output, reason) = match execution.validate(run, &source)? {
-            Validation::Built(limits) => {
-                let ids: Vec<Option<u32>> = gates
-                    .iter()
-                    .map(|gate| (!fallback.contains_key(&gate.id)).then_some(gate.id))
-                    .collect();
-                let build = Build::Schemata {
-                    source: &source,
-                    ids: &ids,
-                    limits: &limits,
-                };
-                let ran = execution.run_file(run, &build)?;
-                return Ok(with_fallback(ran, &gates, &fallback, None));
-            }
-            Validation::Failed { output, reason } => (output, reason),
-        };
-        let lines = rewriter.culprits(&output, run.file);
-        let culprits: Vec<(u32, u32)> = rewritten
-            .lines
-            .into_iter()
-            .filter(|(_, line)| lines.contains(line))
-            .collect();
-        if culprits.is_empty() {
-            failed = Some(format!(
-                "the schemata build of `{}` failed: {}",
-                run.file,
-                first_line(&reason)
-            ));
-            break;
-        }
-        for (id, line) in culprits {
-            fallback.insert(id, format!("did not compile under schemata (line {line})"));
-        }
-        failed = Some(format!(
-            "the schemata build of `{}` still failed after {REBUILDS} rebuilds",
-            run.file
-        ));
-    }
+    let mut attempt = Attempt {
+        execution,
+        rewriter,
+        run,
+        gates: &gates,
+        fallback: BTreeMap::new(),
+    };
+    let failed = match attempt.schemata()? {
+        Ok(ran) => return Ok(ran),
+        Err(failed) => failed,
+    };
     let ran = execution.run_file(run, &Build::Copies)?;
-    Ok(with_fallback(ran, &gates, &fallback, failed.as_deref()))
+    Ok(with_fallback(
+        ran,
+        &gates,
+        &attempt.fallback,
+        failed.as_deref(),
+    ))
+}
+
+/// Building one file's schemata until it validates or gives up.
+struct Attempt<'a> {
+    execution: &'a Execution<'a>,
+    rewriter: &'a dyn Rewriter,
+    run: &'a FileRun<'a>,
+    gates: &'a [Gate<'a>],
+    /// The gates left to file copies so far, with why.
+    fallback: BTreeMap<u32, String>,
+}
+
+impl Attempt<'_> {
+    /// The mutants' runs behind a validated schemata build; else why the whole file falls back
+    /// (`None` when every gate has its own reason).
+    fn schemata(&mut self) -> Result<std::result::Result<Vec<Ran>, Option<String>>> {
+        let (run, file) = (self.run, self.run.file);
+        let text = String::from_utf8_lossy(run.original);
+        let mut failed = None;
+        for _ in 0..=REBUILDS {
+            let open: Vec<Gate<'_>> = self
+                .gates
+                .iter()
+                .filter(|gate| !self.fallback.contains_key(&gate.id))
+                .copied()
+                .collect();
+            let rewritten = self.rewriter.rewrite(&text, &open);
+            self.fallback.extend(rewritten.excluded);
+            let Some(source) = rewritten.source else {
+                break;
+            };
+            let (output, reason) = match self.execution.validate(run, &source)? {
+                Validation::Built(limits) => return self.gated(&source, &limits).map(Ok),
+                Validation::Failed { output, reason } => (output, reason),
+            };
+            let lines = self.rewriter.culprits(&output, file);
+            let culprits: Vec<(u32, u32)> = rewritten
+                .lines
+                .into_iter()
+                .filter(|(_, line)| lines.contains(line))
+                .collect();
+            if culprits.is_empty() {
+                let first = first_line(&reason);
+                return Ok(Err(Some(format!(
+                    "the schemata build of `{file}` failed: {first}"
+                ))));
+            }
+            for (id, line) in culprits {
+                let why = format!("did not compile under schemata (line {line})");
+                self.fallback.insert(id, why);
+            }
+            failed = Some(format!(
+                "the schemata build of `{file}` still failed after {REBUILDS} rebuilds"
+            ));
+        }
+        Ok(Err(failed))
+    }
+
+    /// Runs the mutants with `source`, validated in every slot with these `limits`.
+    fn gated(&self, source: &str, limits: &[std::time::Duration]) -> Result<Vec<Ran>> {
+        let ids: Vec<Option<u32>> = self
+            .gates
+            .iter()
+            .map(|gate| (!self.fallback.contains_key(&gate.id)).then_some(gate.id))
+            .collect();
+        let build = Build::Schemata {
+            source,
+            ids: &ids,
+            limits,
+        };
+        let ran = self.execution.run_file(self.run, &build)?;
+        Ok(with_fallback(ran, self.gates, &self.fallback, None))
+    }
 }
 
 /// `ran` with each file copy's reason: its own, else the whole file's `failed`.

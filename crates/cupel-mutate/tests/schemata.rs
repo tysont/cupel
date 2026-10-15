@@ -4,7 +4,7 @@ use std::path::Path;
 use std::process::Command;
 
 use cupel_core::syntax::Span;
-use cupel_mutate::mutant::apply;
+use cupel_mutate::mutant::{apply, span};
 use cupel_mutate::schemata::{Gate, rewriter};
 
 /// A program whose output shows evaluation order, short-circuiting, borrows, and values.
@@ -94,22 +94,10 @@ const MUTANTS: &[(&str, &str, &str)] = &[
 ];
 
 /// The span of `from` inside the first `context` of `PROGRAM`.
-fn span(context: &str, from: &str) -> Span {
+fn span_of(context: &str, from: &str) -> Span {
     let at = PROGRAM.find(context).expect("context in the program")
         + context.find(from).expect("from in its context");
-    let position = |at: usize| {
-        let before = &PROGRAM[..at];
-        let line = before.matches('\n').count() + 1;
-        let col = at - before.rfind('\n').map_or(0, |newline| newline + 1) + 1;
-        (u32::try_from(line).unwrap(), u32::try_from(col).unwrap())
-    };
-    let ((line, col), (end_line, end_col)) = (position(at), position(at + from.len()));
-    Span {
-        line,
-        col,
-        end_line,
-        end_col,
-    }
+    span(PROGRAM, at, at + from.len())
 }
 
 /// Builds `source` with rustc into `dir/name`; the binary, or `None` when it does not build.
@@ -150,7 +138,7 @@ fn every_gated_mutant_behaves_as_its_file_copy() {
         .zip(MUTANTS)
         .map(|(id, (context, from, to))| Gate {
             id,
-            span: span(context, from),
+            span: span_of(context, from),
             from,
             to,
         })
@@ -162,17 +150,15 @@ fn every_gated_mutant_behaves_as_its_file_copy() {
     let schemata = build(dir.path(), "schemata", &source).expect("the schemata build");
     let original = build(dir.path(), "original", PROGRAM).unwrap();
     assert_eq!(run(&schemata, 0), run(&original, 0));
-    for gate in &gates {
-        let mutated = apply(PROGRAM, &gate.span, gate.from, gate.to).unwrap();
-        let copy = build(dir.path(), &format!("copy{}", gate.id), &mutated)
-            .unwrap_or_else(|| panic!("mutant {} builds as a file copy", gate.id));
-        assert_eq!(
-            run(&schemata, gate.id),
-            run(&copy, 0),
-            "mutant {} ({} → {})",
-            gate.id,
-            gate.from,
-            gate.to
-        );
-    }
+    let gated: Vec<String> = gates.iter().map(|gate| run(&schemata, gate.id)).collect();
+    let copies: Vec<String> = gates
+        .iter()
+        .map(|gate| {
+            let mutated = apply(PROGRAM, &gate.span, gate.from, gate.to).unwrap();
+            let copy = build(dir.path(), &format!("copy{}", gate.id), &mutated)
+                .unwrap_or_else(|| panic!("mutant {} builds as a file copy", gate.id));
+            run(&copy, 0)
+        })
+        .collect();
+    assert_eq!(gated, copies);
 }

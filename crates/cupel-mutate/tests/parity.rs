@@ -123,11 +123,27 @@ fn the_coverage_fixture_has_the_same_outcomes_as_schemata_and_as_file_copies() {
         return;
     }
     let schemata = parity("coverage/rust", unchanged);
-    let run = strategies(&schemata);
-    assert!(!run.is_empty());
-    assert!(
-        run.iter()
-            .all(|built| *built == (Some(MutationStrategy::Schemata), None))
+    assert_eq!(
+        summary(&schemata),
+        [
+            "5 0→1 killed",
+            "7 +=→-= killed",
+            "14 >=→> survived",
+            "17 >=→> survived",
+            "25 <=→< uncovered",
+            "25 0→1 uncovered",
+            "26 0→1 uncovered",
+            "28 >→>= uncovered",
+            "29 0→1 uncovered",
+            "31 &&→|| uncovered",
+            "31 <→<= uncovered",
+            "35 /→* uncovered",
+            "37 /→* uncovered",
+        ]
+    );
+    assert_eq!(
+        strategies(&schemata),
+        [(Some(MutationStrategy::Schemata), None); 4]
     );
 }
 
