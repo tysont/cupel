@@ -168,7 +168,7 @@ impl CoverageTool {
         let report = fs::read(entry.join(REPORT)).ok()?;
         let fresh =
             sources.dir == tree.dir && sources.fresh(tree.repo, tree.exclude, written, &report);
-        fresh.then(|| self.read(&report, &sources.ran_in, tree.dir))?
+        fresh.then(|| self.read(&report, &sources.ran_in, &tree.root(), tree.dir))?
     }
 
     /// The report the tool left at its default location in `root`, when it is newer than
@@ -178,13 +178,16 @@ impl CoverageTool {
         if !tree.is_newest(&report) {
             return None;
         }
-        self.read(&fs::read(&report).ok()?, root, tree.dir)
+        self.read(&fs::read(&report).ok()?, root, root, tree.dir)
     }
 
     /// `report`, written by the tool running in `ran_in`, with paths relative to the repository.
-    fn read(&self, report: &[u8], ran_in: &Path, dir: &str) -> Option<CoverageMap> {
+    /// Names the report resolves through project files (Go import paths through `go.mod`) are
+    /// resolved in `root`, the project root here: a committed report's `ran_in` is on the
+    /// machine that made it.
+    fn read(&self, report: &[u8], ran_in: &Path, root: &Path, dir: &str) -> Option<CoverageMap> {
         let map = parse(std::str::from_utf8(report).ok()?).ok()?;
-        let map = (self.0.resolve)(map, ran_in);
+        let map = (self.0.resolve)(map, root);
         Some(placed(map, &[ran_in, &canonical(ran_in)], dir))
     }
 
@@ -227,7 +230,7 @@ impl CoverageTool {
         let map = report
             .as_deref()
             .filter(|_| captured.exit_code == Some(0))
-            .and_then(|report| self.read(report, root, tree.dir));
+            .and_then(|report| self.read(report, root, root, tree.dir));
         let (Some(report), Some(map)) = (report, map) else {
             let failure = Failure {
                 producer: self.0.id,

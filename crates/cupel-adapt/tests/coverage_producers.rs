@@ -237,6 +237,37 @@ fn a_report_the_tool_left_newer_than_every_source_is_ingested_without_running() 
     assert!(events.is_empty());
 }
 
+/// A committed report was made on another machine: the directory it ran in is gone, and the
+/// paths it names resolve through the fixture that is here, not through that directory.
+#[test]
+fn a_committed_report_resolves_its_paths_through_the_tree_it_is_committed_in() {
+    let registry = registry();
+    let dir = tempfile::tempdir().unwrap();
+    copy_repo("coverage/go", dir.path());
+    let cache = dir
+        .path()
+        .join(".cupel/cache/coverage/tool.go-coverprofile");
+    let entry = fs::read_dir(&cache)
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
+    let sources = entry.join("sources.json");
+    let mut record: Value = serde_json::from_str(&fs::read_to_string(&sources).unwrap()).unwrap();
+    record["ran_in"] = json!("/nonexistent/machine/go");
+    fs::write(&sources, serde_json::to_string(&record).unwrap()).unwrap();
+    let go = producer(&registry, "tool.go-coverprofile", "go");
+
+    let (map, events) = produce(go, &produce_ctx(dir.path(), "go", true));
+
+    assert_eq!(
+        shape(&map.unwrap(), "grade.go"),
+        ("grade.go".to_owned(), 28, 13, None)
+    );
+    assert!(events.is_empty());
+}
+
 #[test]
 fn a_failing_coverage_command_reports_why_and_produces_nothing() {
     let registry = registry();
