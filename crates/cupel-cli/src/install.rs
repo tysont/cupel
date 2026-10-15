@@ -10,6 +10,7 @@ use cupel_core::{
 use serde_json::json;
 
 use crate::problem::Problem;
+use crate::run::Invocation;
 
 /// The component install findings come from.
 const CHECK: &str = "install";
@@ -102,6 +103,18 @@ pub fn run(
             (install.clone(), outcome)
         })
         .collect()
+}
+
+/// The installs `invocation` may make of `planned`, in its repository, asking at the terminal
+/// when it must.
+pub fn attempt(invocation: &Invocation<'_>, planned: &[Planned]) -> Vec<(Planned, Outcome)> {
+    run(
+        planned,
+        invocation.installs,
+        &mut ask,
+        invocation.writer.root(),
+        invocation.run.cancellation(),
+    )
 }
 
 /// Runs `install`'s command through `sh` in `root`, then probes for the tool.

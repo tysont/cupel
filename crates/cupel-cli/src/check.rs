@@ -173,14 +173,7 @@ fn install_tools(
     if matches!(invocation.installs, Permission::Never(_)) {
         return (Vec::new(), Vec::new());
     }
-    let attempts = install::run(
-        &planned,
-        invocation.installs,
-        &mut install::ask,
-        root,
-        run.cancellation(),
-    );
-    let findings = install::problems(&attempts)
+    let findings = install::problems(&install::attempt(invocation, &planned))
         .into_iter()
         .map(|problem| problem.finding(&run.repro()))
         .collect();

@@ -87,6 +87,23 @@ cupel init --write --force   # replace an existing cupel.toml
 
 `doctor` verifies the binary against `required_version`, the validity of `cupel.toml`, and write access to `.cupel/`. For every tool a configured check needs through its facts (a test runner, for a check that needs test results; a coverage tool, for a language with a `coverage` command), it checks the tool is on `PATH` and reports its version under `run.toolchain`; a `[lang.<id>] runner` that names no runner is a finding listing the valid ones. Every problem is a finding with a `configure` or `install_tool` action. Exit 3 means something required is missing.
 
+A missing tool's finding names the command that installs it, or, for a language toolchain Cupel does not install (`cargo`, `go`, `python3`), what to do by hand. `--fix` runs those commands:
+
+```sh
+cupel doctor --fix --install             # install every missing tool, then check again
+cupel doctor --fix                       # on a terminal, ask before each install
+cupel doctor --fix --install --dry-run   # list the installs in the plan's would_install; run none
+```
+
+| Tool | Install command |
+|---|---|
+| `cargo-nextest` | `cargo install cargo-nextest --locked` |
+| `cargo-llvm-cov` | `cargo install cargo-llvm-cov --locked && rustup component add llvm-tools-preview` |
+| `pytest`, `pytest-cov`, `coverage` | `python -m pip install <package>`; `uv add --dev` or `poetry add --group dev` when the project uses uv or poetry |
+| `vitest`, `@vitest/coverage-v8`, `jest`, `c8` | a dev dependency of the root: `npm install --save-dev`, `pnpm add --save-dev`, or `yarn add --dev` |
+
+Installs run in the repository root with your environment, so the tool lands where your shell would put it: `CARGO_HOME`, the Python `PATH` finds (activate a virtual environment first), or the root's `node_modules`. With `--install` nothing is asked; without it Cupel asks on stderr when stdout is a terminal and installs nothing otherwise, and `--no-install` never installs. After installing, `doctor` probes again: `install.succeeded` names the version now installed, and `install.failed` (exit 3) carries the command and the tail of its stderr. `install.skipped` says why `--fix` installed nothing. `cupel check` and `cupel survey` follow the same flags for the tools their checks need, before they run; `--dry-run` lists those installs too.
+
 ### `cupel describe`
 
 The binary documents itself. Every verb, flag, check, finding kind, language, fact, exit code, and schema is described by the same data that drives the CLI, so the documentation cannot drift from the behavior.
@@ -435,7 +452,8 @@ In JSON the same report is the envelope's `tests`: `per_test_map`, `impacted` (`
 | `--timeout DURATION` | Stop after this long with partial results and exit 5 |
 | `--seed N` | Recorded in the envelope; random by default |
 | `--limit N`, `--offset N` | Page findings; the envelope always carries `truncated` and `total_findings` |
-| `--write` | Permit writes outside `.cupel/`; nothing else ever writes elsewhere |
+| `--install`, `--no-install` | Install missing tools without asking, or never; without either, Cupel asks when stdout is a terminal and installs nothing otherwise (`doctor --fix`, `check`, `survey`) |
+| `--write` | Permit writes outside `.cupel/`; installing a tool is governed by `--install` instead |
 | `--quiet`, `--verbose`, `--no-color` | Diagnostics on stderr only; stdout's shape never changes |
 
 ## Checks
@@ -511,7 +529,7 @@ Checks that depend on running the test suite read a `test-results` fact, which C
 | Python | `pytest` (when the project mentions it), `unittest` | JUnit XML; `unittest -v` output |
 | JavaScript, TypeScript | `vitest`, `jest` (whichever `package.json` depends on) | the Jest JSON report |
 
-A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in the root's `node_modules/.bin`); otherwise checks that need test results are skipped as `unavailable` with the tool named, and `cupel doctor` says what to install. `[lang.<id>] runner` chooses one explicitly, by its name with or without the `tool.` prefix:
+A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in the root's `node_modules/.bin`); otherwise checks that need test results are skipped as `unavailable` with the tool named, and `cupel doctor` says what to install (`cupel doctor --fix --install` installs it). `[lang.<id>] runner` chooses one explicitly, by its name with or without the `tool.` prefix:
 
 ```toml
 [lang.python]
@@ -633,7 +651,7 @@ depth = "quick"
 
 **Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the table above. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding) or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening`, which needs a range, is rejected when the config loads.
 
-Cupel writes only under `.cupel/` (run records, the SQLite fact store, scratch space) unless `--write` is given. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
+Cupel writes only under `.cupel/` (run records, the SQLite fact store, scratch space) unless `--write` is given. An install you allow (`--install`, or yes to the question) runs your package manager, which for the JavaScript launchers, uv, and poetry adds a dev dependency to `package.json` or `pyproject.toml` and its lockfile. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
 
 ## Agents
 

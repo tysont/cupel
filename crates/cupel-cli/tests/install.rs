@@ -189,7 +189,7 @@ fn a_dry_run_of_fix_lists_the_installs_it_would_make_and_makes_none() {
 }
 
 #[test]
-fn a_dry_run_of_check_lists_the_installs_install_would_make() {
+fn a_dry_run_of_check_or_survey_lists_the_installs_install_would_make() {
     let bin = Bin::new(&[]);
     let repo = repo();
     let planned = |args: &[&str]| {
@@ -199,6 +199,10 @@ fn a_dry_run_of_check_lists_the_installs_install_would_make() {
     };
     assert_eq!(
         planned(&["check", "--dry-run", "--install"]),
+        json!([{"tool": "pytest", "command": PIP_INSTALL}])
+    );
+    assert_eq!(
+        planned(&["survey", "--dry-run", "--install"]),
         json!([{"tool": "pytest", "command": PIP_INSTALL}])
     );
     assert_eq!(planned(&["check", "--dry-run"]), json!([]));

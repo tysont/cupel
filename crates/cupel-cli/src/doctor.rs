@@ -57,14 +57,7 @@ pub fn run(invocation: &Invocation<'_>, fix: bool) -> Envelope {
     let mut probed = probe_all(&requirements);
     if fix {
         let planned = installable(&requirements, &probed);
-        let attempts = install::run(
-            &planned,
-            invocation.installs,
-            &mut install::ask,
-            writer.root(),
-            run.cancellation(),
-        );
-        problems.extend(install::problems(&attempts));
+        problems.extend(install::problems(&install::attempt(invocation, &planned)));
         if !planned.is_empty() {
             probed = probe_all(&requirements);
         }
