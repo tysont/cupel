@@ -149,12 +149,14 @@ fn standard_depth_with_a_range_mutates_only_the_symbols_it_changed() {
     let standard = Run {
         depth: Some(CostClass::Standard),
         changed: Some(changed.clone()),
+        ..Run::default()
     };
     let outcomes = produce(dir.path(), "python", &standard).unwrap();
     assert_eq!(support::summary(&outcomes), ["13 -→+ uncovered"]);
     let deep = Run {
         depth: Some(CostClass::Deep),
         changed: Some(changed),
+        ..Run::default()
     };
     let outcomes = produce(dir.path(), "python", &deep).unwrap();
     assert_eq!(outcomes.mutants.len(), 6);

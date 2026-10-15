@@ -5,7 +5,7 @@
     reason = "each test binary uses a different subset of these helpers"
 )]
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use cupel_core::config::{Config, ConfigRequest};
 use cupel_core::syntax::ProjectInfo;
@@ -32,17 +32,20 @@ pub fn fixture(name: &str) -> tempfile::TempDir {
     dir
 }
 
-/// What a run at `depth`, over a range that changed `changed`, would see.
+/// What a run at `depth`, over a range that changed `changed`, with `--config` `config`, would
+/// see.
 #[derive(Debug, Clone, Default)]
 pub struct Run {
     pub depth: Option<CostClass>,
     pub changed: Option<ChangedLines>,
+    pub config: Option<PathBuf>,
 }
 
 /// `MutationOutcomes` for `lang` in the repository at `root`, produced as a `check` run would.
 pub fn produce(root: &Path, lang: &str, run: &Run) -> Result<MutationOutcomes, Error> {
     let config = Config::load(&ConfigRequest {
         root: root.to_path_buf(),
+        config_path: run.config.clone(),
         ..ConfigRequest::default()
     })
     .unwrap();
@@ -129,7 +132,7 @@ fn python_at(run: &Run) -> Option<(tempfile::TempDir, MutationOutcomes)> {
 pub fn deep() -> Run {
     Run {
         depth: Some(CostClass::Deep),
-        changed: None,
+        ..Run::default()
     }
 }
 

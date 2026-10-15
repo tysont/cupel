@@ -16,8 +16,16 @@ fn table(value: &Value) -> Map<String, Value> {
 fn nothing_configured_is_the_default_set_at_the_default_factor() {
     let settings = Settings::read(&Map::new()).unwrap();
     assert_eq!(
-        (settings.operators, settings.timeout_factor, settings.strategy),
-        (OperatorSet::Default, DEFAULT_TIMEOUT_FACTOR, Strategy::Schemata)
+        (
+            settings.operators,
+            settings.timeout_factor,
+            settings.strategy
+        ),
+        (
+            OperatorSet::Default,
+            DEFAULT_TIMEOUT_FACTOR,
+            Strategy::Schemata
+        )
     );
     assert!((1..=4).contains(&settings.jobs));
 }

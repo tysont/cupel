@@ -1,17 +1,18 @@
-// ABOUTME: Running mutants (ADR-080 §8–9): the mutants of one file run concurrently, one slot each, every slot first
-// ABOUTME: timing a green reference run of the unmutated file; each mutant's run is then killed, survived, or timed out.
+// ABOUTME: Running mutants (ADR-080 §8–9, ADR-082): the mutants of one file run concurrently, one slot each, after a
+// ABOUTME: green reference run (of the unmutated file, or of its validated schemata build); each is killed or not.
 use std::collections::BTreeSet;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use cupel_core::{
-    Ctx, Error, MutantOutcome, ProduceCtx, Result, RunOptions, Runner, TestRun, TestSelection,
-    WriteError, Writer,
+    Ctx, Error, MutantOutcome, MutationStrategy, ProduceCtx, Result, RunOptions, Runner, TestRun,
+    TestSelection, WriteError, Writer,
 };
 
 use crate::overlay::Slot;
 use crate::plan::Planned;
+use crate::schemata::MUTANT_VAR;
 
 /// The shortest timeout a mutant's run gets (design §9.3).
 const TIMEOUT_FLOOR: Duration = Duration::from_secs(2);
@@ -31,6 +32,9 @@ pub struct Ran {
     pub tests: Vec<String>,
     pub killing_tests: Vec<String>,
     pub duration_ms: u64,
+    pub strategy: MutationStrategy,
+    /// Why it was built as a file copy in a file with schemata.
+    pub fallback: Option<String>,
 }
 
 /// One file's mutants and the files a slot rewrites around them.
@@ -44,21 +48,98 @@ pub struct FileRun<'a> {
     pub mutants: Vec<&'a Planned>,
 }
 
+/// How a file's mutants are built.
+pub enum Build<'a> {
+    /// Each mutant written into the file and rebuilt.
+    Copies,
+    /// The validated schemata `source` every slot already holds; `ids[i]` selects mutant `i`
+    /// (`None`: a file copy), and slot `n` times out at `limits[n]`.
+    Schemata {
+        source: &'a str,
+        ids: &'a [Option<u32>],
+        limits: &'a [Duration],
+    },
+}
+
+/// Whether a schemata build passed the file's tests with no mutant selected in every slot.
+pub enum Validation {
+    /// Green everywhere: each slot's timeout.
+    Built(Vec<Duration>),
+    /// Red somewhere: the first red slot's output, and why it was red.
+    Failed { output: String, reason: String },
+}
+
+/// What one slot has written as the mutated file.
+#[derive(PartialEq, Eq)]
+enum Holds {
+    Original,
+    Schemata,
+}
+
 impl Execution<'_> {
-    /// Runs every mutant of `run` across the slots, each slot taking the next mutant when it is
-    /// free; the outcomes in the order of `run.mutants`.
-    pub fn run_file(&self, run: &FileRun<'_>) -> Result<Vec<Ran>> {
-        let next = AtomicUsize::new(0);
-        let found: Mutex<Vec<Option<Ran>>> = Mutex::new(vec![None; run.mutants.len()]);
-        let workers = self.slots.len().min(run.mutants.len());
-        let failures: Vec<Error> = std::thread::scope(|scope| {
-            let handles: Vec<_> = self.slots[..workers]
+    /// Writes `source` (a schemata build of `run.file`) into every slot `run` uses and runs the
+    /// file's tests against it with no mutant selected: the build every gated mutant shares.
+    pub fn validate(&self, run: &FileRun<'_>, source: &str) -> Result<Validation> {
+        let slots = &self.slots[..self.workers(run)];
+        let ran: Vec<Result<(TestRun, Duration)>> = std::thread::scope(|scope| {
+            let handles: Vec<_> = slots
                 .iter()
-                .map(|slot| scope.spawn(|| self.work(slot, run, &next, &found)))
+                .map(|slot| {
+                    scope.spawn(move || {
+                        let ctx = self.slot_ctx(slot)?;
+                        for (importer, text) in run.importers {
+                            write(slot, importer, text)?;
+                        }
+                        write(slot, run.file, source.as_bytes())?;
+                        self.timed(&ctx, &union(&run.mutants))
+                    })
+                })
                 .collect();
             handles
                 .into_iter()
-                .filter_map(|handle| handle.join().ok().and_then(Result::err))
+                .map(|handle| handle.join().unwrap_or_else(|_| Err(panicked())))
+                .collect()
+        });
+        let mut limits = Vec::new();
+        for ran in ran {
+            let (ran, elapsed) = ran?;
+            if !ran.results.is_green() {
+                return Ok(Validation::Failed {
+                    output: output(&ran),
+                    reason: why_red(&ran),
+                });
+            }
+            limits.push(self.limit(elapsed));
+        }
+        Ok(Validation::Built(limits))
+    }
+
+    /// Runs every mutant of `run` across the slots, each slot taking the next mutant when it is
+    /// free, gated mutants first; the outcomes in the order of `run.mutants`.
+    pub fn run_file(&self, run: &FileRun<'_>, build: &Build<'_>) -> Result<Vec<Ran>> {
+        let mut order: Vec<usize> = (0..run.mutants.len()).collect();
+        order.sort_by_key(|index| id(build, *index).is_none());
+        let next = AtomicUsize::new(0);
+        let found: Mutex<Vec<Option<Ran>>> = Mutex::new(vec![None; run.mutants.len()]);
+        let work = Work {
+            run,
+            build,
+            order: &order,
+            next: &next,
+            found: &found,
+        };
+        let failures: Vec<Error> = std::thread::scope(|scope| {
+            let handles: Vec<_> = self.slots[..self.workers(run)]
+                .iter()
+                .enumerate()
+                .map(|(index, slot)| {
+                    let work = &work;
+                    scope.spawn(move || self.work(index, slot, work))
+                })
+                .collect();
+            handles
+                .into_iter()
+                .filter_map(|handle| handle.join().unwrap_or_else(|_| Err(panicked())).err())
                 .collect()
         });
         if let Some(failure) = failures.into_iter().next() {
@@ -68,32 +149,51 @@ impl Execution<'_> {
         Ok(found.into_iter().flatten().collect())
     }
 
-    /// One slot's work on `run`: the reference, then mutants until none is left.
-    fn work(
-        &self,
-        slot: &Slot,
-        run: &FileRun<'_>,
-        next: &AtomicUsize,
-        found: &Mutex<Vec<Option<Ran>>>,
-    ) -> Result<()> {
+    /// The slots `run` uses: one per mutant, at most all of them.
+    fn workers(&self, run: &FileRun<'_>) -> usize {
+        self.slots.len().min(run.mutants.len())
+    }
+
+    /// One slot's work on a file: the reference (unless the schemata build was validated),
+    /// then mutants until none is left, then the original file back.
+    fn work(&self, index: usize, slot: &Slot, work: &Work<'_>) -> Result<()> {
+        let (run, build) = (work.run, work.build);
         let ctx = self.slot_ctx(slot)?;
-        for (importer, text) in run.importers {
-            write(slot, importer, text)?;
-        }
-        let limit = self.reference(slot, &ctx, run)?;
-        loop {
-            let index = next.fetch_add(1, Ordering::SeqCst);
-            let Some(planned) = run.mutants.get(index) else {
-                return Ok(());
-            };
-            write(slot, run.file, planned.source.as_bytes())?;
-            let ran = self.mutant(&ctx, planned, limit);
-            write(slot, run.file, run.original)?;
-            let ran = ran?;
-            if let Ok(mut found) = found.lock() {
-                found[index] = Some(ran);
+        let (limit, mut holds) = match build {
+            Build::Copies => {
+                for (importer, text) in run.importers {
+                    write(slot, importer, text)?;
+                }
+                (self.reference(slot, &ctx, run)?, Holds::Original)
+            }
+            Build::Schemata { limits, .. } => (limits[index], Holds::Schemata),
+        };
+        while let Some(&mutant) = work.order.get(work.next.fetch_add(1, Ordering::SeqCst)) {
+            let planned = run.mutants[mutant];
+            let ran = match (id(build, mutant), build) {
+                (Some(id), Build::Schemata { source, .. }) => {
+                    if holds != Holds::Schemata {
+                        write(slot, run.file, source.as_bytes())?;
+                        holds = Holds::Schemata;
+                    }
+                    self.mutant(&ctx, planned, limit, id)
+                }
+                _ => {
+                    write(slot, run.file, planned.source.as_bytes())?;
+                    let ran = self.mutant(&ctx, planned, limit, 0);
+                    write(slot, run.file, run.original)?;
+                    holds = Holds::Original;
+                    ran
+                }
+            }?;
+            if let Ok(mut found) = work.found.lock() {
+                found[mutant] = Some(ran);
             }
         }
+        if holds != Holds::Original {
+            write(slot, run.file, run.original)?;
+        }
+        Ok(())
     }
 
     /// The context of running in `slot`: its root, and a writer confined to its `.cupel/`.
@@ -115,11 +215,7 @@ impl Execution<'_> {
         let mut renewed = run.original.to_vec();
         renewed.push(b'\n');
         write(slot, run.file, &renewed)?;
-        let started = Instant::now();
-        let ran = self
-            .runner
-            .run(ctx, &union(&run.mutants), &self.options(None))?;
-        let elapsed = started.elapsed();
+        let (ran, elapsed) = self.timed(ctx, &union(&run.mutants))?;
         if !ran.results.is_green() {
             return Err(Error::Process {
                 program: self.runner.id().to_string(),
@@ -131,22 +227,36 @@ impl Execution<'_> {
                 ),
             });
         }
-        Ok(TIMEOUT_FLOOR.max(elapsed * self.timeout_factor))
+        Ok(self.limit(elapsed))
+    }
+
+    /// Runs `selection` with no mutant selected; the run and its wall time.
+    fn timed(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Result<(TestRun, Duration)> {
+        let started = Instant::now();
+        let ran = self.runner.run(ctx, selection, &self.options(None, 0))?;
+        Ok((ran, started.elapsed()))
+    }
+
+    /// A mutant's timeout after a reference run of `elapsed`.
+    fn limit(&self, elapsed: Duration) -> Duration {
+        TIMEOUT_FLOOR.max(elapsed * self.timeout_factor)
     }
 
     /// How every run of the production runs: in the runner's own order, with the run's seed (so
-    /// `--seed` repeats it, and nothing is answered from a cache of earlier results), and
-    /// `timeout`.
-    fn options(&self, timeout: Option<Duration>) -> RunOptions {
+    /// `--seed` repeats it, and nothing is answered from a cache of earlier results), `timeout`,
+    /// and `CUPEL_MUTANT` set to `mutant` (0 for none), so a variable inherited from an outer run
+    /// never selects a mutant here.
+    fn options(&self, timeout: Option<Duration>, mutant: u32) -> RunOptions {
         RunOptions {
+            env: vec![(MUTANT_VAR.to_owned(), mutant.to_string())],
             timeout,
             seed: Some(self.ctx.seed),
             ..RunOptions::default()
         }
     }
 
-    /// Runs `planned`'s tests against it (already written) with `limit`.
-    fn mutant(&self, ctx: &ProduceCtx, planned: &Planned, limit: Duration) -> Result<Ran> {
+    /// Runs `planned`'s tests against it (already written, or selected by `id`) with `limit`.
+    fn mutant(&self, ctx: &ProduceCtx, planned: &Planned, limit: Duration, id: u32) -> Result<Ran> {
         let selection = planned
             .tests
             .clone()
@@ -154,15 +264,43 @@ impl Execution<'_> {
         let started = Instant::now();
         let ran = self
             .runner
-            .run(ctx, &selection, &self.options(Some(limit)))?;
+            .run(ctx, &selection, &self.options(Some(limit), id))?;
         let elapsed = started.elapsed();
-        Ok(classify(&ran, elapsed >= limit, elapsed))
+        let strategy = if id == 0 {
+            MutationStrategy::FileCopy
+        } else {
+            MutationStrategy::Schemata
+        };
+        Ok(classify(&ran, elapsed >= limit, elapsed, strategy))
+    }
+}
+
+/// What the slots working on one file share.
+struct Work<'a> {
+    run: &'a FileRun<'a>,
+    build: &'a Build<'a>,
+    /// Indexes of `run.mutants` in the order they are taken.
+    order: &'a [usize],
+    next: &'a AtomicUsize,
+    found: &'a Mutex<Vec<Option<Ran>>>,
+}
+
+/// The schemata id of mutant `index` under `build`; `None` for a file copy.
+fn id(build: &Build<'_>, index: usize) -> Option<u32> {
+    match build {
+        Build::Copies => None,
+        Build::Schemata { ids, .. } => ids.get(index).copied().flatten(),
     }
 }
 
 /// What a finished mutant run says: killed when a test failed, a timeout when it ran out of
 /// time, survived when every invocation completed, else unviable (it did not build or load).
-fn classify(ran: &TestRun, out_of_time: bool, elapsed: Duration) -> Ran {
+fn classify(
+    ran: &TestRun,
+    out_of_time: bool,
+    elapsed: Duration,
+    strategy: MutationStrategy,
+) -> Ran {
     let results = &ran.results;
     let killing_tests: Vec<String> = results.failures().map(|test| test.id.clone()).collect();
     let complete = results.incomplete().next().is_none();
@@ -180,6 +318,8 @@ fn classify(ran: &TestRun, out_of_time: bool, elapsed: Duration) -> Ran {
         tests: results.tests.iter().map(|test| test.id.clone()).collect(),
         killing_tests,
         duration_ms: u64::try_from(elapsed.as_millis()).unwrap_or(u64::MAX),
+        strategy,
+        fallback: None,
     }
 }
 
@@ -206,6 +346,22 @@ fn why_red(ran: &TestRun) -> String {
         .next()
         .and_then(|invocation| invocation.output.clone())
         .unwrap_or_else(|| "the run reported no tests".to_owned())
+}
+
+/// Everything `ran`'s incomplete invocations printed, where a build names its errors.
+fn output(ran: &TestRun) -> String {
+    ran.results
+        .incomplete()
+        .filter_map(|invocation| invocation.output.clone())
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn panicked() -> Error {
+    Error::Process {
+        program: "engine.mutation".to_owned(),
+        message: "a mutation worker panicked".to_owned(),
+    }
 }
 
 /// Writes `bytes` as `slot`'s `path`.
