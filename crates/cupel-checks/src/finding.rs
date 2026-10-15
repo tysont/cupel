@@ -1,6 +1,6 @@
 // ABOUTME: Builds findings about one symbol the way every native check reports them: stable ID from the
 // ABOUTME: structural hash, location from the symbol span, and repro and suppress commands.
-use cupel_core::syntax::SymbolDef;
+use cupel_core::syntax::{SymbolDef, TestConventions};
 use cupel_core::{
     Action, ActionKind, CheckId, Evidence, Finding, FindingId, Location, Manifest, Severity,
     Symbol, SymbolHash, Tier,
@@ -106,4 +106,22 @@ impl<'a, E: Serialize> SymbolFinding<'a, E> {
             suppressed: false,
         }
     }
+}
+
+/// `finding` about `symbol` with the action hint `nearest_test_file`: the first test file
+/// `conventions` pairs with the symbol's file, when there is one.
+pub fn with_nearest_test(
+    mut finding: Finding,
+    symbol: &SymbolDef,
+    conventions: Option<&TestConventions>,
+) -> Finding {
+    if let Some(test) =
+        conventions.and_then(|conventions| conventions.test_files_for(&symbol.file).first())
+    {
+        finding
+            .action
+            .hints
+            .insert("nearest_test_file".to_owned(), Value::String(test.clone()));
+    }
+    finding
 }

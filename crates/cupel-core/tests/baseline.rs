@@ -196,6 +196,7 @@ impl Check for Counts {
             duration_ms: 0,
             skipped: None,
             oracle: None,
+            notes: Vec::new(),
         })
     }
 }

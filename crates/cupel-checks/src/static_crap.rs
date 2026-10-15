@@ -1,5 +1,5 @@
 // ABOUTME: `static.crap`: per-symbol CRAP, `CC² × (1 − coverage)³ + CC`, from Symbols, Decisions, NormTree, and
-// ABOUTME: a CoverageMap; without coverage CRAP is null and nothing is reported (ADR-048, ADR-067).
+// ABOUTME: a CoverageMap; without coverage CRAP is null and nothing is reported (ADR-048, ADR-067, ADR-079).
 use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::coverage::CoverageMap;
@@ -13,13 +13,12 @@ use cupel_core::{
 };
 use schemars::JsonSchema;
 use serde::Serialize;
-use serde_json::Value;
 
-use crate::finding::SymbolFinding;
+use crate::finding::{SymbolFinding, with_nearest_test};
 use crate::manifest::{kind, metric, ranked};
 use crate::metrics::{
-    cyclomatic, decisions_by_symbol, hashes_by_symbol, largest, scored, symbol_target,
-    weighted_mean,
+    cyclomatic, decisions_by_symbol, hashes_by_symbol, largest, scored, symbol_coverage,
+    symbol_target, weighted_mean,
 };
 use crate::outcome;
 use crate::settings::Limits;
@@ -55,7 +54,7 @@ impl StaticCrap {
         Self {
             manifest: Manifest {
                 id: CheckId::from(ID),
-                version: 2,
+                version: 3,
                 tier: Tier::try_from(0).expect("tier 0 exists"),
                 cost: CostClass::Quick,
                 needs: vec![FactKind::Symbols, FactKind::Decisions, FactKind::NormTree],
@@ -65,10 +64,10 @@ impl StaticCrap {
                 stability: Stability::Experimental,
                 summary: "CRAP per function: cyclomatic complexity weighted by missing test \
                           coverage. Limitation: CRAP exists only where coverage was measured; \
-                          without a coverage map (no coverage producer exists until P3.2) the \
-                          check passes with no score, no metrics, and no findings, and a function \
-                          with no instrumented line is not scored. `static.complexity` reports \
-                          cyclomatic complexity alone."
+                          without a coverage map (no `[lang.<id>] coverage` command and no \
+                          fresh report) the check passes with no score, no metrics, and no \
+                          findings, and a function with no instrumented line is not scored. \
+                          `static.complexity` reports cyclomatic complexity alone."
                     .to_owned(),
             },
         }
@@ -274,10 +273,7 @@ impl StaticCrap {
         sink: &mut dyn EventSink,
     ) -> Option<Finding> {
         let key = symbol.key();
-        let covered =
-            inputs
-                .coverage
-                .line_coverage(&symbol.file, symbol.span.line, symbol.span.end_line)?;
+        let covered = symbol_coverage(inputs.coverage, symbol)?;
         let cyclomatic = cyclomatic(inputs.decisions.get(&key).copied().unwrap_or_default());
         let crap = crap(cyclomatic, covered);
         tally.add(crap);
@@ -341,19 +337,11 @@ impl StaticCrap {
              cyclomatic complexity, {}), or split it until CRAP is below {}.",
             symbol.name, score.cyclomatic, score.high
         );
-        let mut finding = self
+        let finding = self
             .report(subject, "crap.high", score)
             .described(title, summary)
             .finding();
-        if let Some(test) =
-            conventions.and_then(|conventions| conventions.test_files_for(&symbol.file).first())
-        {
-            finding
-                .action
-                .hints
-                .insert("nearest_test_file".to_owned(), Value::String(test.clone()));
-        }
-        finding
+        with_nearest_test(finding, symbol, conventions)
     }
 
     fn watch(&self, subject: Subject<'_>, score: CrapScore) -> Finding {

@@ -1,13 +1,13 @@
 // ABOUTME: The runner producers as the registry holds them: table order, detection, pins, and real runs of
 // ABOUTME: each runner on the test-results fixtures, skipped with a reason when the tool is not installed.
+mod support;
+
 use cupel_core::{
     Availability, Cancellation, Ctx, Error, FactKind, LangId, ProducerRegistry, Scope, TestOutcome,
     TestResults,
 };
 use cupel_fixtures::copy_repo;
 use support::{lang, produce_ctx, registry, runner};
-
-mod support;
 
 use TestOutcome::{Passed, Skipped};
 

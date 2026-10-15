@@ -142,22 +142,12 @@ impl Producer<TestResults> for Runner {
     }
 
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
-        let mut version: Vec<String> = self
-            .0
-            .version
-            .iter()
-            .map(|word| (*word).to_owned())
-            .collect();
-        // A runner found in `node_modules/.bin` reports that copy's version.
-        if self.0.node_bin
-            && let Some(program) = self.program(&ctx.root)
-        {
-            version[0] = program;
-        }
-        Some(ToolProbe {
-            name: ToolId::from(self.0.tool),
-            version,
-        })
+        Some(probe(
+            self.0.tool,
+            self.0.node_bin,
+            self.0.version,
+            &ctx.root,
+        ))
     }
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<TestResults> {
@@ -383,11 +373,7 @@ impl Runner {
     /// The program to run in `dir`: its `node_modules/.bin` copy when the spec allows one, else
     /// the tool on `PATH`; `None` when neither exists.
     fn program(&self, dir: &Path) -> Option<String> {
-        let local = dir.join("node_modules").join(".bin").join(self.0.tool);
-        if self.0.node_bin && local.is_file() {
-            return Some(local.to_string_lossy().into_owned());
-        }
-        find_program(self.0.tool).map(|_| self.0.tool.to_owned())
+        installed(self.0.tool, self.0.node_bin, dir)
     }
 }
 
@@ -436,6 +422,29 @@ fn quote(word: &str) -> String {
     } else {
         format!("'{}'", word.replace('\'', r"'\''"))
     }
+}
+
+/// The probe of `tool`, whose version `version` prints; a tool found in `dir`'s
+/// `node_modules/.bin` (when `node_bin` allows one) reports that copy's version.
+pub(crate) fn probe(tool: &str, node_bin: bool, version: &[&str], dir: &Path) -> ToolProbe {
+    let mut version: Vec<String> = version.iter().map(|word| (*word).to_owned()).collect();
+    if node_bin && let Some(program) = installed(tool, node_bin, dir) {
+        version[0] = program;
+    }
+    ToolProbe {
+        name: ToolId::from(tool),
+        version,
+    }
+}
+
+/// The program to run for `tool` in `dir`: its `node_modules/.bin` copy when `node_bin` allows
+/// one, else the tool on `PATH`; `None` when neither exists.
+pub(crate) fn installed(tool: &str, node_bin: bool, dir: &Path) -> Option<String> {
+    let local = dir.join("node_modules").join(".bin").join(tool);
+    if node_bin && local.is_file() {
+        return Some(local.to_string_lossy().into_owned());
+    }
+    find_program(tool).map(|_| tool.to_owned())
 }
 
 /// The project roots of the language being produced, each with its packages; the repository

@@ -152,6 +152,17 @@ pub fn runner_command(id: &ProducerId, root: &Root) -> Option<String> {
     selection.commands().test
 }
 
+/// The runners the coverage producer `id` works with, by the table's `commands`; empty when it
+/// has one `command` for every runner, or the table does not list it.
+pub fn companions(id: &ProducerId) -> Vec<&'static ProducerId> {
+    rows()
+        .iter()
+        .flat_map(|row| &row.coverage)
+        .find(|tool| tool.id == *id)
+        .map(|tool| tool.commands.keys().collect())
+        .unwrap_or_default()
+}
+
 /// A command that exits 0 when `program` is installed: `[probes]`, else `<program> --version`.
 pub fn probe(program: &str) -> Vec<String> {
     TOOLCHAIN.probes.get(program).map_or_else(

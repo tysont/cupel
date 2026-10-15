@@ -1,5 +1,5 @@
-// ABOUTME: `static.crap` through the binary on the fixture repositories: without coverage it reports no CRAP,
-// ABOUTME: and `describe` shows the check, its limitation, and its finding kinds from the manifest (ADR-067).
+// ABOUTME: `static.crap` through the binary: no CRAP without coverage, CRAP from the coverage fixtures' reports with
+// ABOUTME: `explain` and one-line text evidence, and `describe` of the check and its kinds (ADR-067, ADR-079).
 use cupel_fixtures::{copy_repo, run_cupel};
 use serde_json::{Value, json};
 
@@ -80,4 +80,55 @@ fn describe_shows_the_check_and_its_finding_kinds_from_the_manifest() {
     );
     let watch = json(dir.path(), &["describe", "finding", "crap.watch"])["description"].clone();
     assert_eq!(watch["action"], json!("review"));
+}
+
+#[test]
+fn with_coverage_explain_shows_the_excerpt_evidence_and_nearest_test_file_of_a_high_finding() {
+    let dir = tempfile::tempdir().unwrap();
+    copy_repo("coverage/javascript", dir.path());
+    let envelope = json(
+        dir.path(),
+        &["check", "--only", "static.crap", "--format", "json"],
+    );
+    let finding = envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|finding| finding["symbol"]["display"] == json!("grade.refund"))
+        .expect("grade.refund is crap.high")
+        .clone();
+    assert_eq!(finding["kind"], json!("crap.high"));
+    let id = finding["id"].as_str().unwrap();
+    let explained = json(dir.path(), &["explain", id, "--format", "json"]);
+    let explanation = &explained["explanation"];
+    assert_eq!(explanation["nearest_test_file"], json!("grade.test.js"));
+    assert_eq!(explanation["excerpt"]["file"], json!("grade.js"));
+    assert_eq!(
+        explained["findings"][0]["evidence"],
+        json!({"crap": 42.0, "cyclomatic": 6, "coverage": 0.0, "watch": 5, "high": 30})
+    );
+}
+
+#[test]
+fn with_coverage_text_output_summarizes_the_evidence_on_one_line() {
+    let dir = tempfile::tempdir().unwrap();
+    copy_repo("coverage/go", dir.path());
+    let outcome = run_cupel(
+        &["check", "--only", "static.crap", "--format", "text"],
+        dir.path(),
+    );
+    assert_eq!(outcome.code, Some(0), "{}", outcome.stdout);
+    let lines: Vec<&str> = outcome.stdout.lines().collect();
+    let title = lines
+        .iter()
+        .position(|line| line.contains("`grade.Refund` has CRAP 42.0"))
+        .expect("the Refund finding is listed");
+    let evidence = lines[title..]
+        .iter()
+        .find(|line| line.trim_start().starts_with("evidence:"))
+        .unwrap();
+    assert!(
+        evidence.contains("coverage 0.0 · crap 42.0 · cyclomatic 6 · high 30 · watch 5"),
+        "{evidence}"
+    );
 }

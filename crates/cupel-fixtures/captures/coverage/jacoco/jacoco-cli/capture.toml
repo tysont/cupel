@@ -1,0 +1,7 @@
+# Captured from the real tool on the coverage fixture (P3.2); the other file here is its unedited
+# report. The sources were a Java port of the fixture (`grade.Grade`, run by a `main` in `grade.GradeTest`).
+# `dir` is where it ran, which parsers' callers strip from absolute paths.
+tool = "JaCoCo 0.8.12 (agent and jacococli), Temurin OpenJDK 21.0.12.1"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p3-2/work/java"
+command = "javac -g -d classes src/main/java/grade/Grade.java src/test/java/grade/GradeTest.java && java -javaagent:jacocoagent.jar=destfile=jacoco.exec -cp classes grade.GradeTest && java -jar jacococli.jar report jacoco.exec --classfiles classes/grade/Grade.class --sourcefiles src/main/java --xml <report>"
+exit_code = 0

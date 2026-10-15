@@ -1,4 +1,4 @@
-# ABOUTME: Continuous integration: `make check` on Linux and macOS with every test runner installed, and
+# ABOUTME: Continuous integration: `make check` on Linux and macOS with every test runner and coverage tool installed, and
 # ABOUTME: `make dogfood` (Cupel's own gate) for every push and pull request. Rust comes from rust-toolchain.toml.
 name: ci
 
@@ -24,6 +24,13 @@ jobs:
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-nextest
+      # The coverage tools the coverage producers' integration tests drive for real (P3.2, ADR-077).
+      - name: Install cargo-llvm-cov and llvm-tools-preview
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov
+      - name: Add llvm-tools-preview
+        run: rustup component add llvm-tools-preview
       - uses: actions/setup-go@v5
         with:
           go-version: stable
@@ -43,11 +50,13 @@ jobs:
           tool: cargo-llvm-cov
       - name: Install pytest-cov
         run: python -m pip install pytest-cov
+      - name: Install pytest and pytest-cov
+        run: python -m pip install pytest pytest-cov
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Install vitest and jest
-        run: npm install --global vitest jest
+      - name: Install vitest, its v8 coverage provider, and jest
+        run: npm install --global vitest @vitest/coverage-v8 jest
       - name: make check
         run: make check
 

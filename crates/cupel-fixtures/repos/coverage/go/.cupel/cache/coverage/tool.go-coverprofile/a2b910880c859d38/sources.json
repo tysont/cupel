@@ -1,0 +1,14 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/gofresh",
+  "skip_dirs": [
+    "vendor"
+  ],
+  "report": "ea5f84cd6a385f823bad2371c7c991f7b7a6a0ace9735acd12bf3841e456e4d0",
+  "files": {
+    "cupel.toml": "49123039adff1eddc650e7cc070a7404fa1090affd0f10759f2a5ce19867ea06",
+    "go.mod": "dea6e2a295bc1a5693a893b7de1571dc441d1997f905c321656375f713995bf4",
+    "grade.go": "a36bb4e9787068629e757c3d341bccef27c899598d38d9b89276d5d42ed9448a",
+    "grade_test.go": "40716bb4ce0591e71b311cf26b881b2eab3d4101ec51520b98f09719d02ee848"
+  }
+}

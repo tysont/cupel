@@ -99,3 +99,85 @@ fn programs_are_found_on_the_path() {
         (true, None)
     );
 }
+
+/// Re-runs this test binary on one test with `vars` set, so the test can check what a child of
+/// `Process` inherits without changing this process's environment.
+fn in_environment(test: &str, vars: &[(&str, &str)]) -> std::process::Output {
+    let mut command = std::process::Command::new(std::env::current_exe().unwrap());
+    command
+        .args([test, "--exact", "--nocapture"])
+        .env("CUPEL_PROCESS_TEST_CHILD", "1")
+        // A harness around this test run must not decide the test.
+        .env_remove("__CARGO_LLVM_COV_RUSTC_WRAPPER");
+    for (key, value) in vars {
+        command.env(key, value);
+    }
+    command.output().unwrap()
+}
+
+/// A coverage harness measuring Cupel itself (cargo-llvm-cov's rustc wrapper and profile file)
+/// must not reach the tools Cupel runs: the fixture a producer builds is not Cupel's workspace.
+#[test]
+fn a_coverage_harness_around_cupel_does_not_reach_the_child() {
+    if std::env::var_os("CUPEL_PROCESS_TEST_CHILD").is_some() {
+        let captured = shell("env").run(&Cancellation::new()).unwrap();
+        let leaked: Vec<&str> = captured
+            .stdout
+            .lines()
+            .filter(|line| {
+                line.starts_with("CARGO_LLVM_COV")
+                    || line.starts_with("__CARGO_LLVM_COV_")
+                    || line.starts_with("LLVM_PROFILE_FILE=")
+                    || line.starts_with("RUSTC_WRAPPER=")
+                    || line.starts_with("RUSTC_WORKSPACE_WRAPPER=")
+            })
+            .collect();
+        assert_eq!(leaked, Vec::<&str>::new());
+        assert!(captured.stdout.contains("KEPT=yes"));
+        return;
+    }
+    let output = in_environment(
+        "a_coverage_harness_around_cupel_does_not_reach_the_child",
+        &[
+            ("CARGO_LLVM_COV", "1"),
+            ("CARGO_LLVM_COV_TARGET_DIR", "/t"),
+            ("__CARGO_LLVM_COV_RUSTC_WRAPPER", "1"),
+            ("RUSTC_WRAPPER", "/bin/cargo-llvm-cov"),
+            ("RUSTC_WORKSPACE_WRAPPER", "/bin/cargo-llvm-cov"),
+            ("LLVM_PROFILE_FILE", "/t/%m.profraw"),
+            ("KEPT", "yes"),
+        ],
+    );
+    assert_eq!(
+        output.status.code(),
+        Some(0),
+        "{}{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+/// A rustc wrapper that is not cargo-llvm-cov's is the user's own and stays.
+#[test]
+fn a_rustc_wrapper_of_the_users_own_is_inherited() {
+    if std::env::var_os("CUPEL_PROCESS_TEST_CHILD").is_some() {
+        let captured = shell("env").run(&Cancellation::new()).unwrap();
+        let wrappers: Vec<&str> = captured
+            .stdout
+            .lines()
+            .filter(|line| line.starts_with("RUSTC_WRAPPER="))
+            .collect();
+        assert_eq!(wrappers, vec!["RUSTC_WRAPPER=/bin/sccache"]);
+        return;
+    }
+    let output = in_environment(
+        "a_rustc_wrapper_of_the_users_own_is_inherited",
+        &[("RUSTC_WRAPPER", "/bin/sccache")],
+    );
+    assert_eq!(
+        output.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+}

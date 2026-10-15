@@ -60,6 +60,7 @@
 
 mod cargo_nextest;
 mod cargo_test;
+pub mod coverage;
 pub mod flake;
 mod go_test;
 mod jest;

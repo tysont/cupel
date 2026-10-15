@@ -1,0 +1,15 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/fresh-rust",
+  "skip_dirs": [
+    "target"
+  ],
+  "report": "6d3adc9aeb02b41d674a6ed164444adc49e7e4b09e02ae1a1532bae5627d8777",
+  "files": {
+    "Cargo.lock": "470c637d7e1b652e749a00946ede95c135d6a827c593497c24aab88b2f49faba",
+    "Cargo.toml": "602fa2eb639702c0221e2be38aceea61c707d281ae2fd2ecbb0b7f8008873bea",
+    "cupel.toml": "514543e3b26bf6cea214591ba9c6f860d3e0ff0a30471f10c3294cbf7b4bb3ca",
+    "src/lib.rs": "a861b769fcf1eee96b40a75cf0854b53b172154b228587892e635d4f8505b7a6",
+    "tests/grade.rs": "6be48fe35e70cce6a84a2dcb7ca1d860a1c021ec3af22034fd9e28d5623c82b2"
+  }
+}

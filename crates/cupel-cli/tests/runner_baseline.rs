@@ -70,6 +70,7 @@ impl Check for NeedsTestResults {
             duration_ms: 0,
             skipped: None,
             oracle: None,
+            notes: Vec::new(),
         })
     }
 }

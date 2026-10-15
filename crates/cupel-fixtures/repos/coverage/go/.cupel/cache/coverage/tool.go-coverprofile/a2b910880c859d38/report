@@ -1,0 +1,18 @@
+mode: set
+example.com/grade/grade.go:5.30,7.31 2 1
+example.com/grade/grade.go:7.31,9.3 1 1
+example.com/grade/grade.go:10.2,10.12 1 1
+example.com/grade/grade.go:14.33,15.17 1 1
+example.com/grade/grade.go:15.17,17.3 1 1
+example.com/grade/grade.go:18.2,18.17 1 1
+example.com/grade/grade.go:18.17,20.3 1 1
+example.com/grade/grade.go:21.2,21.15 1 0
+example.com/grade/grade.go:25.52,26.17 1 0
+example.com/grade/grade.go:26.17,28.3 1 0
+example.com/grade/grade.go:29.2,29.15 1 0
+example.com/grade/grade.go:29.15,31.3 1 0
+example.com/grade/grade.go:32.2,32.24 1 0
+example.com/grade/grade.go:32.24,34.3 1 0
+example.com/grade/grade.go:35.2,35.12 1 0
+example.com/grade/grade.go:35.12,37.3 1 0
+example.com/grade/grade.go:38.2,38.19 1 0

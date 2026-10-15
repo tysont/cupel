@@ -85,7 +85,7 @@ cupel init --write --force   # replace an existing cupel.toml
 
 ### `cupel doctor`
 
-`doctor` verifies the binary against `required_version`, the validity of `cupel.toml`, and write access to `.cupel/`. For every tool a configured check needs through its facts (a test runner, for a check that needs test results), it checks the tool is on `PATH` and reports its version under `run.toolchain`; a `[lang.<id>] runner` that names no runner is a finding listing the valid ones. Every problem is a finding with a `configure` or `install_tool` action. Exit 3 means something required is missing.
+`doctor` verifies the binary against `required_version`, the validity of `cupel.toml`, and write access to `.cupel/`. For every tool a configured check needs through its facts (a test runner, for a check that needs test results; a coverage tool, for a language with a `coverage` command), it checks the tool is on `PATH` and reports its version under `run.toolchain`; a `[lang.<id>] runner` that names no runner is a finding listing the valid ones. Every problem is a finding with a `configure` or `install_tool` action. Exit 3 means something required is missing.
 
 ### `cupel describe`
 
@@ -450,6 +450,7 @@ Every check below exists and is supported in all five languages. All run at `--d
 | `static.crap` | 0 | quick | `crap.high`, `crap.watch` | `max`, `mean` | `crap` | go, javascript, python, rust, typescript |
 | `static.dead-code` | 0 | quick | `dead.symbol`, `dead.export` | `dead_symbols`, `dead_exports` | — | go, javascript, python, rust, typescript |
 | `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | go, javascript, python, rust, typescript |
+| `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines` |  |
 | `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | go, javascript, python, rust, typescript |
 | `tests.quality` | 2 | quick | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | `assertion_density`, `weak_ratio`, `no_assertion` | `mock_density` | go, javascript, python, rust, typescript |
 | `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | go, javascript, python, rust, typescript |
@@ -482,6 +483,7 @@ The support matrix, from `cupel describe matrix`:
 | `static.crap` | supported | supported | supported | supported | supported |
 | `static.dead-code` | supported | supported | supported | supported | supported |
 | `static.deps` | supported | supported | supported | supported | supported |
+| `tests.coverage` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
 | `tests.flaky` | supported | supported | supported | supported | supported |
 | `tests.quality` | supported | supported | supported | supported | supported |
 | `tests.weakening` | supported | supported | supported | supported | supported |
@@ -528,6 +530,30 @@ flake_runs = 5      # reruns per check run; 0 turns them off
 ```
 
 The reruns repeat the whole suite (impacted-test selection is not built yet), so they cost about three baseline runs. `cargo nextest` runs each test in its own process, where order cannot matter; with it as the runner, the flake engine does not rerun and `tests.flaky` ends in `error` for that language.
+Before any check that needs test results runs, Cupel runs the suite once in the real tree, the **baseline**. If any test fails, or the runner cannot finish (a build error), the run is refused: `status: "error"`, exit code 4, no check scores, and one `baseline.test-failed` finding per failing test (with its file, runner, and the tail of its output) or `baseline.run-incomplete` per run that did not finish. Fix the suite, then rerun. Every test of the baseline is also indexed in `.cupel/cupel.db`. The checks shipped today need no test results, so `cupel check` runs no baseline yet; coverage runs the suite through the coverage command instead (see Coverage).
+
+## Coverage
+
+`tests.coverage` and `static.crap` read a `coverage-map` fact: line hits, and branch hits where the tool measures them. Cupel runs the coverage command the repository configures — `cupel init --write` writes one per language — and reads the report it leaves, in any of LCOV, Cobertura XML, Istanbul JSON, Go coverprofile, or JaCoCo XML:
+
+```toml
+[lang.rust]
+coverage = "cargo llvm-cov --lcov --output-path {out}"    # {out}: a report path Cupel chooses
+
+[lang.typescript]
+coverage = "npx vitest run --coverage --coverage.reporter=lcov"   # no {out}: coverage/lcov.info
+```
+
+| Language | Coverage producers, in default order | Branches |
+|---|---|---|
+| Rust | `cargo llvm-cov` | no (stable llvm-cov reports none) |
+| Go | `go test -coverprofile` | no (coverprofile has none) |
+| Python | `pytest-cov` (with pytest), `coverage.py` (with unittest) | with `--cov-branch` |
+| JavaScript, TypeScript | `vitest --coverage`, `jest --coverage`, `c8` | yes |
+
+Without a `coverage` command a language's `tests.coverage` is skipped as `unconfigured` and `static.crap` reports no CRAP; with one but without the tool, it is `unavailable` and `cupel doctor` names the tool. A report is reused instead of rerunning the suite while it is fresh: Cupel records the hash of every file under the project root when it makes one (and trusts files not modified since), and a report the tool left at its default location is used when it is newer than every source. A command that exits non-zero gives no coverage and a `coverage.run-failed` finding, since a red suite has no meaningful coverage.
+
+`tests.coverage` reports `coverage.uncovered-symbol` for each function no test ran (a warning, which fails the check) and `coverage.uncovered-branch` for a function that ran with a branch no test took. Where the tool measured no branches (Go, Rust), there are no branch findings and the result says `notes: ["branches: unavailable (go)"]`. Its gate keys are `tests.coverage.line` and `tests.coverage.branch` (covered shares), `lines`, `branches`, and `uncovered`. `static.crap` computes `CC² × (1 − coverage)³ + CC` from the same map.
 
 ## Configuration
 

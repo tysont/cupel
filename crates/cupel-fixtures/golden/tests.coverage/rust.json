@@ -1,0 +1,151 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "tests.coverage",
+      "metrics": {
+        "line": 0.42857142857142855,
+        "lines": 28.0,
+        "uncovered": 1.0
+      },
+      "notes": [
+        "branches: unavailable (rust)"
+      ],
+      "oracle": null,
+      "score": {
+        "n": 28,
+        "unit": "line_ratio",
+        "value": 0.42857142857142855
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "tests/grade.rs"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that calls `refund`."
+      },
+      "check": "tests.coverage",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "covered": 0,
+        "lines": 14
+      },
+      "id": "fnd_d7e363",
+      "kind": "coverage.uncovered-symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 38,
+        "file": "src/lib.rs",
+        "line": 24
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.coverage --symbols sh_db0231235a26e63c",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d7e363 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "refund",
+        "hash": "sh_db0231235a26e63c",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`refund` never ran under test: none of its 14 instrumented lines"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_d7e363",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Write a test that calls `refund`."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "rust": {
+            "coverage": "cargo llvm-cov --lcov --output-path {out}"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 5
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

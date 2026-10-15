@@ -7,7 +7,7 @@ use cupel_core::config::Config;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
     ActionKind, Availability, Check, Ctx, Envelope, ExitCode, FactKind, Lang, LangId,
-    ProducerRegistry, Selection, Severity, Status, ToolId, Writer,
+    ProducerRegistry, Selection, Severity, Status, ToolId, ToolProbe, Writer,
 };
 use semver::{Version, VersionReq};
 use serde_json::json;
@@ -215,34 +215,47 @@ impl Resolution {
         let Some(producer) = chosen else {
             return;
         };
+        // A producer waiting for configuration (a coverage producer without a
+        // `[lang.<id>] coverage` command, ADR-079) runs nothing, so it needs no tool yet.
+        if matches!(
+            producer.availability(walk.ctx),
+            Availability::Unconfigured { .. }
+        ) {
+            return;
+        }
         if let Some(tool) = producer.tool(walk.ctx) {
             let purpose = format!("{purpose} via {}", producer.id());
-            match self
-                .requirements
-                .iter_mut()
-                .find(|known| known.tool == tool.name)
-            {
-                Some(known) => {
-                    known.needed_for.push_str(", ");
-                    known.needed_for.push_str(&purpose);
-                    known.required |= required;
-                    known.versioned |= required;
-                }
-                None => self.requirements.push(Requirement {
-                    tool: tool.name,
-                    needed_for: purpose,
-                    required,
-                    probe: tool.version,
-                    // Only what the checks need is versioned in `run.toolchain`.
-                    versioned: required,
-                }),
-            }
+            self.require(tool, purpose, required);
         }
         visiting.push(kind);
         for upstream in producer.needs() {
             self.resolve(walk, *upstream, lang, need, visiting);
         }
         visiting.pop();
+    }
+
+    /// Records that `tool` is needed for `purpose`, joining a requirement already known for it.
+    fn require(&mut self, tool: ToolProbe, purpose: String, required: bool) {
+        match self
+            .requirements
+            .iter_mut()
+            .find(|known| known.tool == tool.name)
+        {
+            Some(known) => {
+                known.needed_for.push_str(", ");
+                known.needed_for.push_str(&purpose);
+                known.required |= required;
+                known.versioned |= required;
+            }
+            None => self.requirements.push(Requirement {
+                tool: tool.name,
+                needed_for: purpose,
+                required,
+                probe: tool.version,
+                // Only what the checks need is versioned in `run.toolchain`.
+                versioned: required,
+            }),
+        }
     }
 
     /// The problem of a `[lang.<id>]` pin (`key`) that names no producer of `kind` for `lang`.
@@ -679,10 +692,10 @@ mod tests {
         );
     }
 
-    /// A check that needs `TestResults` and is never run.
-    struct NeedsTestResults(cupel_core::Manifest);
+    /// A check that needs one fact kind and is never run.
+    struct Needs(cupel_core::Manifest);
 
-    impl Check for NeedsTestResults {
+    impl Check for Needs {
         fn manifest(&self) -> &cupel_core::Manifest {
             &self.0
         }
@@ -706,19 +719,19 @@ mod tests {
         }
     }
 
-    /// What doctor resolves for a check needing `TestResults` in the python test-results fixture
-    /// with `[lang.python]` holding `table`: each requirement's shape, then each problem's kind
-    /// and subject.
+    /// What doctor resolves for a check needing `need` in the python test-results fixture with
+    /// `[lang.python]` holding `table`: each requirement's shape, then each problem's kind and
+    /// subject.
     /// A requirement as `(tool, needed_for, required, probe)`.
     type Shape = (String, String, bool, String);
 
-    fn resolved(table: &serde_json::Value) -> (Vec<Shape>, Vec<String>) {
-        let check = NeedsTestResults(cupel_core::Manifest {
+    fn resolved_for(need: FactKind, table: &serde_json::Value) -> (Vec<Shape>, Vec<String>) {
+        let check = Needs(cupel_core::Manifest {
             id: cupel_core::CheckId::from("t.needs"),
             version: 1,
             tier: cupel_core::Tier::try_from(2).unwrap(),
             cost: cupel_core::CostClass::Standard,
-            needs: vec![FactKind::TestResults],
+            needs: vec![need],
             wants: Vec::new(),
             findings: Vec::new(),
             metrics: Vec::new(),
@@ -755,6 +768,34 @@ mod tests {
             false,
             "pytest --version".to_owned(),
         )
+    }
+
+    fn resolved(table: &serde_json::Value) -> (Vec<Shape>, Vec<String>) {
+        resolved_for(FactKind::TestResults, table)
+    }
+
+    #[test]
+    fn a_coverage_tool_is_required_only_where_a_coverage_command_is_configured() {
+        let unconfigured = resolved_for(FactKind::CoverageMap, &json!({}));
+        let configured = resolved_for(
+            FactKind::CoverageMap,
+            &json!({"coverage": "pytest --cov --cov-report=lcov:{out}"}),
+        );
+        assert_eq!(unconfigured, (vec![per_test_map()], vec![]));
+        assert_eq!(
+            configured,
+            (
+                vec![(
+                    "pytest".to_owned(),
+                    "t.needs (coverage-map for python) via tool.pytest-cov, tests --impacted \
+                     (per-test-map for python) via tool.pytest-cov-per-test"
+                        .to_owned(),
+                    true,
+                    "pytest --version".to_owned()
+                )],
+                vec![]
+            )
+        );
     }
 
     #[test]

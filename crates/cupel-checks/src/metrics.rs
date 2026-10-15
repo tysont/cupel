@@ -2,6 +2,7 @@
 // ABOUTME: cyclomatic complexity (ADR-024, ADR-042), ranking targets, and combining `scope` metrics (ADR-063).
 use std::collections::HashMap;
 
+use cupel_core::coverage::{CoverageMap, LineHits};
 use cupel_core::syntax::{Decision, Decisions, NormNode, NormTree, SymbolDef, SymbolKey};
 use cupel_core::{CheckResult, Location, SymbolHash, Target};
 
@@ -32,6 +33,34 @@ pub fn trees_by_symbol<'a>(
         .flat_map(|fact| &fact.symbols)
         .map(|entry| (&entry.symbol, (&entry.hash, &entry.root)))
         .collect()
+}
+
+/// The instrumented lines that say whether tests ran `symbol`: those after its first line, or
+/// its first line alone when nothing after it is instrumented. A declaration line runs when the
+/// definition is evaluated (a Python `def` on import), not when the function is called
+/// (ADR-079).
+pub fn symbol_lines<'a>(coverage: &'a CoverageMap, symbol: &SymbolDef) -> Vec<&'a LineHits> {
+    let (first, last) = (symbol.span.line, symbol.span.end_line);
+    let body = coverage.line_hits(&symbol.file, first.saturating_add(1), last);
+    if body.is_empty() {
+        coverage.line_hits(&symbol.file, first, first)
+    } else {
+        body
+    }
+}
+
+/// The share of `symbol`'s lines ([`symbol_lines`]) that ran; `None` when none is instrumented.
+pub fn symbol_coverage(coverage: &CoverageMap, symbol: &SymbolDef) -> Option<f64> {
+    let lines = symbol_lines(coverage, symbol);
+    if lines.is_empty() {
+        return None;
+    }
+    let ran = lines.iter().filter(|hits| hits.hits > 0).count();
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "line counts stay far below 2^52, where f64 is exact"
+    )]
+    Some(ran as f64 / lines.len() as f64)
 }
 
 /// 1 plus the cyclomatic weight of every decision.

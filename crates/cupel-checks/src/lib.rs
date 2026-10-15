@@ -51,6 +51,7 @@ mod static_complexity;
 mod static_crap;
 mod static_dead_code;
 mod static_deps;
+mod tests_coverage;
 mod tests_flaky;
 mod tests_quality;
 mod tests_weakening;

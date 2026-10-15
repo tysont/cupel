@@ -1,0 +1,16 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/fresh-javascript",
+  "skip_dirs": [
+    "node_modules",
+    "dist",
+    "coverage"
+  ],
+  "report": "26258a9969551b5f0423533c7d2ac1974968910399f8b0d4fe1c75f282d78950",
+  "files": {
+    "cupel.toml": "5572f9a19cf38672fdf77858ab992e374c097c38a50cb3c949af711b56ee5e44",
+    "grade.js": "27934cdf3e64696b73e7b0ca1da23b9df16940fa138113ca867a8d8b4daaa6a0",
+    "grade.test.js": "f412c9f99408a77bcfb19dc9b070092af32572fb0d3d4c8d5ea04f94e87618a2",
+    "package.json": "3cd1a59e2d6bcd58a3321f6b27ef79bccbf7e1aaff362e3ca13ad9434eb043a1"
+  }
+}

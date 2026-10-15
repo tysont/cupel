@@ -1,0 +1,16 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/fresh-typescript",
+  "skip_dirs": [
+    "coverage"
+  ],
+  "report": "cadd9fa92a43326ddf6ceb11c8e282e2a5f64c5c92454e997ea989b731127b4b",
+  "files": {
+    "cupel.toml": "bbb754926a63ee4cf95f971ca224481acc61c15d557fd7fb9ee0587257c8cd1b",
+    "package.json": "ca1d36af6d8a6637bc6b9e378faa150a03f7a0b3a6a3803070f57d3fa25d0a14",
+    "src/grade.test.ts": "04efaf2979c7e5af3acd7e9354dea06d438b64c786a09575b735f3f0c73a15ce",
+    "src/grade.ts": "e8fea46da28e6b95fedef6378cea96a74fa92fbfb9e70f2382b5c52f41a2843e",
+    "tsconfig.json": "41373dc679ff18f7c4beffe22769116e9d65053e517289aa8d71ebb64a9c2785",
+    "vitest.config.mjs": "e8711c19156fc88d38eb0c1ed84d77a54396fd9df480cc203fed9aeb26dcae2a"
+  }
+}

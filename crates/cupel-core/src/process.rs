@@ -86,6 +86,11 @@ impl Process {
             .args(&self.args)
             .current_dir(&self.dir)
             .stdin(Stdio::null());
+        for key in std::env::vars_os().map(|(key, _)| key) {
+            if is_coverage_harness(&key.to_string_lossy()) {
+                command.env_remove(key);
+            }
+        }
         for (key, value) in &self.env {
             command.env(key, value);
         }
@@ -153,6 +158,18 @@ fn kill(child: &mut Child) {
     }
     let _ = child.kill();
     let _ = child.wait();
+}
+
+/// Whether `key` is a variable a coverage harness measuring Cupel itself (cargo-llvm-cov) set:
+/// its profile file, its state, and the rustc wrapper it installs for Cupel's own crates. A child
+/// inheriting them is measured as Cupel, or fails to build, so a child gets none of them. Another
+/// rustc wrapper is the user's own and stays.
+fn is_coverage_harness(key: &str) -> bool {
+    key.starts_with("CARGO_LLVM_COV")
+        || key.starts_with("__CARGO_LLVM_COV_")
+        || key == "LLVM_PROFILE_FILE"
+        || (matches!(key, "RUSTC_WRAPPER" | "RUSTC_WORKSPACE_WRAPPER")
+            && std::env::var_os("__CARGO_LLVM_COV_RUSTC_WRAPPER").is_some())
 }
 
 /// Reads `source` to its end on its own thread.

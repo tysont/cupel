@@ -1,0 +1,18 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/fresh-python",
+  "skip_dirs": [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".tox"
+  ],
+  "report": "5b49245649bd89847de009a776f8ca562792ebbefff7a784811219810b39f166",
+  "files": {
+    "cupel.toml": "938b3a50454597352d49dc86d7d373a32850b297f01c12e329855072c1f9810b",
+    "grade.py": "0a6211744b074d157bae8bdf82e7cbf05433ffe09c8e627a50bf2ff44847c9c0",
+    "pyproject.toml": "cbd16a38ed4f83b2eb93d1bcf2748d094b5dd95adba3c0997510c56b6d2536e9",
+    "tests/__init__.py": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
+    "tests/test_grade.py": "5bbb49ce02bb05b044d91bbb7f08bd83d3ef320e86dcb1b72a4a45baa8a7c8e3"
+  }
+}

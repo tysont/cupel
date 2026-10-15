@@ -197,6 +197,7 @@ fn passing(id: &str, score: Option<Score>) -> CheckResult {
         duration_ms: 0,
         skipped: None,
         oracle: None,
+        notes: Vec::new(),
     }
 }
 
@@ -757,6 +758,33 @@ fn scope_metrics_combine_across_languages_by_the_largest_value() {
         checks[0].metrics,
         BTreeMap::from([("bound".to_owned(), 7.0)])
     );
+}
+
+/// Notes what configuration names under `note`, as a check notes what it could not measure.
+fn noting(ctx: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+    let mut result = passing("t.noted", None);
+    result.notes.extend(
+        ctx.config
+            .get("note")
+            .and_then(serde_json::Value::as_str)
+            .map(str::to_owned),
+    );
+    Ok(result)
+}
+
+#[test]
+fn each_languages_notes_reach_the_combined_entry_naming_their_language() {
+    let notes = |config: &str, langs: &[&str]| -> Vec<String> {
+        let world = World::new(vec![check("t.noted", &[FactKind::Symbols], noting)], config);
+        world.run(langs, |_| {}).0.unwrap().checks[0].notes.clone()
+    };
+    let config = "[checks.\"t.noted\".lang.go]\nnote = \"branches: unavailable\"\n\
+                 [checks.\"t.noted\".lang.rust]\nnote = \"branches: unavailable\"\n";
+    assert_eq!(
+        notes(config, &["go", "rust"]),
+        ["branches: unavailable (go)", "branches: unavailable (rust)"]
+    );
+    assert_eq!(notes("", &["go"]), Vec::<String>::new());
 }
 
 /// Reports `bound` as a `scope` metric over a score covering `n` targets, both from config.
