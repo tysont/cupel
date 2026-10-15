@@ -161,9 +161,11 @@ impl Check for TestsMutation {
     }
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        SETTINGS
-            .read(&self.manifest.id, &ctx.config)
-            .map(|_| outcome::plan_symbols(&self.manifest, scope))
+        SETTINGS.plan(
+            &self.manifest,
+            ctx,
+            outcome::plan_symbols(&self.manifest, scope),
+        )
     }
 
     fn run(
@@ -320,62 +322,23 @@ impl TestsMutation {
         conventions: Option<&TestConventions>,
     ) -> Option<Finding> {
         let hash = mutant.symbol_hash.as_ref()?;
-        let at = format!("{}:{}", symbol.file, mutant.span.line);
-        let change = format!("`{}` → `{}`", mutant.from, mutant.to);
         let mutation = Mutation {
             from: mutant.from.clone(),
             to: mutant.to.clone(),
             operator: operator(mutant),
         };
-        let site = site_of(mutant);
-        let new = |kind, evidence| SymbolFinding::new(&self.manifest, kind, symbol, hash, evidence);
-        let finding = match (mutant.outcome, &mutant.equivalent) {
-            (MutantOutcome::Survived, Some(reason)) => {
-                let evidence = Equivalent {
-                    mutation,
-                    reason: reason.clone(),
-                };
-                let mut finding = new("mutant.equivalent?", serde_json::to_value(evidence).ok()?)
-                    .described(
-                        format!("Mutant may be equivalent: {change} at {at}"),
-                        format!(
-                            "Review whether any input tells {change} apart at {at}; if none \
-                             does, suppress this finding."
-                        ),
-                    )
-                    .at(Severity::Info)
-                    .at_site(&site, &mutant.span);
-                finding.confidence = EQUIVALENT_CONFIDENCE;
-                finding
-            }
-            (MutantOutcome::Survived, None) => {
-                return Some(self.survived(mutant, symbol, hash, mutation, conventions));
-            }
-            (MutantOutcome::Timeout, _) => new(
-                "mutant.timeout",
-                serde_json::to_value(Site { mutation }).ok()?,
-            )
-            .described(
-                format!("Mutant timed out: {change} at {at}"),
-                format!("Review {change} at {at}: the tests ran past their timeout against it."),
-            )
-            .at(Severity::Info)
-            .at_site(&site, &mutant.span),
-            (MutantOutcome::Uncovered, _) => new(
-                "mutant.uncovered",
-                serde_json::to_value(Site { mutation }).ok()?,
-            )
-            .described(
-                format!("No test runs {at}; its mutant {change} was not run"),
-                format!(
-                    "Write a test that runs line {} of {}.",
-                    mutant.span.line, symbol.file
-                ),
-            )
-            .at(Severity::Info)
-            .at_site(&site, &mutant.span),
-            (MutantOutcome::Killed | MutantOutcome::Unviable, _) => return None,
-        };
+        if surviving(mutant) {
+            return Some(self.survived(mutant, symbol, hash, mutation, conventions));
+        }
+        let note = note(mutant, &symbol.file, mutation)?;
+        let mut finding =
+            SymbolFinding::new(&self.manifest, note.kind, symbol, hash, note.evidence)
+                .described(note.title, note.summary)
+                .at(Severity::Info)
+                .at_site(&site_of(mutant), &mutant.span);
+        if note.kind == "mutant.equivalent?" {
+            finding.confidence = EQUIVALENT_CONFIDENCE;
+        }
         Some(with_nearest_test(finding, symbol, conventions))
     }
 
@@ -415,6 +378,57 @@ impl TestsMutation {
         );
         with_nearest_test(finding, symbol, conventions)
     }
+}
+
+/// An informational finding about one mutant: its kind, evidence, title, and action summary.
+struct Note {
+    kind: &'static str,
+    evidence: Value,
+    title: String,
+    summary: String,
+}
+
+/// The note `mutant`, in `file`, calls for when it is not a plain survivor: possibly
+/// equivalent, timed out, or uncovered; none for one killed or unviable.
+fn note(mutant: &Mutant, file: &str, mutation: Mutation) -> Option<Note> {
+    let at = format!("{file}:{}", mutant.span.line);
+    let change = format!("`{}` → `{}`", mutant.from, mutant.to);
+    let (kind, evidence, title, summary) = match (mutant.outcome, &mutant.equivalent) {
+        (MutantOutcome::Survived, Some(reason)) => (
+            "mutant.equivalent?",
+            serde_json::to_value(Equivalent {
+                mutation,
+                reason: reason.clone(),
+            }),
+            format!("Mutant may be equivalent: {change} at {at}"),
+            format!(
+                "Review whether any input tells {change} apart at {at}; if none does, \
+                 suppress this finding."
+            ),
+        ),
+        (MutantOutcome::Timeout, _) => (
+            "mutant.timeout",
+            serde_json::to_value(Site { mutation }),
+            format!("Mutant timed out: {change} at {at}"),
+            format!("Review {change} at {at}: the tests ran past their timeout against it."),
+        ),
+        (MutantOutcome::Uncovered, _) => (
+            "mutant.uncovered",
+            serde_json::to_value(Site { mutation }),
+            format!("No test runs {at}; its mutant {change} was not run"),
+            format!(
+                "Write a test that runs line {} of {file}.",
+                mutant.span.line
+            ),
+        ),
+        _ => return None,
+    };
+    Some(Note {
+        kind,
+        evidence: evidence.ok()?,
+        title,
+        summary,
+    })
 }
 
 /// The operator's name as it serializes, such as `relational`.

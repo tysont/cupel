@@ -5,7 +5,7 @@ mod support;
 use cupel_core::{
     Cancellation, Ctx, FactKind, MutantOutcome, MutationOutcomes, ProduceCtx, Scope, Writer,
 };
-use support::{fixture, produce, registries, summary};
+use support::{registries, summary};
 
 #[test]
 fn the_engine_needs_sites_symbols_coverage_and_the_baseline() {
@@ -50,11 +50,9 @@ fn with_no_baseline_the_engine_runs_nothing() {
 
 #[test]
 fn the_python_fixture_kills_all_but_its_weak_spots() {
-    if !support::installed("pytest", "the Python mutation fixture") {
+    let Some((_dir, outcomes)) = support::python() else {
         return;
-    }
-    let dir = fixture("tests.mutation/python");
-    let outcomes = produce(dir.path(), "python", &support::Run::default()).unwrap();
+    };
     assert_eq!(
         summary(&outcomes),
         [
@@ -74,11 +72,9 @@ fn the_python_fixture_kills_all_but_its_weak_spots() {
 
 #[test]
 fn an_uncovered_mutant_is_never_run() {
-    if !support::installed("pytest", "the Python mutation fixture") {
+    let Some((_dir, outcomes)) = support::python() else {
         return;
-    }
-    let dir = fixture("tests.mutation/python");
-    let outcomes = produce(dir.path(), "python", &support::Run::default()).unwrap();
+    };
     let uncovered: Vec<(usize, Option<u64>)> = outcomes
         .mutants
         .iter()

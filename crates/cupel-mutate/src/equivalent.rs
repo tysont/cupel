@@ -46,9 +46,17 @@ mod tests {
     #[test]
     fn adding_or_subtracting_zero_and_scaling_by_one_are_marked() {
         let add = "x = a + 0\n";
-        assert!(reason(add, MutationOperator::ArithAddSub, &at(7)).is_some());
         let scale = "y = b * 1.0;\n";
-        assert!(reason(scale, MutationOperator::ArithMulDiv, &at(7)).is_some());
+        assert_eq!(
+            (
+                reason(add, MutationOperator::ArithAddSub, &at(7)),
+                reason(scale, MutationOperator::ArithMulDiv, &at(7))
+            ),
+            (
+                Some("the right operand is `0`, the identity of both operators".to_owned()),
+                Some("the right operand is `1.0`, the identity of both operators".to_owned())
+            )
+        );
     }
 
     #[test]

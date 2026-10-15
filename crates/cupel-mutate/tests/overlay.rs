@@ -24,6 +24,25 @@ fn repository() -> tempfile::TempDir {
     dir
 }
 
+/// A repository and a slot synced with it, keeping `outputs` its own.
+struct Synced {
+    repo: tempfile::TempDir,
+    slot: Slot,
+    _work: tempfile::TempDir,
+}
+
+fn synced(outputs: &[&str]) -> Synced {
+    let repo = repository();
+    let work = tempfile::tempdir().unwrap();
+    let slot = Slot::at(work.path().join("0"));
+    slot.sync(repo.path(), outputs).unwrap();
+    Synced {
+        repo,
+        slot,
+        _work: work,
+    }
+}
+
 fn read(root: &Path, path: &str) -> String {
     fs::read_to_string(root.join(path)).unwrap()
 }
@@ -34,10 +53,7 @@ fn modified(path: &Path) -> SystemTime {
 
 #[test]
 fn a_slot_mirrors_the_tree_and_links_what_the_tree_ignores() {
-    let repo = repository();
-    let work = tempfile::tempdir().unwrap();
-    let slot = Slot::at(work.path().join("0"));
-    slot.sync(repo.path(), &[]).unwrap();
+    let Synced { repo, slot, _work } = synced(&[]);
     let root = slot.root();
     assert_eq!(read(root, "src/calc.py"), read(repo.path(), "src/calc.py"));
     assert_eq!(read(root, ".gitignore"), "target/\n");
@@ -50,10 +66,7 @@ fn a_slot_mirrors_the_tree_and_links_what_the_tree_ignores() {
 
 #[test]
 fn a_mutant_is_a_private_copy_and_the_original_never_changes() {
-    let repo = repository();
-    let work = tempfile::tempdir().unwrap();
-    let slot = Slot::at(work.path().join("0"));
-    slot.sync(repo.path(), &[]).unwrap();
+    let Synced { repo, slot, _work } = synced(&[]);
     let original = read(repo.path(), "src/calc.py");
     slot.write("src/calc.py", b"def add(a, b):\n    return a - b\n")
         .unwrap();
@@ -66,10 +79,7 @@ fn a_mutant_is_a_private_copy_and_the_original_never_changes() {
 
 #[test]
 fn a_restored_file_is_newer_than_the_mutant_it_replaces() {
-    let repo = repository();
-    let work = tempfile::tempdir().unwrap();
-    let slot = Slot::at(work.path().join("0"));
-    slot.sync(repo.path(), &[]).unwrap();
+    let Synced { repo, slot, _work } = synced(&[]);
     let path = slot.root().join("src/calc.py");
     slot.write("src/calc.py", b"mutant\n").unwrap();
     let mutated = modified(&path);
@@ -82,10 +92,7 @@ fn a_restored_file_is_newer_than_the_mutant_it_replaces() {
 
 #[test]
 fn a_second_sync_follows_the_trees_changes_and_keeps_restored_files() {
-    let repo = repository();
-    let work = tempfile::tempdir().unwrap();
-    let slot = Slot::at(work.path().join("0"));
-    slot.sync(repo.path(), &[]).unwrap();
+    let Synced { repo, slot, _work } = synced(&[]);
     let original = fs::read(repo.path().join("src/calc.py")).unwrap();
     slot.write("src/calc.py", b"mutant\n").unwrap();
     slot.write("src/calc.py", &original).unwrap();
@@ -123,10 +130,7 @@ fn work_elsewhere() -> tempfile::TempDir {
 
 #[test]
 fn a_runners_build_outputs_are_the_slots_own_and_kept_between_syncs() {
-    let repo = repository();
-    let work = tempfile::tempdir().unwrap();
-    let slot = Slot::at(work.path().join("0"));
-    slot.sync(repo.path(), &["target"]).unwrap();
+    let Synced { repo, slot, _work } = synced(&["target"]);
     assert!(!slot.root().join("target").exists());
     fs::create_dir_all(slot.root().join("target/debug")).unwrap();
     fs::write(slot.root().join("target/debug/own"), "slot build\n").unwrap();

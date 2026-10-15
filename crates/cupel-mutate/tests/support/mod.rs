@@ -6,7 +6,6 @@
 )]
 
 use std::path::Path;
-use std::sync::OnceLock;
 
 use cupel_core::config::{Config, ConfigRequest};
 use cupel_core::syntax::ProjectInfo;
@@ -18,18 +17,12 @@ use cupel_fixtures::matrix::Registries;
 
 /// The registries the binary uses, built once.
 pub fn registries() -> &'static Registries {
-    static REGISTRIES: OnceLock<Registries> = OnceLock::new();
-    REGISTRIES.get_or_init(Registries::builtin)
+    Registries::shared()
 }
 
 /// The registered language `id`.
 pub fn lang(id: &str) -> Lang {
-    registries()
-        .languages
-        .langs()
-        .into_iter()
-        .find(|lang| lang.id.as_str() == id)
-        .unwrap_or_else(|| panic!("{id} is registered"))
+    Registries::shared().lang(id)
 }
 
 /// A copy of `repos/<name>`.
@@ -114,6 +107,28 @@ pub fn with_outcome(outcomes: &MutationOutcomes, outcome: MutantOutcome) -> Vec<
         .filter(|mutant| mutant.outcome == outcome)
         .map(|mutant| format!("{} {}→{}", mutant.span.line, mutant.from, mutant.to))
         .collect()
+}
+
+/// A copy of the Python mutation fixture and its outcomes at the default depth; `None` (reported
+/// as skipped) without pytest.
+pub fn python() -> Option<(tempfile::TempDir, MutationOutcomes)> {
+    if !installed("pytest", "the Python mutation fixture") {
+        return None;
+    }
+    let dir = fixture("tests.mutation/python");
+    let outcomes = produce(dir.path(), "python", &Run::default()).unwrap();
+    Some((dir, outcomes))
+}
+
+/// [`python`], when its mutants ran by a per-test map; `None` (reported as skipped) without
+/// pytest-cov.
+pub fn python_per_test() -> Option<(tempfile::TempDir, MutationOutcomes)> {
+    python().filter(|(_, outcomes)| {
+        if !outcomes.per_test {
+            eprintln!("SKIPPED: pytest-cov not installed; per-test selection was not run");
+        }
+        outcomes.per_test
+    })
 }
 
 /// Whether `program` is on `PATH`; prints the skip line when it is not.

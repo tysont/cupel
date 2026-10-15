@@ -21,29 +21,33 @@
 //!   `--since-baseline`.
 //! - **Test results.** [`Store::record_test_results`] indexes a run's `TestResults` per test;
 //!   [`Store::test_results`] reads a run's rows back (ADR-076).
+//! - **Mutants.** [`Store::record_mutants`] indexes a run's `MutationOutcomes` per mutant;
+//!   [`Store::mutants_by_key`] finds stored outcomes by cache key and
+//!   [`Store::last_mutant_outcomes`] the last outcome of each site (ADR-080).
 //! - **Suppressions.** [`Store::replace_suppressions`] mirrors `.cupel/suppressions.toml`
 //!   (ADR-047); [`Store::suppressions`] reads the mirror.
 
 mod error;
 mod lock;
 mod migrations;
-mod mutants;
 
+use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::PathBuf;
 use std::time::Duration;
 
 use cupel_core::syntax::SymbolDef;
 use cupel_core::{
-    CheckId, CheckResult, Envelope, FactKind, Finding, FindingId, LangId, Metric, ProducerId,
-    RunId, Suppression, SymbolHash, TestResults, Verb, Writer,
+    CheckId, CheckResult, Envelope, FactKind, Finding, FindingId, LangId, Metric, Mutant,
+    MutantOutcome, MutationOutcomes, ProducerId, RunId, Suppression, SymbolHash, TestResults, Verb,
+    Writer,
 };
+use rusqlite::types::Value;
 use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
 
 pub use crate::error::StoreError;
 use crate::lock::WriterLock;
 use crate::migrations::MIGRATIONS;
-pub use crate::mutants::MutantSite;
 
 pub type Result<T, E = StoreError> = std::result::Result<T, E>;
 
@@ -346,27 +350,17 @@ impl Store {
         lang: &LangId,
         results: &TestResults,
     ) -> Result<()> {
-        let run = run.to_string();
-        self.write(|tx| {
-            for test in &results.tests {
-                tx.execute(
-                    "INSERT INTO test_results (run_id, lang, runner, test_id, file, outcome,
-                        duration_ms)
-                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                    params![
-                        run,
-                        lang.as_str(),
-                        results.runner.as_str(),
-                        test.id,
-                        test.file,
-                        test.outcome.as_str(),
-                        test.duration_ms
-                            .map(|ms| i64::try_from(ms).unwrap_or(i64::MAX)),
-                    ],
-                )?;
-            }
-            Ok(())
-        })
+        let fixed = [
+            run.to_string(),
+            lang.to_string(),
+            results.runner.to_string(),
+        ];
+        self.insert_rows(
+            "INSERT INTO test_results (run_id, lang, runner, test_id, file, outcome, duration_ms)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            &fixed,
+            results.tests.iter().map(|test| Ok(test_row(test))),
+        )
     }
 
     /// The `test_results` rows of `run`, by language, then test ID.
@@ -676,7 +670,122 @@ impl Store {
     }
 }
 
+/// A mutant's place across runs: its symbol's structural hash, its site, and its replacement.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct MutantSite {
+    pub symbol_hash: String,
+    pub site_hash: String,
+    pub replacement: String,
+}
+
+impl Store {
+    /// Indexes every mutant of `outcomes`, which `run` produced for `lang`, in `mutants`.
+    pub fn record_mutants(
+        &self,
+        run: &RunId,
+        lang: &LangId,
+        outcomes: &MutationOutcomes,
+    ) -> Result<()> {
+        let fixed = [
+            run.to_string(),
+            lang.to_string(),
+            outcomes.engine.to_string(),
+        ];
+        self.insert_rows(
+            "INSERT INTO mutants (run_id, lang, engine, cache_key, symbol_hash, site_hash,
+                replacement, outcome, duration_ms, mutant)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+            &fixed,
+            outcomes.mutants.iter().map(|mutant| {
+                Ok(vec![
+                    Value::from(mutant.cache_key.clone()),
+                    Value::from(mutant.symbol_hash.as_ref().map(ToString::to_string)),
+                    Value::from(mutant.site_hash.to_string()),
+                    Value::from(mutant.to.clone()),
+                    Value::from(mutant.outcome.as_str().to_owned()),
+                    Value::from(millis(mutant.duration_ms)),
+                    Value::from(serde_json::to_string(mutant)?),
+                ])
+            }),
+        )
+    }
+
+    /// Inserts one row per item of `rows` with `sql` in one locked transaction: the `fixed`
+    /// values, then the item's.
+    fn insert_rows(
+        &self,
+        sql: &str,
+        fixed: &[String],
+        rows: impl Iterator<Item = Result<Vec<Value>>>,
+    ) -> Result<()> {
+        let rows: Vec<Vec<Value>> = rows.collect::<Result<_>>()?;
+        self.write(|tx| {
+            let mut statement = tx.prepare(sql)?;
+            for row in rows {
+                let values = fixed.iter().cloned().map(Value::from).chain(row);
+                statement.execute(rusqlite::params_from_iter(values))?;
+            }
+            Ok(())
+        })
+    }
+
+    /// The last mutant stored under each of `keys` that has one.
+    pub fn mutants_by_key(&self, keys: &[String]) -> Result<BTreeMap<String, Mutant>> {
+        let mut statement = self.connection.prepare(
+            "SELECT mutant FROM mutants WHERE cache_key = ?1 ORDER BY rowid DESC LIMIT 1",
+        )?;
+        let mut found = BTreeMap::new();
+        for key in keys {
+            let stored: Option<String> = statement.query_row([key], |row| row.get(0)).optional()?;
+            if let Some(stored) = stored {
+                found.insert(key.clone(), serde_json::from_str(&stored)?);
+            }
+        }
+        Ok(found)
+    }
+
+    /// The last stored outcome of every site and replacement whose symbol had a structural hash.
+    pub fn last_mutant_outcomes(&self) -> Result<BTreeMap<MutantSite, MutantOutcome>> {
+        let mut statement = self.connection.prepare(
+            "SELECT symbol_hash, site_hash, replacement, outcome FROM mutants
+             WHERE symbol_hash IS NOT NULL ORDER BY rowid",
+        )?;
+        let rows = statement.query_map([], |row| {
+            Ok((
+                MutantSite {
+                    symbol_hash: row.get(0)?,
+                    site_hash: row.get(1)?,
+                    replacement: row.get(2)?,
+                },
+                row.get::<_, String>(3)?,
+            ))
+        })?;
+        let mut last = BTreeMap::new();
+        for row in rows {
+            let (site, outcome) = row?;
+            let outcome = serde_json::from_value(serde_json::Value::String(outcome))?;
+            last.insert(site, outcome);
+        }
+        Ok(last)
+    }
+}
+
 /// `path` for a `file:` URI: the characters URIs give meaning to are percent-encoded.
+/// The `test_results` values of `test` after its run, language, and runner.
+fn test_row(test: &cupel_core::TestResult) -> Vec<Value> {
+    vec![
+        Value::from(test.id.clone()),
+        Value::from(test.file.clone()),
+        Value::from(test.outcome.as_str().to_owned()),
+        Value::from(millis(test.duration_ms)),
+    ]
+}
+
+/// A duration in milliseconds as the store keeps it, a signed integer.
+fn millis(duration_ms: Option<u64>) -> Option<i64> {
+    duration_ms.map(|ms| i64::try_from(ms).unwrap_or(i64::MAX))
+}
+
 fn uri_path(path: &std::path::Path) -> String {
     let mut encoded = String::new();
     for character in path.to_string_lossy().chars() {

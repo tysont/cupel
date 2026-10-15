@@ -7,13 +7,7 @@ use support::Repo;
 
 /// A copy of the Python tests.mutation fixture; `None` (reported as skipped) without pytest.
 fn fixture() -> Option<Repo> {
-    if cupel_core::find_program("pytest").is_none() {
-        eprintln!("SKIPPED: pytest not installed; tests.mutation was not run");
-        return None;
-    }
-    let repo = Repo::new();
-    cupel_fixtures::copy_repo("tests.mutation/python", &repo.root());
-    Some(repo)
+    Repo::python_fixture("tests.mutation")
 }
 
 /// `check --only tests.mutation`, which must exit 0; its envelope.

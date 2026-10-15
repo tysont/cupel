@@ -1,7 +1,6 @@
 // ABOUTME: The flake engine (ADR-078): its schedule from the seed, what it does with no baseline or a runner it
 // ABOUTME: cannot rerun, cancellation, and real reruns of each runner on the tests.flaky fixtures (skipped when absent).
 use std::path::Path;
-use std::sync::OnceLock;
 
 use cupel_adapt::flake::{DEFAULT_RUNS, rerun_seed, schedule};
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
@@ -20,24 +19,13 @@ use TestOutcome::{Failed, Passed};
 /// every shuffling runner.
 const SEED: u64 = cupel_fixtures::matrix::SEED;
 
-/// The producers and languages the binary registers, built once.
-fn registries() -> &'static Registries {
-    static REGISTRIES: OnceLock<Registries> = OnceLock::new();
-    REGISTRIES.get_or_init(Registries::builtin)
-}
-
 fn registry() -> &'static ProducerRegistry {
-    &registries().producers
+    &Registries::shared().producers
 }
 
 /// The registered language `id`.
 fn lang(id: &str) -> Lang {
-    registries()
-        .languages
-        .langs()
-        .into_iter()
-        .find(|lang| lang.id.as_str() == id)
-        .unwrap_or_else(|| panic!("{id} is registered"))
+    Registries::shared().lang(id)
 }
 
 fn producer<'a>(

@@ -37,11 +37,9 @@ fn executed(outcomes: &MutationOutcomes) -> Vec<String> {
 
 #[test]
 fn a_second_run_with_no_changes_runs_no_mutant() {
-    if !python_tools() {
+    let Some((dir, first)) = support::python() else {
         return;
-    }
-    let dir = fixture("tests.mutation/python");
-    let first = produce(dir.path(), "python", &Run::default()).unwrap();
+    };
     record(dir.path(), 1, &first);
     let second = produce(dir.path(), "python", &Run::default()).unwrap();
     assert_eq!(executed(&second), Vec::<String>::new());
@@ -53,15 +51,9 @@ fn a_second_run_with_no_changes_runs_no_mutant() {
 
 #[test]
 fn a_changed_test_reruns_only_the_mutants_it_covers() {
-    if !python_tools() {
+    let Some((dir, first)) = support::python_per_test() else {
         return;
-    }
-    let dir = fixture("tests.mutation/python");
-    let first = produce(dir.path(), "python", &Run::default()).unwrap();
-    if !first.per_test {
-        eprintln!("SKIPPED: pytest-cov not installed; per-test reuse was not run");
-        return;
-    }
+    };
     record(dir.path(), 1, &first);
     // Only the small order's test changes: it runs lines 6 and 8, not line 7.
     let small = dir.path().join("tests/test_small.py");
@@ -73,15 +65,9 @@ fn a_changed_test_reruns_only_the_mutants_it_covers() {
 
 #[test]
 fn with_a_per_test_map_a_mutant_runs_only_the_tests_that_cover_it() {
-    if !python_tools() {
+    let Some((_dir, outcomes)) = support::python_per_test() else {
         return;
-    }
-    let dir = fixture("tests.mutation/python");
-    let outcomes = produce(dir.path(), "python", &Run::default()).unwrap();
-    if !outcomes.per_test {
-        eprintln!("SKIPPED: pytest-cov not installed; per-test selection was not run");
-        return;
-    }
+    };
     let tests: Vec<(u32, &str, Vec<&str>)> = outcomes
         .mutants
         .iter()

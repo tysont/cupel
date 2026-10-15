@@ -7,13 +7,7 @@ use support::Repo;
 
 /// A copy of the Python tests.flaky fixture; `None` (reported as skipped) without pytest.
 fn fixture() -> Option<Repo> {
-    if cupel_core::find_program("pytest").is_none() {
-        eprintln!("SKIPPED: pytest not installed; tests.flaky was not run");
-        return None;
-    }
-    let repo = Repo::new();
-    cupel_fixtures::copy_repo("tests.flaky/python", &repo.root());
-    Some(repo)
+    Repo::python_fixture("tests.flaky")
 }
 
 const SEED: &str = "3";

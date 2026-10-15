@@ -758,6 +758,11 @@ fn mutant(site: &str, to: &str, outcome: MutantOutcome, key: Option<&str>) -> Mu
     }
 }
 
+/// The language every mutant test records under.
+fn python() -> LangId {
+    LangId::from("python")
+}
+
 fn outcomes(mutants: Vec<Mutant>) -> MutationOutcomes {
     MutationOutcomes::new(
         ProducerId::from("engine.mutation"),
@@ -772,7 +777,6 @@ fn outcomes(mutants: Vec<Mutant>) -> MutationOutcomes {
 fn mutants_are_indexed_and_found_again_by_their_cache_key() {
     let repo = Repo::new();
     let store = repo.store();
-    let python = LangId::from("python");
     let first = mutant(
         "00000000000000b1",
         "<=",
@@ -780,11 +784,11 @@ fn mutants_are_indexed_and_found_again_by_their_cache_key() {
         Some("k1"),
     );
     store
-        .record_mutants(&run_id(1), &python, &outcomes(vec![first]))
+        .record_mutants(&run_id(1), &python(), &outcomes(vec![first]))
         .unwrap();
     let killed = mutant("00000000000000b1", "<=", MutantOutcome::Killed, Some("k1"));
     store
-        .record_mutants(&run_id(2), &python, &outcomes(vec![killed.clone()]))
+        .record_mutants(&run_id(2), &python(), &outcomes(vec![killed.clone()]))
         .unwrap();
     let found = store
         .mutants_by_key(&["k1".to_owned(), "k2".to_owned()])
@@ -799,11 +803,10 @@ fn mutants_are_indexed_and_found_again_by_their_cache_key() {
 fn the_last_outcome_of_each_site_and_replacement_is_kept() {
     let repo = Repo::new();
     let store = repo.store();
-    let python = LangId::from("python");
     store
         .record_mutants(
             &run_id(1),
-            &python,
+            &python(),
             &outcomes(vec![
                 mutant("00000000000000b1", "<=", MutantOutcome::Killed, None),
                 mutant("00000000000000b2", ">", MutantOutcome::Survived, None),
@@ -813,7 +816,7 @@ fn the_last_outcome_of_each_site_and_replacement_is_kept() {
     store
         .record_mutants(
             &run_id(2),
-            &python,
+            &python(),
             &outcomes(vec![mutant(
                 "00000000000000b1",
                 "<=",

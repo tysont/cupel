@@ -135,12 +135,18 @@ pub fn whole_suite(_: &Selected<'_>) -> Option<Vec<String>> {
     None
 }
 
+/// A spec's `select` for runners that take what they run as arguments: test files when
+/// `files`, else test IDs; never the other.
+pub fn as_arguments(selected: &Selected<'_>, files: bool) -> Option<Vec<String>> {
+    match (selected, files) {
+        (Selected::Files(paths), true) | (Selected::Tests(paths), false) => Some(paths.to_vec()),
+        _ => None,
+    }
+}
+
 /// A spec's `select` for runners that take test files as arguments, and no test IDs.
 pub fn files(selected: &Selected<'_>) -> Option<Vec<String>> {
-    match selected {
-        Selected::Files(files) => Some(files.to_vec()),
-        Selected::Tests(_) => None,
-    }
+    as_arguments(selected, true)
 }
 
 /// The arguments `flag` and `pattern(ids)` for a selection of test IDs; files are not

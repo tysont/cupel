@@ -70,9 +70,13 @@ pub fn plan(inputs: &Inputs<'_>, read: &dyn Fn(&str) -> Option<String>) -> Vec<P
                 .collect()
         })
         .unwrap_or_default();
-    let index = inputs.per_test.map(PerTestMap::index);
+    let planner = Planner {
+        inputs,
+        index: inputs.per_test.map(PerTestMap::index),
+        read,
+    };
     let mut sources: HashMap<String, Option<String>> = HashMap::new();
-    let mut planned = Vec::new();
+    let mut found = Vec::new();
     for entry in &inputs.sites.symbols {
         let Some(symbol) = symbols.get(&entry.symbol).filter(|s| in_focus(inputs, s)) else {
             continue;
@@ -89,10 +93,10 @@ pub fn plan(inputs: &Inputs<'_>, read: &dyn Fn(&str) -> Option<String>) -> Vec<P
             source_hash: source_hash(source, symbol),
         };
         for site in entry.sites.iter().filter(|site| wanted(inputs, site)) {
-            planned.extend(mutants(inputs, index.as_ref(), &at, site, source, read));
+            found.extend(planner.mutants(&at, site, source));
         }
     }
-    planned
+    found
 }
 
 /// A symbol being planned: its definition, structural hash, and source text hash.
@@ -146,73 +150,93 @@ fn wanted(inputs: &Inputs<'_>, site: &Site) -> bool {
     inputs.operators == OperatorSet::Extended || site.set == OperatorSet::Default
 }
 
-/// The mutants of `site` in `symbol`, whose file's text is `source`.
-fn mutants(
-    inputs: &Inputs<'_>,
-    index: Option<&LineIndex<'_>>,
-    symbol: &Symbol<'_>,
-    site: &Site,
-    source: &str,
-    read: &dyn Fn(&str) -> Option<String>,
-) -> Vec<Planned> {
-    let file = &symbol.def.file;
-    let (line, end) = (site.span.line, site.span.end_line);
-    let covered = inputs
-        .coverage
-        .line_hits(file, line, end)
-        .iter()
-        .any(|hits| hits.hits > 0);
-    let tests = index.map(|index| {
-        let mut ids: Vec<String> = index
-            .covering(file, line, end)
+/// What planning one site reads: the inputs, the per-test index, and the source reader.
+struct Planner<'a, 'r> {
+    inputs: &'a Inputs<'a>,
+    index: Option<LineIndex<'a>>,
+    read: &'r dyn Fn(&str) -> Option<String>,
+}
+
+/// How a site's mutants run: whether a test runs the site, the tests selected for it (`None`
+/// for the whole suite), and the suite hash of that selection.
+struct Selection {
+    covered: bool,
+    tests: Option<Vec<String>>,
+    suite_hash: String,
+}
+
+impl Planner<'_, '_> {
+    /// The mutants of `site` in `symbol`, whose file's text is `source`.
+    fn mutants(&self, symbol: &Symbol<'_>, site: &Site, source: &str) -> Vec<Planned> {
+        let selection = self.selection(&symbol.def.file, site);
+        let equivalent = equivalent::reason(source, site.operator, &site.span);
+        replacements(source, site)
             .into_iter()
-            .map(|(test, _)| test.id.clone())
-            .collect();
-        ids.sort();
-        ids
-    });
-    // A covered line no single test is known to run is run by the whole suite.
-    let tests = tests.filter(|ids| !ids.is_empty());
-    let suite_hash = tests.as_ref().map_or_else(
-        || inputs.suite_hash.to_owned(),
-        |ids| tests_hash(ids, inputs.per_test, read),
-    );
-    let equivalent = equivalent::reason(source, site.operator, &site.span);
-    replacements(source, site)
-        .into_iter()
-        .map(|(to, mutated)| {
-            let key = covered.then(|| {
-                digest(&[
-                    &symbol.source_hash,
-                    site.site_hash.as_str(),
-                    &to,
-                    &suite_hash,
-                    inputs.toolchain_hash,
-                ])
-            });
-            Planned {
-                mutant: Mutant {
-                    symbol: symbol.def.key(),
-                    symbol_hash: symbol.hash.clone(),
-                    site_hash: site.site_hash.clone(),
-                    operator: site.operator,
-                    from: site.from.clone(),
-                    to,
-                    span: site.span,
-                    outcome: MutantOutcome::Uncovered,
-                    tests: Vec::new(),
-                    killing_tests: Vec::new(),
-                    duration_ms: None,
-                    reused: false,
-                    equivalent: equivalent.clone(),
-                    cache_key: key,
-                },
-                source: mutated,
-                tests: tests.clone(),
-                covered,
-            }
-        })
-        .collect()
+            .map(|(to, mutated)| {
+                let key = selection.covered.then(|| {
+                    digest(&[
+                        &symbol.source_hash,
+                        site.site_hash.as_str(),
+                        &to,
+                        &selection.suite_hash,
+                        self.inputs.toolchain_hash,
+                    ])
+                });
+                Planned {
+                    mutant: Mutant {
+                        symbol: symbol.def.key(),
+                        symbol_hash: symbol.hash.clone(),
+                        site_hash: site.site_hash.clone(),
+                        operator: site.operator,
+                        from: site.from.clone(),
+                        to,
+                        span: site.span,
+                        outcome: MutantOutcome::Uncovered,
+                        tests: Vec::new(),
+                        killing_tests: Vec::new(),
+                        duration_ms: None,
+                        reused: false,
+                        equivalent: equivalent.clone(),
+                        cache_key: key,
+                    },
+                    source: mutated,
+                    tests: selection.tests.clone(),
+                    covered: selection.covered,
+                }
+            })
+            .collect()
+    }
+
+    /// How `site` of `file` is run: covered when the coverage map records a hit on one of its
+    /// lines; its tests those the per-test map says run its lines (the whole suite when there
+    /// is no map, or the map names none).
+    fn selection(&self, file: &str, site: &Site) -> Selection {
+        let (line, end) = (site.span.line, site.span.end_line);
+        let covered = self
+            .inputs
+            .coverage
+            .line_hits(file, line, end)
+            .iter()
+            .any(|hits| hits.hits > 0);
+        let tests = self.index.as_ref().and_then(|index| {
+            let mut ids: Vec<String> = index
+                .covering(file, line, end)
+                .into_iter()
+                .map(|(test, _)| test.id.clone())
+                .collect();
+            ids.sort();
+            (!ids.is_empty()).then_some(ids)
+        });
+        let suite_hash = tests.as_ref().map_or_else(
+            || self.inputs.suite_hash.to_owned(),
+            |ids| tests_hash(ids, self.inputs.per_test, self.read),
+        );
+        Selection {
+            covered,
+            tests,
+            suite_hash,
+        }
+    }
 }
 
 /// BLAKE3 of the symbol's source text: any edit to it reruns its mutants.

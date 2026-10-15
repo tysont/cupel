@@ -117,9 +117,11 @@ impl Check for TestsFlaky {
 
     /// One target per file in scope; the reruns' size is the engine's to know.
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        LIMITS
-            .read(&self.manifest.id, &ctx.config)
-            .map(|_| outcome::plan_files(&self.manifest, scope))
+        LIMITS.plan(
+            &self.manifest,
+            ctx,
+            outcome::plan_files(&self.manifest, scope),
+        )
     }
 
     fn run(

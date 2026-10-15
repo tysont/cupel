@@ -856,13 +856,7 @@ impl<'a> FactStore<'a> {
             if !needs_met {
                 continue;
             }
-            for want in producer.wants() {
-                if !visiting.contains(want) {
-                    visiting.push(*want);
-                    let _ = self.ensure(*want, lang, sink);
-                    visiting.pop();
-                }
-            }
+            self.ensure_wants(producer.wants(), lang, sink, visiting);
             self.cancel.checkpoint()?;
             let ctx = ProduceCtx {
                 ctx: self.root.clone(),
@@ -887,6 +881,23 @@ impl<'a> FactStore<'a> {
             return produced.map(crate::producer::Produced::share);
         }
         Err(Error::AbsentFact { kind })
+    }
+
+    /// Makes each of `wants` for `lang` that can be made (ADR-080); one that cannot is left out.
+    fn ensure_wants(
+        &mut self,
+        wants: &[FactKind],
+        lang: &Lang,
+        sink: &mut dyn EventSink,
+        visiting: &mut Vec<FactKind>,
+    ) {
+        for want in wants {
+            if !visiting.contains(want) {
+                visiting.push(*want);
+                let _ = self.ensure(*want, lang, sink);
+                visiting.pop();
+            }
+        }
     }
 
     /// The facts of `needs` already made for `lang`, for a producer that needs or wants them.

@@ -3,7 +3,7 @@
 use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::unittest;
-use crate::runner::{PYTHON, Ran, Root, Runner, RunnerSpec, Selected};
+use crate::runner::{PYTHON, Ran, Root, Runner, RunnerSpec, as_arguments};
 
 const ID: &str = "tool.unittest";
 
@@ -19,7 +19,8 @@ static UNITTEST: RunnerSpec = RunnerSpec {
     read,
     // 5: no tests ran (Python 3.12+), a finished run of an empty suite.
     completed_codes: &[0, 5],
-    select,
+    // Dotted test IDs are arguments unittest runs; files are not.
+    select: |selected| as_arguments(selected, false),
     list: None,
     vary: &PYTHON,
     outputs: &[],
@@ -39,14 +40,6 @@ fn command(root: &Root) -> Vec<String> {
         .chain(["-v", "-b"])
         .map(str::to_owned)
         .collect()
-}
-
-/// Dotted test IDs are arguments unittest runs; files are not.
-fn select(selected: &Selected<'_>) -> Option<Vec<String>> {
-    match selected {
-        Selected::Tests(ids) => Some(ids.to_vec()),
-        Selected::Files(_) => None,
-    }
 }
 
 #[allow(

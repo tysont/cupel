@@ -122,9 +122,11 @@ impl Check for TestsCoverage {
     }
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        SETTINGS
-            .read(&self.manifest.id, &ctx.config)
-            .map(|_| outcome::plan_symbols(&self.manifest, scope))
+        SETTINGS.plan(
+            &self.manifest,
+            ctx,
+            outcome::plan_symbols(&self.manifest, scope),
+        )
     }
 
     fn run(
