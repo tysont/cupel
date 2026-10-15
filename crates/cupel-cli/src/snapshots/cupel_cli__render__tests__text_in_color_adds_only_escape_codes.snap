@@ -80,7 +80,7 @@ cupel check: [1;31mfail[0m (exit 1)
   static.deps.coupling  module · 0 measured · Afferent plus efferent coupling per module.
 
 [1mtests[0m  2 impacted · per-test map: no
-  rust  [2mper-test map from tool.llvm-cov-per-test[0m
+  rust  [2mper-test map from tool.llvm-cov-per-test (2 measured, 1236 cached)[0m
   typescript  [2mfile-level impact: no producer makes per-test-map for this language (see `cupel describe matrix`)[0m
   calc tests::adds  [2mrust[0m
     covers calc::add (src/lib.rs:5)

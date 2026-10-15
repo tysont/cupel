@@ -6,8 +6,8 @@ use std::fmt::Write as _;
 
 use cupel_core::{
     CheckResult, Envelope, Excerpt, Explanation, Finding, GateOutcome, GateResult, GitInfo,
-    Location, Metric, NextAction, PlannedCheck, Rankings, RuleOutcome, RunInfo, RunPlan, ScopeInfo,
-    Severity, Skipped, Status, Summary, TestsReport,
+    ImpactBasis, Location, Metric, NextAction, PlannedCheck, Rankings, RuleOutcome, RunInfo,
+    RunPlan, ScopeInfo, Severity, Skipped, Status, Summary, TestsReport,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -314,6 +314,17 @@ fn rankings_block(rankings: &Rankings, paint: &Paint) -> String {
     out
 }
 
+/// How much of a language's per-test map came from its producer's cache (ADR-083), such as
+/// ` (cached)` or ` (2 measured, 1236 cached)`; empty when unknown.
+fn cache_note(basis: &ImpactBasis) -> String {
+    match (basis.measured, basis.reused) {
+        (Some(0), _) => " (cached)".to_owned(),
+        (Some(measured), Some(0) | None) => format!(" ({measured} measured)"),
+        (Some(measured), Some(reused)) => format!(" ({measured} measured, {reused} cached)"),
+        (None, _) => String::new(),
+    }
+}
+
 /// How each language chose its tests, the impacted tests with why, and the commands that run
 /// them (ADR-077 §6).
 fn tests_block(tests: &TestsReport, paint: &Paint) -> String {
@@ -326,8 +337,8 @@ fn tests_block(tests: &TestsReport, paint: &Paint) -> String {
     for basis in &tests.languages {
         let how = match (&basis.producer, &basis.fallback) {
             (_, Some(fallback)) => format!("file-level impact: {fallback}"),
-            (Some(producer), None) => format!("per-test map from {producer}"),
-            (None, None) => "per-test map".to_owned(),
+            (Some(producer), None) => format!("per-test map from {producer}{}", cache_note(basis)),
+            (None, None) => format!("per-test map{}", cache_note(basis)),
         };
         let _ = writeln!(out, "  {}  {}", basis.lang, paint.dim(&how));
     }

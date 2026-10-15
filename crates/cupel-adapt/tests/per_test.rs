@@ -2,7 +2,9 @@
 // ABOUTME: functions give two disjoint maps, and the cache keeps every test no change touches; skipped without the tool.
 use std::path::Path;
 
-use cupel_core::{Availability, Cancellation, FactKind, PerTestMap, Scope};
+use cupel_core::{
+    Availability, Cancellation, CostClass, Ctx, Estimate, FactKind, PerTestMap, Scope,
+};
 use support::{lang, produce_ctx, producer, registry};
 
 mod support;
@@ -75,6 +77,13 @@ impl Fixture {
 
     fn produce(&self) -> PerTestMap {
         self.produce_in(self.root())
+    }
+
+    /// What the producer estimates producing here would cost now.
+    fn estimate(&self) -> Estimate {
+        let registry = registry();
+        let producer = producer(&registry, FactKind::PerTestMap, self.id, self.lang);
+        producer.estimate(&Ctx::new(self.root().to_path_buf()))
     }
 
     /// Replaces `from` with `to` in `file`, which must hold it.
@@ -352,4 +361,29 @@ fn copy_tree(from: &Path, to: &Path) {
             std::fs::copy(entry.path(), target).unwrap();
         }
     }
+}
+
+#[test]
+fn a_producer_estimates_deep_without_a_cache_and_standard_to_reuse_or_refresh_one() {
+    let Some(fixture) = Fixture::new("tool.pytest-cov-per-test", "python") else {
+        return;
+    };
+    let mut seen = vec![fixture.estimate()];
+    fixture.produce();
+    seen.push(fixture.estimate());
+    // Staleness is by file: both tests cover `calc.py`.
+    fixture.edit("calc.py", "a + b", "b + a");
+    seen.push(fixture.estimate());
+    let estimate = |cost, note: Option<&str>| Estimate {
+        cost,
+        note: note.map(str::to_owned),
+    };
+    assert_eq!(
+        seen,
+        [
+            estimate(CostClass::Deep, None),
+            estimate(CostClass::Standard, Some("cached")),
+            estimate(CostClass::Standard, Some("refresh 2 stale")),
+        ]
+    );
 }

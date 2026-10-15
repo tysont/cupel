@@ -141,7 +141,7 @@ impl Producer<PerTestMap> for PerTest {
                 self.cost()
             },
             note: Some(if measure {
-                format!("refresh {stale} stale tests")
+                format!("refresh {stale} stale")
             } else {
                 "cached".to_owned()
             }),

@@ -211,12 +211,16 @@ fn tests() -> TestsReport {
                 lang: LangId::from("rust"),
                 per_test_map: true,
                 producer: Some(ProducerId::from("tool.llvm-cov-per-test")),
+                measured: Some(2),
+                reused: Some(1236),
                 fallback: None,
             },
             ImpactBasis {
                 lang: LangId::from("typescript"),
                 per_test_map: false,
                 producer: None,
+                measured: None,
+                reused: None,
                 fallback: Some(
                     "no producer makes per-test-map for this language (see `cupel describe matrix`)"
                         .to_owned(),

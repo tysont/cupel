@@ -63,12 +63,12 @@ fn a_changed_test_reruns_only_the_mutants_it_covers() {
     assert_eq!(executed(&second), ["6 >=→>", "6 and→or", "8 *→/", "8 1→0"]);
 }
 
-#[test]
-fn with_a_per_test_map_a_mutant_runs_only_the_tests_that_cover_it() {
-    let Some((_dir, outcomes)) = support::python_per_test() else {
-        return;
-    };
-    let tests: Vec<(u32, &str, Vec<&str>)> = outcomes
+const LARGE: &str = "tests/test_large.py::test_discounts_a_large_member_order";
+const SMALL: &str = "tests/test_small.py::test_keeps_a_small_order";
+
+/// Each mutant as `(line, to, the tests run against it)`.
+fn tests_run(outcomes: &MutationOutcomes) -> Vec<(u32, &str, Vec<&str>)> {
+    outcomes
         .mutants
         .iter()
         .map(|m| {
@@ -78,19 +78,60 @@ fn with_a_per_test_map_a_mutant_runs_only_the_tests_that_cover_it() {
                 m.tests.iter().map(String::as_str).collect(),
             )
         })
-        .collect();
-    let large = "tests/test_large.py::test_discounts_a_large_member_order";
-    let small = "tests/test_small.py::test_keeps_a_small_order";
+        .collect()
+}
+
+/// The fixture's mutants, each with exactly the tests that cover its line.
+fn covering_tests() -> Vec<(u32, &'static str, Vec<&'static str>)> {
+    vec![
+        (6, ">", vec![LARGE, SMALL]),
+        (6, "or", vec![LARGE, SMALL]),
+        (7, "+", vec![LARGE]),
+        (8, "/", vec![SMALL]),
+        (8, "0", vec![SMALL]),
+        (13, "+", vec![]),
+    ]
+}
+
+#[test]
+fn with_a_per_test_map_a_mutant_runs_only_the_tests_that_cover_it() {
+    let Some((_dir, outcomes)) = support::python_per_test() else {
+        return;
+    };
+    assert_eq!(tests_run(&outcomes), covering_tests());
+}
+
+#[test]
+fn at_standard_a_cached_per_test_map_selects_each_mutants_tests() {
+    // The deep run measures the map and caches it; the standard run refreshes nothing.
+    let Some((dir, _)) = support::python_per_test() else {
+        return;
+    };
+    let outcomes = produce(dir.path(), "python", &Run::default()).unwrap();
     assert_eq!(
-        tests,
-        [
-            (6, ">", vec![large, small]),
-            (6, "or", vec![large, small]),
-            (7, "+", vec![large]),
-            (8, "/", vec![small]),
-            (8, "0", vec![small]),
-            (13, "+", vec![]),
-        ]
+        (outcomes.depth, outcomes.per_test),
+        (CostClass::Standard, true)
+    );
+    assert_eq!(tests_run(&outcomes), covering_tests());
+}
+
+#[test]
+fn at_standard_without_a_cached_per_test_map_every_mutant_runs_the_whole_suite() {
+    let Some((_dir, outcomes)) = support::python() else {
+        return;
+    };
+    let whole = |(line, to, tests): (u32, &'static str, Vec<&'static str>)| {
+        let run = if tests.is_empty() {
+            tests
+        } else {
+            vec![LARGE, SMALL]
+        };
+        (line, to, run)
+    };
+    assert!(!outcomes.per_test);
+    assert_eq!(
+        tests_run(&outcomes),
+        covering_tests().into_iter().map(whole).collect::<Vec<_>>()
     );
 }
 
