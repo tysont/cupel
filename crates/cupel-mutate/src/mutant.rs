@@ -27,7 +27,7 @@ pub fn replacements(source: &str, site: &Site) -> Vec<(String, String)> {
 }
 
 /// The byte offset of 1-based `line` and 1-based byte column `col`.
-fn offset(source: &str, line: u32, col: u32) -> Option<usize> {
+pub(crate) fn offset(source: &str, line: u32, col: u32) -> Option<usize> {
     let line = usize::try_from(line.checked_sub(1)?).ok()?;
     let col = usize::try_from(col.checked_sub(1)?).ok()?;
     let start = if line == 0 {

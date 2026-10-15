@@ -13,6 +13,7 @@ mod history;
 pub mod mutant;
 pub mod overlay;
 mod plan;
+pub mod schemata;
 pub mod settings;
 
 pub use engine::{ID, MutationEngine, register};
