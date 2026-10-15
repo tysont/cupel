@@ -130,3 +130,30 @@ fn a_red_baseline_refuses_the_reruns_with_exit_4() {
         .collect();
     assert_eq!(kinds, ["baseline.test-failed"]);
 }
+
+#[test]
+fn a_repository_without_a_test_suite_skips_tests_flaky_as_unavailable() {
+    let repo = Repo::new();
+    repo.write(
+        "calc.rs",
+        "pub fn add(a: i32, b: i32) -> i32 {\n    a + b\n}\n",
+    );
+    repo.write("calc.py", "def add(a, b):\n    return a + b\n");
+    let outcome = repo.run(&["check", "--only", "tests.flaky", "--seed", SEED]);
+    let envelope = outcome.envelope();
+    assert_eq!(
+        (outcome.code, &envelope["status"], &envelope["findings"]),
+        (0, &json!("pass"), &json!([])),
+        "{envelope}"
+    );
+    assert_eq!(
+        envelope["checks"][0]["skipped"],
+        json!({
+            "reason": "unavailable",
+            "fact": "test-results",
+            "lang": null,
+            "tool": null,
+            "see": "cupel describe matrix"
+        })
+    );
+}

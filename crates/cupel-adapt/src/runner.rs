@@ -241,7 +241,7 @@ impl cupel_core::Runner for Runner {
             });
         };
         let mut ids = Vec::new();
-        for (index, (dir, packages)) in roots(ctx).into_iter().enumerate() {
+        for (index, (dir, packages)) in suite_roots(ctx).into_iter().enumerate() {
             let root = self.root(ctx, index, &dir, packages, false)?;
             let command = (lister.command)(&root);
             let captured = self.process(&root, &command, &[]).run(&ctx.cancel)?;
@@ -331,7 +331,7 @@ impl Runner {
     /// The roots `selection` reaches, each with the arguments that narrow its run; an error
     /// when the runner cannot narrow to it.
     fn narrowed(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Result<Vec<Narrowed>> {
-        let roots = roots(ctx);
+        let roots = suite_roots(ctx);
         let dirs: Vec<String> = roots.iter().map(|(dir, _)| dir.clone()).collect();
         let mut narrowed = Vec::new();
         for (index, root) in roots.into_iter().enumerate() {
@@ -548,6 +548,16 @@ pub(crate) fn installed(tool: &str, node_bin: bool, dir: &Path) -> Option<String
         return Some(local.to_string_lossy().into_owned());
     }
     find_program(tool).map(|_| tool.to_owned())
+}
+
+/// The project roots a runner runs the suite in: none when `ProjectInfo` found no project of
+/// the language, since there is no suite to run (a `Cargo.toml`-less crate cannot be tested),
+/// else [`roots`].
+fn suite_roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
+    match ctx.upstream.get::<ProjectInfo>() {
+        Some(info) if info.roots.is_empty() => Vec::new(),
+        _ => roots(ctx),
+    }
 }
 
 /// The project roots of the language being produced, each with its packages; the repository

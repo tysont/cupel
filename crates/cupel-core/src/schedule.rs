@@ -391,6 +391,16 @@ impl Execution<'_, '_> {
                 Some(skip_reason(SkipReason::Timeout, &task.lang.id)),
             );
         }
+        if self.store.ran_no_test(&task.lang.id)
+            && reaches(
+                self.store.producers,
+                &task.check.manifest().needs,
+                &task.lang,
+                &mut Vec::new(),
+            )
+        {
+            return ended(CheckStatus::Skipped, Some(no_tests_ran(&task.lang.id)));
+        }
         let ran = self.facts_for(task, &mut *sink.forward).and_then(|facts| {
             let ctx = check_ctx(self.job, task.check, &task.lang.id, task.scope.clone());
             task.check.run(&ctx, &facts, &task.plan, sink)
@@ -891,6 +901,14 @@ impl<'a> FactStore<'a> {
         upstream
     }
 
+    /// Whether `lang`'s baseline was green and ran no test, so nothing that depends on test
+    /// execution can be measured there.
+    fn ran_no_test(&self, lang: &LangId) -> bool {
+        self.test_results
+            .iter()
+            .any(|(ran, results)| ran == lang && results.is_green() && results.ran_none())
+    }
+
     /// Passes a producer's event on, keeping each finding once by ID.
     fn forward(&mut self, event: Event, sink: &mut dyn EventSink) {
         if let Event::Finding(finding) = &event {
@@ -1160,6 +1178,16 @@ fn needs_range(id: &crate::id::CheckId, lang: &LangId) -> Skipped {
         lang: Some(lang.clone()),
         tool: None,
         see: Some(format!("cupel check --changed --only {id}")),
+    }
+}
+
+/// The `skipped` object for a check that depends on test execution in a language whose
+/// baseline ran no test: test results are unavailable there.
+fn no_tests_ran(lang: &LangId) -> Skipped {
+    Skipped {
+        fact: Some(FactKind::TestResults),
+        see: Some("cupel describe matrix".to_owned()),
+        ..skip_reason(SkipReason::Unavailable, lang)
     }
 }
 

@@ -122,6 +122,14 @@ impl TestResults {
         self.failures().next().is_none() && self.incomplete().next().is_none()
     }
 
+    /// Whether no test ran: there was no suite (no project to run it in), or every test it
+    /// reported was skipped. Nothing that depends on test execution can be measured.
+    pub fn ran_none(&self) -> bool {
+        self.tests
+            .iter()
+            .all(|test| test.outcome == TestOutcome::Skipped)
+    }
+
     /// The tests that make the suite red.
     pub fn failures(&self) -> impl Iterator<Item = &TestResult> {
         self.tests.iter().filter(|test| test.outcome.is_failure())

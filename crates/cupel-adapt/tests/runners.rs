@@ -300,3 +300,75 @@ fn a_cancelled_run_stops_before_running_anything() {
     );
     assert_eq!(produced.err(), Some(Error::Cancelled));
 }
+
+/// What runner `id` for `lang` reports in `dir` when `ProjectInfo` found no project root.
+fn run_without_a_project(id: &str, lang: &str, dir: &std::path::Path) -> TestResults {
+    let mut ctx = produce_ctx(dir, lang, Cancellation::new());
+    ctx.upstream
+        .insert(cupel_core::Produced::new(cupel_core::syntax::ProjectInfo::default()).share());
+    let registry = registry();
+    runner(&registry, id, lang)
+        .produce(&ctx, &Scope::default(), &mut Vec::new())
+        .unwrap()
+        .downcast::<TestResults>()
+        .unwrap()
+}
+
+#[test]
+fn a_runner_runs_nothing_where_its_language_has_no_project() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join("calc.rs"),
+        "pub fn one() -> u8 {\n    1\n}\n",
+    )
+    .unwrap();
+    let ran: Vec<(usize, usize, bool)> = [
+        ("tool.cargo-test", "rust"),
+        ("tool.cargo-nextest", "rust"),
+        ("tool.go-test", "go"),
+        ("tool.jest", "javascript"),
+        ("tool.vitest", "typescript"),
+        ("tool.pytest", "python"),
+        ("tool.unittest", "python"),
+    ]
+    .into_iter()
+    .map(|(id, lang)| {
+        let results = run_without_a_project(id, lang, dir.path());
+        (
+            results.invocations.len(),
+            results.tests.len(),
+            results.is_green(),
+        )
+    })
+    .collect();
+    assert_eq!(ran, [(0, 0, true); 7]);
+}
+
+#[test]
+fn unittest_in_a_project_with_no_tests_finishes_having_run_none() {
+    if cupel_core::find_program("python3").is_none() {
+        eprintln!("SKIPPED: python3 not installed; tool.unittest was not run");
+        return;
+    }
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(dir.path().join("calc.py"), "def one():\n    return 1\n").unwrap();
+    let registry = registry();
+    let results = runner(&registry, "tool.unittest", "python")
+        .produce(
+            &produce_ctx(dir.path(), "python", Cancellation::new()),
+            &Scope::default(),
+            &mut Vec::new(),
+        )
+        .unwrap()
+        .downcast::<TestResults>()
+        .unwrap();
+    let invocations: Vec<(&str, Option<i32>, bool)> = results
+        .invocations
+        .iter()
+        .map(|ran| (ran.dir.as_str(), ran.exit_code, ran.completed))
+        .collect();
+    assert_eq!(
+        (invocations, results.tests.len(), results.is_green()),
+        (vec![(".", Some(5), true)], 0, true)
+    );
+}

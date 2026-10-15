@@ -17,7 +17,8 @@ static UNITTEST: RunnerSpec = RunnerSpec {
     env: &[("PYTHONDONTWRITEBYTECODE", "1")],
     merged: true,
     read,
-    completed_codes: &[0],
+    // 5: no tests ran (Python 3.12+), a finished run of an empty suite.
+    completed_codes: &[0, 5],
     select,
     list: None,
     vary: &PYTHON,
