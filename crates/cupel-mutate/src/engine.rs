@@ -209,7 +209,7 @@ impl Running<'_> {
         (0..self.settings.jobs.min(widest))
             .map(|index| {
                 let slot = Slot::at(slot_dir(root, &self.lang, index));
-                slot.sync(root)
+                slot.sync(root, self.runner.outputs())
                     .map_err(|error| io(slot.root(), "", &error))?;
                 Ok(slot)
             })

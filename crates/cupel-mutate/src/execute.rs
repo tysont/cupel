@@ -107,15 +107,18 @@ impl Execution<'_> {
         Ok(ctx)
     }
 
-    /// Runs the tests of `run`'s mutants against the unmutated file, rewritten fresh so the run
-    /// rebuilds what a mutant would; the timeout its mutants get. A reference that is not green
-    /// means the slot does not reproduce the baseline.
+    /// Runs the tests of `run`'s mutants against the unmutated file with one more trailing
+    /// newline, which builds and loads like the original but is new to every build cache (by
+    /// content or by time), so the run rebuilds what a mutant would; the timeout its mutants
+    /// get. A reference that is not green means the slot does not reproduce the baseline.
     fn reference(&self, slot: &Slot, ctx: &ProduceCtx, run: &FileRun<'_>) -> Result<Duration> {
-        write(slot, run.file, run.original)?;
+        let mut renewed = run.original.to_vec();
+        renewed.push(b'\n');
+        write(slot, run.file, &renewed)?;
         let started = Instant::now();
         let ran = self
             .runner
-            .run(ctx, &union(&run.mutants), &RunOptions::default())?;
+            .run(ctx, &union(&run.mutants), &self.options(None))?;
         let elapsed = started.elapsed();
         if !ran.results.is_green() {
             return Err(Error::Process {
@@ -131,18 +134,27 @@ impl Execution<'_> {
         Ok(TIMEOUT_FLOOR.max(elapsed * self.timeout_factor))
     }
 
+    /// How every run of the production runs: in the runner's own order, with the run's seed (so
+    /// `--seed` repeats it, and nothing is answered from a cache of earlier results), and
+    /// `timeout`.
+    fn options(&self, timeout: Option<Duration>) -> RunOptions {
+        RunOptions {
+            timeout,
+            seed: Some(self.ctx.seed),
+            ..RunOptions::default()
+        }
+    }
+
     /// Runs `planned`'s tests against it (already written) with `limit`.
     fn mutant(&self, ctx: &ProduceCtx, planned: &Planned, limit: Duration) -> Result<Ran> {
         let selection = planned
             .tests
             .clone()
             .map_or(TestSelection::All, TestSelection::Tests);
-        let options = RunOptions {
-            timeout: Some(limit),
-            ..RunOptions::default()
-        };
         let started = Instant::now();
-        let ran = self.runner.run(ctx, &selection, &options)?;
+        let ran = self
+            .runner
+            .run(ctx, &selection, &self.options(Some(limit)))?;
         let elapsed = started.elapsed();
         Ok(classify(&ran, elapsed >= limit, elapsed))
     }

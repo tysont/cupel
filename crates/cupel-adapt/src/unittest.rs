@@ -21,6 +21,7 @@ static UNITTEST: RunnerSpec = RunnerSpec {
     select,
     list: None,
     vary: &PYTHON,
+    outputs: &[],
 };
 
 inventory::submit!(crate::ToolProducer {

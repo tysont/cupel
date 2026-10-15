@@ -29,6 +29,7 @@ static JEST: RunnerSpec = RunnerSpec {
         env: |_| Vec::new(),
         executed: Executed::Unknown,
     },
+    outputs: &[],
 };
 
 inventory::submit!(crate::ToolProducer {

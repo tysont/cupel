@@ -29,6 +29,7 @@ pub(crate) static GO_TEST: RunnerSpec = RunnerSpec {
         env: |_| Vec::new(),
         executed: Executed::Events(|captured| test2json::order(&captured.stdout)),
     },
+    outputs: &[],
 };
 
 inventory::submit!(crate::ToolProducer {

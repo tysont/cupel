@@ -290,6 +290,12 @@ pub trait Runner: Producer<TestResults> {
 
     /// How the runner orders what it runs.
     fn ordering(&self) -> RunOrdering;
+
+    /// The names of the directories the runner builds into (such as `target`), which a copy of
+    /// the tree must not share with the original or another copy (ADR-080 §8).
+    fn outputs(&self) -> &'static [&'static str] {
+        &[]
+    }
 }
 
 /// A fact a producer made, with its type erased: what [`RegisteredProducer::produce`] returns.

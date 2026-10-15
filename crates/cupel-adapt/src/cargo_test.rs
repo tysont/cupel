@@ -26,6 +26,7 @@ static CARGO_TEST: RunnerSpec = RunnerSpec {
         env: |_| Vec::new(),
         executed: Executed::Report,
     },
+    outputs: &["target"],
 };
 
 inventory::submit!(crate::ToolProducer {

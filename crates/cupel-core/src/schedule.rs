@@ -17,6 +17,7 @@ use crate::grade::CostClass;
 use crate::id::{LangId, RunId};
 use crate::lang::Lang;
 use crate::matrix::{Support, SupportMatrix};
+use crate::mutation::MutationOutcomes;
 use crate::producer::{
     Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, SharedFact, Upstream,
 };
@@ -76,6 +77,8 @@ pub struct Outcome {
     pub plan: Option<RunPlan>,
     /// Every test run the run made (the baseline), by language, for the store's index.
     pub test_results: Vec<(LangId, TestResults)>,
+    /// Every mutation outcome the run produced, by language, for the store's index (ADR-080).
+    pub mutation_outcomes: Vec<(LangId, MutationOutcomes)>,
     /// The red baseline that refused the run: no check ran, so `checks` is empty (ADR-076).
     pub refused: Option<Unevaluable>,
 }
@@ -163,6 +166,7 @@ impl Scheduler<'_> {
                 findings: execution.store.findings,
                 symbols: prepared.symbols,
                 test_results: execution.store.test_results,
+                mutation_outcomes: execution.store.mutation_outcomes,
                 refused: Some(red),
                 ..Outcome::default()
             });
@@ -182,6 +186,7 @@ impl Scheduler<'_> {
             interrupted: interrupted || store.interrupted,
             plan: None,
             test_results: store.test_results,
+            mutation_outcomes: store.mutation_outcomes,
             refused: None,
         })
     }
@@ -240,6 +245,7 @@ impl Scheduler<'_> {
                 ..RunPlan::default()
             }),
             test_results: Vec::new(),
+            mutation_outcomes: Vec::new(),
             refused: None,
         })
     }
@@ -704,6 +710,8 @@ struct FactStore<'a> {
     interrupted: bool,
     /// Every `TestResults` produced, by language.
     test_results: Vec<(LangId, TestResults)>,
+    /// Every `MutationOutcomes` produced, by language.
+    mutation_outcomes: Vec<(LangId, MutationOutcomes)>,
     /// The first red `TestResults`, which no check may read.
     refused: Option<Unevaluable>,
 }
@@ -750,6 +758,7 @@ impl<'a> FactStore<'a> {
             seen: HashSet::new(),
             interrupted: false,
             test_results: Vec::new(),
+            mutation_outcomes: Vec::new(),
             refused: None,
         }
     }
@@ -777,6 +786,14 @@ impl<'a> FactStore<'a> {
             .cloned();
         if let Some(results) = results {
             made = self.gate(made, results, lang);
+        }
+        if let Some(outcomes) = made
+            .as_ref()
+            .ok()
+            .and_then(|fact| fact.downcast_ref::<MutationOutcomes>())
+        {
+            self.mutation_outcomes
+                .push((lang.id.clone(), outcomes.clone()));
         }
         self.made.insert(key, made.clone());
         made

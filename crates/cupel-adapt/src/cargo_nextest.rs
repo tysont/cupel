@@ -24,6 +24,7 @@ pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
     }),
     completed_codes: &[0],
     vary: &FIXED,
+    outputs: &["target"],
 };
 
 inventory::submit!(crate::ToolProducer {

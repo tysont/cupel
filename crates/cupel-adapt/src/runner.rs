@@ -42,6 +42,8 @@ pub struct RunnerSpec {
     pub list: Option<Lister>,
     /// How a run's order, seed, and parallelism reach the runner (ADR-078).
     pub vary: &'static Varying,
+    /// The directories it builds into, which no copy of the tree may share (ADR-080 §8).
+    pub outputs: &'static [&'static str],
 }
 
 /// How a runner varies a run: its ordering, the arguments and environment a run's
@@ -307,6 +309,10 @@ impl cupel_core::Runner for Runner {
 
     fn ordering(&self) -> RunOrdering {
         self.0.vary.ordering
+    }
+
+    fn outputs(&self) -> &'static [&'static str] {
+        self.0.outputs
     }
 }
 

@@ -1,9 +1,10 @@
 // ABOUTME: The CLI's access to the fact store: opening it for verbs (failures are usage errors) and the
 // ABOUTME: persistence hook that records every run and mirrors the suppressions file (ADR-045 §8, §10).
-use cupel_core::{Envelope, LangId, Suppressions, TestResults, Writer};
+use cupel_core::{Envelope, Suppressions, Writer};
 use cupel_store::{Store, StoreError};
 
 use crate::error::CupelError;
+use crate::run::Executions;
 
 /// The subject and argument of a store failure in a verb.
 const STORE: &str = ".cupel/cupel.db";
@@ -33,22 +34,27 @@ pub fn unusable(error: &StoreError) -> CupelError {
     )
 }
 
-/// Records `envelope` in the store with the test runs it made (`test_results`, ADR-076 §7) and
-/// mirrors `suppressions` (`.cupel/suppressions.toml`, when it loads) into it. The error is for
+/// Records `envelope` in the store with what it executed (its test runs, ADR-076 §7, and its
+/// mutation outcomes, ADR-080 §10) and mirrors `suppressions` (`.cupel/suppressions.toml`, when it loads) into it. The error is for
 /// one stderr line; it never changes the run's outcome (ADR-045 §8).
 pub fn record(
     writer: &Writer,
     envelope: &Envelope,
-    test_results: &[(LangId, TestResults)],
+    executed: &Executions,
     suppressions: Option<&Suppressions>,
 ) -> Result<(), String> {
     let store = Store::open(writer).map_err(|error| error.to_string())?;
     store
         .record_run(envelope)
         .map_err(|error| error.to_string())?;
-    for (lang, results) in test_results {
+    for (lang, results) in &executed.test_results {
         store
             .record_test_results(&envelope.run.id, lang, results)
+            .map_err(|error| error.to_string())?;
+    }
+    for (lang, outcomes) in &executed.mutation_outcomes {
+        store
+            .record_mutants(&envelope.run.id, lang, outcomes)
             .map_err(|error| error.to_string())?;
     }
     if let Some(suppressions) = suppressions {

@@ -45,12 +45,14 @@ impl Slot {
 
     /// Makes the slot mirror `tree`: what the tree's `.gitignore`s ignore becomes a symlink to
     /// the original, every other file a clone or hard link unless the slot already holds its
-    /// bytes, and what the tree no longer has is removed. `.git` and `.cupel` are left out; the
-    /// slot's own `.cupel` (runner reports) is kept.
-    pub fn sync(&self, tree: &Path) -> io::Result<()> {
+    /// bytes, and what the tree no longer has is removed. `.git`, `.cupel`, and directories named
+    /// in `outputs` (a runner's build directories) are left out of the mirror; the slot's own
+    /// are kept, so its builds are its own and incremental.
+    pub fn sync(&self, tree: &Path, outputs: &[&str]) -> io::Result<()> {
         fs::create_dir_all(&self.root)?;
-        let wanted = wanted(tree)?;
-        prune(&self.root, &self.root, &wanted)?;
+        let own = Own(outputs.iter().map(|name| (*name).to_owned()).collect());
+        let wanted = wanted(tree, &own)?;
+        prune(&self.root, &self.root, &wanted, &own)?;
         for (path, entry) in &wanted {
             self.place(path, entry)?;
         }
@@ -87,8 +89,19 @@ impl Slot {
     }
 }
 
+/// What a slot keeps for itself: Cupel's and the runner's working directories.
+#[derive(Clone)]
+struct Own(Vec<String>);
+
+impl Own {
+    fn holds(&self, name: &std::ffi::OsStr) -> bool {
+        name == ".git" || name == ".cupel" || self.0.iter().any(|output| name == output.as_str())
+    }
+}
+
 /// Every path a slot of `tree` should hold, relative to it.
-fn wanted(tree: &Path) -> io::Result<BTreeMap<PathBuf, Entry>> {
+fn wanted(tree: &Path, own: &Own) -> io::Result<BTreeMap<PathBuf, Entry>> {
+    let filter = own.clone();
     let mut kept: BTreeMap<PathBuf, Entry> = BTreeMap::new();
     let walk = ignore::WalkBuilder::new(tree)
         .hidden(false)
@@ -96,7 +109,7 @@ fn wanted(tree: &Path) -> io::Result<BTreeMap<PathBuf, Entry>> {
         .git_global(false)
         .git_exclude(false)
         .parents(false)
-        .filter_entry(|entry| !left_out(entry.file_name()))
+        .filter_entry(move |entry| !filter.holds(entry.file_name()))
         .build();
     for entry in walk.flatten() {
         let Ok(relative) = entry.path().strip_prefix(tree) else {
@@ -123,7 +136,7 @@ fn wanted(tree: &Path) -> io::Result<BTreeMap<PathBuf, Entry>> {
     for dir in dirs {
         for child in fs::read_dir(tree.join(&dir))?.flatten() {
             let relative = dir.join(child.file_name());
-            if !left_out(&child.file_name()) && !kept.contains_key(&relative) {
+            if !own.holds(&child.file_name()) && !kept.contains_key(&relative) {
                 kept.insert(relative, Entry::Link(child.path()));
             }
         }
@@ -131,28 +144,24 @@ fn wanted(tree: &Path) -> io::Result<BTreeMap<PathBuf, Entry>> {
     Ok(kept)
 }
 
-/// Directories no slot holds: the tree's history and Cupel's own state.
-fn left_out(name: &std::ffi::OsStr) -> bool {
-    name == ".git" || name == ".cupel"
-}
-
 /// Removes everything under `dir` (a directory of the slot at `root`) that `wanted` does not
-/// hold as the same kind of entry, keeping the slot's own `.cupel`.
-fn prune(root: &Path, dir: &Path, wanted: &BTreeMap<PathBuf, Entry>) -> io::Result<()> {
+/// hold as the same kind of entry, keeping what the slot `own`s.
+fn prune(root: &Path, dir: &Path, wanted: &BTreeMap<PathBuf, Entry>, own: &Own) -> io::Result<()> {
     for child in fs::read_dir(dir)?.flatten() {
         let path = child.path();
         let relative = path.strip_prefix(root).unwrap_or(&path).to_path_buf();
         let kind = child.file_type()?;
+        let owned = own.holds(&child.file_name());
         let keep = match wanted.get(&relative) {
             Some(Entry::Dir) => kind.is_dir(),
             Some(Entry::Link(_)) => kind.is_symlink(),
             Some(Entry::File(_)) => kind.is_file(),
-            None => relative.as_os_str() == ".cupel",
+            None => owned && kind.is_dir(),
         };
         if !keep {
             remove(&path)?;
-        } else if kind.is_dir() && relative.as_os_str() != ".cupel" {
-            prune(root, &path, wanted)?;
+        } else if kind.is_dir() && !owned {
+            prune(root, &path, wanted, own)?;
         }
     }
     Ok(())

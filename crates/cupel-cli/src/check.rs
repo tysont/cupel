@@ -17,7 +17,7 @@ use crate::catalog::Catalog;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::project;
-use crate::run::{Invocation, Run, shell_quote};
+use crate::run::{Executions, Invocation, Run, shell_quote};
 
 /// `cupel check`: the envelope of running the selected checks, or of planning them.
 pub fn verb(
@@ -188,9 +188,10 @@ fn schedule(
     } else {
         scheduler.run(job, events)?
     };
-    invocation
-        .run
-        .keep_test_results(std::mem::take(&mut outcome.test_results));
+    invocation.run.keep(Executions {
+        test_results: std::mem::take(&mut outcome.test_results),
+        mutation_outcomes: std::mem::take(&mut outcome.mutation_outcomes),
+    });
     match outcome.refused.take() {
         Some(red) => Err(CupelError::Unevaluable(Box::new(red))),
         None => Ok(outcome),

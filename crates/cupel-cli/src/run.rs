@@ -5,8 +5,8 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::{
     Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, Event, EventSink,
-    ExitCode, Finding, LangId, RunId, RunInfo, RunPlan, Severity, SeverityCounts, Status, Summary,
-    TestResults, ToolchainInfo, Verb, Writer, schema,
+    ExitCode, Finding, LangId, MutationOutcomes, RunId, RunInfo, RunPlan, Severity, SeverityCounts,
+    Status, Summary, TestResults, ToolchainInfo, Verb, Writer, schema,
 };
 
 use cupel_core::config::Config;
@@ -30,9 +30,16 @@ pub struct Run {
     pub depth: Option<CostClass>,
     /// The effective budget in milliseconds, when one is set.
     pub budget_ms: Option<u64>,
-    /// The test runs this run made, green or red, until the run record indexes them in the store
-    /// (ADR-076 §7).
-    test_results: RefCell<Vec<(LangId, TestResults)>>,
+    /// What this run executed, until the run record indexes it in the store.
+    executions: RefCell<Executions>,
+}
+
+/// What a run executed, by language: its test runs, green or red (ADR-076 §7), and its mutation
+/// outcomes (ADR-080 §10), which the store indexes with the run record.
+#[derive(Debug, Default)]
+pub struct Executions {
+    pub test_results: Vec<(LangId, TestResults)>,
+    pub mutation_outcomes: Vec<(LangId, MutationOutcomes)>,
 }
 
 impl Run {
@@ -48,7 +55,7 @@ impl Run {
             config: ConfigEcho::default(),
             depth: None,
             budget_ms: None,
-            test_results: RefCell::default(),
+            executions: RefCell::default(),
         }
     }
 
@@ -61,14 +68,16 @@ impl Run {
         self.cancel = Cancellation::with_deadline(self.clock + limit);
     }
 
-    /// Keeps `results`, test runs this run made, for the store.
-    pub fn keep_test_results(&self, results: impl IntoIterator<Item = (LangId, TestResults)>) {
-        self.test_results.borrow_mut().extend(results);
+    /// Keeps `executed`, what this run executed, for the store.
+    pub fn keep(&self, executed: Executions) {
+        let mut kept = self.executions.borrow_mut();
+        kept.test_results.extend(executed.test_results);
+        kept.mutation_outcomes.extend(executed.mutation_outcomes);
     }
 
-    /// The test runs kept so far, leaving none.
-    pub fn take_test_results(&self) -> Vec<(LangId, TestResults)> {
-        self.test_results.take()
+    /// What was kept so far, leaving nothing.
+    pub fn take_executions(&self) -> Executions {
+        self.executions.take()
     }
 
     pub fn cancellation(&self) -> &Cancellation {
