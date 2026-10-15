@@ -25,13 +25,45 @@ pub struct Slot {
 /// directory, so no runner in the repository ever discovers it, and the same on every run, so
 /// its builds are incremental.
 pub fn slot_dir(repo: &Path, lang: &str, index: usize) -> PathBuf {
-    let repo = repo.canonicalize().unwrap_or_else(|_| repo.to_path_buf());
+    slots_of(repo).join(lang).join(index.to_string())
+}
+
+/// Every repository's slots live under this directory.
+fn slots_root() -> PathBuf {
+    std::env::temp_dir().join("cupel-mutate")
+}
+
+/// The directory of the slots of the repository at `repo`.
+fn slots_of(repo: &Path) -> PathBuf {
+    let repo = canonical(repo);
     let digest = blake3::hash(repo.to_string_lossy().as_bytes()).to_hex();
-    std::env::temp_dir()
-        .join("cupel-mutate")
-        .join(&digest[..16])
-        .join(lang)
-        .join(index.to_string())
+    slots_root().join(&digest[..16])
+}
+
+fn canonical(path: &Path) -> PathBuf {
+    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
+}
+
+/// The file in a repository's slot directory naming the repository.
+const OWNER: &str = "repository";
+
+/// Records `repo` as the owner of its slots and removes the slots of every repository that no
+/// longer exists (a removed checkout, a test's temporary repository), so slots do not pile up.
+pub fn claim(repo: &Path) -> io::Result<()> {
+    let own = slots_of(repo);
+    fs::create_dir_all(&own)?;
+    fs::write(
+        own.join(OWNER),
+        canonical(repo).to_string_lossy().as_bytes(),
+    )?;
+    for entry in fs::read_dir(slots_root())?.flatten() {
+        let owner = fs::read_to_string(entry.path().join(OWNER)).unwrap_or_default();
+        if entry.path() != own && !Path::new(&owner).is_dir() {
+            // Another run may be removing it too; what is left goes next time.
+            let _ = remove(&entry.path());
+        }
+    }
+    Ok(())
 }
 
 impl Slot {

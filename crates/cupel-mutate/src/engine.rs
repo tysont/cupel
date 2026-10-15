@@ -14,7 +14,7 @@ use cupel_core::{
 
 use crate::execute::{Execution, FileRun};
 use crate::history::History;
-use crate::overlay::{Slot, slot_dir};
+use crate::overlay::{Slot, claim, slot_dir};
 use crate::plan::{Inputs, Planned, digest, plan};
 use crate::settings::Settings;
 
@@ -206,6 +206,7 @@ impl Running<'_> {
     /// The slots for files of at most `widest` mutants, each synced with the tree.
     fn slots(&self, widest: usize) -> Result<Vec<Slot>> {
         let root = &self.ctx.ctx.root;
+        claim(root).map_err(|error| io(root, "", &error))?;
         (0..self.settings.jobs.min(widest))
             .map(|index| {
                 let slot = Slot::at(slot_dir(root, &self.lang, index));

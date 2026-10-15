@@ -138,3 +138,18 @@ fn a_runners_build_outputs_are_the_slots_own_and_kept_between_syncs() {
     assert_eq!(read(slot.root(), "target/debug/own"), "slot build\n");
     assert_eq!(read(repo.path(), "target/build.out"), "built\n");
 }
+
+#[test]
+fn claiming_slots_removes_those_of_repositories_that_are_gone() {
+    let gone = repository();
+    let gone_slot = cupel_mutate::overlay::slot_dir(gone.path(), "python", 0);
+    cupel_mutate::overlay::claim(gone.path()).unwrap();
+    fs::create_dir_all(&gone_slot).unwrap();
+    drop(gone);
+    let kept = repository();
+    let kept_slot = cupel_mutate::overlay::slot_dir(kept.path(), "python", 0);
+    cupel_mutate::overlay::claim(kept.path()).unwrap();
+    fs::create_dir_all(&kept_slot).unwrap();
+    cupel_mutate::overlay::claim(kept.path()).unwrap();
+    assert_eq!((gone_slot.exists(), kept_slot.exists()), (false, true));
+}
