@@ -7,15 +7,17 @@ use cupel_core::config::Config;
 use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, GitInfo, Job, Lang, Outcome,
-    PlannedWrite, RANKED, Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection,
-    Status, Verb, Writer, apply_gate, evaluate_gate, gate_for, next_actions, rankings,
+    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, Finding, GitInfo, Job, Lang,
+    Outcome, PlannedInstall, PlannedWrite, RANKED, Range, ResolvedFiles, Scheduler, ScopeInfo,
+    ScopeRequest, Selection, Status, Verb, Writer, apply_gate, evaluate_gate, gate_for,
+    next_actions, rankings,
 };
 use cupel_lang::LanguageRegistry;
 
 use crate::catalog::Catalog;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
+use crate::install::{self, Permission};
 use crate::project;
 use crate::run::{Executions, Invocation, Run, shell_quote};
 
@@ -114,6 +116,8 @@ pub fn run(
         catalog.language_registry(),
         resolved.files.iter().chain(&base_files),
     );
+    let (would_install, installed) =
+        install_tools(invocation, config, &catalog, (&selected, &langs));
     let job = Job {
         run: run.id(),
         writer,
@@ -133,7 +137,11 @@ pub fn run(
         checks: catalog.checks(),
         producers: catalog.producers(),
     };
-    let outcome = schedule(&scheduler, &job, invocation, events)?;
+    let mut outcome = schedule(&scheduler, &job, invocation, events)?;
+    outcome.findings.splice(0..0, installed);
+    if let Some(plan) = &mut outcome.plan {
+        plan.would_install = would_install;
+    }
     let scope = ScopeInfo {
         mode: request.mode(),
         files: resolved.files.len() as u64,
@@ -146,6 +154,37 @@ pub fn run(
         git: git_info(writer.root(), &resolved),
         outcome,
     })
+}
+
+/// Before a run, the missing tools of the producers it would choose for `selected` in `langs`,
+/// installed as far as the invocation may (ADR-081): the installs a dry run would attempt, and
+/// the findings of the installs a real run made or was refused at the terminal's question.
+fn install_tools(
+    invocation: &Invocation<'_>,
+    config: &Config,
+    catalog: &Catalog,
+    (selected, langs): (&[&dyn Check], &[Lang]),
+) -> (Vec<PlannedInstall>, Vec<Finding>) {
+    let (run, root) = (invocation.run, invocation.writer.root());
+    let planned = crate::doctor::installs(selected, catalog.producers(), langs, config, root);
+    if invocation.dry_run {
+        return (invocation.installs.would_install(&planned), Vec::new());
+    }
+    if matches!(invocation.installs, Permission::Never(_)) {
+        return (Vec::new(), Vec::new());
+    }
+    let attempts = install::run(
+        &planned,
+        invocation.installs,
+        &mut install::ask,
+        root,
+        run.cancellation(),
+    );
+    let findings = install::problems(&attempts)
+        .into_iter()
+        .map(|problem| problem.finding(&run.repro()))
+        .collect();
+    (Vec::new(), findings)
 }
 
 /// The lines a range scope changed per file; `None` without a range.

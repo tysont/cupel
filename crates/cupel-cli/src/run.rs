@@ -272,6 +272,8 @@ pub struct Invocation<'a> {
     pub writer: &'a Writer,
     pub config: Result<&'a Config, &'a cupel_core::Error>,
     pub dry_run: bool,
+    /// Whether the run may install the tools its producers need (ADR-081).
+    pub installs: crate::install::Permission,
 }
 
 impl Invocation<'_> {

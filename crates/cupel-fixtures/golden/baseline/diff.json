@@ -19,6 +19,7 @@
       "confidence": 1.0,
       "detail": null,
       "evidence": {
+        "install": null,
         "needed_for": "[lang.rust] test",
         "probe": "cupel-test-missing-b --version",
         "required": false,
@@ -47,6 +48,7 @@
       "confidence": 1.0,
       "detail": null,
       "evidence": {
+        "install": null,
         "needed_for": "[lang.rust] test",
         "probe": "cupel-test-missing-a --version",
         "required": false,

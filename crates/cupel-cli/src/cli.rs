@@ -62,10 +62,8 @@ pub struct GlobalArgs {
     pub offset: Option<u64>,
     #[arg(long, global = true)]
     pub no_color: bool,
-    // Parsed now; tool installation arrives in P3.7.
     #[arg(long, global = true, conflicts_with = "install")]
     pub no_install: bool,
-    // Parsed now; tool installation arrives in P3.7.
     #[arg(long, global = true, conflicts_with = "no_install")]
     pub install: bool,
     #[arg(long, global = true)]

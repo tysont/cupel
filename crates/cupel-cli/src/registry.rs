@@ -175,13 +175,11 @@ fn doctor_verb() -> CommandDescription {
         "doctor",
         "Verify the binary's version, the configuration, .cupel/ write access, and needed tools.",
         None,
-        vec![
-            switch(
-                "--fix",
-                "Install missing tools; with --install, without asking.",
-            )
-            .pending("P3.7"),
-        ],
+        vec![switch(
+            "--fix",
+            "Install the missing tools that have an install command: asking first on a \
+                 terminal, without asking with --install, never with --no-install.",
+        )],
         examples(&[
             (
                 "cupel doctor",
@@ -190,7 +188,17 @@ fn doctor_verb() -> CommandDescription {
             ),
             (
                 "cupel doctor --dry-run",
-                "A dry run; doctor writes nothing worth planning, so the plan is empty.",
+                "A dry run; without --fix doctor would install nothing, so the plan is empty.",
+                ExitCode::Pass,
+            ),
+            (
+                "cupel doctor --fix --install",
+                "Install every missing tool that has an install command, then check again.",
+                ExitCode::Pass,
+            ),
+            (
+                "cupel doctor --fix --install --dry-run",
+                "List the installs --fix --install would run, in the plan's would_install.",
                 ExitCode::Pass,
             ),
         ]),
@@ -609,13 +617,14 @@ fn run_control_flags() -> Vec<ArgDescription> {
         switch("--no-color", "Render text without color.").env("NO_COLOR"),
         switch(
             "--no-install",
-            "Never install tools; the default unless stdout is a terminal.",
+            "Never install tools; the default unless stdout is a terminal, where Cupel asks.",
         )
-        .pending("P3.7")
         .conflicts(&["--install"]),
-        switch("--install", "Install missing tools that producers need.")
-            .pending("P3.7")
-            .conflicts(&["--no-install"]),
+        switch(
+            "--install",
+            "Install the missing tools producers need, without asking.",
+        )
+        .conflicts(&["--no-install"]),
         switch("--write", "Permit writes outside .cupel/."),
         switch("--help", "Print help and exit."),
     ]

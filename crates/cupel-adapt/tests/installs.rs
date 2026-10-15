@@ -13,19 +13,21 @@ fn install(id: &str, program: &str, files: &[(&str, &str)]) -> Option<Install> {
     cupel_adapt::toolchain::install(&ProducerId::from(id), program, root.path())
 }
 
-fn command(text: &str) -> Option<Install> {
-    Some(Install::Command(text.to_owned()))
+fn command(text: &str) -> Install {
+    Install::Command(text.to_owned())
 }
 
 #[test]
 fn cargo_tools_install_with_cargo_install_locked() {
     assert_eq!(
         install("tool.cargo-nextest", "cargo-nextest", &[]),
-        command("cargo install cargo-nextest --locked")
+        Some(command("cargo install cargo-nextest --locked"))
     );
     assert_eq!(
         install("tool.cargo-llvm-cov", "cargo-llvm-cov", &[]),
-        command("cargo install cargo-llvm-cov --locked && rustup component add llvm-tools-preview")
+        Some(command(
+            "cargo install cargo-llvm-cov --locked && rustup component add llvm-tools-preview"
+        ))
     );
 }
 
@@ -33,15 +35,15 @@ fn cargo_tools_install_with_cargo_install_locked() {
 fn python_tools_install_through_the_detected_launcher() {
     assert_eq!(
         install("tool.pytest", "pytest", &[]),
-        command("python -m pip install pytest")
+        Some(command("python -m pip install pytest"))
     );
     assert_eq!(
         install("tool.pytest-cov", "pytest", &[("uv.lock", "")]),
-        command("uv add --dev pytest-cov")
+        Some(command("uv add --dev pytest-cov"))
     );
     assert_eq!(
         install("tool.coverage-py", "coverage", &[("poetry.lock", "")]),
-        command("poetry add --group dev coverage")
+        Some(command("poetry add --group dev coverage"))
     );
 }
 
@@ -49,15 +51,15 @@ fn python_tools_install_through_the_detected_launcher() {
 fn javascript_tools_are_dev_dependencies_of_the_root() {
     assert_eq!(
         install("tool.vitest", "vitest", &[("package.json", "{}")]),
-        command("npm install --save-dev vitest")
+        Some(command("npm install --save-dev vitest"))
     );
     assert_eq!(
         install("tool.vitest-coverage", "vitest", &[("pnpm-lock.yaml", "")]),
-        command("pnpm add --save-dev vitest @vitest/coverage-v8")
+        Some(command("pnpm add --save-dev vitest @vitest/coverage-v8"))
     );
     assert_eq!(
         install("tool.jest", "jest", &[("yarn.lock", "")]),
-        command("yarn add --dev jest")
+        Some(command("yarn add --dev jest"))
     );
 }
 

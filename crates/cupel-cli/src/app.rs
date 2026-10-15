@@ -20,6 +20,7 @@ use crate::cli::{Cli, VerbArgs, verb_name};
 use crate::error::{BugReport, CupelError, Usage};
 use crate::events::Events;
 use crate::format::{self, Rendering};
+use crate::install::Permission;
 use crate::page::Page;
 use crate::problem::Problem;
 use crate::run::{Invocation, Run};
@@ -242,6 +243,7 @@ fn configured(
                     writer,
                     config: Err(&error),
                     dry_run: cli.global.dry_run,
+                    installs: installs(cli, environment),
                 };
                 execute(&invocation, cli, environment, events)
             });
@@ -278,10 +280,20 @@ fn configured(
             writer,
             config: Ok(&config),
             dry_run: cli.global.dry_run,
+            installs: installs(cli, environment),
         };
         execute(&invocation, cli, environment, events)
     });
     (envelope, rendering, said)
+}
+
+/// Whether the run may install tools: the flags, else whether stdout is a terminal (ADR-081).
+fn installs(cli: &Cli, environment: &Environment) -> Permission {
+    Permission::of(
+        cli.global.install,
+        cli.global.no_install,
+        environment.stdout_is_terminal,
+    )
 }
 
 /// The configuration, rejected when it names a check, gate metric, or language the registries
@@ -383,11 +395,11 @@ fn run_verb(
                 described
             })
         }
-        // `doctor` writes only its probe and run record; its plan is empty (ADR-022 §6).
-        VerbArgs::Doctor { .. } | VerbArgs::Explain { .. } if dry_run => {
-            Ok(invocation.nothing_planned(events))
-        }
-        VerbArgs::Doctor { fix } => Ok(doctor::run(run, invocation.config, writer, *fix)),
+        // `doctor` writes only its probe and run record; its plan lists only what `--fix` would
+        // install (ADR-022 §6, ADR-081).
+        VerbArgs::Doctor { fix } if dry_run => Ok(doctor::plan(invocation, *fix, events)),
+        VerbArgs::Explain { .. } if dry_run => Ok(invocation.nothing_planned(events)),
+        VerbArgs::Doctor { fix } => Ok(doctor::run(invocation, *fix)),
         VerbArgs::Init { force } => init_verb(invocation, cli, *force, events),
         VerbArgs::Check { scope } => check::verb(invocation, scope, events),
         VerbArgs::Survey { scope } => survey::verb(invocation, scope, events),
