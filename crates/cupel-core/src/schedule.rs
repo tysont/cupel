@@ -883,7 +883,9 @@ impl<'a> FactStore<'a> {
         Err(Error::AbsentFact { kind })
     }
 
-    /// Makes each of `wants` for `lang` that can be made (ADR-080); one that cannot is left out.
+    /// Makes each of `wants` for `lang` that can be made by a producer within the run's depth
+    /// (ADR-080); one that cannot is left out, so an optional fact never costs more than the
+    /// run asked for.
     fn ensure_wants(
         &mut self,
         wants: &[FactKind],
@@ -892,7 +894,11 @@ impl<'a> FactStore<'a> {
         visiting: &mut Vec<FactKind>,
     ) {
         for want in wants {
-            if !visiting.contains(want) {
+            let affordable = self
+                .producers
+                .producers_for(*want, lang)
+                .any(|producer| producer.cost() <= self.depth);
+            if affordable && !visiting.contains(want) {
                 visiting.push(*want);
                 let _ = self.ensure(*want, lang, sink);
                 visiting.pop();

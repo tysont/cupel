@@ -59,7 +59,7 @@ fn a_changed_test_reruns_only_the_mutants_it_covers() {
     let small = dir.path().join("tests/test_small.py");
     let text = fs::read_to_string(&small).unwrap();
     fs::write(&small, text.replace("(50, True) == 50", "(60, True) == 60")).unwrap();
-    let second = produce(dir.path(), "python", &Run::default()).unwrap();
+    let second = produce(dir.path(), "python", &support::deep()).unwrap();
     assert_eq!(executed(&second), ["6 >=→>", "6 and→or", "8 *→/", "8 1→0"]);
 }
 

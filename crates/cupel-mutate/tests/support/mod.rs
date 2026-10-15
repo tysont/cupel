@@ -112,18 +112,31 @@ pub fn with_outcome(outcomes: &MutationOutcomes, outcome: MutantOutcome) -> Vec<
 /// A copy of the Python mutation fixture and its outcomes at the default depth; `None` (reported
 /// as skipped) without pytest.
 pub fn python() -> Option<(tempfile::TempDir, MutationOutcomes)> {
+    python_at(&Run::default())
+}
+
+/// [`python`] in a run like `run`.
+fn python_at(run: &Run) -> Option<(tempfile::TempDir, MutationOutcomes)> {
     if !installed("pytest", "the Python mutation fixture") {
         return None;
     }
     let dir = fixture("tests.mutation/python");
-    let outcomes = produce(dir.path(), "python", &Run::default()).unwrap();
+    let outcomes = produce(dir.path(), "python", run).unwrap();
     Some((dir, outcomes))
 }
 
-/// [`python`], when its mutants ran by a per-test map; `None` (reported as skipped) without
-/// pytest-cov.
+/// A run at `deep`, the depth that measures a per-test map (its producers cost `deep`).
+pub fn deep() -> Run {
+    Run {
+        depth: Some(CostClass::Deep),
+        changed: None,
+    }
+}
+
+/// [`python`] at `deep`, when its mutants ran by a per-test map; `None` (reported as skipped)
+/// without pytest-cov.
 pub fn python_per_test() -> Option<(tempfile::TempDir, MutationOutcomes)> {
-    python().filter(|(_, outcomes)| {
+    python_at(&deep()).filter(|(_, outcomes)| {
         if !outcomes.per_test {
             eprintln!("SKIPPED: pytest-cov not installed; per-test selection was not run");
         }

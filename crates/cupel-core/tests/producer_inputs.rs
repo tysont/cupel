@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex};
 
 use cupel_core::coverage::CoverageMap;
-use cupel_core::syntax::{ProjectInfo, Symbols};
+use cupel_core::syntax::{ProjectInfo, Roots as EntryPoints, Symbols};
 use cupel_core::{
     Availability, CheckRegistry, CostClass, Ctx, Error, EventSink, FactKind, Focus, Langs,
     ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, Scheduler, Scope, Writer,
@@ -17,6 +17,7 @@ use cupel_core::{
 struct Seen {
     project_info: bool,
     coverage: bool,
+    roots: bool,
     runners: String,
     focus: Option<Focus>,
 }
@@ -38,7 +39,11 @@ impl Producer<Symbols> for Recording {
     }
 
     fn wants(&self) -> &[FactKind] {
-        &[FactKind::ProjectInfo, FactKind::CoverageMap]
+        &[
+            FactKind::ProjectInfo,
+            FactKind::CoverageMap,
+            FactKind::Roots,
+        ]
     }
 
     fn cost(&self) -> CostClass {
@@ -53,6 +58,7 @@ impl Producer<Symbols> for Recording {
         *self.0.lock().unwrap() = Some(Seen {
             project_info: ctx.upstream.get::<ProjectInfo>().is_some(),
             coverage: ctx.upstream.get::<CoverageMap>().is_some(),
+            roots: ctx.upstream.get::<EntryPoints>().is_some(),
             runners: format!("{:?}", ctx.runners),
             focus: Some(ctx.focus.clone()),
         });
@@ -86,6 +92,35 @@ impl Producer<ProjectInfo> for Roots {
 
     fn produce(&self, _: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<ProjectInfo> {
         Ok(ProjectInfo::default())
+    }
+}
+
+/// Entry points at `deep` cost: wanted, but made only when the run's depth reaches it.
+struct Expensive;
+
+impl Producer<EntryPoints> for Expensive {
+    fn id(&self) -> ProducerId {
+        ProducerId::from("tool.expensive")
+    }
+
+    fn languages(&self) -> Langs {
+        Langs::Any
+    }
+
+    fn needs(&self) -> &[FactKind] {
+        &[]
+    }
+
+    fn cost(&self) -> CostClass {
+        CostClass::Deep
+    }
+
+    fn availability(&self, _: &Ctx) -> Availability {
+        Availability::Ready
+    }
+
+    fn produce(&self, _: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<EntryPoints> {
+        Ok(EntryPoints::default())
     }
 }
 
@@ -131,6 +166,11 @@ fn changed() -> BTreeMap<String, Vec<(u32, u32)>> {
 /// `Symbols` with the recording producer, the roots, and the broken coverage producer
 /// registered; what the recording producer saw.
 fn seen() -> Seen {
+    seen_at(CostClass::Deep)
+}
+
+/// What the recording producer saw in a run at `depth` (see [`seen`]).
+fn seen_at(depth: CostClass) -> Seen {
     let dir = tempfile::tempdir().unwrap();
     let config = support::config_at(dir.path(), "");
     let writer = Writer::new(dir.path(), false).unwrap();
@@ -139,9 +179,10 @@ fn seen() -> Seen {
     producers.register::<Symbols, _>(Recording(Arc::clone(&recorded)));
     producers.register::<ProjectInfo, _>(Roots);
     producers.register::<CoverageMap, _>(Broken);
+    producers.register::<EntryPoints, _>(Expensive);
     let checks = CheckRegistry::default();
     let mut job = support::job(&writer, &config, &checks, &["rust"]);
-    job.depth = CostClass::Deep;
+    job.depth = depth;
     job.changed = Some(changed());
     Scheduler {
         checks: &checks,
@@ -177,5 +218,16 @@ fn a_producer_gets_the_runs_depth_and_changed_lines() {
             symbols: None,
             changed: Some(changed()),
         })
+    );
+}
+
+#[test]
+fn a_want_only_a_costlier_producer_than_the_runs_depth_makes_is_left_out() {
+    assert_eq!(
+        (
+            seen_at(CostClass::Standard).roots,
+            seen_at(CostClass::Deep).roots
+        ),
+        (false, true)
     );
 }

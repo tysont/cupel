@@ -119,7 +119,7 @@ cupel/
 
 `cupel-checks` as a single crate (modules per check) is a deliberate deviation from the design's original `cupel-check-*` layout; see ADR-001 (§2.5). Split a check out into its own crate only when it acquires heavy, check-specific dependencies.
 
-The crate graph is part of the design (design §8.2): `cupel-checks` → `cupel-core` only; `cupel-lang`, `cupel-adapt`, `cupel-mutate` → `cupel-core` only; `cupel-cli` → everything. A `Cargo.toml` change that violates this is a design change and needs an ADR.
+The crate graph is part of the design (design §8.2): `cupel-checks` → `cupel-core` only; `cupel-lang`, `cupel-adapt` → `cupel-core` only; `cupel-mutate` → `cupel-core` and `cupel-store` (it reads earlier mutation outcomes, [ADR-080](adr/CUPEL_DECISION_080.md)); `cupel-cli` → everything. A `Cargo.toml` change that violates this is a design change and needs an ADR.
 
 ### 2.2 Toolchain and dependencies
 
