@@ -869,7 +869,7 @@ P3 fans out to parallel worktrees, each adding a check or a producer. Before it 
 
 #### P3.7 Tool installation: `--install`, `--no-install`, `doctor --fix`
 
-**Status:** not started
+**Status:** in progress (2026-10-15)
 
 Added during P3.1, which the P0.3 and P0.8 notes named as the step that installs tools; P3.1 delivered the runner producers and their `doctor` checks but installs nothing (see P3.1 Notes).
 
