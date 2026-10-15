@@ -110,3 +110,14 @@ impl Seen {
         }
     }
 }
+
+/// Each test's ID (`<package>/<Test>`) in the order `stdout`, the events of `go test -json`,
+/// started them: its `run` events, in the order they appear.
+pub fn order(stdout: &str) -> Vec<String> {
+    stdout
+        .lines()
+        .filter_map(|line| serde_json::from_str::<Event>(line).ok())
+        .filter(|event| event.action == "run")
+        .filter_map(|event| Some(format!("{}/{}", event.package, event.test?)))
+        .collect()
+}

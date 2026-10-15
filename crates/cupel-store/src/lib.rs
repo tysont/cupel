@@ -27,6 +27,7 @@
 mod error;
 mod lock;
 mod migrations;
+mod mutants;
 
 use std::fmt::Write as _;
 use std::path::PathBuf;
@@ -42,6 +43,7 @@ use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
 pub use crate::error::StoreError;
 use crate::lock::WriterLock;
 use crate::migrations::MIGRATIONS;
+pub use crate::mutants::MutantSite;
 
 pub type Result<T, E = StoreError> = std::result::Result<T, E>;
 

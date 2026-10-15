@@ -3,7 +3,7 @@
 use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::unittest;
-use crate::runner::{Ran, Root, Runner, RunnerSpec, whole_suite};
+use crate::runner::{PYTHON, Ran, Root, Runner, RunnerSpec, Selected};
 
 const ID: &str = "tool.unittest";
 
@@ -18,8 +18,9 @@ static UNITTEST: RunnerSpec = RunnerSpec {
     merged: true,
     read,
     completed_codes: &[0],
-    select: whole_suite,
+    select,
     list: None,
+    vary: &PYTHON,
 };
 
 inventory::submit!(crate::ToolProducer {
@@ -27,17 +28,23 @@ inventory::submit!(crate::ToolProducer {
     register: |registry| registry.register_runner(Runner(&UNITTEST)),
 });
 
+/// Discovery, or (narrowed) the dotted test IDs that follow, run in the order given.
 fn command(root: &Root) -> Vec<String> {
-    [
-        root.program.as_str(),
-        "-m",
-        "unittest",
-        "discover",
-        "-v",
-        "-b",
-    ]
-    .map(str::to_owned)
-    .to_vec()
+    let discover = (!root.narrowed).then_some("discover");
+    [root.program.as_str(), "-m", "unittest"]
+        .into_iter()
+        .chain(discover)
+        .chain(["-v", "-b"])
+        .map(str::to_owned)
+        .collect()
+}
+
+/// Dotted test IDs are arguments unittest runs; files are not.
+fn select(selected: &Selected<'_>) -> Option<Vec<String>> {
+    match selected {
+        Selected::Tests(ids) => Some(ids.to_vec()),
+        Selected::Files(_) => None,
+    }
 }
 
 #[allow(

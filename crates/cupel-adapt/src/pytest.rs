@@ -3,7 +3,7 @@
 use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::{junit, listing};
-use crate::runner::{Lister, Ran, Root, Runner, RunnerSpec, Selected};
+use crate::runner::{Lister, PYTHON, Ran, Root, Runner, RunnerSpec, Selected};
 
 const ID: &str = "tool.pytest";
 
@@ -23,6 +23,7 @@ static PYTEST: RunnerSpec = RunnerSpec {
         parse: listing::pytest,
     }),
     completed_codes: &[0, 5],
+    vary: &PYTHON,
 };
 
 inventory::submit!(crate::ToolProducer {

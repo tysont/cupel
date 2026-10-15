@@ -1,9 +1,12 @@
 // ABOUTME: The `jest` runner producer: `jest --ci --json` writing its report to `.cupel/`, from the root's
 // ABOUTME: `node_modules/.bin` or `PATH`; read by the Jest JSON parser.
-use cupel_core::{LangFamily, Langs, TestResult};
+use cupel_core::{LangFamily, Langs, RunOrdering, TestResult};
 
 use crate::report::jest_json;
-use crate::runner::{Ran, Root, Runner, RunnerSpec, files, jest_report_command};
+use crate::runner::{
+    Executed, Ran, Root, Runner, RunnerSpec, Varying, files, jest_report_command,
+    jest_report_variation,
+};
 
 const ID: &str = "tool.jest";
 
@@ -20,6 +23,12 @@ static JEST: RunnerSpec = RunnerSpec {
     completed_codes: &[0],
     select: files,
     list: None,
+    vary: &Varying {
+        ordering: RunOrdering::Seeded,
+        args: |options| jest_report_variation(options, "--seed", "--randomize"),
+        env: |_| Vec::new(),
+        executed: Executed::Unknown,
+    },
 };
 
 inventory::submit!(crate::ToolProducer {

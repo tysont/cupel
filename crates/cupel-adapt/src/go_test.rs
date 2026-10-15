@@ -1,9 +1,9 @@
 // ABOUTME: The `go test -json` runner producer: the root's packages (`./...` by default) run with test2json
 // ABOUTME: events on standard output and build errors on standard error, read by the test2json parser.
-use cupel_core::{LangId, Langs, TestResult};
+use cupel_core::{LangId, Langs, RunOptions, RunOrder, RunOrdering, TestResult};
 
 use crate::report::{listing, test2json};
-use crate::runner::{Lister, Ran, Root, Runner, RunnerSpec, tests_flag};
+use crate::runner::{Executed, Lister, Ran, Root, Runner, RunnerSpec, Varying, tests_flag};
 
 const ID: &str = "tool.go-test";
 
@@ -23,6 +23,12 @@ pub(crate) static GO_TEST: RunnerSpec = RunnerSpec {
         parse: listing::go,
     }),
     completed_codes: &[0],
+    vary: &Varying {
+        ordering: RunOrdering::Seeded,
+        args: vary,
+        env: |_| Vec::new(),
+        executed: Executed::Events(|captured| test2json::order(&captured.stdout)),
+    },
 };
 
 inventory::submit!(crate::ToolProducer {
@@ -35,6 +41,24 @@ fn command(root: &Root) -> Vec<String> {
         .into_iter()
         .chain(packages(&root.packages))
         .collect()
+}
+
+/// A seeded run uncached (`-count=1`), its shuffle off or seeded; one package and one parallel
+/// test at a time for a parallelism of one.
+fn vary(options: &RunOptions) -> Vec<String> {
+    let mut args = Vec::new();
+    if let Some(seed) = options.seed {
+        args.push("-count=1".to_owned());
+        args.push(match options.order {
+            RunOrder::Shuffled => format!("-shuffle={}", seed >> 1),
+            _ => "-shuffle=off".to_owned(),
+        });
+    }
+    if let Some(parallel) = options.parallelism {
+        args.push(format!("-p={parallel}"));
+        args.push(format!("-parallel={parallel}"));
+    }
+    args
 }
 
 /// A root's package patterns, `./...` when it names none.

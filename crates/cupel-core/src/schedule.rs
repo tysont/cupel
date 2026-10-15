@@ -13,10 +13,13 @@ use crate::event::{Event, EventSink};
 use crate::fact::FactKind;
 use crate::facts::Facts;
 use crate::finding::{Finding, Severity};
+use crate::grade::CostClass;
 use crate::id::{LangId, RunId};
 use crate::lang::Lang;
 use crate::matrix::{Support, SupportMatrix};
-use crate::producer::{Availability, Ctx, ProduceCtx, ProducerRegistry, SharedFact, Upstream};
+use crate::producer::{
+    Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, SharedFact, Upstream,
+};
 use crate::rank::{Measured, Measurement};
 use crate::result::{CheckResult, CheckStatus, SkipReason, Skipped};
 use crate::scope::{Scope, SymbolSelector, select_symbols};
@@ -50,6 +53,10 @@ pub struct Job<'a> {
     pub base: Option<BaseTree>,
     /// The run's seed, handed to every producer (ADR-078).
     pub seed: u64,
+    /// The run's depth, handed to every producer (ADR-080).
+    pub depth: CostClass,
+    /// The lines a range scope changed, per file; `None` without a range (ADR-080).
+    pub changed: Option<ChangedLines>,
 }
 
 /// What a run (or a dry run's planning) produced.
@@ -245,6 +252,12 @@ impl Scheduler<'_> {
         sink: &mut dyn EventSink,
     ) -> Result<Prepared<'a>> {
         let scopes = resolve_symbols(job, store, sink)?;
+        if !job.selectors.is_empty() {
+            store.selected = scopes
+                .iter()
+                .map(|(lang, scope)| (lang.clone(), scope.symbols.clone().unwrap_or_default()))
+                .collect();
+        }
         let symbols = scopes
             .values()
             .map(|scope| scope.symbols.as_ref().map_or(0, BTreeSet::len) as u64)
@@ -679,6 +692,10 @@ struct FactStore<'a> {
     cancel: Cancellation,
     config: &'a Config,
     seed: u64,
+    depth: CostClass,
+    changed: Option<ChangedLines>,
+    /// Per language, the symbols `--symbols` selected; empty without selectors.
+    selected: HashMap<LangId, BTreeSet<crate::syntax::SymbolKey>>,
     files: Vec<String>,
     made: HashMap<(FactKind, LangId), std::result::Result<SharedFact, Error>>,
     /// Producers' findings, once per ID.
@@ -724,6 +741,9 @@ impl<'a> FactStore<'a> {
             cancel: job.cancel.clone(),
             config: job.config,
             seed: job.seed,
+            depth: job.depth,
+            changed: job.changed.clone(),
+            selected: HashMap::new(),
             files,
             made: HashMap::new(),
             findings: Vec::new(),
@@ -809,14 +829,27 @@ impl<'a> FactStore<'a> {
             if !needs_met {
                 continue;
             }
+            for want in producer.wants() {
+                if !visiting.contains(want) {
+                    visiting.push(*want);
+                    let _ = self.ensure(*want, lang, sink);
+                    visiting.pop();
+                }
+            }
             self.cancel.checkpoint()?;
             let ctx = ProduceCtx {
                 ctx: self.root.clone(),
                 config: self.config.lang_config(&lang.id),
                 writer: self.writer.clone(),
                 cancel: self.cancel.clone(),
-                upstream: self.upstream(producer.needs(), lang),
+                upstream: self.upstream(producer.needs().iter().chain(producer.wants()), lang),
                 seed: self.seed,
+                runners: self.producers.runners(),
+                focus: Focus {
+                    depth: self.depth,
+                    symbols: self.selected.get(&lang.id).cloned(),
+                    changed: self.changed.clone(),
+                },
             };
             let mut events = Vec::new();
             let produced =
@@ -829,11 +862,10 @@ impl<'a> FactStore<'a> {
         Err(Error::AbsentFact { kind })
     }
 
-    /// The facts of `needs` already made for `lang`, for a producer that needs them.
-    fn upstream(&self, needs: &[FactKind], lang: &Lang) -> Upstream {
+    /// The facts of `needs` already made for `lang`, for a producer that needs or wants them.
+    fn upstream<'k>(&self, needs: impl Iterator<Item = &'k FactKind>, lang: &Lang) -> Upstream {
         let mut upstream = Upstream::default();
         for fact in needs
-            .iter()
             .filter_map(|need| self.made.get(&(*need, lang.id.clone())))
             .filter_map(|made| made.as_ref().ok())
         {

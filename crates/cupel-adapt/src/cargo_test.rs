@@ -1,9 +1,9 @@
 // ABOUTME: The `cargo test` runner producer: `cargo test --workspace --no-fail-fast`, standard error merged into
 // ABOUTME: standard output so each test follows its target's `Running` line, read by the libtest text parser.
-use cupel_core::{LangId, Langs, TestResult};
+use cupel_core::{LangId, Langs, RunOptions, RunOrder, RunOrdering, TestResult};
 
 use crate::report::libtest;
-use crate::runner::{Ran, Root, Runner, RunnerSpec, whole_suite};
+use crate::runner::{Executed, Ran, Root, Runner, RunnerSpec, Varying, whole_suite};
 
 const ID: &str = "tool.cargo-test";
 
@@ -20,6 +20,12 @@ static CARGO_TEST: RunnerSpec = RunnerSpec {
     completed_codes: &[0],
     select: whole_suite,
     list: None,
+    vary: &Varying {
+        ordering: RunOrdering::Seeded,
+        args: vary,
+        env: |_| Vec::new(),
+        executed: Executed::Report,
+    },
 };
 
 inventory::submit!(crate::ToolProducer {
@@ -36,6 +42,35 @@ fn command(root: &Root) -> Vec<String> {
     ]
     .map(str::to_owned)
     .to_vec()
+}
+
+/// `--test-threads`, and for a shuffle libtest's `--shuffle-seed` over the test targets (no
+/// doc-tests, whose harness takes no unstable flags): unstable on stable Rust, so the test
+/// binaries (never `rustc`) run with `RUSTC_BOOTSTRAP=1` through a target runner, which
+/// rebuilds nothing (ADR-078).
+fn vary(options: &RunOptions) -> Vec<String> {
+    let mut args = Vec::new();
+    let mut harness = Vec::new();
+    if options.order == RunOrder::Shuffled {
+        args.extend(
+            [
+                "--tests",
+                "--config",
+                r#"target.'cfg(all())'.runner = ["env", "RUSTC_BOOTSTRAP=1"]"#,
+            ]
+            .map(str::to_owned),
+        );
+        harness.extend(["-Z", "unstable-options", "--shuffle-seed"].map(str::to_owned));
+        harness.push(options.seed.unwrap_or_default().to_string());
+    }
+    if let Some(threads) = options.parallelism {
+        harness.push(format!("--test-threads={threads}"));
+    }
+    if !harness.is_empty() {
+        args.push("--".to_owned());
+        args.extend(harness);
+    }
+    args
 }
 
 #[allow(

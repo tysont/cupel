@@ -5,7 +5,6 @@ mod impact;
 use std::collections::BTreeMap;
 
 use cupel_core::config::Config;
-use cupel_core::git::Git;
 use cupel_core::syntax::{ModuleGraph, NormTree, Symbols, TestConventions, TestFrames};
 use cupel_core::{
     Availability, Ctx, Envelope, EventSink, ExitCode, FactKind, ImpactBasis, ImpactedTest, Job,
@@ -73,7 +72,7 @@ pub fn verb(
                 ..Ctx::new(invocation.writer.root().to_path_buf())
             },
             config,
-            hunks: changed_lines(invocation.writer.root(), &request, &scoped.files)?,
+            hunks: check::changed_lines(invocation.writer.root(), &request, &scoped.files)?,
             events,
         };
         let by_language = files_by_language(&catalog, &scoped.files.files);
@@ -128,6 +127,8 @@ fn job<'a>(
         selectors_must_match: false,
         base: None,
         seed: invocation.run.seed,
+        depth: config.effective.depth,
+        changed: None,
     }
 }
 
@@ -140,33 +141,6 @@ fn files_by_language(catalog: &Catalog, files: &[String]) -> BTreeMap<LangId, Ve
         }
     }
     owned
-}
-
-/// The lines a range scope changed per file; `None` without a range.
-fn changed_lines(
-    root: &std::path::Path,
-    request: &ScopeRequest,
-    resolved: &cupel_core::ResolvedFiles,
-) -> Result<Option<Regions>, CupelError> {
-    let (Some(base), Some(git)) = (&resolved.base, Git::open(root)) else {
-        return Ok(None);
-    };
-    let hunks = git
-        .changed_lines(base, request.head.as_deref())
-        .map_err(|error| {
-            CupelError::bad_argument(
-                if request.changed {
-                    "--changed"
-                } else {
-                    "--base"
-                },
-                None,
-                format!("cannot read the changed lines: {error}"),
-                "Run in a git work tree with git installed, or scope with --paths instead."
-                    .to_owned(),
-            )
-        })?;
-    Ok(Some(hunks))
 }
 
 /// One `tests --impacted` run in progress: the facts it produces and what it reads them with.

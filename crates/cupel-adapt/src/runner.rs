@@ -6,8 +6,9 @@ use std::time::Duration;
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
     Availability, Cancellation, Captured, CostClass, Ctx, Error, EventSink, FactKind, Langs,
-    Process, ProduceCtx, Producer, ProducerId, Result, RunnerCommand, RunnerInvocation, Scope,
-    TestResult, TestResults, TestSelection, ToolId, ToolProbe, find_program, output_tail,
+    Process, ProduceCtx, Producer, ProducerId, Result, RunOptions, RunOrder, RunOrdering,
+    RunnerCommand, RunnerInvocation, Scope, TestResult, TestResults, TestRun, TestSelection,
+    ToolId, ToolProbe, find_program, output_tail,
 };
 
 use crate::toolchain;
@@ -39,6 +40,76 @@ pub struct RunnerSpec {
     pub select: fn(&Selected<'_>) -> Option<Vec<String>>,
     /// How the runner lists its tests; `None` when it cannot.
     pub list: Option<Lister>,
+    /// How a run's order, seed, and parallelism reach the runner (ADR-078).
+    pub vary: &'static Varying,
+}
+
+/// How a runner varies a run: its ordering, the arguments and environment a run's
+/// [`RunOptions`] become, and where a finished run says the order its tests ran in.
+pub struct Varying {
+    pub ordering: RunOrdering,
+    /// Appended to the command after the arguments that narrow it.
+    pub args: fn(&RunOptions) -> Vec<String>,
+    /// Added to the environment after the spec's own variables and the options' `env`.
+    pub env: fn(&RunOptions) -> Vec<(String, String)>,
+    pub executed: Executed,
+}
+
+/// Where a finished run says the order its tests ran in.
+pub enum Executed {
+    /// The report lists the tests in the order they ran.
+    Report,
+    /// Events in the captured output do, as test IDs relative to the root.
+    Events(fn(&Captured) -> Vec<String>),
+    /// Nothing does.
+    Unknown,
+}
+
+/// The variation of a runner that varies nothing.
+pub static FIXED: Varying = Varying {
+    ordering: RunOrdering::Fixed,
+    args: |_| Vec::new(),
+    env: |_| Vec::new(),
+    executed: Executed::Unknown,
+};
+
+/// The variation of the Python runners: the order of the test IDs they are given, the seed as
+/// `PYTHONHASHSEED`, and the report's order.
+pub static PYTHON: Varying = Varying {
+    ordering: RunOrdering::Explicit,
+    args: |_| Vec::new(),
+    env: python_hash_seed,
+    executed: Executed::Report,
+};
+
+/// `PYTHONHASHSEED` from a run's seed.
+fn python_hash_seed(options: &RunOptions) -> Vec<(String, String)> {
+    options
+        .seed
+        .map(|seed| ("PYTHONHASHSEED".to_owned(), (seed % (1 << 32)).to_string()))
+        .into_iter()
+        .collect()
+}
+
+/// The arguments of a runner that writes the Jest JSON report (`jest`, `vitest`) for a run's
+/// options: the seed (in a signed 32-bit range, all they take) as `seed_flag`, `shuffle_flag`
+/// for a shuffle, and `--maxWorkers`.
+pub fn jest_report_variation(
+    options: &RunOptions,
+    seed_flag: &str,
+    shuffle_flag: &str,
+) -> Vec<String> {
+    let mut args = Vec::new();
+    if let Some(seed) = options.seed {
+        args.push(format!("{seed_flag}={}", seed % (1 << 31)));
+    }
+    if options.order == RunOrder::Shuffled {
+        args.push(shuffle_flag.to_owned());
+    }
+    if let Some(workers) = options.parallelism {
+        args.push(format!("--maxWorkers={workers}"));
+    }
+    args
 }
 
 /// What one root runs of a selection, relative to that root.
@@ -95,6 +166,8 @@ pub struct Root {
     pub report: PathBuf,
     /// A file in `.cupel/` the runner may use for its own configuration.
     pub config: PathBuf,
+    /// Whether the run is narrowed to a selection.
+    pub narrowed: bool,
 }
 
 /// A finished run in one root.
@@ -151,7 +224,8 @@ impl Producer<TestResults> for Runner {
     }
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<TestResults> {
-        cupel_core::Runner::run(self, ctx, &TestSelection::All, &[], None)
+        cupel_core::Runner::run(self, ctx, &TestSelection::All, &RunOptions::default())
+            .map(|run| run.results)
     }
 }
 
@@ -166,7 +240,7 @@ impl cupel_core::Runner for Runner {
         };
         let mut ids = Vec::new();
         for (index, (dir, packages)) in roots(ctx).into_iter().enumerate() {
-            let root = self.root(ctx, index, &dir, packages)?;
+            let root = self.root(ctx, index, &dir, packages, false)?;
             let command = (lister.command)(&root);
             let captured = self.process(&root, &command, &[]).run(&ctx.cancel)?;
             ids.extend(
@@ -182,30 +256,31 @@ impl cupel_core::Runner for Runner {
         &self,
         ctx: &ProduceCtx,
         selection: &TestSelection,
-        env: &[(String, String)],
-        timeout: Option<Duration>,
-    ) -> Result<TestResults> {
-        let cancel = timeout.map_or_else(|| ctx.cancel.clone(), |limit| ctx.cancel.child(limit));
+        options: &RunOptions,
+    ) -> Result<TestRun> {
+        let cancel = options
+            .timeout
+            .map_or_else(|| ctx.cancel.clone(), |limit| ctx.cancel.child(limit));
         let mut invocations = Vec::new();
         let mut tests = Vec::new();
+        let mut executed = Vec::new();
         for (index, (dir, packages), narrowing) in self.narrowed(ctx, selection)? {
-            let root = self.root(ctx, index, &dir, packages)?;
+            let root = self.root(ctx, index, &dir, packages, !narrowing.is_empty())?;
             let run = Run {
                 narrowing: &narrowing,
-                env,
+                options,
                 cancel: &cancel,
-                timeout,
             };
-            let (invocation, found) = self.run_root(ctx, &root, &dir, &run)?;
+            let (invocation, found, order) = self.run_root(ctx, &root, &dir, &run)?;
             invocations.push(invocation);
+            executed.extend(order.into_iter().map(|id| under(&dir, &id, ID_SEPARATOR)));
             tests.extend(found.into_iter().map(|test| placed(test, &dir)));
         }
-        Ok(TestResults::new(
-            self.id(),
-            invocations,
-            tests,
-            &ctx.ctx.root,
-        ))
+        let reports_order = !matches!(self.0.vary.executed, Executed::Unknown);
+        Ok(TestRun {
+            results: TestResults::new(self.id(), invocations, tests, &ctx.ctx.root),
+            executed: reports_order.then_some(executed),
+        })
     }
 
     fn commands(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Option<Vec<RunnerCommand>> {
@@ -229,15 +304,18 @@ impl cupel_core::Runner for Runner {
                 .collect(),
         )
     }
+
+    fn ordering(&self) -> RunOrdering {
+        self.0.vary.ordering
+    }
 }
 
 /// How one root's run differs from the whole suite's.
 struct Run<'a> {
     /// Arguments appended to the command.
     narrowing: &'a [String],
-    env: &'a [(String, String)],
+    options: &'a RunOptions,
     cancel: &'a Cancellation,
-    timeout: Option<Duration>,
 }
 
 /// A root to run in: its index, its directory and packages, and the arguments that narrow it.
@@ -288,6 +366,7 @@ impl Runner {
         index: usize,
         dir: &str,
         packages: Vec<String>,
+        narrowed: bool,
     ) -> Result<Root> {
         let absolute = ctx.ctx.root.join(dir);
         let absolute = absolute.canonicalize().unwrap_or(absolute);
@@ -306,28 +385,40 @@ impl Runner {
             packages,
             report: area.join("report"),
             config: area.join("config.toml"),
+            narrowed,
         })
     }
 
-    /// Runs the suite, narrowed by `run`, in `root` (at `dir`) and reads what it reported,
-    /// relative to that root. A run its own timeout ended is an incomplete invocation.
+    /// Runs the suite, narrowed and varied by `run`, in `root` (at `dir`) and reads what it
+    /// reported, relative to that root, with the IDs in the order they ran when it says. A run
+    /// its own timeout ended is an incomplete invocation.
     fn run_root(
         &self,
         ctx: &ProduceCtx,
         root: &Root,
         dir: &str,
         run: &Run<'_>,
-    ) -> Result<(RunnerInvocation, Vec<TestResult>)> {
+    ) -> Result<(RunnerInvocation, Vec<TestResult>, Vec<String>)> {
         let _ = std::fs::remove_file(&root.report);
+        let vary = self.0.vary;
         let command: Vec<String> = (self.0.command)(root)
             .into_iter()
             .chain(run.narrowing.iter().cloned())
+            .chain((vary.args)(run.options))
             .collect();
-        let process = self.process(root, &command, run.env);
+        let env: Vec<(String, String)> = run
+            .options
+            .env
+            .iter()
+            .cloned()
+            .chain((vary.env)(run.options))
+            .collect();
+        let process = self.process(root, &command, &env);
         let captured = match process.run(run.cancel) {
             Err(Error::Cancelled) if !ctx.cancel.is_cancelled() => {
-                let limit = run.timeout.unwrap_or_default();
-                return Ok((timed_out(dir, process.command_line(), limit), Vec::new()));
+                let limit = run.options.timeout.unwrap_or_default();
+                let invocation = timed_out(dir, process.command_line(), limit);
+                return Ok((invocation, Vec::new(), Vec::new()));
             }
             ran => ran?,
         };
@@ -351,7 +442,13 @@ impl Runner {
                 .then(|| output_tail(&format!("{}\n{}", captured.stdout, captured.stderr)))
                 .flatten(),
         };
-        Ok((invocation, found.unwrap_or_default()))
+        let found = found.unwrap_or_default();
+        let order = match vary.executed {
+            Executed::Report => found.iter().map(|test| test.id.clone()).collect(),
+            Executed::Events(order) => order(&captured),
+            Executed::Unknown => Vec::new(),
+        };
+        Ok((invocation, found, order))
     }
 
     /// The process that runs `command` in `root`, with the spec's environment and `env`.

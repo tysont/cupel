@@ -3,10 +3,11 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use cupel_core::syntax::{Span, SymbolDef, SymbolKind, Visibility};
+use cupel_core::syntax::{MutationOperator, Span, SymbolDef, SymbolKey, SymbolKind, Visibility};
 use cupel_core::{
-    CheckId, Envelope, FactKind, FindingId, LangId, Metric, ProducerId, RunId, Suppression,
-    SymbolHash, TestOutcome, TestResult, TestResults, Writer,
+    CheckId, CostClass, Envelope, FactKind, FindingId, LangId, Metric, Mutant, MutantOutcome,
+    MutationOutcomes, ProducerId, RunId, Suppression, SymbolHash, TestOutcome, TestResult,
+    TestResults, Writer,
 };
 use cupel_store::{CacheKey, Store, StoreError, StoredFact, StoredTestResult};
 use serde_json::{Value, json};
@@ -725,5 +726,121 @@ fn test_results_are_indexed_per_run_and_language() {
             ],
             vec![]
         )
+    );
+}
+
+/// A mutant of `site` with replacement `to`, `outcome`, stored under `key`.
+fn mutant(site: &str, to: &str, outcome: MutantOutcome, key: Option<&str>) -> Mutant {
+    Mutant {
+        symbol: SymbolKey {
+            file: "calc.py".to_owned(),
+            line: 1,
+            col: 1,
+        },
+        symbol_hash: Some("sh_00000000000000aa".parse().unwrap()),
+        site_hash: site.parse().unwrap(),
+        operator: MutationOperator::Relational,
+        from: "<".to_owned(),
+        to: to.to_owned(),
+        span: Span {
+            line: 2,
+            col: 5,
+            end_line: 2,
+            end_col: 6,
+        },
+        outcome,
+        tests: vec!["t::a".to_owned()],
+        killing_tests: Vec::new(),
+        duration_ms: Some(40),
+        reused: false,
+        equivalent: None,
+        cache_key: key.map(str::to_owned),
+    }
+}
+
+fn outcomes(mutants: Vec<Mutant>) -> MutationOutcomes {
+    MutationOutcomes::new(
+        ProducerId::from("engine.mutation"),
+        Some(ProducerId::from("tool.pytest")),
+        CostClass::Standard,
+        false,
+        mutants,
+    )
+}
+
+#[test]
+fn mutants_are_indexed_and_found_again_by_their_cache_key() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let python = LangId::from("python");
+    let first = mutant(
+        "00000000000000b1",
+        "<=",
+        MutantOutcome::Survived,
+        Some("k1"),
+    );
+    store
+        .record_mutants(&run_id(1), &python, &outcomes(vec![first]))
+        .unwrap();
+    let killed = mutant("00000000000000b1", "<=", MutantOutcome::Killed, Some("k1"));
+    store
+        .record_mutants(&run_id(2), &python, &outcomes(vec![killed.clone()]))
+        .unwrap();
+    let found = store
+        .mutants_by_key(&["k1".to_owned(), "k2".to_owned()])
+        .unwrap();
+    assert_eq!(
+        found.into_iter().collect::<Vec<_>>(),
+        vec![("k1".to_owned(), killed)]
+    );
+}
+
+#[test]
+fn the_last_outcome_of_each_site_and_replacement_is_kept() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let python = LangId::from("python");
+    store
+        .record_mutants(
+            &run_id(1),
+            &python,
+            &outcomes(vec![
+                mutant("00000000000000b1", "<=", MutantOutcome::Killed, None),
+                mutant("00000000000000b2", ">", MutantOutcome::Survived, None),
+            ]),
+        )
+        .unwrap();
+    store
+        .record_mutants(
+            &run_id(2),
+            &python,
+            &outcomes(vec![mutant(
+                "00000000000000b1",
+                "<=",
+                MutantOutcome::Survived,
+                None,
+            )]),
+        )
+        .unwrap();
+    let last: Vec<(String, String, String, MutantOutcome)> = store
+        .last_mutant_outcomes()
+        .unwrap()
+        .into_iter()
+        .map(|(site, outcome)| (site.symbol_hash, site.site_hash, site.replacement, outcome))
+        .collect();
+    let row = |site: &str, to: &str, outcome| {
+        (
+            "sh_00000000000000aa".to_owned(),
+            site.to_owned(),
+            to.to_owned(),
+            outcome,
+        )
+    };
+    assert_eq!(
+        last,
+        [
+            row("00000000000000b1", "<=", MutantOutcome::Survived),
+            row("00000000000000b2", ">", MutantOutcome::Survived),
+        ]
     );
 }

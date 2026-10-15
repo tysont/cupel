@@ -71,6 +71,7 @@ impl Registries {
         let mut producers = ProducerRegistry::default();
         languages.register_producers(&mut producers);
         cupel_adapt::register(&mut producers);
+        cupel_mutate::register(&mut producers);
         let mut checks = CheckRegistry::default();
         cupel_checks::register(&mut checks);
         Self {

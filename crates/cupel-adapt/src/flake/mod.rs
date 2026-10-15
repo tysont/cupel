@@ -1,30 +1,25 @@
-// ABOUTME: The flake engine, `engine.flake` (ADR-078): reruns the baseline's tests with the baseline's runner,
-// ABOUTME: varying order, seed, and parallelism by a schedule from the run's seed, into `TestReruns`.
+// ABOUTME: The flake engine, `engine.flake` (ADR-078): reruns the baseline's tests with the baseline's registered
+// ABOUTME: runner, varying order, seed, and parallelism by a schedule from the run's seed, into `TestReruns`.
 //! The flake engine.
 //!
 //! `engine.flake` is a [`Producer`] of [`TestReruns`] that needs [`TestResults`]: the baseline
-//! must be green (ADR-076) before any rerun, and it names the runner and the project roots to
-//! rerun. Each rerun's [`RunOptions`] come from [`options::schedule`]; `reruns` turns them
-//! into each runner's arguments and environment and reads the report with the runner's own
-//! parser. The engine runs every process through [`Process`] against the run's cancellation,
-//! so `--timeout` stops a rerun (exit 5).
+//! must be green (ADR-076) before any rerun, and it names the runner to rerun. Each rerun's
+//! order, seed, and parallelism come from [`options::schedule`]; the engine hands them to the
+//! baseline's runner, which it finds among the registered runners (`ProduceCtx::runners`), as
+//! [`RunOptions`]. The runner runs every process against the run's cancellation, so
+//! `--timeout` stops a rerun (exit 5).
 
 mod options;
-mod order;
-mod reruns;
-
-use std::path::Path;
 
 use cupel_core::{
-    Availability, CostClass, Ctx, Error, EventSink, FactKind, Langs, Process, ProduceCtx, Producer,
-    ProducerId, Result, RunnerInvocation, Scope, TestRerun, TestReruns, TestResult, TestResults,
-    find_program, output_tail,
+    Availability, CostClass, Ctx, Error, EventSink, FactKind, Langs, ProduceCtx, Producer,
+    ProducerId, Result, RunOrdering, Runner, Scope, TestRerun, TestReruns, TestResult, TestResults,
+    TestSelection,
 };
 use serde_json::Value;
 
-pub use options::{DEFAULT_RUNS, RunOptions, rerun_seed, schedule};
-pub use order::go_test_order;
-pub use reruns::{RerunSpec, runners};
+pub use crate::report::test2json::order as go_test_order;
+pub use options::{DEFAULT_RUNS, Planned, rerun_seed, schedule};
 
 const ID: &str = "engine.flake";
 
@@ -52,6 +47,11 @@ impl Producer<TestReruns> for FlakeEngine {
         &[FactKind::TestResults]
     }
 
+    /// The project roots the runner reruns in, as the baseline ran.
+    fn wants(&self) -> &[FactKind] {
+        &[FactKind::ProjectInfo]
+    }
+
     fn cost(&self) -> CostClass {
         CostClass::Standard
     }
@@ -73,26 +73,22 @@ impl Producer<TestReruns> for FlakeEngine {
                 runs: Vec::new(),
             });
         };
-        let spec = reruns::spec(baseline.runner.as_str()).ok_or_else(|| Error::InvalidValue {
-            what: "runner for engine.flake",
-            value: baseline.runner.to_string(),
-            expected: "a runner the flake engine reruns: tool.cargo-test, tool.go-test, \
-                       tool.pytest, tool.unittest, tool.vitest, or tool.jest",
-        })?;
-        let rerunning = Rerunning {
-            ctx,
-            spec,
-            baseline,
-            scope,
-        };
+        let runner = ctx
+            .runners
+            .get(&baseline.runner)
+            .filter(|runner| runner.ordering() != RunOrdering::Fixed)
+            .ok_or_else(|| Error::InvalidValue {
+                what: "runner for engine.flake",
+                value: baseline.runner.to_string(),
+                expected: "a runner the flake engine reruns: tool.cargo-test, tool.go-test, \
+                           tool.pytest, tool.unittest, tool.vitest, or tool.jest",
+            })?;
+        let explicit = runner.ordering() == RunOrdering::Explicit;
         let mut runs: Vec<TestRerun> = Vec::new();
-        for (index, planned) in schedule(ctx.seed, rerun_count(&ctx.config)?)
-            .into_iter()
-            .enumerate()
-        {
+        for planned in schedule(ctx.seed, rerun_count(&ctx.config)?) {
             let first = runs.first().and_then(|run| run.executed.as_deref());
-            let options = planned.resolved(spec.explicit_order, first);
-            runs.push(rerunning.rerun(&options, index)?);
+            let planned = planned.resolved(explicit, first);
+            runs.push(rerun(ctx, runner, &planned, scope)?);
         }
         Ok(TestReruns {
             runner: baseline.runner.clone(),
@@ -117,160 +113,36 @@ fn rerun_count(config: &serde_json::Map<String, Value>) -> Result<u32> {
     }
 }
 
-/// What every rerun of one production shares.
-struct Rerunning<'a> {
-    ctx: &'a ProduceCtx,
-    spec: &'static RerunSpec,
-    baseline: &'a TestResults,
-    scope: &'a Scope,
-}
-
-impl Rerunning<'_> {
-    /// Rerun `index` with `options` in every project root the baseline ran in; its tests
-    /// narrowed to those in scope (or with no file), its order the whole run's.
-    fn rerun(&self, options: &RunOptions, index: usize) -> Result<TestRerun> {
-        let mut invocations = Vec::new();
-        let mut tests = Vec::new();
-        let mut executed = Vec::new();
-        for (root, ran) in self.baseline.invocations.iter().enumerate() {
-            let writer = &self.ctx.writer;
-            let area = writer.create_dir(
-                &writer
-                    .cache_dir()
-                    .join("flake")
-                    .join(index.to_string())
-                    .join(root.to_string()),
-            )?;
-            let (invocation, found, order) = self.rerun_root(ran, options, &area)?;
-            invocations.push(invocation);
-            executed.extend(order.into_iter().map(|id| placed_id(id, &ran.dir)));
-            tests.extend(found.into_iter().map(|test| placed(test, &ran.dir)));
-        }
-        let files = &self.scope.files;
-        tests.retain(|test: &TestResult| {
-            files.is_empty() || test.file.as_ref().is_none_or(|file| files.contains(file))
-        });
-        tests.sort_by(|a, b| a.id.cmp(&b.id));
-        let spec = self.spec;
-        Ok(TestRerun {
-            order: options.order,
-            seed: options.seed,
-            parallelism: if spec.explicit_order {
-                Some(1)
-            } else {
-                options.parallelism
-            },
-            executed: (spec.reports_order && (options.serial() || spec.explicit_order))
-                .then_some(executed),
-            invocations,
-            tests,
-        })
-    }
-
-    /// One rerun in the root the baseline invocation `ran` ran in: what ran, the tests it
-    /// reported relative to that root, and their IDs in the order they ran.
-    fn rerun_root(
-        &self,
-        ran: &RunnerInvocation,
-        options: &RunOptions,
-        area: &Path,
-    ) -> Result<(RunnerInvocation, Vec<TestResult>, Vec<String>)> {
-        let spec = self.spec;
-        let dir = self.ctx.ctx.root.join(&ran.dir);
-        let dir = dir.canonicalize().unwrap_or(dir);
-        let in_root = RunOptions {
-            explicit: in_root(&options.explicit, &ran.dir),
-            ..options.clone()
-        };
-        let rerun = reruns::Rerun {
-            program: program(spec, &dir).unwrap_or_else(|| spec.tool.to_owned()),
-            report: area.join("report"),
-            options: &in_root,
-            baseline: &ran.command,
-        };
-        let _ = std::fs::remove_file(&rerun.report);
-        let process = process(&(spec.command)(&rerun), &rerun.program, &dir);
-        let captured = process.run(&self.ctx.cancel)?;
-        let found = (spec.read)(&reruns::Ran {
-            dir: &dir,
-            captured: &captured,
-            report: std::fs::read_to_string(&rerun.report).ok(),
-        });
-        let order = match spec.ran_order {
-            Some(ran_order) => ran_order(&captured),
-            None => found.iter().flatten().map(|test| test.id.clone()).collect(),
-        };
-        let completed = found.is_some();
-        let invocation = RunnerInvocation {
-            dir: ran.dir.clone(),
-            command: process.command_line(),
-            exit_code: captured.exit_code,
-            completed,
-            output: (!completed)
-                .then(|| output_tail(&format!("{}\n{}", captured.stdout, captured.stderr)))
-                .flatten(),
-        };
-        Ok((invocation, found.unwrap_or_default(), order))
-    }
-}
-
-/// The IDs of `explicit` that belong to the root at `dir`, as that root's runner names them.
-fn in_root(explicit: &[String], dir: &str) -> Vec<String> {
-    let prefix = format!("{dir}: ");
-    explicit
-        .iter()
-        .filter_map(|id| {
-            if dir == "." {
-                Some(id.clone())
-            } else {
-                id.strip_prefix(&prefix).map(str::to_owned)
-            }
-        })
-        .collect()
-}
-
-/// The process that runs `command` in `dir`; `program` when the command names none.
-fn process(command: &reruns::Command, program: &str, dir: &Path) -> Process {
-    let (program, args) = command
-        .argv
-        .split_first()
-        .map_or((program, &[][..]), |(program, args)| {
-            (program.as_str(), args)
-        });
-    let mut process = Process::new(program, dir).args(args.iter().cloned());
-    for (key, value) in &command.env {
-        process = process.env(key, value);
-    }
-    if command.merged {
-        process = process.merged();
-    }
-    process
-}
-
-/// The program to run in `dir`: the root's `node_modules/.bin` copy when the runner may use
-/// one, else the tool on `PATH`.
-fn program(spec: &RerunSpec, dir: &Path) -> Option<String> {
-    let local = dir.join("node_modules").join(".bin").join(spec.tool);
-    if spec.node_bin && local.is_file() {
-        return Some(local.to_string_lossy().into_owned());
-    }
-    find_program(spec.tool).map(|_| spec.tool.to_owned())
-}
-
-/// A test ID reported relative to the root at `dir`, as the baseline names it (ADR-075).
-fn placed_id(id: String, dir: &str) -> String {
-    if dir == "." {
-        id
+/// One rerun as `planned`, its tests narrowed to those in scope (or with no file). Its order is
+/// kept when the runner reports one and ran one test at a time or in the order given.
+fn rerun(
+    ctx: &ProduceCtx,
+    runner: &dyn Runner,
+    planned: &Planned,
+    scope: &Scope,
+) -> Result<TestRerun> {
+    let selection = if planned.explicit.is_empty() {
+        TestSelection::All
     } else {
-        format!("{dir}: {id}")
-    }
-}
-
-/// `test`, reported relative to the root at `dir`, made relative to the repository root.
-fn placed(mut test: TestResult, dir: &str) -> TestResult {
-    test.id = placed_id(test.id, dir);
-    if dir != "." {
-        test.file = test.file.map(|file| format!("{dir}/{file}"));
-    }
-    test
+        TestSelection::Tests(planned.explicit.clone())
+    };
+    let explicit = runner.ordering() == RunOrdering::Explicit;
+    let ran = runner.run(ctx, &selection, &planned.options())?;
+    let files = &scope.files;
+    let mut tests = ran.results.tests;
+    tests.retain(|test: &TestResult| {
+        files.is_empty() || test.file.as_ref().is_none_or(|file| files.contains(file))
+    });
+    Ok(TestRerun {
+        order: planned.order,
+        seed: planned.seed,
+        parallelism: if explicit {
+            Some(1)
+        } else {
+            planned.parallelism
+        },
+        executed: ran.executed.filter(|_| planned.serial() || explicit),
+        invocations: ran.results.invocations,
+        tests,
+    })
 }

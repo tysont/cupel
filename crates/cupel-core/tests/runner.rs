@@ -4,7 +4,8 @@ use std::time::Duration;
 
 use cupel_core::{
     Availability, Cancellation, CostClass, Ctx, EventSink, FactKind, Langs, ProduceCtx, Producer,
-    ProducerId, ProducerRegistry, Result, Runner, RunnerCommand, Scope, TestResults, TestSelection,
+    ProducerId, ProducerRegistry, Result, RunOptions, RunOrdering, Runner, RunnerCommand, Scope,
+    TestResults, TestRun, TestSelection,
 };
 
 mod support;
@@ -35,7 +36,8 @@ impl Producer<TestResults> for Listing {
     }
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<TestResults> {
-        self.run(ctx, &TestSelection::All, &[], None)
+        self.run(ctx, &TestSelection::All, &RunOptions::default())
+            .map(|run| run.results)
     }
 }
 
@@ -44,19 +46,15 @@ impl Runner for Listing {
         Ok(vec!["a".to_owned(), "b".to_owned()])
     }
 
-    fn run(
-        &self,
-        ctx: &ProduceCtx,
-        _: &TestSelection,
-        _: &[(String, String)],
-        _: Option<Duration>,
-    ) -> Result<TestResults> {
-        Ok(TestResults::new(
-            self.id(),
-            Vec::new(),
-            Vec::new(),
-            &ctx.ctx.root,
-        ))
+    fn run(&self, ctx: &ProduceCtx, _: &TestSelection, _: &RunOptions) -> Result<TestRun> {
+        Ok(TestRun {
+            results: TestResults::new(self.id(), Vec::new(), Vec::new(), &ctx.ctx.root),
+            executed: None,
+        })
+    }
+
+    fn ordering(&self) -> RunOrdering {
+        RunOrdering::Seeded
     }
 
     fn commands(&self, _: &ProduceCtx, selection: &TestSelection) -> Option<Vec<RunnerCommand>> {
@@ -95,6 +93,13 @@ fn a_registered_runner_is_found_by_id_and_produces_test_results() {
     assert_eq!(commands[0].command, "listing a");
     assert!(runner.commands(&ctx, &TestSelection::All).is_none());
     assert!(registry.runner(&ProducerId::from("tool.other")).is_none());
+    let shared = registry.runners();
+    assert_eq!(
+        shared
+            .get(&ProducerId::from("tool.listing"))
+            .map(Runner::ordering),
+        Some(RunOrdering::Seeded)
+    );
 }
 
 #[test]

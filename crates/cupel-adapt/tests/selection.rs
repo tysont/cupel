@@ -5,8 +5,8 @@ use std::time::Duration;
 use cupel_adapt::report::listing;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Cancellation, LangId, ProduceCtx, Produced, ProducerId, ProducerRegistry, Runner,
-    RunnerCommand, TestOutcome, TestSelection,
+    Availability, Cancellation, LangId, ProduceCtx, Produced, ProducerId, ProducerRegistry,
+    RunOptions, RunOrder, Runner, RunnerCommand, TestOutcome, TestSelection,
 };
 use cupel_fixtures::Capture;
 use support::{lang, produce_ctx, registry};
@@ -222,7 +222,10 @@ fn assert_lists_and_runs_one(id: &str, repo: &str, lang: &str, selected: &str) {
     let ids = runner.list(&ctx).unwrap();
     assert_eq!(ids.len(), 2, "{ids:?}");
     assert!(ids.iter().any(|listed| listed == selected), "{ids:?}");
-    let results = runner.run(&ctx, &tests(&[selected]), &[], None).unwrap();
+    let results = runner
+        .run(&ctx, &tests(&[selected]), &RunOptions::default())
+        .unwrap()
+        .results;
     let ran: Vec<(&str, TestOutcome)> = results
         .tests
         .iter()
@@ -262,10 +265,13 @@ fn a_run_its_own_timeout_ends_is_incomplete_and_leaves_the_run_going() {
         .run(
             &ctx,
             &TestSelection::All,
-            &[],
-            Some(Duration::from_millis(1)),
+            &RunOptions {
+                timeout: Some(Duration::from_millis(1)),
+                ..RunOptions::default()
+            },
         )
-        .unwrap();
+        .unwrap()
+        .results;
     let invocation = &results.invocations[0];
     assert_eq!(
         (
@@ -290,4 +296,78 @@ fn a_runner_that_cannot_list_says_which_runners_can() {
         "invalid runner `tool.jest`: expected a runner that lists its tests: \
          tool.cargo-nextest, tool.go-test, tool.pytest"
     );
+}
+
+/// A copy of `tests.flaky/python` and the context of its unittest runner, or `None` (reported as
+/// skipped) without `python3`.
+fn unittest_fixture() -> Option<(tempfile::TempDir, ProduceCtx)> {
+    let dir = tempfile::tempdir().unwrap();
+    cupel_fixtures::copy_repo("tests.flaky/python", dir.path());
+    let ctx = produce_ctx(dir.path(), "python", Cancellation::new());
+    let registry = registry();
+    if let Availability::MissingTool { name, .. } =
+        runner(&registry, "tool.unittest").availability(&ctx.ctx)
+    {
+        eprintln!("SKIPPED: {name} not installed; tool.unittest was not run");
+        return None;
+    }
+    Some((dir, ctx))
+}
+
+#[test]
+fn an_explicit_order_runner_runs_a_selection_in_the_order_given_and_reports_it() {
+    let Some((_dir, ctx)) = unittest_fixture() else {
+        return;
+    };
+    let registry = registry();
+    let order = [
+        "tests.test_ledger.LedgerTest.test_deposit_changes_balance",
+        "tests.test_ledger.LedgerTest.test_balance_starts_at_zero",
+    ];
+    let ran = runner(&registry, "tool.unittest")
+        .run(
+            &ctx,
+            &tests(&order),
+            &RunOptions {
+                order: RunOrder::Reversed,
+                seed: Some(7),
+                parallelism: Some(1),
+                ..RunOptions::default()
+            },
+        )
+        .unwrap();
+    assert_eq!(ran.executed.as_deref(), Some(&order.map(str::to_owned)[..]));
+    let outcomes: Vec<TestOutcome> = ran.results.tests.iter().map(|test| test.outcome).collect();
+    // Sorted by ID: the balance test ran second, after the deposit, and failed.
+    assert_eq!(outcomes, [TestOutcome::Failed, TestOutcome::Passed]);
+    let command = &ran.results.invocations[0].command;
+    assert!(
+        !command.iter().any(|word| word == "discover"),
+        "{command:?}"
+    );
+}
+
+#[test]
+fn a_seeded_run_hands_the_seed_to_the_runner() {
+    let Some((dir, ctx)) = unittest_fixture() else {
+        return;
+    };
+    std::fs::write(
+        dir.path().join("tests").join("test_seed.py"),
+        "import os, unittest\n\nclass SeedTest(unittest.TestCase):\n    def test_seed(self):\n        self.assertEqual(os.environ.get('PYTHONHASHSEED'), '11')\n",
+    )
+    .unwrap();
+    let registry = registry();
+    let ran = runner(&registry, "tool.unittest")
+        .run(
+            &ctx,
+            &tests(&["tests.test_seed.SeedTest.test_seed"]),
+            &RunOptions {
+                seed: Some(11),
+                ..RunOptions::default()
+            },
+        )
+        .unwrap();
+    let outcomes: Vec<TestOutcome> = ran.results.tests.iter().map(|test| test.outcome).collect();
+    assert_eq!(outcomes, [TestOutcome::Passed]);
 }
