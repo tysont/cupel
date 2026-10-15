@@ -139,36 +139,7 @@ impl Own {
 
 /// Every path a slot of `tree` should hold, relative to it.
 fn wanted(tree: &Path, own: &Own) -> io::Result<BTreeMap<PathBuf, Entry>> {
-    let filter = own.clone();
-    let root = tree.to_path_buf();
-    let mut kept: BTreeMap<PathBuf, Entry> = BTreeMap::new();
-    let walk = ignore::WalkBuilder::new(tree)
-        .hidden(false)
-        .require_git(false)
-        .git_global(false)
-        .git_exclude(false)
-        .parents(false)
-        .filter_entry(move |entry| {
-            !filter.holds(entry.path().strip_prefix(&root).unwrap_or(entry.path()))
-        })
-        .build();
-    for entry in walk.flatten() {
-        let Ok(relative) = entry.path().strip_prefix(tree) else {
-            continue;
-        };
-        if relative.as_os_str().is_empty() {
-            continue;
-        }
-        let mirrored = if entry.path_is_symlink() {
-            // The same link, so a relative one points into the slot as it does in the tree.
-            Entry::Link(fs::read_link(entry.path())?)
-        } else if entry.file_type().is_some_and(|kind| kind.is_dir()) {
-            Entry::Dir
-        } else {
-            Entry::File(entry.path().to_path_buf())
-        };
-        kept.insert(relative.to_path_buf(), mirrored);
-    }
+    let mut kept = mirrored(tree, own)?;
     let dirs: Vec<PathBuf> = std::iter::once(PathBuf::new())
         .chain(
             kept.iter()
@@ -185,6 +156,43 @@ fn wanted(tree: &Path, own: &Own) -> io::Result<BTreeMap<PathBuf, Entry>> {
         }
     }
     Ok(kept)
+}
+
+/// What the walk of `tree` keeps (its `.gitignore`s honoured, what the slot `own`s left out),
+/// relative to it: directories, files, and the tree's own symlinks.
+fn mirrored(tree: &Path, own: &Own) -> io::Result<BTreeMap<PathBuf, Entry>> {
+    let filter = own.clone();
+    let root = tree.to_path_buf();
+    let walk = ignore::WalkBuilder::new(tree)
+        .hidden(false)
+        .require_git(false)
+        .git_global(false)
+        .git_exclude(false)
+        .parents(false)
+        .filter_entry(move |entry| {
+            !filter.holds(entry.path().strip_prefix(&root).unwrap_or(entry.path()))
+        })
+        .build();
+    let mut kept = BTreeMap::new();
+    for entry in walk.flatten() {
+        let relative = entry.path().strip_prefix(tree).unwrap_or(entry.path());
+        if !relative.as_os_str().is_empty() {
+            kept.insert(relative.to_path_buf(), entry_of(&entry)?);
+        }
+    }
+    Ok(kept)
+}
+
+/// How a slot mirrors `entry` of the tree.
+fn entry_of(entry: &ignore::DirEntry) -> io::Result<Entry> {
+    Ok(if entry.path_is_symlink() {
+        // The same link, so a relative one points into the slot as it does in the tree.
+        Entry::Link(fs::read_link(entry.path())?)
+    } else if entry.file_type().is_some_and(|kind| kind.is_dir()) {
+        Entry::Dir
+    } else {
+        Entry::File(entry.path().to_path_buf())
+    })
 }
 
 /// Removes everything under `dir` (a directory of the slot at `root`) that `wanted` does not
