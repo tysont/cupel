@@ -69,6 +69,18 @@ pub enum CostClass {
     Exhaustive,
 }
 
+impl std::fmt::Display for CostClass {
+    /// The name a depth is selected by, such as `deep`.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(match self {
+            Self::Quick => "quick",
+            Self::Standard => "standard",
+            Self::Deep => "deep",
+            Self::Exhaustive => "exhaustive",
+        })
+    }
+}
+
 impl CostClass {
     /// The planning estimate for one target of work of this class, until the store has
     /// measured durations (ADR-041): 1 ms, 100 ms, 1 s, 10 s.

@@ -174,6 +174,23 @@ pub enum Availability {
     },
 }
 
+/// What producing a fact here would cost the run now (ADR-083): the producer's cost class,
+/// unless it can tell it would do less, such as refreshing a cache it keeps.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Estimate {
+    pub cost: CostClass,
+    /// How the producer would make the fact, such as `cached` or `refresh 3 tests`, for a dry
+    /// run's `needs`; `None` when it would simply produce it.
+    pub note: Option<String>,
+}
+
+impl Estimate {
+    /// Producing at `cost`, with nothing to say about it.
+    pub fn of(cost: CostClass) -> Self {
+        Self { cost, note: None }
+    }
+}
+
 /// Makes one kind of fact. Language producers, tool producers, and engines all implement this.
 pub trait Producer<F: Fact>: Send + Sync {
     /// Such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.
@@ -186,6 +203,12 @@ pub trait Producer<F: Fact>: Send + Sync {
         &[]
     }
     fn cost(&self) -> CostClass;
+    /// What producing here would cost now; `cost()` unless the producer keeps a cache that
+    /// makes it cheaper (ADR-083). The scheduler makes a want only when this is within the
+    /// run's depth.
+    fn estimate(&self, _ctx: &Ctx) -> Estimate {
+        Estimate::of(self.cost())
+    }
     fn availability(&self, ctx: &Ctx) -> Availability;
     /// Whether the repository shows signs of using this producer (a tool producer's
     /// toolchain-table detection rules). Detected producers are preferred over the rest (ADR-076).
@@ -400,6 +423,7 @@ pub trait RegisteredProducer: Send + Sync {
     fn needs(&self) -> &[FactKind];
     fn wants(&self) -> &[FactKind];
     fn cost(&self) -> CostClass;
+    fn estimate(&self, ctx: &Ctx) -> Estimate;
     fn availability(&self, ctx: &Ctx) -> Availability;
     fn detected(&self, ctx: &Ctx) -> bool;
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe>;
@@ -441,6 +465,10 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
 
     fn cost(&self) -> CostClass {
         self.producer.cost()
+    }
+
+    fn estimate(&self, ctx: &Ctx) -> Estimate {
+        self.producer.estimate(ctx)
     }
 
     fn availability(&self, ctx: &Ctx) -> Availability {

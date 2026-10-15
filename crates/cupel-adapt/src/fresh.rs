@@ -1,6 +1,6 @@
-// ABOUTME: Freshness of coverage reports (ADR-079): what every file under a project root hashed to when Cupel
-// ABOUTME: made a report, and whether a cached report, or one the tool left in the tree, still describes it.
-use std::collections::BTreeMap;
+// ABOUTME: Freshness of cached tool output (ADR-079, ADR-083): what every file under a project root hashed to when Cupel
+// ABOUTME: made a report or a per-test map, which files changed since, and whether a cached report still describes the tree.
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
@@ -73,9 +73,12 @@ impl Sources {
         written: SystemTime,
         report: &[u8],
     ) -> bool {
-        if hash(report) != self.report {
-            return false;
-        }
+        hash(report) == self.report && self.changes(repo, exclude, written).is_empty()
+    }
+
+    /// The files under the root that differ from the record: those added, and those removed or
+    /// hashing otherwise (a file not modified since `written` is trusted without rehashing).
+    pub fn changes(&self, repo: &Path, exclude: &Exclude, written: SystemTime) -> Changes {
         let tree = Tree {
             repo,
             dir: &self.dir,
@@ -83,13 +86,44 @@ impl Sources {
             exclude,
         };
         let files = tree.files();
-        files.len() == self.files.len()
-            && files.iter().all(|(name, path)| {
-                self.files.get(name).is_some_and(|recorded| {
-                    modified(path).is_some_and(|at| at < written)
-                        || fs::read(path).is_ok_and(|bytes| hash(&bytes) == *recorded)
-                })
-            })
+        let mut changes = Changes::default();
+        for (name, path) in &files {
+            match self.files.get(name) {
+                None => {
+                    changes.added.insert(name.clone());
+                }
+                Some(recorded) => {
+                    let same = modified(path).is_some_and(|at| at < written)
+                        || fs::read(path).is_ok_and(|bytes| hash(&bytes) == *recorded);
+                    if !same {
+                        changes.changed.insert(name.clone());
+                    }
+                }
+            }
+        }
+        let removed = self.files.keys().filter(|name| !files.contains_key(*name));
+        changes.changed.extend(removed.cloned());
+        changes
+    }
+}
+
+/// The files under a project root that differ from a record, relative to the root.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub(crate) struct Changes {
+    /// Files the record does not hold.
+    pub added: BTreeSet<String>,
+    /// Files the record holds that are gone or hash otherwise.
+    pub changed: BTreeSet<String>,
+}
+
+impl Changes {
+    pub fn is_empty(&self) -> bool {
+        self.added.is_empty() && self.changed.is_empty()
+    }
+
+    /// Every added, changed, or removed file.
+    pub fn all(&self) -> impl Iterator<Item = &String> {
+        self.added.iter().chain(&self.changed)
     }
 }
 
@@ -261,6 +295,30 @@ mod tests {
         fs::remove_file(root.join("tests/a.rs")).unwrap();
         seen.push(fresh());
         assert_eq!(seen, [true, false, false]);
+    }
+
+    #[test]
+    fn changes_name_the_added_the_rewritten_and_the_removed_files_but_not_one_rewritten_alike() {
+        let (dir, sources, written) = recorded();
+        let root = dir.path();
+        fs::write(root.join("src/lib.rs"), "fn a() {}\n").unwrap();
+        fs::write(root.join("tests/a.rs"), "#[test] fn u() {}\n").unwrap();
+        fs::write(root.join("src/new.rs"), "").unwrap();
+        fs::write(root.join("target/new.o"), "").unwrap();
+        let seen = sources.changes(root, &EXCLUDE, written);
+        assert_eq!(
+            (
+                seen.added.iter().map(String::as_str).collect::<Vec<_>>(),
+                seen.changed.iter().map(String::as_str).collect::<Vec<_>>()
+            ),
+            (vec!["src/new.rs"], vec!["tests/a.rs"])
+        );
+        fs::remove_file(root.join("src/lib.rs")).unwrap();
+        let seen = sources.changes(root, &EXCLUDE, written);
+        assert_eq!(
+            seen.all().map(String::as_str).collect::<Vec<_>>(),
+            ["src/new.rs", "src/lib.rs", "tests/a.rs"]
+        );
     }
 
     #[test]

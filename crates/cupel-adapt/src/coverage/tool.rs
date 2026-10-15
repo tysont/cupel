@@ -13,7 +13,7 @@ use cupel_core::{
 use serde_json::json;
 
 use super::format::{parse, placed};
-use super::fresh::{REPORT, SOURCES, Sources, Tree, hash};
+use crate::fresh::{REPORT, SOURCES, Sources, Tree, hash};
 use crate::runner::{installed, probe, roots};
 use crate::toolchain;
 

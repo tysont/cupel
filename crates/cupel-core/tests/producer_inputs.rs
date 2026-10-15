@@ -8,8 +8,8 @@ use std::sync::{Arc, Mutex};
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{ProjectInfo, Roots as EntryPoints, Symbols};
 use cupel_core::{
-    Availability, CheckRegistry, CostClass, Ctx, Error, EventSink, FactKind, Focus, Langs,
-    ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, Scheduler, Scope, Writer,
+    Availability, CheckRegistry, CostClass, Ctx, Error, Estimate, EventSink, FactKind, Focus,
+    Langs, ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, Scheduler, Scope, Writer,
 };
 
 /// What the recording producer saw: the kinds upstream held and the runners it was handed.
@@ -95,7 +95,8 @@ impl Producer<ProjectInfo> for Roots {
     }
 }
 
-/// Entry points at `deep` cost: wanted, but made only when the run's depth reaches it.
+/// Entry points at `deep` cost: wanted, but made only when the run's depth reaches it, unless
+/// a file named `cached` in the repository makes it a `standard` refresh (ADR-083).
 struct Expensive;
 
 impl Producer<EntryPoints> for Expensive {
@@ -113,6 +114,17 @@ impl Producer<EntryPoints> for Expensive {
 
     fn cost(&self) -> CostClass {
         CostClass::Deep
+    }
+
+    fn estimate(&self, ctx: &Ctx) -> Estimate {
+        if ctx.root.join("cached").exists() {
+            Estimate {
+                cost: CostClass::Standard,
+                note: Some("cached".to_owned()),
+            }
+        } else {
+            Estimate::of(self.cost())
+        }
     }
 
     fn availability(&self, _: &Ctx) -> Availability {
@@ -171,7 +183,16 @@ fn seen() -> Seen {
 
 /// What the recording producer saw in a run at `depth` (see [`seen`]).
 fn seen_at(depth: CostClass) -> Seen {
+    seen_in(depth, false)
+}
+
+/// What the recording producer saw in a run at `depth`, with the expensive producer's cache
+/// present when `cached`.
+fn seen_in(depth: CostClass, cached: bool) -> Seen {
     let dir = tempfile::tempdir().unwrap();
+    if cached {
+        std::fs::write(dir.path().join("cached"), "").unwrap();
+    }
     let config = support::config_at(dir.path(), "");
     let writer = Writer::new(dir.path(), false).unwrap();
     let recorded = Arc::new(Mutex::new(None));
@@ -229,5 +250,59 @@ fn a_want_only_a_costlier_producer_than_the_runs_depth_makes_is_left_out() {
             seen_at(CostClass::Deep).roots
         ),
         (false, true)
+    );
+}
+
+#[test]
+fn a_want_whose_producer_estimates_a_cheap_refresh_is_made_at_that_depth() {
+    assert_eq!(
+        (
+            seen_in(CostClass::Standard, true).roots,
+            seen_in(CostClass::Quick, true).roots
+        ),
+        (true, false)
+    );
+}
+
+/// The `needs` a dry run at `depth` plans for a check needing `Symbols`, whose producer wants
+/// the expensive entry points, with that producer's cache present when `cached`.
+fn planned_needs(depth: CostClass, cached: bool) -> Vec<String> {
+    let dir = tempfile::tempdir().unwrap();
+    if cached {
+        std::fs::write(dir.path().join("cached"), "").unwrap();
+    }
+    let config = support::config_at(dir.path(), "");
+    let writer = Writer::new(dir.path(), false).unwrap();
+    let mut producers = ProducerRegistry::default();
+    producers.register::<Symbols, _>(Recording(Arc::new(Mutex::new(None))));
+    producers.register::<EntryPoints, _>(Expensive);
+    let mut checks = CheckRegistry::default();
+    let manifest = support::manifest("needs.symbols", &[FactKind::Symbols], &[]);
+    checks
+        .register(Box::new(support::Declared(manifest)))
+        .unwrap();
+    let mut job = support::job(&writer, &config, &checks, &["rust"]);
+    job.depth = depth;
+    let scheduler = Scheduler {
+        checks: &checks,
+        producers: &producers,
+    };
+    let outcome = scheduler.plan(&job, &mut Vec::new()).unwrap();
+    outcome.plan.unwrap().would_run[0].needs.clone()
+}
+
+#[test]
+fn a_dry_run_says_how_a_want_of_a_needed_facts_producer_would_be_made() {
+    assert_eq!(
+        [
+            planned_needs(CostClass::Standard, false),
+            planned_needs(CostClass::Standard, true),
+            planned_needs(CostClass::Deep, false),
+        ],
+        [
+            vec!["symbols", "roots(deep)"],
+            vec!["symbols", "roots(cached)"],
+            vec!["symbols"],
+        ]
     );
 }
