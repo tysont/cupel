@@ -1,0 +1,9 @@
+{
+  "name": "discount-ts",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.0",
+    "vitest": "^4.0.0"
+  }
+}

@@ -46,8 +46,11 @@ fn found(envelope: &Value) -> Vec<(String, String)> {
 fn every_committed_coverage_report_is_fresh() {
     let mut producers = ProducerRegistry::default();
     cupel_adapt::register(&mut producers);
-    for lang in LANGS {
-        let ctx = Ctx::new(repo_path(&format!("coverage/{lang}")));
+    for (fixture, lang) in ["coverage", "tests.mutation"]
+        .into_iter()
+        .flat_map(|fixture| LANGS.map(|lang| (fixture, lang)))
+    {
+        let ctx = Ctx::new(repo_path(&format!("{fixture}/{lang}")));
         let language = Lang {
             id: LangId::from(lang),
             family: LangFamily::from(lang),
@@ -57,7 +60,7 @@ fn every_committed_coverage_report_is_fresh() {
             .any(|producer| producer.availability(&ctx) == Availability::Ready);
         assert!(
             ready,
-            "the coverage report committed in repos/coverage/{lang}/.cupel/cache/coverage/ is \
+            "the coverage report committed in repos/{fixture}/{lang}/.cupel/cache/coverage/ is \
              stale: delete that directory, run `cupel check --only tests.coverage` in a copy of \
              the fixture with the tool installed, and commit the copy's new cache (ADR-079)"
         );
