@@ -31,9 +31,11 @@ jobs:
           tool: cargo-llvm-cov
       - name: Add llvm-tools-preview
         run: rustup component add llvm-tools-preview
+      # Pinned to the Go release the coverage fixtures' committed coverprofile and the real-tool
+      # tests' block counts come from: coverprofile block boundaries differ between Go releases.
       - uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: '1.23'
           cache: false
       - uses: actions/setup-python@v5
         with:
