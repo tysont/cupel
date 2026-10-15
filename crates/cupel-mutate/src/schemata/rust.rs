@@ -408,11 +408,18 @@ mod tests {
     }
 
     #[test]
-    fn a_relational_operator_gates_its_comparison() {
-        let source = "fn f(a: i64) -> bool {\n    a >= 1\n}\n";
+    fn a_comparison_is_gated_calling_the_reader_through_super_from_an_inline_module() {
+        let source = "fn f(a: i64) -> bool {\n    a >= 1\n}\nmod inner {\n    \
+                      pub fn g(a: i64) -> bool {\n        a < 1\n    }\n}\n";
+        let gates = [
+            gate(source, 1, "a >= 1", ">=", ">"),
+            gate(source, 2, "a < 1", "<", "<="),
+        ];
         assert_eq!(
-            body(source, &[gate(source, 1, "a >= 1", ">=", ">")]),
-            "fn f(a: i64) -> bool {\n    if cupel_mutant_id() == 1 { a > 1 } else { a >= 1 }\n}\n"
+            body(source, &gates),
+            "fn f(a: i64) -> bool {\n    if cupel_mutant_id() == 1 { a > 1 } else { a >= 1 }\n}\n\
+             mod inner {\n    pub fn g(a: i64) -> bool {\n        \
+             if super::cupel_mutant_id() == 2 { a <= 1 } else { a < 1 }\n    }\n}\n"
         );
     }
 
@@ -547,16 +554,6 @@ mod tests {
         assert_eq!(
             rewritten.excluded.get(&1).map(String::as_str),
             Some("a multi-line expression holding a comment or multi-line literal")
-        );
-    }
-
-    #[test]
-    fn a_gate_in_an_inline_module_reaches_the_reader_through_super() {
-        let source = "mod inner {\n    pub fn f(a: i64) -> bool {\n        a < 1\n    }\n}\n";
-        assert_eq!(
-            body(source, &[gate(source, 1, "a < 1", "<", "<=")]),
-            "mod inner {\n    pub fn f(a: i64) -> bool {\n        \
-             if super::cupel_mutant_id() == 1 { a <= 1 } else { a < 1 }\n    }\n}\n"
         );
     }
 

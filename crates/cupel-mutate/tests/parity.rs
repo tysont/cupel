@@ -95,13 +95,14 @@ fn parity(name: &str, change: fn(&Path)) -> MutationOutcomes {
 }
 
 #[test]
-fn the_mutation_fixture_has_the_same_outcomes_as_schemata_and_as_file_copies() {
+fn every_rust_fixture_with_a_suite_has_the_same_outcomes_as_schemata_and_as_file_copies() {
     if !cargo() {
         return;
     }
-    let schemata = parity("tests.mutation/rust", unchanged);
+    let mutation = parity("tests.mutation/rust", unchanged);
+    let coverage = parity("coverage/rust", unchanged);
     assert_eq!(
-        summary(&schemata),
+        summary(&mutation),
         [
             "5 >=→> survived",
             "5 &&→|| killed",
@@ -112,19 +113,7 @@ fn the_mutation_fixture_has_the_same_outcomes_as_schemata_and_as_file_copies() {
         ]
     );
     assert_eq!(
-        strategies(&schemata),
-        [(Some(MutationStrategy::Schemata), None); 5]
-    );
-}
-
-#[test]
-fn the_coverage_fixture_has_the_same_outcomes_as_schemata_and_as_file_copies() {
-    if !cargo() {
-        return;
-    }
-    let schemata = parity("coverage/rust", unchanged);
-    assert_eq!(
-        summary(&schemata),
+        summary(&coverage),
         [
             "5 0→1 killed",
             "7 +=→-= killed",
@@ -142,8 +131,11 @@ fn the_coverage_fixture_has_the_same_outcomes_as_schemata_and_as_file_copies() {
         ]
     );
     assert_eq!(
-        strategies(&schemata),
-        [(Some(MutationStrategy::Schemata), None); 4]
+        (strategies(&mutation), strategies(&coverage)),
+        (
+            vec![(Some(MutationStrategy::Schemata), None); 5],
+            vec![(Some(MutationStrategy::Schemata), None); 4]
+        )
     );
 }
 

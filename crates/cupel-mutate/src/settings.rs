@@ -47,8 +47,8 @@ impl Settings {
         let table = table.as_object().ok_or_else(|| invalid(KEY, table))?;
         for (key, value) in table {
             match key.as_str() {
-                "operators" => settings.operators = operators(value)?,
-                "strategy" => settings.strategy = strategy(value)?,
+                "operators" => settings.operators = choice("mutation.operators", value, OPERATORS)?,
+                "strategy" => settings.strategy = choice("mutation.strategy", value, STRATEGIES)?,
                 "jobs" => settings.jobs = count("mutation.jobs", value)?,
                 "timeout_factor" => {
                     let what = "mutation.timeout_factor";
@@ -62,33 +62,23 @@ impl Settings {
     }
 }
 
+/// The operator sets, by name.
+const OPERATORS: &[(&str, OperatorSet)] = &[
+    ("default", OperatorSet::Default),
+    ("extended", OperatorSet::Extended),
+];
+
+/// The strategies, by name.
+const STRATEGIES: &[(&str, Strategy)] = &[
+    ("schemata", Strategy::Schemata),
+    ("file-copy", Strategy::FileCopy),
+];
+
 /// Half the cores, at least one and at most four.
 fn default_jobs() -> usize {
     std::thread::available_parallelism()
         .map_or(1, |cores| cores.get() / 2)
         .clamp(1, 4)
-}
-
-fn operators(value: &Value) -> Result<OperatorSet> {
-    choice(
-        "mutation.operators",
-        value,
-        &[
-            ("default", OperatorSet::Default),
-            ("extended", OperatorSet::Extended),
-        ],
-    )
-}
-
-fn strategy(value: &Value) -> Result<Strategy> {
-    choice(
-        "mutation.strategy",
-        value,
-        &[
-            ("schemata", Strategy::Schemata),
-            ("file-copy", Strategy::FileCopy),
-        ],
-    )
 }
 
 /// `value`, the setting `what`, as the choice it names.
