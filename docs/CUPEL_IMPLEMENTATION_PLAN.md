@@ -976,11 +976,11 @@ Added during P3.1, which the P0.3 and P0.8 notes named as the step that installs
 
 **Goal:** Compile-once mutation for Rust, a long-lived daemon with byte-identical output, and value-ordered scheduling under a wall-clock budget.
 
-**Status:** not started
+**Status:** in progress (2026-10-15)
 
 #### P4.1 Rust mutant schemata
 
-**Status:** not started
+**Status:** in progress (2026-10-15)
 
 - Rust schemata strategy registered with the mutation engine: rewrite each site as `if cupel_mutant_id() == N { mutated } else { original }` preserving expression types; compile once; run each mutant with `CUPEL_MUTANT=N`. Validate the schemata build compiles before running; fall back to file-copy on failure (recorded in the check result). Write **ADR-005** on Go timing.
 
