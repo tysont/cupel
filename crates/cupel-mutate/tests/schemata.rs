@@ -150,7 +150,7 @@ fn every_gated_mutant_behaves_as_its_file_copy() {
     let schemata = build(dir.path(), "schemata", &source).expect("the schemata build");
     let original = build(dir.path(), "original", PROGRAM).unwrap();
     assert_eq!(run(&schemata, 0), run(&original, 0));
-    let gated: Vec<String> = gates.iter().map(|gate| run(&schemata, gate.id)).collect();
+    let switched: Vec<String> = gates.iter().map(|gate| run(&schemata, gate.id)).collect();
     let copies: Vec<String> = gates
         .iter()
         .map(|gate| {
@@ -160,5 +160,5 @@ fn every_gated_mutant_behaves_as_its_file_copy() {
             run(&copy, 0)
         })
         .collect();
-    assert_eq!(gated, copies);
+    assert_eq!(switched, copies);
 }
