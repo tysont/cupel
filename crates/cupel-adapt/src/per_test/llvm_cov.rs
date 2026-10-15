@@ -2,8 +2,9 @@
 // ABOUTME: runs each test alone under `cargo llvm-cov nextest` and reads the executed lines of its LCOV report.
 use cupel_core::{LangId, Langs, PerTestMap, Result, TestCoverage};
 
-use super::{PerTest, PerTestSpec, Site, covered, executed_lcov_lines};
+use super::{PerTest, PerTestSpec, Site, covered, executed_lines};
 use crate::cargo_nextest::filterset;
+use crate::coverage::{parse_lcov, placed};
 use crate::report::listing;
 
 const ID: &str = "tool.llvm-cov-per-test";
@@ -57,12 +58,14 @@ fn measure(site: &Site<'_>) -> Result<Vec<TestCoverage>> {
         // A failing test still measures what it ran; a run that wrote no report measured nothing.
         site.run("cargo", &args, ENV)?;
         let lines = std::fs::read_to_string(&report)
-            .map(|text| executed_lcov_lines(&text))
+            .ok()
+            .and_then(|text| parse_lcov(&text).ok())
+            .map(|map| executed_lines(&placed(map, &[&site.path], ".")))
             .unwrap_or_default();
         tests.push(TestCoverage::new(
             &id,
             None,
-            covered(lines, |file| site.file(file)),
+            covered(lines, |file| Some(file.to_owned())),
         ));
     }
     Ok(tests)

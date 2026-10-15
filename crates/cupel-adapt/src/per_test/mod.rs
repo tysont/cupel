@@ -1,12 +1,11 @@
 // ABOUTME: The `PerTestMap` producers (ADR-077): what they share (a spec per tool, run once per project root
-// ABOUTME: into a report area under `.cupel/`) and the minimal report slicing they need until P3.2's parsers.
+// ABOUTME: into a report area under `.cupel/`), and the executed lines of one test's parsed coverage report.
 //! Per-test coverage producers.
 //!
 //! Each producer lists or runs a root's tests under a coverage tool so that every report it reads
 //! belongs to one test, and maps the report's executed lines to the runner's test IDs. The
-//! report slicing here (`executed_lcov_lines`, `executed_coverprofile_lines`) reads only the
-//! executed lines per file; the general format parsers belong to `CoverageMap` (P3.2), which
-//! replaces these at integration.
+//! reports are read by the `CoverageMap` format parsers (`crate::coverage`), and
+//! [`executed_lines`] keeps the lines each test ran.
 
 mod go_cover;
 mod llvm_cov;
@@ -15,6 +14,7 @@ mod pytest_cov;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
+use cupel_core::coverage::CoverageMap;
 use cupel_core::{
     Availability, Captured, CostClass, CoveredLines, Ctx, Error, EventSink, FactKind, Langs,
     PerTestMap, Process, ProduceCtx, Producer, ProducerId, Result, Scope, TestCoverage, ToolId,
@@ -209,71 +209,30 @@ pub(crate) fn covered(
         .collect()
 }
 
-/// The executed lines per source file of an LCOV report (`SF:` records, `DA:<line>,<hits>`
-/// with hits above zero). Minimal slicing for one test's report; P3.2's LCOV parser replaces it
-/// at integration (ADR-077).
-pub(crate) fn executed_lcov_lines(text: &str) -> BTreeMap<String, Vec<u32>> {
-    let mut files: BTreeMap<String, Vec<u32>> = BTreeMap::new();
-    let mut current: Option<String> = None;
-    for line in text.lines() {
-        if let Some(file) = line.strip_prefix("SF:") {
-            current = Some(file.trim().to_owned());
-        } else if line == "end_of_record" {
-            current = None;
-        } else if let (Some(file), Some(record)) = (&current, line.strip_prefix("DA:")) {
-            let mut fields = record.split(',');
-            let number = fields
-                .next()
-                .and_then(|field| field.trim().parse::<u32>().ok());
-            let hits = fields
-                .next()
-                .and_then(|field| field.trim().parse::<u64>().ok());
-            if let (Some(number), Some(hits)) = (number, hits)
-                && hits > 0
-            {
-                files.entry(file.clone()).or_default().push(number);
-            }
-        }
-    }
-    files
-}
-
-/// The executed lines per file of a Go coverprofile (`<file>:<l>.<c>,<l>.<c> <statements>
-/// <count>` with count above zero), files as the profile names them (import paths). Minimal
-/// slicing for one test's profile; P3.2's coverprofile parser replaces it at integration
-/// (ADR-077).
-pub(crate) fn executed_coverprofile_lines(text: &str) -> BTreeMap<String, Vec<u32>> {
-    let mut files: BTreeMap<String, Vec<u32>> = BTreeMap::new();
-    for line in text.lines().filter(|line| !line.starts_with("mode:")) {
-        let Some((file, block)) = line.rsplit_once(':') else {
-            continue;
-        };
-        let fields: Vec<&str> = block.split_whitespace().collect();
-        let [range, _, count] = fields.as_slice() else {
-            continue;
-        };
-        let Some((start, end)) = range.split_once(',') else {
-            continue;
-        };
-        let line_of = |position: &str| position.split('.').next()?.parse::<u32>().ok();
-        if let (Some(start), Some(end), Ok(count)) =
-            (line_of(start), line_of(end), count.parse::<u64>())
-            && count > 0
-        {
-            files
-                .entry(file.to_owned())
-                .or_default()
-                .extend(start..=end);
-        }
-    }
-    files
+/// The executed lines (hits above zero) per file of one test's coverage, files as `map` names
+/// them.
+pub(crate) fn executed_lines(map: &CoverageMap) -> BTreeMap<String, Vec<u32>> {
+    map.files
+        .iter()
+        .map(|file| {
+            let lines: Vec<u32> = file
+                .lines
+                .iter()
+                .filter(|hits| hits.hits > 0)
+                .map(|hits| hits.line)
+                .collect();
+            (file.file.clone(), lines)
+        })
+        .filter(|(_, lines)| !lines.is_empty())
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
     use cupel_fixtures::Capture;
 
-    use super::{executed_coverprofile_lines, executed_lcov_lines};
+    use super::executed_lines;
+    use crate::coverage::{parse_coverprofile, parse_lcov, placed};
 
     fn lines(files: &std::collections::BTreeMap<String, Vec<u32>>) -> Vec<(String, Vec<u32>)> {
         files
@@ -285,19 +244,18 @@ mod tests {
     #[test]
     fn one_tests_lcov_report_yields_the_lines_it_executed() {
         let capture = Capture::of("per-test/cargo-llvm-cov", "adds");
-        let file = capture.ran_in.join("src/lib.rs").display().to_string();
+        let map = parse_lcov(&capture.file("report.lcov")).unwrap();
         assert_eq!(
-            lines(&executed_lcov_lines(&capture.file("report.lcov"))),
-            [(file, vec![4, 5, 6, 18, 19, 20])]
+            lines(&executed_lines(&placed(map, &[&capture.ran_in], "."))),
+            [("src/lib.rs".to_owned(), vec![4, 5, 6, 18, 19, 20])]
         );
     }
 
     #[test]
     fn one_tests_coverprofile_yields_the_lines_of_its_executed_blocks() {
         let read = |test: &str| {
-            lines(&executed_coverprofile_lines(
-                &Capture::of("per-test/go-cover", test).file("coverprofile.out"),
-            ))
+            let profile = Capture::of("per-test/go-cover", test).file("coverprofile.out");
+            lines(&executed_lines(&parse_coverprofile(&profile).unwrap()))
         };
         assert_eq!(
             read("TestAdd"),
