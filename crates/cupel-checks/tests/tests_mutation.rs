@@ -1,5 +1,5 @@
-// ABOUTME: tests.mutation over a hand-built MutationOutcomes fact, with no engine: findings per outcome, the score over
-// ABOUTME: killed and surviving mutants, ADR-004's possibly equivalent survivors, scope, IDs, and combining languages.
+// ABOUTME: tests.mutation over a hand-built MutationOutcomes fact, with no engine: findings per outcome, the score, ADR-004's
+// ABOUTME: possibly equivalent survivors, ADR-082's strategies and fallbacks, scope, IDs, and combining languages.
 mod support;
 
 use cupel_core::syntax::{
@@ -8,7 +8,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts, Finding, LangId,
-    MetricPer, Mutant, MutantOutcome, MutationOutcomes, ProducerId, Scope, Severity,
+    MetricPer, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, ProducerId, Scope,
+    Severity,
 };
 use serde_json::{Value, json};
 use support::{Recorded, Shape, combined, language};
@@ -146,6 +147,8 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("equivalent", MetricPer::Scope),
             ("executed", MetricPer::Scope),
             ("reused", MetricPer::Scope),
+            ("schemata", MetricPer::Scope),
+            ("fallback", MetricPer::Scope),
             ("survivors", MetricPer::Symbol),
         ]
     );
@@ -225,6 +228,65 @@ fn the_score_is_killed_over_killed_and_surviving() {
             Some(1.0),
             Some(1.0),
             Some(5.0)
+        ]
+    );
+}
+
+/// `mutant` built by `strategy`, falling back for `fallback`.
+fn built(mut mutant: Mutant, strategy: MutationStrategy, fallback: Option<&str>) -> Mutant {
+    mutant.strategy = Some(strategy);
+    mutant.fallback = fallback.map(str::to_owned);
+    mutant
+}
+
+#[test]
+fn the_result_counts_mutants_run_as_schemata_and_notes_each_fallback() {
+    let pattern = "inside a pattern";
+    let failed = "the schemata build of `discount.rs` failed: error[E0369]";
+    let mut reused = built(
+        mutant(8, 12, "*", "/", MutantOutcome::Killed),
+        MutationStrategy::FileCopy,
+        Some(failed),
+    );
+    reused.reused = true;
+    let (result, _) = run(vec![
+        built(
+            mutant(6, 14, ">=", ">", MutantOutcome::Killed),
+            MutationStrategy::Schemata,
+            None,
+        ),
+        built(
+            mutant(6, 20, "and", "or", MutantOutcome::Killed),
+            MutationStrategy::FileCopy,
+            Some(pattern),
+        ),
+        built(
+            mutant(7, 22, "-", "+", MutantOutcome::Killed),
+            MutationStrategy::FileCopy,
+            Some(failed),
+        ),
+        built(
+            mutant(7, 24, "10", "11", MutantOutcome::Killed),
+            MutationStrategy::FileCopy,
+            Some(failed),
+        ),
+        built(
+            mutant(8, 14, "1", "0", MutantOutcome::Killed),
+            MutationStrategy::FileCopy,
+            None,
+        ),
+        reused,
+    ]);
+    let metric = |name: &str| result.metrics.get(name).copied();
+    assert_eq!(
+        ["schemata", "fallback", "executed"].map(metric),
+        [Some(1.0), Some(3.0), Some(5.0)]
+    );
+    assert_eq!(
+        result.notes,
+        [
+            "1 mutant ran as a file copy: inside a pattern".to_owned(),
+            format!("2 mutants ran as file copies: {failed}"),
         ]
     );
 }

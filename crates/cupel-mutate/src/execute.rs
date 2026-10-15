@@ -169,23 +169,7 @@ impl Execution<'_> {
             Build::Schemata { limits, .. } => (limits[index], Holds::Schemata),
         };
         while let Some(&mutant) = work.order.get(work.next.fetch_add(1, Ordering::SeqCst)) {
-            let planned = run.mutants[mutant];
-            let ran = match (id(build, mutant), build) {
-                (Some(id), Build::Schemata { source, .. }) => {
-                    if holds != Holds::Schemata {
-                        write(slot, run.file, source.as_bytes())?;
-                        holds = Holds::Schemata;
-                    }
-                    self.mutant(&ctx, planned, limit, id)
-                }
-                _ => {
-                    write(slot, run.file, planned.source.as_bytes())?;
-                    let ran = self.mutant(&ctx, planned, limit, 0);
-                    write(slot, run.file, run.original)?;
-                    holds = Holds::Original;
-                    ran
-                }
-            }?;
+            let ran = self.one(slot, &ctx, work, mutant, limit, &mut holds)?;
             if let Ok(mut found) = work.found.lock() {
                 found[mutant] = Some(ran);
             }
@@ -194,6 +178,32 @@ impl Execution<'_> {
             write(slot, run.file, run.original)?;
         }
         Ok(())
+    }
+
+    /// Runs mutant `index` of the file in `slot`, which `holds` the schemata build or the
+    /// original: selected by its id, or written as a file copy and the original put back.
+    fn one(
+        &self,
+        slot: &Slot,
+        ctx: &ProduceCtx,
+        work: &Work<'_>,
+        index: usize,
+        limit: Duration,
+        holds: &mut Holds,
+    ) -> Result<Ran> {
+        let (run, planned) = (work.run, work.run.mutants[index]);
+        if let (Some(id), Build::Schemata { source, .. }) = (id(work.build, index), work.build) {
+            if *holds != Holds::Schemata {
+                write(slot, run.file, source.as_bytes())?;
+                *holds = Holds::Schemata;
+            }
+            return self.mutant(ctx, planned, limit, id);
+        }
+        write(slot, run.file, planned.source.as_bytes())?;
+        let ran = self.mutant(ctx, planned, limit, 0);
+        write(slot, run.file, run.original)?;
+        *holds = Holds::Original;
+        ran
     }
 
     /// The context of running in `slot`: its root, and a writer confined to its `.cupel/`.

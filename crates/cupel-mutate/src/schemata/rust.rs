@@ -1,6 +1,7 @@
 // ABOUTME: Rust schemata (ADR-082): each mutant's smallest whole expression becomes an `if cupel_mutant_id() == N`
 // ABOUTME: chain, sites where an `if` cannot stand are excluded, and the `CUPEL_MUTANT` reader is appended once.
 use std::collections::{BTreeMap, BTreeSet};
+use std::fmt::Write as _;
 
 use tree_sitter::{Node, Parser, Tree};
 
@@ -368,9 +369,9 @@ fn chain(target: &Target, original: &str) -> String {
     let reader = format!("{}cupel_mutant_id()", "super::".repeat(target.depth));
     let mut chain = String::new();
     for (id, variant) in &target.variants {
-        chain.push_str(&format!("if {reader} == {id} {{ {variant} }} else "));
+        let _ = write!(chain, "if {reader} == {id} {{ {variant} }} else ");
     }
-    chain.push_str(&format!("{{ {original} }}"));
+    let _ = write!(chain, "{{ {original} }}");
     if target.parens {
         format!("({chain})")
     } else {

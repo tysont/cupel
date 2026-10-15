@@ -156,7 +156,7 @@ fn every_gated_mutant_behaves_as_its_file_copy() {
         })
         .collect();
     let rewritten = rewriter("rust").unwrap().rewrite(PROGRAM, &gates);
-    assert_eq!(rewritten.excluded, Default::default());
+    assert_eq!(rewritten.excluded, std::collections::BTreeMap::new());
     let source = rewritten.source.unwrap();
     assert_eq!(source.lines().count(), PROGRAM.lines().count() + 11);
     let schemata = build(dir.path(), "schemata", &source).expect("the schemata build");
