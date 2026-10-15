@@ -6,7 +6,7 @@
 //! must be green (ADR-076) before any rerun, and it names the runner to rerun. Each rerun's
 //! order, seed, and parallelism come from [`options::schedule`]; the engine hands them to the
 //! baseline's runner, which it finds among the registered runners (`ProduceCtx::runners`), as
-//! [`RunOptions`]. The runner runs every process against the run's cancellation, so
+//! [`RunOptions`](cupel_core::RunOptions). The runner runs every process against the run's cancellation, so
 //! `--timeout` stops a rerun (exit 5).
 
 mod options;
