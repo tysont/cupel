@@ -1077,6 +1077,7 @@ expression: pretty(&schema)
         "test-conventions",
         "project-info",
         "test-results",
+        "test-reruns",
         "coverage-map",
         "per-test-map",
         "mutation-outcomes",

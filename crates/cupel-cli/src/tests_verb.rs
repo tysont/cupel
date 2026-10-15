@@ -127,6 +127,7 @@ fn job<'a>(
         selectors,
         selectors_must_match: false,
         base: None,
+        seed: invocation.run.seed,
     }
 }
 

@@ -1,0 +1,17 @@
+test_settles_on_every_other_run (tests.test_settle.SettleTest.test_settles_on_every_other_run) ... ok
+test_deposit_changes_balance (tests.test_ledger.LedgerTest.test_deposit_changes_balance) ... ok
+test_balance_starts_at_zero (tests.test_ledger.LedgerTest.test_balance_starts_at_zero) ... FAIL
+
+======================================================================
+FAIL: test_balance_starts_at_zero (tests.test_ledger.LedgerTest.test_balance_starts_at_zero)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/cap/unittest-reversed/tests/test_ledger.py", line 11, in test_balance_starts_at_zero
+    self.assertEqual(sum(BALANCE), 0)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+AssertionError: 5 != 0
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.001s
+
+FAILED (failures=1)

@@ -5,38 +5,6 @@
     "version": "<version>"
   },
   "description": {
-    "languages": [
-      {
-        "lang": "go",
-        "support": {
-          "status": "supported"
-        }
-      },
-      {
-        "lang": "javascript",
-        "support": {
-          "status": "supported"
-        }
-      },
-      {
-        "lang": "python",
-        "support": {
-          "status": "supported"
-        }
-      },
-      {
-        "lang": "rust",
-        "support": {
-          "status": "supported"
-        }
-      },
-      {
-        "lang": "typescript",
-        "support": {
-          "status": "supported"
-        }
-      }
-    ],
     "manifest": {
       "cost": "quick",
       "findings": [

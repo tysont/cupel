@@ -8,10 +8,12 @@ use support::Repo;
 /// One function of cyclomatic complexity 3 and seven parameters (one `params.many` finding).
 const CODE: &str = "pub fn wide(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32, g: i32) -> i32 {\n    if a > 1 { b } else if c > 2 { d } else { e + f + g }\n}\n";
 
+/// A repository with `CODE` and `config` at depth `quick`: it has no test suite for the
+/// baseline of a standard check (`tests.flaky`) to run.
 fn repo(config: &str) -> Repo {
     let repo = Repo::new();
     repo.write("src/wide.rs", CODE);
-    repo.write("cupel.toml", config);
+    repo.write("cupel.toml", &format!("depth = \"quick\"\n{config}"));
     repo
 }
 
@@ -151,7 +153,7 @@ fn python(config: &str) -> Repo {
         "pyproject.toml",
         "[project]\nname = \"pkg\"\nversion = \"0.1.0\"\n",
     );
-    repo.write("cupel.toml", config);
+    repo.write("cupel.toml", &format!("depth = \"quick\"\n{config}"));
     repo.write("src/pkg/__init__.py", "");
     repo
 }

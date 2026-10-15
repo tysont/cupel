@@ -48,6 +48,8 @@ pub struct Job<'a> {
     pub selectors_must_match: bool,
     /// The base side of a range scope; `None` without a range (ADR-056).
     pub base: Option<BaseTree>,
+    /// The run's seed, handed to every producer (ADR-078).
+    pub seed: u64,
 }
 
 /// What a run (or a dry run's planning) produced.
@@ -675,6 +677,7 @@ struct FactStore<'a> {
     writer: Writer,
     cancel: Cancellation,
     config: &'a Config,
+    seed: u64,
     files: Vec<String>,
     made: HashMap<(FactKind, LangId), std::result::Result<SharedFact, Error>>,
     /// Producers' findings, once per ID.
@@ -719,6 +722,7 @@ impl<'a> FactStore<'a> {
             writer: job.writer.confined(),
             cancel: job.cancel.clone(),
             config: job.config,
+            seed: job.seed,
             files,
             made: HashMap::new(),
             findings: Vec::new(),
@@ -811,6 +815,7 @@ impl<'a> FactStore<'a> {
                 writer: self.writer.clone(),
                 cancel: self.cancel.clone(),
                 upstream: self.upstream(producer.needs(), lang),
+                seed: self.seed,
             };
             let mut events = Vec::new();
             let produced =

@@ -130,9 +130,20 @@ fn column(registries: &Registries, lang: &LangId) -> Value {
 fn describe_check_matches_its_golden_for_every_registered_check() {
     let registries = Registries::builtin();
     let mut checked = 0;
+    let pairs = registries.pairs();
     for check in registries.checks.iter() {
         let id = check.manifest().id.as_str();
-        assert_golden(&format!("{id}/describe"), &described(&["describe", id]));
+        let mut envelope = described(&["describe", id]);
+        // Support depends on the tools installed here (a runner's `unavailable`), so the row is
+        // asserted from the registries, which see the same tools, rather than pinned.
+        let [languages] = take(&mut envelope, &["languages"]).try_into().unwrap();
+        let row: Vec<Value> = pairs
+            .iter()
+            .filter(|pair| pair.check.as_str() == id)
+            .map(|pair| json!({"lang": pair.lang, "support": SupportDescription::from(&pair.support)}))
+            .collect();
+        assert_eq!(languages, Value::Array(row), "{id}");
+        assert_golden(&format!("{id}/describe"), &envelope);
         checked += 1;
     }
     assert!(checked > 0);

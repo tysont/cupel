@@ -1,0 +1,48 @@
+   Compiling ledger v0.1.0 (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/cap/cargo-shuffled)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running unittests src/lib.rs (target/debug/deps/ledger-6f4d1b56d92647ca)
+
+running 2 tests (shuffle seed: 7134611160154358618)
+test tests::deposit_changes_balance ... ok
+test tests::balance_starts_at_zero ... FAILED
+
+failures:
+
+---- tests::balance_starts_at_zero stdout ----
+
+thread 'tests::balance_starts_at_zero' (22378239) panicked at src/lib.rs:19:9:
+assertion `left == right` failed
+  left: 5
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::balance_starts_at_zero
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+error: test failed, to rerun pass `--lib`
+     Running tests/settle.rs (target/debug/deps/settle-650b5b911e5a3e2c)
+
+running 1 test (shuffle seed: 7134611160154358618)
+test settles_on_every_other_run ... FAILED
+
+failures:
+
+---- settles_on_every_other_run stdout ----
+
+thread 'settles_on_every_other_run' (22378264) panicked at tests/settle.rs:9:9:
+settled twice in a row
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    settles_on_every_other_run
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test settle`
+error: 2 targets failed:
+    `--lib`
+    `--test settle`

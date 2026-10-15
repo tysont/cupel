@@ -591,7 +591,8 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `Roots` | symbols live by convention (entry points, exports, tests, framework hooks) | language | `static.dead-code` |
 | `TestConventions` | test files for a source file; is-test predicate | language | `write_test` hints, scope |
 | `ProjectInfo` | detected roots: path, language, build files, workspace members, dirs to skip — no commands; the CLI joins it with the toolchain table (§8.7, ADR-037) | language | `init`, `doctor`, toolchain selection |
-| `TestResults` | per test: outcome, duration | runner tool | baseline/exit 4, `tests.flaky`, mutation engine |
+| `TestResults` | per test: outcome, duration | runner tool | baseline/exit 4, flake engine, mutation engine |
+| `TestReruns` | per rerun: order, seed, parallelism, executed order; per test per rerun: outcome (ADR-078) | flake engine | `tests.flaky` |
 | `CoverageMap` | line + optional branch hits; `branches: Option<_>` says whether the producer measures branches | coverage tool | `tests.coverage`, `static.crap`, mutation engine |
 | `PerTestMap` | `test_id → lines` | coverage tool | `tests --impacted`, mutation engine |
 | `MutationOutcomes` | per site: killed/survived/timeout/uncovered, killing tests, duration | mutation engine · PIT/Stryker tool | `tests.mutation` |
@@ -745,7 +746,7 @@ pub trait Check: Send + Sync {
 
 `Facts` serves exactly the kinds declared in `needs` and `wants` (§8.3.4). `CheckCtx` provides: resolved config for this check (with the per-language override already merged), read-only store access for history, cancellation token, scratch dir under `.cupel/work/<run>/`. It has no file-system, process, or language API: a check cannot do anything but compute over facts. `EventSink` receives findings and progress; the core serializes to `--events` and accumulates the envelope.
 
-All execution lives in producers. `tests.mutation` does not run mutants — the mutation engine produces `MutationOutcomes` and the check scores them and writes findings. `tests.flaky` does not re-run tests — a flake engine produces repeated `TestResults`. This is what lets a PIT wrapper or a future Stryker wrapper feed the same check, and what keeps the scheduler able to account for every process spawned.
+All execution lives in producers. `tests.mutation` does not run mutants — the mutation engine produces `MutationOutcomes` and the check scores them and writes findings. `tests.flaky` does not re-run tests — a flake engine reruns the baseline's tests and produces `TestReruns` (ADR-078). This is what lets a PIT wrapper or a future Stryker wrapper feed the same check, and what keeps the scheduler able to account for every process spawned.
 
 ### 8.6 Plugin protocol (external process)
 

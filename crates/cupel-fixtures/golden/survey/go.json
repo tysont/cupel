@@ -31,7 +31,7 @@
           }
         },
         "default_branch": null,
-        "depth": "standard",
+        "depth": "quick",
         "format": "json",
         "gate": {
           "changed": null,
@@ -49,7 +49,7 @@
         "defaults"
       ]
     },
-    "depth": "standard",
+    "depth": "quick",
     "duration_ms": "<duration-ms>",
     "git": null,
     "id": "<run-id>",

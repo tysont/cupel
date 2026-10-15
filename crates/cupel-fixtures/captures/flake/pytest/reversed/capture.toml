@@ -1,0 +1,6 @@
+# Captured from the real tool on the tests.flaky fixture (P3.5) as engine.flake runs a reversed rerun;
+# the other files here are its unedited output. `dir` is where it ran.
+tool = "pytest 8.4.2"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/cap/pytest-reversed"
+command = "pytest -p no:cacheprovider -o junit_family=xunit1 -o junit_logging=all --junitxml=/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/cap/pytest-reversed/junit.xml tests/test_settle.py::SettleTest::test_settles_on_every_other_run tests/test_ledger.py::LedgerTest::test_deposit_changes_balance tests/test_ledger.py::LedgerTest::test_balance_starts_at_zero"
+exit_code = 1

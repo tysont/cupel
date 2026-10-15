@@ -174,6 +174,7 @@ fn fact_kinds_are_the_catalog_rows_in_kebab_case() {
         "test-conventions",
         "project-info",
         "test-results",
+        "test-reruns",
         "coverage-map",
         "per-test-map",
         "mutation-outcomes",

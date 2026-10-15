@@ -2,7 +2,7 @@
 // ABOUTME: each check's results, findings, and rankings are its own golden beside its matrix goldens (ADR-074).
 use std::collections::BTreeSet;
 
-use cupel_core::{CheckStatus, Envelope, MetricPer, Severity, Status};
+use cupel_core::{CheckStatus, CostClass, Envelope, MetricPer, Severity, Status};
 use cupel_fixtures::matrix::Registries;
 use cupel_fixtures::{Goldens, copy_repo, redact, run_cupel};
 use serde_json::{Value, json};
@@ -15,7 +15,7 @@ fn assert_golden(name: &str, actual: &Value) {
 }
 
 /// Every check that declares per-target metrics ranks something when it scored, and reports
-/// exactly the gate keys it declares.
+/// exactly the gate keys it declares. Checks above `quick` are not selected (see the survey).
 fn assert_metrics_match_manifests(registries: &Registries, envelope: &Envelope, lang: &str) {
     let rankings = envelope.rankings.as_ref().expect("survey ranks");
     for check in registries.checks.iter() {
@@ -34,11 +34,14 @@ fn assert_metrics_match_manifests(registries: &Registries, envelope: &Envelope, 
             .filter(|d| d.check == manifest.id && !d.entries.is_empty())
             .map(|d| d.metric.as_str())
             .collect();
+        if manifest.cost > CostClass::Quick {
+            continue;
+        }
         let result = envelope
             .checks
             .iter()
             .find(|result| result.id == manifest.id)
-            .expect("every check has an entry");
+            .expect("every selected check has an entry");
         // A check that scored nothing (static.crap without coverage) measures nothing.
         let scored = result.status != CheckStatus::Skipped && result.score.is_some();
         let per_target = declared(|per| per != MetricPer::Scope);
@@ -115,7 +118,12 @@ fn survey_matches_its_goldens_for_every_language_fixture() {
         let dir = tempfile::tempdir().unwrap();
         copy_repo(lang.as_str(), dir.path());
 
-        let outcome = run_cupel(&["survey", "--format", "json"], dir.path());
+        // Quick: the shared fixtures are code to analyze, not test suites a standard check's
+        // baseline could run (ADR-076).
+        let outcome = run_cupel(
+            &["survey", "--depth", "quick", "--format", "json"],
+            dir.path(),
+        );
 
         assert_eq!(outcome.code, Some(0), "{lang}: {}", outcome.stdout);
         let envelope = outcome.envelope();

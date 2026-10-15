@@ -1,0 +1,18 @@
+{"Time":"2026-10-14T12:49:52.833677-07:00","Action":"start","Package":"example.com/ledger"}
+{"Time":"2026-10-14T12:49:53.161086-07:00","Action":"output","Package":"example.com/ledger","Output":"-test.shuffle 3567305580077179309\n"}
+{"Time":"2026-10-14T12:49:53.161164-07:00","Action":"run","Package":"example.com/ledger","Test":"TestDepositChangesBalance"}
+{"Time":"2026-10-14T12:49:53.161177-07:00","Action":"output","Package":"example.com/ledger","Test":"TestDepositChangesBalance","Output":"=== RUN   TestDepositChangesBalance\n"}
+{"Time":"2026-10-14T12:49:53.1612-07:00","Action":"output","Package":"example.com/ledger","Test":"TestDepositChangesBalance","Output":"--- PASS: TestDepositChangesBalance (0.00s)\n"}
+{"Time":"2026-10-14T12:49:53.161208-07:00","Action":"pass","Package":"example.com/ledger","Test":"TestDepositChangesBalance","Elapsed":0}
+{"Time":"2026-10-14T12:49:53.161215-07:00","Action":"run","Package":"example.com/ledger","Test":"TestBalanceStartsAtZero"}
+{"Time":"2026-10-14T12:49:53.16122-07:00","Action":"output","Package":"example.com/ledger","Test":"TestBalanceStartsAtZero","Output":"=== RUN   TestBalanceStartsAtZero\n"}
+{"Time":"2026-10-14T12:49:53.161231-07:00","Action":"output","Package":"example.com/ledger","Test":"TestBalanceStartsAtZero","Output":"    ledger_test.go:8: balance = 5, want 0\n"}
+{"Time":"2026-10-14T12:49:53.16129-07:00","Action":"output","Package":"example.com/ledger","Test":"TestBalanceStartsAtZero","Output":"--- FAIL: TestBalanceStartsAtZero (0.00s)\n"}
+{"Time":"2026-10-14T12:49:53.161301-07:00","Action":"fail","Package":"example.com/ledger","Test":"TestBalanceStartsAtZero","Elapsed":0}
+{"Time":"2026-10-14T12:49:53.16131-07:00","Action":"run","Package":"example.com/ledger","Test":"TestSettlesOnEveryOtherRun"}
+{"Time":"2026-10-14T12:49:53.161315-07:00","Action":"output","Package":"example.com/ledger","Test":"TestSettlesOnEveryOtherRun","Output":"=== RUN   TestSettlesOnEveryOtherRun\n"}
+{"Time":"2026-10-14T12:49:53.161413-07:00","Action":"output","Package":"example.com/ledger","Test":"TestSettlesOnEveryOtherRun","Output":"--- PASS: TestSettlesOnEveryOtherRun (0.00s)\n"}
+{"Time":"2026-10-14T12:49:53.161422-07:00","Action":"pass","Package":"example.com/ledger","Test":"TestSettlesOnEveryOtherRun","Elapsed":0}
+{"Time":"2026-10-14T12:49:53.161427-07:00","Action":"output","Package":"example.com/ledger","Output":"FAIL\n"}
+{"Time":"2026-10-14T12:49:53.161875-07:00","Action":"output","Package":"example.com/ledger","Output":"FAIL\texample.com/ledger\t0.328s\n"}
+{"Time":"2026-10-14T12:49:53.161889-07:00","Action":"fail","Package":"example.com/ledger","Elapsed":0.328}

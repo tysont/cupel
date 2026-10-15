@@ -20,6 +20,10 @@ use crate::redact::redact;
 use crate::repos::{copy_repo, repo_path};
 use crate::run::run_cupel;
 
+/// The `--seed` every matrix run passes, so a check whose producers vary their work by seed
+/// (the flake engine's reruns, ADR-078) makes the same golden on every run.
+pub const SEED: u64 = 3;
+
 /// One cell of the support matrix.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Pair {
@@ -128,7 +132,15 @@ fn run_on_fixture(
     let dir = tempfile::tempdir().map_err(|error| error.to_string())?;
     copy_repo(&pair.fixture(), dir.path());
     let outcome = run_cupel(
-        &["check", "--only", pair.check.as_str(), "--format", "json"],
+        &[
+            "check",
+            "--only",
+            pair.check.as_str(),
+            "--format",
+            "json",
+            "--seed",
+            &SEED.to_string(),
+        ],
         dir.path(),
     );
     let envelope = outcome
@@ -205,8 +217,14 @@ fn verify_skipped(pair: &Pair) -> Result<(), String> {
         Support::Unsupported(fact) => {
             skipped.reason == SkipReason::Unsupported && skipped.fact == Some(*fact)
         }
+        // The matrix resolves tools at the repository root; the fixture's own detection may
+        // prefer another runner of the language, which is just as missing.
         Support::Unavailable(tool) => {
-            skipped.reason == SkipReason::Unavailable && skipped.tool.as_ref() == Some(tool)
+            eprintln!(
+                "SKIPPED: {tool} not installed; {} ran as `unavailable`",
+                pair.golden()
+            );
+            skipped.reason == SkipReason::Unavailable
         }
         Support::Unconfigured(_) => skipped.reason == SkipReason::Unconfigured,
         Support::Supported => true,
@@ -228,7 +246,9 @@ fn verify_skipped(pair: &Pair) -> Result<(), String> {
 fn stale_goldens(goldens: &Goldens, registries: &Registries, pairs: &[Pair]) -> Vec<String> {
     let mut claimed: BTreeSet<String> = pairs
         .iter()
-        .filter(|pair| pair.support == Support::Supported)
+        // A pair whose tool is missing here is supported where it is installed, so its golden
+        // stays (CI installs every runner).
+        .filter(|pair| matches!(pair.support, Support::Supported | Support::Unavailable(_)))
         .map(Pair::golden)
         .collect();
     for check in registries.checks.iter() {

@@ -125,6 +125,7 @@ pub fn run(
         files: resolved.files.clone(),
         selectors: request.selectors()?,
         selectors_must_match: !request.has_range(),
+        seed: run.seed,
     };
     let scheduler = Scheduler {
         checks: catalog.checks(),

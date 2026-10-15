@@ -20,6 +20,7 @@ mod explanation;
 mod fact;
 mod facts;
 mod finding;
+mod flake;
 mod gate;
 pub mod git;
 mod grade;
@@ -73,6 +74,7 @@ pub use explanation::{Excerpt, ExcerptLine, ExplainSubject, Explanation, Metric}
 pub use fact::{Fact, FactKind};
 pub use facts::Facts;
 pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Symbol};
+pub use flake::{RunOrder, TestRerun, TestReruns};
 pub use gate::{GATE_CHANGED, GATE_TREE, apply_gate, evaluate_gate, gate_for};
 pub use grade::{CostClass, Tier};
 pub use hash::{FindingId, SiteHash, SymbolHash};
