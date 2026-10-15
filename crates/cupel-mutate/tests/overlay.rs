@@ -153,3 +153,20 @@ fn claiming_slots_removes_those_of_repositories_that_are_gone() {
     cupel_mutate::overlay::claim(kept.path()).unwrap();
     assert_eq!((gone_slot.exists(), kept_slot.exists()), (false, true));
 }
+
+#[cfg(unix)]
+#[test]
+fn a_symlink_in_the_tree_is_the_same_symlink_in_the_slot() {
+    let repo = repository();
+    std::os::unix::fs::symlink("src", repo.path().join("alias")).unwrap();
+    let work = tempfile::tempdir().unwrap();
+    let slot = Slot::at(work.path().join("0"));
+    slot.sync(repo.path(), &[]).unwrap();
+    assert_eq!(
+        (
+            fs::read_link(slot.root().join("alias")).unwrap(),
+            read(slot.root(), "alias/other.py")
+        ),
+        (Path::new("src").to_path_buf(), "X = 1\n".to_owned())
+    );
+}

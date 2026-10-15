@@ -150,8 +150,10 @@ fn wanted(tree: &Path, own: &Own) -> io::Result<BTreeMap<PathBuf, Entry>> {
         if relative.as_os_str().is_empty() {
             continue;
         }
-        let is_dir = entry.file_type().is_some_and(|kind| kind.is_dir());
-        let mirrored = if is_dir {
+        let mirrored = if entry.path_is_symlink() {
+            // The same link, so a relative one points into the slot as it does in the tree.
+            Entry::Link(fs::read_link(entry.path())?)
+        } else if entry.file_type().is_some_and(|kind| kind.is_dir()) {
             Entry::Dir
         } else {
             Entry::File(entry.path().to_path_buf())
