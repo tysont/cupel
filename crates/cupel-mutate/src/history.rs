@@ -91,3 +91,102 @@ impl History {
         files
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use cupel_core::syntax::{MutationOperator, Span, SymbolKey};
+
+    use super::*;
+
+    fn planned(file: &str, symbol: &str, site: &str, line: u32) -> Planned {
+        Planned {
+            mutant: Mutant {
+                symbol: SymbolKey {
+                    file: file.to_owned(),
+                    line: 1,
+                    col: 1,
+                },
+                symbol_hash: Some(symbol.parse().unwrap()),
+                site_hash: site.parse().unwrap(),
+                operator: MutationOperator::Relational,
+                from: "<".to_owned(),
+                to: "<=".to_owned(),
+                span: Span {
+                    line,
+                    col: 1,
+                    end_line: line,
+                    end_col: 2,
+                },
+                outcome: MutantOutcome::Uncovered,
+                tests: Vec::new(),
+                killing_tests: Vec::new(),
+                duration_ms: None,
+                reused: false,
+                equivalent: None,
+                cache_key: None,
+            },
+            source: String::new(),
+            tests: None,
+            covered: true,
+        }
+    }
+
+    fn site(symbol: &str, site: &str) -> MutantSite {
+        MutantSite {
+            symbol_hash: symbol.to_owned(),
+            site_hash: site.to_owned(),
+            replacement: "<=".to_owned(),
+        }
+    }
+
+    #[test]
+    fn last_survivors_run_first_then_new_symbols_then_the_rest_with_files_together() {
+        let (known, new) = ("sh_00000000000000a1", "sh_00000000000000a2");
+        let plan = vec![
+            planned("a.py", known, "0000000000000001", 1),
+            planned("b.py", new, "0000000000000002", 2),
+            planned("a.py", known, "0000000000000003", 3),
+            planned("c.py", known, "0000000000000004", 4),
+        ];
+        let history = History {
+            stored: BTreeMap::new(),
+            last: BTreeMap::from([
+                (site(known, "0000000000000001"), MutantOutcome::Killed),
+                (site(known, "0000000000000004"), MutantOutcome::Survived),
+            ]),
+        };
+        assert_eq!(
+            history.order(&plan, &[0, 1, 2, 3]),
+            [
+                ("c.py".to_owned(), vec![3]),
+                ("b.py".to_owned(), vec![1]),
+                ("a.py".to_owned(), vec![0, 2]),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_stored_outcome_under_the_same_key_is_reused() {
+        let mut fresh = planned("a.py", "sh_00000000000000a1", "0000000000000001", 1);
+        fresh.mutant.cache_key = Some("k".to_owned());
+        let mut stored = fresh.mutant.clone();
+        stored.outcome = MutantOutcome::Survived;
+        stored.tests = vec!["t".to_owned()];
+        let history = History {
+            stored: BTreeMap::from([("k".to_owned(), stored)]),
+            last: BTreeMap::new(),
+        };
+        assert!(history.reuse(&mut fresh));
+        assert_eq!(
+            (
+                fresh.mutant.outcome,
+                fresh.mutant.reused,
+                fresh.mutant.tests
+            ),
+            (MutantOutcome::Survived, true, vec!["t".to_owned()])
+        );
+        let mut other = planned("a.py", "sh_00000000000000a1", "0000000000000001", 1);
+        other.mutant.cache_key = Some("other".to_owned());
+        assert!(!history.reuse(&mut other));
+    }
+}
