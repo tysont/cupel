@@ -1,8 +1,8 @@
-// ABOUTME: The engine's `[lang.<id>] mutation` table (ADR-080): defaults, each key read, and every other key or a
-// ABOUTME: value of the wrong shape refused with what the table takes.
+// ABOUTME: The engine's `[lang.<id>] mutation` table (ADR-080, ADR-082): defaults, each key read, and every other key
+// ABOUTME: or a value of the wrong shape refused with what the table takes.
 use cupel_core::Error;
 use cupel_core::syntax::OperatorSet;
-use cupel_mutate::settings::{DEFAULT_TIMEOUT_FACTOR, Settings};
+use cupel_mutate::settings::{DEFAULT_TIMEOUT_FACTOR, Settings, Strategy};
 use serde_json::{Map, Value, json};
 
 fn table(value: &Value) -> Map<String, Value> {
@@ -16,8 +16,8 @@ fn table(value: &Value) -> Map<String, Value> {
 fn nothing_configured_is_the_default_set_at_the_default_factor() {
     let settings = Settings::read(&Map::new()).unwrap();
     assert_eq!(
-        (settings.operators, settings.timeout_factor),
-        (OperatorSet::Default, DEFAULT_TIMEOUT_FACTOR)
+        (settings.operators, settings.timeout_factor, settings.strategy),
+        (OperatorSet::Default, DEFAULT_TIMEOUT_FACTOR, Strategy::Schemata)
     );
     assert!((1..=4).contains(&settings.jobs));
 }
@@ -25,7 +25,7 @@ fn nothing_configured_is_the_default_set_at_the_default_factor() {
 #[test]
 fn each_key_is_read() {
     let settings = Settings::read(&table(
-        &json!({"operators": "extended", "jobs": 3, "timeout_factor": 4}),
+        &json!({"operators": "extended", "jobs": 3, "timeout_factor": 4, "strategy": "file-copy"}),
     ))
     .unwrap();
     assert_eq!(
@@ -33,7 +33,8 @@ fn each_key_is_read() {
         Settings {
             operators: OperatorSet::Extended,
             jobs: 3,
-            timeout_factor: 4
+            timeout_factor: 4,
+            strategy: Strategy::FileCopy,
         }
     );
 }
@@ -49,7 +50,8 @@ fn refused_setting(value: &Value) -> &'static str {
 #[test]
 fn an_unknown_key_or_a_bad_value_is_refused() {
     let refused: Vec<&str> = [
-        json!({"strategy": "schemata"}),
+        json!({"engine": "schemata"}),
+        json!({"strategy": "fast"}),
         json!({"operators": "all"}),
         json!({"jobs": 0}),
         json!({"timeout_factor": "ten"}),
@@ -62,6 +64,7 @@ fn an_unknown_key_or_a_bad_value_is_refused() {
         refused,
         [
             "mutation",
+            "mutation.strategy",
             "mutation.operators",
             "mutation.jobs",
             "mutation.timeout_factor",

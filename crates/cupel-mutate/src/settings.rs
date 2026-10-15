@@ -1,5 +1,5 @@
-// ABOUTME: The engine's settings, from `[lang.<id>] mutation = { operators, jobs, timeout_factor }` (ADR-080):
-// ABOUTME: which operator set to mutate with, how many slots run mutants at once, and the timeout factor.
+// ABOUTME: The engine's settings, from `[lang.<id>] mutation = { operators, jobs, timeout_factor, strategy }`
+// ABOUTME: (ADR-080, ADR-082): the operator set, slots at once, the timeout factor, and schemata or file copies.
 use cupel_core::syntax::OperatorSet;
 use cupel_core::{Error, Result};
 use serde_json::{Map, Value};
@@ -19,6 +19,17 @@ pub struct Settings {
     pub jobs: usize,
     /// A mutant's run may take this many times its reference run (floor 2 s).
     pub timeout_factor: u32,
+    /// How mutants are built.
+    pub strategy: Strategy,
+}
+
+/// How the engine builds mutants (ADR-082).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Strategy {
+    /// Schemata where the language has a rewriter, file copies elsewhere.
+    Schemata,
+    /// Every mutant a file copy.
+    FileCopy,
 }
 
 impl Settings {
@@ -28,6 +39,7 @@ impl Settings {
             operators: OperatorSet::Default,
             jobs: default_jobs(),
             timeout_factor: DEFAULT_TIMEOUT_FACTOR,
+            strategy: Strategy::Schemata,
         };
         let Some(table) = config.get(KEY) else {
             return Ok(settings);
@@ -36,6 +48,7 @@ impl Settings {
         for (key, value) in table {
             match key.as_str() {
                 "operators" => settings.operators = operators(value)?,
+                "strategy" => settings.strategy = strategy(value)?,
                 "jobs" => settings.jobs = count("mutation.jobs", value)?,
                 "timeout_factor" => {
                     let what = "mutation.timeout_factor";
@@ -64,6 +77,14 @@ fn operators(value: &Value) -> Result<OperatorSet> {
     }
 }
 
+fn strategy(value: &Value) -> Result<Strategy> {
+    match value.as_str() {
+        Some("schemata") => Ok(Strategy::Schemata),
+        Some("file-copy") => Ok(Strategy::FileCopy),
+        _ => Err(invalid("mutation.strategy", value)),
+    }
+}
+
 /// `value`, the setting `what`, as a positive integer.
 fn count(what: &'static str, value: &Value) -> Result<usize> {
     value
@@ -78,6 +99,7 @@ fn invalid(what: &'static str, value: &Value) -> Error {
         what,
         value: value.to_string(),
         expected: "`mutation = { operators = \"default\" | \"extended\", jobs = <positive \
-                   integer>, timeout_factor = <positive integer> }`",
+                   integer>, timeout_factor = <positive integer>, strategy = \"schemata\" | \
+                   \"file-copy\" }`",
     }
 }

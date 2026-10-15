@@ -1,5 +1,5 @@
-// ABOUTME: The `MutationOutcomes` fact payload (ADR-080): every mutant an engine planned, with what became of it,
-// ABOUTME: the tests that ran against it, and whether its outcome came from the store.
+// ABOUTME: The `MutationOutcomes` fact payload (ADR-080, ADR-082): every mutant an engine planned, what became of it,
+// ABOUTME: the tests that ran against it, how it was built, and whether its outcome came from the store.
 use std::fmt;
 
 use schemars::JsonSchema;
@@ -11,7 +11,8 @@ use crate::hash::{SiteHash, SymbolHash};
 use crate::id::ProducerId;
 use crate::syntax::{MutationOperator, Span, SymbolKey};
 
-/// What mutation testing found in scope (ADR-080).
+/// What mutation testing found in scope (ADR-080; version 2 adds how each mutant was built,
+/// ADR-082).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct MutationOutcomes {
     /// The producer, such as `engine.mutation`.
@@ -28,7 +29,7 @@ pub struct MutationOutcomes {
 
 impl Fact for MutationOutcomes {
     const KIND: FactKind = FactKind::MutationOutcomes;
-    const VERSION: u32 = 1;
+    const VERSION: u32 = 2;
 }
 
 impl MutationOutcomes {
@@ -87,6 +88,35 @@ pub struct Mutant {
     /// The key its outcome is stored and reused under (ADR-080 §10); `None` from a producer
     /// that does not reuse outcomes.
     pub cache_key: Option<String>,
+    /// How the mutant was built (ADR-082); `None` when it was not run, or its outcome was
+    /// stored before strategies were recorded.
+    #[serde(default)]
+    pub strategy: Option<MutationStrategy>,
+    /// Why a mutant of a language with schemata was built as a file copy instead; `None`
+    /// otherwise.
+    #[serde(default)]
+    pub fallback: Option<String>,
+}
+
+/// How a mutant was built (ADR-082).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum MutationStrategy {
+    /// One build of the file with every mutant behind a run-time switch, selected by
+    /// `CUPEL_MUTANT`.
+    Schemata,
+    /// The file rewritten with only this mutant, and rebuilt.
+    FileCopy,
+}
+
+impl MutationStrategy {
+    /// The strategy's name as it serializes.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Schemata => "schemata",
+            Self::FileCopy => "file-copy",
+        }
+    }
 }
 
 /// What became of a mutant.

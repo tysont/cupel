@@ -48,6 +48,8 @@ impl History {
         mutant.tests.clone_from(&stored.tests);
         mutant.killing_tests.clone_from(&stored.killing_tests);
         mutant.duration_ms = stored.duration_ms;
+        mutant.strategy = stored.strategy;
+        mutant.fallback.clone_from(&stored.fallback);
         mutant.reused = true;
         true
     }
@@ -94,6 +96,7 @@ impl History {
 
 #[cfg(test)]
 mod tests {
+    use cupel_core::MutationStrategy;
     use cupel_core::syntax::{MutationOperator, Span, SymbolKey};
 
     use super::*;
@@ -124,6 +127,8 @@ mod tests {
                 reused: false,
                 equivalent: None,
                 cache_key: None,
+                strategy: None,
+                fallback: None,
             },
             source: String::new(),
             tests: None,
@@ -172,6 +177,7 @@ mod tests {
         let mut stored = fresh.mutant.clone();
         stored.outcome = MutantOutcome::Survived;
         stored.tests = vec!["t".to_owned()];
+        stored.strategy = Some(MutationStrategy::Schemata);
         let history = History {
             stored: BTreeMap::from([("k".to_owned(), stored)]),
             last: BTreeMap::new(),
@@ -181,9 +187,15 @@ mod tests {
             (
                 fresh.mutant.outcome,
                 fresh.mutant.reused,
-                fresh.mutant.tests
+                fresh.mutant.tests,
+                fresh.mutant.strategy
             ),
-            (MutantOutcome::Survived, true, vec!["t".to_owned()])
+            (
+                MutantOutcome::Survived,
+                true,
+                vec!["t".to_owned()],
+                Some(MutationStrategy::Schemata)
+            )
         );
         let mut other = planned("a.py", "sh_00000000000000a1", "0000000000000001", 1);
         other.mutant.cache_key = Some("other".to_owned());

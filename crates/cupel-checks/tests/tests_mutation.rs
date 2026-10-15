@@ -58,6 +58,8 @@ fn mutant(line: u32, col: u32, from: &str, to: &str, outcome: MutantOutcome) -> 
         reused: false,
         equivalent: None,
         cache_key: None,
+        strategy: None,
+        fallback: None,
     }
 }
 

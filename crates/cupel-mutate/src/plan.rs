@@ -198,6 +198,8 @@ impl Planner<'_, '_> {
                         reused: false,
                         equivalent: equivalent.clone(),
                         cache_key: key,
+                        strategy: None,
+                        fallback: None,
                     },
                     source: mutated,
                     tests: selection.tests.clone(),
