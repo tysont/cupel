@@ -1,10 +1,13 @@
 // ABOUTME: The Python `PerTestMap` producer (ADR-077): one pytest run with pytest-cov's test contexts, its data and
 // ABOUTME: JSON report under `.cupel/`; each executed line's contexts name the tests that ran it.
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
+use std::path::Path;
 
 use cupel_core::{LangId, Langs, PerTestMap, Result, TestCoverage};
 
-use super::{PerTest, PerTestSpec, Site, covered, failed};
+use super::cache::own_file;
+use super::{Measured, PerTest, PerTestSpec, Runs, Site, covered, failed};
+use crate::report::listing;
 
 const ID: &str = "tool.pytest-cov-per-test";
 
@@ -14,6 +17,18 @@ static PYTEST_COV: PerTestSpec = PerTestSpec {
     runner: "tool.pytest",
     programs: &["pytest"],
     version: &["pytest", "--version"],
+    runs: Runs::Suite,
+    outputs: &["__pycache__"],
+    whole: &[
+        "conftest.py",
+        "pyproject.toml",
+        "setup.cfg",
+        "setup.py",
+        "pytest.ini",
+        "tox.ini",
+    ],
+    sources: &["py"],
+    owns: |_: &Path, test, file| own_file(test, file),
     measure,
 };
 
@@ -22,7 +37,38 @@ inventory::submit!(crate::ToolProducer {
     register: |registry| registry.register::<PerTestMap, _>(PerTest(&PYTEST_COV)),
 });
 
-fn measure(site: &Site<'_>) -> Result<Vec<TestCoverage>> {
+/// Arguments that keep pytest from writing into the tree.
+const QUIET: &[&str] = &["-p", "no:cacheprovider"];
+const ENV: &[(&str, &str)] = &[("PYTHONDONTWRITEBYTECODE", "1")];
+
+/// One run over every test but `keep`: all of them when `keep` is empty, else the listed tests
+/// not in it (none, without running, when that is every listed test).
+fn measure(site: &Site<'_>, keep: &BTreeSet<String>) -> Result<Measured> {
+    if keep.is_empty() {
+        return Ok(Measured {
+            tests: run(site, &[])?,
+            listed: None,
+        });
+    }
+    let mut list: Vec<String> = QUIET.iter().map(|arg| (*arg).to_owned()).collect();
+    list.extend(["--collect-only".to_owned(), "-q".to_owned()]);
+    let listed: BTreeSet<String> = listing::pytest(&site.succeed("pytest", &list, ENV)?.stdout)
+        .into_iter()
+        .collect();
+    let selected: Vec<String> = listed.difference(keep).cloned().collect();
+    let tests = if selected.is_empty() {
+        Vec::new()
+    } else {
+        run(site, &selected)?
+    };
+    Ok(Measured {
+        tests,
+        listed: Some(listed),
+    })
+}
+
+/// One pytest run with test contexts over `selected` node IDs (every test when empty).
+fn run(site: &Site<'_>, selected: &[String]) -> Result<Vec<TestCoverage>> {
     let config = site.report("coveragerc");
     let report = site.report("coverage.json");
     let rc = format!(
@@ -31,16 +77,16 @@ fn measure(site: &Site<'_>) -> Result<Vec<TestCoverage>> {
     );
     site.ctx.writer.write(&config, rc.as_bytes())?;
     let _ = std::fs::remove_file(&report);
-    let args = vec![
-        "-p".to_owned(),
-        "no:cacheprovider".to_owned(),
+    let mut args: Vec<String> = QUIET.iter().map(|arg| (*arg).to_owned()).collect();
+    args.extend([
         "--cov=.".to_owned(),
         "--cov-context=test".to_owned(),
         format!("--cov-config={}", config.display()),
         format!("--cov-report=json:{}", report.display()),
-    ];
+    ]);
+    args.extend(selected.iter().cloned());
     // Failing tests still measure what they ran; only a run that wrote no report failed.
-    let captured = site.run("pytest", &args, &[("PYTHONDONTWRITEBYTECODE", "1")])?;
+    let captured = site.run("pytest", &args, ENV)?;
     let Ok(text) = std::fs::read_to_string(&report) else {
         return Err(failed("pytest", &captured));
     };

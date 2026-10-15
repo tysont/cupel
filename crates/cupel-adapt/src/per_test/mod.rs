@@ -1,27 +1,39 @@
-// ABOUTME: The `PerTestMap` producers (ADR-077): what they share (a spec per tool, run once per project root
-// ABOUTME: into a report area under `.cupel/`), and the executed lines of one test's parsed coverage report.
+// ABOUTME: The `PerTestMap` producers (ADR-077, ADR-083): what they share (a spec per tool, run per project root and
+// ABOUTME: cached there under `.cupel/`, refreshed by re-measuring only stale tests), and one test's executed lines.
 //! Per-test coverage producers.
 //!
 //! Each producer lists or runs a root's tests under a coverage tool so that every report it reads
 //! belongs to one test, and maps the report's executed lines to the runner's test IDs. The
 //! reports are read by the `CoverageMap` format parsers (`crate::coverage`), and
-//! [`executed_lines`] keeps the lines each test ran.
+//! [`executed_lines`] keeps the lines each test ran. Each root's map is cached with the record of
+//! the tree it measured; a later production keeps the tests no change touched and measures only
+//! the rest (ADR-083).
 
+mod cache;
 mod go_cover;
 mod llvm_cov;
 mod pytest_cov;
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use cupel_core::coverage::CoverageMap;
 use cupel_core::{
-    Availability, Captured, CostClass, CoveredLines, Ctx, Error, EventSink, FactKind, Langs,
-    PerTestMap, Process, ProduceCtx, Producer, ProducerId, Result, Scope, TestCoverage, ToolId,
-    ToolProbe, find_program, output_tail,
+    Availability, Captured, CostClass, CoveredLines, Ctx, Error, Estimate, EventSink, FactKind,
+    Langs, PerTestMap, Process, ProduceCtx, Producer, ProducerId, Result, Scope, TestCoverage,
+    ToolId, ToolProbe, find_program, output_tail,
 };
 
+use self::cache::{Cached, Staleness, report};
+use crate::fresh::{Sources, Tree, cache_dir, entries, entry_name, hash, skip_dirs, store};
 use crate::runner::{ID_SEPARATOR, roots, under};
+
+/// The kind of cache the producers keep under `.cupel/cache/`.
+const CACHE: &str = "per-test";
+
+/// The most stale tests a producer that runs each test on its own refreshes at `standard`
+/// (ADR-083); more, and refreshing costs what measuring does, `deep`.
+const REFRESH_LIMIT: usize = 32;
 
 /// One per-test producer: everything that differs between Rust, Go, and Python.
 pub(crate) struct PerTestSpec {
@@ -34,8 +46,37 @@ pub(crate) struct PerTestSpec {
     pub programs: &'static [&'static str],
     /// The command that prints the first program's version.
     pub version: &'static [&'static str],
-    /// The tests of one root and the lines each executed, relative to that root.
-    pub measure: fn(&Site<'_>) -> Result<Vec<TestCoverage>>,
+    /// How many runs measuring takes.
+    pub runs: Runs,
+    /// Directories the tools write below the root, left out of the record of the tree.
+    pub outputs: &'static [&'static str],
+    /// File names whose change re-measures every test (build and test configuration).
+    pub whole: &'static [&'static str],
+    /// Extensions of files that may hold a test.
+    pub sources: &'static [&'static str],
+    /// Whether the file (relative to the root at the path) is part of the test itself.
+    pub owns: fn(&Path, &TestCoverage, &str) -> bool,
+    /// The tests of one root, but those whose IDs it is given, and the lines each executed,
+    /// relative to that root.
+    pub measure: fn(&Site<'_>, &BTreeSet<String>) -> Result<Measured>,
+}
+
+/// How many tool runs measuring a root takes.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Runs {
+    /// One run of the suite, however many tests it measures.
+    Suite,
+    /// One run per test.
+    PerTest,
+}
+
+/// What measuring a root found.
+pub(crate) struct Measured {
+    /// The tests measured, relative to the root.
+    pub tests: Vec<TestCoverage>,
+    /// Every test the root holds, when the producer listed them; a cached test not among them
+    /// is gone.
+    pub listed: Option<BTreeSet<String>>,
 }
 
 /// A per-test producer: `spec` run once per project root of its language.
@@ -71,6 +112,42 @@ impl Producer<PerTestMap> for PerTest {
         CostClass::Deep
     }
 
+    /// `standard` when every root has a cache entry and refreshing them is cheap: always for
+    /// a producer that measures in one suite run, at most [`REFRESH_LIMIT`] stale tests for one
+    /// that runs each test alone; else `deep` (ADR-083).
+    fn estimate(&self, ctx: &Ctx) -> Estimate {
+        let mut stale = 0;
+        let mut measure = false;
+        let mut found = false;
+        for entry in entries(&cache_dir(&ctx.root, CACHE, self.0.id)) {
+            let Some(cached) = Cached::read(&entry) else {
+                return Estimate::of(self.cost());
+            };
+            let changes = cached.changes(&ctx.root, &ctx.exclude);
+            let root = ctx.root.join(&cached.sources.dir);
+            let refresh = self.staleness(&root).refresh(cached.tests, &changes);
+            stale += refresh.stale;
+            measure |= refresh.measure;
+            found = true;
+        }
+        if !found {
+            return Estimate::of(self.cost());
+        }
+        let cheap = self.0.runs == Runs::Suite || stale <= REFRESH_LIMIT;
+        Estimate {
+            cost: if cheap {
+                CostClass::Standard
+            } else {
+                self.cost()
+            },
+            note: Some(if measure {
+                format!("refresh {stale} stale tests")
+            } else {
+                "cached".to_owned()
+            }),
+        }
+    }
+
     fn availability(&self, _: &Ctx) -> Availability {
         match self
             .0
@@ -100,30 +177,103 @@ impl Producer<PerTestMap> for PerTest {
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<PerTestMap> {
         let mut tests = Vec::new();
-        for (index, (dir, packages)) in roots(ctx).into_iter().enumerate() {
+        let mut measured = 0;
+        for (dir, packages) in roots(ctx) {
             let path = ctx.ctx.root.join(&dir);
-            let area = ctx.writer.create_dir(
+            let entry = ctx.writer.create_dir(
                 &ctx.writer
                     .cache_dir()
-                    .join("per-test")
+                    .join(CACHE)
                     .join(self.0.id)
-                    .join(index.to_string()),
+                    .join(entry_name(&dir)),
             )?;
             let site = Site {
                 ctx,
                 dir: &dir,
                 path: path.canonicalize().unwrap_or(path),
                 packages,
-                area,
+                area: ctx.writer.create_dir(&entry.join("work"))?,
             };
-            tests.extend(
-                (self.0.measure)(&site)?
-                    .into_iter()
-                    .map(|test| site.placed(test)),
-            );
+            let (found, count) = self.root(&site, &entry)?;
+            measured += count;
+            tests.extend(found.into_iter().map(|test| site.placed(test)));
         }
-        Ok(PerTestMap::new(ProducerId::from(self.0.runner), tests))
+        Ok(PerTestMap::refreshed(
+            ProducerId::from(self.0.runner),
+            tests,
+            measured,
+        ))
     }
+}
+
+impl PerTest {
+    /// The tests of `site`'s root, relative to it, and how many were measured: the cache entry
+    /// `entry` when nothing changed, else its tests no change touched and the rest measured,
+    /// cached again with the record of the tree after measuring.
+    fn root(&self, site: &Site<'_>, entry: &Path) -> Result<(Vec<TestCoverage>, u64)> {
+        let ctx = site.ctx;
+        let skip = skip_dirs(ctx, site.dir, self.0.outputs);
+        let tree = Tree {
+            repo: &ctx.ctx.root,
+            dir: site.dir,
+            skip_dirs: &skip,
+            exclude: &ctx.ctx.exclude,
+        };
+        let before = Sources::record(&tree, &site.path, &[]);
+        let (keep, measure) = match Cached::load(entry, site.dir) {
+            Some(cached) => {
+                let changes = cached.changes(&ctx.ctx.root, &ctx.ctx.exclude);
+                if changes.is_empty() {
+                    return Ok((cached.tests, 0));
+                }
+                let refresh = self.staleness(&site.path).refresh(cached.tests, &changes);
+                (refresh.keep, refresh.measure)
+            }
+            None => (Vec::new(), true),
+        };
+        let (tests, measured, mut sources) = if measure {
+            let kept: BTreeSet<String> = keep.iter().map(|test| test.id.clone()).collect();
+            let found = (self.0.measure)(site, &kept)?;
+            let measured = found.tests.len() as u64;
+            // The tools may write files (`Cargo.lock`); a file edited while they ran is stale.
+            let after = Sources::record(&tree, &site.path, &[]).since(&before);
+            (merged(keep, found), measured, after)
+        } else {
+            (keep, 0, before)
+        };
+        let report = report(&tests);
+        sources.report = hash(&report);
+        store(&ctx.writer, entry, &report, &sources)?;
+        Ok((tests, measured))
+    }
+
+    /// What makes a cached test of the root at `root` stale for this producer.
+    fn staleness<'a>(&self, root: &'a Path) -> Staleness<'a> {
+        let owns = self.0.owns;
+        Staleness {
+            whole: self.0.whole,
+            sources: self.0.sources,
+            owns: Box::new(move |test: &TestCoverage, file: &str| owns(root, test, file)),
+        }
+    }
+}
+
+/// The kept tests that are still listed, with the measured ones, which replace any kept test of
+/// the same ID.
+fn merged(keep: Vec<TestCoverage>, found: Measured) -> Vec<TestCoverage> {
+    let measured: BTreeSet<&str> = found.tests.iter().map(|test| test.id.as_str()).collect();
+    let mut tests: Vec<TestCoverage> = keep
+        .into_iter()
+        .filter(|test| {
+            !measured.contains(test.id.as_str())
+                && found
+                    .listed
+                    .as_ref()
+                    .is_none_or(|listed| listed.contains(&test.id))
+        })
+        .collect();
+    tests.extend(found.tests);
+    tests
 }
 
 impl Site<'_> {
