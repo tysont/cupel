@@ -111,8 +111,11 @@ fn assert_the_second_run_is_cached(lang: &str, file: &str, producer: &str) {
         return;
     };
     let first = impacted(&repo);
-    if first["languages"][0]["per_test_map"] == json!(false) {
-        eprintln!("SKIPPED: {}", first["languages"][0]["fallback"]);
+    let basis = &first["languages"][0];
+    if basis["per_test_map"] == json!(false) {
+        let why = basis["fallback"].as_str().unwrap_or_default();
+        assert!(why.contains("not installed"), "{first}");
+        eprintln!("SKIPPED: {why}");
         return;
     }
     let second = impacted(&repo);
