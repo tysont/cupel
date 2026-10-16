@@ -222,11 +222,17 @@ impl<'a> Running<'a> {
         Ok(())
     }
 
-    /// The slots for files of at most `widest` mutants, each synced with the tree.
+    /// The slots for files of at most `widest` mutants, each synced with the tree: as many as
+    /// the settings allow, no more than the run's `--jobs` (ADR-086 §11).
     fn slots(&self, widest: usize) -> Result<Vec<Slot>> {
         let root = &self.ctx.ctx.root;
         claim(root).map_err(|error| io(root, "", &error))?;
-        (0..self.settings.jobs.min(widest))
+        let jobs = self
+            .ctx
+            .focus
+            .jobs
+            .map_or(self.settings.jobs, |cap| self.settings.jobs.min(cap.get()));
+        (0..jobs.min(widest))
             .map(|index| {
                 let slot = Slot::at(slot_dir(root, &self.lang, index));
                 slot.sync(root, self.runner.outputs())

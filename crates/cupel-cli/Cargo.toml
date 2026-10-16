@@ -25,6 +25,7 @@ cupel-lang.workspace = true
 cupel-serve.workspace = true
 cupel-store.workspace = true
 clap.workspace = true
+rayon.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 semver.workspace = true

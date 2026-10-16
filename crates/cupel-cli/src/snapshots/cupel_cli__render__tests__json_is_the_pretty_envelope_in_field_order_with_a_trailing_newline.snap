@@ -103,7 +103,8 @@ expression: out
         "fact": "symbols",
         "lang": "go",
         "tool": "cargo-criterion",
-        "see": "cupel doctor"
+        "see": "cupel doctor",
+        "est_ms": null
       },
       "oracle": null
     }
@@ -408,7 +409,8 @@ expression: out
         "fact": null,
         "lang": "rust",
         "tool": null,
-        "see": "cupel describe conc.dst"
+        "see": "cupel describe conc.dst",
+        "est_ms": null
       }
     ],
     "would_install": [

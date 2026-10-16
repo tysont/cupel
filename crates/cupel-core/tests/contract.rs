@@ -196,7 +196,9 @@ fn design_plan() -> Value {
         ],
         "would_skip": [
             {"id": "conc.dst", "reason": "unconfigured", "fact": null, "lang": null, "tool": null,
-             "see": "cupel describe conc.dst"}
+             "see": "cupel describe conc.dst", "est_ms": null},
+            {"id": "tests.mutation", "reason": "budget", "fact": null, "lang": "rust", "tool": null,
+             "see": null, "est_ms": 140_000}
         ],
         "would_install": [{"tool": "cargo-llvm-cov", "command": "cargo install cargo-llvm-cov"}],
         "would_write": [
@@ -227,6 +229,7 @@ fn envelopes_without_a_plan_carry_a_null_plan() {
 fn envelopes_without_an_explanation_carry_a_null_explanation() {
     let output = assert_round_trip::<Envelope>(&design_envelope());
     assert_eq!(output["explanation"], Value::Null);
+    assert_eq!(output["rankings"], Value::Null);
 }
 
 #[test]
@@ -346,6 +349,8 @@ fn check_status_values() {
         (CheckStatus::Error, "error"),
         (CheckStatus::Skipped, "skipped"),
     ]);
+    // `plan` is an envelope's status, never a check's.
+    assert!(serde_json::from_value::<CheckStatus>(json!("plan")).is_err());
 }
 
 #[test]
@@ -431,6 +436,11 @@ fn config_sources() {
         (ConfigSource::CupelToml, "cupel.toml"),
         (ConfigSource::Defaults, "defaults"),
     ]);
+    // The file layer is named for the file, dot included.
+    assert_eq!(
+        serde_json::to_string(&ConfigSource::CupelToml).unwrap(),
+        "\"cupel.toml\""
+    );
 }
 
 #[test]
@@ -443,4 +453,5 @@ fn skip_reasons() {
         (SkipReason::Timeout, "timeout"),
         (SkipReason::NeedsRange, "needs-range"),
     ]);
+    assert!(serde_json::from_value::<SkipReason>(json!("needs_range")).is_err());
 }

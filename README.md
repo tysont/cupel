@@ -141,6 +141,58 @@ A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weake
 | `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`. Every check is `quick`, so all seven run at every depth |
 | `--only ID`, `--skip ID` | Checks by ID (`static.clones`) or group (`static`, `tests`); repeatable |
 | `--tier N+` | Only checks at or above evidence tier N, e.g. `--tier 2+` |
+| `--budget DURATION` | A wall-clock budget (`250ms`, `20s`, `10m`): run the most valuable selected checks that fit and skip the rest; `CUPEL_BUDGET` or `budget` in `cupel.toml` also set it |
+| `--jobs N` | How many threads and mutation workers run at once; default the cores (and, for mutation, the language's `mutation.jobs`) |
+
+**Budget.** `--budget` chooses among the checks the depth and the selection flags already chose; it never adds deeper ones. Each check costs its own run plus the facts it needs that nothing has made yet: the baseline test run, a coverage report, the mutation engine. A fact two checks share is paid once. A cost is the median of the last ten recorded runs of the same kind of work on this repository (the same check, language, and order of magnitude of targets; the same producer and language, run or read from cache), once three are recorded in `.cupel/cupel.db`; before that it comes from the cost class (a `quick` producer 100 ms, `standard` 30 s, `deep` 5 min). A check's value is its evidence tier plus one, doubled when it has never produced a result here, halved when its last result was made at this commit on a clean tree, and doubled again inside a `--changed` or `--base` scope. Checks are taken greedily by value per millisecond while they fit; ties are broken by `--seed`. The budget counts from the start of the invocation, as `--timeout` does: a check is not started when its estimate exceeds what is left, and work still running at the deadline is stopped (its processes are killed), so a run overshoots its budget only by the moment that takes; a mutation run stopped that way reports `partial` with no score, and the mutants it finished are not kept. Anything the budget left out is `skipped` with `reason: budget` and `est_ms`, its estimate, the run is `partial` (exit 5), and `next_actions` offers the command that runs it alone. On a small Python project with a test suite and no recorded runs, one second leaves out everything that needs the suite:
+
+```console
+$ cupel check --budget 1s --format text
+cupel check: partial (exit 5)
+…
+checks
+  static.clones      pass     tier 0 · quick · score 0 pairs (n 1) · metrics clusters 0, max_jaccard 0, pairs 0 · 0 findings · 0 ms
+  static.complexity  pass     tier 0 · quick · score 3 cyclomatic_max (n 4) · metrics cognitive_max 3, cyclomatic_max 3, length_max 5, nesting_max 1, params_max 2 · 0 findings · 0 ms
+  static.crap        skipped  tier 0 · quick · 0 findings · 0 ms · skipped: budget (lang python, est 30.0 s)
+  static.dead-code   pass     tier 0 · quick · score 0 dead_symbols (n 4) · metrics dead_exports 0, dead_symbols 0 · 0 findings · 256 ms
+  static.deps        pass     tier 0 · quick · score 0 cycles (n 3) · metrics cycles 0, max_distance 0, violations 0 · 0 findings · 0 ms
+  tests.coverage     skipped  tier 2 · standard · 0 findings · 0 ms · skipped: budget (lang python, est 30.4 s)
+  tests.flaky        skipped  tier 2 · standard · 0 findings · 0 ms · skipped: budget (lang python, est 60.4 s)
+  tests.mutation     skipped  tier 3 · standard · 0 findings · 0 ms · skipped: budget (lang python, est 90.4 s)
+  tests.quality      pass     tier 2 · quick · score 1 assertion_density (n 2) · metrics assertion_density 1, no_assertion 0, weak_ratio 0 · 0 findings · 137 ms
+  tests.weakening    skipped  tier 2 · quick · 0 findings · 0 ms · skipped: needs-range (lang python, see `cupel check --changed --only tests.weakening`)
+…
+next actions
+  1. rerun: Run `static.crap`, which the budget cut short on python.
+     $ cupel check --only static.crap
+…
+  4. rerun: Run `tests.mutation`, which the budget cut short on python.
+     $ cupel check --only tests.mutation
+```
+
+`--dry-run` makes the same choice without running anything: the checks it would skip are under `would skip` with their estimates, and every planned check's `est_ms` counts the facts it would make, so `est_total_ms` is what the run is expected to take. With a minute, the same project plans the coverage report once for `static.crap` and `tests.coverage` and still leaves out mutation and flakiness, which would add the suite run and the engine:
+
+```console
+$ cupel check --dry-run --budget 1m --format text
+cupel check: plan (exit 0)
+
+plan      est 30440 ms
+would run
+  static.clones      4 targets · est 4 ms · needs symbols, norm-tree
+  static.complexity  4 targets · est 4 ms · needs symbols, decisions, norm-tree
+  static.crap        4 targets · est 4 ms · needs symbols, decisions, norm-tree, coverage-map, test-conventions, coverage-map(run)
+  static.dead-code   4 targets · est 4 ms · needs symbols, norm-tree, module-graph, roots
+  static.deps        4 targets · est 4 ms · needs module-graph, api-surface
+  tests.coverage     4 targets · est 30400 ms · needs symbols, coverage-map, norm-tree, test-conventions, coverage-map(run)
+  tests.quality      4 targets · est 20 ms · needs test-frames, symbols, norm-tree, decisions
+would skip
+  tests.weakening  needs-range (lang python, see `cupel check --changed --only tests.weakening`)
+  tests.flaky      budget (lang python, est 60.4 s)
+  tests.mutation   budget (lang python, est 60.4 s)
+…
+```
+
+Without `--budget`, checks run in the order `cupel describe --all` lists them; with one, the most valuable per millisecond run first, and the envelope keeps the usual order.
 
 **Grading** flags decide what the result is compared with.
 
@@ -482,7 +534,7 @@ $ cupel check --format json > envelope.json      # cupel was rebuilt after the d
 cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock runs another build of cupel (cupel 0.1.0 (binary 56427528-1792134645316655513)) than this client (cupel 0.1.0 (binary 56427528-1792134881357328000)). Restart it from this one: `cupel serve --stop`, then `cupel serve`.
 ```
 
-- **When the CLI uses it.** Every invocation whose repository root (`--cwd`, else the working directory) has a `.cupel/serve.sock`. It runs in its own process instead when `CUPEL_NO_DAEMON=1` is set, for `serve` itself, when an argument is not UTF-8, when the run could ask a question on the terminal (stdout is a terminal and neither `--install` nor `--no-install` is given), and when nothing answers on the socket (a daemon that was killed leaves its socket file behind; it is ignored).
+- **When the CLI uses it.** Every invocation whose repository root (`--cwd`, else the working directory) has a `.cupel/serve.sock`. It runs in its own process instead when `CUPEL_NO_DAEMON=1` is set, for `serve` itself, when an argument is not UTF-8, when the run could ask a question on the terminal (stdout is a terminal and neither `--install` nor `--no-install` is given), when `--jobs` is given (a process sizes its thread pool once), and when nothing answers on the socket (a daemon that was killed leaves its socket file behind; it is ignored).
 - **When it declines.** A daemon runs only invocations from the same build of `cupel` (the same version and the same executable) and with the same `PATH`, since `PATH` decides which tools run. Otherwise the invocation runs in its own process and says why in one line on stderr (unless `--quiet`); rebuilding or reinstalling `cupel` therefore means restarting the daemon. Other variables (`HOME`, `CARGO_HOME`, `VIRTUAL_ENV`) are the daemon's own: start it from the environment the agent runs in.
 - **`--watch`** reparses a file the daemon has parsed as soon as it changes, from its previous tree (tree-sitter's incremental parse), so the next invocation finds it ready. Without `--watch`, the next invocation that reads the file parses it. Correctness never depends on the watcher: every invocation reads and hashes every file it uses.
 - **Lifetime.** The daemon serves until `cupel serve --stop`, its `--timeout`, Ctrl-C, or its socket file being removed. Invocations run concurrently, as separate processes would; one whose client is killed is cancelled. Starting a second daemon where one answers exits 3 with `serve.running`. The socket is readable and writable only by the user who started the daemon. A socket path is limited to about 100 bytes, so a repository whose root path is longer than about 85 characters cannot have a daemon (`serve` exits 3 with `serve.failed`).

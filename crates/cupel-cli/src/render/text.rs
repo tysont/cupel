@@ -372,11 +372,23 @@ fn skip_reason(skipped: &Skipped) -> String {
     if let Some(see) = &skipped.see {
         why.push(format!("see `{see}`"));
     }
+    if let Some(est_ms) = skipped.est_ms {
+        why.push(format!("est {}", seconds(est_ms)));
+    }
     if why.is_empty() {
         name(skipped.reason)
     } else {
         format!("{} ({})", name(skipped.reason), why.join(", "))
     }
+}
+
+/// `ms` as seconds with one decimal, such as `30.2 s`.
+#[allow(
+    clippy::cast_precision_loss,
+    reason = "an estimate in milliseconds stays far below 2^52, where f64 is exact"
+)]
+fn seconds(ms: u64) -> String {
+    format!("{:.1} s", ms as f64 / 1000.0)
 }
 
 /// A dry run's plan (ADR-020 §6): the estimate, then each non-empty list, with diffs indented.

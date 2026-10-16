@@ -1,15 +1,16 @@
 // ABOUTME: Tests for the fact store: opening through a `Writer`, migrations, recording and reading
 // ABOUTME: runs, findings, checks, metrics, baselines, facts, symbols, and suppressions (ADR-045).
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
+use cupel_core::budget::{TaskDuration, TaskShape};
 use cupel_core::syntax::{MutationOperator, Span, SymbolDef, SymbolKey, SymbolKind, Visibility};
 use cupel_core::{
     CheckId, CostClass, Envelope, FactKind, FindingId, LangId, Metric, Mutant, MutantOutcome,
     MutationOutcomes, ProducerId, RunId, Suppression, SymbolHash, TestOutcome, TestResult,
     TestResults, Writer,
 };
-use cupel_store::{CacheKey, Store, StoreError, StoredFact, StoredTestResult};
+use cupel_store::{CacheKey, ScoredAt, Store, StoreError, StoredFact, StoredTestResult};
 use serde_json::{Value, json};
 use tempfile::TempDir;
 
@@ -38,18 +39,21 @@ impl Repo {
 
     /// Every file under the root, relative and sorted.
     fn files(&self) -> Vec<String> {
-        fn walk(dir: &Path, root: &Path, out: &mut Vec<String>) {
-            for entry in fs::read_dir(dir).unwrap() {
-                let path = entry.unwrap().path();
+        let root = self.root();
+        let mut pending = vec![root.clone()];
+        let mut out = Vec::new();
+        while let Some(dir) = pending.pop() {
+            for path in fs::read_dir(dir)
+                .unwrap()
+                .map(|entry| entry.unwrap().path())
+            {
                 if path.is_dir() {
-                    walk(&path, root, out);
+                    pending.push(path);
                 } else {
-                    out.push(path.strip_prefix(root).unwrap().display().to_string());
+                    out.push(path.strip_prefix(&root).unwrap().display().to_string());
                 }
             }
         }
-        let mut out = Vec::new();
-        walk(&self.root(), &self.root(), &mut out);
         out.sort();
         out
     }
@@ -207,6 +211,7 @@ fn migrations_run_from_empty_and_reopening_changes_nothing() {
             "baselines",
             "checks",
             "coverage",
+            "durations",
             "facts",
             "findings",
             "metrics",
@@ -870,4 +875,90 @@ fn stores_opened_at_once_on_a_new_repository_all_open() {
     // each create or open the store while the others switch it to WAL.
     let rounds: Vec<Vec<bool>> = (0..20).map(|_| opened_at_once()).collect();
     assert_eq!(rounds, vec![vec![true; 6]; 20]);
+}
+
+/// A check result of `id` with `status`, as `checks[]` holds it.
+fn result_with(id: &str, status: &str) -> Value {
+    let skipped = if status == "skipped" {
+        json!({"reason": "budget", "fact": null, "lang": "rust", "tool": null, "see": null,
+               "est_ms": 900})
+    } else {
+        Value::Null
+    };
+    json!({
+        "id": id, "status": status, "tier": 1, "cost": "quick", "score": null,
+        "delta": null, "findings": 0, "duration_ms": 5, "skipped": skipped, "oracle": null
+    })
+}
+
+/// Records `runs` runs, run `n` timing each shape at `n` times its unit in milliseconds.
+fn record_runs(store: &Store, shapes: &[(&TaskShape, u64)], runs: u8) {
+    for n in 1..=runs {
+        let durations: Vec<TaskDuration> = shapes
+            .iter()
+            .map(|(shape, unit)| TaskDuration {
+                shape: (*shape).clone(),
+                duration_ms: u64::from(n) * unit,
+            })
+            .collect();
+        store.record_durations(&run_id(n), &durations).unwrap();
+    }
+}
+
+#[test]
+fn durations_come_back_newest_first_per_shape_and_at_most_ten() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let rust = LangId::from("rust");
+    let pytest = TaskShape::producer(
+        &ProducerId::from("tool.pytest"),
+        &LangId::from("python"),
+        false,
+    );
+    let clones = TaskShape::check(&CheckId::from("static.clones"), &rust, 40);
+    record_runs(&store, &[(&pytest, 100), (&clones, 1)], 12);
+    let recent = store.recent_durations().unwrap();
+    let of = |shape: &TaskShape| -> Vec<u64> {
+        recent
+            .iter()
+            .find(|(recorded, _)| recorded == shape)
+            .map(|(_, durations)| durations.clone())
+            .unwrap()
+    };
+    assert_eq!(
+        of(&pytest),
+        (3..=12).rev().map(|n| n * 100).collect::<Vec<u64>>()
+    );
+    assert_eq!(of(&clones), (3..=12).rev().collect::<Vec<u64>>());
+    assert_eq!(recent.len(), 2);
+}
+
+#[test]
+fn the_latest_scored_result_of_each_check_names_its_commit_and_whether_it_was_dirty() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let ran = [
+        result_with("static.clones", "pass"),
+        result_with("tests.mutation", "pass"),
+    ];
+    record(&store, 1, "check", &[], &ran);
+    // A later run that skipped tests.mutation for its budget does not count as scoring it.
+    let later = [
+        result_with("static.clones", "fail"),
+        result_with("tests.mutation", "skipped"),
+    ];
+    record(&store, 2, "check", &[], &later);
+    let scored = store.latest_scored().unwrap();
+    assert_eq!(
+        scored[&CheckId::from("static.clones")],
+        ScoredAt {
+            sha: Some(format!("sha-{}", run_id(2))),
+            dirty: false,
+        }
+    );
+    assert_eq!(
+        scored[&CheckId::from("tests.mutation")].sha,
+        Some(format!("sha-{}", run_id(1)))
+    );
+    assert!(!scored.contains_key(&CheckId::from("tests.coverage")));
 }

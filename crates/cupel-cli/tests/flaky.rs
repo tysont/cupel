@@ -143,6 +143,7 @@ fn a_repository_without_a_test_suite_skips_tests_flaky_as_unavailable() {
     assert_eq!(
         envelope["checks"][0]["skipped"],
         json!({
+            "est_ms": null,
             "reason": "unavailable",
             "fact": "test-results",
             "lang": null,

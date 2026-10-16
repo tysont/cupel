@@ -176,6 +176,38 @@ fn a_running_daemon_answers_the_cli_with_what_a_cold_run_prints() {
 }
 
 #[test]
+fn a_run_with_jobs_is_local_because_a_process_sizes_its_thread_pool_once() {
+    let repo = repo();
+    let daemon = Daemon::start(&repo, &[]);
+    for args in [
+        [
+            "check",
+            "--only",
+            "static.complexity",
+            "--jobs",
+            "1",
+            "--format",
+            "json",
+        ]
+        .as_slice(),
+        [
+            "check",
+            "--only",
+            "static.complexity",
+            "--jobs=1",
+            "--format",
+            "json",
+        ]
+        .as_slice(),
+    ] {
+        let outcome = repo.run(args);
+        assert_eq!((outcome.code, outcome.stderr.as_str()), (0, ""));
+        assert_eq!(outcome.envelope()["checks"][0]["status"], json!("fail"));
+    }
+    assert_eq!(daemon.status().served, 0, "--jobs runs in its own process");
+}
+
+#[test]
 fn a_stale_socket_file_is_ignored_and_the_run_is_local() {
     let repo = repo();
     std::fs::create_dir_all(repo.path(".cupel")).unwrap();

@@ -10,7 +10,7 @@ use crate::producer::{
 };
 
 /// The note of an estimate that runs nothing.
-const CACHED: &str = "cached";
+pub(crate) const CACHED: &str = "cached";
 
 /// The facts that run a test suite on their own, listed in a dry run's `needs` when a check
 /// reaches them (ADR-084 §8).
@@ -61,7 +61,7 @@ impl Deciding<'_> {
     }
 
     /// The producer the store would choose for `kind`: the first ready candidate.
-    fn chosen(&self, kind: FactKind) -> Option<&dyn RegisteredProducer> {
+    pub fn chosen(&self, kind: FactKind) -> Option<&dyn RegisteredProducer> {
         self.producers
             .candidates(kind, self.lang, self.ctx)
             .ok()?

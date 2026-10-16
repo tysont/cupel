@@ -1966,6 +1966,15 @@ expression: pretty(&schema)
       "description": "A check the run would skip, and why.",
       "type": "object",
       "properties": {
+        "est_ms": {
+          "description": "What the skipped work was estimated to cost, for `budget`: the check's own cost plus the\nproducer runs it would have brought in (ADR-086 §10).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
         "fact": {
           "description": "The missing fact, for `unsupported`.",
           "anyOf": [
@@ -2013,6 +2022,7 @@ expression: pretty(&schema)
         }
       },
       "required": [
+        "est_ms",
         "fact",
         "id",
         "lang",
@@ -2501,6 +2511,15 @@ expression: pretty(&schema)
       "description": "Why a check did not run (design §8.3.5).",
       "type": "object",
       "properties": {
+        "est_ms": {
+          "description": "What the skipped work was estimated to cost, for `budget`: the check's own cost plus the\nproducer runs it would have brought in (ADR-086 §10).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
         "fact": {
           "description": "The missing fact, for `unsupported`.",
           "anyOf": [
@@ -2545,6 +2564,7 @@ expression: pretty(&schema)
         }
       },
       "required": [
+        "est_ms",
         "fact",
         "lang",
         "reason",

@@ -1,5 +1,6 @@
 // ABOUTME: The command-line grammar as clap derive types: global flags, shared scope flags, verbs.
 // ABOUTME: Holds no human text; help and descriptions come from the registry (ADR-018).
+use std::num::NonZeroUsize;
 use std::path::PathBuf;
 
 use clap::builder::{PossibleValuesParser, TypedValueParser};
@@ -141,6 +142,8 @@ pub struct ScopeArgs {
     pub depth: Option<CostClass>,
     #[arg(long, value_name = "DURATION", value_parser = time_limit)]
     pub budget: Option<TimeLimit>,
+    #[arg(long, value_name = "N")]
+    pub jobs: Option<NonZeroUsize>,
     #[arg(long, value_name = "ID", num_args = 1..)]
     pub only: Vec<String>,
     #[arg(long, value_name = "ID", num_args = 1..)]

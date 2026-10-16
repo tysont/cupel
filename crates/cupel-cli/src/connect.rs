@@ -42,7 +42,8 @@ pub fn invoke(environment: &Environment) -> Output {
 
 /// The daemon's socket and the request for `environment`, unless the invocation runs here:
 /// `CUPEL_NO_DAEMON=1`, the `serve` verb, an argument that is not UTF-8, a run that could ask
-/// on the terminal, or no socket file in the repository.
+/// on the terminal, `--jobs` (a process sizes its thread pool once, ADR-086 §11), or no socket
+/// file in the repository.
 fn daemon_request(environment: &Environment) -> Option<(PathBuf, Request)> {
     if environment.variable("CUPEL_NO_DAEMON") == Some("1") {
         return None;
@@ -59,6 +60,12 @@ fn daemon_request(environment: &Environment) -> Option<(PathBuf, Request)> {
         .collect();
     let answers_itself = flags.contains(&"--install") || flags.contains(&"--no-install");
     if environment.stdout_is_terminal && !answers_itself {
+        return None;
+    }
+    if flags
+        .iter()
+        .any(|flag| *flag == "--jobs" || flag.starts_with("--jobs="))
+    {
         return None;
     }
     if command_words(&environment.args).first().map(String::as_str) == Some("serve") {
