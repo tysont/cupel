@@ -8,6 +8,7 @@ use cupel_core::{
     ActionKind, Availability, Check, Ctx, Envelope, EventSink, ExitCode, FactKind, Install, Lang,
     LangId, ProducerRegistry, RunPlan, Selection, Severity, Status, ToolId, ToolProbe, Writer,
 };
+use cupel_serve::{Body, Reply, Request};
 use semver::{Version, VersionReq};
 use serde_json::json;
 
@@ -17,6 +18,7 @@ use crate::install::{self, Planned, probe};
 use crate::problem::Problem;
 use crate::project;
 use crate::run::Invocation;
+use crate::serve;
 
 /// The configuration key `required_version` findings are about.
 const REQUIRED_VERSION: &str = "required_version";
@@ -52,6 +54,7 @@ pub fn run(invocation: &Invocation<'_>, fix: bool) -> Envelope {
         }
     }
     problems.extend(cupel_dir(writer));
+    problems.extend(daemon(writer.root()));
     let (requirements, unresolved) = needed(config, writer);
     problems.extend(unresolved);
     let mut probed = probe_all(&requirements);
@@ -421,6 +424,66 @@ fn cupel_dir(writer: &Writer) -> Option<Problem> {
         evidence: json!({"error": error.to_string()}),
         action: ActionKind::Configure,
         fix: "Make .cupel/ a writable directory in the repository root.".to_owned(),
+    })
+}
+
+/// The daemon at `.cupel/serve.sock` when there is a socket file (ADR-085 §11): running, of
+/// another build, or a stale socket nothing answers on.
+fn daemon(root: &Path) -> Option<Problem> {
+    let socket = serve::default_socket(root);
+    if !socket.exists() {
+        return None;
+    }
+    let shown = serve::shown(root, &socket);
+    let asked = Request::new(serve::build(), Body::Status);
+    let problem = |kind, severity, title: String, evidence, fix: &str| Problem {
+        check: "doctor",
+        kind,
+        subject: shown.clone(),
+        severity,
+        title,
+        detail: None,
+        evidence,
+        action: ActionKind::Configure,
+        fix: fix.to_owned(),
+    };
+    Some(match cupel_serve::request(&socket, &asked, &mut |_| {}) {
+        Ok(Reply::Status(status)) => {
+            let evidence = json!({
+                "socket": shown, "version": status.version, "pid": status.pid,
+                "watching": status.watching,
+            });
+            if status.build == serve::build() {
+                problem(
+                    "doctor.daemon-running",
+                    Severity::Info,
+                    format!(
+                        "The daemon at {shown} serves this repository (pid {})",
+                        status.pid
+                    ),
+                    evidence,
+                    "Nothing to do; `cupel serve --stop` stops it.",
+                )
+            } else {
+                problem(
+                    "doctor.daemon-mismatch",
+                    Severity::Warn,
+                    format!(
+                        "The daemon at {shown} runs another build of cupel ({})",
+                        status.build
+                    ),
+                    evidence,
+                    "Restart it with this cupel: `cupel serve --stop`, then `cupel serve`.",
+                )
+            }
+        }
+        _ => problem(
+            "doctor.daemon-stale",
+            Severity::Warn,
+            format!("Nothing answers on the daemon socket {shown}"),
+            json!({"socket": shown}),
+            "Remove it with `cupel serve --stop`, or start a daemon with `cupel serve`.",
+        ),
     })
 }
 

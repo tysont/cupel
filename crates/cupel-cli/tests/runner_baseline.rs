@@ -98,13 +98,10 @@ fn cupel(repo: &Path, args: &[&str]) -> (u8, Value) {
     let mut words: Vec<String> = args.iter().map(|arg| (*arg).to_owned()).collect();
     words.extend(["--format".to_owned(), "json".to_owned(), "--cwd".to_owned()]);
     words.push(repo.display().to_string());
-    let output = cupel_cli::run(&cupel_cli::Environment {
-        args: words.into_iter().map(Into::into).collect(),
-        current_dir: Some(repo.to_path_buf()),
-        stdout_is_terminal: false,
-        variables: BTreeMap::new(),
-        no_color_variable: false,
-    });
+    let output = cupel_cli::run(&cupel_cli::Environment::new(
+        words.into_iter().map(Into::into).collect(),
+        Some(repo.to_path_buf()),
+    ));
     let envelope = serde_json::from_str(&output.stdout)
         .unwrap_or_else(|error| panic!("{error}: {}{}", output.stdout, output.stderr));
     (output.code, envelope)

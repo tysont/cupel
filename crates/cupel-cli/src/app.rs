@@ -6,14 +6,15 @@ use std::fmt::Write as _;
 use std::io::IsTerminal;
 use std::panic::{self, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use clap::FromArgMatches;
 use clap::error::ErrorKind;
 use cupel_core::config::{Config, ConfigRequest, Setting, Settings};
 use cupel_core::{
-    Envelope, Event, EventSink, ExitCode, Finding, RunPlan, Status, Verb, Writer, random_seed,
+    Cancellation, Envelope, Event, EventSink, ExitCode, Finding, RunPlan, Status, Verb, Writer,
+    random_seed,
 };
 
 use crate::cli::{Cli, VerbArgs, verb_name};
@@ -24,13 +25,15 @@ use crate::install::Permission;
 use crate::page::Page;
 use crate::problem::Problem;
 use crate::run::{Invocation, Run};
+use crate::session::{Session, Stream};
 use crate::{
     against, baseline, catalog, check, describe, doctor, explain, init, persist, registry, render,
-    suppress, survey, tests_verb,
+    serve, suppress, survey, tests_verb,
 };
 
 /// Everything an invocation reads from its process. `main` gathers it once; nothing else looks
-/// at the process environment or working directory.
+/// at the process environment or working directory. The daemon builds one per request from what
+/// its client sent (ADR-085 §2).
 pub struct Environment {
     /// The arguments after the program name.
     pub args: Vec<OsString>,
@@ -43,13 +46,35 @@ pub struct Environment {
     pub variables: BTreeMap<String, String>,
     /// `NO_COLOR` is set to a non-empty value (no-color.org).
     pub no_color_variable: bool,
+    /// `PATH`, which decides whether a daemon may run the invocation (ADR-085 §5).
+    pub path: Option<String>,
+    /// Where `--events stderr` and `serve`'s notices are written as they happen.
+    pub stderr: Stream,
+    /// The caches the invocation may find warm: its own, or the daemon's.
+    pub session: Arc<Session>,
+    /// A token the run's own cancellation sits under: the daemon's, for a request it serves.
+    pub cancel: Cancellation,
 }
 
 impl Environment {
+    /// `args` run in `current_dir` with nothing else from a process: stdout not a terminal, no
+    /// variables, standard error for streams, and a fresh session.
+    pub fn new(args: Vec<OsString>, current_dir: Option<PathBuf>) -> Self {
+        Self {
+            args,
+            current_dir,
+            stdout_is_terminal: false,
+            variables: BTreeMap::new(),
+            no_color_variable: false,
+            path: None,
+            stderr: Stream::stderr(),
+            session: Arc::default(),
+            cancel: Cancellation::new(),
+        }
+    }
+
     pub fn from_process() -> Self {
         Self {
-            args: std::env::args_os().skip(1).collect(),
-            current_dir: std::env::current_dir().ok(),
             stdout_is_terminal: std::io::stdout().is_terminal(),
             variables: std::env::vars_os()
                 .filter_map(|(key, value)| {
@@ -58,10 +83,15 @@ impl Environment {
                 .filter(|(key, _)| key.starts_with("CUPEL_"))
                 .collect(),
             no_color_variable: std::env::var_os("NO_COLOR").is_some_and(|value| !value.is_empty()),
+            path: std::env::var("PATH").ok(),
+            ..Self::new(
+                std::env::args_os().skip(1).collect(),
+                std::env::current_dir().ok(),
+            )
         }
     }
 
-    fn variable(&self, name: &str) -> Option<&str> {
+    pub(crate) fn variable(&self, name: &str) -> Option<&str> {
         self.variables.get(name).map(String::as_str)
     }
 
@@ -124,6 +154,7 @@ pub fn run(environment: &Environment) -> Output {
         .map(|arg| arg.to_string_lossy().into_owned())
         .collect();
     let mut run = Run::start(printable);
+    run.within(&environment.cancel);
     let argv = std::iter::once(OsString::from("cupel")).chain(environment.args.iter().cloned());
     let parsed = registry::command()
         .try_get_matches_from(argv)
@@ -157,15 +188,17 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
         }
     };
     let mut stderr = String::new();
-    let (envelope, rendering, events) = match Events::open(cli.global.events.as_deref(), &writer) {
-        Ok(mut events) => {
-            let (envelope, rendering, said) =
-                configured(environment, run, cli, &writer, &mut events);
-            stderr.push_str(&said);
-            (envelope, rendering, Some(events))
-        }
-        Err(error) => (run.failed(&error), recovered_rendering(environment), None),
-    };
+    let destination = cli.global.events.as_deref();
+    let (envelope, rendering, events) =
+        match Events::open(destination, &writer, &environment.stderr) {
+            Ok(mut events) => {
+                let (envelope, rendering, said) =
+                    configured(environment, run, cli, &writer, &mut events);
+                stderr.push_str(&said);
+                (envelope, rendering, Some(events))
+            }
+            Err(error) => (run.failed(&error), recovered_rendering(environment), None),
+        };
     if let Some(mut events) = events {
         events.emit(Event::RunEnd {
             status: envelope.status,
@@ -285,6 +318,7 @@ fn invoke(
     let invocation = Invocation {
         run,
         writer,
+        session: &environment.session,
         config,
         dry_run: cli.global.dry_run,
         installs: Permission::of(
@@ -367,7 +401,7 @@ fn execute(
             .is_some_and(|duration| !run.cancellation().wait(duration));
     let envelope = match &cli.verb {
         None => Err(CupelError::missing_verb(verb_names())),
-        Some(verb) => run_verb(invocation, cli, verb, events),
+        Some(verb) => run_verb(invocation, (cli, environment), verb, events),
     }?;
     let envelope = graded(envelope, cli, invocation.writer, invocation.config)?;
     Ok(if cut_short {
@@ -380,7 +414,7 @@ fn execute(
 /// Runs `verb`. The dry run of a verb that changes nothing is an empty plan.
 fn run_verb(
     invocation: &Invocation<'_>,
-    cli: &Cli,
+    (cli, environment): (&Cli, &Environment),
     verb: &VerbArgs,
     events: &mut dyn EventSink,
 ) -> Result<Envelope, CupelError> {
@@ -398,8 +432,13 @@ fn run_verb(
         // `doctor` writes only its probe and run record; its plan lists only what `--fix` would
         // install (ADR-022 §6, ADR-081).
         VerbArgs::Doctor { fix } if dry_run => Ok(doctor::plan(invocation, *fix, events)),
-        VerbArgs::Explain { .. } if dry_run => Ok(invocation.nothing_planned(events)),
+        // `explain` only reads the store; `serve` starts or stops a daemon, which a dry run does
+        // not.
+        VerbArgs::Explain { .. } | VerbArgs::Serve(_) if dry_run => {
+            Ok(invocation.nothing_planned(events))
+        }
         VerbArgs::Doctor { fix } => Ok(doctor::run(invocation, *fix)),
+        VerbArgs::Serve(args) => serve::verb(invocation, args, cli.global.quiet, environment),
         VerbArgs::Init { force } => init_verb(invocation, cli, *force, events),
         VerbArgs::Check { scope } => check::verb(invocation, scope, events),
         VerbArgs::Survey { scope } => survey::verb(invocation, scope, events),
@@ -424,7 +463,7 @@ fn run_verb(
                 envelope
             })
         }
-        verb => {
+        verb @ VerbArgs::Oracle { .. } => {
             let words = verb.words();
             let step = registry::find(&words[..1])
                 .and_then(|command| command.pending_step)
@@ -545,7 +584,10 @@ fn output(mut envelope: Envelope, presentation: &Presentation, stderr: String) -
 }
 
 /// `--cwd` resolved against the process working directory; it must be an existing directory.
-fn repository_root(current_dir: Option<&Path>, cwd: Option<&Path>) -> Result<PathBuf, CupelError> {
+pub(crate) fn repository_root(
+    current_dir: Option<&Path>,
+    cwd: Option<&Path>,
+) -> Result<PathBuf, CupelError> {
     let requested = match (cwd, current_dir) {
         (Some(cwd), Some(current)) => current.join(cwd),
         (Some(cwd), None) => cwd.to_path_buf(),
@@ -573,7 +615,7 @@ fn not_a_directory(shown: &str) -> CupelError {
 }
 
 /// The verb and sub-verb words clap can still recognize in a command line it rejected.
-fn command_words(args: &[OsString]) -> Vec<String> {
+pub(crate) fn command_words(args: &[OsString]) -> Vec<String> {
     let command_line = std::iter::once(OsString::from("cupel")).chain(args.iter().cloned());
     let Ok(matches) = registry::command()
         .ignore_errors(true)
@@ -656,13 +698,10 @@ mod tests {
 
     /// An invocation of `args` in `dir`, so verbs that keep a run record write there.
     fn environment(dir: &Path, args: &[&str]) -> Environment {
-        Environment {
-            args: args.iter().map(OsString::from).collect(),
-            current_dir: Some(dir.to_path_buf()),
-            stdout_is_terminal: false,
-            variables: BTreeMap::new(),
-            no_color_variable: false,
-        }
+        Environment::new(
+            args.iter().map(OsString::from).collect(),
+            Some(dir.to_path_buf()),
+        )
     }
 
     #[test]

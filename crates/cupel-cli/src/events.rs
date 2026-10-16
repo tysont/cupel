@@ -6,6 +6,7 @@ use std::path::Path;
 use cupel_core::{Error, Event, EventSink, JsonlSink, WriteError, Writer};
 
 use crate::error::{CupelError, Usage};
+use crate::session::Stream;
 
 /// The value of `--events` that streams to standard error.
 const STDERR: &str = "stderr";
@@ -16,11 +17,16 @@ pub struct Events {
 }
 
 impl Events {
-    /// Opens `--events`: `stderr`, or a path resolved against the root and checked by `writer`.
-    pub fn open(destination: Option<&str>, writer: &Writer) -> Result<Self, CupelError> {
+    /// Opens `--events`: `stderr` (the invocation's standard error stream), or a path resolved
+    /// against the root and checked by `writer`.
+    pub fn open(
+        destination: Option<&str>,
+        writer: &Writer,
+        stderr: &Stream,
+    ) -> Result<Self, CupelError> {
         let out: Box<dyn Write> = match destination {
             None => return Ok(Self { sink: None }),
-            Some(STDERR) => Box::new(std::io::stderr()),
+            Some(STDERR) => Box::new(stderr.clone()),
             Some(path) => Box::new(
                 writer
                     .stream(Path::new(path))

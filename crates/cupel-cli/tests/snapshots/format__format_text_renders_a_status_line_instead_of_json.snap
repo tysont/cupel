@@ -17,7 +17,7 @@ verbs
   oracle    Add, list, remove, or verify the oracles differential checks compare with. · pending P5.2
   tests     List the tests a scope impacts, why, and the command that runs them.
   suppress  Suppress a finding, with a reason and an optional expiry.
-  serve     Run the daemon and MCP server with warm caches and event streaming. · pending P4.2
+  serve     Run the daemon that answers this repository's invocations with warm caches, or stop it.
 
 global flags
   --format FORMAT       Output format; json when stdout is not a terminal, text when it is.

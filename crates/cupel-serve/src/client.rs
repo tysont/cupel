@@ -12,9 +12,10 @@ use crate::protocol::{FrameError, Reply, Request, read_message, write_message};
 pub enum ClientError {
     /// There is no socket file: no daemon was started.
     Absent,
-    /// The socket file exists but nothing answered, or the connection ended before the final
-    /// reply (a daemon that is gone left its socket behind, or it stopped mid-request).
+    /// The socket file exists but nothing answered on it: a daemon that is gone left it behind.
     Unanswered(String),
+    /// The connection ended before the final reply: the daemon stopped or failed mid-request.
+    Interrupted(String),
     /// The daemon declined to run the request (ADR-085 §4–5).
     Refused(String),
     /// A message on either side was not valid protocol.
@@ -26,6 +27,7 @@ impl fmt::Display for ClientError {
         match self {
             Self::Absent => f.write_str("no daemon is running"),
             Self::Unanswered(why) => write!(f, "the daemon did not answer: {why}"),
+            Self::Interrupted(why) => write!(f, "the daemon stopped answering: {why}"),
             Self::Refused(reason) => f.write_str(reason),
             Self::Protocol(why) => write!(f, "the daemon and this client disagree: {why}"),
         }
@@ -49,13 +51,14 @@ pub fn request(
     let stream = UnixStream::connect(socket).map_err(|error| unanswered(&error))?;
     write_message(&mut &stream, request).map_err(|error| unanswered(&error))?;
     let mut replies = BufReader::new(&stream);
+    let interrupted = |error: &dyn fmt::Display| ClientError::Interrupted(error.to_string());
     loop {
         match read_message::<Reply>(&mut replies) {
             Ok(None) => {
-                return Err(unanswered(&"the connection ended before the final reply"));
+                return Err(interrupted(&"the connection ended before the final reply"));
             }
             Err(error @ (FrameError::Io(_) | FrameError::Truncated)) => {
-                return Err(unanswered(&error));
+                return Err(interrupted(&error));
             }
             Err(error) => return Err(ClientError::Protocol(error.to_string())),
             Ok(Some(Reply::Stderr { text })) => on_stderr(&text),

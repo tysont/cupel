@@ -1,8 +1,9 @@
 // ABOUTME: The `cupel` command line as a library: every module but `main`, so the binary and in-process
 // ABOUTME: tests call the same `run` (ADR-076 §8). Only the invocation's entry points are public.
 //! The `cupel` command line. The binary's `main` reads the process once
-//! ([`Environment::from_process`]), calls [`run`], and writes the [`Output`]; tests may build an
-//! [`Environment`] themselves and call [`run`] in-process.
+//! ([`Environment::from_process`]), calls [`invoke`] (which hands the invocation to the daemon
+//! serving the repository, if one does, else calls [`run`]), and writes the [`Output`]; tests
+//! may build an [`Environment`] themselves and call [`run`] in-process.
 
 mod against;
 mod app;
@@ -10,6 +11,7 @@ mod baseline;
 mod catalog;
 mod check;
 mod cli;
+mod connect;
 mod describe;
 mod doctor;
 mod error;
@@ -26,8 +28,12 @@ mod refusal;
 mod registry;
 mod render;
 mod run;
+mod serve;
+mod session;
 mod suppress;
 mod survey;
 mod tests_verb;
 
 pub use app::{Environment, Output, capture_panics, run};
+pub use connect::invoke;
+pub use session::{Session, Stream};

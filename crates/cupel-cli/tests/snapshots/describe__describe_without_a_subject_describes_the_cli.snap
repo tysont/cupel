@@ -456,9 +456,9 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       },
       {
         "name": "serve",
-        "pending_step": "P4.2",
+        "pending_step": null,
         "stability": "experimental",
-        "summary": "Run the daemon and MCP server with warm caches and event streaming."
+        "summary": "Run the daemon that answers this repository's invocations with warm caches, or stop it."
       }
     ],
     "version": "[version]"
