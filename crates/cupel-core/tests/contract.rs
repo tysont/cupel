@@ -196,7 +196,9 @@ fn design_plan() -> Value {
         ],
         "would_skip": [
             {"id": "conc.dst", "reason": "unconfigured", "fact": null, "lang": null, "tool": null,
-             "see": "cupel describe conc.dst"}
+             "see": "cupel describe conc.dst", "est_ms": null},
+            {"id": "tests.mutation", "reason": "budget", "fact": null, "lang": "rust", "tool": null,
+             "see": null, "est_ms": 140000}
         ],
         "would_install": [{"tool": "cargo-llvm-cov", "command": "cargo install cargo-llvm-cov"}],
         "would_write": [

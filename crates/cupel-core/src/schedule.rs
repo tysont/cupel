@@ -1,9 +1,11 @@
 // ABOUTME: Scheduler v1 (design §8.9, ADR-041): resolve the symbols in scope, split selected checks into
 // ABOUTME: supported (check, language) tasks and skips, produce each needed fact once, run, and combine.
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::num::NonZeroUsize;
 use std::time::Instant;
 
 use crate::base::BaseTree;
+use crate::budget::{Resources, TaskDuration, TaskShape};
 use crate::cancel::Cancellation;
 use crate::check::{Check, CheckCtx, CheckRegistry, Manifest, Plan};
 use crate::config::Config;
@@ -28,6 +30,8 @@ use crate::scope::{Scope, SymbolSelector, select_symbols};
 use crate::syntax::{NormTree, Symbols};
 use crate::test_results::{TestResults, Unevaluable};
 use crate::writer::Writer;
+
+mod budgeted;
 
 /// The registries a run draws on.
 pub struct Scheduler<'a> {
@@ -59,6 +63,8 @@ pub struct Job<'a> {
     pub depth: CostClass,
     /// The lines a range scope changed, per file; `None` without a range (ADR-080).
     pub changed: Option<ChangedLines>,
+    /// The run's budget, concurrency cap, and the store's history of durations (ADR-086).
+    pub resources: Resources,
 }
 
 /// What a run (or a dry run's planning) produced.
@@ -82,6 +88,8 @@ pub struct Outcome {
     pub mutation_outcomes: Vec<(LangId, MutationOutcomes)>,
     /// The red baseline that refused the run: no check ran, so `checks` is empty (ADR-076).
     pub refused: Option<Unevaluable>,
+    /// How long each production and check run took, for the store's history (ADR-086 §2).
+    pub durations: Vec<TaskDuration>,
 }
 
 /// The scheduler's fact store opened for a verb that reads facts itself rather than running
@@ -127,6 +135,9 @@ struct Task<'a> {
     siblings: Vec<Lang>,
     scope: Scope,
     plan: Plan,
+    /// What running it is estimated to cost: its own cost plus the producer runs it brings in,
+    /// in the order the run takes tasks (ADR-086 §10).
+    cost_ms: u64,
 }
 
 /// A (check, language) that will not run, and why.
@@ -143,26 +154,10 @@ impl Scheduler<'_> {
             .base
             .as_ref()
             .map(|base| FactStore::at(self.producers, job, base));
-        let prepared = self.prepare(job, &mut store, sink)?;
-        store.reached = store.reached_by(&prepared.tasks);
-        let est_ms = prepared.tasks.iter().map(|task| task.plan.est_ms).sum();
-        sink.emit(Event::Plan {
-            run: job.run,
-            checks: u32::try_from(job.selected.len()).unwrap_or(u32::MAX),
-            est_ms,
-        });
-        for skip in &prepared.skips {
-            sink.emit(Event::Skip {
-                id: skip.check.manifest().id.clone(),
-                reason: skip.skipped.reason,
-            });
-        }
-        let mut execution = Execution {
-            job,
-            store,
-            base,
-            interrupted: false,
-        };
+        let mut prepared = self.prepare(job, &mut store, sink)?;
+        budgeted::schedule(job, &mut store, &mut prepared);
+        prepared.announce(job, sink);
+        let mut execution = Execution::start(job, store, base, &prepared);
         if let Some(red) = execution.baseline(self.producers, &prepared.tasks, sink) {
             return Ok(Outcome {
                 findings: execution.store.findings,
@@ -170,13 +165,18 @@ impl Scheduler<'_> {
                 test_results: execution.store.test_results,
                 mutation_outcomes: execution.store.mutation_outcomes,
                 refused: Some(red),
+                durations: execution.store.durations,
                 ..Outcome::default()
             });
         }
         let (checks, mut findings, measurements) = execution.run_checks(&prepared, sink);
         let Execution {
-            store, interrupted, ..
+            store,
+            interrupted,
+            mut durations,
+            ..
         } = execution;
+        durations.extend(store.durations);
         // P2.2 persists this to the store.
         findings.extend(store.findings);
         sort_findings(&mut findings);
@@ -190,6 +190,7 @@ impl Scheduler<'_> {
             test_results: store.test_results,
             mutation_outcomes: store.mutation_outcomes,
             refused: None,
+            durations,
         })
     }
 
@@ -197,7 +198,8 @@ impl Scheduler<'_> {
     /// what would be skipped. Resolving the scope parses files but writes nothing.
     pub fn plan(&self, job: &Job<'_>, sink: &mut dyn EventSink) -> Result<Outcome> {
         let mut store = FactStore::new(self.producers, job);
-        let prepared = self.prepare(job, &mut store, sink)?;
+        let mut prepared = self.prepare(job, &mut store, sink)?;
+        budgeted::schedule(job, &mut store, &mut prepared);
         let would_run = job
             .selected
             .iter()
@@ -215,7 +217,7 @@ impl Scheduler<'_> {
                 Some(PlannedCheck {
                     id: manifest.id.clone(),
                     targets: tasks.iter().map(|task| task.plan.targets).sum(),
-                    est_ms: tasks.iter().map(|task| task.plan.est_ms).sum(),
+                    est_ms: tasks.iter().map(|task| task.cost_ms).sum(),
                     needs: self.planned_needs(manifest, &langs, &store),
                     note: None,
                 })
@@ -245,6 +247,7 @@ impl Scheduler<'_> {
             test_results: Vec::new(),
             mutation_outcomes: Vec::new(),
             refused: None,
+            durations: Vec::new(),
         })
     }
 
@@ -376,11 +379,38 @@ struct Execution<'a, 'j> {
     store: FactStore<'a>,
     /// The base side of a range scope (ADR-056).
     base: Option<FactStore<'a>>,
-    /// Some task was cut short or skipped by the timeout.
+    /// Some task was cut short or skipped by the timeout or the budget.
     interrupted: bool,
+    /// The run's cancellation, with the budget's deadline when there is one (ADR-086 §6).
+    cancel: Cancellation,
+    /// How long each check run took.
+    durations: Vec<TaskDuration>,
 }
 
-impl Execution<'_, '_> {
+impl<'a, 'j> Execution<'a, 'j> {
+    /// The run of `prepared` over `store` (and a range's `base`): every check and production
+    /// runs under the run's cancellation, which the budget's deadline also fires (ADR-086 §6).
+    fn start(
+        job: &'j Job<'j>,
+        mut store: FactStore<'a>,
+        mut base: Option<FactStore<'a>>,
+        prepared: &Prepared<'_>,
+    ) -> Self {
+        let cancel = budgeted::cancellation(job);
+        store.cancel = cancel.clone();
+        if let Some(base) = &mut base {
+            base.cancel = cancel.clone();
+        }
+        Self {
+            job,
+            store,
+            base,
+            interrupted: prepared.over_budget(),
+            cancel,
+            durations: Vec::new(),
+        }
+    }
+
     /// Runs every selected check in registry order: each check's one entry, every check's
     /// findings, and every measurement.
     fn run_checks(
@@ -391,18 +421,25 @@ impl Execution<'_, '_> {
         let mut checks = Vec::new();
         let mut findings = Vec::new();
         let mut measurements = Vec::new();
-        for check in &self.job.selected {
-            let (tasks, skips) = prepared.of(*check);
+        for check in prepared.running_order(&self.job.selected) {
+            let (tasks, skips) = prepared.of(check);
             // A check runs when some language supports it, or when no language is in scope.
             if tasks.is_empty() && !skips.is_empty() {
-                checks.push(skipped_entry(*check, skips));
+                checks.push(skipped_entry(check, skips));
                 continue;
             }
-            let finished = self.run_check(*check, &tasks, skips, sink);
+            let finished = self.run_check(check, &tasks, skips, sink);
             checks.push(finished.result);
             findings.extend(finished.findings);
             measurements.extend(finished.measurements);
         }
+        let position = |result: &CheckResult| {
+            self.job
+                .selected
+                .iter()
+                .position(|check| check.manifest().id == result.id)
+        };
+        checks.sort_by_key(position);
         (checks, findings, measurements)
     }
 
@@ -448,10 +485,9 @@ impl Execution<'_, '_> {
             // A check may skip itself for its own reasons (ADR-048); only a cut-short check or
             // a timeout skip makes the run partial.
             self.interrupted |= result.status == CheckStatus::Partial
-                || result
-                    .skipped
-                    .as_ref()
-                    .is_some_and(|skipped| skipped.reason == SkipReason::Timeout);
+                || result.skipped.as_ref().is_some_and(|skipped| {
+                    matches!(skipped.reason, SkipReason::Timeout | SkipReason::Budget)
+                });
             run.record(task, result, sink);
         }
         run.finish(skips, sink)
@@ -471,6 +507,16 @@ impl Execution<'_, '_> {
                 Some(skip_reason(SkipReason::Timeout, &task.lang.id)),
             );
         }
+        if let Some(est_ms) = self.over_budget(task) {
+            sink.forward.emit(Event::Skip {
+                id: task.check.manifest().id.clone(),
+                reason: SkipReason::Budget,
+            });
+            return ended(
+                CheckStatus::Skipped,
+                Some(budgeted::skip(&task.lang.id, est_ms)),
+            );
+        }
         if self.store.ran_no_test(&task.lang.id)
             && reaches(
                 self.store.producers,
@@ -481,10 +527,10 @@ impl Execution<'_, '_> {
         {
             return ended(CheckStatus::Skipped, Some(no_tests_ran(&task.lang.id)));
         }
-        let ran = self.facts_for(task, &mut *sink.forward).and_then(|facts| {
-            let ctx = check_ctx(self.job, task.check, &task.lang.id, task.scope.clone());
-            task.check.run(&ctx, &facts, &task.plan, sink)
-        });
+        let ran = match self.facts_for(task, &mut *sink.forward) {
+            Ok(facts) => self.timed_run(task, &facts, sink),
+            Err(error) => Err(error),
+        };
         match ran {
             Ok(mut ran) => {
                 ran.duration_ms = elapsed_ms(started);
@@ -499,6 +545,34 @@ impl Execution<'_, '_> {
                 result
             }
         }
+    }
+
+    /// Runs `task`'s check over `facts` under the run's cancellation, timing a run that finished
+    /// for the store's history (ADR-086 §2).
+    fn timed_run(
+        &mut self,
+        task: &Task<'_>,
+        facts: &Facts,
+        sink: &mut CheckSink<'_>,
+    ) -> Result<CheckResult> {
+        let mut ctx = check_ctx(self.job, task.check, &task.lang.id, task.scope.clone());
+        ctx.cancel = self.cancel.clone();
+        let started = Instant::now();
+        let ran = task.check.run(&ctx, facts, &task.plan, sink);
+        if ran
+            .as_ref()
+            .is_ok_and(|ran| matches!(ran.status, CheckStatus::Pass | CheckStatus::Fail))
+        {
+            self.durations.push(TaskDuration {
+                shape: TaskShape::check(
+                    &task.check.manifest().id,
+                    &task.lang.id,
+                    task.plan.targets,
+                ),
+                duration_ms: elapsed_ms(started),
+            });
+        }
+        ran
     }
 
     /// The facts `task`'s check reads: its language's, its family siblings', the range, and the
@@ -685,10 +759,48 @@ impl<'a> Prepared<'a> {
                 lang,
                 siblings: langs,
                 scope,
+                cost_ms: plan.est_ms,
                 plan,
             });
         }
         Ok(())
+    }
+
+    /// The checks of `selected` in the order their first task runs, then those with none, in
+    /// registry order: the registry's order without a budget, the knapsack's with one.
+    fn running_order(&self, selected: &[&'a dyn Check]) -> Vec<&'a dyn Check> {
+        let first = |check: &dyn Check| {
+            self.tasks
+                .iter()
+                .position(|task| same(task.check, check))
+                .unwrap_or(usize::MAX)
+        };
+        let mut order = selected.to_vec();
+        order.sort_by_key(|check| first(*check));
+        order
+    }
+
+    /// Emits the run's `plan` event, with what the tasks taken are estimated to cost, and a
+    /// `skip` event per (check, language) left out.
+    fn announce(&self, job: &Job<'_>, sink: &mut dyn EventSink) {
+        sink.emit(Event::Plan {
+            run: job.run,
+            checks: u32::try_from(job.selected.len()).unwrap_or(u32::MAX),
+            est_ms: self.tasks.iter().map(|task| task.cost_ms).sum(),
+        });
+        for skip in &self.skips {
+            sink.emit(Event::Skip {
+                id: skip.check.manifest().id.clone(),
+                reason: skip.skipped.reason,
+            });
+        }
+    }
+
+    /// Whether the budget skipped any task before the run.
+    fn over_budget(&self) -> bool {
+        self.skips
+            .iter()
+            .any(|skip| skip.skipped.reason == SkipReason::Budget)
     }
 
     /// `check`'s tasks and the skips of its ruled-out languages.
@@ -826,6 +938,10 @@ struct FactStore<'a> {
     reached: HashMap<LangId, BTreeSet<FactKind>>,
     /// The joint producers already run, by ID and language: each runs at most once.
     joints_run: HashSet<(String, LangId)>,
+    /// How many processes or threads producers may run at once (`--jobs`).
+    jobs: Option<NonZeroUsize>,
+    /// How long each production took, for the store's history (ADR-086 §2).
+    durations: Vec<TaskDuration>,
 }
 
 impl<'a> FactStore<'a> {
@@ -874,6 +990,8 @@ impl<'a> FactStore<'a> {
             refused: None,
             reached: HashMap::new(),
             joints_run: HashSet::new(),
+            jobs: job.resources.jobs,
+            durations: Vec::new(),
         }
     }
 
@@ -994,8 +1112,13 @@ impl<'a> FactStore<'a> {
             return Some(self.keep(kind, lang, Err(error)));
         }
         let ctx = self.produce_ctx(joint.needs().iter(), lang);
+        let cached = budgeted::is_cached(&joint.estimate(&self.root, &ctx.upstream));
         let mut events = Vec::new();
+        let started = Instant::now();
         let produced = joint.produce(&ctx, &Scope::of_files(self.files.clone()), &mut events);
+        if produced.is_ok() {
+            self.time_production(&joint.id(), lang, cached, started);
+        }
         for event in events {
             self.forward(event, sink);
         }
@@ -1051,6 +1174,7 @@ impl<'a> FactStore<'a> {
                 depth: self.depth,
                 symbols: self.selected.get(&lang.id).cloned(),
                 changed: self.changed.clone(),
+                jobs: self.jobs,
             },
         }
     }
@@ -1101,9 +1225,14 @@ impl<'a> FactStore<'a> {
             self.ensure_wants(producer.wants(), lang, sink, visiting);
             self.cancel.checkpoint()?;
             let ctx = self.produce_ctx(producer.needs().iter().chain(producer.wants()), lang);
+            let cached = budgeted::is_cached(&producer.estimate(&self.root, &ctx.upstream));
             let mut events = Vec::new();
+            let started = Instant::now();
             let produced =
                 producer.produce(&ctx, &Scope::of_files(self.files.clone()), &mut events);
+            if produced.is_ok() {
+                self.time_production(&producer.id(), lang, cached, started);
+            }
             for event in events {
                 self.forward(event, sink);
             }
@@ -1384,6 +1513,9 @@ fn skipped_entry(check: &dyn Check, mut skips: Vec<Skipped>) -> CheckResult {
         && skips.iter().all(|other| alike(first, other))
     {
         first.lang = None;
+        first.est_ms = first
+            .est_ms
+            .map(|_| skips.iter().filter_map(|skip| skip.est_ms).sum());
     }
     let manifest = check.manifest();
     CheckResult {
@@ -1416,6 +1548,7 @@ fn unsupported(support: &Support, lang: &LangId) -> Skipped {
         lang: Some(lang.clone()),
         tool,
         see: Some("cupel describe matrix".to_owned()),
+        est_ms: None,
     }
 }
 
@@ -1427,6 +1560,7 @@ fn needs_range(id: &crate::id::CheckId, lang: &LangId) -> Skipped {
         lang: Some(lang.clone()),
         tool: None,
         see: Some(format!("cupel check --changed --only {id}")),
+        est_ms: None,
     }
 }
 
@@ -1447,6 +1581,7 @@ fn skip_reason(reason: SkipReason, lang: &LangId) -> Skipped {
         lang: Some(lang.clone()),
         tool: None,
         see: None,
+        est_ms: None,
     }
 }
 

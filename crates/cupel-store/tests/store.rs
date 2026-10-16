@@ -3,13 +3,14 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use cupel_core::budget::{TaskDuration, TaskShape};
 use cupel_core::syntax::{MutationOperator, Span, SymbolDef, SymbolKey, SymbolKind, Visibility};
 use cupel_core::{
     CheckId, CostClass, Envelope, FactKind, FindingId, LangId, Metric, Mutant, MutantOutcome,
     MutationOutcomes, ProducerId, RunId, Suppression, SymbolHash, TestOutcome, TestResult,
     TestResults, Writer,
 };
-use cupel_store::{CacheKey, Store, StoreError, StoredFact, StoredTestResult};
+use cupel_store::{CacheKey, ScoredAt, Store, StoreError, StoredFact, StoredTestResult};
 use serde_json::{Value, json};
 use tempfile::TempDir;
 
@@ -207,6 +208,7 @@ fn migrations_run_from_empty_and_reopening_changes_nothing() {
             "baselines",
             "checks",
             "coverage",
+            "durations",
             "facts",
             "findings",
             "metrics",
@@ -848,4 +850,88 @@ fn the_last_outcome_of_each_site_and_replacement_is_kept() {
             row("00000000000000b2", ">", MutantOutcome::Survived),
         ]
     );
+}
+
+/// A check result of `id` with `status`, as `checks[]` holds it.
+fn result_with(id: &str, status: &str) -> Value {
+    let skipped = if status == "skipped" {
+        json!({"reason": "budget", "fact": null, "lang": "rust", "tool": null, "see": null,
+               "est_ms": 900})
+    } else {
+        Value::Null
+    };
+    json!({
+        "id": id, "status": status, "tier": 1, "cost": "quick", "score": null,
+        "delta": null, "findings": 0, "duration_ms": 5, "skipped": skipped, "oracle": null
+    })
+}
+
+#[test]
+fn durations_come_back_newest_first_per_shape_and_at_most_ten() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let rust = LangId::from("rust");
+    let pytest = TaskShape::producer(
+        &ProducerId::from("tool.pytest"),
+        &LangId::from("python"),
+        false,
+    );
+    let clones = TaskShape::check(&CheckId::from("static.clones"), &rust, 40);
+    for n in 1..=12_u8 {
+        let durations = [
+            TaskDuration {
+                shape: pytest.clone(),
+                duration_ms: u64::from(n) * 100,
+            },
+            TaskDuration {
+                shape: clones.clone(),
+                duration_ms: u64::from(n),
+            },
+        ];
+        store.record_durations(&run_id(n), &durations).unwrap();
+    }
+    let recent = store.recent_durations().unwrap();
+    let of = |shape: &TaskShape| -> Vec<u64> {
+        recent
+            .iter()
+            .find(|(recorded, _)| recorded == shape)
+            .map(|(_, durations)| durations.clone())
+            .unwrap()
+    };
+    assert_eq!(
+        of(&pytest),
+        (3..=12).rev().map(|n| n * 100).collect::<Vec<u64>>()
+    );
+    assert_eq!(of(&clones), (3..=12).rev().collect::<Vec<u64>>());
+    assert_eq!(recent.len(), 2);
+}
+
+#[test]
+fn the_latest_scored_result_of_each_check_names_its_commit_and_whether_it_was_dirty() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let ran = [
+        result_with("static.clones", "pass"),
+        result_with("tests.mutation", "pass"),
+    ];
+    record(&store, 1, "check", &[], &ran);
+    // A later run that skipped tests.mutation for its budget does not count as scoring it.
+    let later = [
+        result_with("static.clones", "fail"),
+        result_with("tests.mutation", "skipped"),
+    ];
+    record(&store, 2, "check", &[], &later);
+    let scored = store.latest_scored().unwrap();
+    assert_eq!(
+        scored[&CheckId::from("static.clones")],
+        ScoredAt {
+            sha: Some(format!("sha-{}", run_id(2))),
+            dirty: false,
+        }
+    );
+    assert_eq!(
+        scored[&CheckId::from("tests.mutation")].sha,
+        Some(format!("sha-{}", run_id(1)))
+    );
+    assert!(!scored.contains_key(&CheckId::from("tests.coverage")));
 }

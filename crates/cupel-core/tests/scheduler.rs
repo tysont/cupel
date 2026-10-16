@@ -441,6 +441,7 @@ fn a_check_no_language_supports_has_one_skipped_entry_with_the_missing_fact() {
             lang: Some(LangId::from("go")),
             tool: None,
             see: Some("cupel describe matrix".to_owned()),
+            est_ms: None,
         })
     );
 }
@@ -457,6 +458,7 @@ fn a_check_every_language_skips_alike_has_one_entry_naming_no_language() {
                 lang: Some(LangId::from(lang)),
                 tool: None,
                 see: Some("cupel describe t.unconfigured".to_owned()),
+                est_ms: None,
             }),
             ..passing("t.unconfigured", None)
         })
@@ -478,6 +480,7 @@ fn a_check_every_language_skips_alike_has_one_entry_naming_no_language() {
             lang: None,
             tool: None,
             see: Some("cupel describe t.unconfigured".to_owned()),
+            est_ms: None,
         })
     );
 }
@@ -975,6 +978,7 @@ fn a_check_that_skips_itself_is_reported_without_interrupting_the_run() {
                 lang: Some(LangId::from("rust")),
                 tool: None,
                 see: None,
+                est_ms: None,
             }),
             ..passing("t.unconfigured", None)
         })
@@ -1033,6 +1037,7 @@ fn a_check_that_reads_the_base_is_skipped_once_without_a_range() {
             lang: None,
             tool: None,
             see: Some("cupel check --changed --only t.base".to_owned()),
+            est_ms: None,
         })
     );
     assert!(events.iter().any(|event| matches!(

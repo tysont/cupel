@@ -299,12 +299,12 @@ fn processes(profiles: &Path) -> Vec<TestProcess> {
 /// A test and lines it covered.
 type Covered = (String, Vec<CoveredLines>);
 
-/// Each process's coverage, exported on as many threads as there are cores; a test run more
-/// than once (a retry) covers what any of its runs covered.
+/// Each process's coverage, exported on as many threads as the run allows (`--jobs`, else the
+/// cores); a test run more than once (a retry) covers what any of its runs covered.
 fn export(site: &Site<'_>, llvm: &Llvm, processes: &[TestProcess]) -> Result<Vec<TestCoverage>> {
     let next = AtomicUsize::new(0);
     let found: Mutex<Vec<Result<Covered>>> = Mutex::new(Vec::new());
-    let workers = std::thread::available_parallelism().map_or(1, usize::from);
+    let workers = site.ctx.focus.workers();
     std::thread::scope(|scope| {
         for _ in 0..workers {
             scope.spawn(|| {

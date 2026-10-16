@@ -75,6 +75,9 @@ pub struct Skipped {
     pub tool: Option<ToolId>,
     /// A command that explains the reason.
     pub see: Option<String>,
+    /// What the skipped work was estimated to cost, for `budget`: the check's own cost plus the
+    /// producer runs it would have brought in (ADR-086 §10).
+    pub est_ms: Option<u64>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]

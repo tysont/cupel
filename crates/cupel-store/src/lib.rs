@@ -24,6 +24,9 @@
 //! - **Mutants.** [`Store::record_mutants`] indexes a run's `MutationOutcomes` per mutant;
 //!   [`Store::mutants_by_key`] finds stored outcomes by cache key and
 //!   [`Store::last_mutant_outcomes`] the last outcome of each site (ADR-080).
+//! - **Durations.** [`Store::record_durations`] keeps how long a run's productions and check
+//!   runs took; [`Store::recent_durations`] reads each task shape's latest, and
+//!   [`Store::latest_scored`] where each check last ran, for the budget scheduler (ADR-086).
 //! - **Suppressions.** [`Store::replace_suppressions`] mirrors `.cupel/suppressions.toml`
 //!   (ADR-047); [`Store::suppressions`] reads the mirror.
 
@@ -36,6 +39,7 @@ use std::fmt::Write as _;
 use std::path::PathBuf;
 use std::time::Duration;
 
+use cupel_core::budget::{RECENT, TaskDuration, TaskKind, TaskShape};
 use cupel_core::syntax::SymbolDef;
 use cupel_core::{
     CheckId, CheckResult, Envelope, FactKind, Finding, FindingId, LangId, Metric, Mutant,
@@ -667,6 +671,104 @@ impl Store {
                 })
             })
             .collect()
+    }
+}
+
+/// Where a check last produced a result that ran (not skipped): the commit and whether the
+/// tree was dirty (ADR-086 §4).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ScoredAt {
+    /// `None` outside a work tree or before the first commit.
+    pub sha: Option<String>,
+    pub dirty: bool,
+}
+
+impl Store {
+    /// Stores how long each of `durations`, timed in `run`, took.
+    pub fn record_durations(&self, run: &RunId, durations: &[TaskDuration]) -> Result<()> {
+        self.insert_rows(
+            "INSERT INTO durations (run_id, kind, task, lang, class, duration_ms)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            &[run.to_string()],
+            durations.iter().map(|timed| {
+                let shape = &timed.shape;
+                Ok(vec![
+                    Value::from(shape.kind.as_str().to_owned()),
+                    Value::from(shape.task.clone()),
+                    Value::from(shape.lang.to_string()),
+                    Value::from(shape.class.clone()),
+                    Value::from(millis(Some(timed.duration_ms))),
+                ])
+            }),
+        )
+    }
+
+    /// Every task shape's latest [`RECENT`] durations, newest first.
+    pub fn recent_durations(&self) -> Result<Vec<(TaskShape, Vec<u64>)>> {
+        let mut statement = self.connection.prepare(
+            "SELECT kind, task, lang, class, duration_ms FROM (
+                SELECT *, ROW_NUMBER() OVER (
+                    PARTITION BY kind, task, lang, class ORDER BY rowid DESC) AS age
+                FROM durations)
+             WHERE age <= ?1 ORDER BY kind, task, lang, class, age",
+        )?;
+        let recent = i64::try_from(RECENT).unwrap_or(i64::MAX);
+        let rows = statement.query_map([recent], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+                row.get::<_, String>(3)?,
+                row.get::<_, i64>(4)?,
+            ))
+        })?;
+        let mut recent: Vec<(TaskShape, Vec<u64>)> = Vec::new();
+        for row in rows {
+            let (kind, task, lang, class, duration_ms) = row?;
+            let kind = TaskKind::named(&kind).ok_or_else(|| StoreError::Value(kind.clone()))?;
+            let shape = TaskShape {
+                kind,
+                task,
+                lang: LangId::from(lang),
+                class,
+            };
+            let duration_ms = u64::try_from(duration_ms).unwrap_or_default();
+            match recent.last_mut() {
+                Some((last, durations)) if *last == shape => durations.push(duration_ms),
+                _ => recent.push((shape, vec![duration_ms])),
+            }
+        }
+        Ok(recent)
+    }
+
+    /// For every check with a stored result that ran, where its latest such result was made.
+    pub fn latest_scored(&self) -> Result<BTreeMap<CheckId, ScoredAt>> {
+        let mut statement = self.connection.prepare(
+            "SELECT checks.check_id, runs.git_sha,
+                    json_extract(runs.envelope, '$.run.git.dirty')
+             FROM checks JOIN runs ON runs.id = checks.run_id
+             WHERE json_extract(checks.json, '$.status') != 'skipped'
+             ORDER BY checks.run_id",
+        )?;
+        let rows = statement.query_map([], |row| {
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, Option<String>>(1)?,
+                row.get::<_, Option<bool>>(2)?,
+            ))
+        })?;
+        let mut scored = BTreeMap::new();
+        for row in rows {
+            let (check, sha, dirty) = row?;
+            scored.insert(
+                CheckId::from(check),
+                ScoredAt {
+                    sha,
+                    dirty: dirty.unwrap_or(false),
+                },
+            );
+        }
+        Ok(scored)
     }
 }
 

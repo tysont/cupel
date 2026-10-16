@@ -4,6 +4,7 @@ use std::any::Any;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::marker::PhantomData;
+use std::num::NonZeroUsize;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
@@ -77,8 +78,8 @@ pub struct ProduceCtx {
 }
 
 /// What a run asked to look at beyond its files: its depth, the symbols `--symbols` selected,
-/// and the lines a range changed. Producers that narrow their work by it (the mutation engine,
-/// ADR-080) read it; the rest produce over their scope's files.
+/// the lines a range changed, and how much it may run at once. Producers that narrow their work
+/// by it (the mutation engine, ADR-080) read it; the rest produce over their scope's files.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Focus {
     pub depth: CostClass,
@@ -87,6 +88,9 @@ pub struct Focus {
     /// Per file, the 1-based inclusive line ranges a range scope changed (`git diff -U0`);
     /// `None` without a range.
     pub changed: Option<ChangedLines>,
+    /// How many processes or threads a producer may run at once (`--jobs`, ADR-086 §11);
+    /// `None` for its own default.
+    pub jobs: Option<NonZeroUsize>,
 }
 
 /// Per file, the 1-based inclusive line ranges a change touched.
@@ -99,7 +103,18 @@ impl Default for Focus {
             depth: CostClass::Standard,
             symbols: None,
             changed: None,
+            jobs: None,
         }
+    }
+}
+
+impl Focus {
+    /// How many workers a producer that parallelizes its own work may run: `--jobs`, else the
+    /// cores.
+    pub fn workers(&self) -> usize {
+        self.jobs
+            .or_else(|| std::thread::available_parallelism().ok())
+            .map_or(1, NonZeroUsize::get)
     }
 }
 

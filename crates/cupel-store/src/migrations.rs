@@ -2,7 +2,7 @@
 // ABOUTME: how many have been applied (ADR-045 §4). Append new scripts; never edit an applied one.
 
 /// Every migration, in order. Migration `n` (1-based) moves the store from version `n - 1` to `n`.
-pub const MIGRATIONS: &[&str] = &[V1, V2, V3];
+pub const MIGRATIONS: &[&str] = &[V1, V2, V3, V4];
 
 /// Every table of design §8.8, with the ADR-045 §5 additions.
 const V1: &str = "
@@ -146,4 +146,18 @@ CREATE TABLE mutants (
 );
 CREATE INDEX mutants_by_key ON mutants (cache_key);
 CREATE INDEX mutants_by_site ON mutants (symbol_hash, site_hash, replacement);
+";
+
+/// The `durations` table of P4.3 (ADR-086 §2): how long each production and check run took, by
+/// task shape, for the budget scheduler's cost model.
+const V4: &str = "
+CREATE TABLE durations (
+    run_id TEXT NOT NULL,
+    kind TEXT NOT NULL,
+    task TEXT NOT NULL,
+    lang TEXT NOT NULL,
+    class TEXT NOT NULL,
+    duration_ms INTEGER NOT NULL
+);
+CREATE INDEX durations_by_shape ON durations (kind, task, lang, class);
 ";
