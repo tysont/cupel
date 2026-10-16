@@ -1,0 +1,3185 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+assertion_line: 24
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/run.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Envelope",
+  "description": "The single output shape of every verb.",
+  "type": "object",
+  "properties": {
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/CheckResult"
+      }
+    },
+    "cupel": {
+      "$ref": "#/$defs/CupelInfo"
+    },
+    "description": {
+      "description": "What `describe` returns; null for every other verb (ADR-018).",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Description"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "exit_code": {
+      "$ref": "#/$defs/ExitCode"
+    },
+    "explanation": {
+      "description": "What `explain` adds to the finding or check result it returns; null for every other verb.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Explanation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Finding"
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/NextAction"
+      }
+    },
+    "oracles": {
+      "description": "What the `oracle` verb reports: the oracles it listed, added, removed, or verified, with\ntheir state; null for every other verb (ADR-091 §6).",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/$defs/OracleReport"
+      }
+    },
+    "plan": {
+      "description": "What a `--dry-run` would do; null unless `status` is `plan` (ADR-020).",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RunPlan"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rankings": {
+      "description": "What `survey` ranks: the worst targets per dimension; null for every other verb (ADR-062).",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Rankings"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "run": {
+      "$ref": "#/$defs/RunInfo"
+    },
+    "status": {
+      "$ref": "#/$defs/Status"
+    },
+    "summary": {
+      "$ref": "#/$defs/Summary"
+    },
+    "tests": {
+      "description": "What `tests --impacted` selects: the impacted tests and how to run them; null for every\nother verb (ADR-077).",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TestsReport"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "total_findings": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "truncated": {
+      "description": "True when paging (`--limit`/`--offset`) left findings out.",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "checks",
+    "cupel",
+    "description",
+    "exit_code",
+    "explanation",
+    "findings",
+    "next_actions",
+    "oracles",
+    "plan",
+    "rankings",
+    "run",
+    "status",
+    "summary",
+    "tests",
+    "total_findings",
+    "truncated"
+  ],
+  "$defs": {
+    "Action": {
+      "description": "The concrete next step a finding asks for.",
+      "type": "object",
+      "properties": {
+        "hints": {
+          "description": "Kind-specific pointers, such as `nearest_test_file` or `covering_tests`.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "kind": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "priority": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hints",
+        "kind",
+        "priority",
+        "summary"
+      ]
+    },
+    "ActionKind": {
+      "description": "The closed set of things a finding can ask an agent to do (design §7.2).",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "write_test",
+            "strengthen_assertion",
+            "restore_test",
+            "refactor_extract",
+            "reduce_complexity",
+            "break_cycle",
+            "fix_bug",
+            "add_contract",
+            "add_property",
+            "investigate_flake",
+            "rerun",
+            "configure",
+            "install_tool",
+            "verify_oracle"
+          ]
+        },
+        {
+          "description": "Last resort when no mechanical action exists.",
+          "type": "string",
+          "const": "review"
+        }
+      ]
+    },
+    "AllDescription": {
+      "description": "Everything `describe` knows, in one document.",
+      "type": "object",
+      "properties": {
+        "cli": {
+          "$ref": "#/$defs/CliDescription"
+        },
+        "commands": {
+          "description": "Every verb, with its sub-verbs nested.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommandDescription"
+          }
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SchemaDescription"
+          }
+        }
+      },
+      "required": [
+        "cli",
+        "commands",
+        "schemas"
+      ]
+    },
+    "ArgDescription": {
+      "description": "A flag or positional argument.",
+      "type": "object",
+      "properties": {
+        "conflicts": {
+          "description": "Flags that cannot be combined with this one.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "default": {
+          "description": "The value used when the argument is absent, if it is a fixed value.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "env": {
+          "description": "The environment variable read when the flag is absent.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "`--name` for a flag, the value name (such as `FINDING`) for a positional.",
+          "type": "string"
+        },
+        "pending_step": {
+          "description": "The implementation-plan step that gives this argument its behavior; null once it has it.\nUntil then it parses and is otherwise ignored.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "positional": {
+          "type": "boolean"
+        },
+        "repeated": {
+          "description": "Whether the argument accepts several values.",
+          "type": "boolean"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/ValueType"
+        },
+        "value_name": {
+          "description": "The placeholder shown in help, such as `PATH`; null for switches.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "values": {
+          "description": "The accepted values of an `enum`; empty otherwise.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "conflicts",
+        "default",
+        "env",
+        "name",
+        "pending_step",
+        "positional",
+        "repeated",
+        "required",
+        "stability",
+        "summary",
+        "value",
+        "value_name",
+        "values"
+      ]
+    },
+    "BaselineRef": {
+      "description": "The baseline deltas were computed against.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/RunId"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "CheckDescription": {
+      "description": "One check: its manifest, and whether it can run for each registered language (design §6.5).",
+      "type": "object",
+      "properties": {
+        "languages": {
+          "description": "Every registered language and whether the check can run there, derived from its needs.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LanguageSupport"
+          }
+        },
+        "manifest": {
+          "$ref": "#/$defs/Manifest"
+        }
+      },
+      "required": [
+        "languages",
+        "manifest"
+      ]
+    },
+    "CheckId": {
+      "description": "A check's stable namespaced ID, such as `tests.mutation`.",
+      "type": "string"
+    },
+    "CheckResult": {
+      "description": "One check's outcome within a run.",
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/CostClass"
+        },
+        "delta": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Delta"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "duration_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "findings": {
+          "description": "Number of findings this check produced.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "id": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "metrics": {
+          "description": "The value of each `scope` metric the check measured, by metric name; the gate reads\nthem as `<check-id>.<metric>` (ADR-060).",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "format": "double"
+          },
+          "default": {}
+        },
+        "notes": {
+          "description": "What the result could not take into account, such as `branches: unavailable` when the\ncoverage map measured no branches. Absent when empty: the one optional property of an\nemitted type, so results without notes are unchanged (ADR-079).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-cupel-optional": true
+        },
+        "oracle": {
+          "description": "The oracle a differential or trace check compared against.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "score": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Score"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "skipped": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Skipped"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "$ref": "#/$defs/CheckStatus"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        }
+      },
+      "required": [
+        "cost",
+        "delta",
+        "duration_ms",
+        "findings",
+        "id",
+        "metrics",
+        "oracle",
+        "score",
+        "skipped",
+        "status",
+        "tier"
+      ]
+    },
+    "CheckStatus": {
+      "description": "A check's outcome (ADR-013).",
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "partial",
+        "error",
+        "skipped"
+      ]
+    },
+    "CheckSupport": {
+      "type": "object",
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "support": {
+          "$ref": "#/$defs/SupportDescription"
+        }
+      },
+      "required": [
+        "check",
+        "support"
+      ]
+    },
+    "CliDescription": {
+      "description": "Verbs, global flags, exit codes, schema URLs, and configuration precedence.",
+      "type": "object",
+      "properties": {
+        "config_precedence": {
+          "description": "Configuration layers, highest precedence first.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConfigSource"
+          }
+        },
+        "exit_codes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExitCodeDescription"
+          }
+        },
+        "flags": {
+          "description": "Flags accepted only without a verb, such as `--version`.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArgDescription"
+          }
+        },
+        "global_flags": {
+          "description": "Flags every verb accepts.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArgDescription"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "schemas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SchemaRef"
+          }
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "verbs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommandSummary"
+          }
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "config_precedence",
+        "exit_codes",
+        "flags",
+        "global_flags",
+        "name",
+        "schemas",
+        "stability",
+        "summary",
+        "verbs",
+        "version"
+      ]
+    },
+    "CommandDescription": {
+      "description": "A verb or sub-verb with its own arguments (global flags are listed once, on the CLI).",
+      "type": "object",
+      "properties": {
+        "arguments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ArgDescription"
+          }
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Example"
+          }
+        },
+        "name": {
+          "description": "The words that invoke it after `cupel`, such as `check` or `baseline set`.",
+          "type": "string"
+        },
+        "pending_step": {
+          "description": "The implementation-plan step that gives this command its behavior; null once it has it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "subcommands": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommandDescription"
+          }
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "arguments",
+        "examples",
+        "name",
+        "pending_step",
+        "stability",
+        "subcommands",
+        "summary"
+      ]
+    },
+    "CommandSummary": {
+      "description": "One line about a verb; `describe <verb>` has the rest.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "pending_step": {
+          "description": "The implementation-plan step that gives this verb its behavior; null once it has it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "pending_step",
+        "stability",
+        "summary"
+      ]
+    },
+    "CommandTemplate": {
+      "description": "A default command and the runner it goes with.",
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "runner": {
+          "description": "The runner this command wraps or accompanies; null when it fits every runner.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProducerId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "command",
+        "runner"
+      ]
+    },
+    "ConfigEcho": {
+      "description": "The effective configuration and the layers it came from.",
+      "type": "object",
+      "properties": {
+        "effective": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConfigSource"
+          }
+        }
+      },
+      "required": [
+        "effective",
+        "sources"
+      ]
+    },
+    "ConfigSource": {
+      "description": "A configuration layer, in precedence order (design §6.7).",
+      "type": "string",
+      "enum": [
+        "flags",
+        "env",
+        "profile",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "CostClass": {
+      "description": "How expensive a check or producer is to run. The same names select a run's depth (design §5.8).",
+      "type": "string",
+      "enum": [
+        "quick",
+        "standard",
+        "deep",
+        "exhaustive"
+      ]
+    },
+    "CupelInfo": {
+      "description": "The producing binary's version and the schema the envelope conforms to.",
+      "type": "object",
+      "properties": {
+        "schema": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema",
+        "version"
+      ]
+    },
+    "Delta": {
+      "description": "Change in score against a reference run.",
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "number",
+          "format": "double"
+        },
+        "vs": {
+          "description": "`baseline`, a git ref, or `run:<id>`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "vs"
+      ]
+    },
+    "Description": {
+      "description": "What `describe` returns, tagged by the kind of thing described.",
+      "oneOf": [
+        {
+          "description": "`cupel describe`: the whole command line at a glance.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "cli"
+            }
+          },
+          "$ref": "#/$defs/CliDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe <verb>` or `cupel <verb> --describe`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "command"
+            }
+          },
+          "$ref": "#/$defs/CommandDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe schema <name>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "schema"
+            }
+          },
+          "$ref": "#/$defs/SchemaDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe --all`: everything, in one document.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "all"
+            }
+          },
+          "$ref": "#/$defs/AllDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe language <id>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "language"
+            }
+          },
+          "$ref": "#/$defs/LanguageDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe languages`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "languages"
+            }
+          },
+          "$ref": "#/$defs/LanguagesDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe fact <kind>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "fact"
+            }
+          },
+          "$ref": "#/$defs/FactDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe matrix`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "matrix"
+            }
+          },
+          "$ref": "#/$defs/MatrixDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe <check-id>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "check"
+            }
+          },
+          "$ref": "#/$defs/CheckDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe finding <kind>`.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "finding"
+            }
+          },
+          "$ref": "#/$defs/FindingDescription",
+          "required": [
+            "subject"
+          ]
+        }
+      ]
+    },
+    "Evidence": {
+      "description": "Check-specific supporting data. Its shape per finding kind is the JSON Schema the emitting\ncheck declares in its manifest (ADR-012).",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "Example": {
+      "description": "An invocation and the exit code it produces.",
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "exit_code": {
+          "$ref": "#/$defs/ExitCode"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "command",
+        "exit_code",
+        "summary"
+      ]
+    },
+    "Excerpt": {
+      "description": "Lines of one file around a location.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Relative to the repository root.",
+          "type": "string"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExcerptLine"
+          }
+        }
+      },
+      "required": [
+        "file",
+        "lines"
+      ]
+    },
+    "ExcerptLine": {
+      "type": "object",
+      "properties": {
+        "focus": {
+          "description": "Whether the line is inside the finding's location.",
+          "type": "boolean"
+        },
+        "line": {
+          "description": "1-based.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "focus",
+        "line",
+        "text"
+      ]
+    },
+    "ExitCode": {
+      "description": "0 pass · 1 fail · 2 usage · 3 environment · 4 unevaluable · 5 partial · 6 internal",
+      "type": "integer",
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "ExitCodeDescription": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ExitCode"
+        },
+        "meaning": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        }
+      },
+      "required": [
+        "code",
+        "meaning",
+        "name",
+        "stability"
+      ]
+    },
+    "ExplainSubject": {
+      "description": "What `explain` was asked about.",
+      "type": "string",
+      "enum": [
+        "finding",
+        "check"
+      ]
+    },
+    "Explanation": {
+      "description": "Context for one finding or one check result, read from the fact store. The finding or check\nresult itself is in the envelope's `findings` or `checks`.",
+      "type": "object",
+      "properties": {
+        "covering_tests": {
+          "description": "Tests that cover the finding's site, from `action.hints.covering_tests`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "excerpt": {
+          "description": "The source around the finding's location; null when it has no location or the file is\ngone.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Excerpt"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metrics": {
+          "description": "The check's metrics in that run, per symbol; empty for a finding.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Metric"
+          }
+        },
+        "nearest_test_file": {
+          "description": "The test file nearest to the finding's site, from `action.hints.nearest_test_file`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "run": {
+          "description": "The stored run the explanation comes from: the latest run that produced the finding, or\nthe latest run of the check.",
+          "$ref": "#/$defs/RunId"
+        },
+        "subject": {
+          "$ref": "#/$defs/ExplainSubject"
+        },
+        "target": {
+          "description": "The finding ID or check ID that was asked about.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "covering_tests",
+        "excerpt",
+        "metrics",
+        "nearest_test_file",
+        "run",
+        "subject",
+        "target"
+      ]
+    },
+    "FactDescription": {
+      "description": "One fact kind: its payload version and schema, its producers per language, and the checks\nthat consume it.",
+      "type": "object",
+      "properties": {
+        "consumers": {
+          "description": "Checks that need or want this fact.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CheckId"
+          }
+        },
+        "kind": {
+          "$ref": "#/$defs/FactKind"
+        },
+        "producers": {
+          "description": "Every registered language, with its producers of this fact (empty when it has none).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LanguageProducers"
+          }
+        },
+        "schema": {
+          "description": "The payload's JSON Schema; null until the payload type exists.",
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true
+        },
+        "syntactic": {
+          "description": "Whether language producers make it from the syntax tree.",
+          "type": "boolean"
+        },
+        "version": {
+          "description": "The payload's `Fact::VERSION`; null until the payload type exists.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "consumers",
+        "kind",
+        "producers",
+        "schema",
+        "syntactic",
+        "version"
+      ]
+    },
+    "FactKind": {
+      "description": "One row of the fact catalog (design §8.3.2). Adding a kind requires an ADR.",
+      "type": "string",
+      "enum": [
+        "symbols",
+        "decisions",
+        "norm-tree",
+        "mutation-sites",
+        "test-frames",
+        "module-graph",
+        "api-surface",
+        "roots",
+        "test-conventions",
+        "project-info",
+        "test-results",
+        "test-reruns",
+        "coverage-map",
+        "per-test-map",
+        "mutation-outcomes",
+        "bench-samples",
+        "property-results",
+        "fuzz-results",
+        "race-reports",
+        "analyzer-report",
+        "divergence-results"
+      ]
+    },
+    "FactProducers": {
+      "description": "The producers registered for one fact kind, in selection order.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/FactKind"
+        },
+        "producers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProducerDescription"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "producers"
+      ]
+    },
+    "Finding": {
+      "description": "One actionable observation produced by a check.",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/Action"
+        },
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "confidence": {
+          "description": "How sure the check is, from 0 to 1.",
+          "type": "number",
+          "format": "double",
+          "maximum": 1.0,
+          "minimum": 0.0
+        },
+        "detail": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "id": {
+          "$ref": "#/$defs/FindingId"
+        },
+        "kind": {
+          "description": "Namespaced finding kind, such as `mutant.survived`.",
+          "type": "string"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Location"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "new_since_baseline": {
+          "type": "boolean"
+        },
+        "repro": {
+          "description": "A command that reproduces this finding.",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "suppress": {
+          "description": "A command that suppresses this finding.",
+          "type": "string"
+        },
+        "suppressed": {
+          "type": "boolean"
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Symbol"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "check",
+        "confidence",
+        "detail",
+        "evidence",
+        "id",
+        "kind",
+        "location",
+        "new_since_baseline",
+        "repro",
+        "severity",
+        "suppress",
+        "suppressed",
+        "symbol",
+        "tier",
+        "title"
+      ]
+    },
+    "FindingDescription": {
+      "description": "One finding kind: the check that emits it, the action it asks for, and the JSON Schema of its\nevidence (ADR-012).",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "evidence": {
+          "description": "JSON Schema of this kind's `evidence` object.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "kind": {
+          "type": "string"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "check",
+        "evidence",
+        "kind",
+        "stability",
+        "summary"
+      ]
+    },
+    "FindingId": {
+      "description": "`fnd_` followed by six lowercase hex digits",
+      "type": "string",
+      "pattern": "^fnd_[0-9a-f]{6}$"
+    },
+    "FindingKindSpec": {
+      "description": "A finding kind a check emits, the action it maps to, and its evidence schema (ADR-012).",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "evidence": {
+          "description": "JSON Schema of this kind's `evidence` object.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "kind": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "evidence",
+        "kind",
+        "summary"
+      ]
+    },
+    "GateOutcome": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail"
+      ]
+    },
+    "GateResult": {
+      "type": "object",
+      "properties": {
+        "evaluated": {
+          "description": "The gate section evaluated, such as `gate.changed`.",
+          "type": "string"
+        },
+        "result": {
+          "$ref": "#/$defs/GateOutcome"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GateRule"
+          }
+        }
+      },
+      "required": [
+        "evaluated",
+        "result",
+        "rules"
+      ]
+    },
+    "GateRule": {
+      "type": "object",
+      "properties": {
+        "actual": {
+          "description": "The measured value; null when the rule could not be evaluated.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "result": {
+          "$ref": "#/$defs/RuleOutcome"
+        },
+        "rule": {
+          "description": "The rule as written, such as `tests.mutation.score >= 0.80`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "actual",
+        "result",
+        "rule"
+      ]
+    },
+    "GitInfo": {
+      "type": "object",
+      "properties": {
+        "base": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "branch": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dirty": {
+          "type": "boolean"
+        },
+        "sha": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "base",
+        "branch",
+        "dirty",
+        "sha"
+      ]
+    },
+    "ImpactBasis": {
+      "description": "How one language's impacted tests were chosen.",
+      "type": "object",
+      "properties": {
+        "fallback": {
+          "description": "Why the language fell back to file-level impact; null when it did not.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "measured": {
+          "description": "How many of the map's tests the producer measured for this run; 0 when the whole map\ncame from its cache (ADR-083). Null without a map.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "per_test_map": {
+          "description": "True when a per-test coverage map chose the tests; false when file-level impact through\nthe import graph did.",
+          "type": "boolean"
+        },
+        "producer": {
+          "description": "The `PerTestMap` producer that measured the map, when one did.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProducerId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reused": {
+          "description": "How many of the map's tests came from the producer's cache. Null without a map.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "fallback",
+        "lang",
+        "measured",
+        "per_test_map",
+        "producer",
+        "reused"
+      ]
+    },
+    "ImpactedTest": {
+      "description": "One impacted test.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "The test's file, relative to the repository root, when known.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "The runner's test ID; a test file's path where the language fell back to file impact.",
+          "type": "string"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "reason": {
+          "description": "Why the scope impacts it, such as `covers calc::add (src/lib.rs:5)`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "id",
+        "lang",
+        "reason"
+      ]
+    },
+    "LangFamily": {
+      "description": "A family of languages whose symbols are comparable, such as `ecma` for JavaScript and\nTypeScript (ADR-011).",
+      "type": "string"
+    },
+    "LangId": {
+      "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
+      "type": "string"
+    },
+    "LanguageDescription": {
+      "description": "One language: identity, the facts it produces and by which producers, and which checks can\ntherefore run for it (design §8.4.2).",
+      "type": "object",
+      "properties": {
+        "checks": {
+          "description": "Every registered check and whether it can run for this language.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CheckSupport"
+          }
+        },
+        "extensions": {
+          "description": "With the leading dot, such as `.rs`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "facts": {
+          "description": "Every fact kind the language has a producer for, in catalog order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactProducers"
+          }
+        },
+        "family": {
+          "$ref": "#/$defs/LangFamily"
+        },
+        "id": {
+          "$ref": "#/$defs/LangId"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "toolchain": {
+          "description": "The language's toolchain-table row (design §8.7); null when it has none.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolchainDescription"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "checks",
+        "extensions",
+        "facts",
+        "family",
+        "id",
+        "stability",
+        "toolchain"
+      ]
+    },
+    "LanguageProducers": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "producers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ProducerDescription"
+          }
+        }
+      },
+      "required": [
+        "lang",
+        "producers"
+      ]
+    },
+    "LanguageSummary": {
+      "type": "object",
+      "properties": {
+        "extensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "facts": {
+          "description": "The fact kinds the language has a producer for, in catalog order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        },
+        "family": {
+          "$ref": "#/$defs/LangFamily"
+        },
+        "id": {
+          "$ref": "#/$defs/LangId"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        }
+      },
+      "required": [
+        "extensions",
+        "facts",
+        "family",
+        "id",
+        "stability"
+      ]
+    },
+    "LanguageSupport": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "support": {
+          "$ref": "#/$defs/SupportDescription"
+        }
+      },
+      "required": [
+        "lang",
+        "support"
+      ]
+    },
+    "LanguagesDescription": {
+      "description": "Every language, one line each.",
+      "type": "object",
+      "properties": {
+        "languages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LanguageSummary"
+          }
+        }
+      },
+      "required": [
+        "languages"
+      ]
+    },
+    "LauncherDescription": {
+      "description": "A launcher: when it is chosen, and the values it gives `<name>` placeholders in commands.",
+      "type": "object",
+      "properties": {
+        "detect": {
+          "description": "Detection rules, any one of which selects it; empty for the fallback.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tool": {
+          "$ref": "#/$defs/ToolId"
+        },
+        "values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "detect",
+        "tool",
+        "values"
+      ]
+    },
+    "Location": {
+      "description": "A span in a file. Paths are relative to the repository root; lines and columns are 1-based.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "file",
+        "line"
+      ]
+    },
+    "Manifest": {
+      "description": "Everything Cupel knows about a check without running it. Plugins describe themselves with\nthe same shape. Language applicability is never declared; it is derived (design §8.3.5).",
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/CostClass"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FindingKindSpec"
+          }
+        },
+        "id": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "metrics": {
+          "description": "What the check measures: `scope` metrics are gate keys (`<check-id>.<metric>`), the others\nare `survey` ranking dimensions (ADR-060, ADR-062).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MetricSpec"
+          }
+        },
+        "needs": {
+          "description": "Facts the check cannot run without.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "version": {
+          "description": "Bumped when results change for the same facts; invalidates cached results.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "wants": {
+          "description": "Facts the check uses for enrichment when present.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        }
+      },
+      "required": [
+        "cost",
+        "findings",
+        "id",
+        "metrics",
+        "needs",
+        "stability",
+        "summary",
+        "tier",
+        "version",
+        "wants"
+      ]
+    },
+    "MatrixCell": {
+      "type": "object",
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "support": {
+          "$ref": "#/$defs/SupportDescription"
+        }
+      },
+      "required": [
+        "check",
+        "lang",
+        "support"
+      ]
+    },
+    "MatrixDescription": {
+      "description": "Checks × languages (design §8.3.5): derived from check needs and registered producers.",
+      "type": "object",
+      "properties": {
+        "cells": {
+          "description": "One cell per check and language, ordered by check, then language.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MatrixCell"
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CheckId"
+          }
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LangId"
+          }
+        },
+        "verbs": {
+          "description": "Verbs whose behavior depends on a fact a language may lack, such as `tests --impacted`\non `per-test-map` (ADR-006): per language, whether that fact can be produced.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/VerbSupport"
+          }
+        }
+      },
+      "required": [
+        "cells",
+        "checks",
+        "languages",
+        "verbs"
+      ]
+    },
+    "Metric": {
+      "description": "One measured value of a check, for a symbol or for the check as a whole.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "description": "The metric's name, such as `cyclomatic` or `score`.",
+          "type": "string"
+        },
+        "symbol": {
+          "description": "Null for a value about the whole check, such as its score.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolHash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "key",
+        "symbol",
+        "value"
+      ]
+    },
+    "MetricPer": {
+      "description": "What one value of a metric describes: the whole scope, reported in `CheckResult.metrics` and\nusable as a gate key, or one target, reported through `EventSink::measure` and ranked by\n`survey`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "scope"
+          ]
+        },
+        {
+          "description": "A function or method.",
+          "type": "string",
+          "const": "symbol"
+        },
+        {
+          "description": "A file or module.",
+          "type": "string",
+          "const": "module"
+        },
+        {
+          "description": "A set of targets, such as a clone cluster or a dependency cycle.",
+          "type": "string",
+          "const": "group"
+        }
+      ]
+    },
+    "MetricSpec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "per": {
+          "description": "What one value describes (ADR-062).",
+          "$ref": "#/$defs/MetricPer"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "per",
+        "summary"
+      ]
+    },
+    "NextAction": {
+      "description": "A ranked suggestion of what to do next.",
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "finding": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FindingId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "priority": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "command",
+        "finding",
+        "kind",
+        "priority",
+        "summary"
+      ]
+    },
+    "OracleConfig": {
+      "description": "An oracle for differential and trace checks (design §6.5 `oracle`).",
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "description": "A command with an `{input}` placeholder, for `kind = \"command\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "inputs": {
+          "description": "The known inputs of a command's smoke comparison, for `kind = \"command\"`; one empty\ninput when none are given (ADR-090 §3).",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "kind": {
+          "$ref": "#/$defs/OracleKind"
+        },
+        "lang": {
+          "description": "The specification language (`tla+`, `quint`, `p`), for `kind = \"spec\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ref": {
+          "description": "A git ref, for `kind = \"ref\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spec": {
+          "description": "A specification file, for `kind = \"spec\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "cmd",
+        "inputs",
+        "kind",
+        "lang",
+        "ref",
+        "spec"
+      ]
+    },
+    "OracleKind": {
+      "type": "string",
+      "enum": [
+        "ref",
+        "command",
+        "spec"
+      ]
+    },
+    "OracleReport": {
+      "description": "One oracle as the `oracle` verb reports it (ADR-091 §6).",
+      "type": "object",
+      "properties": {
+        "definition": {
+          "$ref": "#/$defs/OracleConfig"
+        },
+        "hash": {
+          "description": "The identity hash now; null when the oracle cannot be reached.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/OracleState"
+        },
+        "verified_at": {
+          "description": "When the recorded verification was made; null without one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verified_run": {
+          "description": "The `oracle verify` run that recorded the verification; null without one.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "definition",
+        "hash",
+        "name",
+        "state",
+        "verified_at",
+        "verified_run"
+      ]
+    },
+    "OracleState": {
+      "description": "Whether an oracle's recorded verification holds now.",
+      "oneOf": [
+        {
+          "description": "A verification is recorded under the oracle's identity now.",
+          "type": "string",
+          "const": "verified"
+        },
+        {
+          "description": "No verification is recorded.",
+          "type": "string",
+          "const": "unverified"
+        },
+        {
+          "description": "A verification is recorded under another identity: the definition, the ref's commit, or\nthe spec file changed since.",
+          "type": "string",
+          "const": "changed"
+        },
+        {
+          "description": "The identity cannot be computed now: the ref or the spec file is gone.",
+          "type": "string",
+          "const": "unreachable"
+        }
+      ]
+    },
+    "PlannedCheck": {
+      "description": "A check the run would execute.",
+      "type": "object",
+      "properties": {
+        "est_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "id": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "needs": {
+          "description": "The facts it needs and where they would come from, such as `coverage(cached)`.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "note": {
+          "description": "What the estimate rests on, such as how many targets are cached.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "targets": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "est_ms",
+        "id",
+        "needs",
+        "note",
+        "targets"
+      ]
+    },
+    "PlannedInstall": {
+      "description": "A tool the run would install (`--install`).",
+      "type": "object",
+      "properties": {
+        "command": {
+          "description": "The command that would install it, when one is known.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tool": {
+          "$ref": "#/$defs/ToolId"
+        }
+      },
+      "required": [
+        "command",
+        "tool"
+      ]
+    },
+    "PlannedSkip": {
+      "description": "A check the run would skip, and why.",
+      "type": "object",
+      "properties": {
+        "est_ms": {
+          "description": "What the skipped work was estimated to cost, for `budget`: the check's own cost plus the\nproducer runs it would have brought in (ADR-086 §10).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "fact": {
+          "description": "The missing fact, for `unsupported`.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FactKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "lang": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LangId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "$ref": "#/$defs/SkipReason"
+        },
+        "see": {
+          "description": "A command that explains the reason.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tool": {
+          "description": "The missing tool, for `unavailable`.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "est_ms",
+        "fact",
+        "id",
+        "lang",
+        "reason",
+        "see",
+        "tool"
+      ]
+    },
+    "PlannedWrite": {
+      "description": "A file the run would write.",
+      "type": "object",
+      "properties": {
+        "diff": {
+          "description": "A unified diff from the current content; null when the content is only known once the\nrun happens, such as a run record.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path": {
+          "description": "Relative to the repository root; absolute when outside it.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "diff",
+        "path"
+      ]
+    },
+    "ProducerDescription": {
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/CostClass"
+        },
+        "id": {
+          "$ref": "#/$defs/ProducerId"
+        },
+        "needs": {
+          "description": "Facts the producer consumes.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        }
+      },
+      "required": [
+        "cost",
+        "id",
+        "needs"
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "RankedTarget": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "rank": {
+          "description": "1 is the highest value.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "target": {
+          "$ref": "#/$defs/Target"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "lang",
+        "rank",
+        "target",
+        "value"
+      ]
+    },
+    "RankingDimension": {
+      "description": "One per-target metric of one check, with its worst targets.",
+      "type": "object",
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "entries": {
+          "description": "The highest values first, at most `top`.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RankedTarget"
+          }
+        },
+        "measured": {
+          "description": "How many targets were measured.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "metric": {
+          "type": "string"
+        },
+        "per": {
+          "$ref": "#/$defs/MetricPer"
+        },
+        "summary": {
+          "description": "The metric's summary from the manifest.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "check",
+        "entries",
+        "measured",
+        "metric",
+        "per",
+        "summary"
+      ]
+    },
+    "Rankings": {
+      "description": "What `survey` adds to its envelope: the highest values of every ranking dimension.",
+      "type": "object",
+      "properties": {
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RankingDimension"
+          }
+        },
+        "top": {
+          "description": "The most entries a dimension lists.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "dimensions",
+        "top"
+      ]
+    },
+    "RuleOutcome": {
+      "description": "One gate rule's result (ADR-060 §6). Only `pass` passes.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        {
+          "description": "The rule's check did not run to completion here, or did not report the metric.",
+          "type": "string",
+          "const": "skipped"
+        },
+        {
+          "description": "The rule's operator cannot be evaluated yet (`no-breaking`).",
+          "type": "string",
+          "const": "unsupported"
+        }
+      ]
+    },
+    "RunId": {
+      "description": "A run ID: `run_` followed by a ULID.",
+      "type": "string",
+      "pattern": "^run_[0-9A-HJKMNP-TV-Z]{26}$"
+    },
+    "RunInfo": {
+      "description": "What ran, when, where, and with which settings.",
+      "type": "object",
+      "properties": {
+        "baseline": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BaselineRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "budget_ms": {
+          "description": "The effective budget in milliseconds; null when no layer set one.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "config": {
+          "$ref": "#/$defs/ConfigEcho"
+        },
+        "depth": {
+          "description": "The effective depth from configuration; null only when configuration did not load.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CostClass"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "duration_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "git": {
+          "description": "Null outside a git repository.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GitInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "$ref": "#/$defs/RunId"
+        },
+        "scope": {
+          "description": "Null for verbs that do not resolve a scope.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScopeInfo"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "seed": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "started": {
+          "description": "Start time, RFC 3339 in UTC (ADR-013).",
+          "type": "string"
+        },
+        "toolchain": {
+          "$ref": "#/$defs/ToolchainInfo"
+        },
+        "verb": {
+          "description": "Null only when the command line named no valid verb (ADR-018).",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Verb"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "baseline",
+        "budget_ms",
+        "config",
+        "depth",
+        "duration_ms",
+        "git",
+        "id",
+        "scope",
+        "seed",
+        "started",
+        "toolchain",
+        "verb"
+      ]
+    },
+    "RunPlan": {
+      "description": "Everything a run would do, without doing it.",
+      "type": "object",
+      "properties": {
+        "est_total_ms": {
+          "description": "The sum of the planned checks' estimates.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "would_install": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlannedInstall"
+          }
+        },
+        "would_run": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlannedCheck"
+          }
+        },
+        "would_skip": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlannedSkip"
+          }
+        },
+        "would_write": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlannedWrite"
+          }
+        }
+      },
+      "required": [
+        "est_total_ms",
+        "would_install",
+        "would_run",
+        "would_skip",
+        "would_write"
+      ]
+    },
+    "SchemaDescription": {
+      "description": "A published schema and the schema itself (JSON Schema draft 2020-12).",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "schema",
+        "stability",
+        "url"
+      ]
+    },
+    "SchemaRef": {
+      "description": "Where a published schema lives.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "stability",
+        "url"
+      ]
+    },
+    "ScopeInfo": {
+      "description": "The set of files and symbols a run considered.",
+      "type": "object",
+      "properties": {
+        "files": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "languages": {
+          "description": "Languages that saw at least one file in scope.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LangId"
+          }
+        },
+        "mode": {
+          "$ref": "#/$defs/ScopeMode"
+        },
+        "roots": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "symbols": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "files",
+        "languages",
+        "mode",
+        "roots",
+        "symbols"
+      ]
+    },
+    "ScopeMode": {
+      "type": "string",
+      "enum": [
+        "tree",
+        "changed",
+        "range",
+        "paths",
+        "symbols",
+        "since-baseline"
+      ]
+    },
+    "Score": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "description": "How many targets the score covers.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "unit": {
+          "description": "What `value` measures, such as `killed_ratio`.",
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "n",
+        "unit",
+        "value"
+      ]
+    },
+    "Severity": {
+      "type": "string",
+      "enum": [
+        "fail",
+        "warn",
+        "info"
+      ]
+    },
+    "SeverityCounts": {
+      "type": "object",
+      "properties": {
+        "fail": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "info": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "warn": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "fail",
+        "info",
+        "warn"
+      ]
+    },
+    "SkipReason": {
+      "type": "string",
+      "enum": [
+        "unsupported",
+        "unavailable",
+        "unconfigured",
+        "budget",
+        "timeout",
+        "needs-range"
+      ]
+    },
+    "Skipped": {
+      "description": "Why a check did not run (design §8.3.5).",
+      "type": "object",
+      "properties": {
+        "est_ms": {
+          "description": "What the skipped work was estimated to cost, for `budget`: the check's own cost plus the\nproducer runs it would have brought in (ADR-086 §10).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "fact": {
+          "description": "The missing fact, for `unsupported`.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FactKind"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "lang": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LangId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "$ref": "#/$defs/SkipReason"
+        },
+        "see": {
+          "description": "A command that explains the reason.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tool": {
+          "description": "The missing tool, for `unavailable`.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "est_ms",
+        "fact",
+        "lang",
+        "reason",
+        "see",
+        "tool"
+      ]
+    },
+    "Stability": {
+      "description": "Whether a described entity's contract may still change.",
+      "type": "string",
+      "enum": [
+        "stable",
+        "experimental"
+      ]
+    },
+    "Status": {
+      "description": "Overall outcome. `partial` and `error` are distinct from `fail`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail",
+            "partial",
+            "error"
+          ]
+        },
+        {
+          "description": "A `--dry-run` plan; nothing ran.",
+          "type": "string",
+          "const": "plan"
+        }
+      ]
+    },
+    "Summary": {
+      "type": "object",
+      "properties": {
+        "findings": {
+          "$ref": "#/$defs/SeverityCounts"
+        },
+        "gate": {
+          "description": "Null when no gate was evaluated.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GateResult"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "new": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "resolved": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "suppressed": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "findings",
+        "gate",
+        "new",
+        "resolved",
+        "suppressed"
+      ]
+    },
+    "SupportDescription": {
+      "description": "A [`Support`] value as `describe` reports it.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "const": "supported"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        {
+          "description": "No producer can make this fact for the language.",
+          "type": "object",
+          "properties": {
+            "fact": {
+              "$ref": "#/$defs/FactKind"
+            },
+            "status": {
+              "type": "string",
+              "const": "unsupported"
+            }
+          },
+          "required": [
+            "fact",
+            "status"
+          ]
+        },
+        {
+          "description": "A producer's tool is missing here.",
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "const": "unavailable"
+            },
+            "tool": {
+              "$ref": "#/$defs/ToolId"
+            }
+          },
+          "required": [
+            "status",
+            "tool"
+          ]
+        },
+        {
+          "description": "A producer needs this configuration key set.",
+          "type": "object",
+          "properties": {
+            "key": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "const": "unconfigured"
+            }
+          },
+          "required": [
+            "key",
+            "status"
+          ]
+        }
+      ]
+    },
+    "Symbol": {
+      "description": "The function or method a finding is about.",
+      "type": "object",
+      "properties": {
+        "display": {
+          "description": "`namespace::name`, for people.",
+          "type": "string"
+        },
+        "hash": {
+          "description": "Structural identity, for machines.",
+          "$ref": "#/$defs/SymbolHash"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        }
+      },
+      "required": [
+        "display",
+        "hash",
+        "lang"
+      ]
+    },
+    "SymbolHash": {
+      "description": "`sh_` followed by sixteen lowercase hex digits",
+      "type": "string",
+      "pattern": "^sh_[0-9a-f]{16}$"
+    },
+    "Target": {
+      "description": "What a measurement is about.",
+      "type": "object",
+      "properties": {
+        "display": {
+          "description": "How people name it: a symbol's display name, a module path, a cluster's description.",
+          "type": "string"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Location"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "symbol": {
+          "description": "The structural hash, when the target is a symbol.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolHash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "display",
+        "location",
+        "symbol"
+      ]
+    },
+    "TestCommand": {
+      "description": "A command that runs one language's impacted tests in one project root.",
+      "type": "object",
+      "properties": {
+        "command": {
+          "description": "Shell words, ready to paste in `dir`.",
+          "type": "string"
+        },
+        "dir": {
+          "description": "The project root to run it in, relative to the repository root; `.` for the root.",
+          "type": "string"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "narrowed": {
+          "description": "False when the runner cannot narrow to the impacted tests and the command runs its whole\nsuite.",
+          "type": "boolean"
+        },
+        "runner": {
+          "$ref": "#/$defs/ProducerId"
+        }
+      },
+      "required": [
+        "command",
+        "dir",
+        "lang",
+        "narrowed",
+        "runner"
+      ]
+    },
+    "TestsReport": {
+      "description": "The tests a scope impacts, and how to run them.",
+      "type": "object",
+      "properties": {
+        "commands": {
+          "description": "One per runner and project root with impacted tests.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TestCommand"
+          }
+        },
+        "impacted": {
+          "description": "Sorted by language, then ID.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ImpactedTest"
+          }
+        },
+        "languages": {
+          "description": "One per language in scope, in ID order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ImpactBasis"
+          }
+        },
+        "per_test_map": {
+          "description": "True only when every language in scope chose its tests from a per-test coverage map.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "commands",
+        "impacted",
+        "languages",
+        "per_test_map"
+      ]
+    },
+    "Tier": {
+      "description": "Evidence tier: 0 structural metric … 6 proof.",
+      "type": "integer",
+      "maximum": 6,
+      "minimum": 0
+    },
+    "ToolDescription": {
+      "description": "A tool producer in a toolchain row.",
+      "type": "object",
+      "properties": {
+        "commands": {
+          "description": "Default command templates.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CommandTemplate"
+          }
+        },
+        "detect": {
+          "description": "Detection rules, any one of which selects it; empty for the fallback.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "format": {
+          "description": "The report format it reads, for coverage producers.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "install": {
+          "description": "The command template that installs it, with the launcher's values as placeholders;\nnull when Cupel does not install it (ADR-081).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "producer": {
+          "$ref": "#/$defs/ProducerId"
+        }
+      },
+      "required": [
+        "commands",
+        "detect",
+        "format",
+        "install",
+        "producer"
+      ]
+    },
+    "ToolId": {
+      "description": "An external tool a producer drives, such as `cargo-llvm-cov`.",
+      "type": "string"
+    },
+    "ToolchainDescription": {
+      "description": "A toolchain-table row: the tools Cupel knows for a language, each list in default order.",
+      "type": "object",
+      "properties": {
+        "bench": {
+          "description": "Benchmark producers (`BenchSamples`).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolDescription"
+          }
+        },
+        "coverage": {
+          "description": "Coverage producers (`CoverageMap`), each with its report format.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolDescription"
+          }
+        },
+        "fuzz": {
+          "description": "Fuzzers.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolId"
+          }
+        },
+        "launchers": {
+          "description": "Package managers and other prefixes commands are launched through.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LauncherDescription"
+          }
+        },
+        "property": {
+          "description": "Property-testing tools.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolId"
+          }
+        },
+        "race": {
+          "description": "Race and undefined-behavior detectors.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolId"
+          }
+        },
+        "runners": {
+          "description": "Test-runner producers (`TestResults`).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolDescription"
+          }
+        }
+      },
+      "required": [
+        "bench",
+        "coverage",
+        "fuzz",
+        "launchers",
+        "property",
+        "race",
+        "runners"
+      ]
+    },
+    "ToolchainInfo": {
+      "description": "Tool name → version for every toolchain component the run used.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "ValueType": {
+      "description": "The type of value an argument takes.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "string",
+            "integer",
+            "path"
+          ]
+        },
+        {
+          "description": "A flag that takes no value.",
+          "type": "string",
+          "const": "switch"
+        },
+        {
+          "description": "A duration such as `10s`, `5m`, or `1h`.",
+          "type": "string",
+          "const": "duration"
+        },
+        {
+          "description": "One of `values`.",
+          "type": "string",
+          "const": "enum"
+        }
+      ]
+    },
+    "Verb": {
+      "description": "The verbs of design §6.2.",
+      "type": "string",
+      "enum": [
+        "init",
+        "doctor",
+        "describe",
+        "check",
+        "survey",
+        "explain",
+        "baseline",
+        "oracle",
+        "tests",
+        "suppress",
+        "serve"
+      ]
+    },
+    "VerbSupport": {
+      "description": "A verb that reads a fact directly, and per language whether the fact can be produced there.",
+      "type": "object",
+      "properties": {
+        "fact": {
+          "$ref": "#/$defs/FactKind"
+        },
+        "languages": {
+          "description": "One per language, in ID order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LanguageSupport"
+          }
+        },
+        "verb": {
+          "description": "Such as `tests --impacted`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fact",
+        "languages",
+        "verb"
+      ]
+    }
+  }
+}
