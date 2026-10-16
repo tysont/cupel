@@ -3,7 +3,7 @@
 mod text;
 
 #[cfg(test)]
-mod fixture;
+pub(crate) mod fixture;
 
 use cupel_core::Envelope;
 

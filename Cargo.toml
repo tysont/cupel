@@ -34,6 +34,8 @@ clap = { version = "4.6.7", features = ["derive", "env"] }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.152"
 toml = { version = "1.1.8", features = ["preserve_order"] }
+# `oracle add` and `oracle remove` edit cupel.toml in place, keeping comments and order (ADR-090).
+toml_edit = "0.25.17"
 schemars = "1.2.2"
 blake3 = "1.8.7"
 semver = "1.0.28"

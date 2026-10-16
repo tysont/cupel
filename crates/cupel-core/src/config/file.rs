@@ -185,6 +185,17 @@ impl OracleConfig {
     /// The specification languages a `spec` oracle may be written in.
     pub const SPEC_LANGS: [&'static str; 3] = ["tla+", "quint", "p"];
 
+    /// Whether `name` can name an oracle: `[a-z][a-z0-9_-]*`; the problem otherwise.
+    pub fn validate_name(name: &str) -> std::result::Result<(), String> {
+        if is_segment(name) {
+            Ok(())
+        } else {
+            Err(format!(
+                "invalid oracle name `{name}`: must match `[a-z][a-z0-9_-]*`"
+            ))
+        }
+    }
+
     /// Whether this definition has exactly its kind's keys and a known specification language;
     /// the problem otherwise (ADR-090 §1).
     pub fn validate(&self) -> std::result::Result<(), String> {
@@ -348,11 +359,7 @@ fn oracle_tables<'de, D: Deserializer<'de>>(
 ) -> Result<BTreeMap<String, OracleConfig>, D::Error> {
     let oracles = BTreeMap::<String, OracleConfig>::deserialize(deserializer)?;
     for (name, oracle) in &oracles {
-        if !is_segment(name) {
-            return Err(de::Error::custom(format!(
-                "invalid oracle name `{name}`: must match `[a-z][a-z0-9_-]*`"
-            )));
-        }
+        OracleConfig::validate_name(name).map_err(de::Error::custom)?;
         oracle
             .validate()
             .map_err(|reason| de::Error::custom(format!("invalid oracle `{name}`: {reason}")))?;

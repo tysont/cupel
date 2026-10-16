@@ -370,9 +370,10 @@ fn baseline_verb() -> CommandDescription {
 
 /// `oracle add`, which registers an oracle of one of three kinds.
 fn oracle_add() -> CommandDescription {
-    sub(
+    let add = sub(
         "oracle add",
-        "Register an oracle: a reference build, a command, or a specification.",
+        "Define an oracle in cupel.toml: a git ref, a command, or a specification; previews \
+         without --write.",
         vec![
             positional("NAME", ValueType::String, "The oracle's name."),
             choice(
@@ -401,40 +402,76 @@ fn oracle_add() -> CommandDescription {
                 "LANG",
                 "The specification language: tla+, quint, or p.",
             ),
+            valued(
+                "--input",
+                ValueType::String,
+                "INPUT",
+                "A known input of a command's smoke comparison; repeatable.",
+            ),
         ],
-        "cupel oracle add pg --kind ref --ref v1.2.0",
-    )
+        "cupel oracle add old --kind ref --ref v1.2.0",
+    );
+    CommandDescription {
+        examples: examples(&[(
+            "cupel oracle add old --kind ref --ref v1.2.0",
+            "Preview the [oracles.old] table add would write to cupel.toml; writes nothing.",
+            ExitCode::Pass,
+        )]),
+        ..add
+    }
 }
 
 /// The `oracle` sub-verbs.
 fn oracle_subcommands() -> Vec<CommandDescription> {
     vec![
         oracle_add(),
-        sub(
-            "oracle list",
-            "List registered oracles.",
-            vec![],
-            "cupel oracle list",
-        ),
+        CommandDescription {
+            examples: examples(&[(
+                "cupel oracle list",
+                "List the oracles defined in cupel.toml, each with its state.",
+                ExitCode::Pass,
+            )]),
+            ..sub(
+                "oracle list",
+                "List the oracles cupel.toml defines and whether each is verified now.",
+                vec![],
+                "cupel oracle list",
+            )
+        },
         sub(
             "oracle remove",
-            "Remove an oracle.",
+            "Remove an oracle from cupel.toml and forget its verification; previews without \
+             --write.",
             vec![positional(
                 "NAME",
                 ValueType::String,
                 "The oracle to remove.",
             )],
-            "cupel oracle remove pg",
+            "cupel oracle remove old",
         ),
-        sub(
-            "oracle verify",
-            "Smoke-test an oracle and record that it is verified.",
-            vec![
-                positional("NAME", ValueType::String, "The oracle to verify.").optional(),
-                switch("--all", "Verify every oracle."),
-            ],
-            "cupel oracle verify pg",
-        ),
+        CommandDescription {
+            examples: examples(&[
+                (
+                    "cupel oracle verify old",
+                    "Run the smoke comparison of the oracle `old` and record it if it passes.",
+                    ExitCode::Usage,
+                ),
+                (
+                    "cupel oracle verify --all",
+                    "Verify every oracle cupel.toml defines.",
+                    ExitCode::Pass,
+                ),
+            ]),
+            ..sub(
+                "oracle verify",
+                "Run an oracle's smoke comparison and record it as verified when it passes.",
+                vec![
+                    positional("NAME", ValueType::String, "The oracle to verify.").optional(),
+                    switch("--all", "Verify every oracle."),
+                ],
+                "cupel oracle verify old",
+            )
+        },
     ]
 }
 
@@ -444,12 +481,12 @@ fn oracle_verb() -> CommandDescription {
         ..verb(
             "oracle",
             "Add, list, remove, or verify the oracles differential checks compare with.",
-            Some("P5.2"),
+            None,
             vec![],
             examples(&[(
                 "cupel oracle list",
-                "List registered oracles.",
-                ExitCode::Usage,
+                "List the oracles defined in cupel.toml, each with its state.",
+                ExitCode::Pass,
             )]),
         )
     }
@@ -752,9 +789,8 @@ fn scope_which_flags() -> Vec<ArgDescription> {
             "--oracle",
             ValueType::String,
             "NAME",
-            "The oracle for differential checks.",
-        )
-        .pending("P5.3"),
+            "The oracle checks that compare against one use; default the first verified.",
+        ),
         valued(
             "--cases",
             ValueType::Integer,
@@ -1076,7 +1112,6 @@ mod tests {
             .into_iter()
             .filter_map(|command| Some((command.name, command.pending_step?)))
             .collect();
-        let expected = [("oracle", "P5.2")].map(|(name, step)| (name.to_owned(), step.to_owned()));
-        assert_eq!(pending, expected);
+        assert_eq!(pending, Vec::<(String, String)>::new());
     }
 }

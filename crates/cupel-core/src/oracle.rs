@@ -18,9 +18,12 @@ pub fn oracle_identity(definition: &OracleConfig, resolved: Option<&str>) -> Str
         "definition": definition,
         "resolved": resolved,
     });
-    blake3::hash(canonical.to_string().as_bytes())
-        .to_hex()
-        .to_string()
+    oracle_content_digest(canonical.to_string().as_bytes())
+}
+
+/// The BLAKE3 hex of a spec file's bytes, what a spec oracle resolves to.
+pub fn oracle_content_digest(bytes: &[u8]) -> String {
+    blake3::hash(bytes).to_hex().to_string()
 }
 
 /// Whether an oracle's recorded verification holds now.

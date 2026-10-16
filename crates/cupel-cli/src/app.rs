@@ -23,8 +23,8 @@ use crate::page::Page;
 use crate::problem::Problem;
 use crate::run::{Invocation, Run};
 use crate::{
-    against, baseline, catalog, check, describe, doctor, explain, init, persist, registry, render,
-    serve, suppress, survey, tests_verb,
+    against, baseline, catalog, check, describe, doctor, explain, init, oracle, persist, registry,
+    render, serve, suppress, survey, tests_verb,
 };
 
 /// How an envelope reaches stdout: its renderer, whether text is colored, and the findings page.
@@ -306,7 +306,7 @@ fn execute(
         None => Err(CupelError::missing_verb(verb_names())),
         Some(verb) => run_verb(invocation, (cli, environment), verb, events),
     }?;
-    let envelope = graded(envelope, cli, invocation.writer, invocation.config)?;
+    let envelope = graded(envelope, cli, invocation)?;
     Ok(if cut_short {
         Run::interrupted(envelope)
     } else {
@@ -367,17 +367,8 @@ fn run_verb(
                 envelope
             })
         }
-        verb @ VerbArgs::Oracle { .. } => Err(pending(verb)),
+        VerbArgs::Oracle { action } => oracle::run(invocation, action, events),
     }
-}
-
-/// The error for `verb`, which a later plan step builds.
-fn pending(verb: &VerbArgs) -> CupelError {
-    let words = verb.words();
-    let step = registry::find(&words[..1])
-        .and_then(|command| command.pending_step)
-        .expect("every verb without behavior names its plan step in the registry");
-    CupelError::pending_verb(&words, &step)
 }
 
 /// `init`: writes the configuration, or previews what `--write` would write.
@@ -402,15 +393,16 @@ fn init_verb(
 }
 
 /// A finished run of a verb that grades the repository with the repository's suppressions
-/// applied (ADR-047 §5) and, for `check` and `survey`, deltas against `--against` or the
-/// default baseline (ADR-046 §5), then the gate and `next_actions` (ADR-060, ADR-061). Plans and
-/// the bookkeeping verbs pass through unchanged.
+/// applied (ADR-047 §5) and, for `check` and `survey`, results against an unverified oracle
+/// capped first (ADR-091 §4), then deltas against `--against` or the default baseline
+/// (ADR-046 §5), the gate, and `next_actions` (ADR-060, ADR-061). Plans and the bookkeeping
+/// verbs pass through unchanged.
 fn graded(
     mut envelope: Envelope,
     cli: &Cli,
-    writer: &Writer,
-    config: Result<&Config, &cupel_core::Error>,
+    invocation: &Invocation<'_>,
 ) -> Result<Envelope, CupelError> {
+    let (writer, config) = (invocation.writer, invocation.config);
     if envelope.status == Status::Plan {
         return Ok(envelope);
     }
@@ -419,6 +411,9 @@ fn graded(
             suppress::apply(&mut envelope, writer)?;
         }
         Some(VerbArgs::Check { scope } | VerbArgs::Survey { scope }) => {
+            if let Ok(config) = config {
+                oracle::cap(&mut envelope, writer, config, &invocation.run.repro())?;
+            }
             suppress::apply(&mut envelope, writer)?;
             against::compare(&mut envelope, writer, scope.against.as_deref())?;
             if let (Some(verb), Ok(config)) = (envelope.run.verb, config) {
