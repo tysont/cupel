@@ -10,6 +10,15 @@ license.workspace = true
 repository.workspace = true
 publish = false
 
+# The Rust reference plugins (ADR-090): protocol speakers that depend on serde_json alone.
+[[bin]]
+name = "cupel-check-ref-rust"
+path = "plugins/rust/check.rs"
+
+[[bin]]
+name = "cupel-produce-ref-rust"
+path = "plugins/rust/produce.rs"
+
 [dependencies]
 cupel-adapt.workspace = true
 cupel-mutate.workspace = true
