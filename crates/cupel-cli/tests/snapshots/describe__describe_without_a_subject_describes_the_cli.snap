@@ -438,7 +438,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       },
       {
         "name": "oracle",
-        "pending_step": "P5.2",
+        "pending_step": null,
         "stability": "experimental",
         "summary": "Add, list, remove, or verify the oracles differential checks compare with."
       },
@@ -467,6 +467,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
   "explanation": null,
   "findings": [],
   "next_actions": [],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {
