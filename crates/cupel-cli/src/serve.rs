@@ -12,8 +12,8 @@ use cupel_serve::{
 };
 use serde_json::json;
 
-use crate::app::{Environment, run};
 use crate::cli::ServeArgs;
+use crate::environment::{Environment, Output};
 use crate::error::CupelError;
 use crate::problem::Problem;
 use crate::run::{Invocation as Verb, Run};
@@ -44,12 +44,15 @@ pub fn shown(root: &Path, socket: &Path) -> String {
         .to_string()
 }
 
-/// `cupel serve`: serves until stopped, or with `--stop`, stops the daemon serving this
-/// repository.
+/// How the daemon runs an invocation: the function a cold process calls.
+pub type Runs = fn(&Environment) -> Output;
+
+/// `cupel serve`: serves until stopped, running each request with `run`, or with `--stop`, stops
+/// the daemon serving this repository.
 pub fn verb(
     invocation: &Verb<'_>,
     args: &ServeArgs,
-    quiet: bool,
+    (quiet, run): (bool, Runs),
     environment: &Environment,
 ) -> Result<Envelope, CupelError> {
     if args.mcp {
@@ -60,9 +63,8 @@ pub fn verb(
         .socket
         .as_ref()
         .map_or_else(|| default_socket(root), |socket| root.join(socket));
-    let run = invocation.run;
     if args.stop {
-        return Ok(stop(run, root, &socket));
+        return Ok(stop(invocation.run, root, &socket));
     }
     let daemon = Daemon {
         root: root.to_path_buf(),
@@ -73,7 +75,9 @@ pub fn verb(
     };
     let handler = Arc::new(Requests {
         session: Arc::clone(&environment.session),
+        run,
     });
+    let run = invocation.run;
     let mut notices = environment.stderr.clone();
     let served = cupel_serve::serve(&daemon, handler, run.cancellation(), &mut |status| {
         if !quiet {
@@ -204,9 +208,10 @@ fn unserved(root: &Path, socket: &Path, error: &ServeError) -> Problem {
     }
 }
 
-/// Runs the daemon's requests: each through [`run`], with the daemon's session.
+/// Runs the daemon's requests: each through `run`, with the daemon's session.
 struct Requests {
     session: Arc<Session>,
+    run: Runs,
 }
 
 impl Handler for Requests {
@@ -228,7 +233,7 @@ impl Handler for Requests {
                 invocation.current_dir,
             )
         };
-        let output = run(&environment);
+        let output = (self.run)(&environment);
         // The stream sends a last unterminated line when dropped, before the final reply.
         drop(environment);
         self.session.sweep();

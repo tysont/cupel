@@ -14,6 +14,7 @@ mod cli;
 mod connect;
 mod describe;
 mod doctor;
+mod environment;
 mod error;
 mod events;
 mod explain;

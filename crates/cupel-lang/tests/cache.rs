@@ -43,14 +43,23 @@ fn a_second_parse_of_an_unchanged_tree_hits_the_cache_for_every_file() {
     );
 }
 
-#[test]
-fn an_edited_file_misses_once_and_identical_files_share_one_tree() {
+/// Two Rust files with the same text, a registry, and their names.
+fn identical_pair() -> (
+    tempfile::TempDir,
+    LanguageRegistry,
+    Vec<String>,
+    Cancellation,
+) {
     let dir = tempfile::tempdir().unwrap();
     fs::write(dir.path().join("a.rs"), "fn a() {}\n").unwrap();
     fs::write(dir.path().join("b.rs"), "fn a() {}\n").unwrap();
-    let registry = LanguageRegistry::builtin();
     let files = vec!["a.rs".to_owned(), "b.rs".to_owned()];
-    let cancel = Cancellation::new();
+    (dir, LanguageRegistry::builtin(), files, Cancellation::new())
+}
+
+#[test]
+fn an_edited_file_misses_once_and_identical_files_share_one_tree() {
+    let (dir, registry, files, cancel) = identical_pair();
 
     let parsed = registry.parse_all(dir.path(), &files, &cancel);
     let stats = registry.cache().stats();
@@ -95,16 +104,43 @@ fn shape(parsed: &cupel_lang::Parsed) -> (String, Vec<(usize, usize)>) {
     (parsed.root().to_sexp(), ranges)
 }
 
-#[test]
-fn a_changed_file_reparses_from_its_old_tree_to_the_tree_a_cold_parse_makes() {
+/// A temporary directory holding `files` (path, text), and its canonical path.
+fn repo(files: &[(&str, &str)]) -> (tempfile::TempDir, std::path::PathBuf) {
     let dir = tempfile::tempdir().unwrap();
     let root = dir.path().canonicalize().unwrap();
+    for (path, text) in files {
+        fs::write(root.join(path), text).unwrap();
+    }
+    (dir, root)
+}
+
+/// Writes `text` to `file` under `root`, reparses it in `registry`, then parses it as a request
+/// would: what the reparse did, whether the request found the tree without parsing, and
+/// whether the tree is the one a fresh registry makes.
+fn edit_and_reparse(
+    registry: &LanguageRegistry,
+    root: &std::path::Path,
+    text: &str,
+) -> (Reparse, bool, bool) {
+    fs::write(root.join("a.rs"), text).unwrap();
+    let reparsed = registry.cache().reparse(&root.join("a.rs"));
+    let stats = registry.cache().stats();
+    let parsed = registry.parse_all(root, &["a.rs".to_owned()], &Cancellation::new());
+    let found = registry.cache().stats()
+        == CacheStats {
+            hits: stats.hits + 1,
+            misses: stats.misses,
+        };
+    let cold = shape(parsed[0].as_ref().unwrap()) == cold_tree(root, "a.rs");
+    (reparsed, found, cold)
+}
+
+#[test]
+fn a_changed_file_reparses_from_its_old_tree_to_the_tree_a_cold_parse_makes() {
     let before = "fn a(x: i32) -> i32 {\n    if x > 1 { x } else { 0 }\n}\n\nfn b() {}\n";
-    fs::write(root.join("a.rs"), before).unwrap();
+    let (_dir, root) = repo(&[("a.rs", before)]);
     let registry = LanguageRegistry::builtin();
-    let files = vec!["a.rs".to_owned()];
-    let cancel = Cancellation::new();
-    registry.parse_all(&root, &files, &cancel);
+    registry.parse_all(&root, &["a.rs".to_owned()], &Cancellation::new());
 
     // Edits in the middle, at the start, and at the end, one after another.
     let edits = [
@@ -112,37 +148,19 @@ fn a_changed_file_reparses_from_its_old_tree_to_the_tree_a_cold_parse_makes() {
         "// lead\nfn a(x: i32) -> i32 {\n    if x >= 10 && x < 20 { x * 2 } else { 0 }\n}\n\nfn b() {}\n",
         "// lead\nfn a(x: i32) -> i32 {\n    if x >= 10 && x < 20 { x * 2 } else { 0 }\n}\n\nfn b() { let é = 1; }\nfn c() {}\n",
     ];
-    for (round, text) in edits.iter().enumerate() {
-        fs::write(root.join("a.rs"), text).unwrap();
-        assert_eq!(
-            registry.cache().reparse(&root.join("a.rs")),
-            Reparse::Reparsed,
-            "edit {round}"
-        );
-        let stats = registry.cache().stats();
-        let parsed = registry.parse_all(&root, &files, &cancel);
-        assert_eq!(
-            registry.cache().stats(),
-            CacheStats {
-                hits: stats.hits + 1,
-                misses: stats.misses
-            },
-            "edit {round}: the request after a reparse finds the tree"
-        );
-        assert_eq!(
-            shape(parsed[0].as_ref().unwrap()),
-            cold_tree(&root, "a.rs"),
-            "edit {round}"
-        );
-    }
+    let rounds: Vec<(Reparse, bool, bool)> = edits
+        .iter()
+        .map(|text| edit_and_reparse(&registry, &root, text))
+        .collect();
+    assert_eq!(rounds, [(Reparse::Reparsed, true, true); 3]);
 }
 
 #[test]
 fn reparse_leaves_alone_files_never_parsed_unchanged_files_and_files_gone() {
-    let dir = tempfile::tempdir().unwrap();
-    let root = dir.path().canonicalize().unwrap();
-    fs::write(root.join("a.py"), "def a():\n    pass\n").unwrap();
-    fs::write(root.join("b.py"), "def b():\n    pass\n").unwrap();
+    let (_dir, root) = repo(&[
+        ("a.py", "def a():\n    pass\n"),
+        ("b.py", "def b():\n    pass\n"),
+    ]);
     let registry = LanguageRegistry::builtin();
     registry.parse_all(&root, &["a.py".to_owned()], &Cancellation::new());
     let cache = registry.cache();
@@ -156,11 +174,11 @@ fn reparse_leaves_alone_files_never_parsed_unchanged_files_and_files_gone() {
 
 #[test]
 fn sweep_keeps_the_trees_of_files_that_still_hold_them_and_drops_the_rest() {
-    let dir = tempfile::tempdir().unwrap();
-    let root = dir.path().canonicalize().unwrap();
-    fs::write(root.join("a.go"), "package a\n").unwrap();
-    fs::write(root.join("b.go"), "package b\n").unwrap();
-    fs::write(root.join("c.go"), "package a\n").unwrap();
+    let (_dir, root) = repo(&[
+        ("a.go", "package a\n"),
+        ("b.go", "package b\n"),
+        ("c.go", "package a\n"),
+    ]);
     let files: Vec<String> = ["a.go", "b.go", "c.go"].map(str::to_owned).to_vec();
     let registry = LanguageRegistry::builtin();
     let cancel = Cancellation::new();
@@ -184,12 +202,7 @@ fn sweep_keeps_the_trees_of_files_that_still_hold_them_and_drops_the_rest() {
 
 #[test]
 fn a_derivation_runs_once_per_file_and_content_and_again_after_a_change() {
-    let dir = tempfile::tempdir().unwrap();
-    fs::write(dir.path().join("a.rs"), "fn a() {}\n").unwrap();
-    fs::write(dir.path().join("b.rs"), "fn a() {}\n").unwrap();
-    let registry = LanguageRegistry::builtin();
-    let files = vec!["a.rs".to_owned(), "b.rs".to_owned()];
-    let cancel = Cancellation::new();
+    let (dir, registry, files, cancel) = identical_pair();
     let runs = std::cell::Cell::new(0);
     let derive = |parsed: &cupel_lang::Parsed, extractor: usize| {
         parsed.derived(extractor, || {

@@ -2,18 +2,16 @@
 // ABOUTME: and malformed input (not JSON, wrong shape, cut short, too long) is an error, never a message.
 use std::collections::BTreeMap;
 use std::io::{BufReader, Cursor};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use cupel_serve::{
     Body, Build, Done, FrameError, Invocation, PROTOCOL, Reply, Request, Status, read_message,
     read_message_within, write_message,
 };
 
+/// Version 0.1.0 of an executable that is not there, so its fingerprint is empty.
 fn build() -> Build {
-    Build {
-        version: "0.1.0".to_owned(),
-        binary: "123-456".to_owned(),
-    }
+    Build::of("0.1.0", Path::new("/no/such/cupel"))
 }
 
 fn invocation() -> Invocation {
@@ -74,6 +72,12 @@ fn replies() -> Vec<Reply> {
     ]
 }
 
+/// Every message in `bytes`, read one after another to the end.
+fn read_all<T: serde::de::DeserializeOwned>(bytes: Vec<u8>) -> Vec<T> {
+    let mut input = BufReader::new(Cursor::new(bytes));
+    std::iter::from_fn(|| read_message::<T>(&mut input).unwrap()).collect()
+}
+
 /// `messages` written one after another to one buffer.
 fn written<T: serde::Serialize>(messages: &[T]) -> Vec<u8> {
     let mut bytes = Vec::new();
@@ -95,18 +99,10 @@ fn every_message_is_one_line_and_reads_back_as_itself() {
         (requests.len(), replies.len()),
         "newlines inside strings are escaped"
     );
-
-    let mut input = BufReader::new(Cursor::new(request_bytes));
-    let mut read_requests = Vec::new();
-    while let Some(request) = read_message::<Request>(&mut input).unwrap() {
-        read_requests.push(request);
-    }
-    let mut input = BufReader::new(Cursor::new(reply_bytes));
-    let mut read_replies = Vec::new();
-    while let Some(reply) = read_message::<Reply>(&mut input).unwrap() {
-        read_replies.push(reply);
-    }
-    assert_eq!((read_requests, read_replies), (requests, replies));
+    assert_eq!(
+        (read_all(request_bytes), read_all(reply_bytes)),
+        (requests, replies)
+    );
 }
 
 #[test]
@@ -114,7 +110,7 @@ fn messages_carry_their_type_and_the_protocol_and_build_on_every_request() {
     let line = String::from_utf8(written(&[Request::new(build(), Body::Status)])).unwrap();
     assert_eq!(
         line,
-        "{\"protocol\":1,\"build\":{\"version\":\"0.1.0\",\"binary\":\"123-456\"},\"type\":\"status\"}\n"
+        "{\"protocol\":1,\"build\":{\"version\":\"0.1.0\",\"binary\":\"\"},\"type\":\"status\"}\n"
     );
     // Hand-written, in another member order, with a member this version does not know.
     let text = "{\"type\":\"stop\",\"build\":{\"version\":\"9\",\"binary\":\"\"},\"protocol\":1,\"later\":true}\n";
@@ -137,6 +133,16 @@ fn refused(text: &str) -> FrameError {
     read_message::<Request>(&mut BufReader::new(text.as_bytes())).unwrap_err()
 }
 
+/// The kind of error reading one `Request` from `text` fails with.
+fn refusal_kind(text: &str) -> &'static str {
+    match refused(text) {
+        FrameError::Malformed(_) => "malformed",
+        FrameError::Truncated => "truncated",
+        FrameError::TooLong { .. } => "too long",
+        FrameError::Io(_) => "io",
+    }
+}
+
 #[test]
 fn malformed_input_is_an_error_naming_what_is_wrong() {
     let cases = [
@@ -155,15 +161,7 @@ fn malformed_input_is_an_error_naming_what_is_wrong() {
     ];
     let kinds: Vec<(&str, &str)> = cases
         .iter()
-        .map(|(text, _)| {
-            let kind = match refused(text) {
-                FrameError::Malformed(_) => "malformed",
-                FrameError::Truncated => "truncated",
-                FrameError::TooLong { .. } => "too long",
-                FrameError::Io(_) => "io",
-            };
-            (*text, kind)
-        })
+        .map(|(text, _)| (*text, refusal_kind(text)))
         .collect();
     assert_eq!(kinds, cases.to_vec());
     let message = refused("not json\n").to_string();

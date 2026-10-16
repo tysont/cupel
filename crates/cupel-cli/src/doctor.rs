@@ -436,10 +436,21 @@ fn daemon(root: &Path) -> Option<Problem> {
     }
     let shown = serve::shown(root, &socket);
     let asked = Request::new(serve::build(), Body::Status);
-    let problem = |kind, severity, title: String, evidence, fix: &str| Problem {
+    let (kind, severity, title, evidence, fix) =
+        match cupel_serve::request(&socket, &asked, &mut |_| {}) {
+            Ok(Reply::Status(status)) => daemon_status(&shown, &status),
+            _ => (
+                "doctor.daemon-stale",
+                Severity::Warn,
+                format!("Nothing answers on the daemon socket {shown}"),
+                json!({"socket": shown}),
+                "Remove it with `cupel serve --stop`, or start a daemon with `cupel serve`.",
+            ),
+        };
+    Some(Problem {
         check: "doctor",
         kind,
-        subject: shown.clone(),
+        subject: shown,
         severity,
         title,
         detail: None,
@@ -450,45 +461,47 @@ fn daemon(root: &Path) -> Option<Problem> {
             ActionKind::Configure
         },
         fix: fix.to_owned(),
-    };
-    Some(match cupel_serve::request(&socket, &asked, &mut |_| {}) {
-        Ok(Reply::Status(status)) => {
-            let evidence = json!({
-                "socket": shown, "version": status.version, "pid": status.pid,
-                "watching": status.watching,
-            });
-            if status.build == serve::build() {
-                problem(
-                    "doctor.daemon-running",
-                    Severity::Info,
-                    format!(
-                        "The daemon at {shown} serves this repository (pid {})",
-                        status.pid
-                    ),
-                    evidence,
-                    "Nothing to do; `cupel serve --stop` stops it.",
-                )
-            } else {
-                problem(
-                    "doctor.daemon-mismatch",
-                    Severity::Warn,
-                    format!(
-                        "The daemon at {shown} runs another build of cupel ({})",
-                        status.build
-                    ),
-                    evidence,
-                    "Restart it with this cupel: `cupel serve --stop`, then `cupel serve`.",
-                )
-            }
-        }
-        _ => problem(
-            "doctor.daemon-stale",
-            Severity::Warn,
-            format!("Nothing answers on the daemon socket {shown}"),
-            json!({"socket": shown}),
-            "Remove it with `cupel serve --stop`, or start a daemon with `cupel serve`.",
-        ),
     })
+}
+
+/// The report on a daemon at `shown` that answered with `status`: running, or another build.
+fn daemon_status(
+    shown: &str,
+    status: &cupel_serve::Status,
+) -> (
+    &'static str,
+    Severity,
+    String,
+    serde_json::Value,
+    &'static str,
+) {
+    let evidence = json!({
+        "socket": shown, "version": status.version, "pid": status.pid,
+        "watching": status.watching,
+    });
+    if status.build == serve::build() {
+        (
+            "doctor.daemon-running",
+            Severity::Info,
+            format!(
+                "The daemon at {shown} serves this repository (pid {})",
+                status.pid
+            ),
+            evidence,
+            "Nothing to do; `cupel serve --stop` stops it.",
+        )
+    } else {
+        (
+            "doctor.daemon-mismatch",
+            Severity::Warn,
+            format!(
+                "The daemon at {shown} runs another build of cupel ({})",
+                status.build
+            ),
+            evidence,
+            "Restart it with this cupel: `cupel serve --stop`, then `cupel serve`.",
+        )
+    }
 }
 
 /// The tools to check: `git`, which `--changed` needs, then the programs the languages' commands

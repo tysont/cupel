@@ -241,11 +241,11 @@ fn concurrent_clients_are_each_answered_by_the_daemon() {
         .collect();
     let outcomes: Vec<Outcome> = clients.into_iter().map(|c| c.join().unwrap()).collect();
     assert_eq!(daemon.status().served, 4);
+    let codes: Vec<i32> = outcomes.iter().map(|outcome| outcome.code).collect();
+    assert_eq!(codes, [0; 4], "{}", outcomes[0].stderr);
     let local = redacted(&cold(&repo, &CHECK), &root);
-    for outcome in &outcomes {
-        assert_eq!(outcome.code, 0, "{}{}", outcome.stdout, outcome.stderr);
-        assert_eq!(redacted(outcome, &root), local);
-    }
+    let served: Vec<Value> = outcomes.iter().map(|o| redacted(o, &root)).collect();
+    assert_eq!(served, vec![local; 4]);
 }
 
 /// The event lines of `stderr` with their volatile values masked.

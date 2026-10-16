@@ -3,7 +3,6 @@
 use std::io::Write;
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, mpsc};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
@@ -13,12 +12,20 @@ use cupel_serve::{
     Body, Build, ClientError, Daemon, Done, Handler, Invocation, Reply, Request, ServeError,
     Served, Status, request, serve,
 };
+use tempfile::TempDir;
 
-/// A handler scripted by the invocation's first argument.
+/// A handler scripted by the invocation's first argument, recording each run's stdout when it
+/// finishes and every changed path the watcher hands it.
 #[derive(Default)]
 struct Script {
-    cancelled: AtomicBool,
+    finished: Mutex<Vec<String>>,
     changed: Mutex<Vec<PathBuf>>,
+}
+
+impl Script {
+    fn finished(&self) -> Vec<String> {
+        self.finished.lock().unwrap().clone()
+    }
 }
 
 impl Handler for Script {
@@ -29,29 +36,27 @@ impl Handler for Script {
         cancel: Cancellation,
     ) -> Done {
         let args = invocation.args;
-        let done = |stdout: &str| Done {
-            stdout: stdout.to_owned(),
-            stderr: "rest\n".to_owned(),
-            code: 0,
-        };
-        match args[0].as_str() {
+        let stdout = match args[0].as_str() {
             "lines" => {
                 for line in 0..3 {
                     writeln!(stderr, "line {line}").unwrap();
                     thread::sleep(Duration::from_millis(100));
                 }
-                done("out")
+                "out".to_owned()
             }
             "sleep" => {
                 thread::sleep(Duration::from_millis(args[1].parse().unwrap()));
-                done(&args[2])
+                args[2].clone()
             }
-            "wait" => {
-                let finished = cancel.wait(Duration::from_secs(30));
-                self.cancelled.store(!finished, Ordering::SeqCst);
-                done(if finished { "finished" } else { "cancelled" })
-            }
-            _ => done(&args.join(" ")),
+            "wait" if cancel.wait(Duration::from_secs(30)) => "finished".to_owned(),
+            "wait" => "cancelled".to_owned(),
+            _ => args.join(" "),
+        };
+        self.finished.lock().unwrap().push(stdout.clone());
+        Done {
+            stdout,
+            stderr: "rest\n".to_owned(),
+            code: 0,
         }
     }
 
@@ -70,15 +75,28 @@ fn build() -> Build {
 
 const PATH: &str = "/usr/bin:/bin";
 
-/// A daemon serving `root` from a thread; dropping it stops it and waits for it.
+/// A daemon serving a root from a thread; dropping it stops it and waits for it.
 struct Running {
+    root: PathBuf,
     socket: PathBuf,
     stop: Cancellation,
     script: Arc<Script>,
     thread: Option<JoinHandle<Result<Served, ServeError>>>,
+    /// The temporary directory the daemon serves, removed once the daemon has stopped.
+    dir: Option<TempDir>,
 }
 
 impl Running {
+    /// A daemon for a new temporary directory.
+    fn new(watch: bool) -> Self {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().canonicalize().unwrap();
+        let mut running = Self::start(&root, watch);
+        running.dir = Some(dir);
+        running
+    }
+
+    /// A daemon for `root`.
     fn start(root: &Path, watch: bool) -> Self {
         let socket = root.join(".cupel/serve.sock");
         let script = Arc::new(Script::default());
@@ -100,16 +118,37 @@ impl Running {
         });
         started.recv_timeout(Duration::from_secs(10)).unwrap();
         Self {
+            root: root.to_path_buf(),
             socket,
             stop,
             script,
             thread: Some(thread),
+            dir: None,
         }
     }
 
     /// Waits for the daemon to exit on its own.
     fn finished(mut self) -> Result<Served, ServeError> {
         self.thread.take().unwrap().join().unwrap()
+    }
+
+    fn ask(&self, request_: &Request) -> Result<Reply, ClientError> {
+        request(&self.socket, request_, &mut |_| {})
+    }
+
+    fn status(&self) -> Status {
+        match self.ask(&Request::new(build(), Body::Status)).unwrap() {
+            Reply::Status(status) => status,
+            other => panic!("not a status: {other:?}"),
+        }
+    }
+
+    /// Why the daemon refused `request_`.
+    fn refusal(&self, request_: &Request) -> String {
+        match self.ask(request_) {
+            Err(ClientError::Refused(reason)) => reason,
+            other => panic!("not refused: {other:?}"),
+        }
     }
 }
 
@@ -119,6 +158,7 @@ impl Drop for Running {
         if let Some(thread) = self.thread.take() {
             let _ = thread.join();
         }
+        drop(self.dir.take());
     }
 }
 
@@ -139,13 +179,6 @@ fn ask(socket: &Path, request_: &Request) -> Result<Reply, ClientError> {
     request(socket, request_, &mut |_| {})
 }
 
-fn status(socket: &Path) -> Status {
-    match ask(socket, &Request::new(build(), Body::Status)).unwrap() {
-        Reply::Status(status) => status,
-        other => panic!("not a status: {other:?}"),
-    }
-}
-
 fn stdout(reply: Result<Reply, ClientError>) -> String {
     match reply {
         Ok(Reply::Done(done)) => done.stdout,
@@ -153,11 +186,21 @@ fn stdout(reply: Result<Reply, ClientError>) -> String {
     }
 }
 
+/// Polls `condition` every 20 ms, up to 500 times.
+fn eventually(condition: impl Fn() -> bool) {
+    let _ = (0..500).find(|_| {
+        let met = condition();
+        if !met {
+            thread::sleep(Duration::from_millis(20));
+        }
+        met
+    });
+}
+
 #[test]
 fn the_daemon_says_what_it_is_and_runs_requests() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
-    let before = status(&daemon.socket);
+    let daemon = Running::new(false);
+    let before = daemon.status();
     assert_eq!(
         (
             before.version.as_str(),
@@ -168,17 +211,13 @@ fn the_daemon_says_what_it_is_and_runs_requests() {
         ("0.1.0", std::process::id(), 0, false)
     );
     assert_eq!(before.socket, daemon.socket);
-    assert_eq!(
-        stdout(ask(&daemon.socket, &run_request(&["echo", "hi"]))),
-        "echo hi"
-    );
-    assert_eq!(status(&daemon.socket).served, 1);
+    assert_eq!(stdout(daemon.ask(&run_request(&["echo", "hi"]))), "echo hi");
+    assert_eq!(daemon.status().served, 1);
 }
 
 #[test]
 fn stderr_reaches_the_client_in_order_while_the_run_goes_on() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
+    let daemon = Running::new(false);
     let started = Instant::now();
     let mut lines = Vec::new();
     let reply = request(&daemon.socket, &run_request(&["lines"]), &mut |text| {
@@ -203,8 +242,7 @@ fn stderr_reaches_the_client_in_order_while_the_run_goes_on() {
 
 #[test]
 fn a_run_from_another_build_protocol_or_path_is_refused_but_status_and_stop_are_answered() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
+    let daemon = Running::new(false);
     let other = Build {
         version: "0.2.0".to_owned(),
         binary: "3-4".to_owned(),
@@ -218,13 +256,11 @@ fn a_run_from_another_build_protocol_or_path_is_refused_but_status_and_stop_are_
         path: Some("/opt/bin".to_owned()),
         invocation: Invocation::default(),
     };
-    let reasons: Vec<String> = [from_other, old_protocol, other_path]
-        .iter()
-        .map(|request_| match ask(&daemon.socket, request_) {
-            Err(ClientError::Refused(reason)) => reason,
-            other => panic!("not refused: {other:?}"),
-        })
-        .collect();
+    let reasons = [
+        daemon.refusal(&from_other),
+        daemon.refusal(&old_protocol),
+        daemon.refusal(&other_path),
+    ];
     assert!(
         reasons[0].contains("another build of cupel (cupel 0.1.0 (binary 1-2))")
             && reasons[0].contains("cupel serve --stop"),
@@ -233,19 +269,18 @@ fn a_run_from_another_build_protocol_or_path_is_refused_but_status_and_stop_are_
     );
     assert!(reasons[1].contains("protocol 0"), "{}", reasons[1]);
     assert!(reasons[2].contains("another PATH"), "{}", reasons[2]);
-    assert_eq!(status(&daemon.socket).served, 0);
+    assert_eq!(daemon.status().served, 0);
 
-    let answered = ask(&daemon.socket, &Request::new(other.clone(), Body::Status));
+    let answered = daemon.ask(&Request::new(other.clone(), Body::Status));
     assert!(matches!(answered, Ok(Reply::Status(_))), "{answered:?}");
-    let stopped = ask(&daemon.socket, &Request::new(other, Body::Stop));
+    let stopped = daemon.ask(&Request::new(other, Body::Stop));
     assert_eq!(stopped, Ok(Reply::Stopping));
     assert_eq!(daemon.finished().unwrap().requests, 0);
 }
 
 #[test]
 fn a_malformed_request_gets_an_error_and_the_daemon_keeps_serving() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
+    let daemon = Running::new(false);
     let mut stream = UnixStream::connect(&daemon.socket).unwrap();
     stream.write_all(b"{\"type\":\"dance\"}\n").unwrap();
     let reply: Reply = cupel_serve::read_message(&mut std::io::BufReader::new(&stream))
@@ -255,17 +290,16 @@ fn a_malformed_request_gets_an_error_and_the_daemon_keeps_serving() {
         matches!(&reply, Reply::Error { message } if message.starts_with("the message is not valid")),
         "{reply:?}"
     );
-    assert_eq!(status(&daemon.socket).served, 0);
+    assert_eq!(daemon.status().served, 0);
 }
 
 #[test]
 fn stop_ends_the_daemon_and_removes_its_socket() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
+    let daemon = Running::new(false);
     let socket = daemon.socket.clone();
-    stdout(ask(&socket, &run_request(&["echo"])));
+    stdout(daemon.ask(&run_request(&["echo"])));
     assert_eq!(
-        ask(&socket, &Request::new(build(), Body::Stop)),
+        daemon.ask(&Request::new(build(), Body::Stop)),
         Ok(Reply::Stopping)
     );
     assert_eq!(daemon.finished().unwrap().requests, 1);
@@ -291,15 +325,14 @@ fn a_stale_socket_is_unanswered_and_a_new_daemon_replaces_it() {
         "a socket file with no listener"
     );
     let daemon = Running::start(dir.path(), false);
-    assert_eq!(stdout(ask(&daemon.socket, &run_request(&["echo"]))), "echo");
+    assert_eq!(stdout(daemon.ask(&run_request(&["echo"]))), "echo");
 }
 
 #[test]
 fn a_second_daemon_on_a_live_socket_is_refused_with_the_first_one_s_status() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
+    let daemon = Running::new(false);
     let second = Daemon {
-        root: dir.path().to_path_buf(),
+        root: daemon.root.clone(),
         socket: daemon.socket.clone(),
         build: build(),
         path: None,
@@ -315,13 +348,12 @@ fn a_second_daemon_on_a_live_socket_is_refused_with_the_first_one_s_status() {
         panic!("not refused: {refused:?}")
     };
     assert_eq!(status.pid, std::process::id());
-    assert_eq!(stdout(ask(&daemon.socket, &run_request(&["echo"]))), "echo");
+    assert_eq!(stdout(daemon.ask(&run_request(&["echo"]))), "echo");
 }
 
 #[test]
 fn concurrent_clients_run_at_once_and_each_gets_its_own_answer() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
+    let daemon = Running::new(false);
     let started = Instant::now();
     let clients: Vec<JoinHandle<String>> = (0..4)
         .map(|client| {
@@ -339,52 +371,35 @@ fn concurrent_clients_run_at_once_and_each_gets_its_own_answer() {
         "four 400 ms runs took {:?}: they ran one at a time",
         started.elapsed()
     );
-    assert_eq!(status(&daemon.socket).served, 4);
-}
-
-/// Waits up to ten seconds for `condition`.
-fn eventually(condition: impl Fn() -> bool) -> bool {
-    let deadline = Instant::now() + Duration::from_secs(10);
-    while Instant::now() < deadline {
-        if condition() {
-            return true;
-        }
-        thread::sleep(Duration::from_millis(20));
-    }
-    false
+    assert_eq!(daemon.status().served, 4);
 }
 
 #[test]
 fn a_client_that_hangs_up_cancels_its_run() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
+    let daemon = Running::new(false);
     let mut stream = UnixStream::connect(&daemon.socket).unwrap();
     cupel_serve::write_message(&mut stream, &run_request(&["wait"])).unwrap();
     thread::sleep(Duration::from_millis(100));
     drop(stream);
-    assert!(eventually(|| daemon
-        .script
-        .cancelled
-        .load(Ordering::SeqCst)));
+    eventually(|| !daemon.script.finished().is_empty());
+    assert_eq!(daemon.script.finished(), ["cancelled"]);
 }
 
 #[test]
 fn stopping_cancels_runs_in_flight_and_they_still_answer() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
+    let daemon = Running::new(false);
     let socket = daemon.socket.clone();
     let waiting = thread::spawn(move || stdout(ask(&socket, &run_request(&["wait"]))));
     // The handler gives no sign that the run started; give it time to.
     thread::sleep(Duration::from_millis(300));
-    ask(&daemon.socket, &Request::new(build(), Body::Stop)).unwrap();
+    daemon.ask(&Request::new(build(), Body::Stop)).unwrap();
     assert_eq!(waiting.join().unwrap(), "cancelled");
     assert_eq!(daemon.finished().unwrap().requests, 1);
 }
 
 #[test]
 fn removing_the_socket_file_ends_the_daemon() {
-    let dir = tempfile::tempdir().unwrap();
-    let daemon = Running::start(dir.path(), false);
+    let daemon = Running::new(false);
     std::fs::remove_file(&daemon.socket).unwrap();
     let started = Instant::now();
     assert_eq!(daemon.finished().unwrap().requests, 0);
@@ -393,16 +408,18 @@ fn removing_the_socket_file_ends_the_daemon() {
 
 #[test]
 fn the_watcher_hands_changed_files_to_the_handler() {
-    let dir = tempfile::tempdir().unwrap();
-    let root = dir.path().canonicalize().unwrap();
-    let daemon = Running::start(&root, true);
-    assert!(status(&daemon.socket).watching);
-    let file = root.join("a.rs");
+    let daemon = Running::new(true);
+    let file = daemon.root.join("a.rs");
     // The watcher may start a moment after the daemon answers; write until it reports.
-    assert!(eventually(|| {
+    eventually(|| {
         std::fs::write(&file, "fn a() {}\n").unwrap();
         thread::sleep(Duration::from_millis(100));
         daemon.script.changed.lock().unwrap().contains(&file)
-    }));
-    assert!(status(&daemon.socket).reparsed >= 1);
+    });
+    let status = daemon.status();
+    let changed = daemon.script.changed.lock().unwrap().contains(&file);
+    assert_eq!(
+        (status.watching, changed, status.reparsed >= 1),
+        (true, true, true)
+    );
 }
