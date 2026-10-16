@@ -67,7 +67,7 @@ impl<F> QueryProducer<F> {
     }
 }
 
-impl<F: Fact + Merge> Producer<F> for QueryProducer<F> {
+impl<F: Fact + Merge + Clone> Producer<F> for QueryProducer<F> {
     fn id(&self) -> ProducerId {
         producer_id(self.language.as_ref())
     }
@@ -91,9 +91,12 @@ impl<F: Fact + Merge> Producer<F> for QueryProducer<F> {
     fn produce(&self, ctx: &ProduceCtx, scope: &Scope, sink: &mut dyn EventSink) -> Result<F> {
         let parsed = parse_scope(&self.cache, ctx, scope, self.language.as_ref(), sink)?;
         let language = self.language.as_ref();
+        let extractor = self.extract as usize;
         let parts: Vec<F> = parsed
             .par_iter()
-            .map(|parsed| (self.extract)(&Source { parsed, language }))
+            .map(|parsed| {
+                parsed.derived(extractor, || (self.extract)(&Source { parsed, language }))
+            })
             .collect();
         let mut fact = F::default();
         for part in parts {

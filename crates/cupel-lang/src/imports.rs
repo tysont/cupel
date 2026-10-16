@@ -309,7 +309,10 @@ impl Imports<'_> {
             self.language,
             &Cancellation::new(),
         )
-        .map(|parsed| file_imports(&parsed, self.language))
+        .map(|parsed| {
+            let extractor = file_imports as fn(&Parsed, &dyn Language) -> FileImports as usize;
+            parsed.derived(extractor, || file_imports(&parsed, self.language))
+        })
         .unwrap_or_default()
     }
 }

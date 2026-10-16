@@ -181,3 +181,38 @@ fn sweep_keeps_the_trees_of_files_that_still_hold_them_and_drops_the_rest() {
     registry.parse_all(&root, &files[1..2], &cancel);
     assert_eq!(registry.cache().stats().hits, stats.hits + 1);
 }
+
+#[test]
+fn a_derivation_runs_once_per_file_and_content_and_again_after_a_change() {
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(dir.path().join("a.rs"), "fn a() {}\n").unwrap();
+    fs::write(dir.path().join("b.rs"), "fn a() {}\n").unwrap();
+    let registry = LanguageRegistry::builtin();
+    let files = vec!["a.rs".to_owned(), "b.rs".to_owned()];
+    let cancel = Cancellation::new();
+    let runs = std::cell::Cell::new(0);
+    let derive = |parsed: &cupel_lang::Parsed, extractor: usize| {
+        parsed.derived(extractor, || {
+            runs.set(runs.get() + 1);
+            format!("{} {}", parsed.file, parsed.root().child_count())
+        })
+    };
+    let parsed = registry.parse_all(dir.path(), &files, &cancel);
+    let (a, b) = (parsed[0].as_ref().unwrap(), parsed[1].as_ref().unwrap());
+    let first = [derive(a, 1), derive(a, 1), derive(b, 1), derive(a, 2)];
+    assert_eq!(first, ["a.rs 1", "a.rs 1", "b.rs 1", "a.rs 1"]);
+    assert_eq!(
+        runs.get(),
+        3,
+        "once per file and extractor, though both share one tree"
+    );
+
+    fs::write(dir.path().join("a.rs"), "fn a() {}\nfn b() {}\n").unwrap();
+    let parsed = registry.parse_all(dir.path(), &files, &cancel);
+    let again = [
+        derive(parsed[0].as_ref().unwrap(), 1),
+        derive(parsed[1].as_ref().unwrap(), 1),
+    ];
+    assert_eq!(again, ["a.rs 2", "b.rs 1"]);
+    assert_eq!(runs.get(), 4, "only the changed file derives again");
+}

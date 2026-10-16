@@ -1,5 +1,6 @@
 // ABOUTME: Parsing and the parse cache: a tree per (content hash, grammar), shared by every producer, so an
 // ABOUTME: unchanged file costs one read and one hash; a changed file can be reparsed from its old tree.
+use std::any::{Any, TypeId};
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -14,6 +15,22 @@ use tree_sitter::{InputEdit, Node, Parser, Point, Tree};
 pub struct Syntax {
     pub source: String,
     pub tree: Tree,
+    /// What extractors derived from this tree, by file, result type, and extractor: kept with
+    /// the tree, so a warm daemon derives nothing again for an unchanged file (ADR-085 §3).
+    derived: Mutex<HashMap<DerivedKey, Arc<dyn Any + Send + Sync>>>,
+}
+
+/// A derived value's file, result type, and extractor.
+type DerivedKey = (String, TypeId, usize);
+
+impl Syntax {
+    fn new(source: String, tree: Tree) -> Self {
+        Self {
+            source,
+            tree,
+            derived: Mutex::default(),
+        }
+    }
 }
 
 /// One file of a language, parsed: the input to every syntactic producer.
@@ -28,6 +45,26 @@ pub struct Parsed {
 }
 
 impl Parsed {
+    /// What `derive` makes of this file, made once per file, content, result type, and
+    /// `extractor` (an identity for `derive`, such as its function's address) and kept with the
+    /// tree. `derive` must read nothing but this file's path, language, and tree.
+    pub fn derived<T: Clone + Send + Sync + 'static>(
+        &self,
+        extractor: usize,
+        derive: impl FnOnce() -> T,
+    ) -> T {
+        let key = (self.file.clone(), TypeId::of::<T>(), extractor);
+        let found = lock(&self.syntax.derived)
+            .get(&key)
+            .and_then(|value| value.downcast_ref::<T>().cloned());
+        if let Some(found) = found {
+            return found;
+        }
+        let value = derive();
+        lock(&self.syntax.derived).insert(key, Arc::new(value.clone()));
+        value
+    }
+
     pub fn source(&self) -> &str {
         &self.syntax.source
     }
@@ -144,7 +181,7 @@ impl ParseCache {
             let mut parser = Parser::new();
             parser.set_language(&parse_grammar).ok()?;
             let tree = parser.parse(&source, None)?;
-            Some(Arc::new(Syntax { source, tree }))
+            Some(Arc::new(Syntax::new(source, tree)))
         });
         let counter = if parsed_here {
             &self.misses
@@ -205,7 +242,7 @@ impl ParseCache {
                 tree
             });
             let tree = parser.parse(&source, old_tree.as_ref())?;
-            Some(Arc::new(Syntax { source, tree }))
+            Some(Arc::new(Syntax::new(source, tree)))
         });
         lock(&self.files).insert(path.to_path_buf(), key);
         if parsed_here {
