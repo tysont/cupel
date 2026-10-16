@@ -33,9 +33,7 @@ fn facts_serve_each_declared_kind_as_json_whether_inserted_typed_or_shared() {
     let mut typed = Facts::declaring([FactKind::PerTestMap, FactKind::Symbols]);
     typed.insert(map()).unwrap();
     let mut shared = Facts::declaring([FactKind::PerTestMap]);
-    shared
-        .insert_shared(&Produced::new(map()).share())
-        .unwrap();
+    shared.insert_shared(&Produced::new(map()).share()).unwrap();
 
     assert_eq!(typed.json(FactKind::PerTestMap), Some(expected()));
     assert_eq!(shared.json(FactKind::PerTestMap), Some(expected()));

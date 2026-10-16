@@ -1,5 +1,5 @@
-// ABOUTME: Validates a finding's evidence against the JSON Schema its check's manifest declares, using
-// ABOUTME: the small keyword subset native evidence needs and refusing every other keyword (ADR-043).
+// ABOUTME: Validates a finding's evidence against the JSON Schema its check's manifest declares, using the small
+// ABOUTME: keyword subset evidence needs and refusing every other keyword (ADR-043); the host and the matrix test share it.
 use serde_json::{Map, Value};
 
 /// Keywords that describe without constraining.
@@ -18,36 +18,64 @@ pub fn validate(schema: &Map<String, Value>, value: &Value) -> Result<(), String
     check(schema, value, "evidence")
 }
 
+/// Checks one keyword's `rule` against `value`, given the whole object `schema` it is in.
+type Rule = fn(&Map<String, Value>, &Value, &Value, &str) -> Result<(), String>;
+
+/// Every constraining keyword the validator implements, with its rule.
+const RULES: [(&str, Rule); 9] = [
+    ("type", |_, rule, value, at| check_type(rule, value, at)),
+    ("properties", |_, rule, value, at| {
+        check_properties(rule, value, at)
+    }),
+    ("required", |_, rule, value, at| {
+        check_required(rule, value, at)
+    }),
+    ("additionalProperties", check_additional),
+    ("items", |_, rule, value, at| check_items(rule, value, at)),
+    ("enum", |_, rule, value, at| check_enum(rule, value, at)),
+    ("const", |_, rule, value, at| check_const(rule, value, at)),
+    ("minimum", |_, rule, value, at| {
+        check_bound("minimum", rule, value, at)
+    }),
+    ("maximum", |_, rule, value, at| {
+        check_bound("maximum", rule, value, at)
+    }),
+];
+
 fn check(schema: &Map<String, Value>, value: &Value, at: &str) -> Result<(), String> {
     for (keyword, rule) in schema {
-        match keyword.as_str() {
-            "type" => check_type(rule, value, at)?,
-            "properties" => check_properties(rule, value, at)?,
-            "required" => check_required(rule, value, at)?,
-            "additionalProperties" => check_additional(schema, rule, value, at)?,
-            "items" => check_items(rule, value, at)?,
-            "enum" => {
-                let allowed = rule.as_array().ok_or_else(|| malformed(keyword, at))?;
-                if !allowed.contains(value) {
-                    return Err(format!("{at}: {value} is not one of {rule}"));
-                }
-            }
-            "const" => {
-                if rule != value {
-                    return Err(format!("{at}: {value} is not {rule}"));
-                }
-            }
-            "minimum" | "maximum" => check_bound(keyword, rule, value, at)?,
-            keyword if ANNOTATIONS.contains(&keyword) => {}
-            other => {
-                return Err(format!(
-                    "{at}: the schema uses `{other}`, which the evidence validator does not \
-                     implement (ADR-043)"
-                ));
-            }
+        if ANNOTATIONS.contains(&keyword.as_str()) {
+            continue;
         }
+        let (_, apply) = RULES
+            .iter()
+            .find(|(name, _)| name == keyword)
+            .ok_or_else(|| {
+                format!(
+                    "{at}: the schema uses `{keyword}`, which the evidence validator does not \
+                     implement (ADR-043)"
+                )
+            })?;
+        apply(schema, rule, value, at)?;
     }
     Ok(())
+}
+
+fn check_enum(rule: &Value, value: &Value, at: &str) -> Result<(), String> {
+    let allowed = rule.as_array().ok_or_else(|| malformed("enum", at))?;
+    if allowed.contains(value) {
+        Ok(())
+    } else {
+        Err(format!("{at}: {value} is not one of {rule}"))
+    }
+}
+
+fn check_const(rule: &Value, value: &Value, at: &str) -> Result<(), String> {
+    if rule == value {
+        Ok(())
+    } else {
+        Err(format!("{at}: {value} is not {rule}"))
+    }
 }
 
 fn malformed(keyword: &str, at: &str) -> String {

@@ -51,7 +51,13 @@ fn plugin_schema_describes_the_manifest() {
         "PluginMessage",
     );
     let defs = schema.as_value()["$defs"].as_object().unwrap();
-    for message in ["Manifest", "ProducerManifest", "RunRequest", "Plan", "PluginEvent"] {
+    for message in [
+        "Manifest",
+        "ProducerManifest",
+        "RunRequest",
+        "Plan",
+        "PluginEvent",
+    ] {
         assert!(defs.contains_key(message), "{message} is not described");
     }
     insta::assert_snapshot!(pretty(&schema));

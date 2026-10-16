@@ -16,6 +16,7 @@ cupel-mutate.workspace = true
 cupel-checks.workspace = true
 cupel-core.workspace = true
 cupel-lang.workspace = true
+cupel-plugin.workspace = true
 cupel-serve.workspace = true
 serde.workspace = true
 serde_json.workspace = true

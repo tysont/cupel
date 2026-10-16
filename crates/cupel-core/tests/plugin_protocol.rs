@@ -8,8 +8,7 @@ use cupel_core::plugin::{
 };
 use cupel_core::syntax::SymbolKey;
 use cupel_core::{
-    CheckId, CheckStatus, CostClass, FactKind, LangId, Manifest, ProducerId, Score, Stability,
-    Tier,
+    CheckId, CheckStatus, CostClass, FactKind, LangId, Manifest, ProducerId, Score, Stability, Tier,
 };
 use proptest::prelude::*;
 use serde_json::{Map, Value, json};
@@ -62,7 +61,10 @@ fn a_producer_manifest_names_the_kind_and_version_it_provides() {
 #[test]
 fn a_manifest_of_an_unknown_kind_is_refused() {
     let error = serde_json::from_str::<PluginManifest>(r#"{"kind": "language"}"#).unwrap_err();
-    assert!(error.to_string().contains("unknown variant `language`"), "{error}");
+    assert!(
+        error.to_string().contains("unknown variant `language`"),
+        "{error}"
+    );
 }
 
 #[test]
@@ -105,8 +107,14 @@ fn a_run_request_carries_every_key_of_design_8_6() {
         ]
     );
     assert_eq!(PROTOCOL_VERSION, 1);
-    assert_eq!(json["facts"], json!({"per-test-map": "/repo/.cupel/f.json"}));
-    assert_eq!(json["scope"], json!({"files": ["src/a.ts"], "symbols": null}));
+    assert_eq!(
+        json["facts"],
+        json!({"per-test-map": "/repo/.cupel/f.json"})
+    );
+    assert_eq!(
+        json["scope"],
+        json!({"files": ["src/a.ts"], "symbols": null})
+    );
 }
 
 #[test]
@@ -186,25 +194,23 @@ fn request() -> impl Strategy<Value = RunRequest> {
         any::<bool>(),
     )
         .prop_map(
-            |((root, files), symbols, (depth, budget_ms), seed, facts, config, write)| {
-                RunRequest {
-                    protocol: PROTOCOL_VERSION,
-                    scratch: format!("{root}/.cupel/work"),
-                    root,
-                    scope: RequestScope { files, symbols },
-                    depth,
-                    budget_ms,
-                    seed,
-                    config: config
-                        .into_iter()
-                        .map(|(key, value)| (key, Value::from(value)))
-                        .collect(),
-                    facts,
-                    toolchain: Toolchain {
-                        cupel: "0.1.0".to_owned(),
-                    },
-                    write,
-                }
+            |((root, files), symbols, (depth, budget_ms), seed, facts, config, write)| RunRequest {
+                protocol: PROTOCOL_VERSION,
+                scratch: format!("{root}/.cupel/work"),
+                root,
+                scope: RequestScope { files, symbols },
+                depth,
+                budget_ms,
+                seed,
+                config: config
+                    .into_iter()
+                    .map(|(key, value)| (key, Value::from(value)))
+                    .collect(),
+                facts,
+                toolchain: Toolchain {
+                    cupel: "0.1.0".to_owned(),
+                },
+                write,
             },
         )
 }
@@ -241,21 +247,28 @@ fn event() -> impl Strategy<Value = PluginEvent> {
                     notes,
                 })
             }),
-        (fact_kind(), 1u32..5, proptest::collection::vec(text(), 0..4)).prop_map(
-            |(kind, version, items)| PluginEvent::Fact(PluginFact {
+        (
+            fact_kind(),
+            1u32..5,
+            proptest::collection::vec(text(), 0..4)
+        )
+            .prop_map(|(kind, version, items)| PluginEvent::Fact(PluginFact {
                 kind,
                 version,
                 payload: json!({ "items": items }),
-            })
-        ),
-        ("[a-z]{1,6}\\.[a-z-]{1,8}", any::<u64>(), any::<u64>(), any::<Option<u64>>()).prop_map(
-            |(id, done, total, eta_ms)| PluginEvent::Progress {
+            })),
+        (
+            "[a-z]{1,6}\\.[a-z-]{1,8}",
+            any::<u64>(),
+            any::<u64>(),
+            any::<Option<u64>>()
+        )
+            .prop_map(|(id, done, total, eta_ms)| PluginEvent::Progress {
                 id: CheckId::from(id),
                 done,
                 total,
                 eta_ms,
-            }
-        ),
+            }),
     ]
 }
 

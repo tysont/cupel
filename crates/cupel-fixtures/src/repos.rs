@@ -22,11 +22,13 @@ pub fn copy_repo(name: &str, into: &Path) {
         .unwrap_or_else(|error| panic!("cannot copy fixture {}: {error}", from.display()));
 }
 
+/// Copies the tree at `from` into `into`, following symbolic links, so a fixture that links to
+/// shared content (the reference plugins, ADR-090) carries a real copy of it.
 fn copy_tree(from: &Path, into: &Path) -> io::Result<()> {
     for entry in fs::read_dir(from)? {
         let entry = entry?;
         let target = into.join(entry.file_name());
-        if entry.file_type()?.is_dir() {
+        if fs::metadata(entry.path())?.is_dir() {
             fs::create_dir_all(&target)?;
             copy_tree(&entry.path(), &target)?;
         } else {

@@ -73,9 +73,8 @@ fn input_reaches_the_child_on_its_standard_input() {
 
 /// A child that writes `term` when SIGTERM reaches it and then exits, or ignores it.
 fn trapping(dir: &std::path::Path, on_term: &str) -> Process {
-    let script = format!(
-        "trap '{on_term}' TERM; echo ready > started; while true; do sleep 0.05; done"
-    );
+    let script =
+        format!("trap '{on_term}' TERM; echo ready > started; while true; do sleep 0.05; done");
     Process::new("sh", dir).args(["-c", script.as_str()])
 }
 
