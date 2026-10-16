@@ -4,16 +4,17 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use cupel_core::coverage::CoverageMap;
-use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
     Action, ActionKind, Availability, CheckId, CostClass, Ctx, Error, Event, EventSink, Evidence,
     FactKind, Finding, FindingId, LangId, Langs, Process, ProduceCtx, Producer, ProducerId, Result,
-    Scope, Severity, Tier, ToolId, ToolProbe, Writer, output_tail,
+    Scope, Severity, Tier, ToolId, ToolProbe, output_tail,
 };
 use serde_json::json;
 
 use super::format::{parse, placed};
-use super::fresh::{REPORT, SOURCES, Sources, Tree, hash};
+use crate::fresh::{
+    REPORT, SOURCES, Sources, Tree, cache_dir, entries, entry_name, load, skip_dirs, store,
+};
 use crate::runner::{installed, probe, roots};
 use crate::toolchain;
 
@@ -21,6 +22,8 @@ use crate::toolchain;
 const KEY: &str = "coverage";
 /// Where a command's report goes: the placeholder the producer fills with a cache path.
 const OUT: &str = "{out}";
+/// The kind of cache the producers keep under `.cupel/cache/`.
+const CACHE: &str = "coverage";
 
 /// One coverage producer: everything that differs between `cargo llvm-cov`, `go test`, and the
 /// rest.
@@ -151,7 +154,7 @@ impl CoverageTool {
         tree: &Tree<'_>,
         sink: &mut dyn EventSink,
     ) -> Result<CoverageMap> {
-        let entry = cache(&ctx.ctx.root, self.0.id).join(entry_name(tree.dir));
+        let entry = cache_dir(&ctx.ctx.root, CACHE, self.0.id).join(entry_name(tree.dir));
         if let Some(map) = self.cached(&entry, tree) {
             return Ok(map);
         }
@@ -164,8 +167,7 @@ impl CoverageTool {
 
     /// The report in the cache entry `entry`, when it was made for this root and is fresh.
     fn cached(&self, entry: &Path, tree: &Tree<'_>) -> Option<CoverageMap> {
-        let (sources, written) = Sources::load(entry)?;
-        let report = fs::read(entry.join(REPORT)).ok()?;
+        let (sources, written, report) = load(entry)?;
         let fresh =
             sources.dir == tree.dir && sources.fresh(tree.repo, tree.exclude, written, &report);
         fresh.then(|| self.read(&report, &sources.ran_in, &tree.root(), tree.dir))?
@@ -209,7 +211,7 @@ impl CoverageTool {
         let area = ctx.writer.create_dir(
             &ctx.writer
                 .cache_dir()
-                .join("coverage")
+                .join(CACHE)
                 .join(self.0.id)
                 .join(entry_name(tree.dir)),
         )?;
@@ -246,7 +248,7 @@ impl CoverageTool {
             });
         };
         let sources = Sources::record(tree, root, &report);
-        record(&ctx.writer, &area, &report, &sources)?;
+        store(&ctx.writer, &area, &report, &sources)?;
         Ok(map)
     }
 
@@ -270,61 +272,25 @@ impl CoverageTool {
     /// The directories skipped below the root `dir` when hashing it: the generated ones its
     /// `ProjectInfo` root names, and the one the tool writes its default report in.
     fn skip_dirs(&self, ctx: &ProduceCtx, dir: &str) -> Vec<String> {
-        let mut skip: Vec<String> = ctx
-            .upstream
-            .get::<ProjectInfo>()
-            .and_then(|info| info.roots.iter().find(|root| root.path == dir))
-            .map(|root| root.skip_dirs.clone())
-            .unwrap_or_default();
         let output = self
             .0
             .default_report
             .and_then(|report| report.split_once('/'))
-            .map(|(dir, _)| dir.to_owned());
-        skip.extend(output.filter(|output| !skip.contains(output)));
-        skip
+            .map(|(dir, _)| dir);
+        skip_dirs(ctx, dir, output.as_slice())
     }
 
     /// Whether a fresh cached report can be ingested: this producer has cache entries, and
     /// every one is fresh.
     fn ingestible(&self, ctx: &Ctx) -> bool {
-        let entries: Vec<PathBuf> = fs::read_dir(cache(&ctx.root, self.0.id))
-            .into_iter()
-            .flatten()
-            .flatten()
-            .map(|entry| entry.path())
-            .collect();
+        let entries = entries(&cache_dir(&ctx.root, CACHE, self.0.id));
         !entries.is_empty()
             && entries.iter().all(|entry| {
-                Sources::load(entry).is_some_and(|(sources, written)| {
-                    fs::read(entry.join(REPORT)).is_ok_and(|report| {
-                        sources.fresh(&ctx.root, &ctx.exclude, written, &report)
-                    })
+                load(entry).is_some_and(|(sources, written, report)| {
+                    sources.fresh(&ctx.root, &ctx.exclude, written, &report)
                 })
             })
     }
-}
-
-/// Writes the cached report (when the tool wrote it elsewhere) and its record into `area`.
-fn record(writer: &Writer, area: &Path, report: &[u8], sources: &Sources) -> Result<()> {
-    writer.write(&area.join(REPORT), report)?;
-    let json = serde_json::to_vec_pretty(sources).unwrap_or_default();
-    writer.write(&area.join(SOURCES), &json)?;
-    Ok(())
-}
-
-/// The cache directory of producer `id` in the repository at `repo`.
-fn cache(repo: &Path, id: &str) -> PathBuf {
-    repo.join(Writer::DIR)
-        .join("cache")
-        .join("coverage")
-        .join(id)
-}
-
-/// The cache entry of the project root `dir`: one per root whatever language asked, so two
-/// languages sharing a root (JavaScript and TypeScript) run the tool once.
-fn entry_name(dir: &str) -> String {
-    hash(dir.as_bytes())[..16].to_owned()
 }
 
 fn canonical(path: &Path) -> PathBuf {

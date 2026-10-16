@@ -555,12 +555,16 @@ expression: out
         "lang": "rust",
         "per_test_map": true,
         "producer": "tool.llvm-cov-per-test",
+        "measured": 2,
+        "reused": 1236,
         "fallback": null
       },
       {
         "lang": "typescript",
         "per_test_map": false,
         "producer": null,
+        "measured": null,
+        "reused": null,
         "fallback": "no producer makes per-test-map for this language (see `cupel describe matrix`)"
       }
     ]

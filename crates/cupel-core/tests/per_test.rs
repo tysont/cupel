@@ -87,6 +87,19 @@ fn the_index_names_the_tests_that_execute_a_range_with_the_first_line_each_execu
 }
 
 #[test]
-fn the_payload_has_a_schema_and_version_one() {
-    assert_eq!(schema::fact_version(FactKind::PerTestMap), Some(1));
+fn the_payload_has_a_schema_and_version_two() {
+    assert_eq!(schema::fact_version(FactKind::PerTestMap), Some(2));
+}
+
+#[test]
+fn a_map_counts_the_tests_it_measured_and_those_its_cache_kept() {
+    let runner = || ProducerId::from("tool.cargo-nextest");
+    let tests = map().tests;
+    let measured = PerTestMap::new(runner(), tests.clone());
+    let refreshed = PerTestMap::refreshed(runner(), tests.clone(), 1);
+    let cached = PerTestMap::refreshed(runner(), tests, 0);
+    assert_eq!(
+        [&measured, &refreshed, &cached].map(|map| (map.measured, map.reused, map.cached())),
+        [(3, 0, false), (1, 2, false), (0, 3, true)]
+    );
 }

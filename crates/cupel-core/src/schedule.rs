@@ -209,16 +209,12 @@ impl Scheduler<'_> {
                     return None;
                 }
                 let manifest = check.manifest();
+                let langs: Vec<&Lang> = tasks.iter().map(|task| &task.lang).collect();
                 Some(PlannedCheck {
                     id: manifest.id.clone(),
                     targets: tasks.iter().map(|task| task.plan.targets).sum(),
                     est_ms: tasks.iter().map(|task| task.plan.est_ms).sum(),
-                    needs: manifest
-                        .needs
-                        .iter()
-                        .chain(&manifest.wants)
-                        .map(ToString::to_string)
-                        .collect(),
+                    needs: self.planned_needs(manifest, &langs, &store.root, job.depth),
                     note: None,
                 })
             })
@@ -248,6 +244,56 @@ impl Scheduler<'_> {
             mutation_outcomes: Vec::new(),
             refused: None,
         })
+    }
+
+    /// A planned check's needs and wants by name, then each want of its needs' producers that
+    /// the run would not simply make (ADR-083): with the producer's note, such as
+    /// `per-test-map(cached)`, or with its cost when that is beyond the run's depth, such as
+    /// `per-test-map(deep)`, so it would be left out.
+    fn planned_needs(
+        &self,
+        manifest: &Manifest,
+        langs: &[&Lang],
+        ctx: &Ctx,
+        depth: CostClass,
+    ) -> Vec<String> {
+        let mut needs: Vec<String> = manifest
+            .needs
+            .iter()
+            .chain(&manifest.wants)
+            .map(ToString::to_string)
+            .collect();
+        for (kind, lang) in manifest
+            .needs
+            .iter()
+            .flat_map(|kind| langs.iter().map(move |lang| (kind, *lang)))
+        {
+            let wants = self
+                .producers
+                .producers_for(*kind, lang)
+                .next()
+                .map_or(&[][..], |producer| producer.wants());
+            for want in wants {
+                let Some(estimate) = self
+                    .producers
+                    .producers_for(*want, lang)
+                    .next()
+                    .map(|producer| producer.estimate(ctx))
+                else {
+                    continue;
+                };
+                let how = if estimate.cost > depth {
+                    Some(estimate.cost.to_string())
+                } else {
+                    estimate.note
+                };
+                let entry = how.map(|how| format!("{want}({how})"));
+                if let Some(entry) = entry.filter(|entry| !needs.contains(entry)) {
+                    needs.push(entry);
+                }
+            }
+        }
+        needs
     }
 
     /// Resolves the symbols in scope, then splits the selected checks into tasks and skips.
@@ -891,8 +937,9 @@ impl<'a> FactStore<'a> {
     }
 
     /// Makes each of `wants` for `lang` that can be made by a producer within the run's depth
-    /// (ADR-080); one that cannot is left out, so an optional fact never costs more than the
-    /// run asked for.
+    /// (ADR-080), as the producer estimates it here (a cache to refresh can make a `deep`
+    /// producer `standard`, ADR-083); one that cannot is left out, so an optional fact never
+    /// costs more than the run asked for.
     fn ensure_wants(
         &mut self,
         wants: &[FactKind],
@@ -904,7 +951,7 @@ impl<'a> FactStore<'a> {
             let affordable = self
                 .producers
                 .producers_for(*want, lang)
-                .any(|producer| producer.cost() <= self.depth);
+                .any(|producer| producer.estimate(&self.root).cost <= self.depth);
             if affordable && !visiting.contains(want) {
                 visiting.push(*want);
                 let _ = self.ensure(*want, lang, sink);

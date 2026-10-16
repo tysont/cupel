@@ -20,7 +20,6 @@ mod coverage_py;
 mod coverprofile;
 mod error;
 mod format;
-mod fresh;
 mod go_coverprofile;
 mod istanbul;
 mod jacoco;

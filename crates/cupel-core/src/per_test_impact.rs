@@ -53,6 +53,11 @@ pub struct ImpactBasis {
     pub per_test_map: bool,
     /// The `PerTestMap` producer that measured the map, when one did.
     pub producer: Option<ProducerId>,
+    /// How many of the map's tests the producer measured for this run; 0 when the whole map
+    /// came from its cache (ADR-083). Null without a map.
+    pub measured: Option<u64>,
+    /// How many of the map's tests came from the producer's cache. Null without a map.
+    pub reused: Option<u64>,
     /// Why the language fell back to file-level impact; null when it did not.
     pub fallback: Option<String>,
 }

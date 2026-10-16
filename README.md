@@ -420,7 +420,7 @@ $ cupel tests --impacted --changed --format text    # `add` changed in calc.py
 cupel tests: pass (exit 0)
 
 tests  1 impacted · per-test map: yes
-  python  per-test map from tool.pytest-cov-per-test
+  python  per-test map from tool.pytest-cov-per-test (2 measured)
   tests/test_calc.py::test_add  python
     covers calc.add (calc.py:6)
   run in .: python -m pytest tests/test_calc.py::test_add
@@ -437,7 +437,9 @@ tests  1 impacted · per-test map: no
   …
 ```
 
-In JSON the same report is the envelope's `tests`: `per_test_map`, `impacted` (`id`, `file`, `reason`, `lang`), `commands` (`lang`, `runner`, `dir`, `command`, and `narrowed: false` when the runner cannot run only those tests and the command runs its whole suite), and `languages` (per language, whether a per-test map chose the tests or why not). Measuring a per-test map runs each test alone under coverage, so it costs a full test run or more; `cupel describe matrix` shows which languages can have one here.
+In JSON the same report is the envelope's `tests`: `per_test_map`, `impacted` (`id`, `file`, `reason`, `lang`), `commands` (`lang`, `runner`, `dir`, `command`, and `narrowed: false` when the runner cannot run only those tests and the command runs its whole suite), and `languages` (per language, whether a per-test map chose the tests or why not, and how many of the map's tests were `measured` for this run and `reused` from the cache). `cupel describe matrix` shows which languages can have a per-test map here.
+
+Measuring a per-test map costs a test run under coverage: one instrumented `cargo llvm-cov nextest` run for Rust (each test's coverage is told apart by process), one pytest-cov run for Python, and one `go test` per test for Go. Each project root's map is cached under `.cupel/cache/per-test/<producer>/`, with the hash of every file under the root, so a later run reuses it. After a change, only the stale tests are measured again: those that cover a changed file or whose own test file changed (for Go, any test file of their package), plus tests the cache does not hold; tests that are gone are dropped. A change to build or test configuration (`Cargo.toml`, `Cargo.lock`, `go.mod`, `conftest.py`, `pyproject.toml`, and the like) measures every test again, and so does deleting the cache. The text report says how many tests were measured, or `(cached)` when none was.
 
 ### Global flags
 
@@ -597,7 +599,7 @@ Mutation testing is expensive, so the engine stacks every saving it can:
 
 1. **Coverage gating.** A site no test runs, by the coverage report, is reported `uncovered` and never run.
 2. **Reuse.** An outcome is stored in `.cupel/cupel.db` under a key of the function's source text, the site, the replacement, the tests that cover it, and the runner's version; a later run reuses it while that key holds. A second run with nothing changed runs no mutant; changing one test file reruns only the mutants that test covers.
-3. **Per-test selection.** At `--depth deep` and beyond (measuring a per-test map runs every test once under coverage), where the language has a per-test coverage map from the baseline's runner (Go; Python with pytest-cov; Rust when cargo-nextest is the runner and cargo-llvm-cov is installed), a mutant runs only the tests that execute its line. Elsewhere it runs the whole suite.
+3. **Per-test selection.** Where the language has a per-test coverage map from the baseline's runner (Go; Python with pytest-cov; Rust when cargo-nextest is the runner and cargo-llvm-cov is installed), a mutant runs only the tests that execute its line. Measuring a map from nothing happens at `--depth deep` and beyond; at `standard` the engine uses a cached map (see [`cupel tests --impacted`](#cupel-tests---impacted)) when refreshing it is cheap: one suite run for Rust and Python, at most 32 tests for Go. `cupel check --dry-run` says which, in the check's `needs`: `per-test-map(cached)`, `per-test-map(refresh 3 stale)`, or `per-test-map(deep)` when the depth leaves it out. Without a map a mutant runs the whole suite.
 4. **Overlays.** Mutants run in copies of the tree outside the repository, one per worker, kept between runs so builds stay incremental: files are cloned (macOS) or hard-linked, what `.gitignore` ignores is shared through symlinks except the runner's build directory (`target/` for cargo), and the mutated file is a private copy. Mutants of one file run concurrently; files run one after another.
 5. **Timeouts.** Before its first mutant of a file, each worker times the unmutated file's tests, rebuild included; a mutant gets ten times that (`timeout_factor`), at least two seconds.
 6. **Order.** Last run's survivors run first, then mutants of functions never run before, then the rest, so a time limit cuts the least informative work.
@@ -651,7 +653,7 @@ depth = "quick"
 
 **Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the table above. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding) or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening`, which needs a range, is rejected when the config loads.
 
-Cupel writes only under `.cupel/` (run records, the SQLite fact store, scratch space) unless `--write` is given. An install you allow (`--install`, or yes to the question) runs your package manager, which for the JavaScript launchers, uv, and poetry adds a dev dependency to `package.json` or `pyproject.toml` and its lockfile. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
+Cupel writes only under `.cupel/` (run records, the SQLite fact store, `cache/` with coverage reports and per-test maps, scratch space) unless `--write` is given. An install you allow (`--install`, or yes to the question) runs your package manager, which for the JavaScript launchers, uv, and poetry adds a dev dependency to `package.json` or `pyproject.toml` and its lockfile. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
 
 ## Agents
 

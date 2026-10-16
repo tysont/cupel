@@ -104,6 +104,49 @@ fn changing_one_python_function_impacts_only_the_test_that_covers_it() {
     );
 }
 
+/// A second `tests --impacted` run reads `lang`'s per-test map from the cache the first wrote
+/// under `.cupel/cache/per-test/<producer>/`: it measures nothing and impacts the same test.
+fn assert_the_second_run_is_cached(lang: &str, file: &str, producer: &str) {
+    let Some(repo) = changed(lang, file) else {
+        return;
+    };
+    let first = impacted(&repo);
+    let basis = &first["languages"][0];
+    if basis["per_test_map"] == json!(false) {
+        let why = basis["fallback"].as_str().unwrap_or_default();
+        assert!(why.contains("not installed"), "{first}");
+        eprintln!("SKIPPED: {why}");
+        return;
+    }
+    let second = impacted(&repo);
+    let counts = |report: &Value| {
+        let basis = &report["languages"][0];
+        (basis["measured"].clone(), basis["reused"].clone())
+    };
+    assert_eq!(
+        (counts(&first), counts(&second)),
+        ((json!(2), json!(0)), (json!(0), json!(2)))
+    );
+    assert_eq!(tests_of(&first), tests_of(&second));
+    assert!(
+        repo.path(&format!(".cupel/cache/per-test/{producer}"))
+            .is_dir()
+    );
+    let text = repo.run(&["tests", "--impacted", "--changed", "--format", "text"]);
+    let line = format!("{lang}  per-test map from {producer} (cached)");
+    assert!(text.stdout.contains(&line), "{line}\nin:\n{}", text.stdout);
+}
+
+#[test]
+fn a_second_python_run_reads_the_per_test_map_from_its_cache() {
+    assert_the_second_run_is_cached("python", "calc.py", "tool.pytest-cov-per-test");
+}
+
+#[test]
+fn a_second_rust_run_reads_the_per_test_map_from_its_cache() {
+    assert_the_second_run_is_cached("rust", "src/lib.rs", "tool.llvm-cov-per-test");
+}
+
 #[test]
 fn javascript_falls_back_to_the_test_files_that_import_the_change_and_says_so() {
     let Some(repo) = changed("javascript", "add.js") else {

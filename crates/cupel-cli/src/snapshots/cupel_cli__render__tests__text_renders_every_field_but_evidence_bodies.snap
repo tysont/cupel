@@ -80,7 +80,7 @@ rankings  top 10 per dimension
   static.deps.coupling  module · 0 measured · Afferent plus efferent coupling per module.
 
 tests  2 impacted · per-test map: no
-  rust  per-test map from tool.llvm-cov-per-test
+  rust  per-test map from tool.llvm-cov-per-test (2 measured, 1236 cached)
   typescript  file-level impact: no producer makes per-test-map for this language (see `cupel describe matrix`)
   calc tests::adds  rust
     covers calc::add (src/lib.rs:5)

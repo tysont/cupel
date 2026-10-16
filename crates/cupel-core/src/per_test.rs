@@ -16,11 +16,16 @@ pub struct PerTestMap {
     pub runner: ProducerId,
     /// Every measured test, sorted by ID; a test that executed nothing has no `covered` entries.
     pub tests: Vec<TestCoverage>,
+    /// How many of `tests` the production that made this map measured (ADR-083); 0 when every
+    /// test came from the producer's cache.
+    pub measured: u64,
+    /// How many of `tests` came from the producer's cache without being measured again.
+    pub reused: u64,
 }
 
 impl Fact for PerTestMap {
     const KIND: FactKind = FactKind::PerTestMap;
-    const VERSION: u32 = 1;
+    const VERSION: u32 = 2;
 }
 
 /// The lines one test executed.
@@ -44,10 +49,28 @@ pub struct CoveredLines {
 }
 
 impl PerTestMap {
-    /// The map of `runner`'s `tests`, sorted by ID.
-    pub fn new(runner: ProducerId, mut tests: Vec<TestCoverage>) -> Self {
+    /// The map of `runner`'s `tests`, sorted by ID, every one of them measured.
+    pub fn new(runner: ProducerId, tests: Vec<TestCoverage>) -> Self {
+        let measured = tests.len() as u64;
+        Self::refreshed(runner, tests, measured)
+    }
+
+    /// The map of `runner`'s `tests`, sorted by ID, of which `measured` were measured and the
+    /// rest came from a cache.
+    pub fn refreshed(runner: ProducerId, mut tests: Vec<TestCoverage>, measured: u64) -> Self {
         tests.sort_by(|a, b| a.id.cmp(&b.id));
-        Self { runner, tests }
+        let reused = (tests.len() as u64).saturating_sub(measured);
+        Self {
+            runner,
+            tests,
+            measured,
+            reused,
+        }
+    }
+
+    /// Whether every test came from the producer's cache.
+    pub fn cached(&self) -> bool {
+        self.measured == 0
     }
 
     /// The inverted index: for each file and line, the tests that execute it.

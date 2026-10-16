@@ -87,7 +87,7 @@ pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
-    Availability, ChangedLines, Ctx, Focus, Install, ProduceCtx, Produced, Producer,
+    Availability, ChangedLines, Ctx, Estimate, Focus, Install, ProduceCtx, Produced, Producer,
     ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand, Runners,
     SharedFact, TestRun, TestSelection, ToolProbe, Upstream,
 };

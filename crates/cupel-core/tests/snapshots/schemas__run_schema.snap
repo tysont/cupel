@@ -1375,6 +1375,15 @@ expression: pretty(&schema)
         "lang": {
           "$ref": "#/$defs/LangId"
         },
+        "measured": {
+          "description": "How many of the map's tests the producer measured for this run; 0 when the whole map\ncame from its cache (ADR-083). Null without a map.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
         "per_test_map": {
           "description": "True when a per-test coverage map chose the tests; false when file-level impact through\nthe import graph did.",
           "type": "boolean"
@@ -1389,13 +1398,24 @@ expression: pretty(&schema)
               "type": "null"
             }
           ]
+        },
+        "reused": {
+          "description": "How many of the map's tests came from the producer's cache. Null without a map.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
         }
       },
       "required": [
         "fallback",
         "lang",
+        "measured",
         "per_test_map",
-        "producer"
+        "producer",
+        "reused"
       ]
     },
     "ImpactedTest": {

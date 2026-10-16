@@ -145,7 +145,7 @@ fn describe_matrix_shows_tests_impacted_unsupported_where_no_per_test_map_exists
 #[test]
 fn describe_fact_per_test_map_lists_producers_for_every_language_but_the_ecma_family() {
     let description = described(&["fact", "per-test-map"]);
-    assert_eq!(description["version"], json!(1));
+    assert_eq!(description["version"], json!(2));
     let producers: Vec<(String, usize)> = description["producers"]
         .as_array()
         .unwrap()

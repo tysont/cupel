@@ -7,8 +7,11 @@ depth = "standard"
 [scope]
 exclude = ["crates/cupel-fixtures/**"]
 
+# nextest runs each test in its own process and narrows to tests by a filterset, so mutants run
+# only the tests a per-test map says cover them (ADR-083); `make test` keeps `cargo test`.
 [lang.rust]
-test = "cargo test --workspace"
+runner = "cargo-nextest"
+test = "cargo nextest run --workspace"
 coverage = "cargo llvm-cov --lcov --output-path {out}"
 bench = "cargo bench --bench {name} -- --save-baseline {id}"
 

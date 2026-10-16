@@ -1,11 +1,12 @@
-// ABOUTME: Freshness of coverage reports (ADR-079): what every file under a project root hashed to when Cupel
-// ABOUTME: made a report, and whether a cached report, or one the tool left in the tree, still describes it.
-use std::collections::BTreeMap;
+// ABOUTME: Freshness of cached tool output (ADR-079, ADR-083): what every file under a project root hashed to when Cupel
+// ABOUTME: made a report or a per-test map, which files changed since, and whether a cached report still describes the tree.
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::SystemTime;
 
-use cupel_core::Exclude;
+use cupel_core::syntax::ProjectInfo;
+use cupel_core::{Exclude, ProduceCtx, Result, Writer};
 use ignore::WalkBuilder;
 use serde::{Deserialize, Serialize};
 
@@ -56,6 +57,22 @@ impl Sources {
         }
     }
 
+    /// This record, made after a tool ran, with every file that `before` (made before it ran)
+    /// recorded otherwise marked as changed, so the next comparison finds it changed: what the
+    /// tool measured may be either version.
+    pub fn since(mut self, before: &Self) -> Self {
+        for (name, recorded) in &mut self.files {
+            if before
+                .files
+                .get(name)
+                .is_some_and(|earlier| earlier != recorded)
+            {
+                recorded.clear();
+            }
+        }
+        self
+    }
+
     /// The record in the cache entry `entry`, with when it was written; `None` when there is none.
     pub fn load(entry: &Path) -> Option<(Self, SystemTime)> {
         let path = entry.join(SOURCES);
@@ -73,9 +90,12 @@ impl Sources {
         written: SystemTime,
         report: &[u8],
     ) -> bool {
-        if hash(report) != self.report {
-            return false;
-        }
+        hash(report) == self.report && self.changes(repo, exclude, written).is_empty()
+    }
+
+    /// The files under the root that differ from the record: those added, and those removed or
+    /// hashing otherwise (a file not modified since `written` is trusted without rehashing).
+    pub fn changes(&self, repo: &Path, exclude: &Exclude, written: SystemTime) -> Changes {
         let tree = Tree {
             repo,
             dir: &self.dir,
@@ -83,13 +103,45 @@ impl Sources {
             exclude,
         };
         let files = tree.files();
-        files.len() == self.files.len()
-            && files.iter().all(|(name, path)| {
-                self.files.get(name).is_some_and(|recorded| {
-                    modified(path).is_some_and(|at| at < written)
-                        || fs::read(path).is_ok_and(|bytes| hash(&bytes) == *recorded)
-                })
-            })
+        let mut changes = Changes::default();
+        for (name, path) in &files {
+            match self.files.get(name) {
+                None => {
+                    changes.added.insert(name.clone());
+                }
+                Some(recorded) => {
+                    let same = !recorded.is_empty()
+                        && (modified(path).is_some_and(|at| at < written)
+                            || fs::read(path).is_ok_and(|bytes| hash(&bytes) == *recorded));
+                    if !same {
+                        changes.changed.insert(name.clone());
+                    }
+                }
+            }
+        }
+        let removed = self.files.keys().filter(|name| !files.contains_key(*name));
+        changes.changed.extend(removed.cloned());
+        changes
+    }
+}
+
+/// The files under a project root that differ from a record, relative to the root.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub(crate) struct Changes {
+    /// Files the record does not hold.
+    pub added: BTreeSet<String>,
+    /// Files the record holds that are gone or hash otherwise.
+    pub changed: BTreeSet<String>,
+}
+
+impl Changes {
+    pub fn is_empty(&self) -> bool {
+        self.added.is_empty() && self.changed.is_empty()
+    }
+
+    /// Every added, changed, or removed file.
+    pub fn all(&self) -> impl Iterator<Item = &String> {
+        self.added.iter().chain(&self.changed)
     }
 }
 
@@ -158,6 +210,63 @@ impl Tree<'_> {
             })
             .all(|path| modified(path).is_some_and(|at| at < made))
     }
+}
+
+/// The cache directory of producer `id` among the `kind` caches (`coverage`, `per-test`) of the
+/// repository at `repo`: `.cupel/cache/<kind>/<id>/`, one entry per project root below it.
+pub(crate) fn cache_dir(repo: &Path, kind: &str, id: &str) -> PathBuf {
+    repo.join(Writer::DIR).join("cache").join(kind).join(id)
+}
+
+/// The cache entry name of the project root `dir`: one per root whatever language asked, so two
+/// languages sharing a root (JavaScript and TypeScript) share it.
+pub(crate) fn entry_name(dir: &str) -> String {
+    hash(dir.as_bytes())[..16].to_owned()
+}
+
+/// Every entry of the cache directory `dir`.
+pub(crate) fn entries(dir: &Path) -> Vec<PathBuf> {
+    let mut entries: Vec<PathBuf> = fs::read_dir(dir)
+        .into_iter()
+        .flatten()
+        .flatten()
+        .map(|entry| entry.path())
+        .collect();
+    entries.sort();
+    entries
+}
+
+/// The record in the cache entry `entry`, when it was written, and the report beside it, when
+/// the report hashes as recorded.
+pub(crate) fn load(entry: &Path) -> Option<(Sources, SystemTime, Vec<u8>)> {
+    let (sources, written) = Sources::load(entry)?;
+    let report = fs::read(entry.join(REPORT)).ok()?;
+    (hash(&report) == sources.report).then_some((sources, written, report))
+}
+
+/// Writes `report` and its record into the cache entry `entry`.
+pub(crate) fn store(writer: &Writer, entry: &Path, report: &[u8], sources: &Sources) -> Result<()> {
+    writer.write(&entry.join(REPORT), report)?;
+    let json = serde_json::to_vec_pretty(sources).unwrap_or_default();
+    writer.write(&entry.join(SOURCES), &json)?;
+    Ok(())
+}
+
+/// The directories skipped below the project root `dir` when hashing it: the generated ones
+/// its `ProjectInfo` root names, and `extra` (a tool's own output directories).
+pub(crate) fn skip_dirs(ctx: &ProduceCtx, dir: &str, extra: &[&str]) -> Vec<String> {
+    let mut skip: Vec<String> = ctx
+        .upstream
+        .get::<ProjectInfo>()
+        .and_then(|info| info.roots.iter().find(|root| root.path == dir))
+        .map(|root| root.skip_dirs.clone())
+        .unwrap_or_default();
+    for output in extra {
+        if !skip.iter().any(|skipped| skipped == output) {
+            skip.push((*output).to_owned());
+        }
+    }
+    skip
 }
 
 fn modified(path: &Path) -> Option<SystemTime> {
@@ -261,6 +370,56 @@ mod tests {
         fs::remove_file(root.join("tests/a.rs")).unwrap();
         seen.push(fresh());
         assert_eq!(seen, [true, false, false]);
+    }
+
+    /// [`recorded`], then `files` written with their texts.
+    fn written(files: &[(&str, &str)]) -> (tempfile::TempDir, Sources, SystemTime) {
+        let (dir, sources, written) = recorded();
+        for (file, text) in files {
+            fs::write(dir.path().join(file), text).unwrap();
+        }
+        (dir, sources, written)
+    }
+
+    fn names<'a>(files: impl Iterator<Item = &'a String>) -> Vec<&'a str> {
+        files.map(String::as_str).collect()
+    }
+
+    #[test]
+    fn changes_name_the_added_the_rewritten_and_the_removed_files_but_not_one_rewritten_alike() {
+        let (dir, sources, written) = written(&[
+            ("src/lib.rs", "fn a() {}\n"),
+            ("tests/a.rs", "#[test] fn u() {}\n"),
+            ("src/new.rs", ""),
+            ("target/new.o", ""),
+        ]);
+        let seen = sources.changes(dir.path(), &EXCLUDE, written);
+        let first = (names(seen.added.iter()), names(seen.changed.iter()));
+        fs::remove_file(dir.path().join("src/lib.rs")).unwrap();
+        let seen = sources.changes(dir.path(), &EXCLUDE, written);
+        assert_eq!(
+            (first, names(seen.all())),
+            (
+                (vec!["src/new.rs"], vec!["tests/a.rs"]),
+                vec!["src/new.rs", "src/lib.rs", "tests/a.rs"]
+            )
+        );
+    }
+
+    #[test]
+    fn a_file_edited_while_a_tool_ran_is_changed_since_and_a_file_the_tool_added_is_not() {
+        let (dir, before, written) =
+            written(&[("src/lib.rs", "fn edited() {}\n"), ("Cargo.lock", "")]);
+        let root = dir.path();
+        let after = Sources::record(&tree(root), root, b"report").since(&before);
+        // Even with every file older than the record, as when the record is written after the run.
+        let later = SystemTime::now() + Duration::from_secs(60);
+        assert_eq!(
+            after.changes(root, &EXCLUDE, later),
+            after.changes(root, &EXCLUDE, written)
+        );
+        let changes = after.changes(root, &EXCLUDE, later);
+        assert_eq!(names(changes.all()), ["src/lib.rs"]);
     }
 
     #[test]
