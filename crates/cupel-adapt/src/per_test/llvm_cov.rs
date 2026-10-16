@@ -357,14 +357,19 @@ mod tests {
             "CARGO_TARGET_X_RUNNER",
             std::path::Path::new("/a/it's/profiles"),
         );
-        assert!(script.starts_with("#!/bin/sh\n"), "{script}");
-        for line in [
-            "unset CARGO_TARGET_X_RUNNER\n",
-            "  dir='/a/it'\\''s/profiles'/$$\n",
-            "  LLVM_PROFILE_FILE=\"$dir/%p-%m.profraw\"\n",
-            "exec \"$@\"\n",
-        ] {
-            assert!(script.contains(line), "{line:?} in {script}");
-        }
+        let expected = [
+            "#!/bin/sh",
+            "# Written by Cupel (ADR-083): one profile directory per nextest test process.",
+            "unset CARGO_TARGET_X_RUNNER",
+            "if [ \"$NEXTEST_TEST_PHASE\" = run ]; then",
+            "  dir='/a/it'\\''s/profiles'/$$",
+            "  mkdir -p \"$dir\"",
+            "  printf '%s\\n%s\\n%s\\n' \"$NEXTEST_BINARY_ID\" \"$NEXTEST_TEST_NAME\" \"$1\" > \"$dir/test\"",
+            "  LLVM_PROFILE_FILE=\"$dir/%p-%m.profraw\"",
+            "  export LLVM_PROFILE_FILE",
+            "fi",
+            "exec \"$@\"",
+        ];
+        assert_eq!(script.lines().collect::<Vec<_>>(), expected);
     }
 }

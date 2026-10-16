@@ -372,36 +372,45 @@ mod tests {
         assert_eq!(seen, [true, false, false]);
     }
 
+    /// [`recorded`], then `files` written with their texts.
+    fn written(files: &[(&str, &str)]) -> (tempfile::TempDir, Sources, SystemTime) {
+        let (dir, sources, written) = recorded();
+        for (file, text) in files {
+            fs::write(dir.path().join(file), text).unwrap();
+        }
+        (dir, sources, written)
+    }
+
+    fn names<'a>(files: impl Iterator<Item = &'a String>) -> Vec<&'a str> {
+        files.map(String::as_str).collect()
+    }
+
     #[test]
     fn changes_name_the_added_the_rewritten_and_the_removed_files_but_not_one_rewritten_alike() {
-        let (dir, sources, written) = recorded();
-        let root = dir.path();
-        fs::write(root.join("src/lib.rs"), "fn a() {}\n").unwrap();
-        fs::write(root.join("tests/a.rs"), "#[test] fn u() {}\n").unwrap();
-        fs::write(root.join("src/new.rs"), "").unwrap();
-        fs::write(root.join("target/new.o"), "").unwrap();
-        let seen = sources.changes(root, &EXCLUDE, written);
+        let (dir, sources, written) = written(&[
+            ("src/lib.rs", "fn a() {}\n"),
+            ("tests/a.rs", "#[test] fn u() {}\n"),
+            ("src/new.rs", ""),
+            ("target/new.o", ""),
+        ]);
+        let seen = sources.changes(dir.path(), &EXCLUDE, written);
+        let first = (names(seen.added.iter()), names(seen.changed.iter()));
+        fs::remove_file(dir.path().join("src/lib.rs")).unwrap();
+        let seen = sources.changes(dir.path(), &EXCLUDE, written);
         assert_eq!(
+            (first, names(seen.all())),
             (
-                seen.added.iter().map(String::as_str).collect::<Vec<_>>(),
-                seen.changed.iter().map(String::as_str).collect::<Vec<_>>()
-            ),
-            (vec!["src/new.rs"], vec!["tests/a.rs"])
-        );
-        fs::remove_file(root.join("src/lib.rs")).unwrap();
-        let seen = sources.changes(root, &EXCLUDE, written);
-        assert_eq!(
-            seen.all().map(String::as_str).collect::<Vec<_>>(),
-            ["src/new.rs", "src/lib.rs", "tests/a.rs"]
+                (vec!["src/new.rs"], vec!["tests/a.rs"]),
+                vec!["src/new.rs", "src/lib.rs", "tests/a.rs"]
+            )
         );
     }
 
     #[test]
     fn a_file_edited_while_a_tool_ran_is_changed_since_and_a_file_the_tool_added_is_not() {
-        let (dir, before, written) = recorded();
+        let (dir, before, written) =
+            written(&[("src/lib.rs", "fn edited() {}\n"), ("Cargo.lock", "")]);
         let root = dir.path();
-        fs::write(root.join("src/lib.rs"), "fn edited() {}\n").unwrap();
-        fs::write(root.join("Cargo.lock"), "").unwrap();
         let after = Sources::record(&tree(root), root, b"report").since(&before);
         // Even with every file older than the record, as when the record is written after the run.
         let later = SystemTime::now() + Duration::from_secs(60);
@@ -410,10 +419,7 @@ mod tests {
             after.changes(root, &EXCLUDE, written)
         );
         let changes = after.changes(root, &EXCLUDE, later);
-        assert_eq!(
-            changes.all().map(String::as_str).collect::<Vec<_>>(),
-            ["src/lib.rs"]
-        );
+        assert_eq!(names(changes.all()), ["src/lib.rs"]);
     }
 
     #[test]

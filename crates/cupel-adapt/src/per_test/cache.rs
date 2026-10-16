@@ -184,18 +184,15 @@ mod tests {
     const SCALE: &str = "tests/test_scale.py::test_scale";
 
     #[test]
-    fn a_changed_source_makes_only_the_tests_covering_it_stale() {
+    fn a_changed_source_or_test_file_makes_only_the_tests_covering_or_owning_it_stale() {
+        let source = refreshed(&changes(&[], &["add.py"]));
+        let test_file = refreshed(&changes(&[], &["tests/test_scale.py"]));
         assert_eq!(
-            refreshed(&changes(&[], &["add.py"])),
-            (vec![SCALE.to_owned()], 1, true)
-        );
-    }
-
-    #[test]
-    fn a_changed_or_removed_test_file_makes_its_own_tests_stale() {
-        assert_eq!(
-            refreshed(&changes(&[], &["tests/test_scale.py"])),
-            (vec![ADD.to_owned()], 1, true)
+            [source, test_file],
+            [
+                (vec![SCALE.to_owned()], 1, true),
+                (vec![ADD.to_owned()], 1, true)
+            ]
         );
     }
 
