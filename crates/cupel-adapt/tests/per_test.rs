@@ -492,14 +492,16 @@ fn commented(
 #[test]
 fn a_one_function_python_change_measures_again_only_the_test_that_ran_that_function() {
     let functions = [("calc.py", 4, 7), ("calc.py", 10, 12)];
-    let seen = commented(&PYTEST_COV, "    return a + b", "    # why", functions);
-    assert!(seen.is_none_or(|seen| seen == (1, 1, ids(&[PY_SCALE]))));
+    if let Some(seen) = commented(&PYTEST_COV, "    return a + b", "    # why", functions) {
+        assert_eq!(seen, (1, 1, ids(&[PY_SCALE])));
+    }
 }
 
 #[test]
 fn a_one_function_go_change_measures_again_only_the_test_that_ran_that_function() {
     let functions = [("calc.go", 5, 8), ("calc.go", 11, 13)];
-    let seen = commented(&GO_COVER, "\treturn a + b", "\t// why", functions);
     let scale = ids(&["example.com/calc/TestScale"]);
-    assert!(seen.is_none_or(|seen| seen == (1, 1, scale)));
+    if let Some(seen) = commented(&GO_COVER, "\treturn a + b", "\t// why", functions) {
+        assert_eq!(seen, (1, 1, scale));
+    }
 }

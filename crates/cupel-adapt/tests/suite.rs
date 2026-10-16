@@ -226,16 +226,21 @@ fn cache_lifecycle(joint: &Joint, file: &str, from: &str, to: &str) -> Option<Ve
 /// The estimates a run, its rerun, and a source edit go through.
 const LIFECYCLE: [&str; 3] = ["one run", "cached", "one run"];
 
+/// Asserts the estimates `joint` goes through when `a + b` in `file` becomes `b + a`.
+fn assert_lifecycle(joint: &Joint, file: &str) {
+    if let Some(seen) = cache_lifecycle(joint, file, "a + b", "b + a") {
+        assert_eq!(seen, LIFECYCLE);
+    }
+}
+
 #[test]
 fn an_unchanged_python_tree_reuses_the_cached_baseline_and_a_source_change_runs_again() {
-    let seen = cache_lifecycle(&PYTHON, "calc.py", "a + b", "b + a");
-    assert!(seen.as_ref().is_none_or(|seen| *seen == LIFECYCLE), "{seen:?}");
+    assert_lifecycle(&PYTHON, "calc.py");
 }
 
 #[test]
 fn an_unchanged_rust_tree_reuses_the_cached_baseline_and_a_source_change_runs_again() {
-    let seen = cache_lifecycle(&RUST, "src/lib.rs", "a + b", "b + a");
-    assert!(seen.as_ref().is_none_or(|seen| *seen == LIFECYCLE), "{seen:?}");
+    assert_lifecycle(&RUST, "src/lib.rs");
 }
 
 #[test]
