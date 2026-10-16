@@ -1,10 +1,12 @@
 // ABOUTME: The matrix test's engine (design §8.3.7, ADR-043): every (check, language) from the registries,
 // ABOUTME: a golden per supported pair, a skip per unsupported pair, and checks run on declared facts only.
-// ABOUTME: Fixtures run as whole trees, so a check that compares a range's two sides records its skip.
+// ABOUTME: Fixtures run as whole trees, so a check that compares a range's two sides records its skip; a fixture's
+// ABOUTME: `[plugins]` join its registries, and a plugin check has pairs where it has its own fixture (ADR-090).
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::Path;
 
+use cupel_core::config::ConfigFile;
 use cupel_core::syntax::{ProjectInfo, SymbolDef, Symbols};
 use cupel_core::{
     Availability, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
@@ -12,6 +14,7 @@ use cupel_core::{
     Support, SupportMatrix, Writer,
 };
 use cupel_lang::{LanguageRegistry, walk};
+use cupel_plugin::{Discovery, Plugins};
 use serde_json::Value;
 
 use crate::evidence;
@@ -81,6 +84,46 @@ impl Registries {
         }
     }
 
+    /// The registries a run in the fixture repository `fixture` uses when its `cupel.toml`
+    /// configures plugins: the binary's plus those plugins (ADR-090 §3); `PATH` is never
+    /// searched. `None` when it configures none, or when a program they run is not installed,
+    /// which is reported with a `SKIPPED:` line.
+    ///
+    /// # Panics
+    ///
+    /// When the fixture's `cupel.toml` does not parse, or a plugin it names cannot be used.
+    pub fn of_fixture(fixture: &str) -> Option<Self> {
+        let root = repo_path(fixture);
+        let config = root.join("cupel.toml");
+        let text = fs::read_to_string(&config).ok()?;
+        let file = ConfigFile::parse(&text, &config)
+            .unwrap_or_else(|error| panic!("fixture {fixture}: {error}"));
+        if file.plugins.is_empty() || !programs_installed(&file, fixture) {
+            return None;
+        }
+        let mut registries = Self::builtin();
+        let plugins = cupel_plugin::discover(&Discovery {
+            root: &root,
+            entries: &file.plugins,
+            path: None,
+            languages: &registries.languages.ids(),
+            taken: registries
+                .checks
+                .iter()
+                .map(|check| check.manifest().id.clone())
+                .collect(),
+            cancel: &Cancellation::new(),
+        })
+        .unwrap_or_else(|error| panic!("fixture {fixture}: {error}"));
+        registries.add(&plugins);
+        Some(registries)
+    }
+
+    fn add(&mut self, plugins: &Plugins) {
+        plugins.register_producers(&mut self.producers);
+        plugins.register_checks(&mut self.checks);
+    }
+
     /// The registries, built once and shared by every test of a test binary.
     pub fn shared() -> &'static Self {
         static REGISTRIES: std::sync::OnceLock<Registries> = std::sync::OnceLock::new();
@@ -122,6 +165,8 @@ impl Registries {
     /// Every (check, language) with its support in the fixture repository it runs on, which is
     /// what the matrix test verifies: support is per repository, and a fresh coverage report
     /// committed in a fixture is part of it (ADR-079). Ordered by check, then language.
+    /// A plugin check's pairs are those of its own fixtures (`repos/<check>/<lang>/`) whose
+    /// `cupel.toml` registers it (ADR-090 §3).
     pub fn fixture_pairs(&self) -> Vec<Pair> {
         let repos = repo_path(".");
         let langs = self.languages.langs();
@@ -131,14 +176,9 @@ impl Registries {
             for lang in &langs {
                 let id = &check.manifest().id;
                 let fixture = fixture_repo(&repos, id, &lang.id);
-                let matrix = matrices.entry(fixture.clone()).or_insert_with(|| {
-                    SupportMatrix::compute(
-                        &self.checks,
-                        &self.producers,
-                        &langs,
-                        &Ctx::new(repo_path(&fixture)),
-                    )
-                });
+                let matrix = matrices
+                    .entry(fixture.clone())
+                    .or_insert_with(|| self.matrix_in(&fixture));
                 pairs.push(Pair {
                     check: id.clone(),
                     lang: lang.id.clone(),
@@ -149,6 +189,46 @@ impl Registries {
                 });
             }
         }
+        pairs.extend(self.plugin_pairs(&repos));
+        pairs
+    }
+
+    /// The support matrix in the fixture repository `fixture`, with its plugins.
+    fn matrix_in(&self, fixture: &str) -> SupportMatrix {
+        let ctx = Ctx::new(repo_path(fixture));
+        let langs = self.languages.langs();
+        match Self::of_fixture(fixture) {
+            Some(own) => SupportMatrix::compute(&own.checks, &own.producers, &langs, &ctx),
+            None => SupportMatrix::compute(&self.checks, &self.producers, &langs, &ctx),
+        }
+    }
+
+    /// The pairs of plugin checks: each `repos/<check>/<lang>/` whose plugins register `<check>`
+    /// and whose `<check>` is not a native check.
+    fn plugin_pairs(&self, repos: &Path) -> Vec<Pair> {
+        let mut pairs = Vec::new();
+        for entry in fs::read_dir(repos).into_iter().flatten().flatten() {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            let id = CheckId::from(name.as_str());
+            if !name.contains('.') || self.checks.get(&id).is_some() {
+                continue;
+            }
+            for lang in self.languages.ids() {
+                let fixture = format!("{name}/{lang}");
+                let Some(own) = Self::of_fixture(&fixture) else {
+                    continue;
+                };
+                let matrix = own.matrix_in(&fixture);
+                if let Some(support) = matrix.get(&id, &lang) {
+                    pairs.push(Pair {
+                        check: id.clone(),
+                        lang,
+                        support: support.clone(),
+                    });
+                }
+            }
+        }
+        pairs.sort_by(|a, b| (&a.check, &a.lang).cmp(&(&b.check, &b.lang)));
         pairs
     }
 
@@ -159,6 +239,19 @@ impl Registries {
     }
 }
 
+/// Whether every bare program `file`'s plugins run (such as `python3`) is on `PATH`; says which is
+/// not, as runners' tests do.
+fn programs_installed(file: &ConfigFile, fixture: &str) -> bool {
+    file.plugins.values().all(|entry| {
+        let program = entry.program();
+        let installed = program.contains('/') || cupel_core::find_program(program).is_some();
+        if !installed {
+            eprintln!("SKIPPED: {program} not installed; the plugins of {fixture} were not loaded");
+        }
+        installed
+    })
+}
+
 /// Every way the matrix fails: a supported pair without a passing golden, an unsupported pair
 /// that is not skipped with its reason, invalid evidence, and goldens no supported pair claims.
 pub fn verify(goldens: &Goldens) -> Vec<String> {
@@ -166,7 +259,8 @@ pub fn verify(goldens: &Goldens) -> Vec<String> {
     let pairs = registries.fixture_pairs();
     let mut problems = Vec::new();
     for pair in &pairs {
-        let check = registries.check(&pair.check);
+        let own = Registries::of_fixture(&pair.fixture());
+        let check = own.as_ref().unwrap_or(&registries).check(&pair.check);
         let outcome = match pair.support {
             Support::Supported => verify_supported(goldens, check, pair),
             _ => verify_skipped(pair),
@@ -322,11 +416,8 @@ fn stale_goldens(goldens: &Goldens, registries: &Registries, pairs: &[Pair]) -> 
         if !name.contains('.') || !entry.path().is_dir() {
             continue;
         }
-        if registries
-            .checks
-            .get(&CheckId::from(name.as_str()))
-            .is_none()
-        {
+        let id = CheckId::from(name.as_str());
+        if registries.checks.get(&id).is_none() && !pairs.iter().any(|pair| pair.check == id) {
             problems.push(format!("golden/{name}/ belongs to no registered check"));
             continue;
         }
@@ -352,7 +443,7 @@ fn stale_goldens(goldens: &Goldens, registries: &Registries, pairs: &[Pair]) -> 
 /// else gets `UndeclaredFact` and fails here. A check with `base_needs` gets the fixture as
 /// both sides of an empty range (ADR-056).
 pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
-    let registries = Registries::builtin();
+    let registries = Registries::of_fixture(&pair.fixture()).unwrap_or_else(Registries::builtin);
     let check = registries.check(&pair.check);
     let manifest = check.manifest();
     let language = registries

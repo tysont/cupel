@@ -1,0 +1,145 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "ref.untested-python",
+      "metrics": {
+        "untested": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 3,
+        "unit": "tested_files",
+        "value": 0.6666666666666666
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 1,
+        "summary": "Write a test that executes src/report.ts."
+      },
+      "check": "ref.untested-python",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "file": "src/report.ts"
+      },
+      "id": "fnd_2d9067",
+      "kind": "ref.untested-file",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/report.ts",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only ref.untested-python",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_2d9067 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 2,
+      "title": "No test executes src/report.ts"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_2d9067",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Write a test that executes src/report.ts."
+    }
+  ],
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "plugins": {
+          "ref-check": [
+            "python3",
+            "plugins/python/check.py"
+          ],
+          "ref-produce": [
+            "python3",
+            "plugins/python/produce.py"
+          ]
+        },
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "typescript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 3
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

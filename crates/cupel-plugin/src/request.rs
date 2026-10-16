@@ -9,7 +9,8 @@ use serde_json::{Map, Value};
 
 /// What differs between a check's request and a producer's.
 pub(crate) struct Inputs<'a> {
-    pub writer: &'a Writer,
+    /// The repository root.
+    pub root: &'a Path,
     pub scope: &'a Scope,
     pub config: &'a Map<String, Value>,
     pub cancel: &'a Cancellation,
@@ -22,7 +23,7 @@ pub(crate) struct Inputs<'a> {
 pub(crate) fn request(inputs: &Inputs<'_>, facts: BTreeMap<FactKind, String>) -> RunRequest {
     RunRequest {
         protocol: PROTOCOL_VERSION,
-        root: inputs.writer.root().display().to_string(),
+        root: inputs.root.display().to_string(),
         scope: RequestScope {
             files: inputs.scope.files.clone(),
             symbols: inputs

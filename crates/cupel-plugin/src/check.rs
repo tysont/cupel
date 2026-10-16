@@ -111,7 +111,7 @@ impl Check for PluginCheck {
 /// What a check's request is built from: its context over `scope`, with its scratch directory.
 fn inputs<'a>(ctx: &'a CheckCtx, scope: &'a Scope, scratch: &'a Path) -> Inputs<'a> {
     Inputs {
-        writer: &ctx.writer,
+        root: ctx.writer.root(),
         scope,
         config: &ctx.config,
         cancel: &ctx.cancel,

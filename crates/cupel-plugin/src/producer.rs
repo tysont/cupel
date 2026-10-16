@@ -118,7 +118,7 @@ impl<F: Fact> Producer<F> for PluginProducer<F> {
         )?;
         let request = request::request(
             &Inputs {
-                writer: &ctx.writer,
+                root: &ctx.ctx.root,
                 scope,
                 config: &ctx.config,
                 cancel: &ctx.cancel,
