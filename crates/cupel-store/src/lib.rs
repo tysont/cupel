@@ -35,7 +35,7 @@
 mod error;
 mod lock;
 mod migrations;
-mod oracles;
+pub mod oracles;
 
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
@@ -55,7 +55,6 @@ use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
 pub use crate::error::StoreError;
 use crate::lock::WriterLock;
 use crate::migrations::MIGRATIONS;
-pub use crate::oracles::VerifiedOracle;
 
 pub type Result<T, E = StoreError> = std::result::Result<T, E>;
 

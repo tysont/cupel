@@ -1,8 +1,8 @@
 // ABOUTME: The `oracle` verb (ADR-090): `add` and `remove` edit cupel.toml (previewed without --write),
 // ABOUTME: `list` reports each oracle's state, `verify` runs smoke comparisons; plus what `check` reads.
-mod cap;
+pub mod cap;
 mod edit;
-mod select;
+pub mod select;
 mod verify;
 
 use std::path::Path;
@@ -14,9 +14,6 @@ use cupel_core::{
     oracle_content_digest, oracle_identity,
 };
 use cupel_store::Store;
-
-pub use cap::{cap, finding_kinds};
-pub use select::Selected;
 
 use crate::cli::OracleArgs;
 use crate::error::{CupelError, Usage};

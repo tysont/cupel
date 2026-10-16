@@ -412,7 +412,7 @@ fn graded(
         }
         Some(VerbArgs::Check { scope } | VerbArgs::Survey { scope }) => {
             if let Ok(config) = config {
-                oracle::cap(&mut envelope, writer, config, &invocation.run.repro())?;
+                oracle::cap::cap(&mut envelope, writer, config, &invocation.run.repro())?;
             }
             suppress::apply(&mut envelope, writer)?;
             against::compare(&mut envelope, writer, scope.against.as_deref())?;

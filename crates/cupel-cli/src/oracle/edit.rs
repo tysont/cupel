@@ -69,8 +69,13 @@ pub(super) fn add(
     oracles.insert(name, Item::Table(table));
     let store = persist::open_for_reading(invocation.writer)?;
     let added = report(invocation.writer.root(), store.as_ref(), name, definition)?;
-    let command = format!("{} --write", add_command(name, definition));
-    finish(invocation, config, &document, added, &command, events)
+    let change = Change {
+        path: config_path(invocation, config),
+        text: document.to_string(),
+        oracle: added,
+        command: format!("{} --write", add_command(name, definition)),
+    };
+    finish(invocation, change, events)
 }
 
 /// Removes the oracle `name` and its verification, or previews that.
@@ -92,8 +97,13 @@ pub(super) fn remove(
     if oracles.is_empty() {
         document.remove(ORACLES);
     }
-    let command = format!("cupel oracle remove {} --write", shell_quote(name));
-    let envelope = finish(invocation, config, &document, removed, &command, events)?;
+    let change = Change {
+        path: config_path(invocation, config),
+        text: document.to_string(),
+        oracle: removed,
+        command: format!("cupel oracle remove {} --write", shell_quote(name)),
+    };
+    let envelope = finish(invocation, change, events)?;
     if let Some(store) = store.filter(|_| envelope.status != Status::Plan) {
         store
             .forget_oracle(name)
@@ -102,19 +112,29 @@ pub(super) fn remove(
     Ok(envelope)
 }
 
-/// Writes `document` as the configuration file, or previews that with `command` as the action
-/// that applies it; the envelope reports `oracle`.
+/// One edit of the configuration file: its new text, the oracle it adds or removes, and the
+/// command that makes it.
+struct Change {
+    path: PathBuf,
+    text: String,
+    oracle: OracleReport,
+    command: String,
+}
+
+/// Writes `change`, or previews it with its command as the action that applies it; the
+/// envelope reports its oracle.
 fn finish(
     invocation: &Invocation<'_>,
-    config: &Config,
-    document: &DocumentMut,
-    oracle: OracleReport,
-    command: &str,
+    change: Change,
     events: &mut dyn EventSink,
 ) -> Result<Envelope, CupelError> {
     let (run, writer) = (invocation.run, invocation.writer);
-    let path = config_path(invocation, config);
-    let text = document.to_string();
+    let Change {
+        path,
+        text,
+        oracle,
+        command,
+    } = change;
     let mut envelope = if writer.is_recording() {
         // A preview shows what `--write` would do, so its recording writer may plan writes
         // outside `.cupel/`; it never writes anything.
@@ -126,7 +146,7 @@ fn finish(
             finding: None,
             kind: ActionKind::Configure,
             summary: format!("Nothing was written; run `{command}` to change cupel.toml."),
-            command: Some(command.to_owned()),
+            command: Some(command),
         });
         envelope
     } else {

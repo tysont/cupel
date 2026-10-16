@@ -7,7 +7,8 @@ use cupel_core::{
     ActionKind, Cancellation, Envelope, ExitCode, Finding, Process, Severity, Status, find_program,
     oracle_identity,
 };
-use cupel_store::{Store, VerifiedOracle};
+use cupel_store::Store;
+use cupel_store::oracles::VerifiedOracle;
 use serde_json::{Value, json};
 
 use super::{Unreachable, report, resolve};

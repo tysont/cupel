@@ -109,7 +109,8 @@ pub fn run(
         ..
     } = resolve(writer, config, &request, catalog.language_registry())?;
     let mut selected = selection(config, args).select(catalog.checks())?;
-    let oracle = oracle::Selected::choose(writer, config, args.oracle.as_deref(), &mut selected)?;
+    let oracle =
+        oracle::select::Selected::choose(writer, config, args.oracle.as_deref(), &mut selected)?;
     let base_files = base_files(catalog.language_registry(), &resolved);
     let langs = languages_of(
         catalog.language_registry(),

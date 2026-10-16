@@ -12,7 +12,7 @@ use cupel_core::{
     TestResults, Writer,
 };
 use cupel_store::{
-    CacheKey, ScoredAt, Store, StoreError, StoredFact, StoredTestResult, VerifiedOracle,
+    CacheKey, ScoredAt, Store, StoreError, StoredFact, StoredTestResult, oracles::VerifiedOracle,
 };
 use serde_json::{Value, json};
 use tempfile::TempDir;
@@ -679,8 +679,8 @@ fn verified(name: &str, hash: &str, run: u8) -> VerifiedOracle {
 fn oracle_verifications_round_trip_are_replaced_and_are_forgotten() {
     let repo = Repo::new();
     let store = repo.store();
-    assert_eq!(store.verified_oracle("calc").unwrap(), None);
     store.record_oracle(&verified("calc", "h1", 1)).unwrap();
+    assert_eq!(store.verified_oracle("bc").unwrap(), None);
     store.record_oracle(&verified("bc", "h2", 2)).unwrap();
     store.record_oracle(&verified("calc", "h3", 3)).unwrap();
     assert_eq!(

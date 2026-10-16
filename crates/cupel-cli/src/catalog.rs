@@ -88,7 +88,7 @@ impl Catalog {
                 .map(|spec| FindingDescription::of(manifest, spec))
         });
         emitted.or_else(|| {
-            oracle::finding_kinds()
+            oracle::cap::finding_kinds()
                 .into_iter()
                 .find(|spec| spec.kind == kind)
                 .map(|spec| FindingDescription {
@@ -116,7 +116,11 @@ impl Catalog {
             })
             .collect();
         kinds.sort();
-        kinds.extend(oracle::finding_kinds().into_iter().map(|spec| spec.kind));
+        kinds.extend(
+            oracle::cap::finding_kinds()
+                .into_iter()
+                .map(|spec| spec.kind),
+        );
         kinds
     }
 
