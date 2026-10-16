@@ -262,15 +262,11 @@ fn edit_between(old: &str, new: &str) -> InputEdit {
     }
 }
 
-/// The row and byte column of byte `offset` in `text`.
+/// The row and byte column of byte `offset`, a character boundary, in `text`.
 fn point(text: &str, offset: usize) -> Point {
-    let before = &text.as_bytes()[..offset];
-    let row = before.iter().filter(|&&byte| byte == b'\n').count();
-    let line_start = before
-        .iter()
-        .rposition(|&byte| byte == b'\n')
-        .map_or(0, |at| at + 1);
-    Point::new(row, offset - line_start)
+    let before = &text[..offset];
+    let line_start = before.rfind('\n').map_or(0, |at| at + 1);
+    Point::new(before.matches('\n').count(), offset - line_start)
 }
 
 #[cfg(test)]
