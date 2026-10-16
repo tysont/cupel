@@ -1017,7 +1017,7 @@ ADRs: [081](adr/CUPEL_DECISION_081.md) (where install commands live, who may ins
 
 #### P4.4 One suite run for `TestResults`, `CoverageMap`, and `PerTestMap`
 
-**Status:** in progress (2026-10-15) · [ADR-084](adr/CUPEL_DECISION_084.md)
+**Status:** complete (2026-10-15, ef916d3) · [ADR-084](adr/CUPEL_DECISION_084.md) · the ≤ 10 min line of the P4 DoD is not yet met (734 s warm on a loaded machine; P3 Notes, "P3.6 — measurement with one suite run")
 
 Added after P3.6's second measurement (P3 Notes "P3.6 — measurement with schemata and the cached map"): a changed run on Cupel runs the suite three times — baseline, coverage report, per-test refresh — each with its own instrumented build, before the first mutant.
 
