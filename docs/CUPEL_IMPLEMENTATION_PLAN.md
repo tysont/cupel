@@ -1079,11 +1079,11 @@ Added after P3.6's second measurement (P3 Notes "P3.6 — measurement with schem
 
 **Goal:** Checks outside the binary, verified oracles, and tier-4 generative evidence.
 
-**Status:** not started
+**Status:** in progress (2026-10-16)
 
 #### P5.1 Plugin host and reference plugins
 
-**Status:** not started
+**Status:** in progress (2026-10-16) · [ADR-087](adr/CUPEL_DECISION_087.md) · [ADR-088](adr/CUPEL_DECISION_088.md) · [ADR-089](adr/CUPEL_DECISION_089.md) · [ADR-090](adr/CUPEL_DECISION_090.md)
 
 - `cupel-plugin`: `Manifest` (`kind: check | producer`), `RunRequest`, event types including `fact`; discovery via `[plugins]` and `cupel-check-*`/`cupel-produce-*` on `$PATH` (`--no-path-plugins`); `describe`/`plan`/`run` subprocess protocol over stdio per design §8.6; budget enforcement (SIGTERM then SIGKILL); manifest schema validation; undeclared finding kinds rejected; emitted facts validated against the fact schema at the declared version; non-zero exit without `result`/`fact` → `status: error`.
 - Check plugins receive their declared facts as JSON files and enter the `CheckRegistry`; producer plugins enter the `ProducerRegistry` and are selected by the same rules as native producers, so they appear in `describe matrix`.
