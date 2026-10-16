@@ -1,5 +1,5 @@
-// ABOUTME: Validates a finding's evidence against the JSON Schema its check's manifest declares, using
-// ABOUTME: the small keyword subset native evidence needs and refusing every other keyword (ADR-043).
+// ABOUTME: Validates a finding's evidence against the JSON Schema its check's manifest declares, using the small
+// ABOUTME: keyword subset evidence needs and refusing every other keyword (ADR-043); the host and the matrix test share it.
 use serde_json::{Map, Value};
 
 /// Keywords that describe without constraining.
@@ -18,36 +18,64 @@ pub fn validate(schema: &Map<String, Value>, value: &Value) -> Result<(), String
     check(schema, value, "evidence")
 }
 
+/// Checks one keyword's `rule` against `value`, given the whole object `schema` it is in.
+type Rule = fn(&Map<String, Value>, &Value, &Value, &str) -> Result<(), String>;
+
+/// Every constraining keyword the validator implements, with its rule.
+const RULES: [(&str, Rule); 9] = [
+    ("type", |_, rule, value, at| check_type(rule, value, at)),
+    ("properties", |_, rule, value, at| {
+        check_properties(rule, value, at)
+    }),
+    ("required", |_, rule, value, at| {
+        check_required(rule, value, at)
+    }),
+    ("additionalProperties", check_additional),
+    ("items", |_, rule, value, at| check_items(rule, value, at)),
+    ("enum", |_, rule, value, at| check_enum(rule, value, at)),
+    ("const", |_, rule, value, at| check_const(rule, value, at)),
+    ("minimum", |_, rule, value, at| {
+        check_bound("minimum", rule, value, at)
+    }),
+    ("maximum", |_, rule, value, at| {
+        check_bound("maximum", rule, value, at)
+    }),
+];
+
 fn check(schema: &Map<String, Value>, value: &Value, at: &str) -> Result<(), String> {
     for (keyword, rule) in schema {
-        match keyword.as_str() {
-            "type" => check_type(rule, value, at)?,
-            "properties" => check_properties(rule, value, at)?,
-            "required" => check_required(rule, value, at)?,
-            "additionalProperties" => check_additional(schema, rule, value, at)?,
-            "items" => check_items(rule, value, at)?,
-            "enum" => {
-                let allowed = rule.as_array().ok_or_else(|| malformed(keyword, at))?;
-                if !allowed.contains(value) {
-                    return Err(format!("{at}: {value} is not one of {rule}"));
-                }
-            }
-            "const" => {
-                if rule != value {
-                    return Err(format!("{at}: {value} is not {rule}"));
-                }
-            }
-            "minimum" | "maximum" => check_bound(keyword, rule, value, at)?,
-            keyword if ANNOTATIONS.contains(&keyword) => {}
-            other => {
-                return Err(format!(
-                    "{at}: the schema uses `{other}`, which the evidence validator does not \
-                     implement (ADR-043)"
-                ));
-            }
+        if ANNOTATIONS.contains(&keyword.as_str()) {
+            continue;
         }
+        let (_, apply) = RULES
+            .iter()
+            .find(|(name, _)| name == keyword)
+            .ok_or_else(|| {
+                format!(
+                    "{at}: the schema uses `{keyword}`, which the evidence validator does not \
+                     implement (ADR-043)"
+                )
+            })?;
+        apply(schema, rule, value, at)?;
     }
     Ok(())
+}
+
+fn check_enum(rule: &Value, value: &Value, at: &str) -> Result<(), String> {
+    let allowed = rule.as_array().ok_or_else(|| malformed("enum", at))?;
+    if allowed.contains(value) {
+        Ok(())
+    } else {
+        Err(format!("{at}: {value} is not one of {rule}"))
+    }
+}
+
+fn check_const(rule: &Value, value: &Value, at: &str) -> Result<(), String> {
+    if rule == value {
+        Ok(())
+    } else {
+        Err(format!("{at}: {value} is not {rule}"))
+    }
 }
 
 fn malformed(keyword: &str, at: &str) -> String {
@@ -173,7 +201,8 @@ mod tests {
             "properties": {
                 "count": {"type": "integer", "format": "uint32", "minimum": 0},
                 "label": {"type": ["string", "null"], "enum": ["a", "b", null]},
-                "sizes": {"type": "array", "items": {"type": "number", "maximum": 10}}
+                "sizes": {"type": "array", "items": {"type": "number", "maximum": 10}},
+                "kind": {"const": "sample"}
             },
             "required": ["count"]
         })
@@ -190,27 +219,41 @@ mod tests {
 
     #[test]
     fn each_violation_is_reported_with_its_path() {
-        for (value, expected) in [
-            (json!({"label": "a"}), "required property `count`"),
-            (json!({"count": -1}), "evidence.count: -1 violates minimum"),
-            (json!({"count": 1.5}), "evidence.count: 1.5 is not of type"),
-            (
-                json!({"count": 1, "label": "c"}),
-                "evidence.label: \"c\" is not one of",
-            ),
-            (
-                json!({"count": 1, "sizes": [11]}),
-                "evidence.sizes[0]: 11 violates maximum",
-            ),
-            (
-                json!({"count": 1, "extra": true}),
-                "property `extra` is not in the schema",
-            ),
-            (json!([1]), "is not of type \"object\""),
-        ] {
-            let error = validate(&schema(), &value).unwrap_err();
-            assert!(error.contains(expected), "{value}: {error}");
-        }
+        let errors: Vec<String> = [
+            json!({"label": "a"}),
+            json!({"count": -1}),
+            json!({"count": 1.5}),
+            json!({"count": 1, "label": "c"}),
+            json!({"count": 1, "sizes": [11]}),
+            json!({"count": 1, "extra": true}),
+            json!([1]),
+            json!({"count": 1, "kind": "other"}),
+        ]
+        .iter()
+        .map(|value| validate(&schema(), value).unwrap_err())
+        .collect();
+        assert_eq!(
+            errors,
+            [
+                "evidence: required property `count` is missing",
+                "evidence.count: -1 violates minimum 0",
+                "evidence.count: 1.5 is not of type \"integer\"",
+                "evidence.label: \"c\" is not one of [\"a\",\"b\",null]",
+                "evidence.sizes[0]: 11 violates maximum 10",
+                "evidence: property `extra` is not in the schema",
+                "evidence: [1] is not of type \"object\"",
+                "evidence.kind: \"other\" is not \"sample\"",
+            ]
+        );
+    }
+
+    #[test]
+    fn a_malformed_rule_is_reported_rather_than_skipped() {
+        let schema = json!({"type": 3}).as_object().cloned().unwrap();
+        assert_eq!(
+            validate(&schema, &json!({})),
+            Err("evidence: malformed `type` in the schema".to_owned())
+        );
     }
 
     #[test]
@@ -219,7 +262,13 @@ mod tests {
             .as_object()
             .cloned()
             .unwrap();
-        let error = validate(&schema, &json!({"a": 1})).unwrap_err();
-        assert!(error.contains("`$ref`"), "{error}");
+        assert_eq!(
+            validate(&schema, &json!({"a": 1})),
+            Err(
+                "evidence.a: the schema uses `$ref`, which the evidence validator does not \
+                 implement (ADR-043)"
+                    .to_owned()
+            )
+        );
     }
 }

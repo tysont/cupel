@@ -292,6 +292,9 @@ pub struct Invocation<'a> {
     /// The caches this invocation may find warm (ADR-085 §3).
     pub session: &'a crate::session::Session,
     pub config: Result<&'a Config, &'a cupel_core::Error>,
+    /// The plugins discovered for this invocation (ADR-088); none when configuration did not
+    /// load.
+    pub plugins: &'a cupel_plugin::Plugins,
     pub dry_run: bool,
     /// Whether the run may install the tools its producers need (ADR-081).
     pub installs: crate::install::Permission,
@@ -301,6 +304,13 @@ impl Invocation<'_> {
     /// The configuration, or the usage error it failed to load with.
     pub fn config(&self) -> Result<&Config, CupelError> {
         self.config.map_err(|error| CupelError::from(error.clone()))
+    }
+
+    /// The registries this invocation reads: the compiled-in ones, parsing through the session's
+    /// cache, with its plugins.
+    pub fn catalog(&self) -> crate::catalog::Catalog {
+        crate::catalog::Catalog::with_cache(std::sync::Arc::clone(self.session.cache()))
+            .with_plugins(self.plugins)
     }
 
     /// A plan that would do nothing: the dry run of a verb that changes nothing.

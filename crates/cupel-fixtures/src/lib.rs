@@ -39,7 +39,6 @@
 
 mod captures;
 pub mod conformance;
-pub mod evidence;
 mod golden;
 pub mod matrix;
 pub mod parity;
@@ -48,6 +47,7 @@ mod repos;
 mod run;
 
 pub use captures::Capture;
+pub use cupel_plugin::evidence;
 pub use golden::{GoldenError, GoldenMode, Goldens, assert_golden, canonical_json};
 pub use redact::redact;
 pub use repos::{copy_repo, repo_path};

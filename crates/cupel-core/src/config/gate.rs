@@ -136,7 +136,7 @@ impl fmt::Display for GateRuleSpec {
 const GROUP_NAME: &str = "check ID must be `<group>.<name>`";
 
 /// Parses a check ID: exactly `<group>.<name>` (ADR-017).
-pub(crate) fn parse_check_id(raw: &str) -> Result<CheckId, String> {
+pub fn parse_check_id(raw: &str) -> Result<CheckId, String> {
     let segments: Vec<&str> = raw.split('.').collect();
     if segments.len() != 2 {
         return Err(GROUP_NAME.to_owned());

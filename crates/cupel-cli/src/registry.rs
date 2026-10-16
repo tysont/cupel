@@ -667,6 +667,10 @@ fn run_control_flags() -> Vec<ArgDescription> {
         )
         .conflicts(&["--no-install"]),
         switch("--write", "Permit writes outside .cupel/."),
+        switch(
+            "--no-path-plugins",
+            "Load no cupel-check-* or cupel-produce-* plugins from PATH; [plugins] still loads.",
+        ),
         switch("--help", "Print help and exit."),
     ]
 }

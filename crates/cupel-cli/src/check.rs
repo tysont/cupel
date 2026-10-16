@@ -2,7 +2,6 @@
 // ABOUTME: checks, run the scheduler (or plan it), assemble the envelope, and grade it with the gate.
 use std::collections::BTreeSet;
 use std::path::Path;
-use std::sync::Arc;
 
 use cupel_core::config::Config;
 use cupel_core::git::{ChangeKind, Git};
@@ -15,7 +14,6 @@ use cupel_core::{
 };
 use cupel_lang::LanguageRegistry;
 
-use crate::catalog::Catalog;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::install::{self, Permission};
@@ -101,7 +99,7 @@ pub fn run(
 ) -> Result<CheckRun, CupelError> {
     let (run, writer) = (invocation.run, invocation.writer);
     resources::limit_threads(args.jobs);
-    let catalog = Catalog::with_cache(Arc::clone(invocation.session.cache()));
+    let catalog = invocation.catalog();
     let request = scope_request(args);
     let Scoped {
         info,

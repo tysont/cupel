@@ -48,8 +48,18 @@ fn plugin_schema_describes_the_manifest() {
     assert_identity(
         &schema,
         "https://cupel.dev/schema/v1/plugin.json",
-        "Manifest",
+        "PluginMessage",
     );
+    let defs = schema.as_value()["$defs"].as_object().unwrap();
+    for message in [
+        "Manifest",
+        "ProducerManifest",
+        "RunRequest",
+        "Plan",
+        "PluginEvent",
+    ] {
+        assert!(defs.contains_key(message), "{message} is not described");
+    }
     insta::assert_snapshot!(pretty(&schema));
 }
 

@@ -9,7 +9,9 @@ use serde_json::Value;
 
 use crate::config::echo::{ConfigEcho, ConfigSource};
 use crate::config::error::ConfigError;
-use crate::config::file::{CheckConfig, ConfigFile, GateConfig, OracleConfig, RootConfig, Table};
+use crate::config::file::{
+    CheckConfig, ConfigFile, GateConfig, OracleConfig, PluginEntry, RootConfig, Table,
+};
 use crate::config::settings::{Format, PROFILE_ENV_VAR, Settings, TimeLimit};
 use crate::error::Result;
 use crate::grade::CostClass;
@@ -198,6 +200,9 @@ impl Config {
             checks: &'a BTreeMap<CheckId, CheckConfig>,
             oracles: &'a BTreeMap<String, OracleConfig>,
             gate: &'a GateConfig,
+            /// Echoed only when configured, so runs without plugins keep their shape (ADR-088).
+            #[serde(skip_serializing_if = "BTreeMap::is_empty")]
+            plugins: &'a BTreeMap<String, PluginEntry>,
         }
 
         let echo = EffectiveEcho {
@@ -209,6 +214,7 @@ impl Config {
             checks: &self.file.checks,
             oracles: &self.file.oracles,
             gate: &self.file.gate,
+            plugins: &self.file.plugins,
         };
         let Ok(Value::Object(effective)) = serde_json::to_value(echo) else {
             unreachable!("the echo is a struct of serializable maps and scalars")

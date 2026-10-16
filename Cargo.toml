@@ -10,6 +10,7 @@ members = [
     "crates/cupel-fixtures",
     "crates/cupel-lang",
     "crates/cupel-mutate",
+    "crates/cupel-plugin",
     "crates/cupel-serve",
     "crates/cupel-store",
 ]
@@ -27,6 +28,7 @@ cupel-checks = { path = "crates/cupel-checks" }
 cupel-core = { path = "crates/cupel-core" }
 cupel-lang = { path = "crates/cupel-lang" }
 cupel-mutate = { path = "crates/cupel-mutate" }
+cupel-plugin = { path = "crates/cupel-plugin" }
 cupel-serve = { path = "crates/cupel-serve" }
 cupel-store = { path = "crates/cupel-store" }
 cupel-fixtures = { path = "crates/cupel-fixtures" }

@@ -360,6 +360,18 @@ impl Usage {
                     ),
                 )
             },
+            ConfigError::Plugin {
+                name,
+                program,
+                on_path,
+                ..
+            } => Self {
+                value: Some(program.clone()),
+                ..usage(
+                    &format!("plugins.{name}"),
+                    plugin_fix(name, program, *on_path),
+                )
+            },
             ConfigError::Unregistered {
                 section,
                 registered,
@@ -482,6 +494,22 @@ fn clap_fix(
         _ => "Run `cupel describe` for valid usage.".to_owned(),
     };
     (fix, valid)
+}
+
+/// The fix for a plugin that cannot be used: its `[plugins]` entry, or its file on `PATH`
+/// (ADR-088 §5).
+fn plugin_fix(name: &str, program: &str, on_path: bool) -> String {
+    if on_path {
+        format!(
+            "Fix `{program}`, remove it from PATH, or pass --no-path-plugins to load no plugins \
+             from PATH."
+        )
+    } else {
+        format!(
+            "Fix or remove `[plugins] {name}` in cupel.toml; it runs `{program}`, which must \
+             answer `describe` with a valid manifest."
+        )
+    }
 }
 
 #[cfg(test)]

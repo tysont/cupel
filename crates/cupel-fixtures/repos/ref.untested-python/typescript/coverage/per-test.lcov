@@ -1,0 +1,18 @@
+TN:test/ledger.test.ts > total > adds the entries
+SF:src/ledger.ts
+DA:1,1
+DA:2,3
+DA:3,1
+end_of_record
+TN:test/format.test.ts > pad > pads on the left
+SF:src/format.ts
+DA:1,1
+DA:2,1
+DA:3,1
+end_of_record
+TN:test/format.test.ts > pad > leaves long text alone
+SF:src/format.ts
+DA:1,1
+DA:2,1
+DA:3,0
+end_of_record

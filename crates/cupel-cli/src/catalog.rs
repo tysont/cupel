@@ -11,6 +11,7 @@ use cupel_core::{
     VerbSupport, schema,
 };
 use cupel_lang::{Language, LanguageRegistry, ParseCache};
+use cupel_plugin::Plugins;
 use serde_json::Value;
 
 use crate::oracle;
@@ -41,6 +42,15 @@ impl Catalog {
             producers,
             checks: checks(),
         }
+    }
+
+    /// This catalog with `plugins`' checks and producers registered after the native ones
+    /// (ADR-088 §7).
+    #[must_use]
+    pub fn with_plugins(mut self, plugins: &Plugins) -> Self {
+        plugins.register_producers(&mut self.producers);
+        plugins.register_checks(&mut self.checks);
+        self
     }
 
     pub fn language_ids(&self) -> Vec<LangId> {

@@ -313,6 +313,7 @@ dependencies = [
  "cupel-fixtures",
  "cupel-lang",
  "cupel-mutate",
+ "cupel-plugin",
  "cupel-serve",
  "cupel-store",
  "insta",
@@ -357,6 +358,7 @@ dependencies = [
  "cupel-core",
  "cupel-lang",
  "cupel-mutate",
+ "cupel-plugin",
  "cupel-serve",
  "serde",
  "serde_json",
@@ -405,6 +407,15 @@ dependencies = [
  "tempfile",
  "tree-sitter",
  "tree-sitter-rust",
+]
+
+[[package]]
+name = "cupel-plugin"
+version = "0.1.0"
+dependencies = [
+ "cupel-core",
+ "serde_json",
+ "tempfile",
 ]
 
 [[package]]

@@ -54,6 +54,9 @@ pub struct ConfigFile {
     /// Named settings selected with `--profile` or `CUPEL_PROFILE`.
     #[serde(default)]
     pub profile: BTreeMap<String, Settings>,
+    /// Plugins by name: their checks and producers join the native ones (ADR-088).
+    #[serde(default, deserialize_with = "plugin_entries")]
+    pub plugins: BTreeMap<String, PluginEntry>,
 }
 
 impl ConfigFile {
@@ -158,6 +161,52 @@ impl JsonSchema for CheckConfig {
             },
             "additionalProperties": true
         })
+    }
+}
+
+/// How to run one plugin (ADR-088 §1): one executable, or a program and its leading arguments.
+/// A program containing `/` is relative to the repository root; any other is found on `PATH`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum PluginEntry {
+    Executable(String),
+    Command(Vec<String>),
+}
+
+impl PluginEntry {
+    /// The program to run.
+    pub fn program(&self) -> &str {
+        match self {
+            Self::Executable(program) => program,
+            Self::Command(words) => &words[0],
+        }
+    }
+
+    /// The arguments before the protocol's subcommand.
+    pub fn args(&self) -> &[String] {
+        match self {
+            Self::Executable(_) => &[],
+            Self::Command(words) => &words[1..],
+        }
+    }
+
+    /// The entry `value` spells, when it is a non-empty program or command.
+    fn from_value(value: Value) -> Option<Self> {
+        let entry = match value {
+            Value::String(program) => Self::Executable(program),
+            Value::Array(words) => Self::Command(
+                words
+                    .into_iter()
+                    .map(|word| word.as_str().map(str::to_owned))
+                    .collect::<Option<_>>()?,
+            ),
+            _ => return None,
+        };
+        let empty = match &entry {
+            Self::Executable(program) => program.is_empty(),
+            Self::Command(words) => words.first().is_none_or(String::is_empty),
+        };
+        (!empty).then_some(entry)
     }
 }
 
@@ -350,6 +399,29 @@ fn lang_tables<'de, D: Deserializer<'de>>(
     BTreeMap::<String, Table>::deserialize(deserializer)?
         .into_iter()
         .map(|(lang, table)| Ok((validate_lang_id(lang)?, table)))
+        .collect::<Result<_, String>>()
+        .map_err(de::Error::custom)
+}
+
+fn plugin_entries<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> Result<BTreeMap<String, PluginEntry>, D::Error> {
+    BTreeMap::<String, Value>::deserialize(deserializer)?
+        .into_iter()
+        .map(|(name, value)| {
+            if !is_segment(&name) {
+                return Err(format!(
+                    "invalid plugin name `{name}`: must match `[a-z][a-z0-9_-]*`"
+                ));
+            }
+            match PluginEntry::from_value(value) {
+                Some(entry) => Ok((name, entry)),
+                None => Err(format!(
+                    "invalid plugin `{name}`: expected a program, or an array of a program and \
+                     its arguments"
+                )),
+            }
+        })
         .collect::<Result<_, String>>()
         .map_err(de::Error::custom)
 }

@@ -5,72 +5,51 @@ expression: pretty(&schema)
 {
   "$id": "https://cupel.dev/schema/v1/plugin.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Manifest",
-  "description": "Everything Cupel knows about a check without running it. Plugins describe themselves with\nthe same shape. Language applicability is never declared; it is derived (design §8.3.5).",
-  "type": "object",
-  "properties": {
-    "cost": {
-      "$ref": "#/$defs/CostClass"
+  "title": "PluginMessage",
+  "description": "Any message of the protocol: what `describe` prints, what `plan` and `run` read, what\n`plan` prints, and one line of `run`'s output. The root of `describe schema plugin`.",
+  "anyOf": [
+    {
+      "$ref": "#/$defs/PluginManifest"
     },
-    "findings": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/FindingKindSpec"
-      }
+    {
+      "$ref": "#/$defs/RunRequest"
     },
-    "id": {
-      "$ref": "#/$defs/CheckId"
+    {
+      "$ref": "#/$defs/Plan"
     },
-    "metrics": {
-      "description": "What the check measures: `scope` metrics are gate keys (`<check-id>.<metric>`), the others\nare `survey` ranking dimensions (ADR-060, ADR-062).",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/MetricSpec"
-      }
-    },
-    "needs": {
-      "description": "Facts the check cannot run without.",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/FactKind"
-      }
-    },
-    "stability": {
-      "$ref": "#/$defs/Stability"
-    },
-    "summary": {
-      "type": "string"
-    },
-    "tier": {
-      "$ref": "#/$defs/Tier"
-    },
-    "version": {
-      "description": "Bumped when results change for the same facts; invalidates cached results.",
-      "type": "integer",
-      "format": "uint32",
-      "minimum": 0
-    },
-    "wants": {
-      "description": "Facts the check uses for enrichment when present.",
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/FactKind"
-      }
+    {
+      "$ref": "#/$defs/PluginEvent"
     }
-  },
-  "required": [
-    "cost",
-    "findings",
-    "id",
-    "metrics",
-    "needs",
-    "stability",
-    "summary",
-    "tier",
-    "version",
-    "wants"
   ],
   "$defs": {
+    "Action": {
+      "description": "The concrete next step a finding asks for.",
+      "type": "object",
+      "properties": {
+        "hints": {
+          "description": "Kind-specific pointers, such as `nearest_test_file` or `covering_tests`.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "kind": {
+          "$ref": "#/$defs/ActionKind"
+        },
+        "priority": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hints",
+        "kind",
+        "priority",
+        "summary"
+      ]
+    },
     "ActionKind": {
       "description": "The closed set of things a finding can ask an agent to do (design §7.2).",
       "oneOf": [
@@ -104,6 +83,17 @@ expression: pretty(&schema)
       "description": "A check's stable namespaced ID, such as `tests.mutation`.",
       "type": "string"
     },
+    "CheckStatus": {
+      "description": "A check's outcome (ADR-013).",
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "partial",
+        "error",
+        "skipped"
+      ]
+    },
     "CostClass": {
       "description": "How expensive a check or producer is to run. The same names select a run's depth (design §5.8).",
       "type": "string",
@@ -113,6 +103,11 @@ expression: pretty(&schema)
         "deep",
         "exhaustive"
       ]
+    },
+    "Evidence": {
+      "description": "Check-specific supporting data. Its shape per finding kind is the JSON Schema the emitting\ncheck declares in its manifest (ADR-012).",
+      "type": "object",
+      "additionalProperties": true
     },
     "FactKind": {
       "description": "One row of the fact catalog (design §8.3.2). Adding a kind requires an ADR.",
@@ -141,6 +136,107 @@ expression: pretty(&schema)
         "divergence-results"
       ]
     },
+    "Finding": {
+      "description": "One actionable observation produced by a check.",
+      "type": "object",
+      "properties": {
+        "action": {
+          "$ref": "#/$defs/Action"
+        },
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "confidence": {
+          "description": "How sure the check is, from 0 to 1.",
+          "type": "number",
+          "format": "double",
+          "maximum": 1.0,
+          "minimum": 0.0
+        },
+        "detail": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "evidence": {
+          "$ref": "#/$defs/Evidence"
+        },
+        "id": {
+          "$ref": "#/$defs/FindingId"
+        },
+        "kind": {
+          "description": "Namespaced finding kind, such as `mutant.survived`.",
+          "type": "string"
+        },
+        "location": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Location"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "new_since_baseline": {
+          "type": "boolean"
+        },
+        "repro": {
+          "description": "A command that reproduces this finding.",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity"
+        },
+        "suppress": {
+          "description": "A command that suppresses this finding.",
+          "type": "string"
+        },
+        "suppressed": {
+          "type": "boolean"
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Symbol"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "check",
+        "confidence",
+        "detail",
+        "evidence",
+        "id",
+        "kind",
+        "location",
+        "new_since_baseline",
+        "repro",
+        "severity",
+        "suppress",
+        "suppressed",
+        "symbol",
+        "tier",
+        "title"
+      ]
+    },
+    "FindingId": {
+      "description": "`fnd_` followed by six lowercase hex digits",
+      "type": "string",
+      "pattern": "^fnd_[0-9a-f]{6}$"
+    },
     "FindingKindSpec": {
       "description": "A finding kind a check emits, the action it maps to, and its evidence schema (ADR-012).",
       "type": "object",
@@ -165,6 +261,118 @@ expression: pretty(&schema)
         "evidence",
         "kind",
         "summary"
+      ]
+    },
+    "LangId": {
+      "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
+      "type": "string"
+    },
+    "Location": {
+      "description": "A span in a file. Paths are relative to the repository root; lines and columns are 1-based.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "file",
+        "line"
+      ]
+    },
+    "Manifest": {
+      "description": "Everything Cupel knows about a check without running it. Plugins describe themselves with\nthe same shape. Language applicability is never declared; it is derived (design §8.3.5).",
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/CostClass"
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FindingKindSpec"
+          }
+        },
+        "id": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "metrics": {
+          "description": "What the check measures: `scope` metrics are gate keys (`<check-id>.<metric>`), the others\nare `survey` ranking dimensions (ADR-060, ADR-062).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MetricSpec"
+          }
+        },
+        "needs": {
+          "description": "Facts the check cannot run without.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "tier": {
+          "$ref": "#/$defs/Tier"
+        },
+        "version": {
+          "description": "Bumped when results change for the same facts; invalidates cached results.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "wants": {
+          "description": "Facts the check uses for enrichment when present.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        }
+      },
+      "required": [
+        "cost",
+        "findings",
+        "id",
+        "metrics",
+        "needs",
+        "stability",
+        "summary",
+        "tier",
+        "version",
+        "wants"
       ]
     },
     "MetricPer": {
@@ -213,6 +421,515 @@ expression: pretty(&schema)
         "summary"
       ]
     },
+    "Plan": {
+      "description": "A check's planned work for a scope; also what `--dry-run` reports.",
+      "type": "object",
+      "properties": {
+        "est_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "targets": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "est_ms",
+        "targets"
+      ]
+    },
+    "PluginEvent": {
+      "description": "One line `<plugin> run` prints (ADR-089 §4).",
+      "oneOf": [
+        {
+          "description": "A check plugin's finding, as design §7.2 shapes it.",
+          "type": "object",
+          "properties": {
+            "ev": {
+              "type": "string",
+              "const": "finding"
+            }
+          },
+          "$ref": "#/$defs/Finding",
+          "required": [
+            "ev"
+          ]
+        },
+        {
+          "description": "A check plugin's progress (design §7.4).",
+          "type": "object",
+          "properties": {
+            "done": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            },
+            "eta_ms": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "uint64",
+              "minimum": 0
+            },
+            "ev": {
+              "type": "string",
+              "const": "progress"
+            },
+            "id": {
+              "$ref": "#/$defs/CheckId"
+            },
+            "total": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "done",
+            "eta_ms",
+            "ev",
+            "id",
+            "total"
+          ]
+        },
+        {
+          "description": "A check plugin's outcome; exactly one ends its run.",
+          "type": "object",
+          "properties": {
+            "ev": {
+              "type": "string",
+              "const": "result"
+            }
+          },
+          "$ref": "#/$defs/PluginResult",
+          "required": [
+            "ev"
+          ]
+        },
+        {
+          "description": "A producer plugin's fact; exactly one is its run's output.",
+          "type": "object",
+          "properties": {
+            "ev": {
+              "type": "string",
+              "const": "fact"
+            }
+          },
+          "$ref": "#/$defs/PluginFact",
+          "required": [
+            "ev"
+          ]
+        }
+      ]
+    },
+    "PluginFact": {
+      "description": "A producer plugin's fact: the kind and payload version it provides, and the payload.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/FactKind"
+        },
+        "payload": {
+          "description": "Valid under `cupel describe fact <kind>`'s schema."
+        },
+        "version": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "payload",
+        "version"
+      ]
+    },
+    "PluginManifest": {
+      "description": "What `<plugin> describe` prints: a check's manifest, as native checks declare it, or a\nproducer's.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "check"
+            }
+          },
+          "$ref": "#/$defs/Manifest",
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "producer"
+            }
+          },
+          "$ref": "#/$defs/ProducerManifest",
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "PluginResult": {
+      "description": "What a check plugin reports about its run; Cupel adds the rest of the check's result.",
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "description": "The value of each `scope` metric the manifest declares.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "score": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Score"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "description": "`pass`, `fail`, `partial`, or `error`.",
+          "$ref": "#/$defs/CheckStatus"
+        }
+      },
+      "required": [
+        "metrics",
+        "notes",
+        "score",
+        "status"
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "ProducerManifest": {
+      "description": "Everything Cupel knows about a producer plugin without running it (design §8.3.3).",
+      "type": "object",
+      "properties": {
+        "cost": {
+          "$ref": "#/$defs/CostClass"
+        },
+        "id": {
+          "description": "Starts with `plugin.` (ADR-088).",
+          "$ref": "#/$defs/ProducerId"
+        },
+        "languages": {
+          "description": "The languages it produces the fact for.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LangId"
+          }
+        },
+        "needs": {
+          "description": "Facts it cannot produce without, made first for the same language.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        },
+        "provides": {
+          "$ref": "#/$defs/Provides"
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "version": {
+          "description": "Bumped when the producer's output changes for the same inputs.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "wants": {
+          "description": "Facts it uses when they can be made.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FactKind"
+          }
+        }
+      },
+      "required": [
+        "cost",
+        "id",
+        "languages",
+        "needs",
+        "provides",
+        "stability",
+        "summary",
+        "version",
+        "wants"
+      ]
+    },
+    "Provides": {
+      "description": "The fact kind a producer plugin makes, at the payload version it emits.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/FactKind"
+        },
+        "version": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "version"
+      ]
+    },
+    "RequestScope": {
+      "description": "The files, and optionally the symbols, a plugin works over.",
+      "type": "object",
+      "properties": {
+        "files": {
+          "description": "Relative to the root, `/`-separated.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "symbols": {
+          "description": "The selected symbols by where they start; `null` for every symbol in `files`.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/SymbolKey"
+          }
+        }
+      },
+      "required": [
+        "files",
+        "symbols"
+      ]
+    },
+    "RunRequest": {
+      "description": "What `<plugin> plan` and `<plugin> run` read on standard input (ADR-089 §2).",
+      "type": "object",
+      "properties": {
+        "budget_ms": {
+          "description": "Milliseconds left before the run is cancelled; `null` without a deadline.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "config": {
+          "description": "A check's `[checks.\"<id>\"]` slice with its language override merged, or a producer's\n`[lang.<id>]` table.",
+          "type": "object",
+          "additionalProperties": true
+        },
+        "depth": {
+          "description": "The run's depth, for a producer; `null` for a check.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CostClass"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "facts": {
+          "description": "The JSON file holding each fact the plugin declared that the run produced, absolute;\nempty for `plan`.",
+          "type": "object",
+          "properties": {
+            "analyzer-report": {
+              "type": "string"
+            },
+            "api-surface": {
+              "type": "string"
+            },
+            "bench-samples": {
+              "type": "string"
+            },
+            "coverage-map": {
+              "type": "string"
+            },
+            "decisions": {
+              "type": "string"
+            },
+            "divergence-results": {
+              "type": "string"
+            },
+            "fuzz-results": {
+              "type": "string"
+            },
+            "module-graph": {
+              "type": "string"
+            },
+            "mutation-outcomes": {
+              "type": "string"
+            },
+            "mutation-sites": {
+              "type": "string"
+            },
+            "norm-tree": {
+              "type": "string"
+            },
+            "per-test-map": {
+              "type": "string"
+            },
+            "project-info": {
+              "type": "string"
+            },
+            "property-results": {
+              "type": "string"
+            },
+            "race-reports": {
+              "type": "string"
+            },
+            "roots": {
+              "type": "string"
+            },
+            "symbols": {
+              "type": "string"
+            },
+            "test-conventions": {
+              "type": "string"
+            },
+            "test-frames": {
+              "type": "string"
+            },
+            "test-reruns": {
+              "type": "string"
+            },
+            "test-results": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "analyzer-report",
+            "api-surface",
+            "bench-samples",
+            "coverage-map",
+            "decisions",
+            "divergence-results",
+            "fuzz-results",
+            "module-graph",
+            "mutation-outcomes",
+            "mutation-sites",
+            "norm-tree",
+            "per-test-map",
+            "project-info",
+            "property-results",
+            "race-reports",
+            "roots",
+            "symbols",
+            "test-conventions",
+            "test-frames",
+            "test-reruns",
+            "test-results"
+          ]
+        },
+        "protocol": {
+          "description": "[`PROTOCOL_VERSION`].",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "root": {
+          "description": "The repository root, absolute; the plugin's working directory.",
+          "type": "string"
+        },
+        "scope": {
+          "$ref": "#/$defs/RequestScope"
+        },
+        "scratch": {
+          "description": "The one directory the plugin may write in, absolute.",
+          "type": "string"
+        },
+        "seed": {
+          "description": "The run's seed, for a producer; `null` for a check.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "toolchain": {
+          "$ref": "#/$defs/Toolchain"
+        },
+        "write": {
+          "description": "Whether the plugin may write outside `scratch`.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "budget_ms",
+        "config",
+        "depth",
+        "facts",
+        "protocol",
+        "root",
+        "scope",
+        "scratch",
+        "seed",
+        "toolchain",
+        "write"
+      ]
+    },
+    "Score": {
+      "type": "object",
+      "properties": {
+        "n": {
+          "description": "How many targets the score covers.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "unit": {
+          "description": "What `value` measures, such as `killed_ratio`.",
+          "type": "string"
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "n",
+        "unit",
+        "value"
+      ]
+    },
+    "Severity": {
+      "type": "string",
+      "enum": [
+        "fail",
+        "warn",
+        "info"
+      ]
+    },
     "Stability": {
       "description": "Whether a described entity's contract may still change.",
       "type": "string",
@@ -221,11 +938,75 @@ expression: pretty(&schema)
         "experimental"
       ]
     },
+    "Symbol": {
+      "description": "The function or method a finding is about.",
+      "type": "object",
+      "properties": {
+        "display": {
+          "description": "`namespace::name`, for people.",
+          "type": "string"
+        },
+        "hash": {
+          "description": "Structural identity, for machines.",
+          "$ref": "#/$defs/SymbolHash"
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        }
+      },
+      "required": [
+        "display",
+        "hash",
+        "lang"
+      ]
+    },
+    "SymbolHash": {
+      "description": "`sh_` followed by sixteen lowercase hex digits",
+      "type": "string",
+      "pattern": "^sh_[0-9a-f]{16}$"
+    },
+    "SymbolKey": {
+      "description": "Identifies a symbol within one run by where it starts. Not stable across edits; anything\npersisted across runs uses `SymbolHash` (ADR-014).",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "file",
+        "line"
+      ]
+    },
     "Tier": {
       "description": "Evidence tier: 0 structural metric … 6 proof.",
       "type": "integer",
       "maximum": 6,
       "minimum": 0
+    },
+    "Toolchain": {
+      "description": "What the plugin runs under.",
+      "type": "object",
+      "properties": {
+        "cupel": {
+          "description": "The `cupel` version running the plugin.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cupel"
+      ]
     }
   }
 }

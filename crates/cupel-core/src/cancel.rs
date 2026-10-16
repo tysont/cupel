@@ -54,6 +54,19 @@ impl Cancellation {
         }
     }
 
+    /// The time left before the nearest deadline of this token or a token it sits under, zero
+    /// once one has passed; `None` when no deadline applies. A plugin's budget (ADR-089 §2).
+    pub fn remaining(&self) -> Option<Duration> {
+        let own = self
+            .deadline
+            .map(|deadline| deadline.saturating_duration_since(Instant::now()));
+        let inherited = self.parent.as_ref().and_then(|parent| parent.remaining());
+        match (own, inherited) {
+            (Some(own), Some(inherited)) => Some(own.min(inherited)),
+            (own, inherited) => own.or(inherited),
+        }
+    }
+
     pub fn cancel(&self) {
         self.cancelled.store(true, Ordering::SeqCst);
     }

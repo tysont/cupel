@@ -1,0 +1,20 @@
+# ABOUTME: Manifest for cupel-plugin: plugin discovery and the external-process host for check and producer
+# ABOUTME: plugins (design §8.6). The protocol's types live in cupel-core, its only Cupel dependency (ADR-087).
+[package]
+name = "cupel-plugin"
+description = "Discovers Cupel plugins and runs them as checks and producers over the plugin protocol."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+cupel-core.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

@@ -608,6 +608,7 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 | `--limit N`, `--offset N` | Page findings; the envelope always carries `truncated` and `total_findings` |
 | `--install`, `--no-install` | Install missing tools without asking, or never; without either, Cupel asks when stdout is a terminal and installs nothing otherwise (`doctor --fix`, `check`, `survey`) |
 | `--write` | Permit writes outside `.cupel/`; installing a tool is governed by `--install` instead |
+| `--no-path-plugins` | Load no `cupel-check-*` or `cupel-produce-*` plugin from `PATH`; `[plugins]` still loads (see [Plugins](#plugins)) |
 | `--quiet`, `--verbose`, `--no-color` | Diagnostics on stderr only; stdout's shape never changes |
 
 ## Checks
@@ -785,6 +786,45 @@ Mutation testing is expensive, so the engine stacks every saving it can. Before 
 A Rust file's mutants cost one build per worker plus one test run each; outside Rust, each mutant costs an incremental build of what it changes plus the tests. The run's `--seed` reaches every mutant run.
 
 On the Cupel repository itself (1377 tests, release build, 8-core Apple silicon, a quiet machine), a one-function change checked at `standard` with a warm cache takes about 10.5 minutes: one instrumented run of the suite (5.3 min) and the mutants (5.2 min, two mutants with sixteen covering tests each); an unchanged rerun takes 2 seconds.
+
+## Plugins
+
+A plugin is a check or a fact producer in its own executable, in any language, that speaks JSON over standard input and output. Cupel registers it beside the built-in checks and producers, so `describe`, `--only`, `--dry-run`, gates, `[checks."<id>"]` settings, and the support matrix treat it like one of them.
+
+Cupel finds plugins in two places on every run: the `[plugins]` table of `cupel.toml`, and any executable named `cupel-check-<name>` or `cupel-produce-<name>` on `PATH` (the first directory wins, as in a shell). `--no-path-plugins` skips `PATH`.
+
+```toml
+[plugins]
+untested = ["python3", "tools/untested.py"]   # a program and its arguments
+per-test = "tools/cupel-produce-per-test"      # one executable; a path with "/" is relative to the root
+```
+
+Each plugin runs in the repository root as `<plugin> describe`, `<plugin> plan`, and `<plugin> run`, the last two with a request on standard input: the files in scope, the plugin's settings, the run's time left, a scratch directory under `.cupel/work/`, and a JSON file for each fact it declared. `cupel describe schema plugin` is the schema of every message.
+
+- **A check plugin** describes itself with the manifest a built-in check has (`cupel describe <check>`), plus `"kind": "check"`: its ID, tier, cost, the facts it needs and wants, its finding kinds with their evidence schemas, and its gate metrics. `run` prints `finding` lines and one `result`.
+- **A producer plugin** describes `"kind": "producer"`, an ID starting with `plugin.`, the fact kind and version it provides, its languages, and its needs. `run` prints one `fact` line. Producers are chosen the same way for plugins and built-ins (a pin in `[lang.<id>]`, then the first producer that is ready); plugins come after the built-in producers, so a plugin fills a gap or stands in for a missing tool rather than displacing a built-in producer that works.
+
+Cupel holds plugins to the protocol. A plugin that cannot describe itself in 10 seconds with a manifest Cupel can register stops the run with exit 2, naming the plugin and the fix. A finding of an undeclared kind, evidence its schema rejects, an undeclared metric, a fact of another kind, version, or shape, or a non-zero exit without a `result` or `fact` makes the check `error`, with the reason in its `notes`, and nothing the plugin printed reaches the envelope. When `--timeout` or `--budget` runs out, the plugin gets SIGTERM, then SIGKILL two seconds later.
+
+Reference plugins in Rust, Python, and TypeScript live in [`crates/cupel-fixtures/plugins/`](crates/cupel-fixtures/plugins/): a producer that reads a `per-test-map` for JavaScript and TypeScript from an LCOV file with one `TN:` section per test, and a check that reports the files in scope no test executes. With the Python pair in `[plugins]` of a TypeScript repository, `cupel describe fact per-test-map` lists it beside the built-in producers, `cupel tests --impacted` works for TypeScript, and the check runs:
+
+```text
+$ cupel check --only ref.untested-python --format text
+cupel check: pass (exit 0)
+
+summary   1 finding · fail 0 · warn 1 · info 0 · new 0 · resolved 0 · suppressed 0
+
+checks
+  ref.untested-python  fail     tier 2 · quick · score 0.6666666666666666 tested_files (n 3) · metrics untested 1 · 1 finding · 100 ms
+
+warn (1)
+  ref.untested-python
+    No test executes src/report.ts
+      fnd_2d9067 · ref.untested-file · tier 2 · confidence 1
+      at src/report.ts:1
+      evidence: file "src/report.ts" (full: cupel explain fnd_2d9067)
+      action write_test (priority 1): Write a test that executes src/report.ts.
+```
 
 ## Configuration
 

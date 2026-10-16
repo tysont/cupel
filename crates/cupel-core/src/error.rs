@@ -54,6 +54,9 @@ pub enum Error {
     /// An external program could not be started.
     #[error("cannot run `{program}`: {message}")]
     Process { program: String, message: String },
+    /// A plugin broke the protocol or failed without reporting (ADR-089 §6).
+    #[error("plugin `{plugin}`: {problem}")]
+    Plugin { plugin: String, problem: String },
 }
 
 /// Why a scope or selection flag cannot be honored, and what to do instead.

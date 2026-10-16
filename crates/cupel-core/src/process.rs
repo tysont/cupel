@@ -1,6 +1,6 @@
-// ABOUTME: `Process`, the one way producers run an external program (ADR-076 §3): output captured, the child
-// ABOUTME: polled against the run's `Cancellation`, and killed with its process group when `--timeout` fires.
-use std::io::Read;
+// ABOUTME: `Process`, the one way producers run an external program (ADR-076 §3): input given, output captured,
+// ABOUTME: the child polled against the run's `Cancellation`, and stopped with its process group when it fires.
+use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::thread::JoinHandle;
@@ -21,6 +21,10 @@ pub struct Process {
     dir: PathBuf,
     env: Vec<(String, String)>,
     merged: bool,
+    /// Written to the child's standard input, which is then closed; `None` for no input.
+    input: Option<Vec<u8>>,
+    /// How long a cancelled child has to exit after SIGTERM before SIGKILL; `None` kills at once.
+    grace: Option<Duration>,
 }
 
 /// What a finished process wrote and how it exited.
@@ -43,6 +47,8 @@ impl Process {
             dir: dir.into(),
             env: Vec::new(),
             merged: false,
+            input: None,
+            grace: None,
         }
     }
 
@@ -70,6 +76,21 @@ impl Process {
         self
     }
 
+    /// Writes `input` to the child's standard input, then closes it (a plugin's request).
+    #[must_use]
+    pub fn input(mut self, input: Vec<u8>) -> Self {
+        self.input = Some(input);
+        self
+    }
+
+    /// When cancelled, sends SIGTERM to the child's process group and kills the group only if
+    /// it is still running after `grace` (ADR-089 §7); without this the group is killed at once.
+    #[must_use]
+    pub fn terminate(mut self, grace: Duration) -> Self {
+        self.grace = Some(grace);
+        self
+    }
+
     /// The program and its arguments.
     pub fn command_line(&self) -> Vec<String> {
         std::iter::once(self.program.clone())
@@ -85,7 +106,11 @@ impl Process {
         command
             .args(&self.args)
             .current_dir(&self.dir)
-            .stdin(Stdio::null());
+            .stdin(if self.input.is_some() {
+                Stdio::piped()
+            } else {
+                Stdio::null()
+            });
         for key in std::env::vars_os().map(|(key, _)| key) {
             if is_coverage_harness(&key.to_string_lossy()) {
                 command.env_remove(key);
@@ -109,11 +134,19 @@ impl Process {
         // The command holds the parent's copies of a merged pipe's write end; the reader sees
         // the end of the output only once they are closed.
         drop(command);
+        let writing = child
+            .stdin
+            .take()
+            .zip(self.input.clone())
+            .map(|(stdin, input)| write(stdin, input));
         let (stdout, stderr) = match merged {
             Some(reader) => (Some(read(reader)), None),
             None => (child.stdout.take().map(read), child.stderr.take().map(read)),
         };
-        let exit_code = wait(&mut child, cancel);
+        let exit_code = wait(&mut child, cancel, self.grace);
+        if let Some(writing) = writing {
+            let _ = writing.join();
+        }
         let (stdout, stderr) = (joined(stdout), joined(stderr));
         Ok(Captured {
             exit_code: exit_code?,
@@ -130,15 +163,38 @@ impl Process {
     }
 }
 
-/// Waits for `child` to exit, killing it when `cancel` fires first.
-fn wait(child: &mut Child, cancel: &Cancellation) -> Result<Option<i32>> {
+/// Waits for `child` to exit, stopping it when `cancel` fires first: at once, or after SIGTERM
+/// and `grace`.
+fn wait(child: &mut Child, cancel: &Cancellation, grace: Option<Duration>) -> Result<Option<i32>> {
     loop {
         if let Ok(Some(status)) = child.try_wait() {
             return Ok(status.code());
         }
         if cancel.is_cancelled() {
+            if let Some(grace) = grace {
+                terminate(child, grace);
+            }
             kill(child);
             return Err(Error::Cancelled);
+        }
+        std::thread::sleep(POLL);
+    }
+}
+
+/// Sends SIGTERM to `child`'s process group and waits up to `grace` for `child` to exit.
+fn terminate(child: &mut Child, grace: Duration) {
+    #[cfg(unix)]
+    {
+        use nix::sys::signal::{Signal, killpg};
+        use nix::unistd::Pid;
+        if let Ok(pid) = i32::try_from(child.id()) {
+            let _ = killpg(Pid::from_raw(pid), Signal::SIGTERM);
+        }
+    }
+    let until = std::time::Instant::now() + grace;
+    while std::time::Instant::now() < until {
+        if let Ok(Some(_)) = child.try_wait() {
+            return;
         }
         std::thread::sleep(POLL);
     }
@@ -170,6 +226,14 @@ fn is_coverage_harness(key: &str) -> bool {
         || key == "LLVM_PROFILE_FILE"
         || (matches!(key, "RUSTC_WRAPPER" | "RUSTC_WORKSPACE_WRAPPER")
             && std::env::var_os("__CARGO_LLVM_COV_RUSTC_WRAPPER").is_some())
+}
+
+/// Writes `input` to `sink` on its own thread and closes it; a child that exits without
+/// reading it all ends the write early.
+fn write(mut sink: impl Write + Send + 'static, input: Vec<u8>) -> JoinHandle<()> {
+    std::thread::spawn(move || {
+        let _ = sink.write_all(&input);
+    })
 }
 
 /// Reads `source` to its end on its own thread.

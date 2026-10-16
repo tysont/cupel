@@ -63,6 +63,57 @@ fn cancellation_kills_the_child_and_its_process_group() {
 }
 
 #[test]
+fn input_reaches_the_child_on_its_standard_input() {
+    let captured = shell("tr a-z A-Z")
+        .input(b"plugin request\n".to_vec())
+        .run(&Cancellation::new())
+        .unwrap();
+    assert_eq!(captured.stdout, "PLUGIN REQUEST\n");
+}
+
+/// Runs a child that runs `on_term` when SIGTERM reaches it, cancelled after 300 ms with
+/// `grace` to exit: what it ended with, its directory, and how long the run took.
+fn terminated(
+    on_term: &str,
+    grace: Duration,
+) -> (Result<Captured, Error>, tempfile::TempDir, Duration) {
+    let dir = tempfile::tempdir().unwrap();
+    let script = format!("trap '{on_term}' TERM; while true; do sleep 0.05; done");
+    let started = Instant::now();
+    let cancel = Cancellation::with_deadline(started + Duration::from_millis(300));
+    let ran = Process::new("sh", dir.path())
+        .args(["-c", script.as_str()])
+        .terminate(grace)
+        .run(&cancel);
+    (ran, dir, started.elapsed())
+}
+
+#[test]
+fn termination_sends_sigterm_and_waits_for_the_child_to_exit() {
+    let (ran, dir, elapsed) = terminated("echo stopped > term; exit 0", Duration::from_secs(20));
+    assert_eq!(ran, Err(Error::Cancelled));
+    assert_eq!(
+        std::fs::read_to_string(dir.path().join("term")).unwrap(),
+        "stopped\n"
+    );
+    assert!(elapsed < Duration::from_secs(10), "{elapsed:?}");
+}
+
+#[test]
+fn a_child_that_ignores_sigterm_is_killed_after_the_grace_period() {
+    let (ran, dir, elapsed) = terminated("echo ignored > term", Duration::from_millis(500));
+    assert_eq!(ran, Err(Error::Cancelled));
+    assert_eq!(
+        std::fs::read_to_string(dir.path().join("term")).unwrap(),
+        "ignored\n"
+    );
+    assert!(
+        elapsed >= Duration::from_millis(800) && elapsed < Duration::from_secs(10),
+        "{elapsed:?}"
+    );
+}
+
+#[test]
 fn a_cancelled_token_runs_nothing() {
     let cancel = Cancellation::new();
     cancel.cancel();
