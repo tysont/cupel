@@ -415,3 +415,32 @@ fn describe_knows_the_finding_a_result_against_an_unverified_oracle_carries() {
     let required = &description["evidence"]["required"];
     assert_eq!(required, &json!(["oracle", "state", "checks"]));
 }
+
+#[test]
+fn add_to_oracles_written_as_an_inline_table_asks_for_tables() {
+    let repo = configured("oracles = {}\n");
+    let add = [
+        "oracle", "add", "old", "--kind", "ref", "--ref", "v1", "--write",
+    ];
+    assert_eq!(usage_argument(&repo.run(&add)), json!("--config"));
+    assert_eq!(config_text(&repo), "oracles = {}\n");
+}
+
+#[test]
+fn each_oracle_sub_verb_describes_itself() {
+    let described = |sub: &str| {
+        let outcome = Repo::new().run(&["oracle", sub, "--describe"]);
+        outcome.envelope()["description"]["name"].clone()
+    };
+    let names: Vec<Value> = ["add", "list", "remove", "verify"]
+        .into_iter()
+        .map(described)
+        .collect();
+    let expected = [
+        "oracle add",
+        "oracle list",
+        "oracle remove",
+        "oracle verify",
+    ];
+    assert_eq!(names, expected.map(|name| json!(name)));
+}
