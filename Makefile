@@ -8,7 +8,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood install
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood parity install
 
 build:
 	$(CARGO) build --workspace
@@ -35,6 +35,13 @@ matrix:
 # `cupel describe`. `make test` fails while they are stale (ADR-073).
 readme:
 	UPDATE_README=1 $(CARGO) test --package cupel-cli --test readme
+
+# Daemon parity (ADR-085 §11): every golden-harness run also goes through a `cupel serve` on a
+# copy of its directory and must print the same after redaction. It runs the fixture suite twice
+# over, so it is its own target; CI runs it after `make check`.
+parity:
+	$(CARGO) build --package cupel-cli
+	DAEMON_PARITY=1 $(CARGO) test --package cupel-fixtures
 
 # The pre-commit bar. The tree is fingerprinted before the build so clean-check can
 # verify the build itself wrote nothing outside .gitignore (see ADR-010).

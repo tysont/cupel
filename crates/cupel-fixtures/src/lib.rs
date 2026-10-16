@@ -5,6 +5,8 @@
 //! A golden test runs the built `cupel` binary with [`run_cupel`], redacts the fields that vary
 //! between runs with [`redact`], and compares the result with `golden/<name>.json` through
 //! [`assert_golden`]. `UPDATE_GOLDENS=1 make test` rewrites goldens instead of comparing.
+//! With `DAEMON_PARITY=1` (`make parity`), every [`run_cupel`] also runs through a daemon on a
+//! copy of its directory and fails unless the two outputs match after redaction (ADR-085 §11).
 //! The volatile fields, placeholders, and file format are fixed by ADR-003. Fixture
 //! repositories live under `repos/`; [`copy_repo`] copies one into a scratch directory to run in.
 //!
@@ -40,6 +42,7 @@ pub mod conformance;
 pub mod evidence;
 mod golden;
 pub mod matrix;
+pub mod parity;
 mod redact;
 mod repos;
 mod run;

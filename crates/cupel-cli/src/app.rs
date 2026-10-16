@@ -341,12 +341,13 @@ fn load_config(request: &ConfigRequest) -> Result<Config, cupel_core::Error> {
     Ok(config)
 }
 
-/// `init` and `doctor` run even when configuration does not load: `init` replaces a broken
-/// `cupel.toml` and `doctor` reports it (ADR-021 §6, ADR-022 §2).
+/// `init`, `doctor`, and `serve` run even when configuration does not load: `init` replaces a
+/// broken `cupel.toml`, `doctor` reports it (ADR-021 §6, ADR-022 §2), and the daemon reads none
+/// of its own; each request it serves loads and reports configuration as a cold run would.
 fn runs_without_configuration(cli: &Cli) -> bool {
     matches!(
         cli.verb,
-        Some(VerbArgs::Init { .. } | VerbArgs::Doctor { .. })
+        Some(VerbArgs::Init { .. } | VerbArgs::Doctor { .. } | VerbArgs::Serve(_))
     )
 }
 

@@ -354,6 +354,7 @@ dependencies = [
  "cupel-core",
  "cupel-lang",
  "cupel-mutate",
+ "cupel-serve",
  "serde",
  "serde_json",
  "similar",

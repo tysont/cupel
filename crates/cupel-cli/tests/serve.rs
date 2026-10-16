@@ -192,11 +192,13 @@ fn a_client_of_another_build_is_refused_runs_locally_and_says_why() {
     assert_eq!(daemon.status().served, 0);
     assert_eq!(outcome.code, 0, "{}", outcome.stderr);
     assert!(
-        outcome.stderr.starts_with("cupel: the daemon at ")
+        outcome
+            .stderr
+            .starts_with("cupel: ran without the daemon: the daemon at ")
             && outcome.stderr.contains("runs another build of cupel")
             && outcome
                 .stderr
-                .ends_with("`cupel serve --stop`, then `cupel serve`.; ran without the daemon.\n"),
+                .ends_with("`cupel serve --stop`, then `cupel serve`.\n"),
         "{}",
         outcome.stderr
     );

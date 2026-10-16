@@ -444,7 +444,11 @@ fn daemon(root: &Path) -> Option<Problem> {
         title,
         detail: None,
         evidence,
-        action: ActionKind::Configure,
+        action: if severity == Severity::Info {
+            ActionKind::Review
+        } else {
+            ActionKind::Configure
+        },
         fix: fix.to_owned(),
     };
     Some(match cupel_serve::request(&socket, &asked, &mut |_| {}) {

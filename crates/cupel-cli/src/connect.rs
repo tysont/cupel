@@ -35,7 +35,7 @@ pub fn invoke(environment: &Environment) -> Output {
     let mut output = run(environment);
     let quiet = format::recover(&environment.args, None, environment.stdout_is_terminal).quiet;
     if !quiet {
-        output.stderr = format!("cupel: {why}; ran without the daemon.\n{}", output.stderr);
+        output.stderr = format!("cupel: ran without the daemon: {why}\n{}", output.stderr);
     }
     output
 }
