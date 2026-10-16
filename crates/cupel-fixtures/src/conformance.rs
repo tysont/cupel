@@ -485,7 +485,28 @@ pub fn produce_fixture_fact(
     lang: &cupel_core::Lang,
     kind: FactKind,
 ) -> Result<Value, String> {
-    let root = repo_path(lang.id.as_str());
+    produce_fact_at(
+        producers,
+        languages,
+        lang,
+        kind,
+        &repo_path(lang.id.as_str()),
+    )
+}
+
+/// [`produce_fixture_fact`] over the repository at `root`, such as a copy of the fixture.
+///
+/// # Errors
+///
+/// As [`produce_fixture_fact`].
+pub fn produce_fact_at(
+    producers: &ProducerRegistry,
+    languages: &LanguageRegistry,
+    lang: &cupel_core::Lang,
+    kind: FactKind,
+    root: &std::path::Path,
+) -> Result<Value, String> {
+    let root = root.to_path_buf();
     let producer = producers
         .producers_for(kind, lang)
         .next()
