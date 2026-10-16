@@ -21,6 +21,7 @@ mod explain;
 mod format;
 mod init;
 mod install;
+mod oracle;
 mod page;
 mod persist;
 mod problem;

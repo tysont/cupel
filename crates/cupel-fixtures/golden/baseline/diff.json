@@ -68,6 +68,7 @@
     }
   ],
   "next_actions": [],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

@@ -128,6 +128,7 @@
       "summary": "Write a test that takes the untaken branches of `classify` (lines 15)."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

@@ -55,6 +55,16 @@ expression: pretty(&schema)
         "$ref": "#/$defs/NextAction"
       }
     },
+    "oracles": {
+      "description": "What the `oracle` verb reports: the oracles it listed, added, removed, or verified, with\ntheir state; null for every other verb (ADR-091 §6).",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/$defs/OracleReport"
+      }
+    },
     "plan": {
       "description": "What a `--dry-run` would do; null unless `status` is `plan` (ADR-020).",
       "anyOf": [
@@ -115,6 +125,7 @@ expression: pretty(&schema)
     "explanation",
     "findings",
     "next_actions",
+    "oracles",
     "plan",
     "rankings",
     "run",
@@ -1900,6 +1911,141 @@ expression: pretty(&schema)
         "kind",
         "priority",
         "summary"
+      ]
+    },
+    "OracleConfig": {
+      "description": "An oracle for differential and trace checks (design §6.5 `oracle`).",
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "description": "A command with an `{input}` placeholder, for `kind = \"command\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "inputs": {
+          "description": "The known inputs of a command's smoke comparison, for `kind = \"command\"`; one empty\ninput when none are given (ADR-090 §3).",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "kind": {
+          "$ref": "#/$defs/OracleKind"
+        },
+        "lang": {
+          "description": "The specification language (`tla+`, `quint`, `p`), for `kind = \"spec\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ref": {
+          "description": "A git ref, for `kind = \"ref\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spec": {
+          "description": "A specification file, for `kind = \"spec\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "cmd",
+        "inputs",
+        "kind",
+        "lang",
+        "ref",
+        "spec"
+      ]
+    },
+    "OracleKind": {
+      "type": "string",
+      "enum": [
+        "ref",
+        "command",
+        "spec"
+      ]
+    },
+    "OracleReport": {
+      "description": "One oracle as the `oracle` verb reports it (ADR-091 §6).",
+      "type": "object",
+      "properties": {
+        "definition": {
+          "$ref": "#/$defs/OracleConfig"
+        },
+        "hash": {
+          "description": "The identity hash now; null when the oracle cannot be reached.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/OracleState"
+        },
+        "verified_at": {
+          "description": "When the recorded verification was made; null without one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verified_run": {
+          "description": "The `oracle verify` run that recorded the verification; null without one.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RunId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "definition",
+        "hash",
+        "name",
+        "state",
+        "verified_at",
+        "verified_run"
+      ]
+    },
+    "OracleState": {
+      "description": "Whether an oracle's recorded verification holds now.",
+      "oneOf": [
+        {
+          "description": "A verification is recorded under the oracle's identity now.",
+          "type": "string",
+          "const": "verified"
+        },
+        {
+          "description": "No verification is recorded.",
+          "type": "string",
+          "const": "unverified"
+        },
+        {
+          "description": "A verification is recorded under another identity: the definition, the ref's commit, or\nthe spec file changed since.",
+          "type": "string",
+          "const": "changed"
+        },
+        {
+          "description": "The identity cannot be computed now: the ref or the spec file is gone.",
+          "type": "string",
+          "const": "unreachable"
+        }
       ]
     },
     "PlannedCheck": {

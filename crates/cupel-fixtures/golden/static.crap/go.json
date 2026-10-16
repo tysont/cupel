@@ -80,6 +80,7 @@
       "summary": "Write tests that cover every branch of `Refund` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

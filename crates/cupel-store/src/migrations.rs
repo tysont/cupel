@@ -2,7 +2,7 @@
 // ABOUTME: how many have been applied (ADR-045 §4). Append new scripts; never edit an applied one.
 
 /// Every migration, in order. Migration `n` (1-based) moves the store from version `n - 1` to `n`.
-pub const MIGRATIONS: &[&str] = &[V1, V2, V3, V4];
+pub const MIGRATIONS: &[&str] = &[V1, V2, V3, V4, V5];
 
 /// Every table of design §8.8, with the ADR-045 §5 additions.
 const V1: &str = "
@@ -160,4 +160,19 @@ CREATE TABLE durations (
     duration_ms INTEGER NOT NULL
 );
 CREATE INDEX durations_by_shape ON durations (kind, task, lang, class);
+";
+
+/// The `oracles` table of P5.2 (ADR-090 §6): one row per verified oracle, with the definition
+/// verified, its identity hash, and the `oracle verify` run that recorded it. The V1 table was
+/// never written.
+const V5: &str = "
+DROP TABLE oracles;
+CREATE TABLE oracles (
+    name TEXT PRIMARY KEY,
+    kind TEXT NOT NULL,
+    spec TEXT NOT NULL,
+    verified_at TEXT NOT NULL,
+    verified_hash TEXT NOT NULL,
+    run_id TEXT NOT NULL
+);
 ";

@@ -17,6 +17,7 @@ fn envelope_with(verb: &Value, description: &Value) -> Value {
                     "new": 0, "resolved": 0, "suppressed": 0, "gate": null},
         "next_actions": [],
         "description": description, "plan": null, "explanation": null, "rankings": null, "tests": null,
+        "oracles": null,
         "truncated": false, "total_findings": 0
     })
 }
@@ -145,6 +146,7 @@ fn run_schema_requires_the_nullable_verb_and_description() {
             "explanation",
             "findings",
             "next_actions",
+            "oracles",
             "plan",
             "rankings",
             "run",

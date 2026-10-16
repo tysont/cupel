@@ -209,6 +209,7 @@
       "summary": "Extract cohesive blocks of `statementTemplate` into named functions until it is at most 60 lines."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

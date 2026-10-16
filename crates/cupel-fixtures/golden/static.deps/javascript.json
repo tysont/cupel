@@ -125,6 +125,7 @@
       "summary": "Remove the import of `src/deps_layers/infra/store.js` from `src/deps_layers/domain/order.js`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

@@ -91,13 +91,21 @@ fn describe_cli_lists_every_verb_exit_code_and_schema() {
 }
 
 #[test]
-fn describe_verb_describes_its_arguments_and_pending_step() {
+fn describe_verb_describes_its_arguments_sub_verbs_and_pending_flags() {
     let outcome = run(["describe", "oracle"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["description"]["subject"], json!("command"));
     assert_eq!(envelope["description"]["name"], json!("oracle"));
-    assert_eq!(envelope["description"]["pending_step"], json!("P5.2"));
+    assert_eq!(envelope["description"]["pending_step"], json!(null));
+    let check = described(&["check"]);
+    let cases = check["arguments"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|argument| argument["name"] == json!("--cases"))
+        .unwrap();
+    assert_eq!(cases["pending_step"], json!("P5.4"));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
 }
 

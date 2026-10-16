@@ -29,10 +29,13 @@
 //!   [`Store::latest_scored`] where each check last ran, for the budget scheduler (ADR-086).
 //! - **Suppressions.** [`Store::replace_suppressions`] mirrors `.cupel/suppressions.toml`
 //!   (ADR-047); [`Store::suppressions`] reads the mirror.
+//! - **Oracle verifications.** [`Store::record_oracle`], [`Store::verified_oracle`],
+//!   [`Store::verified_oracles`], and [`Store::forget_oracle`] (ADR-090 §6).
 
 mod error;
 mod lock;
 mod migrations;
+pub mod oracles;
 
 use std::collections::BTreeMap;
 use std::fmt::Write as _;

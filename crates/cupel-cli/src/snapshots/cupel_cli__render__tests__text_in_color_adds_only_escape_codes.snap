@@ -89,6 +89,10 @@ cupel check: [1;31mfail[0m (exit 1)
   run in .: cargo nextest run --workspace -E '(binary_id(=calc) & test(=tests::adds))'
   run in web: npx vitest run add.test.ts
 
+[1moracles[0m  2
+  bc  command `bc -l <<< {input}` · inputs 1 · changed · [2mrecorded 2026-10-09T08:00:00Z by run_01JA2B3C4D5E6F7G8H9JKMNPQR[0m
+  pg  ref v1.2.0 · verified · [2mrecorded 2026-10-10T16:00:00Z by run_01JA2B3C4D5E6F7G8H9JKMNPQS[0m
+
 [1;31mfail (2)[0m
   [1mtests.mutation[0m
     Mutant survived: `<=` → `<` at planner.rs:142

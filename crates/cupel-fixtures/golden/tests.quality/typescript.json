@@ -606,6 +606,7 @@
       "summary": "Add an assertion to `can be called without checking` that pins the outcome it exercises."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

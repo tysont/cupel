@@ -6,6 +6,7 @@
   "description": null,
   "exit_code": 0,
   "explanation": null,
+  "oracles": null,
   "plan": null,
   "rankings": {
     "top": 10

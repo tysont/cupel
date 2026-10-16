@@ -13,12 +13,12 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "examples": [
       {
         "command": "cupel oracle list",
-        "exit_code": 2,
-        "summary": "List registered oracles."
+        "exit_code": 0,
+        "summary": "List the oracles defined in cupel.toml, each with its state."
       }
     ],
     "name": "oracle",
-    "pending_step": "P5.2",
+    "pending_step": null,
     "stability": "experimental",
     "subcommands": [
       {
@@ -116,35 +116,50 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
             "value": "string",
             "value_name": "LANG",
             "values": []
+          },
+          {
+            "conflicts": [],
+            "default": null,
+            "env": null,
+            "name": "--input",
+            "pending_step": null,
+            "positional": false,
+            "repeated": false,
+            "required": false,
+            "stability": "experimental",
+            "summary": "A known input of a command's smoke comparison; repeatable.",
+            "value": "string",
+            "value_name": "INPUT",
+            "values": []
           }
         ],
         "examples": [
           {
-            "command": "cupel oracle add pg --kind ref --ref v1.2.0",
-            "exit_code": 2,
-            "summary": "Register an oracle: a reference build, a command, or a specification."
+            "command": "cupel oracle add old --kind ref --ref v1.2.0",
+            "exit_code": 0,
+            "summary": "Preview the [oracles.old] table add would write to cupel.toml; writes nothing."
           }
         ],
         "name": "oracle add",
         "pending_step": null,
         "stability": "experimental",
         "subcommands": [],
-        "summary": "Register an oracle: a reference build, a command, or a specification."
+        "summary": "Define an oracle in cupel.toml: a git ref, a command, or a specification; previews without --write."
       },
       {
         "arguments": [],
         "examples": [
           {
             "command": "cupel oracle list",
-            "exit_code": 2,
-            "summary": "List registered oracles."
+            "exit_code": 0,
+            "summary": "List the oracles defined in cupel.toml, each with its state."
           }
         ],
         "name": "oracle list",
         "pending_step": null,
         "stability": "experimental",
         "subcommands": [],
-        "summary": "List registered oracles."
+        "summary": "List the oracles cupel.toml defines and whether each is verified now."
       },
       {
         "arguments": [
@@ -166,16 +181,16 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         ],
         "examples": [
           {
-            "command": "cupel oracle remove pg",
+            "command": "cupel oracle remove old",
             "exit_code": 2,
-            "summary": "Remove an oracle."
+            "summary": "Remove an oracle from cupel.toml and forget its verification; previews without --write."
           }
         ],
         "name": "oracle remove",
         "pending_step": null,
         "stability": "experimental",
         "subcommands": [],
-        "summary": "Remove an oracle."
+        "summary": "Remove an oracle from cupel.toml and forget its verification; previews without --write."
       },
       {
         "arguments": [
@@ -212,16 +227,21 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         ],
         "examples": [
           {
-            "command": "cupel oracle verify pg",
+            "command": "cupel oracle verify old",
             "exit_code": 2,
-            "summary": "Smoke-test an oracle and record that it is verified."
+            "summary": "Run the smoke comparison of the oracle `old` and record it if it passes."
+          },
+          {
+            "command": "cupel oracle verify --all",
+            "exit_code": 0,
+            "summary": "Verify every oracle cupel.toml defines."
           }
         ],
         "name": "oracle verify",
         "pending_step": null,
         "stability": "experimental",
         "subcommands": [],
-        "summary": "Smoke-test an oracle and record that it is verified."
+        "summary": "Run an oracle's smoke comparison and record it as verified when it passes."
       }
     ],
     "subject": "command",
@@ -231,6 +251,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
   "explanation": null,
   "findings": [],
   "next_actions": [],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

@@ -557,6 +557,7 @@
       "summary": "Split `computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

@@ -213,15 +213,7 @@ pub fn apply_suppressions(
             .into_iter()
             .filter(|report| !known.contains(&report.id)),
     );
-    let mut counts = SeverityCounts::default();
-    for finding in &envelope.findings {
-        match finding.severity {
-            Severity::Fail => counts.fail += 1,
-            Severity::Warn => counts.warn += 1,
-            Severity::Info => counts.info += 1,
-        }
-    }
-    envelope.summary.findings = counts;
+    envelope.summary.findings = SeverityCounts::of(&envelope.findings);
     envelope.summary.suppressed = envelope.findings.iter().filter(|f| f.suppressed).count() as u64;
     envelope.total_findings = envelope.findings.len() as u64;
 }
