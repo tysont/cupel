@@ -508,6 +508,22 @@ fn clap_fix(
     (fix, valid)
 }
 
+/// The fix for a plugin that cannot be used: its `[plugins]` entry, or its file on `PATH`
+/// (ADR-088 §5).
+fn plugin_fix(name: &str, program: &str, on_path: bool) -> String {
+    if on_path {
+        format!(
+            "Fix `{program}`, remove it from PATH, or pass --no-path-plugins to load no plugins \
+             from PATH."
+        )
+    } else {
+        format!(
+            "Fix or remove `[plugins] {name}` in cupel.toml; it runs `{program}`, which must \
+             answer `describe` with a valid manifest."
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use cupel_core::{CheckId, FindingId};
@@ -581,21 +597,5 @@ mod tests {
         assert_eq!(argument_name("<FINDING>"), "FINDING");
         assert_eq!(argument_name("--quiet"), "--quiet");
         assert_eq!(argument_name("[SUBJECT]..."), "SUBJECT");
-    }
-}
-
-/// The fix for a plugin that cannot be used: its `[plugins]` entry, or its file on `PATH`
-/// (ADR-088 §5).
-fn plugin_fix(name: &str, program: &str, on_path: bool) -> String {
-    if on_path {
-        format!(
-            "Fix `{program}`, remove it from PATH, or pass --no-path-plugins to load no plugins \
-             from PATH."
-        )
-    } else {
-        format!(
-            "Fix or remove `[plugins] {name}` in cupel.toml; it runs `{program}`, which must \
-             answer `describe` with a valid manifest."
-        )
     }
 }
