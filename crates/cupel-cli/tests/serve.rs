@@ -136,6 +136,18 @@ fn redacted(outcome: &Outcome, root: &Path) -> Value {
     cupel_fixtures::redact(&envelope, root)
 }
 
+/// The program at `path` with no `CUPEL_*` variable from the caller (a `CUPEL_NO_DAEMON=1` would
+/// keep it from the daemon).
+fn clean(path: &Path) -> assert_cmd::Command {
+    let mut command = assert_cmd::Command::new(path);
+    for (key, _) in std::env::vars() {
+        if key.starts_with("CUPEL_") {
+            command.env_remove(key);
+        }
+    }
+    command
+}
+
 /// `args` run cold in `repo`.
 fn cold(repo: &Repo, args: &[&str]) -> Outcome {
     repo.run_with(cupel().env("CUPEL_NO_DAEMON", "1"), args)
@@ -188,7 +200,7 @@ fn a_client_of_another_build_is_refused_runs_locally_and_says_why() {
         .unwrap()
         .set_modified(later)
         .unwrap();
-    let outcome = repo.run_with(&mut assert_cmd::Command::new(&copy), &CHECK);
+    let outcome = repo.run_with(&mut clean(&copy), &CHECK);
     assert_eq!(daemon.status().served, 0);
     assert_eq!(outcome.code, 0, "{}", outcome.stderr);
     assert!(
@@ -207,10 +219,7 @@ fn a_client_of_another_build_is_refused_runs_locally_and_says_why() {
         redacted(&outcome, &repo.root()),
         redacted(&local, &repo.root())
     );
-    let quiet = repo.run_with(
-        &mut assert_cmd::Command::new(&copy),
-        &[&CHECK[..], &["--quiet"]].concat(),
-    );
+    let quiet = repo.run_with(&mut clean(&copy), &[&CHECK[..], &["--quiet"]].concat());
     assert_eq!(quiet.stderr, "");
 }
 
