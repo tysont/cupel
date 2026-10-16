@@ -9,8 +9,10 @@
       "metrics": {
         "equivalent": 1.0,
         "executed": 5.0,
+        "fallback": 0.0,
         "killed": 3.0,
         "reused": 0.0,
+        "schemata": 5.0,
         "score": 0.75,
         "survived": 1.0,
         "timeout": 0.0,

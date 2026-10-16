@@ -1,5 +1,5 @@
-// ABOUTME: The engine's settings, from `[lang.<id>] mutation = { operators, jobs, timeout_factor }` (ADR-080):
-// ABOUTME: which operator set to mutate with, how many slots run mutants at once, and the timeout factor.
+// ABOUTME: The engine's settings, from `[lang.<id>] mutation = { operators, jobs, timeout_factor, strategy }`
+// ABOUTME: (ADR-080, ADR-082): the operator set, slots at once, the timeout factor, and schemata or file copies.
 use cupel_core::syntax::OperatorSet;
 use cupel_core::{Error, Result};
 use serde_json::{Map, Value};
@@ -19,6 +19,17 @@ pub struct Settings {
     pub jobs: usize,
     /// A mutant's run may take this many times its reference run (floor 2 s).
     pub timeout_factor: u32,
+    /// How mutants are built.
+    pub strategy: Strategy,
+}
+
+/// How the engine builds mutants (ADR-082).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Strategy {
+    /// Schemata where the language has a rewriter, file copies elsewhere.
+    Schemata,
+    /// Every mutant a file copy.
+    FileCopy,
 }
 
 impl Settings {
@@ -28,6 +39,7 @@ impl Settings {
             operators: OperatorSet::Default,
             jobs: default_jobs(),
             timeout_factor: DEFAULT_TIMEOUT_FACTOR,
+            strategy: Strategy::Schemata,
         };
         let Some(table) = config.get(KEY) else {
             return Ok(settings);
@@ -35,7 +47,8 @@ impl Settings {
         let table = table.as_object().ok_or_else(|| invalid(KEY, table))?;
         for (key, value) in table {
             match key.as_str() {
-                "operators" => settings.operators = operators(value)?,
+                "operators" => settings.operators = choice("mutation.operators", value, OPERATORS)?,
+                "strategy" => settings.strategy = choice("mutation.strategy", value, STRATEGIES)?,
                 "jobs" => settings.jobs = count("mutation.jobs", value)?,
                 "timeout_factor" => {
                     let what = "mutation.timeout_factor";
@@ -49,6 +62,18 @@ impl Settings {
     }
 }
 
+/// The operator sets, by name.
+const OPERATORS: &[(&str, OperatorSet)] = &[
+    ("default", OperatorSet::Default),
+    ("extended", OperatorSet::Extended),
+];
+
+/// The strategies, by name.
+const STRATEGIES: &[(&str, Strategy)] = &[
+    ("schemata", Strategy::Schemata),
+    ("file-copy", Strategy::FileCopy),
+];
+
 /// Half the cores, at least one and at most four.
 fn default_jobs() -> usize {
     std::thread::available_parallelism()
@@ -56,12 +81,13 @@ fn default_jobs() -> usize {
         .clamp(1, 4)
 }
 
-fn operators(value: &Value) -> Result<OperatorSet> {
-    match value.as_str() {
-        Some("default") => Ok(OperatorSet::Default),
-        Some("extended") => Ok(OperatorSet::Extended),
-        _ => Err(invalid("mutation.operators", value)),
-    }
+/// `value`, the setting `what`, as the choice it names.
+fn choice<T: Copy>(what: &'static str, value: &Value, choices: &[(&str, T)]) -> Result<T> {
+    choices
+        .iter()
+        .find(|(name, _)| value.as_str() == Some(*name))
+        .map(|(_, choice)| *choice)
+        .ok_or_else(|| invalid(what, value))
 }
 
 /// `value`, the setting `what`, as a positive integer.
@@ -78,6 +104,7 @@ fn invalid(what: &'static str, value: &Value) -> Error {
         what,
         value: value.to_string(),
         expected: "`mutation = { operators = \"default\" | \"extended\", jobs = <positive \
-                   integer>, timeout_factor = <positive integer> }`",
+                   integer>, timeout_factor = <positive integer>, strategy = \"schemata\" | \
+                   \"file-copy\" }`",
     }
 }

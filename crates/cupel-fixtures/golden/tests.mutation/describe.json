@@ -240,6 +240,16 @@
           "summary": "Mutants whose outcome came from an earlier run."
         },
         {
+          "name": "schemata",
+          "per": "scope",
+          "summary": "Mutants run this time behind one schemata build of their file (ADR-082)."
+        },
+        {
+          "name": "fallback",
+          "per": "scope",
+          "summary": "Mutants run this time as file copies in a language with schemata; the notes say why."
+        },
+        {
           "name": "survivors",
           "per": "symbol",
           "summary": "Mutants of the function that survived."

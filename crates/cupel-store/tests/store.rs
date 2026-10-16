@@ -755,6 +755,8 @@ fn mutant(site: &str, to: &str, outcome: MutantOutcome, key: Option<&str>) -> Mu
         reused: false,
         equivalent: None,
         cache_key: key.map(str::to_owned),
+        strategy: None,
+        fallback: None,
     }
 }
 

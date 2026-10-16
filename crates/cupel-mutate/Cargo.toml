@@ -1,5 +1,5 @@
 # ABOUTME: Manifest for cupel-mutate: the mutation engine, a producer of `MutationOutcomes` (ADR-080).
-# ABOUTME: Depends on cupel-core and cupel-store (past outcomes); never on cupel-lang, cupel-adapt, or cupel-checks.
+# ABOUTME: Depends on cupel-core and cupel-store (past outcomes), and tree-sitter-rust for Rust schemata (ADR-082).
 [package]
 name = "cupel-mutate"
 description = "Cupel's mutation engine: mutants from MutationSites, run in overlays by the registered runner."
@@ -16,6 +16,8 @@ serde.workspace = true
 serde_json.workspace = true
 blake3.workspace = true
 ignore.workspace = true
+tree-sitter.workspace = true
+tree-sitter-rust.workspace = true
 
 [dev-dependencies]
 cupel-fixtures.workspace = true

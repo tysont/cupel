@@ -1,12 +1,13 @@
 // ABOUTME: `tests.mutation`: scores MutationOutcomes, whoever produced them (ADR-080): surviving mutants as failures at
-// ABOUTME: their site, timeouts and uncovered sites as notes, ADR-004's possibly equivalent survivors, killed ratio.
+// ABOUTME: their site, timeouts and uncovered sites as notes, ADR-004's equivalents, ADR-082's fallbacks, killed ratio.
 use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::syntax::{SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
     Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant, MutantOutcome,
-    MutationOutcomes, Plan, Result, Scope, Score, Severity, SiteHash, Stability, SymbolHash, Tier,
+    MutationOutcomes, MutationStrategy, Plan, Result, Scope, Score, Severity, SiteHash, Stability,
+    SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -143,6 +144,14 @@ fn metrics() -> Vec<MetricSpec> {
         ),
         ("executed", "Mutants run this time."),
         ("reused", "Mutants whose outcome came from an earlier run."),
+        (
+            "schemata",
+            "Mutants run this time behind one schemata build of their file (ADR-082).",
+        ),
+        (
+            "fallback",
+            "Mutants run this time as file copies in a language with schemata; the notes say why.",
+        ),
     ]
     .into_iter()
     .map(|(name, summary)| metric(name, summary))
@@ -244,6 +253,9 @@ struct Tally {
     executed: u64,
     reused: u64,
     findings: u64,
+    schemata: u64,
+    /// Mutants run as file copies where schemata could not hold them, by why.
+    fallbacks: BTreeMap<String, u64>,
 }
 
 impl Tally {
@@ -257,7 +269,22 @@ impl Tally {
             self.reused += 1;
         } else if mutant.outcome != MutantOutcome::Uncovered {
             self.executed += 1;
+            self.schemata += u64::from(mutant.strategy == Some(MutationStrategy::Schemata));
+            if let Some(reason) = &mutant.fallback {
+                *self.fallbacks.entry(reason.clone()).or_default() += 1;
+            }
         }
+    }
+
+    /// One note per reason mutants ran as file copies instead of schemata.
+    fn notes(&self) -> Vec<String> {
+        self.fallbacks
+            .iter()
+            .map(|(reason, n)| match n {
+                1 => format!("1 mutant ran as a file copy: {reason}"),
+                n => format!("{n} mutants ran as file copies: {reason}"),
+            })
+            .collect()
     }
 
     fn of(&self, outcome: MutantOutcome) -> u64 {
@@ -290,7 +317,9 @@ impl Tally {
         metrics.insert("equivalent".to_owned(), count(self.equivalent));
         metrics.insert("executed".to_owned(), count(self.executed));
         metrics.insert("reused".to_owned(), count(self.reused));
-        outcome::result(
+        metrics.insert("schemata".to_owned(), count(self.schemata));
+        metrics.insert("fallback".to_owned(), count(self.fallbacks.values().sum()));
+        let mut result = outcome::result(
             manifest,
             outcome::status(survived > 0),
             Some(Score {
@@ -300,7 +329,9 @@ impl Tally {
             }),
             metrics,
             self.findings,
-        )
+        );
+        result.notes = self.notes();
+        result
     }
 }
 

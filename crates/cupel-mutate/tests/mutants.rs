@@ -1,7 +1,7 @@
 // ABOUTME: Sites become mutants (ADR-080 §1): one per site and replacement, its source text replaced at the site's
 // ABOUTME: span, for every language's real `MutationSites`; a span whose text is not the site's makes none.
 use cupel_core::syntax::{MutationOperator, OperatorSet, Site, Span};
-use cupel_mutate::mutant::{apply, replacements};
+use cupel_mutate::mutant::{self, apply, replacements};
 
 fn site(from: &str, to: &[&str], span: Span) -> Site {
     Site {
@@ -58,4 +58,12 @@ fn every_replacement_of_a_site_is_its_own_mutant() {
         .map(|(to, source)| format!("{to}: {}", source.trim_end()))
         .collect();
     assert_eq!(made, ["<=: a <= b", ">=: a >= b"]);
+}
+
+#[test]
+fn a_byte_range_becomes_the_span_that_holds_it() {
+    let source = "def f(x):\n    return x < 10\n";
+    let at = source.find('<').unwrap();
+    assert_eq!(mutant::span(source, at, at + 1), span(2, 14, 2, 15));
+    assert_eq!(mutant::span(source, 0, source.len()), span(1, 1, 3, 1));
 }

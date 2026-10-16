@@ -1,8 +1,9 @@
-// ABOUTME: Tests for the `MutationOutcomes` payload (ADR-080): its fact kind and schema, which outcomes count
-// ABOUTME: toward the score, and the order mutants are kept in.
+// ABOUTME: Tests for the `MutationOutcomes` payload (ADR-080, ADR-082): its fact kind and schema, which outcomes
+// ABOUTME: count toward the score, the order mutants are kept in, and how each was built.
 use cupel_core::syntax::{MutationOperator, Span, SymbolKey};
 use cupel_core::{
-    CostClass, FactKind, Mutant, MutantOutcome, MutationOutcomes, ProducerId, SiteHash, schema,
+    CostClass, FactKind, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, ProducerId,
+    SiteHash, schema,
 };
 
 fn mutant(file: &str, line: u32, to: &str, outcome: MutantOutcome) -> Mutant {
@@ -30,6 +31,8 @@ fn mutant(file: &str, line: u32, to: &str, outcome: MutantOutcome) -> Mutant {
         reused: false,
         equivalent: None,
         cache_key: None,
+        strategy: None,
+        fallback: None,
     }
 }
 
@@ -37,7 +40,7 @@ fn mutant(file: &str, line: u32, to: &str, outcome: MutantOutcome) -> Mutant {
 fn mutation_outcomes_is_a_fact_kind_with_a_versioned_schema() {
     assert_eq!(FactKind::MutationOutcomes.as_str(), "mutation-outcomes");
     assert!(!FactKind::SYNTACTIC.contains(&FactKind::MutationOutcomes));
-    assert_eq!(schema::fact_version(FactKind::MutationOutcomes), Some(1));
+    assert_eq!(schema::fact_version(FactKind::MutationOutcomes), Some(2));
 }
 
 #[test]
@@ -93,4 +96,30 @@ fn only_killed_and_survived_mutants_are_scored() {
         ]
     );
     assert_eq!(MutantOutcome::Timeout.as_str(), "timeout");
+}
+
+#[test]
+fn each_mutant_says_how_it_was_built_and_why_not_as_schemata() {
+    let mut built = mutant("a.rs", 2, ">", MutantOutcome::Killed);
+    built.strategy = Some(MutationStrategy::FileCopy);
+    built.fallback = Some("inside a pattern".to_owned());
+    let json = serde_json::to_value(&built).unwrap();
+    assert_eq!(
+        (&json["strategy"], &json["fallback"]),
+        (
+            &serde_json::json!("file-copy"),
+            &serde_json::json!("inside a pattern")
+        )
+    );
+    assert_eq!(MutationStrategy::Schemata.as_str(), "schemata");
+}
+
+#[test]
+fn a_mutant_stored_before_strategies_still_reads() {
+    let mut json = serde_json::to_value(mutant("a.py", 2, "<=", MutantOutcome::Killed)).unwrap();
+    let object = json.as_object_mut().unwrap();
+    object.remove("strategy");
+    object.remove("fallback");
+    let read: Mutant = serde_json::from_value(json).unwrap();
+    assert_eq!((read.strategy, read.fallback), (None, None));
 }

@@ -1,5 +1,5 @@
-// ABOUTME: `engine.mutation` (ADR-080): plans the mutants of `MutationSites` in focus, reuses stored outcomes, and runs
-// ABOUTME: the rest file by file in overlays with the baseline's registered runner, into `MutationOutcomes`.
+// ABOUTME: `engine.mutation` (ADR-080, ADR-082): plans the mutants of `MutationSites` in focus, reuses stored outcomes,
+// ABOUTME: and runs the rest file by file in overlays, as schemata or file copies, into `MutationOutcomes`.
 use std::path::Path;
 
 use cupel_core::coverage::CoverageMap;
@@ -16,7 +16,8 @@ use crate::execute::{Execution, FileRun};
 use crate::history::History;
 use crate::overlay::{Slot, claim, slot_dir};
 use crate::plan::{Inputs, Planned, digest, plan};
-use crate::settings::Settings;
+use crate::schemata::{self, Rewriter};
+use crate::settings::{Settings, Strategy};
 
 /// The engine's producer ID.
 pub const ID: &str = "engine.mutation";
@@ -113,17 +114,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
         };
         let root = &ctx.ctx.root;
         let mut planned = plan(&inputs, &|file| read(root, file));
-        let running = Running {
-            ctx,
-            runner,
-            settings,
-            graph: upstream.get::<ModuleGraph>(),
-            lang: symbols
-                .symbols
-                .first()
-                .map_or_else(String::new, |symbol| symbol.lang.to_string()),
-        };
-        running.run(&mut planned)?;
+        Running::new(ctx, runner, settings, symbols).run(&mut planned)?;
         let mutants = planned.into_iter().map(|planned| planned.mutant).collect();
         Ok(self.outcomes(ctx, Some(baseline), per_test.is_some(), mutants))
     }
@@ -153,11 +144,37 @@ struct Running<'a> {
     runner: &'a dyn Runner,
     settings: Settings,
     graph: Option<&'a ModuleGraph>,
+    /// The language's schemata rewriter, when its mutants are built as schemata.
+    rewriter: Option<&'static dyn Rewriter>,
     /// The language being produced, which names its slots.
     lang: String,
 }
 
-impl Running<'_> {
+impl<'a> Running<'a> {
+    /// How `ctx`'s production of `symbols`' language runs its mutants with `runner`.
+    fn new(
+        ctx: &'a ProduceCtx,
+        runner: &'a dyn Runner,
+        settings: Settings,
+        symbols: &Symbols,
+    ) -> Self {
+        let lang = symbols
+            .symbols
+            .first()
+            .map_or_else(String::new, |symbol| symbol.lang.to_string());
+        Self {
+            ctx,
+            runner,
+            settings,
+            graph: ctx.upstream.get::<ModuleGraph>(),
+            rewriter: match settings.strategy {
+                Strategy::Schemata => schemata::rewriter(&lang),
+                Strategy::FileCopy => None,
+            },
+            lang,
+        }
+    }
+
     /// Reuses what the store holds and runs the other covered mutants, file by file.
     fn run(&self, planned: &mut [Planned]) -> Result<()> {
         let history = History::load(&self.ctx.writer, planned);
@@ -191,13 +208,15 @@ impl Running<'_> {
                 importers: &importers,
                 mutants: indexes.iter().map(|index| &planned[*index]).collect(),
             };
-            let found = execution.run_file(&run)?;
+            let found = schemata::run_file(&execution, self.rewriter, &run)?;
             for (index, ran) in indexes.iter().zip(found) {
                 let mutant = &mut planned[*index].mutant;
                 mutant.outcome = ran.outcome;
                 mutant.tests = ran.tests;
                 mutant.killing_tests = ran.killing_tests;
                 mutant.duration_ms = Some(ran.duration_ms);
+                mutant.strategy = Some(ran.strategy);
+                mutant.fallback = ran.fallback;
             }
         }
         Ok(())
