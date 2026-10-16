@@ -156,13 +156,19 @@ impl Store {
         }
         let dir = writer.create_dir(&writer.cupel_dir())?;
         let path = dir.join(Self::FILE);
+        let lock = dir.join(Self::LOCK);
         let connection = Connection::open(&path)?;
         connection.busy_timeout(Duration::from_secs(5))?;
-        connection.pragma_update(None, "journal_mode", "WAL")?;
+        {
+            // Switching to WAL needs the database to itself and does not wait on the busy
+            // timeout, so concurrent first opens take turns.
+            let _lock = WriterLock::acquire(&lock)?;
+            connection.pragma_update(None, "journal_mode", "WAL")?;
+        }
         connection.pragma_update(None, "synchronous", "NORMAL")?;
         let store = Self {
             connection,
-            lock: dir.join(Self::LOCK),
+            lock,
             read_only: false,
         };
         store.migrate()?;

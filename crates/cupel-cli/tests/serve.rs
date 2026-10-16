@@ -243,7 +243,7 @@ fn concurrent_clients_are_each_answered_by_the_daemon() {
     assert_eq!(daemon.status().served, 4);
     let local = redacted(&cold(&repo, &CHECK), &root);
     for outcome in &outcomes {
-        assert_eq!(outcome.code, 0);
+        assert_eq!(outcome.code, 0, "{}{}", outcome.stdout, outcome.stderr);
         assert_eq!(redacted(outcome, &root), local);
     }
 }

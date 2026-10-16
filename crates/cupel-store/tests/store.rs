@@ -849,3 +849,28 @@ fn the_last_outcome_of_each_site_and_replacement_is_kept() {
         ]
     );
 }
+
+#[test]
+fn stores_opened_at_once_on_a_new_repository_all_open() {
+    // Concurrent first runs (separate processes, or the daemon's concurrent requests, ADR-085)
+    // each create or open the store while the others switch it to WAL.
+    for _ in 0..20 {
+        let repo = Repo::new();
+        let opened: Vec<bool> = std::thread::scope(|scope| {
+            let handles: Vec<_> = (0..6)
+                .map(|_| {
+                    scope.spawn(|| {
+                        Store::open(&repo.writer())
+                            .map(|_| ())
+                            .map_err(|e| e.to_string())
+                    })
+                })
+                .collect();
+            handles
+                .into_iter()
+                .map(|handle| handle.join().unwrap().is_ok())
+                .collect()
+        });
+        assert_eq!(opened, [true; 6]);
+    }
+}
