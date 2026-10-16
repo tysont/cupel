@@ -1,16 +1,19 @@
 // ABOUTME: Tests for the fact store: opening through a `Writer`, migrations, recording and reading
-// ABOUTME: runs, findings, checks, metrics, baselines, facts, symbols, and suppressions (ADR-045).
+// ABOUTME: runs, findings, checks, metrics, baselines, facts, symbols, suppressions, and oracles (ADR-045).
 use std::fs;
 use std::path::PathBuf;
 
 use cupel_core::budget::{TaskDuration, TaskShape};
+use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::syntax::{MutationOperator, Span, SymbolDef, SymbolKey, SymbolKind, Visibility};
 use cupel_core::{
     CheckId, CostClass, Envelope, FactKind, FindingId, LangId, Metric, Mutant, MutantOutcome,
     MutationOutcomes, ProducerId, RunId, Suppression, SymbolHash, TestOutcome, TestResult,
     TestResults, Writer,
 };
-use cupel_store::{CacheKey, ScoredAt, Store, StoreError, StoredFact, StoredTestResult};
+use cupel_store::{
+    CacheKey, ScoredAt, Store, StoreError, StoredFact, StoredTestResult, VerifiedOracle,
+};
 use serde_json::{Value, json};
 use tempfile::TempDir;
 
@@ -652,6 +655,73 @@ fn suppressions_mirror_the_file() {
         .unwrap();
     store.replace_suppressions(&[entry("fnd_00000b")]).unwrap();
     assert_eq!(store.suppressions().unwrap(), [entry("fnd_00000b")]);
+}
+
+/// The verification of a command oracle `name` with identity `hash`, recorded by run `run`.
+fn verified(name: &str, hash: &str, run: u8) -> VerifiedOracle {
+    VerifiedOracle {
+        name: name.to_owned(),
+        definition: OracleConfig {
+            kind: OracleKind::Command,
+            reference: None,
+            cmd: Some(format!("{name} {{input}}")),
+            spec: None,
+            lang: None,
+            inputs: vec!["1".to_owned(), "2".to_owned()],
+        },
+        verified_at: "2026-10-16T09:30:00Z".to_owned(),
+        hash: hash.to_owned(),
+        run: run_id(run),
+    }
+}
+
+#[test]
+fn oracle_verifications_round_trip_are_replaced_and_are_forgotten() {
+    let repo = Repo::new();
+    let store = repo.store();
+    assert_eq!(store.verified_oracle("calc").unwrap(), None);
+    store.record_oracle(&verified("calc", "h1", 1)).unwrap();
+    store.record_oracle(&verified("bc", "h2", 2)).unwrap();
+    store.record_oracle(&verified("calc", "h3", 3)).unwrap();
+    assert_eq!(
+        store.verified_oracle("calc").unwrap(),
+        Some(verified("calc", "h3", 3))
+    );
+    assert_eq!(
+        store.verified_oracles().unwrap(),
+        [verified("bc", "h2", 2), verified("calc", "h3", 3)]
+    );
+    store.forget_oracle("calc").unwrap();
+    store.forget_oracle("never-verified").unwrap();
+    assert_eq!(store.verified_oracles().unwrap(), [verified("bc", "h2", 2)]);
+}
+
+#[test]
+fn the_oracles_table_holds_only_verifications_so_every_column_is_required() {
+    let repo = Repo::new();
+    drop(repo.store());
+    let connection = raw(&repo);
+    let mut statement = connection
+        .prepare("SELECT name, \"notnull\" FROM pragma_table_info('oracles') ORDER BY cid")
+        .unwrap();
+    let columns: Vec<(String, bool)> = statement
+        .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))
+        .unwrap()
+        .map(Result::unwrap)
+        .collect();
+    let required = |name: &str| (name.to_owned(), true);
+    assert_eq!(
+        columns,
+        [
+            ("name".to_owned(), false),
+            required("kind"),
+            required("spec"),
+            required("verified_at"),
+            required("verified_hash"),
+            required("run_id"),
+        ]
+    );
+    assert_eq!(Store::SCHEMA_VERSION, 5);
 }
 
 /// Records runs 1 to `runs`, each from a thread of its own with a store of its own.
