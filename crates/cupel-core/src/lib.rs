@@ -5,6 +5,7 @@
 
 mod actions;
 mod base;
+pub mod budget;
 mod cancel;
 mod check;
 pub mod config;

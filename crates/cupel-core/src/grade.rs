@@ -92,4 +92,15 @@ impl CostClass {
             Self::Exhaustive => 10_000,
         }
     }
+
+    /// The planning estimate for one production by a producer of this class, until the store
+    /// has recorded enough of its durations (ADR-086 §3): 100 ms, 30 s, 5 min, 50 min.
+    pub fn est_ms_per_production(self) -> u64 {
+        match self {
+            Self::Quick => 100,
+            Self::Standard => 30_000,
+            Self::Deep => 300_000,
+            Self::Exhaustive => 3_000_000,
+        }
+    }
 }
