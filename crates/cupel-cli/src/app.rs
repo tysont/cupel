@@ -335,8 +335,7 @@ fn run_verb(
         // `doctor` writes only its probe and run record; its plan lists only what `--fix` would
         // install (ADR-022 §6, ADR-081).
         VerbArgs::Doctor { fix } if dry_run => Ok(doctor::plan(invocation, *fix, events)),
-        // `explain` only reads the store; `serve` starts or stops a daemon, which a dry run does
-        // not.
+        // `explain` only reads the store; a dry run of `serve` starts and stops nothing.
         VerbArgs::Explain { .. } | VerbArgs::Serve(_) if dry_run => {
             Ok(invocation.nothing_planned(events))
         }
@@ -368,14 +367,17 @@ fn run_verb(
                 envelope
             })
         }
-        verb @ VerbArgs::Oracle { .. } => {
-            let words = verb.words();
-            let step = registry::find(&words[..1])
-                .and_then(|command| command.pending_step)
-                .expect("every verb without behavior names its plan step in the registry");
-            Err(CupelError::pending_verb(&words, &step))
-        }
+        verb @ VerbArgs::Oracle { .. } => Err(pending(verb)),
     }
+}
+
+/// The error for `verb`, which a later plan step builds.
+fn pending(verb: &VerbArgs) -> CupelError {
+    let words = verb.words();
+    let step = registry::find(&words[..1])
+        .and_then(|command| command.pending_step)
+        .expect("every verb without behavior names its plan step in the registry");
+    CupelError::pending_verb(&words, &step)
 }
 
 /// `init`: writes the configuration, or previews what `--write` would write.
