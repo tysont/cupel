@@ -223,13 +223,19 @@ fn cache_lifecycle(joint: &Joint, file: &str, from: &str, to: &str) -> Option<Ve
     Some(seen)
 }
 
+/// The estimates a run, its rerun, and a source edit go through.
+const LIFECYCLE: [&str; 3] = ["one run", "cached", "one run"];
+
 #[test]
-fn an_unchanged_tree_reuses_the_cached_baseline_and_a_source_change_runs_the_suite_again() {
-    let python = cache_lifecycle(&PYTHON, "calc.py", "a + b", "b + a");
-    let rust = cache_lifecycle(&RUST, "src/lib.rs", "a + b", "b + a");
-    for seen in [python, rust].into_iter().flatten() {
-        assert_eq!(seen, ["one run", "cached", "one run"]);
-    }
+fn an_unchanged_python_tree_reuses_the_cached_baseline_and_a_source_change_runs_again() {
+    let seen = cache_lifecycle(&PYTHON, "calc.py", "a + b", "b + a");
+    assert!(seen.as_ref().is_none_or(|seen| *seen == LIFECYCLE), "{seen:?}");
+}
+
+#[test]
+fn an_unchanged_rust_tree_reuses_the_cached_baseline_and_a_source_change_runs_again() {
+    let seen = cache_lifecycle(&RUST, "src/lib.rs", "a + b", "b + a");
+    assert!(seen.as_ref().is_none_or(|seen| *seen == LIFECYCLE), "{seen:?}");
 }
 
 #[test]

@@ -84,19 +84,8 @@ fn run(site: &Site<'_>) -> Result<SuiteRun> {
         .ok()
         .and_then(|report| parse_lcov(&report).ok())
         .map(|map| placed(map, &[&site.path], "."));
-    let json = [
-        "json".to_owned(),
-        "--show-contexts".to_owned(),
-        "-o".to_owned(),
-        contexts.to_string_lossy().into_owned(),
-    ];
     let per_test = match coverage {
-        Some(_) => {
-            site.run("coverage", &json, &env)?;
-            std::fs::read_to_string(&contexts)
-                .ok()
-                .map(|text| coverage_of(site, &text))
-        }
+        Some(_) => per_test(site, &contexts, &env)?,
         None => None,
     };
     Ok(SuiteRun {
@@ -105,6 +94,25 @@ fn run(site: &Site<'_>) -> Result<SuiteRun> {
         coverage,
         per_test,
     })
+}
+
+/// Each test's lines from the run's data, through `coverage json --show-contexts` into
+/// `contexts`; `None` when it wrote no report.
+fn per_test(
+    site: &Site<'_>,
+    contexts: &std::path::Path,
+    env: &[(&str, &str)],
+) -> Result<Option<Vec<cupel_core::TestCoverage>>> {
+    let json = [
+        "json".to_owned(),
+        "--show-contexts".to_owned(),
+        "-o".to_owned(),
+        contexts.to_string_lossy().into_owned(),
+    ];
+    site.run("coverage", &json, env)?;
+    Ok(std::fs::read_to_string(contexts)
+        .ok()
+        .map(|text| coverage_of(site, &text)))
 }
 
 #[cfg(test)]

@@ -476,30 +476,30 @@ fn a_one_function_rust_change_measures_again_only_the_test_that_ran_that_functio
     }
 }
 
+/// A comment line added inside the first function of a Python or Go fixture: `(expected,
+/// line, comment)` with the function spans after it, `add` then `scale`.
+fn commented(
+    expected: &Disjoint,
+    line: &str,
+    comment: &str,
+    functions: [(&str, u32, u32); 2],
+) -> Option<(u64, u64, Vec<String>)> {
+    let from = format!("{line}\n");
+    let to = format!("{comment}\n{line}\n");
+    after_one_function_change(expected, &from, &to, &functions)
+}
+
 #[test]
 fn a_one_function_python_change_measures_again_only_the_test_that_ran_that_function() {
     let functions = [("calc.py", 4, 7), ("calc.py", 10, 12)];
-    let seen = after_one_function_change(
-        &PYTEST_COV,
-        "    return a + b\n",
-        "    # why\n    return a + b\n",
-        &functions,
-    );
-    if let Some(seen) = seen {
-        assert_eq!(seen, (1, 1, ids(&[PY_SCALE])));
-    }
+    let seen = commented(&PYTEST_COV, "    return a + b", "    # why", functions);
+    assert!(seen.is_none_or(|seen| seen == (1, 1, ids(&[PY_SCALE]))));
 }
 
 #[test]
 fn a_one_function_go_change_measures_again_only_the_test_that_ran_that_function() {
     let functions = [("calc.go", 5, 8), ("calc.go", 11, 13)];
-    let seen = after_one_function_change(
-        &GO_COVER,
-        "\treturn a + b\n",
-        "\t// why\n\treturn a + b\n",
-        &functions,
-    );
-    if let Some(seen) = seen {
-        assert_eq!(seen, (1, 1, ids(&["example.com/calc/TestScale"])));
-    }
+    let seen = commented(&GO_COVER, "\treturn a + b", "\t// why", functions);
+    let scale = ids(&["example.com/calc/TestScale"]);
+    assert!(seen.is_none_or(|seen| seen == (1, 1, scale)));
 }

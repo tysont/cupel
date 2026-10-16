@@ -277,6 +277,25 @@ impl Scheduler<'_> {
                 }
             }
         }
+        for entry in self.wants_planned(manifest, langs, store, &covered) {
+            if !needs.contains(&entry) {
+                needs.push(entry);
+            }
+        }
+        needs
+    }
+
+    /// Each want of `manifest`'s needs' producers that the run would not simply make and no
+    /// joint run covers (ADR-083): `per-test-map(cached)`, or with its cost when that is beyond
+    /// the run's depth, `per-test-map(deep)`.
+    fn wants_planned(
+        &self,
+        manifest: &Manifest,
+        langs: &[&Lang],
+        store: &FactStore<'_>,
+        covered: &BTreeSet<FactKind>,
+    ) -> Vec<String> {
+        let mut entries = Vec::new();
         for (kind, lang) in manifest
             .needs
             .iter()
@@ -303,12 +322,12 @@ impl Scheduler<'_> {
                     estimate.note
                 };
                 let entry = how.map(|how| format!("{want}({how})"));
-                if let Some(entry) = entry.filter(|entry| !needs.contains(entry)) {
-                    needs.push(entry);
+                if let Some(entry) = entry.filter(|entry| !entries.contains(entry)) {
+                    entries.push(entry);
                 }
             }
         }
-        needs
+        entries
     }
 
     /// Resolves the symbols in scope, then splits the selected checks into tasks and skips.
