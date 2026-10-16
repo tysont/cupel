@@ -3,7 +3,7 @@
 use std::path::Path;
 
 use cupel_core::{
-    Availability, Cancellation, CostClass, Ctx, Estimate, FactKind, PerTestMap, Scope,
+    Availability, Cancellation, CostClass, Ctx, Estimate, FactKind, PerTestMap, Scope, Upstream,
 };
 use support::{lang, produce_ctx, producer, registry};
 
@@ -83,7 +83,7 @@ impl Fixture {
     fn estimate(&self) -> Estimate {
         let registry = registry();
         let producer = producer(&registry, FactKind::PerTestMap, self.id, self.lang);
-        producer.estimate(&Ctx::new(self.root().to_path_buf()))
+        producer.estimate(&Ctx::new(self.root().to_path_buf()), &Upstream::default())
     }
 
     /// Replaces `from` with `to` in `file`, which must hold it.

@@ -21,7 +21,7 @@ use cupel_core::coverage::CoverageMap;
 use cupel_core::{
     Availability, Captured, CostClass, CoveredLines, Ctx, Error, Estimate, EventSink, FactKind,
     Langs, PerTestMap, Process, ProduceCtx, Producer, ProducerId, Result, Scope, TestCoverage,
-    ToolId, ToolProbe, find_program, output_tail,
+    ToolId, ToolProbe, Upstream, find_program, output_tail,
 };
 
 use self::cache::{Cached, Staleness, report};
@@ -115,7 +115,7 @@ impl Producer<PerTestMap> for PerTest {
     /// `standard` when every root has a cache entry and refreshing them is cheap: always for
     /// a producer that measures in one suite run, at most [`REFRESH_LIMIT`] stale tests for one
     /// that runs each test alone; else `deep` (ADR-083).
-    fn estimate(&self, ctx: &Ctx) -> Estimate {
+    fn estimate(&self, ctx: &Ctx, _upstream: &Upstream) -> Estimate {
         let mut stale = 0;
         let mut measure = false;
         let mut found = false;
