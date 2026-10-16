@@ -1,0 +1,36 @@
+# Cupel suppressions: written by `cupel suppress <finding-id> --reason TEXT [--until DATE|REF]`.
+[[suppression]]
+finding = "fnd_14e63c"
+reason = "Renamed the_payload_has_a_schema_and_version_two: PerTestMap is version 2 (ADR-083); its assertion moved with it"
+until = "2026-11-15"
+created = "2026-10-16"
+
+[[suppression]]
+finding = "fnd_25dd60"
+reason = "The run schema gained ImpactBasis.measured and .reused (ADR-083); additions only"
+until = "2026-11-15"
+created = "2026-10-16"
+
+[[suppression]]
+finding = "fnd_312a59"
+reason = "ImpactBasis gained measured and reused (ADR-083); the snapshot adds the new fields and nothing it held changed"
+until = "2026-11-15"
+created = "2026-10-16"
+
+[[suppression]]
+finding = "fnd_536d30"
+reason = "ImpactBasis gained measured and reused (ADR-083); the snapshot adds the new fields and nothing it held changed"
+until = "2026-11-15"
+created = "2026-10-16"
+
+[[suppression]]
+finding = "fnd_5c544c"
+reason = "ImpactBasis gained measured and reused (ADR-083); the snapshot adds the new fields and nothing it held changed"
+until = "2026-11-15"
+created = "2026-10-16"
+
+[[suppression]]
+finding = "fnd_dd1d25"
+reason = "ImpactBasis gained measured and reused (ADR-083); the snapshot adds the new fields and nothing it held changed"
+until = "2026-11-15"
+created = "2026-10-16"
