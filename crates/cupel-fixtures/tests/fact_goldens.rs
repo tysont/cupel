@@ -90,7 +90,7 @@ fn every_fact_golden_holds_for_trees_reparsed_from_edited_ones() {
             .collect();
         languages.parse_all(&root, &files, &Cancellation::new());
         let edited = |text: &str| format!("\n{text}\n");
-        let parsed = files.len() - languages.cache().stats().hits as usize;
+        let parsed = usize::try_from(languages.cache().stats().misses).unwrap();
         assert_eq!(
             rewrite_and_reparse(&languages, &root, &files, edited, &originals),
             parsed
