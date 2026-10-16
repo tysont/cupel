@@ -245,12 +245,12 @@
         "default": null,
         "env": null,
         "name": "--oracle",
-        "pending_step": "P5.3",
+        "pending_step": null,
         "positional": false,
         "repeated": false,
         "required": false,
         "stability": "experimental",
-        "summary": "The oracle for differential checks.",
+        "summary": "The oracle checks that compare against one use; default the first verified.",
         "value": "string",
         "value_name": "NAME",
         "values": []
@@ -294,6 +294,7 @@
   "explanation": null,
   "findings": [],
   "next_actions": [],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

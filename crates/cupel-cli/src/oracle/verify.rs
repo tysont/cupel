@@ -120,7 +120,7 @@ fn answers_alike(
         let second = answer(root, cancel, &line, input)?;
         if first != second {
             return Err(Failure::Disagreed {
-                title: format!("The command printed different output for the same input `{input}`"),
+                title: format!("the command printed different output twice for {}", shown(input)),
                 evidence: json!({"input": input, "outputs": [first, second]}),
             });
         }
@@ -135,7 +135,7 @@ fn answer(root: &Path, cancel: &Cancellation, line: &str, input: &str) -> Result
         .run(cancel)
         .map_err(|error| {
             Failure::Unreachable(Unreachable {
-                title: format!("The command could not run: {error}"),
+                title: format!("the command could not run: {error}"),
                 action: ActionKind::InstallTool,
                 fix: "Install `sh`, which runs oracle commands.".to_owned(),
             })
@@ -143,14 +143,23 @@ fn answer(root: &Path, cancel: &Cancellation, line: &str, input: &str) -> Result
     match ran.exit_code {
         Some(0) => Ok(ran.stdout),
         Some(NOT_FOUND) => Err(Failure::Unreachable(Unreachable {
-            title: format!("The command's program is not installed: {}", ran.stderr.trim()),
+            title: format!("the command's program is not installed: {}", ran.stderr.trim()),
             action: ActionKind::InstallTool,
             fix: "Install the program the command runs, or fix `cmd`.".to_owned(),
         })),
         exit_code => Err(Failure::Disagreed {
-            title: format!("The command failed on the input `{input}`"),
+            title: format!("the command failed on {}", shown(input)),
             evidence: json!({"input": input, "exit_code": exit_code, "output": ran.stderr}),
         }),
+    }
+}
+
+/// An input as a title names it.
+fn shown(input: &str) -> String {
+    if input.is_empty() {
+        "the empty input".to_owned()
+    } else {
+        format!("the input `{input}`")
     }
 }
 

@@ -81,6 +81,7 @@
       "summary": "Write a test that calls `refund`."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

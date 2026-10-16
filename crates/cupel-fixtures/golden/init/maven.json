@@ -47,6 +47,7 @@
       "summary": "Nothing was written; run `cupel init --write` to write these files."
     }
   ],
+  "oracles": null,
   "plan": {
     "est_total_ms": 0,
     "would_install": [],

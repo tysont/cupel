@@ -165,7 +165,7 @@ pub(crate) fn resolve(
                 .map(|bytes| Some(oracle_content_digest(&bytes)))
                 .map_err(|error| {
                     Unreachable::configure(
-                        format!("The spec file `{spec}` cannot be read: {error}"),
+                        format!("the spec file `{spec}` cannot be read: {error}"),
                         "Point `spec` at the specification file, relative to the repository root.",
                     )
                 })

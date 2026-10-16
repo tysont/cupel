@@ -190,6 +190,7 @@
       "summary": "Write a test that runs line 14 of discount.go."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

@@ -264,6 +264,7 @@
       "summary": "Extract the structure `net_total` shares with 3 other symbols into one function and call it from each."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

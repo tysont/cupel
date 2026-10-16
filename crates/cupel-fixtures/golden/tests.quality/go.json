@@ -560,6 +560,7 @@
       "summary": "Replace the truthiness, presence, or inequality checks in `TestStatementIsMailed` with an assertion that pins the expected value."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {
