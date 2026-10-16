@@ -46,6 +46,10 @@ const ENV: &[(&str, &str)] = &[
     ("NEXTEST_PROFILE", "default"),
 ];
 
+/// The instrumented build's own target directory below the root (ADR-084 §4), so the clean a
+/// configured `cargo llvm-cov` does of its own (`target/llvm-cov-target`) never discards it.
+pub(crate) const TARGET_DIR: &str = "target/cupel-llvm-cov";
+
 /// Files no report needs: dependencies and the standard library.
 const IGNORED: &str = r"/\.cargo/registry/|/\.cargo/git/|/\.rustup/|^/rustc/";
 
@@ -57,43 +61,128 @@ fn words(words: &[&str]) -> Vec<String> {
 /// a directory of its own through the target runner, then each test's coverage exported alone.
 /// `--no-report` keeps the instrumented build between runs, so a refresh builds incrementally.
 fn measure(site: &Site<'_>, keep: &BTreeSet<String>) -> Result<Measured> {
-    let llvm = Llvm::find(site)?;
-    let profiles = site.report("profiles");
-    let _ = std::fs::remove_dir_all(&profiles);
-    site.ctx.writer.create_dir(&profiles)?;
-    let script = site.report("runner.sh");
-    site.ctx
-        .writer
-        .write(&script, runner_script(&llvm.runner, &profiles).as_bytes())?;
-    executable(&script)?;
-    let mut args = words(&[
-        "llvm-cov",
-        "nextest",
-        "--no-report",
-        "--workspace",
-        "--no-fail-fast",
-        "--no-tests=pass",
-    ]);
+    let mut filter = Vec::new();
     if !keep.is_empty() {
         let kept: Vec<String> = keep.iter().cloned().collect();
-        args.extend(["-E".to_owned(), format!("not ({})", filterset(&kept))]);
+        filter = vec!["-E".to_owned(), format!("not ({})", filterset(&kept))];
     }
-    let script = script.to_string_lossy().into_owned();
-    let mut env = ENV.to_vec();
-    env.push((&llvm.runner, &script));
+    let run = Instrumented::run(site, &filter)?;
     // A failing test still measures what it ran; a run that started no test process failed,
     // unless it had no test to run.
-    let captured = site.run("cargo", &args, &env)?;
-    let processes = processes(&profiles);
-    if processes.is_empty() && captured.exit_code != Some(0) {
-        return Err(failed("cargo", &captured));
+    if run.processes.is_empty() && run.captured.exit_code != Some(0) {
+        return Err(failed("cargo", &run.captured));
     }
-    let tests = export(site, &llvm, &processes)?;
-    let _ = std::fs::remove_dir_all(&profiles);
+    let tests = run.export(site)?;
+    run.finish();
     Ok(Measured {
         tests,
         listed: None,
     })
+}
+
+/// One instrumented `cargo llvm-cov nextest` run of a root: what it printed, and every test
+/// process's profiles, kept apart by the target runner.
+pub(crate) struct Instrumented {
+    llvm: Llvm,
+    /// The command, from `cargo` on.
+    pub command: Vec<String>,
+    pub captured: cupel_core::Captured,
+    processes: Vec<TestProcess>,
+    profiles: PathBuf,
+    /// The build's target directory, absolute.
+    target: PathBuf,
+}
+
+impl Instrumented {
+    /// Runs the root's suite, every test process through the target runner, with `extra`
+    /// arguments for nextest; the target directory's earlier profiles are removed first, since
+    /// `--no-report` never removes them.
+    pub fn run(site: &Site<'_>, extra: &[String]) -> Result<Self> {
+        let llvm = Llvm::find(site)?;
+        let profiles = site.report("profiles");
+        let _ = std::fs::remove_dir_all(&profiles);
+        site.ctx.writer.create_dir(&profiles)?;
+        let target = site.path.join(TARGET_DIR);
+        remove_profiles(&target);
+        let script = site.report("runner.sh");
+        site.ctx
+            .writer
+            .write(&script, runner_script(&llvm.runner, &profiles).as_bytes())?;
+        executable(&script)?;
+        let mut args = words(&[
+            "llvm-cov",
+            "nextest",
+            "--no-report",
+            "--workspace",
+            "--no-fail-fast",
+            "--no-tests=pass",
+        ]);
+        args.extend(extra.iter().cloned());
+        let script = script.to_string_lossy().into_owned();
+        let target_dir = target.to_string_lossy().into_owned();
+        let mut env = ENV.to_vec();
+        env.push((&llvm.runner, &script));
+        env.push(("CARGO_LLVM_COV_TARGET_DIR", &target_dir));
+        let captured = site.run("cargo", &args, &env)?;
+        let processes = processes(&profiles);
+        Ok(Self {
+            command: std::iter::once("cargo".to_owned()).chain(args).collect(),
+            llvm,
+            captured,
+            processes,
+            profiles,
+            target,
+        })
+    }
+
+    /// Whether some test process ran.
+    pub fn ran(&self) -> bool {
+        !self.processes.is_empty()
+    }
+
+    /// Each test's coverage, exported alone.
+    pub fn export(&self, site: &Site<'_>) -> Result<Vec<TestCoverage>> {
+        export(site, &self.llvm, &self.processes)
+    }
+
+    /// The whole run's LCOV report as `cargo llvm-cov report` makes it: every test process's
+    /// profiles are linked into the target directory, where it reads them.
+    pub fn report(&self, site: &Site<'_>) -> Result<String> {
+        for (index, process) in self.processes.iter().enumerate() {
+            for (n, profile) in process.profiles.iter().enumerate() {
+                let linked = self.target.join(format!("cupel-{index}-{n}.profraw"));
+                if std::fs::hard_link(profile, &linked).is_err() {
+                    std::fs::copy(profile, &linked).map_err(|error| Error::Process {
+                        program: "cargo".to_owned(),
+                        message: format!("cannot place {}: {error}", profile.display()),
+                    })?;
+                }
+            }
+        }
+        let output = site.report("coverage.lcov");
+        let _ = std::fs::remove_file(&output);
+        let mut args = words(&["llvm-cov", "report", "--lcov", "--output-path"]);
+        args.push(output.to_string_lossy().into_owned());
+        let target_dir = self.target.to_string_lossy().into_owned();
+        let env = [("CARGO_LLVM_COV_TARGET_DIR", target_dir.as_str())];
+        let captured = site.run("cargo", &args, &env)?;
+        std::fs::read_to_string(&output).map_err(|_| failed("cargo", &captured))
+    }
+
+    /// Removes the run's profiles.
+    pub fn finish(self) {
+        let _ = std::fs::remove_dir_all(&self.profiles);
+        remove_profiles(&self.target);
+    }
+}
+
+/// Removes the raw profiles at the top of the target directory `target`.
+fn remove_profiles(target: &Path) {
+    for path in crate::fresh::entries(target) {
+        if path.extension().is_some_and(|ext| ext == "profraw") {
+            let _ = std::fs::remove_file(path);
+        }
+    }
 }
 
 /// The target runner nextest runs every test binary through: a test process gets a profile
@@ -136,7 +225,7 @@ fn executable(_: &Path) -> Result<()> {
 }
 
 /// The LLVM tools of the root's toolchain and the target runner variable of its host.
-struct Llvm {
+pub(crate) struct Llvm {
     profdata: PathBuf,
     cov: PathBuf,
     /// `CARGO_TARGET_<HOST>_RUNNER`.

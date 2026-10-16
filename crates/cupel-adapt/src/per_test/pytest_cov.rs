@@ -90,13 +90,19 @@ fn run(site: &Site<'_>, selected: &[String]) -> Result<Vec<TestCoverage>> {
     let Ok(text) = std::fs::read_to_string(&report) else {
         return Err(failed("pytest", &captured));
     };
-    Ok(tests_of(&text)
+    Ok(coverage_of(site, &text))
+}
+
+/// Each test's lines in a coverage.py JSON report with `show_contexts`, relative to the root of
+/// `site`; a test's file is the file its node ID names.
+pub(crate) fn coverage_of(site: &Site<'_>, text: &str) -> Vec<TestCoverage> {
+    tests_of(text)
         .into_iter()
         .map(|(id, lines)| {
             let file = id.split("::").next().map(str::to_owned);
             TestCoverage::new(&id, file, covered(lines, |path| site.file(path)))
         })
-        .collect())
+        .collect()
 }
 
 /// The executed lines per test of a coverage.py JSON report with `show_contexts`: each line's

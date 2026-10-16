@@ -38,7 +38,7 @@ inventory::submit!(crate::ToolProducer {
 });
 
 /// The `cupel` profile: a `JUnit` report that keeps the output of failures.
-const PROFILE: &str = "[profile.cupel.junit]\npath = \"junit.xml\"\nstore-success-output = false\nstore-failure-output = true\n";
+pub(crate) const PROFILE: &str = "[profile.cupel.junit]\npath = \"junit.xml\"\nstore-success-output = false\nstore-failure-output = true\n";
 
 fn command(root: &Root) -> Vec<String> {
     // The profile file lives in `.cupel/`; a failure to write it surfaces as nextest's error.

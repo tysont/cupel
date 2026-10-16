@@ -12,8 +12,8 @@
 mod cache;
 mod functions;
 mod go_cover;
-mod llvm_cov;
-mod pytest_cov;
+pub(crate) mod llvm_cov;
+pub(crate) mod pytest_cov;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -337,6 +337,42 @@ fn measured_lines(root: &Path, tests: &[TestCoverage]) -> Lines {
         .collect()
 }
 
+/// The per-test producer `id`'s cached tests of the root `dir` (relative to that root), when
+/// its entry reads back and nothing under the root changed since it was written.
+pub(crate) fn fresh_tests(
+    repo: &Path,
+    exclude: &cupel_core::Exclude,
+    id: &str,
+    dir: &str,
+) -> Option<Vec<TestCoverage>> {
+    let cached = Cached::load(&cache_dir(repo, CACHE, id).join(entry_name(dir)), dir)?;
+    cached
+        .changes(repo, exclude)
+        .is_empty()
+        .then_some(cached.tests)
+}
+
+/// Writes the per-test producer `id`'s cache entry for the root of `site`: `tests` (relative to
+/// the root), measured on the tree `sources` records (ADR-084 §6).
+pub(crate) fn store_tests(
+    site: &Site<'_>,
+    id: &str,
+    tests: &[TestCoverage],
+    mut sources: Sources,
+) -> Result<()> {
+    let writer = &site.ctx.writer;
+    let entry = writer.create_dir(
+        &writer
+            .cache_dir()
+            .join(CACHE)
+            .join(id)
+            .join(entry_name(site.dir)),
+    )?;
+    let report = report(tests, measured_lines(&site.path, tests));
+    sources.report = hash(&report);
+    store(writer, &entry, &report, &sources)
+}
+
 /// The kept tests that are still listed, with the measured ones, which replace any kept test of
 /// the same ID.
 fn merged(keep: Vec<TestCoverage>, found: Measured) -> Vec<TestCoverage> {
@@ -398,7 +434,7 @@ impl Site<'_> {
     }
 
     /// `test`, measured relative to this root, made relative to the repository root.
-    fn placed(&self, test: TestCoverage) -> TestCoverage {
+    pub fn placed(&self, test: TestCoverage) -> TestCoverage {
         TestCoverage::new(
             &under(self.dir, &test.id, ID_SEPARATOR),
             test.file.map(|file| under(self.dir, &file, "/")),

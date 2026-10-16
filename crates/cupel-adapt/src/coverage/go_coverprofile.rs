@@ -23,7 +23,7 @@ inventory::submit!(crate::ToolProducer {
 
 /// `map` with each file's import path (`example.com/grade/grade.go`) made relative to the
 /// module root `dir` through its `go.mod`; files of other modules are dropped.
-fn module_paths(map: CoverageMap, dir: &std::path::Path) -> CoverageMap {
+pub(crate) fn module_paths(map: CoverageMap, dir: &std::path::Path) -> CoverageMap {
     let module = std::fs::read_to_string(dir.join("go.mod"))
         .ok()
         .and_then(|text| {
