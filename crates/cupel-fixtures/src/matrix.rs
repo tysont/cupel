@@ -1,7 +1,7 @@
 // ABOUTME: The matrix test's engine (design §8.3.7, ADR-043): every (check, language) from the registries,
 // ABOUTME: a golden per supported pair, a skip per unsupported pair, and checks run on declared facts only.
 // ABOUTME: Fixtures run as whole trees, so a check that compares a range's two sides records its skip; a fixture's
-// ABOUTME: `[plugins]` join its registries, and a plugin check has pairs where it has its own fixture (ADR-090).
+// ABOUTME: `[plugins]` join its registries, and a plugin check has pairs where it has its own fixture (ADR-092).
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::Path;
@@ -85,7 +85,7 @@ impl Registries {
     }
 
     /// The registries a run in the fixture repository `fixture` uses when its `cupel.toml`
-    /// configures plugins: the binary's plus those plugins (ADR-090 §3); `PATH` is never
+    /// configures plugins: the binary's plus those plugins (ADR-092 §3); `PATH` is never
     /// searched. `None` when it configures none, or when a program they run is not installed,
     /// which is reported with a `SKIPPED:` line.
     ///
@@ -166,7 +166,7 @@ impl Registries {
     /// what the matrix test verifies: support is per repository, and a fresh coverage report
     /// committed in a fixture is part of it (ADR-079). Ordered by check, then language.
     /// A plugin check's pairs are those of its own fixtures (`repos/<check>/<lang>/`) whose
-    /// `cupel.toml` registers it (ADR-090 §3).
+    /// `cupel.toml` registers it (ADR-092 §3).
     pub fn fixture_pairs(&self) -> Vec<Pair> {
         let repos = repo_path(".");
         let langs = self.languages.langs();

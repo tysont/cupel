@@ -1,5 +1,5 @@
 // ABOUTME: A producer plugin registered in a fixture's cupel.toml flips its (check, language) pair from
-// ABOUTME: `unsupported` to `supported` in `describe matrix`, and the matrix test then demands its golden (ADR-090).
+// ABOUTME: `unsupported` to `supported` in `describe matrix`, and the matrix test then demands its golden (ADR-092).
 use std::fs;
 use std::path::Path;
 

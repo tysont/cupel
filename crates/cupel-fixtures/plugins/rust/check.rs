@@ -1,4 +1,4 @@
-// ABOUTME: The Rust reference check plugin (ADR-090): reports each file in scope that no test in the per-test map
+// ABOUTME: The Rust reference check plugin (ADR-092): reports each file in scope that no test in the per-test map
 // ABOUTME: executes, as `ref.untested-file`; speaks the plugin protocol (design §8.6) with `serde_json` alone.
 use std::collections::BTreeSet;
 use std::io::Read;

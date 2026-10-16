@@ -1,4 +1,4 @@
-# CUPEL_DECISION_090: Reference plugins, the conformance suite, and plugins in the matrix test
+# CUPEL_DECISION_092: Reference plugins, the conformance suite, and plugins in the matrix test
 
 **Date:** 2026-10-16 · **Status:** accepted · **Phase:** P5.1
 

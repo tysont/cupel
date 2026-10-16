@@ -1,4 +1,4 @@
-# The Python reference plugins (ADR-090): the producer makes the per-test map TypeScript has no
+# The Python reference plugins (ADR-092): the producer makes the per-test map TypeScript has no
 # native producer for, and the check reads it. `plugins` links to crates/cupel-fixtures/plugins.
 [scope]
 exclude = ["plugins/**"]

@@ -1,4 +1,4 @@
-# ABOUTME: The Python reference producer plugin (ADR-090): a `per-test-map` fact for JavaScript and TypeScript read
+# ABOUTME: The Python reference producer plugin (ADR-092): a `per-test-map` fact for JavaScript and TypeScript read
 # ABOUTME: from a committed LCOV file with one `TN:` section per test; speaks the plugin protocol with the standard library.
 import json
 import os

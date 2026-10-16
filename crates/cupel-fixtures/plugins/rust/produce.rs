@@ -1,4 +1,4 @@
-// ABOUTME: The Rust reference producer plugin (ADR-090): a `per-test-map` fact for JavaScript and TypeScript read
+// ABOUTME: The Rust reference producer plugin (ADR-092): a `per-test-map` fact for JavaScript and TypeScript read
 // ABOUTME: from a committed LCOV file with one `TN:` section per test; speaks the plugin protocol with `serde_json` alone.
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Read;

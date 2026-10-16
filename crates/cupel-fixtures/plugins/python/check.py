@@ -1,4 +1,4 @@
-# ABOUTME: The Python reference check plugin (ADR-090): reports each file in scope that no test in the per-test
+# ABOUTME: The Python reference check plugin (ADR-092): reports each file in scope that no test in the per-test
 # ABOUTME: map executes, as `ref.untested-file`; speaks the plugin protocol (design §8.6) with the standard library.
 import json
 import sys

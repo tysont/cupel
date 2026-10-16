@@ -1,4 +1,4 @@
-// ABOUTME: The protocol conformance suite (ADR-090 §2): the Rust, Python, and TypeScript reference plugins, driven
+// ABOUTME: The protocol conformance suite (ADR-092 §2): the Rust, Python, and TypeScript reference plugins, driven
 // ABOUTME: through cupel-plugin's host as the CLI drives them, must describe, plan, produce, and report identically.
 use std::path::Path;
 

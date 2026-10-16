@@ -23,7 +23,7 @@ pub fn copy_repo(name: &str, into: &Path) {
 }
 
 /// Copies the tree at `from` into `into`, following symbolic links, so a fixture that links to
-/// shared content (the reference plugins, ADR-090) carries a real copy of it.
+/// shared content (the reference plugins, ADR-092) carries a real copy of it.
 fn copy_tree(from: &Path, into: &Path) -> io::Result<()> {
     for entry in fs::read_dir(from)? {
         let entry = entry?;
