@@ -83,6 +83,26 @@ mod tests {
     }
 
     #[test]
+    fn text_lists_each_oracle_with_its_definition_state_and_verification() {
+        let out = text::render(&fixture::envelope(), false);
+        let block: Vec<&str> = out
+            .lines()
+            .skip_while(|line| !line.starts_with("oracles"))
+            .take(3)
+            .collect();
+        assert_eq!(
+            block,
+            [
+                "oracles  2",
+                "  bc  command `bc -l <<< {input}` · inputs 1 · changed · recorded \
+                 2026-10-09T08:00:00Z by run_01JA2B3C4D5E6F7G8H9JKMNPQR",
+                "  pg  ref v1.2.0 · verified · recorded 2026-10-10T16:00:00Z by \
+                 run_01JA2B3C4D5E6F7G8H9JKMNPQS",
+            ]
+        );
+    }
+
+    #[test]
     fn text_in_color_adds_only_escape_codes() {
         let plain = text::render(&fixture::envelope(), false);
         let colored = text::render(&fixture::envelope(), true);

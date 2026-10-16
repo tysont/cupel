@@ -5,7 +5,7 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::{
     Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, Event, EventSink,
-    ExitCode, Finding, LangId, MutationOutcomes, RunId, RunInfo, RunPlan, Severity, SeverityCounts,
+    ExitCode, Finding, LangId, MutationOutcomes, RunId, RunInfo, RunPlan, SeverityCounts,
     Status, Summary, TestResults, ToolchainInfo, Verb, Writer, schema,
 };
 
@@ -190,14 +190,7 @@ impl Run {
         findings: Vec<Finding>,
         description: Option<Description>,
     ) -> Envelope {
-        let mut counts = SeverityCounts::default();
-        for finding in &findings {
-            match finding.severity {
-                Severity::Fail => counts.fail += 1,
-                Severity::Warn => counts.warn += 1,
-                Severity::Info => counts.info += 1,
-            }
-        }
+        let counts = SeverityCounts::of(&findings);
         let total_findings = findings.len() as u64;
         Envelope {
             cupel: CupelInfo {
@@ -235,6 +228,7 @@ impl Run {
             explanation: None,
             rankings: None,
             tests: None,
+            oracles: None,
             truncated: false,
             total_findings,
         }

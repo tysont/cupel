@@ -571,6 +571,42 @@ expression: out
       }
     ]
   },
+  "oracles": [
+    {
+      "name": "bc",
+      "definition": {
+        "kind": "command",
+        "ref": null,
+        "cmd": "bc -l <<< {input}",
+        "spec": null,
+        "lang": null,
+        "inputs": [
+          "2 + 2"
+        ]
+      },
+      "state": "changed",
+      "hash": "6b1d",
+      "verified_at": "2026-10-09T08:00:00Z",
+      "verified_run": "run_01JA2B3C4D5E6F7G8H9JKMNPQR"
+    },
+    {
+      "name": "pg",
+      "definition": {
+        "kind": "ref",
+        "ref": "v1.2.0",
+        "cmd": null,
+        "spec": null,
+        "lang": null,
+        "inputs": [
+          "2 + 2"
+        ]
+      },
+      "state": "verified",
+      "hash": "9e3a",
+      "verified_at": "2026-10-10T16:00:00Z",
+      "verified_run": "run_01JA2B3C4D5E6F7G8H9JKMNPQS"
+    }
+  ],
   "truncated": false,
   "total_findings": 3
 }

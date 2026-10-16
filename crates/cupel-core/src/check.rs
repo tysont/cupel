@@ -121,6 +121,12 @@ pub trait Check: Send + Sync {
         &[]
     }
 
+    /// Whether the check compares against the run's oracle (ADR-091 §1): its results name the
+    /// oracle, and a result against an oracle that is not verified is capped at tier 3.
+    fn uses_oracle(&self) -> bool {
+        false
+    }
+
     /// One score from this check's per-language scores, for the envelope's single entry per
     /// check (ADR-041). The default is the mean weighted by each score's `n`.
     #[allow(
