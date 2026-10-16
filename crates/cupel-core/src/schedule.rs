@@ -15,6 +15,7 @@ use crate::facts::Facts;
 use crate::finding::{Finding, Severity};
 use crate::grade::CostClass;
 use crate::id::{LangId, RunId};
+use crate::joint::Deciding;
 use crate::lang::Lang;
 use crate::matrix::{Support, SupportMatrix};
 use crate::mutation::MutationOutcomes;
@@ -143,6 +144,7 @@ impl Scheduler<'_> {
             .as_ref()
             .map(|base| FactStore::at(self.producers, job, base));
         let prepared = self.prepare(job, &mut store, sink)?;
+        store.reached = store.reached_by(&prepared.tasks);
         let est_ms = prepared.tasks.iter().map(|task| task.plan.est_ms).sum();
         sink.emit(Event::Plan {
             run: job.run,
@@ -214,7 +216,7 @@ impl Scheduler<'_> {
                     id: manifest.id.clone(),
                     targets: tasks.iter().map(|task| task.plan.targets).sum(),
                     est_ms: tasks.iter().map(|task| task.plan.est_ms).sum(),
-                    needs: self.planned_needs(manifest, &langs, &store.root, job.depth),
+                    needs: self.planned_needs(manifest, &langs, &store),
                     note: None,
                 })
             })
@@ -246,16 +248,16 @@ impl Scheduler<'_> {
         })
     }
 
-    /// A planned check's needs and wants by name, then each want of its needs' producers that
-    /// the run would not simply make (ADR-083): with the producer's note, such as
-    /// `per-test-map(cached)`, or with its cost when that is beyond the run's depth, such as
-    /// `per-test-map(deep)`, so it would be left out.
+    /// A planned check's needs and wants by name; then, per language, how the suite facts it
+    /// reaches would be made, in one joint run or each on its own (ADR-084 §8); then each want of
+    /// its needs' producers that the run would not simply make (ADR-083): with the producer's
+    /// note, such as `per-test-map(cached)`, or with its cost when that is beyond the run's
+    /// depth, such as `per-test-map(deep)`, so it would be left out.
     fn planned_needs(
         &self,
         manifest: &Manifest,
         langs: &[&Lang],
-        ctx: &Ctx,
-        depth: CostClass,
+        store: &FactStore<'_>,
     ) -> Vec<String> {
         let mut needs: Vec<String> = manifest
             .needs
@@ -263,6 +265,37 @@ impl Scheduler<'_> {
             .chain(&manifest.wants)
             .map(ToString::to_string)
             .collect();
+        let mut covered = BTreeSet::new();
+        for lang in langs {
+            let deciding = store.deciding(lang);
+            let reached = deciding.reached(&manifest_kinds(manifest));
+            let (entries, joint) = deciding.planned(&reached);
+            covered.extend(joint);
+            for entry in entries {
+                if !needs.contains(&entry) {
+                    needs.push(entry);
+                }
+            }
+        }
+        for entry in self.wants_planned(manifest, langs, store, &covered) {
+            if !needs.contains(&entry) {
+                needs.push(entry);
+            }
+        }
+        needs
+    }
+
+    /// Each want of `manifest`'s needs' producers that the run would not simply make and no
+    /// joint run covers (ADR-083): `per-test-map(cached)`, or with its cost when that is beyond
+    /// the run's depth, `per-test-map(deep)`.
+    fn wants_planned(
+        &self,
+        manifest: &Manifest,
+        langs: &[&Lang],
+        store: &FactStore<'_>,
+        covered: &BTreeSet<FactKind>,
+    ) -> Vec<String> {
+        let mut entries = Vec::new();
         for (kind, lang) in manifest
             .needs
             .iter()
@@ -273,27 +306,28 @@ impl Scheduler<'_> {
                 .producers_for(*kind, lang)
                 .next()
                 .map_or(&[][..], |producer| producer.wants());
-            for want in wants {
+            for want in wants.iter().filter(|want| !covered.contains(*want)) {
+                let upstream = store.upstream(store.made_kinds(lang).iter(), lang);
                 let Some(estimate) = self
                     .producers
                     .producers_for(*want, lang)
                     .next()
-                    .map(|producer| producer.estimate(ctx))
+                    .map(|producer| producer.estimate(&store.root, &upstream))
                 else {
                     continue;
                 };
-                let how = if estimate.cost > depth {
+                let how = if estimate.cost > store.depth {
                     Some(estimate.cost.to_string())
                 } else {
                     estimate.note
                 };
                 let entry = how.map(|how| format!("{want}({how})"));
-                if let Some(entry) = entry.filter(|entry| !needs.contains(entry)) {
-                    needs.push(entry);
+                if let Some(entry) = entry.filter(|entry| !entries.contains(entry)) {
+                    entries.push(entry);
                 }
             }
         }
-        needs
+        entries
     }
 
     /// Resolves the symbols in scope, then splits the selected checks into tasks and skips.
@@ -520,6 +554,16 @@ fn reaches(
         visiting.pop();
         found
     })
+}
+
+/// A check's needs, then its wants, which a run makes whatever they cost.
+fn manifest_kinds(manifest: &Manifest) -> Vec<FactKind> {
+    manifest
+        .needs
+        .iter()
+        .chain(&manifest.wants)
+        .copied()
+        .collect()
 }
 
 /// Produces `manifest`'s needs for `lang`, failing on the first that cannot be made, then
@@ -777,6 +821,11 @@ struct FactStore<'a> {
     mutation_outcomes: Vec<(LangId, MutationOutcomes)>,
     /// The first red `TestResults`, which no check may read.
     refused: Option<Unevaluable>,
+    /// Per language, the facts the run's tasks reach, which decide when a joint run saves a
+    /// run (ADR-084); empty for a verb's production.
+    reached: HashMap<LangId, BTreeSet<FactKind>>,
+    /// The joint producers already run, by ID and language: each runs at most once.
+    joints_run: HashSet<(String, LangId)>,
 }
 
 impl<'a> FactStore<'a> {
@@ -823,7 +872,43 @@ impl<'a> FactStore<'a> {
             test_results: Vec::new(),
             mutation_outcomes: Vec::new(),
             refused: None,
+            reached: HashMap::new(),
+            joints_run: HashSet::new(),
         }
+    }
+
+    /// Per language, every fact the tasks' checks reach, through their own languages and
+    /// their family siblings'.
+    fn reached_by(&self, tasks: &[Task<'_>]) -> HashMap<LangId, BTreeSet<FactKind>> {
+        let mut reached: HashMap<LangId, BTreeSet<FactKind>> = HashMap::new();
+        for task in tasks {
+            let kinds = manifest_kinds(task.check.manifest());
+            for lang in std::iter::once(&task.lang).chain(&task.siblings) {
+                let found = self.deciding(lang).reached(&kinds);
+                reached.entry(lang.id.clone()).or_default().extend(found);
+            }
+        }
+        reached
+    }
+
+    /// What deciding how to make a fact for `lang` sees: the facts made so far among them.
+    fn deciding<'s>(&'s self, lang: &'s Lang) -> Deciding<'s> {
+        Deciding {
+            producers: self.producers,
+            lang,
+            ctx: &self.root,
+            depth: self.depth,
+            upstream: self.upstream(self.made_kinds(lang).iter(), lang),
+        }
+    }
+
+    /// The kinds made for `lang` so far.
+    fn made_kinds(&self, lang: &Lang) -> Vec<FactKind> {
+        self.made
+            .iter()
+            .filter(|((_, made), fact)| *made == lang.id && fact.is_ok())
+            .map(|((kind, _), _)| *kind)
+            .collect()
     }
 
     /// `kind` for `lang`, produced on first request by the first producer whose needs can be
@@ -838,7 +923,22 @@ impl<'a> FactStore<'a> {
         if let Some(made) = self.made.get(&key) {
             return made.clone();
         }
-        let mut made = self.produce(kind, lang, sink, &mut vec![kind]);
+        if let Some(made) = self.make_jointly(kind, lang, sink) {
+            return made;
+        }
+        let made = self.produce(kind, lang, sink, &mut vec![kind]);
+        self.keep(kind, lang, made)
+    }
+
+    /// Keeps `made` as `kind` for `lang`: a `TestResults` passes the gate, a
+    /// `MutationOutcomes` is kept for the store's index, and a cancellation marks the run cut
+    /// short.
+    fn keep(
+        &mut self,
+        kind: FactKind,
+        lang: &Lang,
+        mut made: Result<SharedFact>,
+    ) -> Result<SharedFact> {
         if matches!(made, Err(Error::Cancelled)) {
             self.interrupted = true;
         }
@@ -858,8 +958,101 @@ impl<'a> FactStore<'a> {
             self.mutation_outcomes
                 .push((lang.id.clone(), outcomes.clone()));
         }
-        self.made.insert(key, made.clone());
+        self.made.insert((kind, lang.id.clone()), made.clone());
         made
+    }
+
+    /// `kind` for `lang` made by a joint producer (ADR-084), with every other fact its run made;
+    /// `None` when no joint applies, or the one that ran did not make `kind`, so `kind` is left
+    /// to its own producer.
+    fn make_jointly(
+        &mut self,
+        kind: FactKind,
+        lang: &Lang,
+        sink: &mut dyn EventSink,
+    ) -> Option<Result<SharedFact>> {
+        let reached = self.reached.get(&lang.id).cloned().unwrap_or_default();
+        let made = |kind: FactKind| self.made.contains_key(&(kind, lang.id.clone()));
+        let id = self
+            .deciding(lang)
+            .joint(kind, &reached, &made)
+            .map(|(joint, _)| joint.id())?;
+        let producers = self.producers;
+        let joint = producers.joints_for(lang).find(|joint| joint.id() == id)?;
+        if !self.joints_run.insert((id.to_string(), lang.id.clone())) {
+            return None;
+        }
+        let mut visiting = vec![kind];
+        let needs_met = joint
+            .needs()
+            .iter()
+            .all(|need| self.ensure_need(*need, lang, sink, &mut visiting));
+        if !needs_met {
+            return None;
+        }
+        if let Err(error) = self.cancel.checkpoint() {
+            return Some(self.keep(kind, lang, Err(error)));
+        }
+        let ctx = self.produce_ctx(joint.needs().iter(), lang);
+        let mut events = Vec::new();
+        let produced = joint.produce(&ctx, &Scope::of_files(self.files.clone()), &mut events);
+        for event in events {
+            self.forward(event, sink);
+        }
+        match produced {
+            Err(Error::Cancelled) => Some(self.keep(kind, lang, Err(Error::Cancelled))),
+            Err(_) => None,
+            Ok(facts) => {
+                for fact in facts {
+                    let made = fact.kind();
+                    if !self.made.contains_key(&(made, lang.id.clone())) {
+                        let _ = self.keep(made, lang, Ok(fact.share()));
+                    }
+                }
+                self.made.get(&(kind, lang.id.clone())).cloned()
+            }
+        }
+    }
+
+    /// Makes `need` for `lang` for a producer, unless it is one of the kinds being made above
+    /// (`visiting`), which would be a cycle; whether it was made.
+    fn ensure_need(
+        &mut self,
+        need: FactKind,
+        lang: &Lang,
+        sink: &mut dyn EventSink,
+        visiting: &mut Vec<FactKind>,
+    ) -> bool {
+        if visiting.contains(&need) {
+            return false;
+        }
+        visiting.push(need);
+        let met = self.ensure(need, lang, sink).is_ok();
+        visiting.pop();
+        met
+    }
+
+    /// What a producer of `lang` sees: the run's context, with the facts of `inputs` (its needs
+    /// and wants) already made.
+    fn produce_ctx<'k>(
+        &self,
+        inputs: impl Iterator<Item = &'k FactKind>,
+        lang: &Lang,
+    ) -> ProduceCtx {
+        ProduceCtx {
+            ctx: self.root.clone(),
+            config: self.config.lang_config(&lang.id),
+            writer: self.writer.clone(),
+            cancel: self.cancel.clone(),
+            upstream: self.upstream(inputs, lang),
+            seed: self.seed,
+            runners: self.producers.runners(),
+            focus: Focus {
+                depth: self.depth,
+                symbols: self.selected.get(&lang.id).cloned(),
+                changed: self.changed.clone(),
+            },
+        }
     }
 
     /// Keeps a produced `TestResults` for the store and withholds a red one, recording it as
@@ -898,33 +1091,16 @@ impl<'a> FactStore<'a> {
             if producer.availability(&self.root) != Availability::Ready {
                 continue;
             }
-            let needs_met = producer.needs().iter().all(|need| {
-                !visiting.contains(need) && {
-                    visiting.push(*need);
-                    let met = self.ensure(*need, lang, sink).is_ok();
-                    visiting.pop();
-                    met
-                }
-            });
+            let needs_met = producer
+                .needs()
+                .iter()
+                .all(|need| self.ensure_need(*need, lang, sink, visiting));
             if !needs_met {
                 continue;
             }
             self.ensure_wants(producer.wants(), lang, sink, visiting);
             self.cancel.checkpoint()?;
-            let ctx = ProduceCtx {
-                ctx: self.root.clone(),
-                config: self.config.lang_config(&lang.id),
-                writer: self.writer.clone(),
-                cancel: self.cancel.clone(),
-                upstream: self.upstream(producer.needs().iter().chain(producer.wants()), lang),
-                seed: self.seed,
-                runners: self.producers.runners(),
-                focus: Focus {
-                    depth: self.depth,
-                    symbols: self.selected.get(&lang.id).cloned(),
-                    changed: self.changed.clone(),
-                },
-            };
+            let ctx = self.produce_ctx(producer.needs().iter().chain(producer.wants()), lang);
             let mut events = Vec::new();
             let produced =
                 producer.produce(&ctx, &Scope::of_files(self.files.clone()), &mut events);
@@ -948,10 +1124,12 @@ impl<'a> FactStore<'a> {
         visiting: &mut Vec<FactKind>,
     ) {
         for want in wants {
-            let affordable = self
-                .producers
-                .producers_for(*want, lang)
-                .any(|producer| producer.estimate(&self.root).cost <= self.depth);
+            let upstream = self.upstream(self.made_kinds(lang).iter(), lang);
+            let affordable = self.made.contains_key(&(*want, lang.id.clone()))
+                || self
+                    .producers
+                    .producers_for(*want, lang)
+                    .any(|producer| producer.estimate(&self.root, &upstream).cost <= self.depth);
             if affordable && !visiting.contains(want) {
                 visiting.push(*want);
                 let _ = self.ensure(*want, lang, sink);

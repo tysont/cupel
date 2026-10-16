@@ -33,6 +33,7 @@ pub use cobertura::parse_cobertura;
 pub use coverprofile::parse_coverprofile;
 pub use error::ReportError;
 pub use format::{Format, parse, placed};
+pub(crate) use go_coverprofile::module_paths;
 pub use istanbul::parse_istanbul;
 pub use jacoco::parse_jacoco;
 pub use lcov::parse_lcov;

@@ -26,6 +26,7 @@ pub mod git;
 mod grade;
 mod hash;
 mod id;
+mod joint;
 mod lang;
 mod matrix;
 mod mutation;
@@ -87,9 +88,9 @@ pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
-    Availability, ChangedLines, Ctx, Estimate, Focus, Install, ProduceCtx, Produced, Producer,
-    ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand, Runners,
-    SharedFact, TestRun, TestSelection, ToolProbe, Upstream,
+    Availability, ChangedLines, Ctx, Estimate, Focus, Install, JointProducer, ProduceCtx, Produced,
+    Producer, ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand,
+    Runners, SharedFact, TestRun, TestSelection, ToolProbe, Upstream,
 };
 pub use rank::{
     Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,

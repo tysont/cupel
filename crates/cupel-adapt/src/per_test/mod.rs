@@ -10,22 +10,27 @@
 //! the rest (ADR-083).
 
 mod cache;
+mod functions;
 mod go_cover;
-mod llvm_cov;
-mod pytest_cov;
+pub(crate) mod llvm_cov;
+pub(crate) mod pytest_cov;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 use cupel_core::coverage::CoverageMap;
+use cupel_core::syntax::Symbols;
 use cupel_core::{
     Availability, Captured, CostClass, CoveredLines, Ctx, Error, Estimate, EventSink, FactKind,
     Langs, PerTestMap, Process, ProduceCtx, Producer, ProducerId, Result, Scope, TestCoverage,
-    ToolId, ToolProbe, find_program, output_tail,
+    ToolId, ToolProbe, Upstream, find_program, output_tail,
 };
 
-use self::cache::{Cached, Staleness, report};
-use crate::fresh::{Sources, Tree, cache_dir, entries, entry_name, hash, skip_dirs, store};
+use self::cache::{Cached, Lines, Staleness, report};
+use self::functions::{FunctionEdit, edit, line_hashes};
+use crate::fresh::{
+    Changes, Sources, Tree, cache_dir, entries, entry_name, hash, skip_dirs, store,
+};
 use crate::runner::{ID_SEPARATOR, roots, under};
 
 /// The kind of cache the producers keep under `.cupel/cache/`.
@@ -108,6 +113,12 @@ impl Producer<PerTestMap> for PerTest {
         &[FactKind::ProjectInfo]
     }
 
+    /// The functions of the files in scope, so a change re-measures only the tests that ran a
+    /// changed function (ADR-084 §7).
+    fn wants(&self) -> &[FactKind] {
+        &[FactKind::Symbols]
+    }
+
     fn cost(&self) -> CostClass {
         CostClass::Deep
     }
@@ -115,7 +126,7 @@ impl Producer<PerTestMap> for PerTest {
     /// `standard` when every root has a cache entry and refreshing them is cheap: always for
     /// a producer that measures in one suite run, at most [`REFRESH_LIMIT`] stale tests for one
     /// that runs each test alone; else `deep` (ADR-083).
-    fn estimate(&self, ctx: &Ctx) -> Estimate {
+    fn estimate(&self, ctx: &Ctx, upstream: &Upstream) -> Estimate {
         let mut stale = 0;
         let mut measure = false;
         let mut found = false;
@@ -124,8 +135,16 @@ impl Producer<PerTestMap> for PerTest {
                 return Estimate::of(self.cost());
             };
             let changes = cached.changes(&ctx.root, &ctx.exclude);
-            let root = ctx.root.join(&cached.sources.dir);
-            let refresh = self.staleness(&root).refresh(cached.tests, &changes);
+            let dir = cached.sources.dir.clone();
+            let root = ctx.root.join(&dir);
+            let edits = edits(
+                &dir,
+                &root,
+                &cached.lines,
+                &changes,
+                upstream.get::<Symbols>(),
+            );
+            let refresh = self.staleness(&root, edits).refresh(cached.tests, &changes);
             stale += refresh.stale;
             measure |= refresh.measure;
             found = true;
@@ -226,7 +245,11 @@ impl PerTest {
                 if changes.is_empty() {
                     return Ok((cached.tests, 0));
                 }
-                let refresh = self.staleness(&site.path).refresh(cached.tests, &changes);
+                let symbols = ctx.upstream.get::<Symbols>();
+                let edits = edits(site.dir, &site.path, &cached.lines, &changes, symbols);
+                let refresh = self
+                    .staleness(&site.path, edits)
+                    .refresh(cached.tests, &changes);
                 (refresh.keep, refresh.measure)
             }
             None => (Vec::new(), true),
@@ -241,21 +264,113 @@ impl PerTest {
         } else {
             (keep, 0, before)
         };
-        let report = report(&tests);
+        let report = report(&tests, measured_lines(&site.path, &tests));
         sources.report = hash(&report);
         store(&ctx.writer, entry, &report, &sources)?;
         Ok((tests, measured))
     }
 
-    /// What makes a cached test of the root at `root` stale for this producer.
-    fn staleness<'a>(&self, root: &'a Path) -> Staleness<'a> {
+    /// What makes a cached test of the root at `root` stale for this producer, after a change
+    /// that did `edits` to the functions of the files it changed.
+    fn staleness<'a>(
+        &self,
+        root: &'a Path,
+        edits: BTreeMap<String, FunctionEdit>,
+    ) -> Staleness<'a> {
         let owns = self.0.owns;
         Staleness {
             whole: self.0.whole,
             sources: self.0.sources,
             owns: Box::new(move |test: &TestCoverage, file: &str| owns(root, test, file)),
+            edits,
         }
     }
+}
+
+/// For each changed file of the root `dir` (at `root`) whose lines the cache holds, what the
+/// change did to its functions, as `symbols` (repository-relative) has them now; a file with no
+/// functions there, or that the change touched outside them, is left out.
+fn edits(
+    dir: &str,
+    root: &Path,
+    lines: &Lines,
+    changes: &Changes,
+    symbols: Option<&Symbols>,
+) -> BTreeMap<String, FunctionEdit> {
+    let Some(symbols) = symbols else {
+        return BTreeMap::new();
+    };
+    changes
+        .changed
+        .iter()
+        .filter_map(|file| {
+            let measured = lines.get(file)?;
+            let path = under(dir, file, "/");
+            let functions: Vec<(u32, u32)> = symbols
+                .symbols
+                .iter()
+                .filter(|symbol| symbol.file == path)
+                .map(|symbol| (symbol.span.line, symbol.span.end_line))
+                .collect();
+            if functions.is_empty() {
+                return None;
+            }
+            let now = std::fs::read_to_string(root.join(file)).ok()?;
+            Some((file.clone(), edit(measured, &now, &functions)?))
+        })
+        .collect()
+}
+
+/// The line hashes of every file `tests` cover, relative to the root at `root`, as they are
+/// now: what the tests were measured on.
+fn measured_lines(root: &Path, tests: &[TestCoverage]) -> Lines {
+    let files: BTreeSet<&str> = tests
+        .iter()
+        .flat_map(|test| test.covered.iter().map(|lines| lines.file.as_str()))
+        .collect();
+    files
+        .into_iter()
+        .filter_map(|file| {
+            let text = std::fs::read_to_string(root.join(file)).ok()?;
+            Some((file.to_owned(), line_hashes(&text)))
+        })
+        .collect()
+}
+
+/// The per-test producer `id`'s cached tests of the root `dir` (relative to that root), when
+/// its entry reads back and nothing under the root changed since it was written.
+pub(crate) fn fresh_tests(
+    repo: &Path,
+    exclude: &cupel_core::Exclude,
+    id: &str,
+    dir: &str,
+) -> Option<Vec<TestCoverage>> {
+    let cached = Cached::load(&cache_dir(repo, CACHE, id).join(entry_name(dir)), dir)?;
+    cached
+        .changes(repo, exclude)
+        .is_empty()
+        .then_some(cached.tests)
+}
+
+/// Writes the per-test producer `id`'s cache entry for the root of `site`: `tests` (relative to
+/// the root), measured on the tree `sources` records (ADR-084 §6).
+pub(crate) fn store_tests(
+    site: &Site<'_>,
+    id: &str,
+    tests: &[TestCoverage],
+    mut sources: Sources,
+) -> Result<()> {
+    let writer = &site.ctx.writer;
+    let entry = writer.create_dir(
+        &writer
+            .cache_dir()
+            .join(CACHE)
+            .join(id)
+            .join(entry_name(site.dir)),
+    )?;
+    let report = report(tests, measured_lines(&site.path, tests));
+    sources.report = hash(&report);
+    store(writer, &entry, &report, &sources)
 }
 
 /// The kept tests that are still listed, with the measured ones, which replace any kept test of
@@ -319,7 +434,7 @@ impl Site<'_> {
     }
 
     /// `test`, measured relative to this root, made relative to the repository root.
-    fn placed(&self, test: TestCoverage) -> TestCoverage {
+    pub fn placed(&self, test: TestCoverage) -> TestCoverage {
         TestCoverage::new(
             &under(self.dir, &test.id, ID_SEPARATOR),
             test.file.map(|file| under(self.dir, &file, "/")),

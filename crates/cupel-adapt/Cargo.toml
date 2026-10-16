@@ -19,6 +19,7 @@ inventory.workspace = true
 roxmltree.workspace = true
 blake3.workspace = true
 ignore.workspace = true
+similar.workspace = true
 
 [dev-dependencies]
 cupel-fixtures.workspace = true

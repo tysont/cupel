@@ -214,8 +214,8 @@ pub trait Producer<F: Fact>: Send + Sync {
     fn cost(&self) -> CostClass;
     /// What producing here would cost now; `cost()` unless the producer keeps a cache that
     /// makes it cheaper (ADR-083). The scheduler makes a want only when this is within the
-    /// run's depth.
-    fn estimate(&self, _ctx: &Ctx) -> Estimate {
+    /// run's depth. `upstream` holds those of its needs and wants already made (ADR-084).
+    fn estimate(&self, _ctx: &Ctx, _upstream: &Upstream) -> Estimate {
         Estimate::of(self.cost())
     }
     fn availability(&self, ctx: &Ctx) -> Availability;
@@ -432,7 +432,7 @@ pub trait RegisteredProducer: Send + Sync {
     fn needs(&self) -> &[FactKind];
     fn wants(&self) -> &[FactKind];
     fn cost(&self) -> CostClass;
-    fn estimate(&self, ctx: &Ctx) -> Estimate;
+    fn estimate(&self, ctx: &Ctx, upstream: &Upstream) -> Estimate;
     fn availability(&self, ctx: &Ctx) -> Availability;
     fn detected(&self, ctx: &Ctx) -> bool;
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe>;
@@ -476,8 +476,8 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
         self.producer.cost()
     }
 
-    fn estimate(&self, ctx: &Ctx) -> Estimate {
-        self.producer.estimate(ctx)
+    fn estimate(&self, ctx: &Ctx, upstream: &Upstream) -> Estimate {
+        self.producer.estimate(ctx, upstream)
     }
 
     fn availability(&self, ctx: &Ctx) -> Availability {
@@ -502,12 +502,39 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
     }
 }
 
+/// One run that makes several facts at once, standing in for the per-kind producers that would
+/// make them in a run each (ADR-084). Joint producers are kept apart from the per-kind lists:
+/// they are never a candidate for one fact, and the support matrix never sees them; the fact
+/// store uses one only where it would have chosen exactly the producers it stands in for.
+pub trait JointProducer: Send + Sync {
+    /// Such as `tool.llvm-cov-nextest`.
+    fn id(&self) -> ProducerId;
+    fn languages(&self) -> Langs;
+    /// Each fact kind it makes, with the ID of the producer it stands in for.
+    fn makes(&self) -> &[(FactKind, &'static str)];
+    /// Facts it consumes, made first for the same language.
+    fn needs(&self) -> &[FactKind];
+    /// What producing here would cost now; its note is `cached` when it would run nothing.
+    fn estimate(&self, ctx: &Ctx, upstream: &Upstream) -> Estimate;
+    fn availability(&self, ctx: &Ctx) -> Availability;
+    /// The facts of one run; it may make fewer kinds than [`makes`](Self::makes) names, such
+    /// as `TestResults` alone for a build that failed.
+    fn produce(
+        &self,
+        ctx: &ProduceCtx,
+        scope: &Scope,
+        sink: &mut dyn EventSink,
+    ) -> Result<Vec<Produced>>;
+}
+
 /// Every registered producer, by the fact kind it provides, in registration order.
 #[derive(Default)]
 pub struct ProducerRegistry {
     by_kind: BTreeMap<FactKind, Vec<Box<dyn RegisteredProducer>>>,
     /// The `TestResults` producers registered as runners, by ID (ADR-077).
     runners: BTreeMap<ProducerId, Arc<dyn Runner>>,
+    /// The joint producers, in registration order (ADR-084).
+    joints: Vec<Box<dyn JointProducer>>,
 }
 
 impl ProducerRegistry {
@@ -530,6 +557,23 @@ impl ProducerRegistry {
     /// The runner registered as `id`.
     pub fn runner(&self, id: &ProducerId) -> Option<&dyn Runner> {
         self.runners.get(id).map(AsRef::as_ref)
+    }
+
+    /// Registers `joint`, which makes several facts in one run (ADR-084).
+    pub fn register_joint<J: JointProducer + 'static>(&mut self, joint: J) {
+        self.joints.push(Box::new(joint));
+    }
+
+    /// The joint producers that serve `lang`, in registration order.
+    pub fn joints_for<'a>(
+        &'a self,
+        lang: &Lang,
+    ) -> impl Iterator<Item = &'a dyn JointProducer> + use<'a> {
+        let lang = lang.clone();
+        self.joints
+            .iter()
+            .map(AsRef::as_ref)
+            .filter(move |joint| joint.languages().covers(&lang))
     }
 
     /// Every registered runner, to hand to producers.

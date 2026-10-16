@@ -2,8 +2,10 @@
 // ABOUTME: functions give two disjoint maps, and the cache keeps every test no change touches; skipped without the tool.
 use std::path::Path;
 
+use cupel_core::syntax::{Span, SymbolDef, SymbolKind, Symbols, Visibility};
 use cupel_core::{
-    Availability, Cancellation, CostClass, Ctx, Estimate, FactKind, PerTestMap, Scope,
+    Availability, Cancellation, CostClass, Ctx, Estimate, FactKind, LangId, PerTestMap, Produced,
+    Scope, Upstream,
 };
 use support::{lang, produce_ctx, producer, registry};
 
@@ -66,9 +68,17 @@ impl Fixture {
 
     /// The map the producer makes in `root` now.
     fn produce_in(&self, root: &Path) -> PerTestMap {
+        self.produce_seeing(root, &[])
+    }
+
+    /// The map the producer makes in `root` now, seeing `functions` (file, first and last
+    /// line) as the language's `Symbols`.
+    fn produce_seeing(&self, root: &Path, functions: &[(&str, u32, u32)]) -> PerTestMap {
         let registry = registry();
         let producer = producer(&registry, FactKind::PerTestMap, self.id, self.lang);
-        let ctx = produce_ctx(root, self.lang, Cancellation::new());
+        let mut ctx = produce_ctx(root, self.lang, Cancellation::new());
+        ctx.upstream
+            .insert(Produced::new(symbols(self.lang, functions)).share());
         let fact = producer
             .produce(&ctx, &Scope::default(), &mut Vec::new())
             .unwrap();
@@ -81,9 +91,17 @@ impl Fixture {
 
     /// What the producer estimates producing here would cost now.
     fn estimate(&self) -> Estimate {
+        self.estimate_seeing(&[])
+    }
+
+    /// What the producer estimates producing here would cost now, seeing `functions` as the
+    /// language's `Symbols` (see [`produce_seeing`](Self::produce_seeing)).
+    fn estimate_seeing(&self, functions: &[(&str, u32, u32)]) -> Estimate {
         let registry = registry();
         let producer = producer(&registry, FactKind::PerTestMap, self.id, self.lang);
-        producer.estimate(&Ctx::new(self.root().to_path_buf()))
+        let mut upstream = Upstream::default();
+        upstream.insert(Produced::new(symbols(self.lang, functions)).share());
+        producer.estimate(&Ctx::new(self.root().to_path_buf()), &upstream)
     }
 
     /// Replaces `from` with `to` in `file`, which must hold it.
@@ -98,6 +116,32 @@ impl Fixture {
         let path = self.root().join(file);
         std::fs::create_dir_all(path.parent().unwrap()).unwrap();
         std::fs::write(path, text).unwrap();
+    }
+}
+
+/// `Symbols` holding one function per `(file, first line, last line)`.
+fn symbols(lang: &str, functions: &[(&str, u32, u32)]) -> Symbols {
+    Symbols {
+        symbols: functions
+            .iter()
+            .map(|(file, line, end_line)| SymbolDef {
+                name: format!("f{line}"),
+                namespace: String::new(),
+                display: format!("f{line}"),
+                kind: SymbolKind::Function,
+                visibility: Visibility::Public,
+                lang: LangId::from(lang),
+                file: (*file).to_owned(),
+                span: Span {
+                    line: *line,
+                    col: 1,
+                    end_line: *end_line,
+                    end_col: 1,
+                },
+                body: None,
+                parameters: 0,
+            })
+            .collect(),
     }
 }
 
@@ -371,9 +415,11 @@ fn a_producer_estimates_deep_without_a_cache_and_standard_to_reuse_or_refresh_on
     let mut seen = vec![fixture.estimate()];
     fixture.produce();
     seen.push(fixture.estimate());
-    // Staleness is by file: both tests cover `calc.py`.
+    // Without the functions, staleness is by file: both tests cover `calc.py`; with them, only
+    // the test that ran `add` is stale.
     fixture.edit("calc.py", "a + b", "b + a");
     seen.push(fixture.estimate());
+    seen.push(fixture.estimate_seeing(&[("calc.py", 4, 6), ("calc.py", 9, 11)]));
     let estimate = |cost, note: Option<&str>| Estimate {
         cost,
         note: note.map(str::to_owned),
@@ -384,6 +430,78 @@ fn a_producer_estimates_deep_without_a_cache_and_standard_to_reuse_or_refresh_on
             estimate(CostClass::Deep, None),
             estimate(CostClass::Standard, Some("cached")),
             estimate(CostClass::Standard, Some("refresh 2 stale")),
+            estimate(CostClass::Standard, Some("refresh 1 stale")),
         ]
     );
+}
+
+/// A one-function change on a per-test fixture: the fixture measured once, then `file` edited
+/// (`from` → `to`, adding a line inside the first function) and measured again seeing
+/// `functions` as they are after the edit; how many tests were measured and reused, and which
+/// tests the map says run the second function's lines now.
+fn after_one_function_change(
+    expected: &Disjoint,
+    from: &str,
+    to: &str,
+    functions: &[(&str, u32, u32)],
+) -> Option<(u64, u64, Vec<String>)> {
+    let fixture = Fixture::new(expected.producer, expected.lang)?;
+    assert_eq!(fixture.produce().measured, 2);
+    fixture.edit(expected.file, from, to);
+    let map = fixture.produce_seeing(fixture.root(), functions);
+    let (start, end) = expected.scale;
+    Some((
+        map.measured,
+        map.reused,
+        covering(&map, expected.file, start + 1, end + 1),
+    ))
+}
+
+#[test]
+fn a_one_function_rust_change_measures_again_only_the_test_that_ran_that_function() {
+    let functions = [
+        ("src/lib.rs", 4, 7),
+        ("src/lib.rs", 10, 12),
+        ("src/lib.rs", 19, 21),
+        ("src/lib.rs", 24, 26),
+    ];
+    let seen = after_one_function_change(
+        &LLVM_COV,
+        "    a + b\n",
+        "    // why\n    a + b\n",
+        &functions,
+    );
+    if let Some(seen) = seen {
+        assert_eq!(seen, (1, 1, ids(&["calc tests::scales"])));
+    }
+}
+
+/// A comment line added inside the first function of a Python or Go fixture: `(expected,
+/// line, comment)` with the function spans after it, `add` then `scale`.
+fn commented(
+    expected: &Disjoint,
+    line: &str,
+    comment: &str,
+    functions: [(&str, u32, u32); 2],
+) -> Option<(u64, u64, Vec<String>)> {
+    let from = format!("{line}\n");
+    let to = format!("{comment}\n{line}\n");
+    after_one_function_change(expected, &from, &to, &functions)
+}
+
+#[test]
+fn a_one_function_python_change_measures_again_only_the_test_that_ran_that_function() {
+    let functions = [("calc.py", 4, 7), ("calc.py", 10, 12)];
+    if let Some(seen) = commented(&PYTEST_COV, "    return a + b", "    # why", functions) {
+        assert_eq!(seen, (1, 1, ids(&[PY_SCALE])));
+    }
+}
+
+#[test]
+fn a_one_function_go_change_measures_again_only_the_test_that_ran_that_function() {
+    let functions = [("calc.go", 5, 8), ("calc.go", 11, 13)];
+    let scale = ids(&["example.com/calc/TestScale"]);
+    if let Some(seen) = commented(&GO_COVER, "\treturn a + b", "\t// why", functions) {
+        assert_eq!(seen, (1, 1, scale));
+    }
 }

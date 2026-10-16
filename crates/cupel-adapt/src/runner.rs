@@ -439,21 +439,13 @@ impl Runner {
             captured: &captured,
             report: std::fs::read_to_string(&root.report).ok(),
         });
-        let completed = found.as_ref().is_some_and(|found| {
-            captured
-                .exit_code
-                .is_some_and(|code| self.0.completed_codes.contains(&code))
-                || found.iter().any(|test| test.outcome.is_failure())
-        });
-        let invocation = RunnerInvocation {
-            dir: dir.to_owned(),
-            command: process.command_line(),
-            exit_code: captured.exit_code,
-            completed,
-            output: (!completed)
-                .then(|| output_tail(&format!("{}\n{}", captured.stdout, captured.stderr)))
-                .flatten(),
-        };
+        let invocation = finished(
+            dir,
+            process.command_line(),
+            &captured,
+            found.as_deref(),
+            self.0.completed_codes,
+        );
         let found = found.unwrap_or_default();
         let order = match vary.executed {
             Executed::Report => found.iter().map(|test| test.id.clone()).collect(),
@@ -483,6 +475,33 @@ impl Runner {
     /// the tool on `PATH`; `None` when neither exists.
     fn program(&self, dir: &Path) -> Option<String> {
         installed(self.0.tool, self.0.node_bin, dir)
+    }
+}
+
+/// The invocation in `dir` of `command`, which finished as `captured` reports and reported
+/// `found` (`None`: no readable report). It completed when it reported its tests and either
+/// exited with one of `completed_codes` or reported a failure.
+pub(crate) fn finished(
+    dir: &str,
+    command: Vec<String>,
+    captured: &Captured,
+    found: Option<&[TestResult]>,
+    completed_codes: &[i32],
+) -> RunnerInvocation {
+    let completed = found.is_some_and(|found| {
+        captured
+            .exit_code
+            .is_some_and(|code| completed_codes.contains(&code))
+            || found.iter().any(|test| test.outcome.is_failure())
+    });
+    RunnerInvocation {
+        dir: dir.to_owned(),
+        command,
+        exit_code: captured.exit_code,
+        completed,
+        output: (!completed)
+            .then(|| output_tail(&format!("{}\n{}", captured.stdout, captured.stderr)))
+            .flatten(),
     }
 }
 
@@ -599,7 +618,7 @@ pub fn jest_report_command(root: &Root, args: &[&str]) -> Vec<String> {
 }
 
 /// `test`, reported relative to the root at `dir`, made relative to the repository root.
-fn placed(mut test: TestResult, dir: &str) -> TestResult {
+pub(crate) fn placed(mut test: TestResult, dir: &str) -> TestResult {
     test.id = under(dir, &test.id, ID_SEPARATOR);
     test.file = test.file.map(|file| under(dir, &file, "/"));
     test

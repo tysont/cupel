@@ -70,6 +70,7 @@ mod pytest;
 pub mod report;
 mod rules;
 mod runner;
+mod suite;
 pub mod toolchain;
 mod unittest;
 mod vitest;

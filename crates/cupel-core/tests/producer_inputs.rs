@@ -9,7 +9,8 @@ use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{ProjectInfo, Roots as EntryPoints, Symbols};
 use cupel_core::{
     Availability, CheckRegistry, CostClass, Ctx, Error, Estimate, EventSink, FactKind, Focus,
-    Langs, ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, Scheduler, Scope, Writer,
+    Langs, ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, Scheduler, Scope, Upstream,
+    Writer,
 };
 
 /// What the recording producer saw: the kinds upstream held and the runners it was handed.
@@ -116,7 +117,7 @@ impl Producer<EntryPoints> for Expensive {
         CostClass::Deep
     }
 
-    fn estimate(&self, ctx: &Ctx) -> Estimate {
+    fn estimate(&self, ctx: &Ctx, _: &Upstream) -> Estimate {
         if ctx.root.join("cached").exists() {
             Estimate {
                 cost: CostClass::Standard,
