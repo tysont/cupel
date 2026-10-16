@@ -1,0 +1,327 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+assertion_line: 64
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/config.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConfigFile",
+  "description": "A parsed `cupel.toml`. Every section is optional.",
+  "type": "object",
+  "properties": {
+    "budget": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TimeLimit"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "checks": {
+      "description": "Language-neutral check settings with per-language overrides. Read by checks only.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/CheckConfig"
+      },
+      "default": {}
+    },
+    "default_branch": {
+      "description": "The branch `--changed` diffs against.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "depth": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CostClass"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "format": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Format"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "gate": {
+      "$ref": "#/$defs/GateConfig",
+      "default": {
+        "changed": null,
+        "tree": null
+      }
+    },
+    "lang": {
+      "description": "Tool and producer choices per language. Read by producers, never by checks.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "default": {}
+    },
+    "oracles": {
+      "description": "Oracles by name, each with exactly its kind's keys (ADR-090 §1).",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/OracleConfig"
+      },
+      "default": {}
+    },
+    "profile": {
+      "description": "Named settings selected with `--profile` or `CUPEL_PROFILE`.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/Settings"
+      },
+      "default": {}
+    },
+    "required_version": {
+      "description": "A semver requirement on the `cupel` binary, such as `>=0.4`.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "roots": {
+      "description": "Project roots of a monorepo, by name.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/RootConfig"
+      },
+      "default": {}
+    },
+    "scope": {
+      "description": "Which paths a run considers (ADR-065).",
+      "$ref": "#/$defs/ScopeConfig",
+      "default": {
+        "exclude": []
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "CheckConfig": {
+      "description": "A check's parameters. The `lang` key holds per-language override tables, merged over the parameters for that language.",
+      "type": "object",
+      "properties": {
+        "lang": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "CostClass": {
+      "description": "How expensive a check or producer is to run. The same names select a run's depth (design §5.8).",
+      "type": "string",
+      "enum": [
+        "quick",
+        "standard",
+        "deep",
+        "exhaustive"
+      ]
+    },
+    "Exclude": {
+      "description": "Gitignore-style globs relative to the repository root: a pattern with a `/` is anchored at the root, one without matches a name at any depth; an excluded directory excludes everything below it.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "Format": {
+      "description": "An output format (design §6.3).",
+      "type": "string",
+      "enum": [
+        "json",
+        "jsonl",
+        "text",
+        "sarif"
+      ]
+    },
+    "GateConfig": {
+      "description": "`[gate.changed]` applies to `--changed` scopes, `[gate.tree]` to whole-tree scopes.",
+      "type": "object",
+      "properties": {
+        "changed": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GateSection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tree": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/GateSection"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "GateSection": {
+      "description": "Gate rules: `<check-id>.<metric>` with `>= > <= < ==` and a number (optionally `%`), or `<check-id>` with `none` or `no-breaking`.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^\\s*((>=|>|<=|<|==)\\s*[-+]?[0-9.eE+-]+%?|none|no-breaking)\\s*$"
+      },
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_-]*\\.[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)?$"
+      }
+    },
+    "LangId": {
+      "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
+      "type": "string"
+    },
+    "OracleConfig": {
+      "description": "An oracle for differential and trace checks (design §6.5 `oracle`).",
+      "type": "object",
+      "properties": {
+        "cmd": {
+          "description": "A command with an `{input}` placeholder, for `kind = \"command\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "inputs": {
+          "description": "The known inputs of a command's smoke comparison, for `kind = \"command\"`; one empty\ninput when none are given (ADR-090 §3).",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "kind": {
+          "$ref": "#/$defs/OracleKind"
+        },
+        "lang": {
+          "description": "The specification language (`tla+`, `quint`, `p`), for `kind = \"spec\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "ref": {
+          "description": "A git ref, for `kind = \"ref\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spec": {
+          "description": "A specification file, for `kind = \"spec\"`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ]
+    },
+    "OracleKind": {
+      "type": "string",
+      "enum": [
+        "ref",
+        "command",
+        "spec"
+      ]
+    },
+    "RootConfig": {
+      "description": "One project root of a monorepo.",
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "path": {
+          "description": "Relative to the repository root.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "lang"
+      ]
+    },
+    "ScopeConfig": {
+      "description": "`[scope]`: paths no run considers.",
+      "type": "object",
+      "properties": {
+        "exclude": {
+          "description": "Excluded from the file walk, project-root detection, and range scopes.",
+          "$ref": "#/$defs/Exclude",
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "Settings": {
+      "description": "One layer's settings; unset values fall through to the next layer.",
+      "type": "object",
+      "properties": {
+        "budget": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TimeLimit"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "depth": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CostClass"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "format": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Format"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "TimeLimit": {
+      "description": "A wall-clock limit: a positive whole number and a unit, such as `20s`.",
+      "type": "string",
+      "pattern": "^[1-9][0-9]*(ms|s|m|h)$"
+    }
+  }
+}

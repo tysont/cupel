@@ -46,7 +46,8 @@ pub struct ConfigFile {
     /// Language-neutral check settings with per-language overrides. Read by checks only.
     #[serde(default, deserialize_with = "check_tables")]
     pub checks: BTreeMap<CheckId, CheckConfig>,
-    #[serde(default)]
+    /// Oracles by name, each with exactly its kind's keys (ADR-090 §1).
+    #[serde(default, deserialize_with = "oracle_tables")]
     pub oracles: BTreeMap<String, OracleConfig>,
     #[serde(default)]
     pub gate: GateConfig,
@@ -174,6 +175,54 @@ pub struct OracleConfig {
     pub spec: Option<String>,
     /// The specification language (`tla+`, `quint`, `p`), for `kind = "spec"`.
     pub lang: Option<String>,
+    /// The known inputs of a command's smoke comparison, for `kind = "command"`; one empty
+    /// input when none are given (ADR-090 §3).
+    #[serde(default)]
+    pub inputs: Vec<String>,
+}
+
+impl OracleConfig {
+    /// The specification languages a `spec` oracle may be written in.
+    pub const SPEC_LANGS: [&'static str; 3] = ["tla+", "quint", "p"];
+
+    /// Whether this definition has exactly its kind's keys and a known specification language;
+    /// the problem otherwise (ADR-090 §1).
+    pub fn validate(&self) -> std::result::Result<(), String> {
+        let (required, allowed): (&[&str], &[&str]) = match self.kind {
+            OracleKind::Ref => (&["ref"], &["ref"]),
+            OracleKind::Command => (&["cmd"], &["cmd", "inputs"]),
+            OracleKind::Spec => (&["spec", "lang"], &["spec", "lang"]),
+        };
+        let present = self.keys();
+        let kind = self.kind.as_str();
+        if let Some(missing) = required.iter().find(|key| !present.contains(key)) {
+            return Err(format!("kind `{kind}` needs `{missing}`"));
+        }
+        if let Some(extra) = present.iter().find(|key| !allowed.contains(key)) {
+            return Err(format!("kind `{kind}` does not take `{extra}`"));
+        }
+        match &self.lang {
+            Some(lang) if !Self::SPEC_LANGS.contains(&lang.as_str()) => Err(format!(
+                "`lang` must be one of {}",
+                Self::SPEC_LANGS.map(|lang| format!("`{lang}`")).join(", ")
+            )),
+            _ => Ok(()),
+        }
+    }
+
+    /// The keys this definition sets besides `kind`.
+    fn keys(&self) -> Vec<&'static str> {
+        [
+            ("ref", self.reference.is_some()),
+            ("cmd", self.cmd.is_some()),
+            ("spec", self.spec.is_some()),
+            ("lang", self.lang.is_some()),
+            ("inputs", !self.inputs.is_empty()),
+        ]
+        .into_iter()
+        .filter_map(|(key, present)| present.then_some(key))
+        .collect()
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
@@ -182,6 +231,17 @@ pub enum OracleKind {
     Ref,
     Command,
     Spec,
+}
+
+impl OracleKind {
+    /// The kind as `cupel.toml` and `--kind` spell it.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Ref => "ref",
+            Self::Command => "command",
+            Self::Spec => "spec",
+        }
+    }
 }
 
 /// `[gate.changed]` applies to `--changed` scopes, `[gate.tree]` to whole-tree scopes.
@@ -281,6 +341,23 @@ fn lang_tables<'de, D: Deserializer<'de>>(
         .map(|(lang, table)| Ok((validate_lang_id(lang)?, table)))
         .collect::<Result<_, String>>()
         .map_err(de::Error::custom)
+}
+
+fn oracle_tables<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> Result<BTreeMap<String, OracleConfig>, D::Error> {
+    let oracles = BTreeMap::<String, OracleConfig>::deserialize(deserializer)?;
+    for (name, oracle) in &oracles {
+        if !is_segment(name) {
+            return Err(de::Error::custom(format!(
+                "invalid oracle name `{name}`: must match `[a-z][a-z0-9_-]*`"
+            )));
+        }
+        oracle
+            .validate()
+            .map_err(|reason| de::Error::custom(format!("invalid oracle `{name}`: {reason}")))?;
+    }
+    Ok(oracles)
 }
 
 fn check_tables<'de, D: Deserializer<'de>>(
