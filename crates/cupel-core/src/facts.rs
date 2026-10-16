@@ -1,13 +1,13 @@
 // ABOUTME: `Facts`, what one check may read: the facts its manifest declares, shared between checks, plus
 // ABOUTME: the base side and range of a range scope. Facts are the only channel from producers to checks.
-use std::any::Any;
 use std::collections::{BTreeSet, HashMap};
-use std::sync::Arc;
+
+use serde_json::Value;
 
 use crate::base::Range;
 use crate::error::{Error, Result};
 use crate::fact::{Fact, FactKind};
-use crate::producer::SharedFact;
+use crate::producer::{Produced, SharedFact};
 
 /// The facts a check may read: exactly the kinds its manifest declares in `needs` and `wants`.
 /// Facts are shared, so one production serves every check that declares the kind. Under a
@@ -15,11 +15,11 @@ use crate::producer::SharedFact;
 /// at the base commit, and the range itself (ADR-056).
 pub struct Facts {
     declared: BTreeSet<FactKind>,
-    values: HashMap<FactKind, Arc<dyn Any + Send + Sync>>,
+    values: HashMap<FactKind, SharedFact>,
     /// The same kinds for the other languages of the family, for a family-wide check
     /// (`Check::spans_family`, ADR-051), in language-ID order.
-    siblings: HashMap<FactKind, Vec<Arc<dyn Any + Send + Sync>>>,
-    base: HashMap<FactKind, Arc<dyn Any + Send + Sync>>,
+    siblings: HashMap<FactKind, Vec<SharedFact>>,
+    base: HashMap<FactKind, SharedFact>,
     range: Option<Range>,
 }
 
@@ -37,27 +37,20 @@ impl Facts {
 
     /// Adds a produced fact. Refuses kinds the manifest does not declare.
     pub fn insert<F: Fact>(&mut self, fact: F) -> Result<()> {
-        self.check_declared(F::KIND)?;
-        self.values.insert(F::KIND, Arc::new(fact));
-        Ok(())
+        self.insert_shared(&Produced::new(fact).share())
     }
 
     /// Adds a fact the scheduler produced once for several checks. Refuses kinds the manifest
     /// does not declare.
     pub fn insert_shared(&mut self, fact: &SharedFact) -> Result<()> {
         self.check_declared(fact.kind())?;
-        self.values.insert(fact.kind(), fact.value());
+        self.values.insert(fact.kind(), fact.clone());
         Ok(())
     }
 
     /// Adds another family member's fact of a declared kind (ADR-051).
     pub fn insert_sibling<F: Fact>(&mut self, fact: F) -> Result<()> {
-        self.check_declared(F::KIND)?;
-        self.siblings
-            .entry(F::KIND)
-            .or_default()
-            .push(Arc::new(fact));
-        Ok(())
+        self.insert_shared_sibling(&Produced::new(fact).share())
     }
 
     /// Adds another family member's fact the scheduler produced (ADR-051).
@@ -66,7 +59,7 @@ impl Facts {
         self.siblings
             .entry(fact.kind())
             .or_default()
-            .push(fact.value());
+            .push(fact.clone());
         Ok(())
     }
 
@@ -79,7 +72,7 @@ impl Facts {
             .get(&F::KIND)
             .into_iter()
             .flatten()
-            .filter_map(|value| value.downcast_ref::<F>());
+            .filter_map(SharedFact::downcast_ref::<F>);
         Ok(std::iter::once(own).chain(siblings).collect())
     }
 
@@ -87,7 +80,7 @@ impl Facts {
     /// not declare.
     pub fn insert_base_shared(&mut self, fact: &SharedFact) -> Result<()> {
         self.check_declared(fact.kind())?;
-        self.base.insert(fact.kind(), fact.value());
+        self.base.insert(fact.kind(), fact.clone());
         Ok(())
     }
 
@@ -106,8 +99,14 @@ impl Facts {
         self.check_declared(F::KIND)?;
         self.values
             .get(&F::KIND)
-            .and_then(|value| value.downcast_ref::<F>())
+            .and_then(SharedFact::downcast_ref::<F>)
             .ok_or(Error::AbsentFact { kind: F::KIND })
+    }
+
+    /// The fact of `kind` as it serializes, for a reader that does not know its type (a check
+    /// plugin, ADR-089 §3); `None` when `kind` is undeclared or was not produced.
+    pub fn json(&self, kind: FactKind) -> Option<Value> {
+        self.values.get(&kind).map(SharedFact::to_json)
     }
 
     /// The fact of type `F` as it was at the range's base commit, over the changed files that
@@ -116,7 +115,7 @@ impl Facts {
         self.check_declared(F::KIND)?;
         self.base
             .get(&F::KIND)
-            .and_then(|value| value.downcast_ref::<F>())
+            .and_then(SharedFact::downcast_ref::<F>)
             .ok_or(Error::AbsentFact { kind: F::KIND })
     }
 

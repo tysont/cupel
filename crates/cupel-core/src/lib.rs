@@ -33,6 +33,7 @@ mod matrix;
 mod mutation;
 mod per_test;
 mod per_test_impact;
+pub mod plugin;
 mod process;
 mod producer;
 mod rank;

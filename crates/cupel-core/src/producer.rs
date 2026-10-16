@@ -165,6 +165,17 @@ impl Upstream {
     pub fn get<F: Fact>(&self) -> Option<&F> {
         self.0.get(&F::KIND)?.downcast_ref()
     }
+
+    /// The fact of `kind` as it serializes, when it was produced (a producer plugin's input,
+    /// ADR-089 §3).
+    pub fn json(&self, kind: FactKind) -> Option<Value> {
+        self.0.get(&kind).map(SharedFact::to_json)
+    }
+
+    /// The kinds produced, in catalog order.
+    pub fn kinds(&self) -> impl Iterator<Item = FactKind> + '_ {
+        self.0.keys().copied()
+    }
 }
 
 /// The program a tool producer runs, and the command that prints its version (for `doctor`).
@@ -415,10 +426,6 @@ impl SharedFact {
     /// The fact as it serializes.
     pub fn to_json(&self) -> Value {
         (self.to_json)(self.value.as_ref())
-    }
-
-    pub(crate) fn value(&self) -> Arc<dyn Any + Send + Sync> {
-        Arc::clone(&self.value)
     }
 }
 

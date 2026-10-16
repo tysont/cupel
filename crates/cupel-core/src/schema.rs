@@ -5,7 +5,6 @@ use schemars::transform::transform_subschemas;
 use schemars::{JsonSchema, Schema};
 use serde_json::{Value, json};
 
-use crate::check::Manifest;
 use crate::config::ConfigFile;
 use crate::coverage::CoverageMap;
 use crate::envelope::Envelope;
@@ -15,6 +14,7 @@ use crate::finding::Finding;
 use crate::flake::TestReruns;
 use crate::mutation::MutationOutcomes;
 use crate::per_test::PerTestMap;
+use crate::plugin::PluginMessage;
 use crate::syntax::{
     ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, ProjectInfo, Roots, Symbols,
     TestConventions, TestFrames,
@@ -62,10 +62,9 @@ pub fn config() -> Schema {
     input_root::<ConfigFile>(&url("config"))
 }
 
-/// Schema of the plugin protocol. Today that is the `Manifest` a plugin's `describe` emits;
-/// the run request and plugin events join it in P5.1 (ADR-013).
+/// Schema of the plugin protocol: every message a plugin prints or reads (ADR-013 §9, ADR-087).
 pub fn plugin() -> Schema {
-    root::<Manifest>(&url("plugin"))
+    root::<PluginMessage>(&url("plugin"))
 }
 
 /// Schema of a fact kind's payload, or `None` for kinds whose payload type does not exist yet.

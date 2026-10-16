@@ -31,6 +31,28 @@ fn a_deadline_cancels_once_it_passes() {
 }
 
 #[test]
+fn remaining_is_the_time_to_the_nearest_deadline_in_the_chain() {
+    let parent = Cancellation::with_deadline(Instant::now() + Duration::from_secs(60));
+    let child = parent.child(Duration::from_secs(3600));
+    let tighter = parent.child(Duration::from_secs(5));
+    let remaining = |token: &Cancellation| token.remaining().map(|left| left.as_secs());
+    assert_eq!(
+        [
+            remaining(&Cancellation::new()),
+            remaining(&child),
+            remaining(&tighter),
+        ],
+        [None, Some(59), Some(4)]
+    );
+    let past = Cancellation::with_deadline(
+        Instant::now()
+            .checked_sub(Duration::from_millis(1))
+            .unwrap(),
+    );
+    assert_eq!(past.remaining(), Some(Duration::ZERO));
+}
+
+#[test]
 fn wait_completes_when_nothing_cancels_it() {
     let token = Cancellation::new();
     // (completed, cancelled)

@@ -63,6 +63,60 @@ fn cancellation_kills_the_child_and_its_process_group() {
 }
 
 #[test]
+fn input_reaches_the_child_on_its_standard_input() {
+    let captured = shell("tr a-z A-Z")
+        .input(b"plugin request\n".to_vec())
+        .run(&Cancellation::new())
+        .unwrap();
+    assert_eq!(captured.stdout, "PLUGIN REQUEST\n");
+}
+
+/// A child that writes `term` when SIGTERM reaches it and then exits, or ignores it.
+fn trapping(dir: &std::path::Path, on_term: &str) -> Process {
+    let script = format!(
+        "trap '{on_term}' TERM; echo ready > started; while true; do sleep 0.05; done"
+    );
+    Process::new("sh", dir).args(["-c", script.as_str()])
+}
+
+#[test]
+fn termination_sends_sigterm_and_waits_for_the_child_to_exit() {
+    let dir = tempfile::tempdir().unwrap();
+    let started = Instant::now();
+    let cancel = Cancellation::with_deadline(started + Duration::from_millis(300));
+    let ran = trapping(dir.path(), "echo stopped > term; exit 0")
+        .terminate(Duration::from_secs(20))
+        .run(&cancel);
+    assert_eq!(ran, Err(Error::Cancelled));
+    assert_eq!(
+        std::fs::read_to_string(dir.path().join("term")).unwrap(),
+        "stopped\n"
+    );
+    assert!(
+        started.elapsed() < Duration::from_secs(10),
+        "{:?}",
+        started.elapsed()
+    );
+}
+
+#[test]
+fn a_child_that_ignores_sigterm_is_killed_after_the_grace_period() {
+    let dir = tempfile::tempdir().unwrap();
+    let started = Instant::now();
+    let cancel = Cancellation::with_deadline(started + Duration::from_millis(300));
+    let ran = trapping(dir.path(), "echo ignored > term")
+        .terminate(Duration::from_millis(500))
+        .run(&cancel);
+    assert_eq!(ran, Err(Error::Cancelled));
+    assert!(dir.path().join("term").exists(), "SIGTERM was not sent");
+    let elapsed = started.elapsed();
+    assert!(
+        elapsed >= Duration::from_millis(800) && elapsed < Duration::from_secs(10),
+        "{elapsed:?}"
+    );
+}
+
+#[test]
 fn a_cancelled_token_runs_nothing() {
     let cancel = Cancellation::new();
     cancel.cancel();
