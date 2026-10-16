@@ -210,14 +210,20 @@ pub enum VerbArgs {
         #[arg(long, value_name = "REF|DATE")]
         until: Option<String>,
     },
-    Serve {
-        #[arg(long, value_name = "PATH")]
-        socket: Option<PathBuf>,
-        #[arg(long)]
-        mcp: bool,
-        #[arg(long)]
-        watch: bool,
-    },
+    Serve(ServeArgs),
+}
+
+/// `serve`'s flags (ADR-085 §9–10).
+#[derive(Debug, Clone, Args)]
+pub struct ServeArgs {
+    #[arg(long, value_name = "PATH")]
+    pub socket: Option<PathBuf>,
+    #[arg(long)]
+    pub mcp: bool,
+    #[arg(long)]
+    pub watch: bool,
+    #[arg(long)]
+    pub stop: bool,
 }
 
 impl VerbArgs {
@@ -233,7 +239,7 @@ impl VerbArgs {
             Self::Oracle { .. } => Verb::Oracle,
             Self::Tests { .. } => Verb::Tests,
             Self::Suppress { .. } => Verb::Suppress,
-            Self::Serve { .. } => Verb::Serve,
+            Self::Serve(_) => Verb::Serve,
         }
     }
 

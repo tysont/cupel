@@ -183,3 +183,20 @@ fn random_seeds_are_non_zero_and_differ() {
     unique.dedup();
     assert_eq!(unique.len(), seeds.len(), "{seeds:?}");
 }
+
+#[test]
+fn a_token_under_another_ends_with_it_or_at_its_own_deadline_and_never_ends_it() {
+    let parent = Cancellation::new();
+    let open = parent.under(None);
+    let past = parent.under(Some(Instant::now()));
+    open.cancel();
+    // (parent, open, past) after cancelling `open`, then a fresh one after cancelling the parent.
+    let first = (
+        parent.is_cancelled(),
+        open.is_cancelled(),
+        past.is_cancelled(),
+    );
+    let fresh = parent.under(None);
+    parent.cancel();
+    assert_eq!((first, fresh.is_cancelled()), ((false, true, true), true));
+}

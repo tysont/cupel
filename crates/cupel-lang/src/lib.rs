@@ -73,7 +73,7 @@ pub use contract::{Contract, capture, contract};
 pub use conventions::GlobTestConventions;
 pub use langs::ecosystems::unregistered_roots;
 pub use language::{Language, LanguageRegistry, lang, owns};
-pub use parse::{CacheStats, ParseCache, ParseProblem, Parsed, Syntax};
+pub use parse::{CacheStats, ParseCache, ParseProblem, Parsed, Reparse, Syntax};
 pub use producer::{Extract, Merge, QueryProducer, Source, parse_scope, producer_id};
 pub use query::{Match, matches, span};
 pub use spec::{LanguageSpec, QueryFile, SpecError};

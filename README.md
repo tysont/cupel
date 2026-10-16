@@ -441,6 +441,62 @@ In JSON the same report is the envelope's `tests`: `per_test_map`, `impacted` (`
 
 Measuring a per-test map costs a test run under coverage: one instrumented `cargo llvm-cov nextest` run for Rust (each test's coverage is told apart by process, and the instrumented build has its own `target/cupel-llvm-cov`, so a configured `cargo llvm-cov` never discards it), one pytest-cov run for Python, and one `go test` per test for Go. Each project root's map is cached under `.cupel/cache/per-test/<producer>/`, with the hash of every file under the root and of every line the tests ran, so a later run reuses it. After a change, only the stale tests are measured again: those that ran a line of a function the change touched, those whose own test file changed (for Go, any test file of their package), and tests the cache does not hold; tests that are gone are dropped, and the kept tests' lines move with the edit. A change outside every function (a new function, an import, a constant, a comment above a function) makes stale every test that covers the file. A change to build or test configuration (`Cargo.toml`, `Cargo.lock`, `go.mod`, `conftest.py`, `pyproject.toml`, and the like) measures every test again, and so does deleting the cache. The text report says how many tests were measured, or `(cached)` when none was.
 
+### `cupel serve`
+
+`serve` runs a daemon for one repository in the foreground. It keeps every file's syntax tree, keyed by a hash of the file's content, and what each fact producer extracted from it, across invocations, so a warm `check --depth quick` neither parses nor re-extracts an unchanged file. While `.cupel/serve.sock` exists and answers, every `cupel` invocation in the repository is answered by the daemon, and prints exactly what it would print without it: the same envelope, the same stderr, the same exit code. `--events stderr` lines stream to the invoking process as the run writes them.
+
+```console
+$ cupel serve --watch
+cupel: serving /home/me/shop at .cupel/serve.sock (pid 72908, watching)
+```
+
+In another terminal, `doctor` reports the daemon, and `serve --stop` stops it:
+
+```console
+$ cupel doctor --format text
+cupel doctor: pass (exit 0)
+
+summary   1 finding · fail 0 · warn 0 · info 1 · new 0 · resolved 0 · suppressed 0
+
+info (1)
+  doctor
+    The daemon at .cupel/serve.sock serves this repository (pid 72908)
+      fnd_c243c8 · doctor.daemon-running · tier 0 · confidence 1
+      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.1.0" · watching true (full: cupel explain fnd_c243c8)
+      …
+
+$ cupel serve --stop --format text
+cupel serve: pass (exit 0)
+
+summary   1 finding · fail 0 · warn 0 · info 1 · new 0 · resolved 0 · suppressed 0
+
+info (1)
+  serve
+    Stopped the daemon at .cupel/serve.sock
+      fnd_8ec73e · serve.stopped · tier 0 · confidence 1
+      …
+```
+
+```console
+$ cupel check --format json > envelope.json      # cupel was rebuilt after the daemon started
+cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock runs another build of cupel (cupel 0.1.0 (binary 56427528-1792134645316655513)) than this client (cupel 0.1.0 (binary 56427528-1792134881357328000)). Restart it from this one: `cupel serve --stop`, then `cupel serve`.
+```
+
+- **When the CLI uses it.** Every invocation whose repository root (`--cwd`, else the working directory) has a `.cupel/serve.sock`. It runs in its own process instead when `CUPEL_NO_DAEMON=1` is set, for `serve` itself, when an argument is not UTF-8, when the run could ask a question on the terminal (stdout is a terminal and neither `--install` nor `--no-install` is given), and when nothing answers on the socket (a daemon that was killed leaves its socket file behind; it is ignored).
+- **When it declines.** A daemon runs only invocations from the same build of `cupel` (the same version and the same executable) and with the same `PATH`, since `PATH` decides which tools run. Otherwise the invocation runs in its own process and says why in one line on stderr (unless `--quiet`); rebuilding or reinstalling `cupel` therefore means restarting the daemon. Other variables (`HOME`, `CARGO_HOME`, `VIRTUAL_ENV`) are the daemon's own: start it from the environment the agent runs in.
+- **`--watch`** reparses a file the daemon has parsed as soon as it changes, from its previous tree (tree-sitter's incremental parse), so the next invocation finds it ready. Without `--watch`, the next invocation that reads the file parses it. Correctness never depends on the watcher: every invocation reads and hashes every file it uses.
+- **Lifetime.** The daemon serves until `cupel serve --stop`, its `--timeout`, Ctrl-C, or its socket file being removed. Invocations run concurrently, as separate processes would; one whose client is killed is cancelled. Starting a second daemon where one answers exits 3 with `serve.running`. The socket is readable and writable only by the user who started the daemon. A socket path is limited to about 100 bytes, so a repository whose root path is longer than about 85 characters cannot have a daemon (`serve` exits 3 with `serve.failed`).
+- **`--socket PATH`** listens elsewhere; the CLI looks only at `.cupel/serve.sock`, so a daemon elsewhere serves programs that speak its protocol themselves ([ADR-009](docs/adr/CUPEL_DECISION_009.md): one JSON line per message).
+
+**Performance.** Measured on the Cupel repository itself (333 Rust files, 78k lines, 4133 symbols, release build, 8-core Apple silicon, other builds running: load average 30–60):
+
+| `cupel check --depth quick` | Cold process | Warm daemon |
+|---|---|---|
+| Wall time, no coverage tool installed | 0.97–1.06 s | 0.28–0.31 s |
+| Wall time, `cargo llvm-cov` installed and its cached report fresh | 1.07–1.20 s | 0.42–0.47 s |
+
+What a warm run still does: walk the tree and hash every file, run the checks over the facts, ask git for the commit, and record the run. When `cargo llvm-cov` (or another coverage tool) is installed and configured, `static.crap` wants a coverage report even at `quick`: a fresh cached report is reused, but after any change to the tree the next run measures coverage again with the whole test suite, cold or warm alike.
+
 ### Global flags
 
 | Flag | Meaning |
@@ -634,7 +690,7 @@ A Rust file's mutants cost one build per worker plus one test run each; outside 
 
 ## Configuration
 
-`cupel.toml` is found by walking up from `--cwd`. Precedence is flags, then `CUPEL_*` environment variables (`CUPEL_DEPTH`, `CUPEL_FORMAT`, `CUPEL_PROFILE`), then `--profile`, then `cupel.toml`, then defaults. The envelope echoes the effective configuration and the layers that contributed under `run.config`. Unknown keys are usage errors (exit 2) that list the valid keys, and `cupel describe schema config` is the full schema.
+`cupel.toml` is found by walking up from `--cwd`. Precedence is flags, then `CUPEL_*` environment variables (`CUPEL_DEPTH`, `CUPEL_FORMAT`, `CUPEL_PROFILE`), then `--profile`, then `cupel.toml`, then defaults. `CUPEL_NO_DAEMON=1` makes an invocation run in its own process even when a daemon serves the repository (see `cupel serve`). The envelope echoes the effective configuration and the layers that contributed under `run.config`. Unknown keys are usage errors (exit 2) that list the valid keys, and `cupel describe schema config` is the full schema.
 
 ```toml
 default_branch = "main"            # what --changed diffs against
@@ -699,14 +755,15 @@ All automation goes through `make`.
 | `make build`, `make doc` | build the workspace; build its rustdoc |
 | `make matrix` | print the check × language support matrix |
 | `make readme` | regenerate this README's exit-code table, check table, check summaries, and support matrix from `cupel describe` |
+| `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)) |
 | `make dogfood` | Cupel grades itself: `cupel check --changed --gate` against `main`; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`. Both skip `tests.flaky` and `tests.mutation`, which would rerun Cupel's whole suite many times |
 | `make install` | `cargo install --path crates/cupel-cli` |
 
 The generated README sections sit between `<!-- generated:NAME -->` and `<!-- end:NAME -->` markers. A test in `crates/cupel-cli/tests/readme.rs` renders them from the binary's `describe` output and fails when the committed text differs, so `make check` catches a stale table. Run `make readme` and review the diff.
 
-CI runs `make check` on Linux and macOS and `make dogfood` on every push: the tree gate on `main` and the changed gate on branches. Cupel's own `cupel.toml` is the example to copy.
+CI runs `make check` and `make parity` on Linux and macOS and `make dogfood` on every push: the tree gate on `main` and the changed gate on branches. Cupel's own `cupel.toml` is the example to copy.
 
-The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-mutate` is the mutation engine. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-cli` is the binary. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
+The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-mutate` is the mutation engine. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-serve` is the daemon's socket protocol, server, client, and file watcher, generic over what it runs. `cupel-cli` is the binary, and the daemon runs requests through the same code a cold invocation does. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
 
 Checks and tool producers register themselves from their own modules ([ADR-074](docs/adr/CUPEL_DECISION_074.md)), so additions made in parallel never edit the same lines. Adding a check is one module in `crates/cupel-checks/src/` that submits itself with `inventory::submit!`, its `mod` line in that crate's `lib.rs`, its fixture code, and its goldens under `crates/cupel-fixtures/golden/<check-id>/` (the matrix golden per language, `describe.json`, and `survey-<lang>.json`); a check can keep its fixture code in its own `crates/cupel-fixtures/repos/<check-id>/<lang>/` so no other check's goldens change. Adding a tool producer is one module in `crates/cupel-adapt/src/` and its `mod` line. Tests derive what must be described, golden, and supported from the registries, so nothing else lists checks; `UPDATE_GOLDENS=1 make test` writes a new check's goldens and `make readme` adds its rows here.
 

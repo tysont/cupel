@@ -1,13 +1,10 @@
 // ABOUTME: Runs one invocation end to end: parse, resolve the root, open events, load configuration,
 // ABOUTME: dispatch the verb, turn every outcome into an envelope, and keep the run record.
-use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::fmt::Write as _;
-use std::io::IsTerminal;
 use std::panic::{self, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
-use std::time::Duration;
 
 use clap::FromArgMatches;
 use clap::error::ErrorKind;
@@ -17,6 +14,7 @@ use cupel_core::{
 };
 
 use crate::cli::{Cli, VerbArgs, verb_name};
+pub use crate::environment::{Environment, Output};
 use crate::error::{BugReport, CupelError, Usage};
 use crate::events::Events;
 use crate::format::{self, Rendering};
@@ -26,67 +24,8 @@ use crate::problem::Problem;
 use crate::run::{Invocation, Run};
 use crate::{
     against, baseline, catalog, check, describe, doctor, explain, init, persist, registry, render,
-    suppress, survey, tests_verb,
+    serve, suppress, survey, tests_verb,
 };
-
-/// Everything an invocation reads from its process. `main` gathers it once; nothing else looks
-/// at the process environment or working directory.
-pub struct Environment {
-    /// The arguments after the program name.
-    pub args: Vec<OsString>,
-    /// The process working directory, the root when `--cwd` is absent.
-    pub current_dir: Option<PathBuf>,
-    pub stdout_is_terminal: bool,
-    /// The `CUPEL_*` variables. Configuration reads its settings from them;
-    /// `CUPEL_DEBUG_PANIC=1` fails deliberately after parsing to exercise exit 6 (ADR-018), and
-    /// `CUPEL_DEBUG_SLEEP_MS` injects a slow task to exercise exit 5 (ADR-020).
-    pub variables: BTreeMap<String, String>,
-    /// `NO_COLOR` is set to a non-empty value (no-color.org).
-    pub no_color_variable: bool,
-}
-
-impl Environment {
-    pub fn from_process() -> Self {
-        Self {
-            args: std::env::args_os().skip(1).collect(),
-            current_dir: std::env::current_dir().ok(),
-            stdout_is_terminal: std::io::stdout().is_terminal(),
-            variables: std::env::vars_os()
-                .filter_map(|(key, value)| {
-                    Some((key.into_string().ok()?, value.into_string().ok()?))
-                })
-                .filter(|(key, _)| key.starts_with("CUPEL_"))
-                .collect(),
-            no_color_variable: std::env::var_os("NO_COLOR").is_some_and(|value| !value.is_empty()),
-        }
-    }
-
-    fn variable(&self, name: &str) -> Option<&str> {
-        self.variables.get(name).map(String::as_str)
-    }
-
-    fn debug_panic(&self) -> bool {
-        self.variable("CUPEL_DEBUG_PANIC") == Some("1")
-    }
-
-    /// `CUPEL_DEBUG_SLEEP_MS=<n>`: a slow task of `n` milliseconds that every verb but a dry run
-    /// waits on its cancellation token before its own work, so tests can prove `--timeout`
-    /// (ADR-020 §5). A value that is not a number is ignored.
-    fn debug_sleep(&self) -> Option<Duration> {
-        self.variable("CUPEL_DEBUG_SLEEP_MS")
-            .and_then(|value| value.parse().ok())
-            .map(Duration::from_millis)
-    }
-
-    /// Whether `rendering` gets color: text on a terminal with neither `--no-color` nor
-    /// `NO_COLOR` (ADR-019 §4).
-    fn color(&self, rendering: Rendering, no_color_flag: bool) -> bool {
-        rendering == Rendering::Text
-            && self.stdout_is_terminal
-            && !no_color_flag
-            && !self.no_color_variable
-    }
-}
 
 /// How an envelope reaches stdout: its renderer, whether text is colored, and the findings page.
 struct Presentation {
@@ -110,13 +49,6 @@ impl Presentation {
     }
 }
 
-/// What to write and how to exit.
-pub struct Output {
-    pub stdout: String,
-    pub stderr: String,
-    pub code: u8,
-}
-
 pub fn run(environment: &Environment) -> Output {
     let printable = environment
         .args
@@ -124,6 +56,7 @@ pub fn run(environment: &Environment) -> Output {
         .map(|arg| arg.to_string_lossy().into_owned())
         .collect();
     let mut run = Run::start(printable);
+    run.within(&environment.cancel);
     let argv = std::iter::once(OsString::from("cupel")).chain(environment.args.iter().cloned());
     let parsed = registry::command()
         .try_get_matches_from(argv)
@@ -157,15 +90,17 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
         }
     };
     let mut stderr = String::new();
-    let (envelope, rendering, events) = match Events::open(cli.global.events.as_deref(), &writer) {
-        Ok(mut events) => {
-            let (envelope, rendering, said) =
-                configured(environment, run, cli, &writer, &mut events);
-            stderr.push_str(&said);
-            (envelope, rendering, Some(events))
-        }
-        Err(error) => (run.failed(&error), recovered_rendering(environment), None),
-    };
+    let destination = cli.global.events.as_deref();
+    let (envelope, rendering, events) =
+        match Events::open(destination, &writer, &environment.stderr) {
+            Ok(mut events) => {
+                let (envelope, rendering, said) =
+                    configured(environment, run, cli, &writer, &mut events);
+                stderr.push_str(&said);
+                (envelope, rendering, Some(events))
+            }
+            Err(error) => (run.failed(&error), recovered_rendering(environment), None),
+        };
     if let Some(mut events) = events {
         events.emit(Event::RunEnd {
             status: envelope.status,
@@ -285,6 +220,7 @@ fn invoke(
     let invocation = Invocation {
         run,
         writer,
+        session: &environment.session,
         config,
         dry_run: cli.global.dry_run,
         installs: Permission::of(
@@ -307,12 +243,13 @@ fn load_config(request: &ConfigRequest) -> Result<Config, cupel_core::Error> {
     Ok(config)
 }
 
-/// `init` and `doctor` run even when configuration does not load: `init` replaces a broken
-/// `cupel.toml` and `doctor` reports it (ADR-021 §6, ADR-022 §2).
+/// `init`, `doctor`, and `serve` run even when configuration does not load: `init` replaces a
+/// broken `cupel.toml`, `doctor` reports it (ADR-021 §6, ADR-022 §2), and the daemon reads none
+/// of its own; each request it serves loads and reports configuration as a cold run would.
 fn runs_without_configuration(cli: &Cli) -> bool {
     matches!(
         cli.verb,
-        Some(VerbArgs::Init { .. } | VerbArgs::Doctor { .. })
+        Some(VerbArgs::Init { .. } | VerbArgs::Doctor { .. } | VerbArgs::Serve(_))
     )
 }
 
@@ -367,7 +304,7 @@ fn execute(
             .is_some_and(|duration| !run.cancellation().wait(duration));
     let envelope = match &cli.verb {
         None => Err(CupelError::missing_verb(verb_names())),
-        Some(verb) => run_verb(invocation, cli, verb, events),
+        Some(verb) => run_verb(invocation, (cli, environment), verb, events),
     }?;
     let envelope = graded(envelope, cli, invocation.writer, invocation.config)?;
     Ok(if cut_short {
@@ -380,7 +317,7 @@ fn execute(
 /// Runs `verb`. The dry run of a verb that changes nothing is an empty plan.
 fn run_verb(
     invocation: &Invocation<'_>,
-    cli: &Cli,
+    (cli, environment): (&Cli, &Environment),
     verb: &VerbArgs,
     events: &mut dyn EventSink,
 ) -> Result<Envelope, CupelError> {
@@ -398,8 +335,14 @@ fn run_verb(
         // `doctor` writes only its probe and run record; its plan lists only what `--fix` would
         // install (ADR-022 §6, ADR-081).
         VerbArgs::Doctor { fix } if dry_run => Ok(doctor::plan(invocation, *fix, events)),
-        VerbArgs::Explain { .. } if dry_run => Ok(invocation.nothing_planned(events)),
+        // `explain` only reads the store; a dry run of `serve` starts and stops nothing.
+        VerbArgs::Explain { .. } | VerbArgs::Serve(_) if dry_run => {
+            Ok(invocation.nothing_planned(events))
+        }
         VerbArgs::Doctor { fix } => Ok(doctor::run(invocation, *fix)),
+        VerbArgs::Serve(args) => {
+            serve::verb(invocation, args, (cli.global.quiet, self::run), environment)
+        }
         VerbArgs::Init { force } => init_verb(invocation, cli, *force, events),
         VerbArgs::Check { scope } => check::verb(invocation, scope, events),
         VerbArgs::Survey { scope } => survey::verb(invocation, scope, events),
@@ -424,14 +367,17 @@ fn run_verb(
                 envelope
             })
         }
-        verb => {
-            let words = verb.words();
-            let step = registry::find(&words[..1])
-                .and_then(|command| command.pending_step)
-                .expect("every verb without behavior names its plan step in the registry");
-            Err(CupelError::pending_verb(&words, &step))
-        }
+        verb @ VerbArgs::Oracle { .. } => Err(pending(verb)),
     }
+}
+
+/// The error for `verb`, which a later plan step builds.
+fn pending(verb: &VerbArgs) -> CupelError {
+    let words = verb.words();
+    let step = registry::find(&words[..1])
+        .and_then(|command| command.pending_step)
+        .expect("every verb without behavior names its plan step in the registry");
+    CupelError::pending_verb(&words, &step)
 }
 
 /// `init`: writes the configuration, or previews what `--write` would write.
@@ -545,7 +491,10 @@ fn output(mut envelope: Envelope, presentation: &Presentation, stderr: String) -
 }
 
 /// `--cwd` resolved against the process working directory; it must be an existing directory.
-fn repository_root(current_dir: Option<&Path>, cwd: Option<&Path>) -> Result<PathBuf, CupelError> {
+pub(crate) fn repository_root(
+    current_dir: Option<&Path>,
+    cwd: Option<&Path>,
+) -> Result<PathBuf, CupelError> {
     let requested = match (cwd, current_dir) {
         (Some(cwd), Some(current)) => current.join(cwd),
         (Some(cwd), None) => cwd.to_path_buf(),
@@ -573,7 +522,7 @@ fn not_a_directory(shown: &str) -> CupelError {
 }
 
 /// The verb and sub-verb words clap can still recognize in a command line it rejected.
-fn command_words(args: &[OsString]) -> Vec<String> {
+pub(crate) fn command_words(args: &[OsString]) -> Vec<String> {
     let command_line = std::iter::once(OsString::from("cupel")).chain(args.iter().cloned());
     let Ok(matches) = registry::command()
         .ignore_errors(true)
@@ -656,13 +605,10 @@ mod tests {
 
     /// An invocation of `args` in `dir`, so verbs that keep a run record write there.
     fn environment(dir: &Path, args: &[&str]) -> Environment {
-        Environment {
-            args: args.iter().map(OsString::from).collect(),
-            current_dir: Some(dir.to_path_buf()),
-            stdout_is_terminal: false,
-            variables: BTreeMap::new(),
-            no_color_variable: false,
-        }
+        Environment::new(
+            args.iter().map(OsString::from).collect(),
+            Some(dir.to_path_buf()),
+        )
     }
 
     #[test]

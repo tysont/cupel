@@ -12,9 +12,14 @@ use crate::language::{Language, LanguageRegistry};
 use crate::parse::ParseCache;
 
 impl LanguageRegistry {
-    /// The five launch languages, sharing one parse cache.
+    /// The five launch languages, sharing one new parse cache.
     pub fn builtin() -> Self {
-        let cache = Arc::new(ParseCache::default());
+        Self::with_cache(Arc::default())
+    }
+
+    /// The five launch languages, sharing `cache`, which may outlive the registry (the daemon's,
+    /// ADR-085).
+    pub fn with_cache(cache: Arc<ParseCache>) -> Self {
         let languages: Vec<Arc<dyn Language>> = vec![
             Arc::new(ecma::Ecma::javascript(Arc::clone(&cache))),
             Arc::new(ecma::Ecma::typescript(Arc::clone(&cache))),

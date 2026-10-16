@@ -1,5 +1,5 @@
-# ABOUTME: Continuous integration: `make check` on Linux and macOS with every test runner and coverage tool installed, and
-# ABOUTME: `make dogfood` (Cupel's own gate) for every push and pull request. Rust comes from rust-toolchain.toml.
+# ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner and coverage tool
+# ABOUTME: installed, and `make dogfood` (Cupel's own gate) for every push and pull request. Rust comes from rust-toolchain.toml.
 name: ci
 
 on:
@@ -61,6 +61,9 @@ jobs:
         run: npm install --global vitest @vitest/coverage-v8 jest
       - name: make check
         run: make check
+      # Every golden-harness run again through the daemon, compared with the cold run (ADR-085 §11).
+      - name: make parity
+        run: make parity
 
   dogfood:
     runs-on: ubuntu-latest

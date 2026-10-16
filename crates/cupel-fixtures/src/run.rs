@@ -1,5 +1,5 @@
-// ABOUTME: Runs the built `cupel` binary in a chosen directory with a clean `CUPEL_*` environment
-// ABOUTME: and captures its exit code, stdout, stderr, and the envelope stdout carries.
+// ABOUTME: Runs the built `cupel` binary in a chosen directory with a clean `CUPEL_*` environment and captures
+// ABOUTME: its exit code, stdout, stderr, and envelope; under DAEMON_PARITY=1 also proves the daemon prints the same.
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -43,14 +43,17 @@ impl Outcome {
 /// Runs `cupel <args>` in `cwd` and captures everything it produced.
 ///
 /// The binary is the one Cargo built for this workspace (`make test` rebuilds it first). Stdin
-/// is closed and no `CUPEL_*` variable reaches it, so the caller's shell cannot change the
-/// output.
+/// is closed and no `CUPEL_*` variable reaches it but `CUPEL_NO_DAEMON=1`, so the caller's shell
+/// cannot change the output and the run is cold. With `DAEMON_PARITY=1`, the same invocation
+/// also runs through a daemon on a copy of `cwd` made before this run, and a difference after
+/// redaction panics (ADR-085 §11).
 ///
 /// # Panics
 ///
 /// When the binary has not been built or cannot be started, and when it prints JSON that is
 /// not an envelope, which breaks the output contract.
 pub fn run_cupel(args: &[&str], cwd: &Path) -> Outcome {
+    let twin = crate::parity::enabled().then(|| crate::parity::Twin::of(cwd));
     let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
     command.args(args).current_dir(cwd).stdin(Stdio::null());
     for (key, _) in std::env::vars_os() {
@@ -58,11 +61,15 @@ pub fn run_cupel(args: &[&str], cwd: &Path) -> Outcome {
             command.env_remove(key);
         }
     }
+    command.env("CUPEL_NO_DAEMON", "1");
     let output = command
         .output()
         .unwrap_or_else(|error| panic!("cannot run cupel {args:?} in {}: {error}", cwd.display()));
     let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
     let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+    if let Some(twin) = twin {
+        twin.assert_same(args, (output.status.code(), &stdout, &stderr));
+    }
     let envelope = stdout.trim_start().starts_with('{').then(|| {
         serde_json::from_str(&stdout).unwrap_or_else(|error| {
             panic!("cupel {args:?} printed JSON that is not an envelope ({error}):\n{stdout}")

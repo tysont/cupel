@@ -1,6 +1,7 @@
 // ABOUTME: The registries every verb reads: compiled-in languages, the producers they and the tool layer
 // ABOUTME: register, and the native checks. Builds the `describe` payloads from them, never from lists.
 use std::path::Path;
+use std::sync::Arc;
 
 use cupel_core::{
     CheckDescription, CheckId, CheckRegistry, CheckSupport, Ctx, FactDescription, FactKind,
@@ -8,7 +9,7 @@ use cupel_core::{
     LanguageSummary, LanguageSupport, LanguagesDescription, MatrixCell, MatrixDescription,
     ProducerDescription, ProducerRegistry, RegisteredProducer, SupportMatrix, VerbSupport, schema,
 };
-use cupel_lang::{Language, LanguageRegistry};
+use cupel_lang::{Language, LanguageRegistry, ParseCache};
 use serde_json::Value;
 
 /// Every registry `describe` renders.
@@ -21,7 +22,13 @@ pub struct Catalog {
 impl Catalog {
     /// The compiled-in languages, their producers and the tool producers, and the native checks.
     pub fn builtin() -> Self {
-        let languages = LanguageRegistry::builtin();
+        Self::with_cache(Arc::default())
+    }
+
+    /// [`Catalog::builtin`] with its languages parsing through `cache`, which may be warm (the
+    /// daemon's session, ADR-085 §3).
+    pub fn with_cache(cache: Arc<ParseCache>) -> Self {
+        let languages = LanguageRegistry::with_cache(cache);
         let mut producers = ProducerRegistry::default();
         languages.register_producers(&mut producers);
         cupel_adapt::register(&mut producers);

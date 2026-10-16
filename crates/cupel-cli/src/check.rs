@@ -2,6 +2,7 @@
 // ABOUTME: checks, run the scheduler (or plan it), assemble the envelope, and grade it with the gate.
 use std::collections::BTreeSet;
 use std::path::Path;
+use std::sync::Arc;
 
 use cupel_core::config::Config;
 use cupel_core::git::{ChangeKind, Git};
@@ -97,7 +98,7 @@ pub fn run(
     events: &mut dyn EventSink,
 ) -> Result<CheckRun, CupelError> {
     let (run, writer) = (invocation.run, invocation.writer);
-    let catalog = Catalog::builtin();
+    let catalog = Catalog::with_cache(Arc::clone(invocation.session.cache()));
     let request = scope_request(args);
     let Scoped {
         info,

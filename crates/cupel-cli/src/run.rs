@@ -17,8 +17,12 @@ pub struct Run {
     id: RunId,
     started: SystemTime,
     clock: Instant,
-    /// Fires when `--timeout` passes, counted from the start of the invocation.
+    /// Fires when `--timeout` passes, counted from the start of the invocation, or when
+    /// `parent` fires.
     cancel: Cancellation,
+    /// The invocation's outer token: never fired in a cold process; the daemon's request token,
+    /// which a client's hang-up or the daemon's stop fires (ADR-085 §7).
+    parent: Cancellation,
     pub verb: Option<Verb>,
     /// `--seed`, or a random seed once the command line parsed (ADR-020 §7).
     pub seed: u64,
@@ -49,6 +53,7 @@ impl Run {
             started: SystemTime::now(),
             clock: Instant::now(),
             cancel: Cancellation::new(),
+            parent: Cancellation::new(),
             verb: None,
             seed: 0,
             args,
@@ -63,9 +68,15 @@ impl Run {
         self.id
     }
 
+    /// Puts this run's cancellation under `parent`, so it fires when `parent` does.
+    pub fn within(&mut self, parent: &Cancellation) {
+        self.parent = parent.clone();
+        self.cancel = parent.under(None);
+    }
+
     /// Cancels this run's work `limit` after the invocation started (`--timeout`).
     pub fn set_timeout(&mut self, limit: Duration) {
-        self.cancel = Cancellation::with_deadline(self.clock + limit);
+        self.cancel = self.parent.under(Some(self.clock + limit));
     }
 
     /// Keeps `executed`, what this run executed, for the store.
@@ -270,6 +281,8 @@ fn civil_from_days(days: i64) -> (i64, u32, u32) {
 pub struct Invocation<'a> {
     pub run: &'a Run,
     pub writer: &'a Writer,
+    /// The caches this invocation may find warm (ADR-085 §3).
+    pub session: &'a crate::session::Session,
     pub config: Result<&'a Config, &'a cupel_core::Error>,
     pub dry_run: bool,
     /// Whether the run may install the tools its producers need (ADR-081).

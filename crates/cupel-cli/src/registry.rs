@@ -512,22 +512,26 @@ fn suppress_verb() -> CommandDescription {
 fn serve_verb() -> CommandDescription {
     verb(
         "serve",
-        "Run the daemon and MCP server with warm caches and event streaming.",
-        Some("P4.2"),
+        "Run the daemon that answers this repository's invocations with warm caches, or stop it.",
+        None,
         vec![
             valued(
                 "--socket",
                 ValueType::Path,
                 "PATH",
-                "The Unix socket to listen on.",
+                "Listen at PATH instead of .cupel/serve.sock, where clients look.",
             ),
-            switch("--mcp", "Expose the verbs as MCP tools."),
-            switch("--watch", "Reparse files as they change."),
+            switch(
+                "--watch",
+                "Reparse the files the daemon has parsed as they change.",
+            ),
+            switch("--stop", "Stop the daemon serving this repository."),
+            switch("--mcp", "Expose the verbs as MCP tools.").pending("P7.7"),
         ],
         examples(&[(
-            "cupel serve --mcp",
-            "Serve the verbs over MCP.",
-            ExitCode::Usage,
+            "cupel serve --stop",
+            "Stop the daemon serving this repository.",
+            ExitCode::Pass,
         )]),
     )
 }
@@ -1066,8 +1070,7 @@ mod tests {
             .into_iter()
             .filter_map(|command| Some((command.name, command.pending_step?)))
             .collect();
-        let expected = [("oracle", "P5.2"), ("serve", "P4.2")]
-            .map(|(name, step)| (name.to_owned(), step.to_owned()));
+        let expected = [("oracle", "P5.2")].map(|(name, step)| (name.to_owned(), step.to_owned()));
         assert_eq!(pending, expected);
     }
 }

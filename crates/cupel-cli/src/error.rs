@@ -92,6 +92,16 @@ impl CupelError {
         })
     }
 
+    /// A flag whose behavior arrives in `step`.
+    pub fn pending_flag(flag: &str, step: &str) -> Self {
+        Self::NotImplemented(Pending {
+            subject: flag.to_owned(),
+            what: format!("`{flag}`"),
+            step: step.to_owned(),
+            fix: format!("Run without {flag}."),
+        })
+    }
+
     /// An output format whose renderer arrives in `step`.
     pub fn pending_format(name: &str, step: &str) -> Self {
         Self::NotImplemented(Pending {

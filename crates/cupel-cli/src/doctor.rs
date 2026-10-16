@@ -8,6 +8,7 @@ use cupel_core::{
     ActionKind, Availability, Check, Ctx, Envelope, EventSink, ExitCode, FactKind, Install, Lang,
     LangId, ProducerRegistry, RunPlan, Selection, Severity, Status, ToolId, ToolProbe, Writer,
 };
+use cupel_serve::{Body, Reply, Request};
 use semver::{Version, VersionReq};
 use serde_json::json;
 
@@ -17,6 +18,7 @@ use crate::install::{self, Planned, probe};
 use crate::problem::Problem;
 use crate::project;
 use crate::run::Invocation;
+use crate::serve;
 
 /// The configuration key `required_version` findings are about.
 const REQUIRED_VERSION: &str = "required_version";
@@ -52,6 +54,7 @@ pub fn run(invocation: &Invocation<'_>, fix: bool) -> Envelope {
         }
     }
     problems.extend(cupel_dir(writer));
+    problems.extend(daemon(writer.root()));
     let (requirements, unresolved) = needed(config, writer);
     problems.extend(unresolved);
     let mut probed = probe_all(&requirements);
@@ -422,6 +425,83 @@ fn cupel_dir(writer: &Writer) -> Option<Problem> {
         action: ActionKind::Configure,
         fix: "Make .cupel/ a writable directory in the repository root.".to_owned(),
     })
+}
+
+/// The daemon at `.cupel/serve.sock` when there is a socket file (ADR-085 §11): running, of
+/// another build, or a stale socket nothing answers on.
+fn daemon(root: &Path) -> Option<Problem> {
+    let socket = serve::default_socket(root);
+    if !socket.exists() {
+        return None;
+    }
+    let shown = serve::shown(root, &socket);
+    let asked = Request::new(serve::build(), Body::Status);
+    let (kind, severity, title, evidence, fix) =
+        match cupel_serve::request(&socket, &asked, &mut |_| {}) {
+            Ok(Reply::Status(status)) => daemon_status(&shown, &status),
+            _ => (
+                "doctor.daemon-stale",
+                Severity::Warn,
+                format!("Nothing answers on the daemon socket {shown}"),
+                json!({"socket": shown}),
+                "Remove it with `cupel serve --stop`, or start a daemon with `cupel serve`.",
+            ),
+        };
+    Some(Problem {
+        check: "doctor",
+        kind,
+        subject: shown,
+        severity,
+        title,
+        detail: None,
+        evidence,
+        action: if severity == Severity::Info {
+            ActionKind::Review
+        } else {
+            ActionKind::Configure
+        },
+        fix: fix.to_owned(),
+    })
+}
+
+/// The report on a daemon at `shown` that answered with `status`: running, or another build.
+fn daemon_status(
+    shown: &str,
+    status: &cupel_serve::Status,
+) -> (
+    &'static str,
+    Severity,
+    String,
+    serde_json::Value,
+    &'static str,
+) {
+    let evidence = json!({
+        "socket": shown, "version": status.version, "pid": status.pid,
+        "watching": status.watching,
+    });
+    if status.build == serve::build() {
+        (
+            "doctor.daemon-running",
+            Severity::Info,
+            format!(
+                "The daemon at {shown} serves this repository (pid {})",
+                status.pid
+            ),
+            evidence,
+            "Nothing to do; `cupel serve --stop` stops it.",
+        )
+    } else {
+        (
+            "doctor.daemon-mismatch",
+            Severity::Warn,
+            format!(
+                "The daemon at {shown} runs another build of cupel ({})",
+                status.build
+            ),
+            evidence,
+            "Restart it with this cupel: `cupel serve --stop`, then `cupel serve`.",
+        )
+    }
 }
 
 /// The tools to check: `git`, which `--changed` needs, then the programs the languages' commands

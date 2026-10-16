@@ -10,6 +10,7 @@ members = [
     "crates/cupel-fixtures",
     "crates/cupel-lang",
     "crates/cupel-mutate",
+    "crates/cupel-serve",
     "crates/cupel-store",
 ]
 
@@ -26,6 +27,7 @@ cupel-checks = { path = "crates/cupel-checks" }
 cupel-core = { path = "crates/cupel-core" }
 cupel-lang = { path = "crates/cupel-lang" }
 cupel-mutate = { path = "crates/cupel-mutate" }
+cupel-serve = { path = "crates/cupel-serve" }
 cupel-store = { path = "crates/cupel-store" }
 cupel-fixtures = { path = "crates/cupel-fixtures" }
 clap = { version = "4.6.7", features = ["derive", "env"] }
@@ -59,6 +61,8 @@ rayon = "1.12.0"
 inventory = "0.3.25"
 # The fact store (ADR-045); `bundled` compiles SQLite in, so no system library is needed.
 rusqlite = { version = "0.40.2", features = ["bundled"] }
+# The daemon's file watcher (P4.2, ADR-085).
+notify = "8.2.0"
 # JUnit XML from pytest and cargo nextest (P3.1); read-only, no dependencies of its own.
 roxmltree = "0.21.1"
 
