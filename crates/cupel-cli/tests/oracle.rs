@@ -8,7 +8,8 @@ use std::path::Path;
 use serde_json::{Value, json};
 use support::{Outcome, Repo, cupel, usage_argument};
 
-const CALC: &str = "[oracles.calc]\nkind = \"command\"\ncmd = \"echo {input}\"\ninputs = [\"1\", \"2\"]\n";
+const CALC: &str =
+    "[oracles.calc]\nkind = \"command\"\ncmd = \"echo {input}\"\ninputs = [\"1\", \"2\"]\n";
 
 /// A repository whose `cupel.toml` is `toml`.
 fn configured(toml: &str) -> Repo {
@@ -75,14 +76,19 @@ fn add_previews_the_cupel_toml_change_without_write_and_makes_it_with_write() {
     let planned = &envelope["plan"]["would_write"][0];
     assert_eq!(planned["path"], json!("cupel.toml"));
     let diff = planned["diff"].as_str().unwrap();
-    assert!(diff.contains("+[oracles.old]\n+kind = \"ref\"\n+ref = \"v1\"\n"), "{diff}");
+    assert!(
+        diff.contains("+[oracles.old]\n+kind = \"ref\"\n+ref = \"v1\"\n"),
+        "{diff}"
+    );
     assert_eq!(config_text(&repo), "# ours\ndepth = \"quick\"\n");
     assert_eq!(
         envelope["next_actions"][0]["command"],
         json!("cupel oracle add old --kind ref --ref v1 --write")
     );
 
-    let written = repo.run(&["oracle", "add", "old", "--kind", "ref", "--ref", "v1", "--write"]);
+    let written = repo.run(&[
+        "oracle", "add", "old", "--kind", "ref", "--ref", "v1", "--write",
+    ]);
     assert_eq!(written.code, 0, "{}", written.stdout);
     assert_eq!(
         config_text(&repo),
@@ -94,14 +100,36 @@ fn add_previews_the_cupel_toml_change_without_write_and_makes_it_with_write() {
 #[test]
 fn add_writes_a_command_with_its_inputs_and_a_spec_with_its_language() {
     let repo = Repo::new();
-    let calc = ["oracle", "add", "calc", "--kind", "command", "--cmd", "echo {input}"];
+    let calc = [
+        "oracle",
+        "add",
+        "calc",
+        "--kind",
+        "command",
+        "--cmd",
+        "echo {input}",
+    ];
     let inputs = ["--input", "1", "--input", "2", "--write"];
     assert_eq!(repo.run(&[&calc[..], &inputs[..]].concat()).code, 0);
-    let model = ["oracle", "add", "model", "--kind", "spec", "--spec", "model.qnt"];
-    assert_eq!(repo.run(&[&model[..], &["--lang", "quint", "--write"]].concat()).code, 0);
+    let model = [
+        "oracle",
+        "add",
+        "model",
+        "--kind",
+        "spec",
+        "--spec",
+        "model.qnt",
+    ];
+    assert_eq!(
+        repo.run(&[&model[..], &["--lang", "quint", "--write"]].concat())
+            .code,
+        0
+    );
     assert_eq!(
         config_text(&repo),
-        format!("{CALC}\n[oracles.model]\nkind = \"spec\"\nspec = \"model.qnt\"\nlang = \"quint\"\n")
+        format!(
+            "{CALC}\n[oracles.model]\nkind = \"spec\"\nspec = \"model.qnt\"\nlang = \"quint\"\n"
+        )
     );
 }
 
@@ -112,7 +140,10 @@ fn add_refuses_a_taken_name_a_malformed_name_and_flags_the_kind_does_not_take() 
         (&["calc", "--kind", "ref", "--ref", "v1"], "NAME"),
         (&["Calc", "--kind", "ref", "--ref", "v1"], "NAME"),
         (&["old", "--kind", "ref", "--cmd", "echo"], "--kind"),
-        (&["model", "--kind", "spec", "--spec", "m.v", "--lang", "coq"], "--kind"),
+        (
+            &["model", "--kind", "spec", "--spec", "m.v", "--lang", "coq"],
+            "--kind",
+        ),
     ];
     for (args, argument) in cases {
         let outcome = repo.run(&[&["oracle", "add"][..], args, &["--write"]].concat());
@@ -123,7 +154,9 @@ fn add_refuses_a_taken_name_a_malformed_name_and_flags_the_kind_does_not_take() 
 
 #[test]
 fn list_reports_every_oracle_by_name_with_its_identity_and_state() {
-    let repo = committed(&format!("{CALC}[oracles.old]\nkind = \"ref\"\nref = \"v1\"\n"));
+    let repo = committed(&format!(
+        "{CALC}[oracles.old]\nkind = \"ref\"\nref = \"v1\"\n"
+    ));
     let outcome = repo.run(&["oracle", "list"]);
     let envelope = outcome.envelope();
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
@@ -144,11 +177,20 @@ fn verify_records_a_command_that_answers_each_input_the_same_way_twice() {
     let envelope = outcome.envelope();
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     assert_eq!(states(&envelope), [named("calc", "verified")]);
-    assert_eq!(envelope["oracles"][0]["verified_run"], envelope["run"]["id"]);
-    assert_eq!(envelope["oracles"][0]["verified_at"], envelope["run"]["started"]);
+    assert_eq!(
+        envelope["oracles"][0]["verified_run"],
+        envelope["run"]["id"]
+    );
+    assert_eq!(
+        envelope["oracles"][0]["verified_at"],
+        envelope["run"]["started"]
+    );
     let stored = repo.store().verified_oracle("calc").unwrap().unwrap();
     assert_eq!(json!(stored.hash), envelope["oracles"][0]["hash"]);
-    assert_eq!(states(&repo.run(&["oracle", "list"]).envelope()), [named("calc", "verified")]);
+    assert_eq!(
+        states(&repo.run(&["oracle", "list"]).envelope()),
+        [named("calc", "verified")]
+    );
 }
 
 #[test]
@@ -156,13 +198,20 @@ fn an_edited_definition_is_changed_and_a_failed_verify_revokes_the_verification(
     let repo = configured(CALC);
     assert_eq!(repo.run(&["oracle", "verify", "calc"]).code, 0);
     repo.write("cupel.toml", &CALC.replace("echo {input}", "echo $$"));
-    assert_eq!(states(&repo.run(&["oracle", "list"]).envelope()), [named("calc", "changed")]);
+    assert_eq!(
+        states(&repo.run(&["oracle", "list"]).envelope()),
+        [named("calc", "changed")]
+    );
 
     let outcome = repo.run(&["oracle", "verify", "calc"]);
     assert_eq!(outcome.code, 1, "{}", outcome.stdout);
     assert_eq!(
         problems(&outcome),
-        [("oracle.smoke-failed".to_owned(), "fail".to_owned(), "verify_oracle".to_owned())]
+        [(
+            "oracle.smoke-failed".to_owned(),
+            "fail".to_owned(),
+            "verify_oracle".to_owned()
+        )]
     );
     let evidence = &outcome.envelope()["findings"][0]["evidence"];
     assert_eq!(evidence["input"], json!("1"));
@@ -178,7 +227,11 @@ fn a_command_whose_program_is_missing_or_that_fails_is_not_verified() {
     assert_eq!(outcome.code, 3, "{}", outcome.stdout);
     assert_eq!(
         problems(&outcome),
-        [("oracle.unreachable".to_owned(), "fail".to_owned(), "install_tool".to_owned())]
+        [(
+            "oracle.unreachable".to_owned(),
+            "fail".to_owned(),
+            "install_tool".to_owned()
+        )]
     );
     let failing = configured(&CALC.replace("echo {input}", "exit 4"));
     let outcome = failing.run(&["oracle", "verify", "calc"]);
@@ -192,18 +245,28 @@ fn a_ref_oracle_is_verified_until_its_ref_moves_and_a_missing_ref_is_exit_3() {
     let repo = committed("[oracles.rel]\nkind = \"ref\"\nref = \"release\"\n");
     assert!(repo.git(&["branch", "release"]));
     assert_eq!(repo.run(&["oracle", "verify", "rel"]).code, 0);
-    assert_eq!(states(&repo.run(&["oracle", "list"]).envelope()), [named("rel", "verified")]);
+    assert_eq!(
+        states(&repo.run(&["oracle", "list"]).envelope()),
+        [named("rel", "verified")]
+    );
     repo.write("calc.py", "def add(a, b):\n    return b + a\n");
     assert!(repo.git(&["commit", "-q", "-am", "second"]));
     assert!(repo.git(&["branch", "-f", "release"]));
-    assert_eq!(states(&repo.run(&["oracle", "list"]).envelope()), [named("rel", "changed")]);
+    assert_eq!(
+        states(&repo.run(&["oracle", "list"]).envelope()),
+        [named("rel", "changed")]
+    );
 
     assert!(repo.git(&["branch", "-D", "release"]));
     let outcome = repo.run(&["oracle", "verify", "rel"]);
     assert_eq!(outcome.code, 3, "{}", outcome.stdout);
     assert_eq!(
         problems(&outcome),
-        [("oracle.unreachable".to_owned(), "fail".to_owned(), "configure".to_owned())]
+        [(
+            "oracle.unreachable".to_owned(),
+            "fail".to_owned(),
+            "configure".to_owned()
+        )]
     );
     assert_eq!(states(&outcome.envelope()), [named("rel", "unreachable")]);
 }
@@ -228,20 +291,30 @@ fn fake_quint() -> tempfile::TempDir {
 /// `cupel <args> --cwd <repo>` with `PATH` set to `bin` (when given) and the system directories.
 fn with_path(repo: &Repo, bin: Option<&Path>, args: &[&str]) -> Outcome {
     let system = "/usr/bin:/bin";
-    let path = bin.map_or_else(|| system.to_owned(), |bin| format!("{}:{system}", bin.display()));
+    let path = bin.map_or_else(
+        || system.to_owned(),
+        |bin| format!("{}:{system}", bin.display()),
+    );
     repo.run_with(cupel().env("PATH", path), args)
 }
 
 #[test]
 fn a_spec_oracle_is_verified_by_its_languages_parser_and_changes_with_its_file() {
-    let repo = configured("[oracles.model]\nkind = \"spec\"\nspec = \"model.qnt\"\nlang = \"quint\"\n");
+    let repo =
+        configured("[oracles.model]\nkind = \"spec\"\nspec = \"model.qnt\"\nlang = \"quint\"\n");
     repo.write("model.qnt", "module counter {}\n");
     let bin = fake_quint();
     let verify = ["oracle", "verify", "model"];
     assert_eq!(with_path(&repo, Some(bin.path()), &verify).code, 0);
-    assert_eq!(states(&repo.run(&["oracle", "list"]).envelope()), [named("model", "verified")]);
+    assert_eq!(
+        states(&repo.run(&["oracle", "list"]).envelope()),
+        [named("model", "verified")]
+    );
     repo.write("model.qnt", "garbage\n");
-    assert_eq!(states(&repo.run(&["oracle", "list"]).envelope()), [named("model", "changed")]);
+    assert_eq!(
+        states(&repo.run(&["oracle", "list"]).envelope()),
+        [named("model", "changed")]
+    );
 
     let rejected = with_path(&repo, Some(bin.path()), &verify);
     assert_eq!(rejected.code, 1, "{}", rejected.stdout);
@@ -249,10 +322,17 @@ fn a_spec_oracle_is_verified_by_its_languages_parser_and_changes_with_its_file()
     assert_eq!(without_parser.code, 3, "{}", without_parser.stdout);
     assert_eq!(
         problems(&without_parser),
-        [("oracle.unreachable".to_owned(), "fail".to_owned(), "install_tool".to_owned())]
+        [(
+            "oracle.unreachable".to_owned(),
+            "fail".to_owned(),
+            "install_tool".to_owned()
+        )]
     );
     fs::remove_file(repo.path("model.qnt")).unwrap();
-    assert_eq!(states(&repo.run(&["oracle", "list"]).envelope()), [named("model", "unreachable")]);
+    assert_eq!(
+        states(&repo.run(&["oracle", "list"]).envelope()),
+        [named("model", "unreachable")]
+    );
 }
 
 #[test]
@@ -273,21 +353,29 @@ fn verify_all_verifies_each_oracle_and_exit_3_outranks_exit_1() {
         ]
     );
     let none = Repo::new().run(&["oracle", "verify", "--all"]);
-    assert_eq!((none.code, none.envelope()["oracles"].clone()), (0, json!([])));
+    assert_eq!(
+        (none.code, none.envelope()["oracles"].clone()),
+        (0, json!([]))
+    );
 }
 
 #[test]
 fn a_dry_run_of_verify_runs_nothing_and_records_nothing() {
     let repo = configured("[oracles.side]\nkind = \"command\"\ncmd = \"touch ran\"\n");
     let outcome = repo.run(&["oracle", "verify", "side", "--dry-run"]);
-    assert_eq!((outcome.code, outcome.envelope()["status"].clone()), (0, json!("plan")));
+    assert_eq!(
+        (outcome.code, outcome.envelope()["status"].clone()),
+        (0, json!("plan"))
+    );
     assert!(!repo.path("ran").exists());
     assert_eq!(repo.store().verified_oracles().unwrap(), []);
 }
 
 #[test]
 fn remove_previews_then_deletes_the_table_and_the_verification() {
-    let repo = configured(&format!("# ours\ndepth = \"quick\"\n\n# the calculator\n{CALC}"));
+    let repo = configured(&format!(
+        "# ours\ndepth = \"quick\"\n\n# the calculator\n{CALC}"
+    ));
     assert_eq!(repo.run(&["oracle", "verify", "calc"]).code, 0);
     let preview = repo.run(&["oracle", "remove", "calc"]);
     assert_eq!(preview.envelope()["status"], json!("plan"));
@@ -307,7 +395,11 @@ fn an_oracle_that_is_not_defined_is_a_usage_error() {
     for verb in ["verify", "remove"] {
         let outcome = repo.run(&["oracle", verb, "nope", "--write"]);
         assert_eq!(usage_argument(&outcome), json!("NAME"), "{verb}");
-        assert_eq!(outcome.finding()["evidence"]["valid"], json!(["calc"]), "{verb}");
+        assert_eq!(
+            outcome.finding()["evidence"]["valid"],
+            json!(["calc"]),
+            "{verb}"
+        );
     }
 }
 

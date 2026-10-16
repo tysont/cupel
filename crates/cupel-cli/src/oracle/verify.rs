@@ -4,8 +4,8 @@ use std::path::Path;
 
 use cupel_core::config::{Config, OracleConfig, OracleKind};
 use cupel_core::{
-    ActionKind, Cancellation, Envelope, ExitCode, Finding, Process, Severity, Status,
-    find_program, oracle_identity,
+    ActionKind, Cancellation, Envelope, ExitCode, Finding, Process, Severity, Status, find_program,
+    oracle_identity,
 };
 use cupel_store::{Store, VerifiedOracle};
 use serde_json::{Value, json};
@@ -97,10 +97,17 @@ fn smoke(
     let resolved = resolve(root, definition).map_err(Failure::Unreachable)?;
     let given = |value: &Option<String>| value.clone().unwrap_or_default();
     match definition.kind {
-        OracleKind::Ref => {}
-        OracleKind::Command => answers_alike(root, cancel, &given(&definition.cmd), &definition.inputs)?,
-        OracleKind::Spec => parses(root, cancel, &given(&definition.spec), &given(&definition.lang))?,
-    }
+        OracleKind::Ref => Ok(()),
+        OracleKind::Command => {
+            answers_alike(root, cancel, &given(&definition.cmd), &definition.inputs)
+        }
+        OracleKind::Spec => parses(
+            root,
+            cancel,
+            &given(&definition.spec),
+            &given(&definition.lang),
+        ),
+    }?;
     Ok(resolved)
 }
 
@@ -113,14 +120,21 @@ fn answers_alike(
     inputs: &[String],
 ) -> Result<(), Failure> {
     let empty = [String::new()];
-    let inputs = if inputs.is_empty() { &empty[..] } else { inputs };
+    let inputs = if inputs.is_empty() {
+        &empty[..]
+    } else {
+        inputs
+    };
     for input in inputs {
         let line = cmd.replace("{input}", &shell_quote(input));
         let first = answer(root, cancel, &line, input)?;
         let second = answer(root, cancel, &line, input)?;
         if first != second {
             return Err(Failure::Disagreed {
-                title: format!("the command printed different output twice for {}", shown(input)),
+                title: format!(
+                    "the command printed different output twice for {}",
+                    shown(input)
+                ),
                 evidence: json!({"input": input, "outputs": [first, second]}),
             });
         }
@@ -143,7 +157,10 @@ fn answer(root: &Path, cancel: &Cancellation, line: &str, input: &str) -> Result
     match ran.exit_code {
         Some(0) => Ok(ran.stdout),
         Some(NOT_FOUND) => Err(Failure::Unreachable(Unreachable {
-            title: format!("the command's program is not installed: {}", ran.stderr.trim()),
+            title: format!(
+                "the command's program is not installed: {}",
+                ran.stderr.trim()
+            ),
             action: ActionKind::InstallTool,
             fix: "Install the program the command runs, or fix `cmd`.".to_owned(),
         })),
@@ -206,14 +223,19 @@ fn problem(name: &str, failure: Failure) -> Problem {
             unreachable.action,
             unreachable.fix,
         ),
-        Failure::Disagreed { title, mut evidence } => {
+        Failure::Disagreed {
+            title,
+            mut evidence,
+        } => {
             evidence["oracle"] = json!(name);
             (
                 "oracle.smoke-failed",
                 title,
                 evidence,
                 ActionKind::VerifyOracle,
-                format!("Fix the oracle `{name}` so it answers deterministically, then run `cupel oracle verify {name}`."),
+                format!(
+                    "Fix the oracle `{name}` so it answers deterministically, then run `cupel oracle verify {name}`."
+                ),
             )
         }
     };

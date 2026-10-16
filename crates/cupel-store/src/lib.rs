@@ -53,9 +53,9 @@ use rusqlite::types::Value;
 use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
 
 pub use crate::error::StoreError;
-pub use crate::oracles::VerifiedOracle;
 use crate::lock::WriterLock;
 use crate::migrations::MIGRATIONS;
+pub use crate::oracles::VerifiedOracle;
 
 pub type Result<T, E = StoreError> = std::result::Result<T, E>;
 

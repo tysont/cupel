@@ -74,7 +74,13 @@ impl Store {
 type OracleRow = (String, String, String, String, String);
 
 fn read_row(row: &Row<'_>) -> rusqlite::Result<OracleRow> {
-    Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?, row.get(4)?))
+    Ok((
+        row.get(0)?,
+        row.get(1)?,
+        row.get(2)?,
+        row.get(3)?,
+        row.get(4)?,
+    ))
 }
 
 fn verification((name, spec, verified_at, hash, run): OracleRow) -> Result<VerifiedOracle> {

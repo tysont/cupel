@@ -163,7 +163,11 @@ mod tests {
     }
 
     fn tiers(envelope: &Envelope) -> Vec<u8> {
-        envelope.checks.iter().map(|result| result.tier.value()).collect()
+        envelope
+            .checks
+            .iter()
+            .map(|result| result.tier.value())
+            .collect()
     }
 
     #[test]
@@ -177,7 +181,11 @@ mod tests {
         assert_eq!(tiers(&envelope), [3, 3, 5]);
         let finding = &envelope.findings[0];
         assert_eq!(
-            (envelope.findings.len(), finding.kind.as_str(), finding.check.as_str()),
+            (
+                envelope.findings.len(),
+                finding.kind.as_str(),
+                finding.check.as_str()
+            ),
             (1, UNVERIFIED, "oracle")
         );
         assert_eq!(
@@ -185,7 +193,11 @@ mod tests {
             json!({"oracle": "pg", "state": "unverified", "checks": ["perf.bench", "tests.mutation"]})
         );
         assert_eq!(
-            (finding.severity, finding.action.kind, envelope.summary.findings.warn),
+            (
+                finding.severity,
+                finding.action.kind,
+                envelope.summary.findings.warn
+            ),
             (Severity::Warn, ActionKind::VerifyOracle, 1)
         );
         assert_eq!(envelope.total_findings, 1);

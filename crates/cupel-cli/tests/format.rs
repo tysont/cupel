@@ -48,7 +48,11 @@ fn format_text_shows_findings_with_their_fix() {
     let outcome = run(["describe", "--agent", "--format", "text"]);
     assert_eq!(outcome.code, 2);
     let id = cli_finding_id("cli.not-implemented", "describe --agent");
-    assert!(outcome.stdout.starts_with("cupel describe: error (exit 2)\n"));
+    assert!(
+        outcome
+            .stdout
+            .starts_with("cupel describe: error (exit 2)\n")
+    );
     let findings = format!(
         "fail (1)\n  cli\n    `cupel describe --agent` is not implemented yet\n      \
          {id} · cli.not-implemented · tier 0 · confidence 1\n      \

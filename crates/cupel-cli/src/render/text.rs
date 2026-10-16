@@ -4,12 +4,12 @@ mod description;
 
 use std::fmt::Write as _;
 
+use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::{
     CheckResult, Envelope, Excerpt, Explanation, Finding, GateOutcome, GateResult, GitInfo,
-    ImpactBasis, Location, Metric, NextAction, PlannedCheck, Rankings, RuleOutcome, RunInfo,
-    OracleReport, RunPlan, ScopeInfo, Severity, Skipped, Status, Summary, TestsReport,
+    ImpactBasis, Location, Metric, NextAction, OracleReport, PlannedCheck, Rankings, RuleOutcome,
+    RunInfo, RunPlan, ScopeInfo, Severity, Skipped, Status, Summary, TestsReport,
 };
-use cupel_core::config::{OracleConfig, OracleKind};
 use serde::Serialize;
 use serde_json::{Map, Value};
 
@@ -367,9 +367,16 @@ fn tests_block(tests: &TestsReport, paint: &Paint) -> String {
 /// (ADR-091 §6).
 fn oracles_block(oracles: &[OracleReport], paint: &Paint) -> String {
     let mut out = format!("{}  {}\n", paint.bold("oracles"), oracles.len());
-    let width = oracles.iter().map(|oracle| oracle.name.len()).max().unwrap_or(0);
+    let width = oracles
+        .iter()
+        .map(|oracle| oracle.name.len())
+        .max()
+        .unwrap_or(0);
     for oracle in oracles {
-        let mut facts = vec![definition(&oracle.definition), oracle.state.as_str().to_owned()];
+        let mut facts = vec![
+            definition(&oracle.definition),
+            oracle.state.as_str().to_owned(),
+        ];
         if let (Some(at), Some(run)) = (&oracle.verified_at, &oracle.verified_run) {
             facts.push(paint.dim(&format!("recorded {at} by {run}")));
         }

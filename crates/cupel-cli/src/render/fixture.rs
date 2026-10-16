@@ -2,6 +2,7 @@
 // ABOUTME: Built from struct literals, so a new envelope field fails to compile here until it is filled.
 use std::collections::BTreeMap;
 
+use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::{
     Action, ActionKind, ArgDescription, BaselineRef, CheckId, CheckResult, CheckStatus,
     CommandDescription, ConfigEcho, ConfigSource, CostClass, CupelInfo, Delta, Description,
@@ -13,7 +14,6 @@ use cupel_core::{
     Status, Summary, Symbol, Target, TestCommand, TestsReport, Tier, ToolId, ToolchainInfo,
     ValueType, Verb,
 };
-use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::{OracleReport, OracleState};
 use serde_json::{Map, Value, json};
 
@@ -191,7 +191,11 @@ fn oracles() -> Vec<OracleReport> {
             state: OracleState::Changed,
             hash: Some("6b1d".to_owned()),
             verified_at: Some("2026-10-09T08:00:00Z".to_owned()),
-            verified_run: Some("run_01JA2B3C4D5E6F7G8H9JKMNPQR".parse().expect("valid run ID")),
+            verified_run: Some(
+                "run_01JA2B3C4D5E6F7G8H9JKMNPQR"
+                    .parse()
+                    .expect("valid run ID"),
+            ),
         },
         OracleReport {
             name: "pg".to_owned(),
@@ -199,7 +203,11 @@ fn oracles() -> Vec<OracleReport> {
             state: OracleState::Verified,
             hash: Some("9e3a".to_owned()),
             verified_at: Some("2026-10-10T16:00:00Z".to_owned()),
-            verified_run: Some("run_01JA2B3C4D5E6F7G8H9JKMNPQS".parse().expect("valid run ID")),
+            verified_run: Some(
+                "run_01JA2B3C4D5E6F7G8H9JKMNPQS"
+                    .parse()
+                    .expect("valid run ID"),
+            ),
         },
     ]
 }

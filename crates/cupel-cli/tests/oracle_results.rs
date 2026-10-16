@@ -14,18 +14,20 @@ const ID: &str = "test.against-oracle";
 /// A tier-4 check that compares against the run's oracle and finds nothing.
 struct AgainstOracle(Manifest);
 
-inventory::submit!(cupel_checks::NativeCheck(|| Box::new(AgainstOracle(Manifest {
-    id: CheckId::from(ID),
-    version: 1,
-    tier: Tier::try_from(4).unwrap(),
-    cost: CostClass::Quick,
-    needs: Vec::new(),
-    wants: Vec::new(),
-    findings: Vec::new(),
-    metrics: Vec::new(),
-    stability: Stability::Experimental,
-    summary: "Compares against the run's oracle (test binary only).".to_owned(),
-}))));
+inventory::submit!(cupel_checks::NativeCheck(|| Box::new(AgainstOracle(
+    Manifest {
+        id: CheckId::from(ID),
+        version: 1,
+        tier: Tier::try_from(4).unwrap(),
+        cost: CostClass::Quick,
+        needs: Vec::new(),
+        wants: Vec::new(),
+        findings: Vec::new(),
+        metrics: Vec::new(),
+        stability: Stability::Experimental,
+        summary: "Compares against the run's oracle (test binary only).".to_owned(),
+    }
+))));
 
 impl Check for AgainstOracle {
     fn manifest(&self) -> &Manifest {
@@ -61,7 +63,11 @@ impl Check for AgainstOracle {
 /// A repository with one Python file and `toml` as its `cupel.toml`.
 fn repo(toml: &str) -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
-    std::fs::write(dir.path().join("calc.py"), "def add(a, b):\n    return a + b\n").unwrap();
+    std::fs::write(
+        dir.path().join("calc.py"),
+        "def add(a, b):\n    return a + b\n",
+    )
+    .unwrap();
     std::fs::write(dir.path().join("cupel.toml"), toml).unwrap();
     dir
 }
@@ -69,7 +75,10 @@ fn repo(toml: &str) -> tempfile::TempDir {
 /// `cupel <args> --format json --cwd <repo>` through `cupel_cli::run`: its exit code and envelope.
 fn cupel(repo: &Path, args: &[&str]) -> (u8, Value) {
     let root = repo.display().to_string();
-    let words = args.iter().copied().chain(["--format", "json", "--cwd", &root]);
+    let words = args
+        .iter()
+        .copied()
+        .chain(["--format", "json", "--cwd", &root]);
     let output = cupel_cli::run(&cupel_cli::Environment::new(
         words.map(Into::into).collect(),
         Some(repo.to_path_buf()),
@@ -144,7 +153,10 @@ fn the_first_verified_oracle_is_the_default_and_oracle_chooses_another() {
     assert_eq!(oracle(&["check", "--only", ID]), json!("cat"));
     assert_eq!(cupel(dir.path(), &["oracle", "verify", "echo"]).0, 0);
     assert_eq!(oracle(&["check", "--only", ID]), json!("echo"));
-    assert_eq!(oracle(&["check", "--only", ID, "--oracle", "cat"]), json!("cat"));
+    assert_eq!(
+        oracle(&["check", "--only", ID, "--oracle", "cat"]),
+        json!("cat")
+    );
 }
 
 #[test]

@@ -211,10 +211,10 @@ fn parsed(text: &str) -> Result<DocumentMut, CupelError> {
 
 /// The usage error for an `oracles` key that is not a table.
 fn not_a_table(config: &Config) -> CupelError {
-    let shown = config
-        .path
-        .as_deref()
-        .map_or_else(|| "cupel.toml".to_owned(), |path| path.display().to_string());
+    let shown = config.path.as_deref().map_or_else(
+        || "cupel.toml".to_owned(),
+        |path| path.display().to_string(),
+    );
     CupelError::bad_argument(
         "--config",
         None,

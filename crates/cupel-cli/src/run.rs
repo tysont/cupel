@@ -5,8 +5,8 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::{
     Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, Event, EventSink,
-    ExitCode, Finding, LangId, MutationOutcomes, RunId, RunInfo, RunPlan, SeverityCounts,
-    Status, Summary, TestResults, ToolchainInfo, Verb, Writer, schema,
+    ExitCode, Finding, LangId, MutationOutcomes, RunId, RunInfo, RunPlan, SeverityCounts, Status,
+    Summary, TestResults, ToolchainInfo, Verb, Writer, schema,
 };
 
 use cupel_core::budget::TaskDuration;

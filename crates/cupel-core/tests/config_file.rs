@@ -265,11 +265,13 @@ fn each_oracle_kind_takes_exactly_its_keys() {
 
 #[test]
 fn a_command_oracle_keeps_its_known_inputs_in_order() {
-    let file =
-        parse("[oracles.calc]\nkind = \"command\"\ncmd = \"calc {input}\"\ninputs = [\"2\", \"1\"]\n")
-            .unwrap();
+    let file = parse(
+        "[oracles.calc]\nkind = \"command\"\ncmd = \"calc {input}\"\ninputs = [\"2\", \"1\"]\n",
+    )
+    .unwrap();
     assert_eq!(file.oracles["calc"].inputs, ["2", "1"]);
-    let spec = parse("[oracles.model]\nkind = \"spec\"\nspec = \"m.qnt\"\nlang = \"quint\"\n").unwrap();
+    let spec =
+        parse("[oracles.model]\nkind = \"spec\"\nspec = \"m.qnt\"\nlang = \"quint\"\n").unwrap();
     assert!(spec.oracles["model"].inputs.is_empty());
 }
 
