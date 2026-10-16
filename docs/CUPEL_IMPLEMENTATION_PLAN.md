@@ -1093,7 +1093,7 @@ Added after P3.6's second measurement (P3 Notes "P3.6 — measurement with schem
 
 #### P5.2 `oracle` verb
 
-**Status:** not started
+**Status:** in progress (2026-10-16) · [ADR-090](adr/CUPEL_DECISION_090.md) · [ADR-091](adr/CUPEL_DECISION_091.md)
 
 - `add NAME --kind ref|command|spec …`, `list`, `remove`, `verify` (smoke comparison; records `verified_at` + hash); `oracles` table. Results against unverified oracles capped at tier 3 with `warn: oracle.unverified`.
 
