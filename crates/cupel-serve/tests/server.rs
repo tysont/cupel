@@ -116,7 +116,10 @@ impl Running {
                 ready.send(status.clone()).unwrap();
             })
         });
-        started.recv_timeout(Duration::from_secs(10)).unwrap();
+        // Generous: on macOS a freshly built binary's first FSEvents registration (the watcher's
+        // `FSEventStreamStart`) has taken 8-14 s here, and a wait cut short leaves it to start over
+        // on the next run; a built binary that has registered once is ready in well under a second.
+        started.recv_timeout(Duration::from_secs(60)).unwrap();
         Self {
             root: root.to_path_buf(),
             socket,
