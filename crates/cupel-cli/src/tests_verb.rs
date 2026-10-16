@@ -37,7 +37,7 @@ pub fn verb(
         return Err(needs_impacted());
     }
     let config = invocation.config()?;
-    let catalog = Catalog::with_cache(std::sync::Arc::clone(invocation.session.cache()));
+    let catalog = invocation.catalog();
     let request = check::scope_request(args);
     let scoped = check::resolve(
         invocation.writer,

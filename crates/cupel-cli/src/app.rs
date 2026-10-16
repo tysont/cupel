@@ -12,6 +12,7 @@ use cupel_core::config::{Config, ConfigRequest, Setting, Settings};
 use cupel_core::{
     Envelope, Event, EventSink, ExitCode, Finding, RunPlan, Status, Verb, Writer, random_seed,
 };
+use cupel_plugin::{Discovery, Plugins};
 
 use crate::cli::{Cli, VerbArgs, verb_name};
 pub use crate::environment::{Environment, Output};
@@ -169,11 +170,18 @@ fn configured(
 ) -> (Envelope, Rendering, String) {
     let mut said = String::new();
     let stderr = &mut said;
-    let config = match load_config(&config_request(environment, cli, writer.root().to_owned())) {
-        Ok(config) => config,
+    let request = config_request(environment, cli, writer.root().to_owned());
+    let (config, plugins) = match load_config(&request, plugin_path(environment, cli), run) {
+        Ok(loaded) => loaded,
         Err(error) if runs_without_configuration(cli) => {
             let envelope = guarded(run, stderr, cli.global.quiet, || {
-                invoke((run, writer), Err(&error), cli, environment, events)
+                invoke(
+                    (run, writer, &Plugins::default()),
+                    Err(&error),
+                    cli,
+                    environment,
+                    events,
+                )
             });
             return (envelope, recovered_rendering(environment), said);
         }
@@ -203,7 +211,13 @@ fn configured(
         let _ = writeln!(stderr, "cupel: format: {}", format.as_str());
     }
     let envelope = guarded(run, stderr, cli.global.quiet, || {
-        invoke((run, writer), Ok(&config), cli, environment, events)
+        invoke(
+            (run, writer, &plugins),
+            Ok(&config),
+            cli,
+            environment,
+            events,
+        )
     });
     (envelope, rendering, said)
 }
@@ -211,7 +225,7 @@ fn configured(
 /// Runs the verb of `run` with `config`, the loaded configuration or why it did not load. The
 /// run may install tools as the flags say, else as whether stdout is a terminal says (ADR-081).
 fn invoke(
-    (run, writer): (&Run, &Writer),
+    (run, writer, plugins): (&Run, &Writer, &Plugins),
     config: Result<&Config, &cupel_core::Error>,
     cli: &Cli,
     environment: &Environment,
@@ -222,6 +236,7 @@ fn invoke(
         writer,
         session: &environment.session,
         config,
+        plugins,
         dry_run: cli.global.dry_run,
         installs: Permission::of(
             cli.global.install,
@@ -232,15 +247,39 @@ fn invoke(
     execute(&invocation, cli, environment, events)
 }
 
-/// The configuration, rejected when it names a check, gate metric, or language the registries
+/// The configuration and the plugins it and `path` name (ADR-088 §4), the configuration
+/// rejected when it names a check, gate metric, or language the registries, plugins included,
 /// do not have (ADR-017, ADR-038).
-fn load_config(request: &ConfigRequest) -> Result<Config, cupel_core::Error> {
+fn load_config(
+    request: &ConfigRequest,
+    path: Option<&str>,
+    run: &Run,
+) -> Result<(Config, Plugins), cupel_core::Error> {
     let config = Config::load(request)?;
-    config.validate_registered(
-        &catalog::checks(),
-        &cupel_lang::LanguageRegistry::builtin().ids(),
-    )?;
-    Ok(config)
+    let languages = cupel_lang::LanguageRegistry::builtin().ids();
+    let mut checks = catalog::checks();
+    let plugins = cupel_plugin::discover(&Discovery {
+        root: &request.root,
+        entries: &config.file.plugins,
+        path,
+        languages: &languages,
+        taken: checks
+            .iter()
+            .map(|check| check.manifest().id.clone())
+            .collect(),
+        cancel: run.cancellation(),
+    })?;
+    plugins.register_checks(&mut checks);
+    config.validate_registered(&checks, &languages)?;
+    Ok((config, plugins))
+}
+
+/// The `PATH` plugins are searched on: the invocation's, unless `--no-path-plugins`.
+fn plugin_path<'a>(environment: &'a Environment, cli: &Cli) -> Option<&'a str> {
+    environment
+        .path
+        .as_deref()
+        .filter(|_| !cli.global.no_path_plugins)
 }
 
 /// `init`, `doctor`, and `serve` run even when configuration does not load: `init` replaces a
@@ -324,7 +363,7 @@ fn run_verb(
     let (run, writer, dry_run) = (invocation.run, invocation.writer, invocation.dry_run);
     match verb {
         VerbArgs::Describe(args) => {
-            let described = describe::run(run, args, writer.root())?;
+            let described = describe::run(run, args, &invocation.catalog(), writer.root())?;
             // `describe` runs nothing and writes nothing; its plan is empty.
             Ok(if dry_run {
                 invocation.nothing_planned(events)

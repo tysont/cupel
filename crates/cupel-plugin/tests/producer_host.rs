@@ -83,7 +83,12 @@ fn problem(made: cupel_core::Result<Produced>) -> String {
 #[test]
 fn the_fact_a_producer_plugin_prints_is_the_typed_fact() {
     let dir = tempfile::tempdir().unwrap();
-    let made = produce_with(dir.path(), &producer_manifest(), &prints(&[fact(2, &map())])).unwrap();
+    let made = produce_with(
+        dir.path(),
+        &producer_manifest(),
+        &prints(&[fact(2, &map())]),
+    )
+    .unwrap();
     let map: &PerTestMap = made.downcast_ref().unwrap();
     assert_eq!(map.runner, ProducerId::from("tool.vitest"));
     assert_eq!(map.tests[0].covered[0].lines, [1, 2]);

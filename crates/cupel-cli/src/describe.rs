@@ -24,8 +24,14 @@ const SUBJECTS: [&str; 6] = [
 ];
 
 /// `root` is the repository root, against which tool availability is judged for the matrix.
-pub fn run(run: &Run, args: &DescribeArgs, root: &Path) -> Result<Envelope, CupelError> {
-    Ok(run.passed(Some(describe(args, root)?)))
+/// `catalog` holds the registries, plugins included (ADR-088 §7).
+pub fn run(
+    run: &Run,
+    args: &DescribeArgs,
+    catalog: &Catalog,
+    root: &Path,
+) -> Result<Envelope, CupelError> {
+    Ok(run.passed(Some(describe(args, catalog, root)?)))
 }
 
 /// `<command> --describe`: the command named by `words`, or the CLI when there are none.
@@ -40,7 +46,11 @@ pub fn command(run: &Run, words: &[String]) -> Result<Envelope, CupelError> {
     Ok(run.passed(Some(description)))
 }
 
-fn describe(args: &DescribeArgs, root: &Path) -> Result<Description, CupelError> {
+fn describe(
+    args: &DescribeArgs,
+    catalog: &Catalog,
+    root: &Path,
+) -> Result<Description, CupelError> {
     if args.agent {
         return Err(CupelError::pending_description("describe --agent", "P8.3"));
     }
@@ -59,26 +69,26 @@ fn describe(args: &DescribeArgs, root: &Path) -> Result<Description, CupelError>
         [] => Ok(Description::Cli(registry::cli())),
         ["schema"] => Err(unknown_schema(None)),
         ["schema", name] => schema_description(name).map(Description::Schema),
-        ["languages"] => Ok(Description::Languages(Catalog::builtin().languages())),
-        ["matrix"] => Ok(Description::Matrix(Catalog::builtin().matrix(root))),
-        ["language"] => Err(unknown_language(None)),
-        ["language", id] => Catalog::builtin()
+        ["languages"] => Ok(Description::Languages(catalog.languages())),
+        ["matrix"] => Ok(Description::Matrix(catalog.matrix(root))),
+        ["language"] => Err(unknown_language(catalog, None)),
+        ["language", id] => catalog
             .language(&LangId::from(*id), root)
             .map(Description::Language)
-            .ok_or_else(|| unknown_language(Some(id))),
+            .ok_or_else(|| unknown_language(catalog, Some(id))),
         ["fact"] => Err(unknown_fact(None)),
         ["fact", kind] => fact_kind(kind)
-            .map(|kind| Description::Fact(Catalog::builtin().fact(kind)))
+            .map(|kind| Description::Fact(catalog.fact(kind)))
             .ok_or_else(|| unknown_fact(Some(kind))),
-        ["finding"] => Err(unknown_finding(None)),
-        ["finding", kind] => Catalog::builtin()
+        ["finding"] => Err(unknown_finding(catalog, None)),
+        ["finding", kind] => catalog
             .finding(kind)
             .map(Description::Finding)
-            .ok_or_else(|| unknown_finding(Some(kind))),
-        [check] if check.contains('.') => Catalog::builtin()
+            .ok_or_else(|| unknown_finding(catalog, Some(kind))),
+        [check] if check.contains('.') => catalog
             .check(&CheckId::from(*check), root)
             .map(Description::Check)
-            .ok_or_else(|| unknown_check(check)),
+            .ok_or_else(|| unknown_check(catalog, check)),
         _ => registry::find(&args.subject)
             .map(Description::Command)
             .ok_or_else(|| unknown_subject(&words.join(" "))),
@@ -128,8 +138,8 @@ fn fact_kind(name: &str) -> Option<FactKind> {
     FactKind::ALL.into_iter().find(|kind| kind.as_str() == name)
 }
 
-fn unknown_language(id: Option<&str>) -> CupelError {
-    let valid: Vec<String> = Catalog::builtin()
+fn unknown_language(catalog: &Catalog, id: Option<&str>) -> CupelError {
+    let valid: Vec<String> = catalog
         .language_ids()
         .iter()
         .map(ToString::to_string)
@@ -137,8 +147,7 @@ fn unknown_language(id: Option<&str>) -> CupelError {
     unknown_named("describe language", "language", id, valid)
 }
 
-fn unknown_check(id: &str) -> CupelError {
-    let catalog = Catalog::builtin();
+fn unknown_check(catalog: &Catalog, id: &str) -> CupelError {
     let valid: Vec<String> = catalog
         .checks()
         .iter()
@@ -147,8 +156,8 @@ fn unknown_check(id: &str) -> CupelError {
     unknown_named("describe CHECK", "check", Some(id), valid)
 }
 
-fn unknown_finding(kind: Option<&str>) -> CupelError {
-    let valid = Catalog::builtin().finding_kinds();
+fn unknown_finding(catalog: &Catalog, kind: Option<&str>) -> CupelError {
+    let valid = catalog.finding_kinds();
     unknown_named("describe finding", "finding kind", kind, valid)
 }
 

@@ -313,6 +313,7 @@ dependencies = [
  "cupel-fixtures",
  "cupel-lang",
  "cupel-mutate",
+ "cupel-plugin",
  "cupel-serve",
  "cupel-store",
  "insta",

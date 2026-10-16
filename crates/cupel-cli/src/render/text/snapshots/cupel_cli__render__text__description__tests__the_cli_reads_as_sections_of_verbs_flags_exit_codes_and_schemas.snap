@@ -48,6 +48,7 @@ global flags
   --install             Install the missing tools producers need, without asking.
                         conflicts with --no-install
   --write               Permit writes outside .cupel/.
+  --no-path-plugins     Load no cupel-check-* or cupel-produce-* plugins from PATH; [plugins] still loads.
   --help                Print help and exit.
 
 flags without a verb

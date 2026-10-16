@@ -69,6 +69,8 @@ pub struct GlobalArgs {
     pub install: bool,
     #[arg(long, global = true)]
     pub write: bool,
+    #[arg(long, global = true)]
+    pub no_path_plugins: bool,
     #[arg(long, global = true, action = ArgAction::Help)]
     pub help: Option<bool>,
 }
