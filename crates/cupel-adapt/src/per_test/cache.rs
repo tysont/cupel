@@ -1,31 +1,39 @@
-// ABOUTME: The per-test map cache (ADR-083): one entry per producer and project root under `.cupel/cache/per-test/`,
-// ABOUTME: and the refresh of a stale entry, which keeps every test no changed file touches and re-measures the rest.
-use std::collections::BTreeSet;
+// ABOUTME: The per-test map cache (ADR-083, ADR-084): one entry per producer and project root under `.cupel/cache/per-test/`,
+// ABOUTME: and the refresh of a stale entry, which keeps every test no changed function touches and re-measures the rest.
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::SystemTime;
 
 use cupel_core::{CoveredLines, Exclude, TestCoverage};
 use serde::{Deserialize, Serialize};
 
+use super::functions::FunctionEdit;
 use crate::fresh::{Changes, Sources, load};
 
 /// Bumped when what a cache entry holds, or what its tests mean, changes, so older entries are
 /// measured again rather than read.
-const VERSION: u32 = 1;
+const VERSION: u32 = 2;
 
-/// What a cache entry's report holds: the root's tests, relative to the root.
+/// Per file, a hash of each line as measured (`functions::line_hashes`).
+pub(crate) type Lines = BTreeMap<String, Vec<u64>>;
+
+/// What a cache entry's report holds: the root's tests and the lines of every file they cover
+/// as measured, relative to the root.
 #[derive(Debug, Serialize, Deserialize)]
 struct Report {
     version: u32,
     tests: Vec<TestCoverage>,
+    lines: Lines,
 }
 
-/// A cache entry read back: its record, when it was written, and its tests.
+/// A cache entry read back: its record, when it was written, its tests, and the lines they
+/// were measured on.
 pub(crate) struct Cached {
     pub sources: Sources,
     pub written: SystemTime,
     /// Relative to the project root, as they were measured.
     pub tests: Vec<TestCoverage>,
+    pub lines: Lines,
 }
 
 impl Cached {
@@ -43,6 +51,7 @@ impl Cached {
             sources,
             written,
             tests: report.tests,
+            lines: report.lines,
         })
     }
 
@@ -52,11 +61,12 @@ impl Cached {
     }
 }
 
-/// The report of a cache entry holding `tests`.
-pub(crate) fn report(tests: &[TestCoverage]) -> Vec<u8> {
+/// The report of a cache entry holding `tests`, measured on `lines`.
+pub(crate) fn report(tests: &[TestCoverage], lines: Lines) -> Vec<u8> {
     let report = Report {
         version: VERSION,
         tests: tests.to_vec(),
+        lines,
     };
     serde_json::to_vec(&report).unwrap_or_default()
 }
@@ -69,6 +79,9 @@ pub(crate) struct Staleness<'a> {
     pub sources: &'a [&'a str],
     /// Whether `file` (relative to the root) is part of `test` itself, beyond the files it covers.
     pub owns: Owns<'a>,
+    /// Per changed file, what the change did to its functions (ADR-084 §7); a changed file not
+    /// here is stale for every test that covers it.
+    pub edits: BTreeMap<String, FunctionEdit>,
 }
 
 /// Whether a file (relative to the root) is part of a test itself.
@@ -87,30 +100,54 @@ pub(crate) struct Refresh {
 
 impl Staleness<'_> {
     /// The refresh of `tests` after `changes`: every test is stale when a `whole` file changed;
-    /// otherwise a test is stale when it covers a changed or removed file or owns a changed,
-    /// added, or removed one, and the rest are kept.
+    /// otherwise a test is stale when it ran a changed function of a changed file (any line of
+    /// a changed file without an edit, or a removed one) or owns a changed, added, or removed
+    /// file, and the rest are kept, their lines moved with the edits.
     pub fn refresh(&self, tests: Vec<TestCoverage>, changes: &Changes) -> Refresh {
         let whole = changes.all().any(|file| self.whole.contains(&name(file)));
         let (stale, keep): (Vec<TestCoverage>, Vec<TestCoverage>) =
             tests.into_iter().partition(|test| {
                 whole
-                    || covers_any(&test.covered, &changes.changed)
+                    || self.ran_a_change(&test.covered, &changes.changed)
                     || changes.all().any(|file| (self.owns)(test, file))
             });
         let new_tests = changes
             .all()
             .any(|file| self.sources.iter().any(|ext| extension(file) == *ext));
         Refresh {
-            keep,
+            keep: keep.into_iter().map(|test| self.moved(test)).collect(),
             stale: stale.len(),
             measure: !stale.is_empty() || new_tests,
         }
     }
-}
 
-/// Whether any of `covered` is one of `files`.
-fn covers_any(covered: &[CoveredLines], files: &BTreeSet<String>) -> bool {
-    covered.iter().any(|lines| files.contains(&lines.file))
+    /// Whether `covered` runs a changed function of one of the changed `files`, or any line of
+    /// one without an edit.
+    fn ran_a_change(&self, covered: &[CoveredLines], files: &BTreeSet<String>) -> bool {
+        covered.iter().any(|lines| {
+            files.contains(&lines.file)
+                && self
+                    .edits
+                    .get(&lines.file)
+                    .is_none_or(|edit| edit.touches(&lines.lines))
+        })
+    }
+
+    /// `test` with its lines in edited files numbered as they are now.
+    fn moved(&self, test: TestCoverage) -> TestCoverage {
+        let covered = test
+            .covered
+            .into_iter()
+            .map(|lines| match self.edits.get(&lines.file) {
+                Some(edit) => CoveredLines {
+                    lines: edit.moved(&lines.lines),
+                    file: lines.file,
+                },
+                None => lines,
+            })
+            .collect();
+        TestCoverage::new(&test.id, test.file, covered)
+    }
 }
 
 /// Whether `file` is the test's own file, when the producer names it.
@@ -174,6 +211,7 @@ mod tests {
             whole: &["conftest.py"],
             sources: &["py"],
             owns: Box::new(own_file),
+            edits: BTreeMap::new(),
         };
         let refresh = staleness.refresh(cached(), changes);
         let kept = refresh.keep.into_iter().map(|test| test.id).collect();

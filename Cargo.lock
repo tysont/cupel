@@ -282,6 +282,7 @@ dependencies = [
  "roxmltree",
  "serde",
  "serde_json",
+ "similar",
  "tempfile",
  "toml",
 ]
