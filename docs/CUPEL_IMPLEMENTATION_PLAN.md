@@ -1009,7 +1009,7 @@ ADRs: [081](adr/CUPEL_DECISION_081.md) (where install commands live, who may ins
 
 #### P4.3 Budget scheduler
 
-**Status:** not started
+**Status:** in progress (2026-10-16) · [ADR-086](adr/CUPEL_DECISION_086.md)
 
 - Cost from store history (p50 of last 10 runs of the task shape) else manifest default; value = `tier_weight × novelty × (changed ? 2 : 1)`; greedy knapsack with dependency closure; skipped tasks reported with `reason: budget` and `est_ms`. `--jobs` concurrency cap; CPU-bound on rayon, process-spawning on tokio.
 
