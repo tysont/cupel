@@ -25,6 +25,7 @@ mod project;
 mod refusal;
 mod registry;
 mod render;
+mod resources;
 mod run;
 mod suppress;
 mod survey;

@@ -318,6 +318,7 @@ dependencies = [
  "inventory",
  "predicates",
  "proptest",
+ "rayon",
  "semver",
  "serde",
  "serde_json",

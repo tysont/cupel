@@ -9,6 +9,7 @@ use cupel_core::{
     Status, Summary, TestResults, ToolchainInfo, Verb, Writer, schema,
 };
 
+use cupel_core::budget::TaskDuration;
 use cupel_core::config::Config;
 
 use crate::error::CupelError;
@@ -40,6 +41,8 @@ pub struct Run {
 pub struct Executions {
     pub test_results: Vec<(LangId, TestResults)>,
     pub mutation_outcomes: Vec<(LangId, MutationOutcomes)>,
+    /// How long its productions and check runs took (ADR-086 §2).
+    pub durations: Vec<TaskDuration>,
 }
 
 impl Run {
@@ -73,6 +76,12 @@ impl Run {
         let mut kept = self.executions.borrow_mut();
         kept.test_results.extend(executed.test_results);
         kept.mutation_outcomes.extend(executed.mutation_outcomes);
+        kept.durations.extend(executed.durations);
+    }
+
+    /// When `limit` after the invocation started passes, as `--timeout` counts (ADR-086 §6).
+    pub fn deadline_after(&self, limit: Duration) -> Instant {
+        self.clock + limit
     }
 
     /// What was kept so far, leaving nothing.

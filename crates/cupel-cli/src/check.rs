@@ -19,6 +19,7 @@ use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::install::{self, Permission};
 use crate::project;
+use crate::resources;
 use crate::run::{Executions, Invocation, Run, shell_quote};
 
 /// `cupel check`: the envelope of running the selected checks, or of planning them.
@@ -97,6 +98,7 @@ pub fn run(
     events: &mut dyn EventSink,
 ) -> Result<CheckRun, CupelError> {
     let (run, writer) = (invocation.run, invocation.writer);
+    resources::limit_threads(args.jobs);
     let catalog = Catalog::builtin();
     let request = scope_request(args);
     let Scoped {
@@ -116,6 +118,7 @@ pub fn run(
         catalog.language_registry(),
         resolved.files.iter().chain(&base_files),
     );
+    let git = git_info(writer.root(), &resolved);
     let job = Job {
         run: run.id(),
         writer,
@@ -130,6 +133,7 @@ pub fn run(
         seed: run.seed,
         depth: config.effective.depth,
         changed: changed_lines(writer.root(), &request, &resolved)?,
+        resources: resources::of(invocation, config, args, git.as_ref())?,
     };
     let scheduler = Scheduler {
         checks: catalog.checks(),
@@ -145,7 +149,7 @@ pub fn run(
     };
     Ok(CheckRun {
         scope,
-        git: git_info(writer.root(), &resolved),
+        git,
         outcome,
     })
 }
@@ -222,6 +226,7 @@ fn schedule(
     invocation.run.keep(Executions {
         test_results: std::mem::take(&mut outcome.test_results),
         mutation_outcomes: std::mem::take(&mut outcome.mutation_outcomes),
+        durations: std::mem::take(&mut outcome.durations),
     });
     match outcome.refused.take() {
         Some(red) => Err(CupelError::Unevaluable(Box::new(red))),

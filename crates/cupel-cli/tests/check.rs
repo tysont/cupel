@@ -205,8 +205,10 @@ fn a_dry_run_plans_targets_and_the_run_record_and_writes_nothing() {
     let plan = &envelope["plan"];
     assert_eq!(plan["would_run"][0]["id"], json!("static.complexity"));
     assert_eq!(plan["would_run"][0]["targets"], json!(3));
-    assert_eq!(plan["would_run"][0]["est_ms"], json!(3));
-    assert_eq!(plan["est_total_ms"], json!(3));
+    // Three quick targets (1 ms each) and the two quick productions planning did not make,
+    // `decisions` and `norm-tree` (100 ms each, ADR-086 §3).
+    assert_eq!(plan["would_run"][0]["est_ms"], json!(203));
+    assert_eq!(plan["est_total_ms"], json!(203));
     assert_eq!(plan["would_skip"], json!([]));
     assert_eq!(
         plan["would_write"],

@@ -696,10 +696,16 @@ fn scope_how_much_flags() -> Vec<ArgDescription> {
             "--budget",
             ValueType::Duration,
             "DURATION",
-            "A time budget that overrides the depth.",
+            "A wall-clock budget: run the most valuable checks that fit and skip the rest.",
         )
-        .env(Setting::Budget.env_var())
-        .pending("P4.3"),
+        .env(Setting::Budget.env_var()),
+        valued(
+            "--jobs",
+            ValueType::Integer,
+            "N",
+            "How many threads and test processes run at once.",
+        )
+        .default_value("cores"),
     ]
 }
 

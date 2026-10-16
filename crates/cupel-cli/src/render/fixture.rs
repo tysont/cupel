@@ -321,6 +321,7 @@ fn checks() -> Vec<CheckResult> {
                 lang: Some(LangId::from("go")),
                 tool: Some(ToolId::from("cargo-criterion")),
                 see: Some("cupel doctor".to_owned()),
+                est_ms: None,
             }),
             oracle: None,
             notes: Vec::new(),
@@ -506,6 +507,7 @@ fn plan() -> RunPlan {
                 lang: Some(LangId::from("rust")),
                 tool: None,
                 see: Some("cupel describe conc.dst".to_owned()),
+                est_ms: None,
             },
         }],
         would_install: vec![PlannedInstall {

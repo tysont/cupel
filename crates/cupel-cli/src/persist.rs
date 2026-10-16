@@ -34,9 +34,10 @@ pub fn unusable(error: &StoreError) -> CupelError {
     )
 }
 
-/// Records `envelope` in the store with what it executed (its test runs, ADR-076 §7, and its
-/// mutation outcomes, ADR-080 §10) and mirrors `suppressions` (`.cupel/suppressions.toml`, when it loads) into it. The error is for
-/// one stderr line; it never changes the run's outcome (ADR-045 §8).
+/// Records `envelope` in the store with what it executed (its test runs, ADR-076 §7, its
+/// mutation outcomes, ADR-080 §10, and its durations, ADR-086 §2) and mirrors `suppressions`
+/// (`.cupel/suppressions.toml`, when it loads) into it. The error is for one stderr line; it
+/// never changes the run's outcome (ADR-045 §8).
 pub fn record(
     writer: &Writer,
     envelope: &Envelope,
@@ -57,6 +58,9 @@ pub fn record(
             .record_mutants(&envelope.run.id, lang, outcomes)
             .map_err(|error| error.to_string())?;
     }
+    store
+        .record_durations(&envelope.run.id, &executed.durations)
+        .map_err(|error| error.to_string())?;
     if let Some(suppressions) = suppressions {
         store
             .replace_suppressions(suppressions.entries())
