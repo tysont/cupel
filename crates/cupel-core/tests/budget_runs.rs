@@ -1,6 +1,7 @@
 // ABOUTME: The scheduler under `--budget` and `--jobs` over synthetic registries (ADR-086): closures that do not fit
 // ABOUTME: are skipped with `est_ms`, history changes the choice, the deadline cuts a running task, durations are kept.
 mod support;
+use support::symbols_of;
 
 use std::num::NonZeroUsize;
 use std::path::Path;
@@ -10,9 +11,7 @@ use std::time::{Duration, Instant};
 
 use cupel_core::budget::{Budget, History, Resources, TaskKind, TaskShape};
 use cupel_core::config::Config;
-use cupel_core::syntax::{
-    Decisions, ModuleGraph, Span, SymbolDef, SymbolKind, Symbols, TestFrames, Visibility,
-};
+use cupel_core::syntax::{Decisions, ModuleGraph, Symbols, TestFrames};
 use cupel_core::{
     Availability, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus, CostClass,
     Ctx, Error, Event, EventSink, Fact, FactKind, Facts, LangId, Langs, Outcome, Plan, ProduceCtx,
@@ -84,33 +83,6 @@ impl Shape {
     }
 }
 
-/// One symbol per file in scope.
-fn symbols_of(scope: &Scope) -> Symbols {
-    Symbols {
-        symbols: scope
-            .files
-            .iter()
-            .map(|file| SymbolDef {
-                name: file.clone(),
-                namespace: String::new(),
-                display: file.clone(),
-                kind: SymbolKind::Function,
-                visibility: Visibility::Public,
-                lang: LangId::from("rust"),
-                file: file.clone(),
-                span: Span {
-                    line: 1,
-                    col: 1,
-                    end_line: 2,
-                    end_col: 1,
-                },
-                body: None,
-                parameters: 0,
-            })
-            .collect(),
-    }
-}
-
 /// A check of `tier` and `cost` needing `needs`, planned over its symbols, that passes.
 struct Graded(cupel_core::Manifest);
 
@@ -120,8 +92,7 @@ impl Check for Graded {
     }
 
     fn plan(&self, _: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        let targets = scope.symbols.as_ref().map_or(0, |keys| keys.len() as u64);
-        Ok(Plan::estimate(self.0.cost, targets))
+        Ok(support::symbol_plan(self.0.cost, scope))
     }
 
     fn run(
@@ -316,13 +287,9 @@ fn a_check_whose_closure_does_not_fit_is_skipped_for_budget_with_its_estimate() 
 fn without_a_budget_everything_runs_and_nothing_is_partial() {
     let world = World::new(cheap_and_costly(), Duration::ZERO);
     let (outcome, _) = world.run(Resources::default());
-    assert!(
-        outcome
-            .checks
-            .iter()
-            .all(|check| check.status == CheckStatus::Pass)
-    );
-    assert!(!outcome.interrupted);
+    let statuses: Vec<CheckStatus> = outcome.checks.iter().map(|check| check.status).collect();
+    let expected = (vec![CheckStatus::Pass, CheckStatus::Pass], false);
+    assert_eq!((statuses, outcome.interrupted), expected);
 }
 
 #[test]
@@ -364,6 +331,17 @@ fn a_dry_run_plans_the_same_skips_and_honest_estimates() {
     assert_eq!(world.graphs_made.load(Ordering::SeqCst), 0);
 }
 
+/// The checks `events` started, in order.
+fn started(events: &[Event]) -> Vec<&str> {
+    events
+        .iter()
+        .filter_map(|event| match event {
+            Event::CheckStart { id, .. } => Some(id.as_str()),
+            _ => None,
+        })
+        .collect()
+}
+
 #[test]
 fn under_a_budget_the_most_valuable_check_runs_first_and_results_keep_registry_order() {
     let checks = vec![
@@ -372,14 +350,7 @@ fn under_a_budget_the_most_valuable_check_runs_first_and_results_keep_registry_o
     ];
     let world = World::new(checks, Duration::ZERO);
     let (outcome, events) = world.run(with_budget(60_000));
-    let started: Vec<&str> = events
-        .iter()
-        .filter_map(|event| match event {
-            Event::CheckStart { id, .. } => Some(id.as_str()),
-            _ => None,
-        })
-        .collect();
-    assert_eq!(started, ["tests.high", "static.low"]);
+    assert_eq!(started(&events), ["tests.high", "static.low"]);
     let ids: Vec<&str> = outcome
         .checks
         .iter()
@@ -445,21 +416,21 @@ fn every_production_and_check_run_is_timed_for_the_store() {
     let world = World::new(cheap_and_costly(), Duration::ZERO);
     let (outcome, _) = world.run(Resources::default());
     let rust = LangId::from("rust");
-    let shapes: Vec<&TaskShape> = outcome.durations.iter().map(|timed| &timed.shape).collect();
-    for expected in [
-        TaskShape::producer(&ProducerId::from("lang.symbols"), &rust, false),
-        TaskShape::producer(&ProducerId::from("lang.decisions"), &rust, false),
-        TaskShape::producer(&ProducerId::from("tool.graph"), &rust, false),
-        TaskShape::check(&CheckId::from("static.cheap"), &rust, 2),
-        TaskShape::check(&CheckId::from("tests.costly"), &rust, 2),
-    ] {
-        assert!(shapes.contains(&&expected), "{expected:?} in {shapes:?}");
-    }
-    assert!(
-        shapes
-            .iter()
-            .all(|shape| [TaskKind::Check, TaskKind::Producer].contains(&shape.kind))
+    let mut shapes: Vec<&TaskShape> = outcome.durations.iter().map(|timed| &timed.shape).collect();
+    shapes.sort();
+    let producer = |id: &str| TaskShape::producer(&ProducerId::from(id), &rust, false);
+    let check = |id: &str| TaskShape::check(&CheckId::from(id), &rust, 2);
+    assert_eq!(
+        shapes,
+        [
+            &check("static.cheap"),
+            &check("tests.costly"),
+            &producer("lang.decisions"),
+            &producer("lang.symbols"),
+            &producer("tool.graph"),
+        ]
     );
+    assert_eq!(shapes[0].kind, TaskKind::Check);
 }
 
 #[test]
@@ -475,10 +446,7 @@ fn the_concurrency_cap_reaches_producers() {
         jobs: NonZeroUsize::new(1),
         ..Resources::default()
     });
-    let seen = world.jobs_seen.lock().unwrap();
-    assert!(!seen.is_empty());
-    assert!(
-        seen.iter().all(|jobs| *jobs == NonZeroUsize::new(1)),
-        "{seen:?}"
-    );
+    let mut seen = world.jobs_seen.lock().unwrap().clone();
+    seen.dedup();
+    assert_eq!(seen, [NonZeroUsize::new(1)]);
 }

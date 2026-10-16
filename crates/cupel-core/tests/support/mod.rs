@@ -6,11 +6,13 @@
     reason = "each test binary uses a different subset of the helpers"
 )]
 
+use std::collections::BTreeSet;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use cupel_core::config::{Config, ConfigRequest};
+use cupel_core::syntax::{Span, SymbolDef, SymbolKind, Symbols, Visibility};
 use cupel_core::{
     Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CostClass, EventSink,
     FactKind, Facts, Job, Lang, LangFamily, LangId, Manifest, Plan, Result, RunId, Scope,
@@ -76,6 +78,36 @@ pub fn job<'a>(
         changed: None,
         resources: cupel_core::budget::Resources::default(),
     }
+}
+
+/// One symbol per file in scope, a rust function at line 1 named for its file.
+pub fn symbols_of(scope: &Scope) -> Symbols {
+    let symbol = |file: &String| SymbolDef {
+        name: file.clone(),
+        namespace: String::new(),
+        display: file.replace(".x", ""),
+        kind: SymbolKind::Function,
+        visibility: Visibility::Public,
+        lang: LangId::from("rust"),
+        file: file.clone(),
+        span: Span {
+            line: 1,
+            col: 1,
+            end_line: 2,
+            end_col: 1,
+        },
+        body: None,
+        parameters: 0,
+    };
+    Symbols {
+        symbols: scope.files.iter().map(symbol).collect(),
+    }
+}
+
+/// A plan over the symbols in `scope` at `cost`, as most checks plan.
+pub fn symbol_plan(cost: CostClass, scope: &Scope) -> Plan {
+    let targets = scope.symbols.as_ref().map_or(0, BTreeSet::len);
+    Plan::estimate(cost, targets as u64)
 }
 
 /// A registered check that plans nothing and is never run; only its manifest matters.

@@ -2,6 +2,7 @@
 // ABOUTME: skips mutation and says so, a dry run plans it, a slow run ends at the budget, and `--jobs 1` runs one slot.
 mod support;
 
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
@@ -15,53 +16,71 @@ fn fixture() -> Option<Repo> {
     Repo::python_fixture("tests.mutation")
 }
 
-/// The entry of `id` in `envelope`'s `checks`.
-fn result<'a>(envelope: &'a Value, id: &str) -> &'a Value {
-    envelope["checks"]
+/// The fixture after running cupel with `args`, which must exit with `code`, and its envelope.
+fn ran(args: &[&str], code: i32) -> Option<(Repo, Value)> {
+    let repo = fixture()?;
+    let outcome = repo.run(args);
+    assert_eq!(outcome.code, code, "{}", outcome.stdout);
+    let envelope = outcome.envelope();
+    Some((repo, envelope))
+}
+
+/// The entries of `list` (checks, or a plan's skips) by their `id`.
+fn by_id(list: &Value) -> BTreeMap<String, Value> {
+    let entries = list.as_array().cloned().unwrap_or_default();
+    entries
+        .into_iter()
+        .map(|entry| (entry["id"].as_str().unwrap_or_default().to_owned(), entry))
+        .collect()
+}
+
+/// The checks skipped for a reason other than the budget or a missing range.
+fn skipped_otherwise(envelope: &Value) -> Vec<Value> {
+    let ok = ["budget", "needs-range"];
+    by_id(&envelope["checks"])
+        .into_values()
+        .filter(|check| check["status"] == "skipped")
+        .filter(|check| {
+            !ok.iter()
+                .any(|reason| check["skipped"]["reason"] == *reason)
+        })
+        .collect()
+}
+
+/// The commands of `envelope`'s `rerun` actions.
+fn reruns(envelope: &Value) -> Vec<String> {
+    let actions = envelope["next_actions"]
         .as_array()
-        .unwrap()
+        .cloned()
+        .unwrap_or_default();
+    actions
         .iter()
-        .find(|check| check["id"] == id)
-        .unwrap_or_else(|| panic!("no {id} in {envelope}"))
+        .filter(|action| action["kind"] == "rerun")
+        .map(|action| action["command"].as_str().unwrap_or_default().to_owned())
+        .collect()
 }
 
 #[test]
 fn a_one_second_budget_skips_mutation_and_says_so() {
-    let Some(repo) = fixture() else { return };
-    let outcome = repo.run(&["check", "--budget", "1s", "--no-gate"]);
-    assert_eq!(outcome.code, 5, "{}", outcome.stdout);
-    let envelope = outcome.envelope();
+    let Some((repo, envelope)) = ran(&["check", "--budget", "1s", "--no-gate"], 5) else {
+        return;
+    };
     assert_eq!(envelope["status"], "partial");
-    let mutation = result(&envelope, "tests.mutation");
+    let checks = by_id(&envelope["checks"]);
+    let mutation = &checks["tests.mutation"];
     assert_eq!(mutation["status"], "skipped");
     assert_eq!(mutation["skipped"]["reason"], "budget");
     let est_ms = mutation["skipped"]["est_ms"].as_u64().unwrap();
     assert!(est_ms > 1_000, "{est_ms}");
     // Which cheap checks fit depends on how much of the second starting the process took; each
     // either ran or was left out for the budget.
-    for check in envelope["checks"].as_array().unwrap() {
-        let skipped = &check["skipped"]["reason"];
-        assert!(
-            check["status"] != "skipped" || skipped == "budget" || skipped == "needs-range",
-            "{check}"
-        );
-    }
+    assert_eq!(skipped_otherwise(&envelope), Vec::<Value>::new());
     assert_eq!(envelope["run"]["budget_ms"], json!(1_000));
-    let reruns: Vec<&str> = envelope["next_actions"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|action| action["kind"] == "rerun")
-        .map(|action| action["command"].as_str().unwrap())
-        .collect();
     assert!(
-        reruns.contains(&"cupel check --only tests.mutation"),
-        "{reruns:?}"
+        reruns(&envelope).contains(&"cupel check --only tests.mutation".to_owned()),
+        "{envelope}"
     );
-    assert!(
-        repo.store().last_mutant_outcomes().unwrap().is_empty(),
-        "no mutant ran"
-    );
+    assert_eq!(repo.store().last_mutant_outcomes().unwrap().len(), 0);
     let text = repo.run(&["check", "--budget", "1s", "--no-gate", "--format", "text"]);
     assert!(
         text.stdout.contains("skipped: budget (lang python, est "),
@@ -72,26 +91,15 @@ fn a_one_second_budget_skips_mutation_and_says_so() {
 
 #[test]
 fn a_dry_run_under_a_budget_lists_mutation_in_would_skip() {
-    let Some(repo) = fixture() else { return };
-    let outcome = repo.run(&["check", "--dry-run", "--budget", "1s"]);
-    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let plan = outcome.envelope()["plan"].clone();
-    let skipped = plan["would_skip"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|skip| skip["id"] == "tests.mutation")
-        .unwrap_or_else(|| panic!("tests.mutation not in {plan}"))
-        .clone();
+    let Some((_, envelope)) = ran(&["check", "--dry-run", "--budget", "1s"], 0) else {
+        return;
+    };
+    let plan = &envelope["plan"];
+    let skips = by_id(&plan["would_skip"]);
+    let skipped = &skips["tests.mutation"];
     assert_eq!(skipped["reason"], "budget");
     assert!(skipped["est_ms"].as_u64().unwrap() > 1_000, "{skipped}");
-    let planned: Vec<&str> = plan["would_run"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|check| check["id"].as_str().unwrap())
-        .collect();
-    assert!(!planned.contains(&"tests.mutation"), "{planned:?}");
+    assert!(!by_id(&plan["would_run"]).contains_key("tests.mutation"));
     let total = plan["est_total_ms"].as_u64().unwrap();
     assert!(total <= 1_000, "{total}");
 }
@@ -155,7 +163,8 @@ fn a_run_cut_by_its_budget_ends_within_the_budget_and_the_cut_task_s_stop() {
         "took {elapsed:?}"
     );
     assert_eq!(envelope["status"], "partial");
-    let mutation = result(&envelope, "tests.mutation");
+    let checks = by_id(&envelope["checks"]);
+    let mutation = &checks["tests.mutation"];
     assert_eq!(mutation["skipped"]["reason"], "budget", "{mutation}");
     eprintln!("budget 10 s: the run's clock {duration:?}, wall {elapsed:?}");
 }
@@ -198,7 +207,7 @@ fn mutation_slots(extra: &[&str]) -> Option<Vec<String>> {
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(
-        result(&envelope, "tests.mutation")["metrics"]["executed"],
+        by_id(&envelope["checks"])["tests.mutation"]["metrics"]["executed"],
         json!(5.0)
     );
     Some(slots(tmp.path()))

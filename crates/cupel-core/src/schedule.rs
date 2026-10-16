@@ -1112,16 +1112,11 @@ impl<'a> FactStore<'a> {
             return Some(self.keep(kind, lang, Err(error)));
         }
         let ctx = self.produce_ctx(joint.needs().iter(), lang);
-        let cached = budgeted::is_cached(&joint.estimate(&self.root, &ctx.upstream));
-        let mut events = Vec::new();
-        let started = Instant::now();
-        let produced = joint.produce(&ctx, &Scope::of_files(self.files.clone()), &mut events);
-        if produced.is_ok() {
-            self.time_production(&joint.id(), lang, cached, started);
-        }
-        for event in events {
-            self.forward(event, sink);
-        }
+        let estimate = joint.estimate(&self.root, &ctx.upstream);
+        let scope = Scope::of_files(self.files.clone());
+        let produced = self.timed(&joint.id(), lang, &estimate, sink, &mut |events| {
+            joint.produce(&ctx, &scope, events)
+        });
         match produced {
             Err(Error::Cancelled) => Some(self.keep(kind, lang, Err(Error::Cancelled))),
             Err(_) => None,
@@ -1225,17 +1220,11 @@ impl<'a> FactStore<'a> {
             self.ensure_wants(producer.wants(), lang, sink, visiting);
             self.cancel.checkpoint()?;
             let ctx = self.produce_ctx(producer.needs().iter().chain(producer.wants()), lang);
-            let cached = budgeted::is_cached(&producer.estimate(&self.root, &ctx.upstream));
-            let mut events = Vec::new();
-            let started = Instant::now();
-            let produced =
-                producer.produce(&ctx, &Scope::of_files(self.files.clone()), &mut events);
-            if produced.is_ok() {
-                self.time_production(&producer.id(), lang, cached, started);
-            }
-            for event in events {
-                self.forward(event, sink);
-            }
+            let estimate = producer.estimate(&self.root, &ctx.upstream);
+            let scope = Scope::of_files(self.files.clone());
+            let produced = self.timed(&producer.id(), lang, &estimate, sink, &mut |events| {
+                producer.produce(&ctx, &scope, events)
+            });
             return produced.map(crate::producer::Produced::share);
         }
         Err(Error::AbsentFact { kind })

@@ -5,6 +5,7 @@
     reason = "test checks share the `Check::run` signature, which returns a Result"
 )]
 mod support;
+use support::symbols_of;
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -13,7 +14,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use cupel_core::config::Config;
 use cupel_core::git::{Change, ChangeKind};
-use cupel_core::syntax::{Decisions, Span, SymbolDef, SymbolKind, Symbols, Visibility};
+use cupel_core::syntax::{Decisions, Symbols};
 use cupel_core::{
     Action, ActionKind, Availability, BaseTree, Check, CheckCtx, CheckId, CheckRegistry,
     CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence, Fact, FactKind,
@@ -102,33 +103,6 @@ impl<F: Fact> Producer<F> for Counting<F> {
     }
 }
 
-/// One symbol per file in scope, at line 1.
-fn symbols_of(scope: &Scope) -> Symbols {
-    Symbols {
-        symbols: scope
-            .files
-            .iter()
-            .map(|file| SymbolDef {
-                name: file.clone(),
-                namespace: String::new(),
-                display: file.replace(".x", ""),
-                kind: SymbolKind::Function,
-                visibility: Visibility::Public,
-                lang: LangId::from("rust"),
-                file: file.clone(),
-                span: Span {
-                    line: 1,
-                    col: 1,
-                    end_line: 2,
-                    end_col: 1,
-                },
-                body: None,
-                parameters: 0,
-            })
-            .collect(),
-    }
-}
-
 /// What a test check does when it runs.
 type Body = fn(&CheckCtx, &Facts, &mut dyn EventSink) -> Result<CheckResult>;
 
@@ -146,8 +120,7 @@ impl Check for TestCheck {
     }
 
     fn plan(&self, _: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        let targets = scope.symbols.as_ref().map_or(0, |keys| keys.len() as u64);
-        Ok(Plan::estimate(self.manifest.cost, targets))
+        Ok(support::symbol_plan(self.manifest.cost, scope))
     }
 
     fn run(
@@ -201,23 +174,23 @@ fn passing(id: &str, score: Option<Score>) -> CheckResult {
     }
 }
 
-fn check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
-    Box::new(TestCheck {
+/// A quick tier-0 check that needs `needs` and runs `body`, once per family when `spans_family`.
+fn test_check(id: &str, needs: &[FactKind], body: Body, spans_family: bool) -> TestCheck {
+    TestCheck {
         manifest: support::manifest(id, needs, &[]),
         body,
-        spans_family: false,
+        spans_family,
         weighted: false,
-    })
+    }
+}
+
+fn check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
+    Box::new(test_check(id, needs, body, false))
 }
 
 /// A check that runs once per language family, over every member language's facts.
 fn family_check(id: &str, needs: &[FactKind], body: Body) -> Box<dyn Check> {
-    Box::new(TestCheck {
-        manifest: support::manifest(id, needs, &[]),
-        body,
-        spans_family: true,
-        weighted: false,
-    })
+    Box::new(test_check(id, needs, body, true))
 }
 
 /// A world: registries, a repository directory, and its configuration.
@@ -303,28 +276,25 @@ fn ok(_: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
 }
 
 /// A check that also reads `Symbols` from a range's base side (ADR-056).
-struct BaseCheck {
-    manifest: Manifest,
-    body: Body,
-}
+struct BaseCheck(TestCheck);
 
 impl Check for BaseCheck {
     fn manifest(&self) -> &Manifest {
-        &self.manifest
+        self.0.manifest()
     }
 
     fn plan(&self, _: &CheckCtx, _: &Scope) -> Result<Plan> {
-        Ok(Plan::estimate(self.manifest.cost, 1))
+        Ok(Plan::estimate(self.0.manifest.cost, 1))
     }
 
     fn run(
         &self,
         ctx: &CheckCtx,
         facts: &Facts,
-        _: &Plan,
+        plan: &Plan,
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
-        (self.body)(ctx, facts, sink)
+        self.0.run(ctx, facts, plan, sink)
     }
 
     fn base_needs(&self) -> &[FactKind] {
@@ -333,10 +303,7 @@ impl Check for BaseCheck {
 }
 
 fn base_check(id: &str, body: Body) -> Box<dyn Check> {
-    Box::new(BaseCheck {
-        manifest: support::manifest(id, &[FactKind::Symbols], &[]),
-        body,
-    })
+    Box::new(BaseCheck(test_check(id, &[FactKind::Symbols], body, false)))
 }
 
 /// A base side holding `gone.x`, which the range deleted, and `a.x`, which it modified.

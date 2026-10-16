@@ -6,6 +6,8 @@ use std::time::Instant;
 use super::{Execution, FactStore, Job, Prepared, Skip, Task, elapsed_ms, manifest_kinds};
 use crate::budget::{Candidate, History, TaskDuration, TaskShape, choose, tie, value};
 use crate::cancel::Cancellation;
+use crate::error::Result;
+use crate::event::{Event, EventSink};
 use crate::fact::FactKind;
 use crate::grade::CostClass;
 use crate::id::{LangId, ProducerId};
@@ -82,7 +84,7 @@ pub(super) fn skip(lang: &LangId, est_ms: u64) -> Skipped {
 }
 
 /// Whether a producer that estimates `estimate` would read its cache rather than run.
-pub(super) fn is_cached(estimate: &Estimate) -> bool {
+fn is_cached(estimate: &Estimate) -> bool {
     estimate.note.as_deref() == Some(CACHED)
 }
 
@@ -199,19 +201,30 @@ fn production(
 }
 
 impl FactStore<'_> {
-    /// Records how long a successful production of `producer` for `lang`, started at `started`,
-    /// took.
-    pub(super) fn time_production(
+    /// Runs `produce`, `producer`'s production for `lang`, forwarding the events it emitted and
+    /// recording how long it took when it succeeded, under its shape (ADR-086 §2): `estimate`
+    /// says whether it would read its cache.
+    pub(super) fn timed<T>(
         &mut self,
         producer: &ProducerId,
         lang: &Lang,
-        cached: bool,
-        started: Instant,
-    ) {
-        self.durations.push(TaskDuration {
-            shape: TaskShape::producer(producer, &lang.id, cached),
-            duration_ms: elapsed_ms(started),
-        });
+        estimate: &Estimate,
+        sink: &mut dyn EventSink,
+        produce: &mut dyn FnMut(&mut Vec<Event>) -> Result<T>,
+    ) -> Result<T> {
+        let mut events = Vec::new();
+        let started = Instant::now();
+        let result = produce(&mut events);
+        if result.is_ok() {
+            self.durations.push(TaskDuration {
+                shape: TaskShape::producer(producer, &lang.id, is_cached(estimate)),
+                duration_ms: elapsed_ms(started),
+            });
+        }
+        for event in events {
+            self.forward(event, sink);
+        }
+        result
     }
 }
 

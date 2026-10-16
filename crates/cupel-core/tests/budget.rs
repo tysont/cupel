@@ -138,11 +138,17 @@ fn ties_are_broken_by_the_seeded_key_so_a_seed_repeats_the_order() {
 #[test]
 fn value_is_tier_weight_times_novelty_times_the_change_bonus() {
     let tier = |t: u8| Tier::try_from(t).unwrap();
-    assert!((value(tier(0), Novelty::Scored, false) - 1.0).abs() < f64::EPSILON);
-    assert!((value(tier(3), Novelty::Scored, false) - 4.0).abs() < f64::EPSILON);
-    assert!((value(tier(3), Novelty::Unscored, false) - 8.0).abs() < f64::EPSILON);
-    assert!((value(tier(3), Novelty::Repeated, false) - 2.0).abs() < f64::EPSILON);
-    assert!((value(tier(3), Novelty::Unscored, true) - 16.0).abs() < f64::EPSILON);
+    let values = [
+        value(tier(0), Novelty::Scored, false),
+        value(tier(3), Novelty::Scored, false),
+        value(tier(3), Novelty::Unscored, false),
+        value(tier(3), Novelty::Repeated, false),
+        value(tier(3), Novelty::Unscored, true),
+    ];
+    assert_eq!(
+        values.map(|value| value.to_string()),
+        ["1", "4", "8", "2", "16"]
+    );
 }
 
 #[test]

@@ -23,20 +23,25 @@ pub enum TaskKind {
     Producer,
 }
 
+/// Each kind with the name the store keeps it under.
+const TASK_KINDS: [(TaskKind, &str); 2] =
+    [(TaskKind::Check, "check"), (TaskKind::Producer, "producer")];
+
 impl TaskKind {
     /// The name the store keeps it under.
     pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Check => "check",
-            Self::Producer => "producer",
-        }
+        TASK_KINDS
+            .iter()
+            .find(|(kind, _)| *kind == self)
+            .map_or("", |(_, name)| name)
     }
 
     /// The kind named `name`, as the store keeps it.
     pub fn named(name: &str) -> Option<Self> {
-        [Self::Check, Self::Producer]
-            .into_iter()
-            .find(|kind| kind.as_str() == name)
+        TASK_KINDS
+            .iter()
+            .find(|(_, named)| *named == name)
+            .map(|(kind, _)| *kind)
     }
 }
 
@@ -86,25 +91,22 @@ pub struct TaskDuration {
     pub duration_ms: u64,
 }
 
-/// Whether a check's findings would be new (ADR-086 §4).
+/// Whether a check's findings would be new (ADR-086 §4). The discriminant is the power of two
+/// its value is multiplied by, plus one.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Novelty {
-    /// The store holds no result of the check that ran.
+    /// The store holds no result of the check that ran: ×2.
     #[default]
-    Unscored,
-    /// Its latest result was made at another state of the tree.
-    Scored,
-    /// Its latest result was made at this commit with a clean tree, which is still clean.
-    Repeated,
+    Unscored = 2,
+    /// Its latest result was made at another state of the tree: ×1.
+    Scored = 1,
+    /// Its latest result was made at this commit with a clean tree, which is still clean: ×½.
+    Repeated = 0,
 }
 
 impl Novelty {
     fn factor(self) -> f64 {
-        match self {
-            Self::Unscored => 2.0,
-            Self::Scored => 1.0,
-            Self::Repeated => 0.5,
-        }
+        2_f64.powi(self as i32 - 1)
     }
 }
 

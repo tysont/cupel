@@ -106,13 +106,7 @@ pub fn run(
         files: resolved,
         ..
     } = resolve(writer, config, &request, catalog.language_registry())?;
-    let selected = Selection {
-        depth: config.effective.depth,
-        only: args.only.clone(),
-        skip: args.skip.clone(),
-        tier: args.tier.clone(),
-    }
-    .select(catalog.checks())?;
+    let selected = selection(config, args).select(catalog.checks())?;
     let base_files = base_files(catalog.language_registry(), &resolved);
     let langs = languages_of(
         catalog.language_registry(),
@@ -152,6 +146,16 @@ pub fn run(
         git,
         outcome,
     })
+}
+
+/// The checks `args` select at the configuration's depth.
+fn selection(config: &Config, args: &ScopeArgs) -> Selection {
+    Selection {
+        depth: config.effective.depth,
+        only: args.only.clone(),
+        skip: args.skip.clone(),
+        tier: args.tier.clone(),
+    }
 }
 
 /// Before a run, the missing tools of the producers it would choose for the job's checks and

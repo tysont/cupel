@@ -1,7 +1,7 @@
 // ABOUTME: Tests for the fact store: opening through a `Writer`, migrations, recording and reading
 // ABOUTME: runs, findings, checks, metrics, baselines, facts, symbols, and suppressions (ADR-045).
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use cupel_core::budget::{TaskDuration, TaskShape};
 use cupel_core::syntax::{MutationOperator, Span, SymbolDef, SymbolKey, SymbolKind, Visibility};
@@ -39,18 +39,21 @@ impl Repo {
 
     /// Every file under the root, relative and sorted.
     fn files(&self) -> Vec<String> {
-        fn walk(dir: &Path, root: &Path, out: &mut Vec<String>) {
-            for entry in fs::read_dir(dir).unwrap() {
-                let path = entry.unwrap().path();
+        let root = self.root();
+        let mut pending = vec![root.clone()];
+        let mut out = Vec::new();
+        while let Some(dir) = pending.pop() {
+            for path in fs::read_dir(dir)
+                .unwrap()
+                .map(|entry| entry.unwrap().path())
+            {
                 if path.is_dir() {
-                    walk(&path, root, out);
+                    pending.push(path);
                 } else {
-                    out.push(path.strip_prefix(root).unwrap().display().to_string());
+                    out.push(path.strip_prefix(&root).unwrap().display().to_string());
                 }
             }
         }
-        let mut out = Vec::new();
-        walk(&self.root(), &self.root(), &mut out);
         out.sort();
         out
     }
@@ -866,6 +869,20 @@ fn result_with(id: &str, status: &str) -> Value {
     })
 }
 
+/// Records `runs` runs, run `n` timing each shape at `n` times its unit in milliseconds.
+fn record_runs(store: &Store, shapes: &[(&TaskShape, u64)], runs: u8) {
+    for n in 1..=runs {
+        let durations: Vec<TaskDuration> = shapes
+            .iter()
+            .map(|(shape, unit)| TaskDuration {
+                shape: (*shape).clone(),
+                duration_ms: u64::from(n) * unit,
+            })
+            .collect();
+        store.record_durations(&run_id(n), &durations).unwrap();
+    }
+}
+
 #[test]
 fn durations_come_back_newest_first_per_shape_and_at_most_ten() {
     let repo = Repo::new();
@@ -877,19 +894,7 @@ fn durations_come_back_newest_first_per_shape_and_at_most_ten() {
         false,
     );
     let clones = TaskShape::check(&CheckId::from("static.clones"), &rust, 40);
-    for n in 1..=12_u8 {
-        let durations = [
-            TaskDuration {
-                shape: pytest.clone(),
-                duration_ms: u64::from(n) * 100,
-            },
-            TaskDuration {
-                shape: clones.clone(),
-                duration_ms: u64::from(n),
-            },
-        ];
-        store.record_durations(&run_id(n), &durations).unwrap();
-    }
+    record_runs(&store, &[(&pytest, 100), (&clones, 1)], 12);
     let recent = store.recent_durations().unwrap();
     let of = |shape: &TaskShape| -> Vec<u64> {
         recent
