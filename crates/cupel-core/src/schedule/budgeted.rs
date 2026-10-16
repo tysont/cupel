@@ -177,15 +177,14 @@ fn production(
     let deciding: Deciding<'_> = store.deciding(lang);
     let reached = store.reached.get(&lang.id).cloned().unwrap_or_default();
     let made = |kind: FactKind| store.made.contains_key(&(kind, lang.id.clone()));
-    let (id, estimate) = match deciding.joint(kind, &reached, &made) {
-        Some((joint, _)) => (joint.id(), joint.estimate(deciding.ctx, &deciding.upstream)),
-        None => {
-            let producer = deciding.chosen(kind)?;
-            (
-                producer.id(),
-                producer.estimate(deciding.ctx, &deciding.upstream),
-            )
-        }
+    let (id, estimate) = if let Some((joint, _)) = deciding.joint(kind, &reached, &made) {
+        (joint.id(), joint.estimate(deciding.ctx, &deciding.upstream))
+    } else {
+        let producer = deciding.chosen(kind)?;
+        (
+            producer.id(),
+            producer.estimate(deciding.ctx, &deciding.upstream),
+        )
     };
     let cached = is_cached(&estimate);
     let default = if cached {

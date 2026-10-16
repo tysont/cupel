@@ -26,7 +26,7 @@ struct Slow<F> {
     cost: CostClass,
     wait: Duration,
     made: Arc<AtomicUsize>,
-    jobs: Arc<Mutex<Option<Option<NonZeroUsize>>>>,
+    jobs: Arc<Mutex<Vec<Option<NonZeroUsize>>>>,
     make: fn(&Scope) -> F,
 }
 
@@ -53,7 +53,7 @@ impl<F: Fact> Producer<F> for Slow<F> {
 
     fn produce(&self, ctx: &ProduceCtx, scope: &Scope, _: &mut dyn EventSink) -> Result<F> {
         self.made.fetch_add(1, Ordering::SeqCst);
-        *self.jobs.lock().unwrap() = Some(ctx.focus.jobs);
+        self.jobs.lock().unwrap().push(ctx.focus.jobs);
         if !ctx.cancel.wait(self.wait) {
             return Err(Error::Cancelled);
         }
@@ -67,7 +67,7 @@ struct Shape {
     cost: CostClass,
     wait: Duration,
     made: Arc<AtomicUsize>,
-    jobs: Arc<Mutex<Option<Option<NonZeroUsize>>>>,
+    jobs: Arc<Mutex<Vec<Option<NonZeroUsize>>>>,
 }
 
 impl Shape {
@@ -165,14 +165,14 @@ struct World {
     producers: ProducerRegistry,
     config: Config,
     graphs_made: Arc<AtomicUsize>,
-    jobs_seen: Arc<Mutex<Option<Option<NonZeroUsize>>>>,
+    jobs_seen: Arc<Mutex<Vec<Option<NonZeroUsize>>>>,
 }
 
 impl World {
     fn new(checks: Vec<Box<dyn Check>>, slow: Duration) -> Self {
         let dir = tempfile::tempdir().unwrap();
         let graphs_made = Arc::new(AtomicUsize::new(0));
-        let jobs_seen = Arc::new(Mutex::new(None));
+        let jobs_seen = Arc::new(Mutex::new(Vec::new()));
         let none = Arc::new(AtomicUsize::new(0));
         let producer = |id, cost, wait, made: &Arc<AtomicUsize>| Shape {
             id,
@@ -239,17 +239,17 @@ impl World {
 }
 
 /// A budget of `ms` milliseconds from now.
-fn budget(ms: u64) -> Option<Budget> {
+fn budget(ms: u64) -> Budget {
     let limit = Duration::from_millis(ms);
-    Some(Budget {
+    Budget {
         limit,
         deadline: Instant::now() + limit,
-    })
+    }
 }
 
 fn with_budget(ms: u64) -> Resources {
     Resources {
-        budget: budget(ms),
+        budget: Some(budget(ms)),
         ..Resources::default()
     }
 }
@@ -331,7 +331,7 @@ fn recorded_durations_replace_the_default_and_let_the_check_fit() {
     let mut history = History::default();
     recorded(&mut history, "tool.graph", 40);
     let (outcome, _) = world.run(Resources {
-        budget: budget(5_000),
+        budget: Some(budget(5_000)),
         history,
         ..Resources::default()
     });
@@ -402,7 +402,7 @@ fn a_task_running_at_the_deadline_is_cut_and_the_run_ends_near_the_budget() {
     recorded(&mut history, "tool.frames", 10);
     let started = Instant::now();
     let (outcome, _) = world.run(Resources {
-        budget: budget(300),
+        budget: Some(budget(300)),
         history,
         ..Resources::default()
     });
@@ -429,7 +429,7 @@ fn a_task_the_knapsack_took_is_skipped_when_an_earlier_one_overran() {
     recorded(&mut history, "tool.frames", 10);
     recorded(&mut history, "tool.graph", 400);
     let (outcome, _) = world.run(Resources {
-        budget: budget(800),
+        budget: Some(budget(800)),
         history,
         ..Resources::default()
     });
@@ -475,5 +475,10 @@ fn the_concurrency_cap_reaches_producers() {
         jobs: NonZeroUsize::new(1),
         ..Resources::default()
     });
-    assert_eq!(*world.jobs_seen.lock().unwrap(), Some(NonZeroUsize::new(1)));
+    let seen = world.jobs_seen.lock().unwrap();
+    assert!(!seen.is_empty());
+    assert!(
+        seen.iter().all(|jobs| *jobs == NonZeroUsize::new(1)),
+        "{seen:?}"
+    );
 }
