@@ -74,6 +74,16 @@ pub enum ConfigError {
          and head, and a tree scope has no range"
     )]
     TreeGateNeedsRange { check: String },
+    /// A plugin cannot describe itself, or describes something Cupel cannot register (ADR-088 §5).
+    #[error("plugin `{name}` (`{program}`) cannot be used: {problem}")]
+    Plugin {
+        name: String,
+        /// How the plugin is run: its program and arguments.
+        program: String,
+        problem: String,
+        /// Whether it was found on `PATH` rather than in `[plugins]`.
+        on_path: bool,
+    },
     /// An ID is well formed but no registry knows it (ADR-017).
     #[error(
         "unknown {what} in `{section}`; registered: {}",

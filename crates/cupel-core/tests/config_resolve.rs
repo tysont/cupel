@@ -249,3 +249,12 @@ fn echo_carries_the_effective_config_and_its_sources() {
         })
     );
 }
+
+#[test]
+fn echo_names_plugins_only_when_some_are_configured() {
+    let request = request(Settings::default(), &[], None);
+    let echo = |text| resolve(Some(text), &request).unwrap().echo().effective;
+    let configured = echo("[plugins]\ncov = [\"python3\", \"cov.py\"]\n");
+    assert_eq!(configured["plugins"], json!({"cov": ["python3", "cov.py"]}));
+    assert!(!echo("").contains_key("plugins"));
+}

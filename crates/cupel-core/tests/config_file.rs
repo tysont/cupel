@@ -197,9 +197,57 @@ fn unknown_keys_are_rejected_at_every_closed_level() {
             "unknown field `pr`, expected `changed` or `tree`",
         ),
         (
-            "[plugins]\nfoo = \"bar\"\n",
-            "unknown field `plugins`, expected one of `required_version`, `default_branch`, `depth`, \
-             `format`, `budget`, `scope`, `roots`, `lang`, `checks`, `oracles`, `gate`, `profile`",
+            "[plugin]\nfoo = \"bar\"\n",
+            "unknown field `plugin`, expected one of `required_version`, `default_branch`, `depth`, \
+             `format`, `budget`, `scope`, `roots`, `lang`, `checks`, `oracles`, `gate`, `profile`, \
+             `plugins`",
+        ),
+    ];
+    assert_problems(&cases);
+}
+
+#[test]
+fn a_plugin_is_one_executable_or_a_program_with_its_arguments() {
+    let file = parse(
+        "[plugins]\ncov = \"tools/cupel-produce-cov\"\nlint = [\"python3\", \"lint.py\", \"--fast\"]\n",
+    )
+    .unwrap();
+    let commands: Vec<(&str, &str, &[String])> = file
+        .plugins
+        .iter()
+        .map(|(name, entry)| (name.as_str(), entry.program(), entry.args()))
+        .collect();
+    assert_eq!(
+        commands,
+        [
+            ("cov", "tools/cupel-produce-cov", &[][..]),
+            (
+                "lint",
+                "python3",
+                &["lint.py".to_owned(), "--fast".to_owned()][..]
+            ),
+        ]
+    );
+}
+
+#[test]
+fn bad_plugin_entries_are_usage_errors() {
+    let cases = [
+        (
+            "[plugins]\nLint = \"lint\"\n",
+            "invalid plugin name `Lint`: must match `[a-z][a-z0-9_-]*`",
+        ),
+        (
+            "[plugins]\nlint = []\n",
+            "invalid plugin `lint`: expected a program, or an array of a program and its arguments",
+        ),
+        (
+            "[plugins]\nlint = [\"python3\", 3]\n",
+            "invalid plugin `lint`: expected a program, or an array of a program and its arguments",
+        ),
+        (
+            "[plugins]\nlint = \"\"\n",
+            "invalid plugin `lint`: expected a program, or an array of a program and its arguments",
         ),
     ];
     assert_problems(&cases);

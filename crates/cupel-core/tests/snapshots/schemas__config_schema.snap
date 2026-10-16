@@ -77,6 +77,14 @@ expression: pretty(&schema)
       },
       "default": {}
     },
+    "plugins": {
+      "description": "Plugins by name: their checks and producers join the native ones (ADR-088).",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/PluginEntry"
+      },
+      "default": {}
+    },
     "profile": {
       "description": "Named settings selected with `--profile` or `CUPEL_PROFILE`.",
       "type": "object",
@@ -239,6 +247,20 @@ expression: pretty(&schema)
         "ref",
         "command",
         "spec"
+      ]
+    },
+    "PluginEntry": {
+      "description": "How to run one plugin (ADR-088 §1): one executable, or a program and its leading arguments.\nA program containing `/` is relative to the repository root; any other is found on `PATH`.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       ]
     },
     "RootConfig": {
