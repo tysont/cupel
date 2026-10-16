@@ -12,7 +12,7 @@ verbs
   survey    Rank a whole tree without a baseline or gate: the worst targets per metric.
   explain   Give full context and remediation for one finding or check result.
   baseline  Set, show, diff, export, or import the baseline runs are compared with.
-  oracle    Add, list, remove, or verify the oracles differential checks compare with. · pending P5.2
+  oracle    Add, list, remove, or verify the oracles differential checks compare with.
   tests     List the tests a scope impacts, why, and the command that runs them.
   suppress  Suppress a finding, with a reason and an optional expiry.
   serve     Run the daemon that answers this repository's invocations with warm caches, or stop it.

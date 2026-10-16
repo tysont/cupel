@@ -438,6 +438,50 @@ warn (3)
       …
 ```
 
+### `cupel oracle`
+
+An oracle is something a check compares against: an earlier version at a git ref, a command that computes the reference answer, or a specification. Oracles are defined in `cupel.toml` as `[oracles.<name>]` tables, so they are reviewed and committed like the rest of the configuration; whether each one is verified is recorded in the fact store. `add` and `remove` change only that table, keeping the rest of the file as it was, and preview the diff until you pass `--write`.
+
+```sh
+cupel oracle add release --kind ref --ref v1.2.0 --write
+cupel oracle add sum --kind command --cmd "python3 sum.py {input}" --input "1 2 3" --input "40 2" --write
+cupel oracle add model --kind spec --spec specs/cart.qnt --lang quint --write
+cupel oracle list                     # every oracle with its state
+cupel oracle verify sum               # run its smoke comparison; --all verifies every oracle
+cupel oracle remove sum --write       # drop the table and the verification
+```
+
+`verify` runs a smoke comparison for each kind. A ref must resolve to a commit. A command runs twice on each known input (`--input`, or one empty input; `{input}` is replaced by the shell-quoted input) and must exit 0 and print the same both times. A spec must be accepted by its language's parser: `quint parse`, `sany` for TLA+, or `p compile`. A pass records the oracle's identity hash (its definition, plus the commit its ref resolves to or the spec file's content) with the run that verified it. The oracle stays `verified` while that identity holds. Editing its table, moving its ref, or changing its spec file makes it `changed`. A ref or spec file that is gone makes it `unreachable`. A failed `verify` revokes the verification. An oracle that cannot be reached exits 3 (`oracle.unreachable`); one that answers differently each time exits 1 (`oracle.smoke-failed`):
+
+```console
+$ cupel oracle verify --all --format text
+cupel oracle: fail (exit 1)
+
+summary   1 finding · fail 1 · warn 0 · info 0 · new 0 · resolved 0 · suppressed 0
+
+oracles  3
+  clock    command `python3 -c 'import time; print(time.time())'` · unverified
+  release  ref v1.2.0 · verified · recorded 2026-10-16T21:42:51Z by run_01M53ANXSYM8E0R93GKZRRF5CT
+  sum      command `python3 sum.py {input}` · inputs 2 · verified · recorded 2026-10-16T21:42:51Z by run_01M53ANXSYM8E0R93GKZRRF5CT
+
+fail (1)
+  oracle
+    Oracle `clock` is not verified: the command printed different output twice for the empty input
+      fnd_daeb25 · oracle.smoke-failed · tier 0 · confidence 1
+      …
+
+$ cupel oracle list --format text     # after adding an input to `sum`
+…
+oracles  3
+  clock    command `python3 -c 'import time; print(time.time())'` · unverified
+  release  ref v1.2.0 · verified · recorded 2026-10-16T21:42:51Z by run_01M53ANXSYM8E0R93GKZRRF5CT
+  sum      command `python3 sum.py {input}` · inputs 3 · changed · recorded 2026-10-16T21:42:51Z by run_01M53ANXSYM8E0R93GKZRRF5CT
+```
+
+The envelope of every `oracle` command carries the oracles it reported in `oracles`: each one's `name`, `definition`, `state`, identity `hash`, `verified_at`, and `verified_run`.
+
+A check that compares against an oracle names it in its result's `oracle` member. It uses `--oracle NAME` on `check` or `survey`, else the first verified oracle, else the first defined one; with no oracle defined, the check is skipped as `unconfigured`. When the run is graded, a result against an oracle that is not verified at that moment is capped at tier 3 and the run carries a `warn` finding, `oracle.unverified` (`cupel describe finding oracle.unverified`), whose action is `verify_oracle`. Only `cupel oracle verify` lifts the cap; suppressing the finding does not. None of the built-in checks listed under [Checks](#checks) compares against an oracle.
+
 ### `cupel suppress`
 
 `suppress` silences one finding with a reason and an optional expiry date or git ref. It writes `.cupel/suppressions.toml`, the one file under `.cupel/` meant to be committed. A suppressed finding still appears, with `suppressed: true` and severity `info`, and no longer counts against the gate. When the expiry passes, the finding is active again and a `suppression.expired` finding says so.
@@ -811,6 +855,10 @@ cyclomatic_max = 15
 [checks."static.deps".layers]      # lower layers may not import higher ones
 order = ["domain", "app", "infra"]
 map = { domain = "src/domain/**", app = "src/app/**", infra = "src/infra/**" }
+
+[oracles.release]                  # what checks compare against; see cupel oracle
+kind = "ref"
+ref = "v1.2.0"
 
 [gate.changed]                     # evaluated for --changed and --base scopes
 "tests.weakening" = "none"

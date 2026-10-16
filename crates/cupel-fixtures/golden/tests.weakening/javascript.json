@@ -38,6 +38,7 @@
       "summary": "Run `tests.weakening` over a range (`--changed` or `--base`): it compares base and head."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

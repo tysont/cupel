@@ -71,6 +71,7 @@ expression: pretty(&schema)
       "default": {}
     },
     "oracles": {
+      "description": "Oracles by name, each with exactly its kind's keys (ADR-090 §1).",
       "type": "object",
       "additionalProperties": {
         "$ref": "#/$defs/OracleConfig"
@@ -210,6 +211,14 @@ expression: pretty(&schema)
             "string",
             "null"
           ]
+        },
+        "inputs": {
+          "description": "The known inputs of a command's smoke comparison, for `kind = \"command\"`; one empty\ninput when none are given (ADR-090 §3).",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
         },
         "kind": {
           "$ref": "#/$defs/OracleKind"

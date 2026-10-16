@@ -17,6 +17,7 @@ use cupel_lang::LanguageRegistry;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::install::{self, Permission};
+use crate::oracle;
 use crate::project;
 use crate::resources;
 use crate::run::{Executions, Invocation, Run, shell_quote};
@@ -105,7 +106,9 @@ pub fn run(
         files: resolved,
         ..
     } = resolve(writer, config, &request, catalog.language_registry())?;
-    let selected = selection(config, args).select(catalog.checks())?;
+    let mut selected = selection(config, args).select(catalog.checks())?;
+    let oracle =
+        oracle::select::Selected::choose(writer, config, args.oracle.as_deref(), &mut selected)?;
     let base_files = base_files(catalog.language_registry(), &resolved);
     let langs = languages_of(
         catalog.language_registry(),
@@ -132,7 +135,8 @@ pub fn run(
         checks: catalog.checks(),
         producers: catalog.producers(),
     };
-    let outcome = schedule(&scheduler, &job, invocation, events)?;
+    let mut outcome = schedule(&scheduler, &job, invocation, events)?;
+    oracle.apply(&mut outcome, catalog.checks());
     let scope = ScopeInfo {
         mode: request.mode(),
         files: resolved.files.len() as u64,

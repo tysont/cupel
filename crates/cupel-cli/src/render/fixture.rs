@@ -2,6 +2,7 @@
 // ABOUTME: Built from struct literals, so a new envelope field fails to compile here until it is filled.
 use std::collections::BTreeMap;
 
+use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::{
     Action, ActionKind, ArgDescription, BaselineRef, CheckId, CheckResult, CheckStatus,
     CommandDescription, ConfigEcho, ConfigSource, CostClass, CupelInfo, Delta, Description,
@@ -13,6 +14,7 @@ use cupel_core::{
     Status, Summary, Symbol, Target, TestCommand, TestsReport, Tier, ToolId, ToolchainInfo,
     ValueType, Verb,
 };
+use cupel_core::{OracleReport, OracleState};
 use serde_json::{Map, Value, json};
 
 fn object(value: Value) -> Map<String, Value> {
@@ -165,9 +167,49 @@ pub fn envelope() -> Envelope {
         explanation: Some(explanation()),
         rankings: Some(rankings()),
         tests: Some(tests()),
+        oracles: Some(oracles()),
         truncated: false,
         total_findings: 3,
     }
+}
+
+/// A verified ref oracle and a command oracle whose definition changed since it was verified
+/// (ADR-091 §6).
+fn oracles() -> Vec<OracleReport> {
+    let definition = |kind, reference: Option<&str>, cmd: Option<&str>| OracleConfig {
+        kind,
+        reference: reference.map(str::to_owned),
+        cmd: cmd.map(str::to_owned),
+        spec: None,
+        lang: None,
+        inputs: vec!["2 + 2".to_owned()],
+    };
+    vec![
+        OracleReport {
+            name: "bc".to_owned(),
+            definition: definition(OracleKind::Command, None, Some("bc -l <<< {input}")),
+            state: OracleState::Changed,
+            hash: Some("6b1d".to_owned()),
+            verified_at: Some("2026-10-09T08:00:00Z".to_owned()),
+            verified_run: Some(
+                "run_01JA2B3C4D5E6F7G8H9JKMNPQR"
+                    .parse()
+                    .expect("valid run ID"),
+            ),
+        },
+        OracleReport {
+            name: "pg".to_owned(),
+            definition: definition(OracleKind::Ref, Some("v1.2.0"), None),
+            state: OracleState::Verified,
+            hash: Some("9e3a".to_owned()),
+            verified_at: Some("2026-10-10T16:00:00Z".to_owned()),
+            verified_run: Some(
+                "run_01JA2B3C4D5E6F7G8H9JKMNPQS"
+                    .parse()
+                    .expect("valid run ID"),
+            ),
+        },
+    ]
 }
 
 /// One language chose by per-test coverage and one fell back to file-level impact (ADR-077).

@@ -31,6 +31,7 @@ serde.workspace = true
 serde_json.workspace = true
 semver.workspace = true
 thiserror.workspace = true
+toml_edit.workspace = true
 
 [dev-dependencies]
 cupel-fixtures.workspace = true

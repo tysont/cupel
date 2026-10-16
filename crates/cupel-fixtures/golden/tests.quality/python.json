@@ -519,6 +519,7 @@
       "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `test_deposits_keep_the_owner`."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

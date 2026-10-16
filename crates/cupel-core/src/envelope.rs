@@ -9,10 +9,11 @@ use crate::config::ConfigEcho;
 use crate::describe::Description;
 use crate::dry_run::RunPlan;
 use crate::explanation::Explanation;
-use crate::finding::{ActionKind, Finding};
+use crate::finding::{ActionKind, Finding, Severity};
 use crate::grade::CostClass;
 use crate::hash::FindingId;
 use crate::id::{LangId, RunId};
+use crate::oracle::OracleReport;
 use crate::per_test_impact::TestsReport;
 use crate::rank::Rankings;
 pub use crate::result::{CheckResult, CheckStatus, Delta, Score, SkipReason, Skipped};
@@ -41,6 +42,9 @@ pub struct Envelope {
     /// What `tests --impacted` selects: the impacted tests and how to run them; null for every
     /// other verb (ADR-077).
     pub tests: Option<TestsReport>,
+    /// What the `oracle` verb reports: the oracles it listed, added, removed, or verified, with
+    /// their state; null for every other verb (ADR-091 §6).
+    pub oracles: Option<Vec<OracleReport>>,
     /// True when paging (`--limit`/`--offset`) left findings out.
     pub truncated: bool,
     pub total_findings: u64,
@@ -157,6 +161,21 @@ pub struct SeverityCounts {
     pub fail: u64,
     pub warn: u64,
     pub info: u64,
+}
+
+impl SeverityCounts {
+    /// How many of `findings` have each severity.
+    pub fn of(findings: &[Finding]) -> Self {
+        let mut counts = Self::default();
+        for finding in findings {
+            match finding.severity {
+                Severity::Fail => counts.fail += 1,
+                Severity::Warn => counts.warn += 1,
+                Severity::Info => counts.info += 1,
+            }
+        }
+        counts
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]

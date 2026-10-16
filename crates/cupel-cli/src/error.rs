@@ -80,18 +80,6 @@ impl CupelError {
         }
     }
 
-    /// A verb whose behavior arrives in `step`.
-    pub fn pending_verb(words: &[String], step: &str) -> Self {
-        Self::NotImplemented(Pending {
-            subject: words.join(" "),
-            what: format!("`cupel {}`", words.join(" ")),
-            step: step.to_owned(),
-            fix: "Use a verb that is implemented; `cupel describe` marks pending ones with \
-                  pending_step."
-                .to_owned(),
-        })
-    }
-
     /// A flag whose behavior arrives in `step`.
     pub fn pending_flag(flag: &str, step: &str) -> Self {
         Self::NotImplemented(Pending {
@@ -546,7 +534,7 @@ mod tests {
             ExitCode::Usage
         );
         assert_eq!(
-            CupelError::pending_verb(&["check".to_owned()], "P2.1").exit_code(),
+            CupelError::pending_flag("--cases", "P5.4").exit_code(),
             ExitCode::Usage
         );
         assert_eq!(

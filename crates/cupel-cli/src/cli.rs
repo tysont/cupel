@@ -272,9 +272,10 @@ impl VerbArgs {
 }
 
 impl Cli {
-    /// Whether this invocation only plans: `--dry-run`, or `init`, `baseline set`, or
-    /// `baseline import` without `--write`, which preview (ADR-021 §5, ADR-046 §3). Planning
-    /// invocations write nothing, not even a run record.
+    /// Whether this invocation only plans: `--dry-run`, or `init`, `baseline set`,
+    /// `baseline import`, `oracle add`, or `oracle remove` without `--write`, which preview
+    /// (ADR-021 §5, ADR-046 §3, ADR-090 §2). Planning invocations write nothing, not even a run
+    /// record.
     pub fn plans_only(&self) -> bool {
         let previews = matches!(
             self.verb,
@@ -283,6 +284,9 @@ impl Cli {
                     | VerbArgs::Baseline {
                         action: BaselineArgs::Set { .. } | BaselineArgs::Import { .. },
                         ..
+                    }
+                    | VerbArgs::Oracle {
+                        action: OracleArgs::Add { .. } | OracleArgs::Remove { .. }
                     }
             )
         );
@@ -356,6 +360,8 @@ pub enum OracleArgs {
         spec: Option<PathBuf>,
         #[arg(long, value_name = "LANG")]
         lang: Option<String>,
+        #[arg(long = "input", value_name = "INPUT")]
+        inputs: Vec<String>,
     },
     List,
     Remove {

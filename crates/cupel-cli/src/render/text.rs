@@ -4,10 +4,11 @@ mod description;
 
 use std::fmt::Write as _;
 
+use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::{
     CheckResult, Envelope, Excerpt, Explanation, Finding, GateOutcome, GateResult, GitInfo,
-    ImpactBasis, Location, Metric, NextAction, PlannedCheck, Rankings, RuleOutcome, RunInfo,
-    RunPlan, ScopeInfo, Severity, Skipped, Status, Summary, TestsReport,
+    ImpactBasis, Location, Metric, NextAction, OracleReport, PlannedCheck, Rankings, RuleOutcome,
+    RunInfo, RunPlan, ScopeInfo, Severity, Skipped, Status, Summary, TestsReport,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -55,6 +56,11 @@ pub fn render(envelope: &Envelope, color: bool) -> String {
             .tests
             .as_ref()
             .map(|tests| tests_block(tests, &paint))
+            .unwrap_or_default(),
+        envelope
+            .oracles
+            .as_ref()
+            .map(|oracles| oracles_block(oracles, &paint))
             .unwrap_or_default(),
         findings_block(envelope, &paint),
         run_block(envelope, &paint),
@@ -355,6 +361,45 @@ fn tests_block(tests: &TestsReport, paint: &Paint) -> String {
         let _ = writeln!(out, "  run in {}{scope}: {}", command.dir, command.command);
     }
     out
+}
+
+/// Each oracle with what it compares against, its state, and its recorded verification
+/// (ADR-091 §6).
+fn oracles_block(oracles: &[OracleReport], paint: &Paint) -> String {
+    let mut out = format!("{}  {}\n", paint.bold("oracles"), oracles.len());
+    let width = oracles
+        .iter()
+        .map(|oracle| oracle.name.len())
+        .max()
+        .unwrap_or(0);
+    for oracle in oracles {
+        let mut facts = vec![
+            definition(&oracle.definition),
+            oracle.state.as_str().to_owned(),
+        ];
+        if let (Some(at), Some(run)) = (&oracle.verified_at, &oracle.verified_run) {
+            facts.push(paint.dim(&format!("recorded {at} by {run}")));
+        }
+        let _ = writeln!(out, "  {:width$}  {}", oracle.name, facts.join(" · "));
+    }
+    out
+}
+
+/// What an oracle compares against, as one phrase.
+fn definition(oracle: &OracleConfig) -> String {
+    let given = |value: &Option<String>| value.clone().unwrap_or_default();
+    match oracle.kind {
+        OracleKind::Ref => format!("ref {}", given(&oracle.reference)),
+        OracleKind::Command if oracle.inputs.is_empty() => {
+            format!("command `{}`", given(&oracle.cmd))
+        }
+        OracleKind::Command => format!(
+            "command `{}` · inputs {}",
+            given(&oracle.cmd),
+            oracle.inputs.len()
+        ),
+        OracleKind::Spec => format!("spec {} ({})", given(&oracle.spec), given(&oracle.lang)),
+    }
 }
 
 /// A skip's reason followed by whichever of its fact, language, tool, and pointer are present.

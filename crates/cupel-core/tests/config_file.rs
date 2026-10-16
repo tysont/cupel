@@ -190,7 +190,7 @@ fn unknown_keys_are_rejected_at_every_closed_level() {
         ),
         (
             "[oracles.pg]\nkind = \"command\"\ncommand = \"psql\"\n",
-            "unknown field `command`, expected one of `kind`, `ref`, `cmd`, `spec`, `lang`",
+            "unknown field `command`, expected one of `kind`, `ref`, `cmd`, `spec`, `lang`, `inputs`",
         ),
         (
             "[gate.pr]\n\"tests.weakening\" = \"none\"\n",
@@ -267,6 +267,53 @@ fn bad_values_are_usage_errors() {
         ),
     ];
     assert_problems(&cases);
+}
+
+#[test]
+fn each_oracle_kind_takes_exactly_its_keys() {
+    let cases = [
+        (
+            "[oracles.PG]\nkind = \"ref\"\nref = \"v1\"\n",
+            "invalid oracle name `PG`: must match `[a-z][a-z0-9_-]*`",
+        ),
+        (
+            "[oracles.old]\nkind = \"ref\"\n",
+            "invalid oracle `old`: kind `ref` needs `ref`",
+        ),
+        (
+            "[oracles.old]\nkind = \"ref\"\nref = \"v1\"\ncmd = \"echo\"\n",
+            "invalid oracle `old`: kind `ref` does not take `cmd`",
+        ),
+        (
+            "[oracles.calc]\nkind = \"command\"\ninputs = [\"1\"]\n",
+            "invalid oracle `calc`: kind `command` needs `cmd`",
+        ),
+        (
+            "[oracles.calc]\nkind = \"ref\"\nref = \"v1\"\ninputs = [\"1\"]\n",
+            "invalid oracle `calc`: kind `ref` does not take `inputs`",
+        ),
+        (
+            "[oracles.model]\nkind = \"spec\"\nspec = \"model.qnt\"\n",
+            "invalid oracle `model`: kind `spec` needs `lang`",
+        ),
+        (
+            "[oracles.model]\nkind = \"spec\"\nspec = \"model.v\"\nlang = \"coq\"\n",
+            "invalid oracle `model`: `lang` must be one of `tla+`, `quint`, `p`",
+        ),
+    ];
+    assert_problems(&cases);
+}
+
+#[test]
+fn a_command_oracle_keeps_its_known_inputs_in_order() {
+    let file = parse(
+        "[oracles.calc]\nkind = \"command\"\ncmd = \"calc {input}\"\ninputs = [\"2\", \"1\"]\n",
+    )
+    .unwrap();
+    assert_eq!(file.oracles["calc"].inputs, ["2", "1"]);
+    let spec =
+        parse("[oracles.model]\nkind = \"spec\"\nspec = \"m.qnt\"\nlang = \"quint\"\n").unwrap();
+    assert!(spec.oracles["model"].inputs.is_empty());
 }
 
 #[test]

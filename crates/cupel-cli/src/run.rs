@@ -5,8 +5,8 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::{
     Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, Event, EventSink,
-    ExitCode, Finding, LangId, MutationOutcomes, RunId, RunInfo, RunPlan, Severity, SeverityCounts,
-    Status, Summary, TestResults, ToolchainInfo, Verb, Writer, schema,
+    ExitCode, Finding, LangId, MutationOutcomes, RunId, RunInfo, RunPlan, SeverityCounts, Status,
+    Summary, TestResults, ToolchainInfo, Verb, Writer, schema,
 };
 
 use cupel_core::budget::TaskDuration;
@@ -69,6 +69,11 @@ impl Run {
 
     pub fn id(&self) -> RunId {
         self.id
+    }
+
+    /// When the invocation started, as the envelope's `run.started` reports it.
+    pub fn started(&self) -> String {
+        rfc3339(self.started)
     }
 
     /// Puts this run's cancellation under `parent`, so it fires when `parent` does.
@@ -190,14 +195,7 @@ impl Run {
         findings: Vec<Finding>,
         description: Option<Description>,
     ) -> Envelope {
-        let mut counts = SeverityCounts::default();
-        for finding in &findings {
-            match finding.severity {
-                Severity::Fail => counts.fail += 1,
-                Severity::Warn => counts.warn += 1,
-                Severity::Info => counts.info += 1,
-            }
-        }
+        let counts = SeverityCounts::of(&findings);
         let total_findings = findings.len() as u64;
         Envelope {
             cupel: CupelInfo {
@@ -207,7 +205,7 @@ impl Run {
             run: RunInfo {
                 id: self.id,
                 verb: self.verb,
-                started: rfc3339(self.started),
+                started: self.started(),
                 duration_ms: u64::try_from(self.clock.elapsed().as_millis()).unwrap_or(u64::MAX),
                 git: None,
                 scope: None,
@@ -235,6 +233,7 @@ impl Run {
             explanation: None,
             rankings: None,
             tests: None,
+            oracles: None,
             truncated: false,
             total_findings,
         }
@@ -361,7 +360,7 @@ mod tests {
         let partial = Run::interrupted(run.passed(None));
         assert_eq!(partial.status, Status::Partial);
         assert_eq!(partial.exit_code, ExitCode::Partial);
-        let error = run.failed(&CupelError::pending_verb(&["check".to_owned()], "P2.1"));
+        let error = run.failed(&CupelError::pending_flag("--cases", "P5.4"));
         assert_eq!(Run::interrupted(error.clone()), error);
     }
 
@@ -384,7 +383,7 @@ mod tests {
     #[test]
     fn failed_envelopes_count_their_finding_and_carry_its_exit_code() {
         let run = Run::start(vec!["check".to_owned()]);
-        let envelope = run.failed(&CupelError::pending_verb(&["check".to_owned()], "P2.1"));
+        let envelope = run.failed(&CupelError::pending_flag("--cases", "P5.4"));
         assert_eq!(envelope.status, Status::Error);
         assert_eq!(envelope.exit_code, ExitCode::Usage);
         assert_eq!(envelope.summary.findings.fail, 1);

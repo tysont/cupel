@@ -7,11 +7,14 @@ use cupel_core::{
     CheckDescription, CheckId, CheckRegistry, CheckSupport, Ctx, FactDescription, FactKind,
     FactProducers, FindingDescription, LangId, LanguageDescription, LanguageProducers,
     LanguageSummary, LanguageSupport, LanguagesDescription, MatrixCell, MatrixDescription,
-    ProducerDescription, ProducerRegistry, RegisteredProducer, SupportMatrix, VerbSupport, schema,
+    ProducerDescription, ProducerRegistry, RegisteredProducer, Stability, SupportMatrix,
+    VerbSupport, schema,
 };
 use cupel_lang::{Language, LanguageRegistry, ParseCache};
 use cupel_plugin::Plugins;
 use serde_json::Value;
+
+use crate::oracle;
 
 /// Every registry `describe` renders.
 pub struct Catalog {
@@ -83,15 +86,29 @@ impl Catalog {
         })
     }
 
-    /// The finding kind `kind`, from the manifest of the check that emits it.
+    /// The finding kind `kind`, from the manifest of the check that emits it, else from the
+    /// kinds Cupel attaches to a run outside any check (ADR-091 §5).
     pub fn finding(&self, kind: &str) -> Option<FindingDescription> {
-        self.checks.iter().find_map(|check| {
+        let emitted = self.checks.iter().find_map(|check| {
             let manifest = check.manifest();
             manifest
                 .findings
                 .iter()
                 .find(|spec| spec.kind == kind)
                 .map(|spec| FindingDescription::of(manifest, spec))
+        });
+        emitted.or_else(|| {
+            oracle::cap::finding_kinds()
+                .into_iter()
+                .find(|spec| spec.kind == kind)
+                .map(|spec| FindingDescription {
+                    kind: spec.kind,
+                    check: CheckId::from("oracle"),
+                    action: spec.action,
+                    summary: spec.summary,
+                    evidence: spec.evidence,
+                    stability: Stability::Experimental,
+                })
         })
     }
 
@@ -109,6 +126,11 @@ impl Catalog {
             })
             .collect();
         kinds.sort();
+        kinds.extend(
+            oracle::cap::finding_kinds()
+                .into_iter()
+                .map(|spec| spec.kind),
+        );
         kinds
     }
 

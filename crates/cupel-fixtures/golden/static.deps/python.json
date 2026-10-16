@@ -171,6 +171,7 @@
       "summary": "Review `src/deps_layers/port.py`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {

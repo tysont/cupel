@@ -147,32 +147,10 @@ fn examples(command: &Value) -> Vec<(String, i64)> {
 }
 
 #[test]
-fn exit_2_for_every_unimplemented_verb_names_its_plan_step() {
-    // Every verb but describe, init, doctor, check, survey, explain, baseline, tests, suppress, and
-    // serve is pending: (verb, its first example, its plan step).
-    let pending = [("oracle", "cupel oracle list", "P5.2")];
-    let owned =
-        pending.map(|(verb, example, step)| (verb.to_owned(), example.to_owned(), step.to_owned()));
-    assert_eq!(pending_examples(), owned);
-    let outcomes: Vec<(i32, Value, Value, bool)> = pending
-        .iter()
-        .map(|(_, example, step)| {
-            let outcome = run(arguments(example));
-            let finding = outcome.finding();
-            let detail = finding["detail"].as_str().unwrap();
-            (
-                outcome.code,
-                finding["kind"].clone(),
-                outcome.envelope()["run"]["verb"].clone(),
-                detail.contains(step),
-            )
-        })
-        .collect();
-    let expected: Vec<(i32, Value, Value, bool)> = pending
-        .iter()
-        .map(|(verb, _, _)| (2, json!("cli.not-implemented"), json!(verb), true))
-        .collect();
-    assert_eq!(outcomes, expected);
+fn every_verb_is_implemented() {
+    // `oracle` (P5.2) was the last verb with a plan step; pending flags and formats still name
+    // theirs (`describe --agent`, `--cases`, `--format sarif`).
+    assert_eq!(pending_examples(), Vec::<(String, String, String)>::new());
 }
 
 #[test]

@@ -136,6 +136,7 @@
       "summary": "Find what `settles on every other run` depends on besides its code and the test order: time, randomness, concurrency, or the environment; make it deterministic."
     }
   ],
+  "oracles": null,
   "plan": null,
   "rankings": null,
   "run": {
