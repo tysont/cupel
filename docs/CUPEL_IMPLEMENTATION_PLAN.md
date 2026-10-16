@@ -1001,7 +1001,7 @@ ADRs: [081](adr/CUPEL_DECISION_081.md) (where install commands live, who may ins
 
 #### P4.2 Daemon (`serve`)
 
-**Status:** not started
+**Status:** in progress (2026-10-15)
 
 - `cupel-serve`: holds parsed trees (content-hash keyed), store connection, coverage map, last plan; `notify` watcher for incremental reparse and re-hash; Unix socket at `.cupel/serve.sock`; CLI auto-connects when present, `CUPEL_NO_DAEMON=1` bypasses. Write **ADR-009**.
 - Parity test: every fixture run cold and via daemon is byte-identical after redaction.
