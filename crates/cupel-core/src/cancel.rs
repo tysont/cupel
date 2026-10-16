@@ -43,6 +43,17 @@ impl Cancellation {
         }
     }
 
+    /// A token cancelled when this one is, or once `deadline` (if any) passes; cancelling it
+    /// leaves this one alone. A daemon's request runs under the daemon's token (ADR-085).
+    #[must_use]
+    pub fn under(&self, deadline: Option<Instant>) -> Self {
+        Self {
+            cancelled: Arc::default(),
+            deadline,
+            parent: Some(Box::new(self.clone())),
+        }
+    }
+
     pub fn cancel(&self) {
         self.cancelled.store(true, Ordering::SeqCst);
     }

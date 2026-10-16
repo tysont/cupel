@@ -1,0 +1,23 @@
+# ABOUTME: Manifest for cupel-serve: the daemon's socket protocol (ADR-009), server loop, client, and file
+# ABOUTME: watcher. It runs requests through a handler the CLI supplies, so it depends on cupel-core alone.
+[package]
+name = "cupel-serve"
+description = "The Cupel daemon: socket protocol, server, client, and file watcher."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+cupel-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+notify.workspace = true
+nix = { workspace = true, features = ["poll"] }
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true
