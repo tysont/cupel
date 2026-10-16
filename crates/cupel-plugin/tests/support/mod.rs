@@ -11,7 +11,7 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 use cupel_core::config::PluginEntry;
-use cupel_core::{Cancellation, CheckId, LangId};
+use cupel_core::{Cancellation, CheckId, Lang, LangFamily, LangId};
 use cupel_plugin::Discovery;
 use serde_json::{Value, json};
 
@@ -119,5 +119,13 @@ pub fn discovery<'a>(
         languages,
         taken: vec![CheckId::from("static.complexity")],
         cancel,
+    }
+}
+
+/// TypeScript, which the sample producer serves.
+pub fn typescript() -> Lang {
+    Lang {
+        id: LangId::from("typescript"),
+        family: LangFamily::from("ecma"),
     }
 }

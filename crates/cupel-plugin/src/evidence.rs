@@ -201,7 +201,8 @@ mod tests {
             "properties": {
                 "count": {"type": "integer", "format": "uint32", "minimum": 0},
                 "label": {"type": ["string", "null"], "enum": ["a", "b", null]},
-                "sizes": {"type": "array", "items": {"type": "number", "maximum": 10}}
+                "sizes": {"type": "array", "items": {"type": "number", "maximum": 10}},
+                "kind": {"const": "sample"}
             },
             "required": ["count"]
         })
@@ -218,27 +219,41 @@ mod tests {
 
     #[test]
     fn each_violation_is_reported_with_its_path() {
-        for (value, expected) in [
-            (json!({"label": "a"}), "required property `count`"),
-            (json!({"count": -1}), "evidence.count: -1 violates minimum"),
-            (json!({"count": 1.5}), "evidence.count: 1.5 is not of type"),
-            (
-                json!({"count": 1, "label": "c"}),
-                "evidence.label: \"c\" is not one of",
-            ),
-            (
-                json!({"count": 1, "sizes": [11]}),
-                "evidence.sizes[0]: 11 violates maximum",
-            ),
-            (
-                json!({"count": 1, "extra": true}),
-                "property `extra` is not in the schema",
-            ),
-            (json!([1]), "is not of type \"object\""),
-        ] {
-            let error = validate(&schema(), &value).unwrap_err();
-            assert!(error.contains(expected), "{value}: {error}");
-        }
+        let errors: Vec<String> = [
+            json!({"label": "a"}),
+            json!({"count": -1}),
+            json!({"count": 1.5}),
+            json!({"count": 1, "label": "c"}),
+            json!({"count": 1, "sizes": [11]}),
+            json!({"count": 1, "extra": true}),
+            json!([1]),
+            json!({"count": 1, "kind": "other"}),
+        ]
+        .iter()
+        .map(|value| validate(&schema(), value).unwrap_err())
+        .collect();
+        assert_eq!(
+            errors,
+            [
+                "evidence: required property `count` is missing",
+                "evidence.count: -1 violates minimum 0",
+                "evidence.count: 1.5 is not of type \"integer\"",
+                "evidence.label: \"c\" is not one of [\"a\",\"b\",null]",
+                "evidence.sizes[0]: 11 violates maximum 10",
+                "evidence: property `extra` is not in the schema",
+                "evidence: [1] is not of type \"object\"",
+                "evidence.kind: \"other\" is not \"sample\"",
+            ]
+        );
+    }
+
+    #[test]
+    fn a_malformed_rule_is_reported_rather_than_skipped() {
+        let schema = json!({"type": 3}).as_object().cloned().unwrap();
+        assert_eq!(
+            validate(&schema, &json!({})),
+            Err("evidence: malformed `type` in the schema".to_owned())
+        );
     }
 
     #[test]
@@ -247,7 +262,13 @@ mod tests {
             .as_object()
             .cloned()
             .unwrap();
-        let error = validate(&schema, &json!({"a": 1})).unwrap_err();
-        assert!(error.contains("`$ref`"), "{error}");
+        assert_eq!(
+            validate(&schema, &json!({"a": 1})),
+            Err(
+                "evidence.a: the schema uses `$ref`, which the evidence validator does not \
+                 implement (ADR-043)"
+                    .to_owned()
+            )
+        );
     }
 }

@@ -43,9 +43,7 @@ impl Facts {
     /// Adds a fact the scheduler produced once for several checks. Refuses kinds the manifest
     /// does not declare.
     pub fn insert_shared(&mut self, fact: &SharedFact) -> Result<()> {
-        self.check_declared(fact.kind())?;
-        self.values.insert(fact.kind(), fact.clone());
-        Ok(())
+        put(&self.declared, &mut self.values, fact)
     }
 
     /// Adds another family member's fact of a declared kind (ADR-051).
@@ -79,9 +77,7 @@ impl Facts {
     /// Adds a fact produced from the base side of the range. Refuses kinds the manifest does
     /// not declare.
     pub fn insert_base_shared(&mut self, fact: &SharedFact) -> Result<()> {
-        self.check_declared(fact.kind())?;
-        self.base.insert(fact.kind(), fact.clone());
-        Ok(())
+        put(&self.declared, &mut self.base, fact)
     }
 
     /// Records the range the base side comes from.
@@ -96,11 +92,7 @@ impl Facts {
 
     /// The fact of type `F`. Errors when `F` is undeclared or was not produced.
     pub fn get<F: Fact>(&self) -> Result<&F> {
-        self.check_declared(F::KIND)?;
-        self.values
-            .get(&F::KIND)
-            .and_then(SharedFact::downcast_ref::<F>)
-            .ok_or(Error::AbsentFact { kind: F::KIND })
+        read(&self.declared, &self.values)
     }
 
     /// The fact of `kind` as it serializes, for a reader that does not know its type (a check
@@ -112,11 +104,7 @@ impl Facts {
     /// The fact of type `F` as it was at the range's base commit, over the changed files that
     /// existed there. Errors when `F` is undeclared or no base side was produced.
     pub fn base<F: Fact>(&self) -> Result<&F> {
-        self.check_declared(F::KIND)?;
-        self.base
-            .get(&F::KIND)
-            .and_then(SharedFact::downcast_ref::<F>)
-            .ok_or(Error::AbsentFact { kind: F::KIND })
+        read(&self.declared, &self.base)
     }
 
     /// The range being compared; `None` outside a range scope.
@@ -131,4 +119,31 @@ impl Facts {
             Err(Error::UndeclaredFact { kind })
         }
     }
+}
+
+/// Adds `fact` to `facts` when `declared` holds its kind.
+fn put(
+    declared: &BTreeSet<FactKind>,
+    facts: &mut HashMap<FactKind, SharedFact>,
+    fact: &SharedFact,
+) -> Result<()> {
+    if !declared.contains(&fact.kind()) {
+        return Err(Error::UndeclaredFact { kind: fact.kind() });
+    }
+    facts.insert(fact.kind(), fact.clone());
+    Ok(())
+}
+
+/// The fact of type `F` in `facts`, when `declared` holds its kind and it was produced.
+fn read<'a, F: Fact>(
+    declared: &BTreeSet<FactKind>,
+    facts: &'a HashMap<FactKind, SharedFact>,
+) -> Result<&'a F> {
+    if !declared.contains(&F::KIND) {
+        return Err(Error::UndeclaredFact { kind: F::KIND });
+    }
+    facts
+        .get(&F::KIND)
+        .and_then(SharedFact::downcast_ref::<F>)
+        .ok_or(Error::AbsentFact { kind: F::KIND })
 }

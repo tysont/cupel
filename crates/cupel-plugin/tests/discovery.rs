@@ -12,7 +12,9 @@ use cupel_core::{
 };
 use cupel_plugin::{Plugins, discover};
 use serde_json::{Value, json};
-use support::{check_manifest, discovery, entries, languages, plugin, producer_manifest, script};
+use support::{
+    check_manifest, discovery, entries, languages, plugin, producer_manifest, script, typescript,
+};
 
 fn describing(dir: &Path, name: &str, manifest: &Value) -> std::path::PathBuf {
     script(dir, name, &plugin(dir, manifest, "exit 1", "exit 1"))
@@ -35,13 +37,6 @@ fn problem(result: Result<Plugins, ConfigError>) -> (String, String, bool) {
         }) => (name, problem, on_path),
         Err(other) => panic!("not a plugin error: {other}"),
         Ok(_) => panic!("discovery should have failed"),
-    }
-}
-
-fn typescript() -> Lang {
-    Lang {
-        id: LangId::from("typescript"),
-        family: LangFamily::from("ecma"),
     }
 }
 
@@ -237,11 +232,15 @@ fn manifests_that_cannot_be_registered_are_refused_with_the_reason() {
         ),
     ];
     let dir = tempfile::tempdir().unwrap();
-    for (manifest, expected) in cases {
-        let plugin = describing(dir.path(), "plugin.sh", &manifest);
-        let (_, problem, _) = problem(discovered(dir.path(), &[("sample", &plugin)]));
-        assert!(problem.contains(expected), "{expected}: {problem}");
-    }
+    let (manifests, expected): (Vec<Value>, Vec<&str>) = cases.into_iter().unzip();
+    let problems: Vec<String> = manifests
+        .iter()
+        .map(|manifest| {
+            let plugin = describing(dir.path(), "plugin.sh", manifest);
+            problem(discovered(dir.path(), &[("sample", &plugin)])).1
+        })
+        .collect();
+    assert_eq!(problems, expected);
 }
 
 #[test]

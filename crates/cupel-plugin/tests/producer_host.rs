@@ -7,18 +7,13 @@ mod support;
 use std::path::Path;
 
 use cupel_core::{
-    Cancellation, CostClass, Ctx, Error, FactKind, Lang, LangFamily, LangId, PerTestMap,
-    ProduceCtx, Produced, ProducerId, ProducerRegistry, Scope, TestResults, Writer, schema,
+    Cancellation, CostClass, Ctx, Error, FactKind, PerTestMap, ProduceCtx, Produced, ProducerId,
+    ProducerRegistry, Scope, TestResults, Writer, schema,
 };
 use serde_json::{Value, json};
-use support::{discovery, entries, languages, plugin, prints, producer_manifest, script};
-
-fn typescript() -> Lang {
-    Lang {
-        id: LangId::from("typescript"),
-        family: LangFamily::from("ecma"),
-    }
-}
+use support::{
+    discovery, entries, languages, plugin, prints, producer_manifest, script, typescript,
+};
 
 /// Registers the producer plugin `manifest` in `dir`, running `run`, and produces with it.
 fn produce_with(dir: &Path, manifest: &Value, run: &str) -> cupel_core::Result<Produced> {
@@ -149,15 +144,19 @@ fn facts_outside_the_declared_kind_version_or_shape_are_refused() {
         ),
         (vec![], "no fact"),
     ];
-    for (lines, expected) in cases {
-        let dir = tempfile::tempdir().unwrap();
-        let problem = problem(produce_with(
-            dir.path(),
-            &producer_manifest(),
-            &prints(&lines),
-        ));
-        assert!(problem.contains(expected), "{expected}: {problem}");
-    }
+    let (outputs, expected): (Vec<Vec<Value>>, Vec<&str>) = cases.into_iter().unzip();
+    let problems: Vec<String> = outputs
+        .iter()
+        .map(|lines| {
+            let dir = tempfile::tempdir().unwrap();
+            problem(produce_with(
+                dir.path(),
+                &producer_manifest(),
+                &prints(lines),
+            ))
+        })
+        .collect();
+    assert_eq!(problems, expected);
 }
 
 #[test]
@@ -168,10 +167,7 @@ fn a_non_zero_exit_without_a_fact_is_an_error() {
         &producer_manifest(),
         "echo 'no lcov file' >&2; exit 4",
     ));
-    assert!(
-        problem.contains("exited with code 4 without a fact") && problem.contains("no lcov file"),
-        "{problem}"
-    );
+    assert_eq!(problem, "exited with code 4 without a fact: no lcov file");
 }
 
 #[test]

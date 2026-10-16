@@ -71,44 +71,42 @@ fn input_reaches_the_child_on_its_standard_input() {
     assert_eq!(captured.stdout, "PLUGIN REQUEST\n");
 }
 
-/// A child that writes `term` when SIGTERM reaches it and then exits, or ignores it.
-fn trapping(dir: &std::path::Path, on_term: &str) -> Process {
-    let script =
-        format!("trap '{on_term}' TERM; echo ready > started; while true; do sleep 0.05; done");
-    Process::new("sh", dir).args(["-c", script.as_str()])
+/// Runs a child that runs `on_term` when SIGTERM reaches it, cancelled after 300 ms with
+/// `grace` to exit: what it ended with, its directory, and how long the run took.
+fn terminated(
+    on_term: &str,
+    grace: Duration,
+) -> (Result<Captured, Error>, tempfile::TempDir, Duration) {
+    let dir = tempfile::tempdir().unwrap();
+    let script = format!("trap '{on_term}' TERM; while true; do sleep 0.05; done");
+    let started = Instant::now();
+    let cancel = Cancellation::with_deadline(started + Duration::from_millis(300));
+    let ran = Process::new("sh", dir.path())
+        .args(["-c", script.as_str()])
+        .terminate(grace)
+        .run(&cancel);
+    (ran, dir, started.elapsed())
 }
 
 #[test]
 fn termination_sends_sigterm_and_waits_for_the_child_to_exit() {
-    let dir = tempfile::tempdir().unwrap();
-    let started = Instant::now();
-    let cancel = Cancellation::with_deadline(started + Duration::from_millis(300));
-    let ran = trapping(dir.path(), "echo stopped > term; exit 0")
-        .terminate(Duration::from_secs(20))
-        .run(&cancel);
+    let (ran, dir, elapsed) = terminated("echo stopped > term; exit 0", Duration::from_secs(20));
     assert_eq!(ran, Err(Error::Cancelled));
     assert_eq!(
         std::fs::read_to_string(dir.path().join("term")).unwrap(),
         "stopped\n"
     );
-    assert!(
-        started.elapsed() < Duration::from_secs(10),
-        "{:?}",
-        started.elapsed()
-    );
+    assert!(elapsed < Duration::from_secs(10), "{elapsed:?}");
 }
 
 #[test]
 fn a_child_that_ignores_sigterm_is_killed_after_the_grace_period() {
-    let dir = tempfile::tempdir().unwrap();
-    let started = Instant::now();
-    let cancel = Cancellation::with_deadline(started + Duration::from_millis(300));
-    let ran = trapping(dir.path(), "echo ignored > term")
-        .terminate(Duration::from_millis(500))
-        .run(&cancel);
+    let (ran, dir, elapsed) = terminated("echo ignored > term", Duration::from_millis(500));
     assert_eq!(ran, Err(Error::Cancelled));
-    assert!(dir.path().join("term").exists(), "SIGTERM was not sent");
-    let elapsed = started.elapsed();
+    assert_eq!(
+        std::fs::read_to_string(dir.path().join("term")).unwrap(),
+        "ignored\n"
+    );
     assert!(
         elapsed >= Duration::from_millis(800) && elapsed < Duration::from_secs(10),
         "{elapsed:?}"

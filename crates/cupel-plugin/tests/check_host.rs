@@ -96,6 +96,16 @@ fn run(dir: &Path, script_run: &str) -> (cupel_core::Result<cupel_core::CheckRes
     (ran, events)
 }
 
+/// A finding by its kind, any other event by its `ev` tag.
+fn event_name(event: &Event) -> String {
+    let json = serde_json::to_value(event).unwrap();
+    json.get("kind")
+        .unwrap_or(&json["ev"])
+        .as_str()
+        .unwrap()
+        .to_owned()
+}
+
 fn plugin_problem(ran: cupel_core::Result<cupel_core::CheckResult>) -> String {
     match ran {
         Err(Error::Plugin { plugin, problem }) => {
@@ -121,15 +131,10 @@ fn a_check_plugin_reports_its_findings_and_result_through_the_run() {
     assert_eq!(ran.metrics.get("untested").copied(), Some(1.0));
     assert_eq!(ran.score.unwrap().unit, "tested_files");
     assert!(ran.notes.is_empty(), "{:?}", ran.notes);
-    let kinds: Vec<&str> = events
-        .iter()
-        .map(|event| match event {
-            Event::Finding(finding) => finding.kind.as_str(),
-            Event::Progress { .. } => "progress",
-            _ => "other",
-        })
-        .collect();
-    assert_eq!(kinds, ["ref.sample-file", "progress"]);
+    assert_eq!(
+        events.iter().map(event_name).collect::<Vec<_>>(),
+        ["ref.sample-file", "progress"]
+    );
 }
 
 #[test]
@@ -216,13 +221,20 @@ fn findings_the_manifest_does_not_declare_or_describe_are_refused_and_nothing_is
             "progress of check `ref.other`, not `ref.sample`",
         ),
     ];
-    for (event, expected) in cases {
-        let dir = tempfile::tempdir().unwrap();
-        let (ran, events) = run(dir.path(), &prints(&[event, result("fail")]));
-        let problem = plugin_problem(ran);
-        assert!(problem.contains(expected), "{expected}: {problem}");
-        assert!(events.is_empty(), "{events:?}");
-    }
+    let (events, expected): (Vec<Value>, Vec<&str>) = cases.into_iter().unzip();
+    let outcomes: Vec<(String, usize)> = events
+        .into_iter()
+        .map(|event| {
+            let dir = tempfile::tempdir().unwrap();
+            let (ran, emitted) = run(dir.path(), &prints(&[event, result("fail")]));
+            (plugin_problem(ran), emitted.len())
+        })
+        .collect();
+    let expected: Vec<(String, usize)> = expected
+        .iter()
+        .map(|problem| ((*problem).to_owned(), 0))
+        .collect();
+    assert_eq!(outcomes, expected);
 }
 
 #[test]
@@ -243,28 +255,33 @@ fn results_outside_the_protocol_are_refused() {
         (vec![fact, result("pass")], "a check plugin printed a fact"),
         (vec![], "no result"),
     ];
-    for (lines, expected) in cases {
-        let dir = tempfile::tempdir().unwrap();
-        let (ran, _) = run(dir.path(), &prints(&lines));
-        let problem = plugin_problem(ran);
-        assert!(problem.contains(expected), "{expected}: {problem}");
-    }
+    let (outputs, expected): (Vec<Vec<Value>>, Vec<&str>) = cases.into_iter().unzip();
+    let mut problems: Vec<String> = outputs
+        .iter()
+        .map(|lines| {
+            let dir = tempfile::tempdir().unwrap();
+            plugin_problem(run(dir.path(), &prints(lines)).0)
+        })
+        .collect();
     let dir = tempfile::tempdir().unwrap();
-    let problem = plugin_problem(run(dir.path(), "echo '{\"ev\": \"plan\"}'").0);
-    assert!(
-        problem.contains("line 1 is not a protocol event"),
-        "{problem}"
-    );
+    problems.push(plugin_problem(
+        run(dir.path(), "echo '{\"ev\": \"plan\"}'").0,
+    ));
+    let mut expected: Vec<String> = expected
+        .iter()
+        .map(|problem| (*problem).to_owned())
+        .collect();
+    expected.push("line 1 is not a protocol event: unknown variant `plan`, expected one of `finding`, `progress`, `result`, `fact` at line 1 column 13".to_owned());
+    assert_eq!(problems, expected);
 }
 
 #[test]
 fn a_non_zero_exit_without_a_result_is_an_error_and_with_one_is_noted() {
     let dir = tempfile::tempdir().unwrap();
     let problem = plugin_problem(run(dir.path(), "echo 'out of memory' >&2; exit 2").0);
-    assert!(
-        problem.contains("exited with code 2 without a result")
-            && problem.contains("out of memory"),
-        "{problem}"
+    assert_eq!(
+        problem,
+        "exited with code 2 without a result: out of memory"
     );
     let (ran, _) = run(
         dir.path(),

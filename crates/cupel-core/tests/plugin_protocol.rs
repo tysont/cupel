@@ -61,9 +61,9 @@ fn a_producer_manifest_names_the_kind_and_version_it_provides() {
 #[test]
 fn a_manifest_of_an_unknown_kind_is_refused() {
     let error = serde_json::from_str::<PluginManifest>(r#"{"kind": "language"}"#).unwrap_err();
-    assert!(
-        error.to_string().contains("unknown variant `language`"),
-        "{error}"
+    assert_eq!(
+        error.to_string(),
+        "unknown variant `language`, expected `check` or `producer` at line 1 column 19"
     );
 }
 
@@ -153,26 +153,49 @@ fn result_and_fact_events_parse_from_the_lines_a_plugin_prints() {
 
 #[test]
 fn an_event_outside_the_protocol_is_refused() {
-    for line in [
+    let errors: Vec<String> = [
         r#"{"ev": "run.end", "status": "pass", "exit_code": 0}"#,
         r#"{"ev": "result", "status": "fail"}"#,
         r#"{"status": "pass"}"#,
-    ] {
-        assert!(serde_json::from_str::<PluginEvent>(line).is_err(), "{line}");
-    }
+    ]
+    .iter()
+    .map(|line| {
+        serde_json::from_str::<PluginEvent>(line)
+            .unwrap_err()
+            .to_string()
+    })
+    .collect();
+    assert_eq!(
+        errors,
+        [
+            "unknown variant `run.end`, expected one of `finding`, `progress`, `result`, `fact` at line 1 column 16",
+            "missing field `metrics`",
+            "missing field `ev` at line 1 column 18",
+        ]
+    );
 }
+
+/// Every status a plugin's result may report.
+const STATUSES: [CheckStatus; 4] = [
+    CheckStatus::Pass,
+    CheckStatus::Fail,
+    CheckStatus::Partial,
+    CheckStatus::Error,
+];
 
 fn fact_kind() -> impl Strategy<Value = FactKind> {
     proptest::sample::select(FactKind::ALL.to_vec())
 }
 
 fn cost() -> impl Strategy<Value = CostClass> {
-    proptest::sample::select(vec![
-        CostClass::Quick,
-        CostClass::Standard,
-        CostClass::Deep,
-        CostClass::Exhaustive,
-    ])
+    proptest::sample::select(
+        &[
+            CostClass::Quick,
+            CostClass::Standard,
+            CostClass::Deep,
+            CostClass::Exhaustive,
+        ][..],
+    )
 }
 
 fn text() -> impl Strategy<Value = String> {
@@ -215,19 +238,10 @@ fn request() -> impl Strategy<Value = RunRequest> {
         )
 }
 
-fn status() -> impl Strategy<Value = CheckStatus> {
-    proptest::sample::select(vec![
-        CheckStatus::Pass,
-        CheckStatus::Fail,
-        CheckStatus::Partial,
-        CheckStatus::Error,
-    ])
-}
-
 fn event() -> impl Strategy<Value = PluginEvent> {
     prop_oneof![
         (
-            status(),
+            proptest::sample::select(&STATUSES[..]),
             proptest::option::of((0u32..=1000, text(), any::<u32>())),
             proptest::collection::btree_map(text(), 0u32..1000, 0..3),
             proptest::collection::vec(text(), 0..3),
