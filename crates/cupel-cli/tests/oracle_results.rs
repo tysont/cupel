@@ -1,11 +1,10 @@
 // ABOUTME: Results against an oracle through the CLI's entry point (ADR-091): a tier-4 check that uses one,
 // ABOUTME: submitted from this test binary, is capped at tier 3 with `oracle.unverified` until `oracle verify`.
-use std::collections::BTreeMap;
 use std::path::Path;
 
 use cupel_core::{
-    Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, EventSink, Facts, Manifest,
-    Plan, Result, Scope, Stability, Tier,
+    Check, CheckCtx, CheckId, CheckResult, CostClass, EventSink, Facts, Manifest, Plan, Result,
+    Scope, Stability, Tier,
 };
 use serde_json::{Value, json};
 
@@ -39,20 +38,11 @@ impl Check for AgainstOracle {
     }
 
     fn run(&self, _: &CheckCtx, _: &Facts, _: &Plan, _: &mut dyn EventSink) -> Result<CheckResult> {
-        Ok(CheckResult {
-            id: self.0.id.clone(),
-            status: CheckStatus::Pass,
-            tier: self.0.tier,
-            cost: self.0.cost,
-            score: None,
-            metrics: BTreeMap::new(),
-            delta: None,
-            findings: 0,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-            notes: Vec::new(),
-        })
+        let passed = json!({
+            "id": ID, "status": "pass", "tier": self.0.tier, "cost": "quick", "score": null,
+            "delta": null, "findings": 0, "duration_ms": 0, "skipped": null, "oracle": null
+        });
+        Ok(serde_json::from_value(passed).expect("a passing result"))
     }
 
     fn uses_oracle(&self) -> bool {
