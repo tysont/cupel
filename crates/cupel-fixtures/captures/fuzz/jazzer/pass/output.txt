@@ -1,0 +1,23 @@
+INFO: using inputs from: corpus
+(node:22740) Warning: Accessing non-existent property 'default' of module exports inside circular dependency
+(Use `node --trace-warnings ...` to show where the warning was created)
+Dictionary: 4 entries
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3
+INFO: Loaded 3 modules   (514 inline 8-bit counters): 512 [0xb22910000, 0xb22910200), 1 [0xb22d7c4c0, 0xb22d7c4c1), 1 [0xb22d7c1b0, 0xb22d7c1b1), 
+INFO: Loaded 3 PC tables (514 PCs): 512 [0xb231f0000,0xb231f2000), 1 [0xb2305d9f0,0xb2305da00), 1 [0xb2305da00,0xb2305da10), 
+INFO:        0 files found in corpus
+INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
+INFO: A corpus is not provided, starting from an empty corpus
+#2	INITED cov: 2 ft: 2 corp: 1/1b exec/s: 0 rss: 172Mb
+#2000	DONE   cov: 2 ft: 2 corp: 1/1b lim: 21 exec/s: 0 rss: 176Mb
+Done 2000 runs in 0 second(s)
+stat::number_of_executed_units: 2000
+stat::average_exec_per_sec:     0
+stat::new_units_added:          0
+stat::slowest_unit_time_sec:    0
+stat::peak_rss_mb:              176
+
+== Jazzer.js:
+  Exclusively observed synchronous return values from fuzzed function. Fuzzing in synchronous mode seems beneficial!
+  To enable it, append a `--sync` to your Jazzer.js invocation.

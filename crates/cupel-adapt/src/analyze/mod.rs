@@ -51,7 +51,7 @@ fn languages() -> Vec<LangId> {
 
 /// The file extensions of `lang`'s sources, which its analyzers are handed: a scope holds every
 /// language's files.
-fn extensions(lang: &LangId) -> &'static [&'static str] {
+pub(crate) fn extensions(lang: &LangId) -> &'static [&'static str] {
     match lang.as_str() {
         "rust" => &["rs"],
         "python" => &["py", "pyi"],

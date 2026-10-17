@@ -1,0 +1,5 @@
+{"Time":"2026-10-17T02:59:58.381211-07:00","Action":"start","Package":"example.com/units/text"}
+{"Time":"2026-10-17T02:59:58.614211-07:00","Action":"output","Package":"example.com/units/text","Output":"FuzzFirstByte\n"}
+{"Time":"2026-10-17T02:59:58.614259-07:00","Action":"output","Package":"example.com/units/text","Output":"FuzzEven\n"}
+{"Time":"2026-10-17T02:59:58.614582-07:00","Action":"output","Package":"example.com/units/text","Output":"ok  \texample.com/units/text\t0.233s\n"}
+{"Time":"2026-10-17T02:59:58.614611-07:00","Action":"pass","Package":"example.com/units/text","Elapsed":0.233}

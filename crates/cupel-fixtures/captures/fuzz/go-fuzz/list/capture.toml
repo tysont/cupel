@@ -1,0 +1,6 @@
+# Captured from the real fuzzer (P6.3, ADR-107); output.txt is its unedited output, standard error
+# merged into standard output. `dir` is where it ran.
+tool = "go 1.23.2"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/go"
+command = "go test -list ^Fuzz -json ./..."
+exit_code = 0

@@ -1,0 +1,36 @@
+warning: starting with empty corpus
+fuzz: elapsed: 0s, execs: 0 (0/sec), new interesting: 0 (total: 0)
+fuzz: minimizing 27-byte failing input file
+fuzz: elapsed: 0s, minimizing
+--- FAIL: FuzzFirstByte (0.01s)
+    --- FAIL: FuzzFirstByte (0.00s)
+        testing.go:1591: panic: runtime error: index out of range [0] with length 0
+            goroutine 378 [running]:
+            runtime/debug.Stack()
+            	/opt/homebrew/Cellar/go/1.23.2/libexec/src/runtime/debug/stack.go:26 +0xc4
+            testing.tRunner.func1()
+            	/opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:1591 +0x21c
+            panic({0x1029c26e0?, 0x14000018318?})
+            	/opt/homebrew/Cellar/go/1.23.2/libexec/src/runtime/panic.go:785 +0x124
+            example.com/units/text.FirstByte(...)
+            	/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/go/text/first.go:5
+            example.com/units/text.FuzzFirstByte.func1(0x140001917d8?, {0x0?, 0x0?})
+            	/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/go/text/first_test.go:7 +0x6c
+            reflect.Value.call({0x10299c920?, 0x1029d3d08?, 0x14000191e38?}, {0x1029418c3, 0x4}, {0x140001e4e40, 0x2, 0x1028b29f0?})
+            	/opt/homebrew/Cellar/go/1.23.2/libexec/src/reflect/value.go:581 +0x97c
+            reflect.Value.Call({0x10299c920?, 0x1029d3d08?, 0x1400016de78?}, {0x140001e4e40?, 0x1029d3560?, 0x1029f39b3?})
+            	/opt/homebrew/Cellar/go/1.23.2/libexec/src/reflect/value.go:365 +0x94
+            testing.(*F).Fuzz.func1.1(0x14006632000?)
+            	/opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/fuzz.go:335 +0x258
+            testing.tRunner(0x14006632000, 0x14006616360)
+            	/opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:1690 +0xe4
+            created by testing.(*F).Fuzz.func1 in goroutine 6
+            	/opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/fuzz.go:322 +0x49c
+            
+    
+    Failing input written to testdata/fuzz/FuzzFirstByte/5838cdfae7b16cde
+    To re-run:
+    go test -run=FuzzFirstByte/5838cdfae7b16cde
+FAIL
+exit status 1
+FAIL	example.com/units/text	0.247s
