@@ -1,0 +1,25 @@
+{
+  "id": "OSV-2099-0001",
+  "summary": "Out-of-bounds write in oldsmall",
+  "affected": [
+    {
+      "package": {
+        "ecosystem": "crates.io",
+        "name": "oldsmall"
+      },
+      "ranges": [
+        {
+          "type": "ECOSYSTEM",
+          "events": [
+            {
+              "introduced": "0.6.0"
+            },
+            {
+              "fixed": "0.6.10"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

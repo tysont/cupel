@@ -134,7 +134,8 @@ expression: pretty(&schema)
         "race-reports",
         "analyzer-report",
         "divergence-results",
-        "relation-results"
+        "relation-results",
+        "footprint"
       ]
     },
     "Finding": {
@@ -780,6 +781,9 @@ expression: pretty(&schema)
             "divergence-results": {
               "type": "string"
             },
+            "footprint": {
+              "type": "string"
+            },
             "fuzz-results": {
               "type": "string"
             },
@@ -837,6 +841,7 @@ expression: pretty(&schema)
             "coverage-map",
             "decisions",
             "divergence-results",
+            "footprint",
             "fuzz-results",
             "module-graph",
             "mutation-outcomes",

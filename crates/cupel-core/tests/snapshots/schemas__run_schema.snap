@@ -1106,7 +1106,8 @@ expression: pretty(&schema)
         "race-reports",
         "analyzer-report",
         "divergence-results",
-        "relation-results"
+        "relation-results",
+        "footprint"
       ]
     },
     "FactProducers": {

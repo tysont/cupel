@@ -9,9 +9,9 @@ use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{ProjectInfo, Roots as EntryPoints, Symbols};
 use cupel_core::{
-    Availability, CheckRegistry, CostClass, Ctx, Error, Estimate, EventSink, FactKind, Focus,
-    Langs, ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, RunOracle, Scheduler, Scope,
-    Upstream, Writer,
+    Availability, BaseTree, CheckRegistry, CostClass, Ctx, Error, Estimate, EventSink, FactKind,
+    Focus, Langs, ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result, RunId,
+    RunOracle, Scheduler, Scope, Upstream, Writer,
 };
 
 /// What the recording producer saw: the kinds upstream held and the runners it was handed.
@@ -209,6 +209,13 @@ fn seen_in(depth: CostClass, cached: bool) -> Seen {
     let mut job = support::job(&writer, &config, &checks, &["rust"]);
     job.depth = depth;
     job.changed = Some(changed());
+    job.base = Some(BaseTree::planned(
+        Range {
+            commit: "c0ffee".to_owned(),
+            changes: Vec::new(),
+        },
+        &writer.scratch(&RunId::generate()),
+    ));
     job.cases = Some(7);
     job.oracle = Some(RunOracle {
         name: "release".to_owned(),
@@ -247,13 +254,14 @@ fn a_producer_gets_the_registered_runners() {
 }
 
 #[test]
-fn a_producer_gets_the_runs_depth_and_changed_lines() {
+fn a_producer_gets_the_runs_depth_changed_lines_and_base_commit() {
     assert_eq!(
         seen().focus,
         Some(Focus {
             depth: CostClass::Deep,
             symbols: None,
             changed: Some(changed()),
+            base: Some("c0ffee".to_owned()),
             jobs: None,
             cases: Some(7),
         })

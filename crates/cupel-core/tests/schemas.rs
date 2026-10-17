@@ -108,6 +108,7 @@ fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
                         | FactKind::RelationResults
                         | FactKind::PropertyResults
                         | FactKind::AnalyzerReport
+                        | FactKind::Footprint
                 ),
             "{kind}"
         );

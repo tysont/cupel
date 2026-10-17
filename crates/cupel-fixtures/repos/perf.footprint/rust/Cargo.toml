@@ -1,0 +1,12 @@
+[package]
+name = "ledger"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+gplthing = { path = "vendor/gplthing" }
+oldsmall = { path = "vendor/oldsmall" }
+
+# A workspace of its own that leaves the vendored crates out, so they are dependencies.
+[workspace]
+exclude = ["vendor"]

@@ -924,6 +924,8 @@ struct FactStore<'a> {
     seed: u64,
     depth: CostClass,
     changed: Option<ChangedLines>,
+    /// The commit the range starts from, for `Focus::base` (ADR-103 §5).
+    base_commit: Option<String>,
     /// Per language, the symbols `--symbols` selected; empty without selectors.
     selected: HashMap<LangId, BTreeSet<crate::syntax::SymbolKey>>,
     files: Vec<String>,
@@ -986,6 +988,7 @@ impl<'a> FactStore<'a> {
             seed: job.seed,
             depth: job.depth,
             changed: job.changed.clone(),
+            base_commit: job.base.as_ref().map(|base| base.range.commit.clone()),
             selected: HashMap::new(),
             files,
             made: HashMap::new(),
@@ -1178,6 +1181,7 @@ impl<'a> FactStore<'a> {
                 depth: self.depth,
                 symbols: self.selected.get(&lang.id).cloned(),
                 changed: self.changed.clone(),
+                base: self.base_commit.clone(),
                 jobs: self.jobs,
                 cases: self.cases,
             },

@@ -1,0 +1,220 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `footprint.grew`.",
+            "properties": {
+              "added": {
+                "description": "`name@version` of each dependency head has and the base did not.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "base": {
+                "description": "Dependencies at the base commit.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "head": {
+                "description": "Dependencies at head.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "removed": {
+                "description": "`name@version` of each dependency the base had and head does not.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "base",
+              "head",
+              "added",
+              "removed"
+            ],
+            "title": "Grew",
+            "type": "object"
+          },
+          "kind": "footprint.grew",
+          "summary": "The range added dependencies: there are more than at its base commit."
+        },
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `dep.vuln`.",
+            "properties": {
+              "advisory": {
+                "description": "The advisory's ID.",
+                "type": "string"
+              },
+              "fixed": {
+                "description": "The first version that fixes it, when the advisory names one.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "package": {
+                "type": "string"
+              },
+              "summary": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "package",
+              "version",
+              "advisory",
+              "summary"
+            ],
+            "title": "Vulnerable",
+            "type": "object"
+          },
+          "kind": "dep.vuln",
+          "summary": "A dependency has a known vulnerability in the configured advisories."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `dep.license`.",
+            "properties": {
+              "license": {
+                "description": "The license expression, which offers no alternative free of copyleft.",
+                "type": "string"
+              },
+              "package": {
+                "type": "string"
+              },
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "package",
+              "license"
+            ],
+            "title": "Licensed",
+            "type": "object"
+          },
+          "kind": "dep.license",
+          "summary": "A dependency's license offers no alternative free of copyleft (GPL, AGPL, LGPL, SSPL, EUPL, OSL)."
+        }
+      ],
+      "id": "perf.footprint",
+      "metrics": [
+        {
+          "name": "dependencies",
+          "per": "scope",
+          "summary": "Dependencies the lockfiles and manifests list."
+        },
+        {
+          "name": "vulnerable",
+          "per": "scope",
+          "summary": "Reported dependencies with a known vulnerability (zero when no advisories are configured; a note says so)."
+        },
+        {
+          "name": "copyleft",
+          "per": "scope",
+          "summary": "Reported dependencies with a copyleft license (zero when licenses are not read; a note says so)."
+        },
+        {
+          "name": "artifact_bytes",
+          "per": "scope",
+          "summary": "Total size of the configured artifacts, for a size budget."
+        }
+      ],
+      "needs": [
+        "footprint"
+      ],
+      "stability": "experimental",
+      "summary": "Dependencies, their licenses and known vulnerabilities, and artifact sizes, read offline; against the range's base under --changed or --base.",
+      "tier": 0,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

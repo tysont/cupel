@@ -1,0 +1,190 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "perf.footprint",
+      "metrics": {
+        "artifact_bytes": 68.0,
+        "copyleft": 1.0,
+        "dependencies": 2.0,
+        "vulnerable": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "dependencies",
+        "value": 2.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Confirm the project may ship `gplthing` under GPL-3.0-only, or replace it with a permissively licensed alternative."
+      },
+      "check": "perf.footprint",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "license": "GPL-3.0-only",
+        "package": "gplthing",
+        "version": "1.0.0"
+      },
+      "id": "fnd_cf5289",
+      "kind": "dep.license",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 15,
+        "file": "package-lock.json",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only perf.footprint",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_cf5289 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "gplthing@1.0.0 is licensed GPL-3.0-only"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Upgrade `oldlib` to 2.0.1 or later, or replace it."
+      },
+      "check": "perf.footprint",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "advisory": "OSV-2099-0001",
+        "fixed": "2.0.1",
+        "package": "oldlib",
+        "summary": "Out-of-bounds write in oldlib",
+        "version": "2.0.0"
+      },
+      "id": "fnd_2defe5",
+      "kind": "dep.vuln",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 19,
+        "file": "package-lock.json",
+        "line": 19
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only perf.footprint",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_2defe5 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "oldlib@2.0.0 OSV-2099-0001: Out-of-bounds write in oldlib"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_2defe5",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Upgrade `oldlib` to 2.0.1 or later, or replace it."
+    },
+    {
+      "command": null,
+      "finding": "fnd_cf5289",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Confirm the project may ship `gplthing` under GPL-3.0-only, or replace it with a permissively licensed alternative."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "javascript": {
+            "advisories": "advisories",
+            "artifacts": [
+              "dist/*"
+            ]
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "javascript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 1
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

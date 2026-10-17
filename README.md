@@ -616,7 +616,7 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 ## Checks
 
-Every check below exists. Each is supported in all five languages except `gen.property`, which Go lacks (Cupel runs no Go property framework), and `gen.metamorphic`, which has a Python harness only; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite and so run from `--depth standard`, the default, and `gen.differential` and `gen.metamorphic`, which run from `--depth deep` (or by name with `--only`) once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists. Each is supported in all five languages except `gen.property`, which Go lacks (Cupel runs no Go property framework), and `gen.metamorphic`, which has a Python harness only; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default, and `gen.differential` and `gen.metamorphic`, which run from `--depth deep` (or by name with `--only`) once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
@@ -624,6 +624,7 @@ Every check below exists. Each is supported in all five languages except `gen.pr
 | `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — |  |
 | `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — |  |
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
+| `perf.footprint` | 0 | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
 | `static.analyze` | 1 | standard | `analyze.<tool>.<rule>` | `errors`, `diagnostics` | — | go, javascript, python, rust, typescript |
 | `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | go, javascript, python, rust, typescript |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | go, javascript, python, rust, typescript |
@@ -646,6 +647,9 @@ What each check looks for:
 - **`static.deps`** builds the module graph from resolved imports. It reports import cycles, modules that are both unstable and abstract, and imports that break the layering you configure.
 - **`static.dead-code`** reports symbols and exports in modules that no import reaches and no entry point, test, or framework hook keeps alive. Reachability is decided per module, not per call, so an export of a module nothing imports is reported as `info` with low confidence: it may be public API.
 - **`tests.quality`** reads every test: tests with no assertions or only weak ones (truthiness, presence, inequality), heavy mocking, loops and branches inside tests, and duplicated setup.
+- **`static.api-surface`** compares the public API at the range's base with the API now, path by path. A public item that is gone (deleted, renamed, or made private) or lost a signature is `api.breaking` (`warn`); one that is new or gained a signature (an overload) is `api.widened` (`info`). It needs `--changed` or `--base`, and the gate rule `"static.api-surface" = "no-breaking"` holds a branch to no unsuppressed break.
+- **`static.analyze`** runs each language's type checker at its strictest and its linters, and reports every result in a file in scope as `analyze.<tool>.<rule>` (`analyze.mypy.arg-type`, `analyze.clippy.needless_return`): errors `fail`, warnings `warn`, notes `info`. See [Analyzers](#analyzers).
+- **`perf.footprint`** reads the dependencies the lockfiles list, without network access, and reports those with a known vulnerability (`dep.vuln`) or a copyleft license (`dep.license`); under a range it reports only dependencies the range added or changed, and `footprint.grew` when there are more than at the base. See [Dependencies and footprint](#dependencies-and-footprint).
 - **`tests.weakening`** compares the tests at the range's base with the tests now. It reports removed or loosened assertions, skipped or deleted tests, and rewritten snapshots. It needs `--changed` or `--base`.
 - **`tests.flaky`** reruns the test suite several times in different orders and with different seeds, and reports tests whose outcome changes: `test.flaky` when two reruns in the same order disagree, `test.order-dependent` when the outcome follows the order. See [Flakiness](#flakiness).
 - **`gen.differential`** calls the functions you name on generated inputs, in the working tree and against an oracle (the same code at an earlier commit, or a command that computes the reference answer), and reports the smallest input on which the two answer differently, with both answers. See [Differential testing](#differential-testing).
@@ -668,6 +672,7 @@ The support matrix, from `cupel describe matrix`:
 | `gen.differential` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
 | `gen.metamorphic` | unsupported | unsupported | unconfigured | unsupported | unsupported |
 | `gen.property` | unsupported | supported | supported | supported | supported |
+| `perf.footprint` | supported | supported | supported | supported | supported |
 | `static.analyze` | supported | supported | supported | supported | supported |
 | `static.api-surface` | supported | supported | supported | supported | supported |
 | `static.clones` | supported | supported | supported | supported | supported |
@@ -937,6 +942,41 @@ fail (1)
 
 The minimized input `[0, 1, 1]` sorts to `[0, 1, 1]`, its reverse `[1, 1, 0]` to `[1, 0, 1]`. A failing check does not fail the run by itself; a gate rule such as `"gen.metamorphic.violated" = "== 0"` does. Without any relation declared for a language, the check is skipped there as `unconfigured` (`lang.python.relations`); the support matrix above, which knows no repository's configuration, shows Python that way. The other four languages have no harness yet, so the check is `unsupported` for them. Every relation is evaluated whatever the scope, and only those whose function is defined in a file in scope are reported.
 
+## Analyzers
+
+`static.analyze` runs every analyzer of a language that is installed, in each project root, and keeps the results in files in scope. Type checkers run at their strictest; linters use the project's own configuration.
+
+| Language | Analyzers | Run as |
+|---|---|---|
+| Rust | clippy | `cargo clippy --all-targets --message-format=json`, with the project's `[lints]` |
+| Python | mypy, ruff | `mypy --strict --output json` and `ruff check --output-format json` on the files in scope |
+| JavaScript | ESLint | `eslint --format json`, only where the root has a flat config (`eslint.config.js` and its siblings) |
+| TypeScript | tsc, ESLint | `tsc --noEmit --strict` over the root's `tsconfig.json`, else over the files in scope; ESLint as for JavaScript |
+| Go | go vet, staticcheck | `go vet -json` and `staticcheck -f json` over the module's packages |
+
+The check runs when at least one of a language's analyzers is installed; each one that is missing, unconfigured (ESLint without a config), or failed (its output could not be read) is a note in the result saying what to install or fix, and the others still run. The finding's evidence holds the `tool`, its `rule`, the `level`, and the `message`; its ID does not change when the line moves. The gate keys are `static.analyze.errors` and `diagnostics`. Results depend on each tool's version, so pin them where a gate reads them.
+
+## Dependencies and footprint
+
+`perf.footprint` reads, in each project root, the lockfile or manifest the ecosystem keeps, and never the network:
+
+| Language | Dependencies | Licenses |
+|---|---|---|
+| Rust | `Cargo.lock`, except the workspace's own packages | `cargo metadata --offline --locked`, from the local registry cache |
+| Python | `uv.lock`, else `poetry.lock`, else `requirements*.txt` | the package metadata in `.venv/` or `venv/` |
+| JavaScript, TypeScript | `package-lock.json`, else `package.json` (without versions) | the lockfile |
+| Go | `go.mod`'s `require` lines | not read |
+
+A dependency is direct when the project declares it itself. Two measurements are opt-in, per language:
+
+```toml
+[lang.rust]
+advisories = "advisories"            # a directory of OSV advisories (*.json), such as an osv.dev export
+artifacts = ["target/release/app"]   # files or globs whose sizes the artifact_bytes metric adds up
+```
+
+A dependency whose name and version an advisory's `affected` entry lists, or falls in its ranges, is `dep.vuln` (`fail`, with the advisory and the fixed version); a license expression with no alternative free of GPL, AGPL, LGPL, SSPL, EUPL, or OSL is `dep.license` (`warn`). Under `--changed` or `--base` the same files are read at the base commit, and only dependencies whose name and version are new are reported; `footprint.grew` (`warn`) lists what was added and removed when the count grew. The gate keys are `perf.footprint.dependencies`, `vulnerable`, `copyleft`, and `artifact_bytes` (a size budget, such as `"perf.footprint.artifact_bytes" = "<= 4000000"`); what was not measured (licenses, advisories, artifacts) is a note, never a silent zero.
+
 ## Plugins
 
 A plugin is a check or a fact producer in its own executable, in any language, that speaks JSON over standard input and output. Cupel registers it beside the built-in checks and producers, so `describe`, `--only`, `--dry-run`, gates, `[checks."<id>"]` settings, and the support matrix treat it like one of them.
@@ -996,6 +1036,7 @@ test = "cargo test --workspace"
 coverage = "cargo llvm-cov --lcov --output-path {out}"
 runner = "cargo-nextest"           # the test runner Cupel uses; see Test runners
 differential_entries = ["src/money.rs:split"]   # what gen.differential compares
+advisories = "advisories"          # OSV advisories perf.footprint matches dependencies against
 
 [checks."static.complexity"]       # check settings, for every language
 cyclomatic_max = 10
@@ -1013,6 +1054,7 @@ ref = "v1.2.0"
 
 [gate.changed]                     # evaluated for --changed and --base scopes
 "tests.weakening" = "none"
+"static.api-surface" = "no-breaking"
 "static.complexity" = "none"
 "static.complexity.cyclomatic_max" = "<= 10"
 "static.deps.cycles" = "== 0"
@@ -1026,7 +1068,7 @@ depth = "quick"
 
 **Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. `static.complexity` takes `cyclomatic_max` (10), `cognitive_max` (15), `nesting_max` (4), `params_max` (5), and `length_max` (60). `static.clones` takes `threshold` (0.82), `min_lines` (4), and `min_nodes` (20). `static.crap` takes `high` (30) and `watch` (5). `static.deps` takes `distance_max` (0.7) and `layers`. `tests.quality` takes `mock_density_max` (50), `mocks_min` (2), `logic_max` (0), and `setup_statements_min` (3).
 
-**Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the table above. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding) or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening`, which needs a range, is rejected when the config loads.
+**Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the table above. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening` or `static.api-surface`, which need a range, is rejected when the config loads.
 
 Cupel writes only under `.cupel/` (run records, the SQLite fact store, `cache/` with coverage reports and per-test maps, scratch space) unless `--write` is given. An install you allow (`--install`, or yes to the question) runs your package manager, which for the JavaScript launchers, uv, and poetry adds a dev dependency to `package.json` or `pyproject.toml` and its lockfile. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
 

@@ -1,0 +1,33 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "perf.footprint",
+      "metrics": {
+        "artifact_bytes": 0.0,
+        "copyleft": 0.0,
+        "dependencies": 0.0,
+        "vulnerable": 0.0
+      },
+      "notes": [
+        "artifact sizes not measured: set `[lang.<id>] artifacts` to their paths or globs (rust)",
+        "no lockfile or manifest found (rust)",
+        "vulnerabilities not measured: set `[lang.<id>] advisories` to a directory of OSV advisories (rust)"
+      ],
+      "oracle": null,
+      "score": {
+        "n": 0,
+        "unit": "dependencies",
+        "value": 0.0
+      },
+      "skipped": null,
+      "status": "pass",
+      "tier": 0
+    }
+  ],
+  "findings": [],
+  "rankings": []
+}

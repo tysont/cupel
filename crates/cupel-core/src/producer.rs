@@ -82,7 +82,8 @@ pub struct ProduceCtx {
 }
 
 /// What a run asked to look at beyond its files: its depth, the symbols `--symbols` selected,
-/// the lines a range changed, how much it may run at once, and its case budget. Producers that narrow their work
+/// the lines a range changed and the commit it starts from, how much it may run at once, and
+/// its case budget. Producers that narrow their work
 /// by it (the mutation engine, ADR-080) read it; the rest produce over their scope's files.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Focus {
@@ -92,6 +93,9 @@ pub struct Focus {
     /// Per file, the 1-based inclusive line ranges a range scope changed (`git diff -U0`);
     /// `None` without a range.
     pub changed: Option<ChangedLines>,
+    /// The commit a range starts from (`--changed`'s merge base or `--base`), for producers
+    /// that compare what they measure with it (ADR-103 §5); `None` without a range.
+    pub base: Option<String>,
     /// How many processes or threads a producer may run at once (`--jobs`, ADR-086 §11);
     /// `None` for its own default.
     pub jobs: Option<NonZeroUsize>,
@@ -111,6 +115,7 @@ impl Default for Focus {
             depth: CostClass::Standard,
             symbols: None,
             changed: None,
+            base: None,
             jobs: None,
             cases: None,
         }

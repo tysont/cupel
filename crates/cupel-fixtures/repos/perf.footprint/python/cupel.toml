@@ -1,0 +1,4 @@
+# perf.footprint reads advisories and artifact sizes only where they are configured (ADR-103).
+[lang.python]
+advisories = "advisories"
+artifacts = ["dist/*"]

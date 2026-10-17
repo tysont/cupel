@@ -48,6 +48,7 @@ mod gen_property;
 mod manifest;
 mod metrics;
 mod outcome;
+mod perf_footprint;
 mod settings;
 mod static_analyze;
 mod static_api_surface;

@@ -1,0 +1,25 @@
+{
+  "id": "OSV-2099-0001",
+  "summary": "Out-of-bounds write in example.com/oldlib",
+  "affected": [
+    {
+      "package": {
+        "ecosystem": "Go",
+        "name": "example.com/oldlib"
+      },
+      "ranges": [
+        {
+          "type": "ECOSYSTEM",
+          "events": [
+            {
+              "introduced": "2.0.0"
+            },
+            {
+              "fixed": "2.0.1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

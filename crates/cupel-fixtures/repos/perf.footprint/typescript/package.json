@@ -1,0 +1,9 @@
+{
+  "name": "ledger",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "gplthing": "^1.0.0",
+    "oldlib": "^2.0.0"
+  }
+}

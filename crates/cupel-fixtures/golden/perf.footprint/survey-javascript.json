@@ -1,0 +1,33 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "perf.footprint",
+      "metrics": {
+        "artifact_bytes": 0.0,
+        "copyleft": 0.0,
+        "dependencies": 1.0,
+        "vulnerable": 0.0
+      },
+      "notes": [
+        "artifact sizes not measured: set `[lang.<id>] artifacts` to their paths or globs (javascript)",
+        "licenses not read for these dependencies (javascript)",
+        "vulnerabilities not measured: set `[lang.<id>] advisories` to a directory of OSV advisories (javascript)"
+      ],
+      "oracle": null,
+      "score": {
+        "n": 1,
+        "unit": "dependencies",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "pass",
+      "tier": 0
+    }
+  ],
+  "findings": [],
+  "rankings": []
+}

@@ -1,0 +1,25 @@
+{
+  "id": "OSV-2099-0001",
+  "summary": "Out-of-bounds write in oldlib",
+  "affected": [
+    {
+      "package": {
+        "ecosystem": "npm",
+        "name": "oldlib"
+      },
+      "ranges": [
+        {
+          "type": "ECOSYSTEM",
+          "events": [
+            {
+              "introduced": "2.0.0"
+            },
+            {
+              "fixed": "2.0.1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

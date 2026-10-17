@@ -600,8 +600,9 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `PropertyResults` | per property: passed/falsified, minimized counterexample, seed | property tool | `gen.property` |
 | `FuzzResults` | crashes with reproducers, coverage reached | fuzz tool | `gen.fuzz` |
 | `RaceReports` | races/UB with stacks | race tool | `conc.race` |
-| `AnalyzerReport` | SARIF-normalized results | linter/type-checker tool | `static.analyze` |
+| `AnalyzerReport` | per analyzer: ran, missing, unconfigured, or failed; its results normalized to SARIF's rule, level, message, location (ADR-102) | linter/type-checker tool | `static.analyze` |
 | `DivergenceResults` | per generated input: both outputs, minimized | differential engine | `gen.differential`, `gen.metamorphic` |
+| `Footprint` | dependencies from lockfiles and manifests (name, version, direct, license, where listed), whether licenses were read, OSV vulnerabilities and artifact sizes when configured, the range's base dependencies; read offline (ADR-103) | lockfile readers | `perf.footprint` |
 
 P7 adds `Traces`, `Histories`, `ProofResults`, `ContractViolations` under the same rules. Facts carry completeness flags rather than languages carrying capability flags: a `CoverageMap` with `branches: None` makes `tests.coverage` skip branch findings with that reason; whether a language has a per-test map is simply whether a `PerTestMap` producer is registered for it.
 
@@ -785,12 +786,12 @@ Engines use the same contract: `cupel-mutate` is `Producer<MutationOutcomes>` wi
 
 Producers are registered per language in a **toolchain table** in `cupel-adapt`, keyed by `LangId`. Each row lists the runners Cupel knows for that language (with detection rules: lockfile, config file, dependency name), the coverage producers and the report formats they emit, bench producers, and the property/fuzz/race tools. The row is the registry's default order for that language. `init` consults the table to choose defaults; `doctor` consults it to know what to verify; `describe language` renders it. Launch rows:
 
-| LangId | Runners | Coverage producer → format | Bench | Per-test map |
-|---|---|---|---|---|
-| `javascript` / `typescript` | vitest, jest, mocha, node:test | vitest/jest → Istanbul JSON, c8 → lcov | hyperfine, tinybench | file-level fallback |
-| `rust` | cargo test, cargo nextest | cargo llvm-cov → lcov | criterion | nextest + llvm-cov per test |
-| `go` | go test -json | go test -coverprofile → coverprofile | go test -bench + benchstat | `-run` narrowing per test |
-| `python` | pytest, unittest | pytest-cov / coverage.py → lcov, Cobertura XML | pytest-benchmark, hyperfine | `--cov-context=test` |
+| LangId | Runners | Coverage producer → format | Bench | Per-test map | Analyzers (ADR-102) |
+|---|---|---|---|---|---|
+| `javascript` / `typescript` | vitest, jest, mocha, node:test | vitest/jest → Istanbul JSON, c8 → lcov | hyperfine, tinybench | file-level fallback | tsc `--strict` (TypeScript), ESLint (with a flat config) |
+| `rust` | cargo test, cargo nextest | cargo llvm-cov → lcov | criterion | nextest + llvm-cov per test | clippy |
+| `go` | go test -json | go test -coverprofile → coverprofile | go test -bench + benchstat | `-run` narrowing per test | go vet, staticcheck |
+| `python` | pytest, unittest | pytest-cov / coverage.py → lcov, Cobertura XML | pytest-benchmark, hyperfine | `--cov-context=test` | mypy `--strict`, ruff |
 
 Producers ingest existing reports when fresher than the sources (mtime and content hash), avoiding regeneration.
 
