@@ -1,0 +1,220 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "strengthen_assertion",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `density.sparse-test`.",
+            "properties": {
+              "assertions": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines": {
+                "description": "Lines the test spans, from its first line to its last.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines_per_assertion": {
+                "description": "Lines per assertion, rounded down.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines_per_assertion_max": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "test": {
+                "description": "The test's name, as its framework names it.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "test",
+              "assertions",
+              "lines",
+              "lines_per_assertion",
+              "lines_per_assertion_max"
+            ],
+            "title": "SparseTest",
+            "type": "object"
+          },
+          "kind": "density.sparse-test",
+          "summary": "A test that asserts something spans more than lines_per_assertion_max lines per assertion it makes."
+        },
+        {
+          "action": "strengthen_assertion",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `density.sparse-file`.",
+            "properties": {
+              "assertions": {
+                "description": "Assertions those tests make.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "file_density_percent_min": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "file_tests_min": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "percent": {
+                "description": "The file's assertions per test as a percentage of the repository's, rounded down.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "repository_assertions": {
+                "description": "Assertions those tests make.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "repository_tests": {
+                "description": "Tests in every test file the run read.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tests": {
+                "description": "Tests in the file.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "tests",
+              "assertions",
+              "repository_tests",
+              "repository_assertions",
+              "percent",
+              "file_density_percent_min",
+              "file_tests_min"
+            ],
+            "title": "SparseFile",
+            "type": "object"
+          },
+          "kind": "density.sparse-file",
+          "summary": "A test file of at least file_tests_min tests whose assertions per test are below file_density_percent_min percent of the repository's."
+        }
+      ],
+      "id": "tests.assertion-density",
+      "metrics": [
+        {
+          "name": "assertions_per_test",
+          "per": "scope",
+          "summary": "Assertions per test in scope; the score."
+        },
+        {
+          "name": "assertions_per_public_function",
+          "per": "scope",
+          "summary": "Assertions in the tests paired with a source file, per public function of it in scope."
+        },
+        {
+          "name": "tested_public_functions",
+          "per": "scope",
+          "summary": "Public functions in scope whose source file has tests."
+        },
+        {
+          "name": "sparse_tests",
+          "per": "scope",
+          "summary": "Tests in scope reported as sparse."
+        },
+        {
+          "name": "sparse_files",
+          "per": "scope",
+          "summary": "Test files in scope reported as sparse."
+        }
+      ],
+      "needs": [
+        "test-frames",
+        "symbols",
+        "test-conventions"
+      ],
+      "stability": "experimental",
+      "summary": "Assertion density: assertions per test and per tested public function, long tests that assert little, and test files far below the repository's density.",
+      "tier": 2,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

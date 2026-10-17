@@ -631,6 +631,7 @@ Every check below exists. Each is supported in all five languages except `gen.pr
 | `static.crap` | 0 | quick | `crap.high`, `crap.watch` | `max`, `mean` | `crap` | go, javascript, python, rust, typescript |
 | `static.dead-code` | 0 | quick | `dead.symbol`, `dead.export` | `dead_symbols`, `dead_exports` | — | go, javascript, python, rust, typescript |
 | `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | go, javascript, python, rust, typescript |
+| `tests.assertion-density` | 2 | quick | `density.sparse-test`, `density.sparse-file` | `assertions_per_test`, `assertions_per_public_function`, `tested_public_functions`, `sparse_tests`, `sparse_files` | — | go, javascript, python, rust, typescript |
 | `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines` |  |
 | `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | go, javascript, python, rust, typescript |
 | `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.uncovered`, `mutant.equivalent?` | `score`, `killed`, `survived`, `timeout`, `uncovered`, `unviable`, `equivalent`, `executed`, `reused`, `schemata`, `fallback` | `survivors` |  |
@@ -646,6 +647,7 @@ What each check looks for:
 - **`static.deps`** builds the module graph from resolved imports. It reports import cycles, modules that are both unstable and abstract, and imports that break the layering you configure.
 - **`static.dead-code`** reports symbols and exports in modules that no import reaches and no entry point, test, or framework hook keeps alive. Reachability is decided per module, not per call, so an export of a module nothing imports is reported as `info` with low confidence: it may be public API.
 - **`tests.quality`** reads every test: tests with no assertions or only weak ones (truthiness, presence, inequality), heavy mocking, loops and branches inside tests, and duplicated setup.
+- **`tests.assertion-density`** measures assertions per test and per tested public function (one whose file has tests). It reports long tests that assert little for their length (`density.sparse-test`) and test files whose assertions per test fall far below the repository's (`density.sparse-file`); a test that asserts nothing is `tests.quality`'s.
 - **`tests.weakening`** compares the tests at the range's base with the tests now. It reports removed or loosened assertions, skipped or deleted tests, and rewritten snapshots. It needs `--changed` or `--base`.
 - **`tests.flaky`** reruns the test suite several times in different orders and with different seeds, and reports tests whose outcome changes: `test.flaky` when two reruns in the same order disagree, `test.order-dependent` when the outcome follows the order. See [Flakiness](#flakiness).
 - **`gen.differential`** calls the functions you name on generated inputs, in the working tree and against an oracle (the same code at an earlier commit, or a command that computes the reference answer), and reports the smallest input on which the two answer differently, with both answers. See [Differential testing](#differential-testing).
@@ -673,6 +675,7 @@ The support matrix, from `cupel describe matrix`:
 | `static.crap` | supported | supported | supported | supported | supported |
 | `static.dead-code` | supported | supported | supported | supported | supported |
 | `static.deps` | supported | supported | supported | supported | supported |
+| `tests.assertion-density` | supported | supported | supported | supported | supported |
 | `tests.coverage` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
 | `tests.flaky` | supported | supported | supported | supported | supported |
 | `tests.mutation` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
@@ -1022,7 +1025,7 @@ ref = "v1.2.0"
 depth = "quick"
 ```
 
-**Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. `static.complexity` takes `cyclomatic_max` (10), `cognitive_max` (15), `nesting_max` (4), `params_max` (5), and `length_max` (60). `static.clones` takes `threshold` (0.82), `min_lines` (4), and `min_nodes` (20). `static.crap` takes `high` (30) and `watch` (5). `static.deps` takes `distance_max` (0.7) and `layers`. `tests.quality` takes `mock_density_max` (50), `mocks_min` (2), `logic_max` (0), and `setup_statements_min` (3).
+**Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. `static.complexity` takes `cyclomatic_max` (10), `cognitive_max` (15), `nesting_max` (4), `params_max` (5), and `length_max` (60). `static.clones` takes `threshold` (0.82), `min_lines` (4), and `min_nodes` (20). `static.crap` takes `high` (30) and `watch` (5). `static.deps` takes `distance_max` (0.7) and `layers`. `tests.quality` takes `mock_density_max` (50), `mocks_min` (2), `logic_max` (0), and `setup_statements_min` (3). `tests.assertion-density` takes `lines_per_assertion_max` (20), `file_density_percent_min` (50), and `file_tests_min` (3).
 
 **Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the table above. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding) or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening`, which needs a range, is rejected when the config loads.
 
