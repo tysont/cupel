@@ -8,6 +8,27 @@
     "languages": [
       {
         "extensions": [
+          ".clj",
+          ".cljc"
+        ],
+        "facts": [
+          "symbols",
+          "decisions",
+          "norm-tree",
+          "mutation-sites",
+          "test-frames",
+          "module-graph",
+          "api-surface",
+          "roots",
+          "test-conventions",
+          "project-info"
+        ],
+        "family": "clojure",
+        "id": "clojure",
+        "stability": "experimental"
+      },
+      {
+        "extensions": [
           ".go"
         ],
         "facts": [
@@ -24,6 +45,26 @@
         ],
         "family": "go",
         "id": "go",
+        "stability": "experimental"
+      },
+      {
+        "extensions": [
+          ".java"
+        ],
+        "facts": [
+          "symbols",
+          "decisions",
+          "norm-tree",
+          "mutation-sites",
+          "test-frames",
+          "module-graph",
+          "api-surface",
+          "roots",
+          "test-conventions",
+          "project-info"
+        ],
+        "family": "java",
+        "id": "java",
         "stability": "experimental"
       },
       {

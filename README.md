@@ -12,7 +12,7 @@ That detects your project, writes `cupel.toml`, and grades everything that diffe
 
 ## What Cupel does
 
-Cupel runs seven static checks over JavaScript, TypeScript, Rust, Go, and Python. They measure complexity, CRAP, clones, dependency structure, dead code, test quality, and tests weakened on a branch. Every check works in every language, because checks read language-neutral facts and never see source syntax.
+Cupel runs seven static checks over JavaScript, TypeScript, Rust, Go, Python, Java, and Clojure. They measure complexity, CRAP, clones, dependency structure, dead code, test quality, and tests weakened on a branch. Every check works in every language, because checks read language-neutral facts and never see source syntax.
 
 Every command writes one JSON envelope to stdout. It carries the checks that ran, the findings with stable IDs, the gate's verdict, and `next_actions` ranked for an agent to work through. `--format text` renders the same envelope for people.
 
@@ -514,7 +514,7 @@ created = "2026-10-14"
 
 ### `cupel tests --impacted`
 
-`tests --impacted` lists the tests a scope impacts, why, and a ready-to-run command per runner. It takes the same scope flags as `check`; with `--changed` or `--base` it reads the changed lines and widens each change to the functions it touches. Where a language has a per-test coverage map (Rust through `cargo llvm-cov` and `cargo nextest`, Go through `go test -coverprofile` per test, Python through pytest-cov's test contexts), a test is impacted when it executes one of those lines. JavaScript and TypeScript have no per-test map, so their impacted tests are the test files that import a changed file, directly or through other files; the envelope says so with `per_test_map: false` and the reason. The same happens for any language whose coverage tool is not installed.
+`tests --impacted` lists the tests a scope impacts, why, and a ready-to-run command per runner. It takes the same scope flags as `check`; with `--changed` or `--base` it reads the changed lines and widens each change to the functions it touches. Where a language has a per-test coverage map (Rust through `cargo llvm-cov` and `cargo nextest`, Go through `go test -coverprofile` per test, Python through pytest-cov's test contexts), a test is impacted when it executes one of those lines. JavaScript, TypeScript, Java, and Clojure have no per-test map, so their impacted tests are the test files that import a changed file, directly or through other files; the envelope says so with `per_test_map: false` and the reason. The same happens for any language whose coverage tool is not installed.
 
 ```console
 $ cupel tests --impacted --changed --format text    # `add` changed in calc.py
@@ -618,7 +618,7 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 ## Checks
 
-Every check below exists. Each is supported in all five languages except `gen.property`, which Go lacks (Cupel runs no Go property framework), and `gen.metamorphic`, which has a Python harness only; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default, and `gen.differential` and `gen.metamorphic`, which run from `--depth deep` (or by name with `--only`) once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists. Each is supported in all seven languages except `gen.property`, which Go, Java, and Clojure lack (Cupel runs no property framework for them), `gen.metamorphic`, which has a Python harness only, and `gen.differential`, `static.analyze`, and `perf.footprint`, which have no Java or Clojure harness, analyzer, or lockfile reader yet; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default, and `gen.differential` and `gen.metamorphic`, which run from `--depth deep` (or by name with `--only`) once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
@@ -628,18 +628,18 @@ Every check below exists. Each is supported in all five languages except `gen.pr
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
 | `perf.footprint` | 0 | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
 | `static.analyze` | 1 | standard | `analyze.<tool>.<rule>` | `errors`, `diagnostics` | — | go, javascript, python, rust, typescript |
-| `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | go, javascript, python, rust, typescript |
-| `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | go, javascript, python, rust, typescript |
-| `static.complexity` | 0 | quick | `complexity.high`, `nesting.deep`, `params.many`, `function.long` | `cyclomatic_max`, `cognitive_max`, `nesting_max`, `params_max`, `length_max` | `cyclomatic`, `cognitive` | go, javascript, python, rust, typescript |
-| `static.crap` | 0 | quick | `crap.high`, `crap.watch` | `max`, `mean` | `crap` | go, javascript, python, rust, typescript |
-| `static.dead-code` | 0 | quick | `dead.symbol`, `dead.export` | `dead_symbols`, `dead_exports` | — | go, javascript, python, rust, typescript |
-| `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | go, javascript, python, rust, typescript |
-| `tests.assertion-density` | 2 | quick | `density.sparse-test`, `density.sparse-file` | `assertions_per_test`, `assertions_per_public_function`, `tested_public_functions`, `sparse_tests`, `sparse_files` | — | go, javascript, python, rust, typescript |
+| `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | clojure, go, java, javascript, python, rust, typescript |
+| `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | clojure, go, java, javascript, python, rust, typescript |
+| `static.complexity` | 0 | quick | `complexity.high`, `nesting.deep`, `params.many`, `function.long` | `cyclomatic_max`, `cognitive_max`, `nesting_max`, `params_max`, `length_max` | `cyclomatic`, `cognitive` | clojure, go, java, javascript, python, rust, typescript |
+| `static.crap` | 0 | quick | `crap.high`, `crap.watch` | `max`, `mean` | `crap` | clojure, go, java, javascript, python, rust, typescript |
+| `static.dead-code` | 0 | quick | `dead.symbol`, `dead.export` | `dead_symbols`, `dead_exports` | — | clojure, go, java, javascript, python, rust, typescript |
+| `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | clojure, go, java, javascript, python, rust, typescript |
+| `tests.assertion-density` | 2 | quick | `density.sparse-test`, `density.sparse-file` | `assertions_per_test`, `assertions_per_public_function`, `tested_public_functions`, `sparse_tests`, `sparse_files` | — | clojure, go, java, javascript, python, rust, typescript |
 | `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines` |  |
-| `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | go, javascript, python, rust, typescript |
+| `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | clojure, go, java, javascript, python, rust, typescript |
 | `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.uncovered`, `mutant.equivalent?` | `score`, `killed`, `survived`, `timeout`, `uncovered`, `unviable`, `equivalent`, `executed`, `reused`, `schemata`, `fallback` | `survivors` |  |
-| `tests.quality` | 2 | quick | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | `assertion_density`, `weak_ratio`, `no_assertion` | `mock_density` | go, javascript, python, rust, typescript |
-| `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | go, javascript, python, rust, typescript |
+| `tests.quality` | 2 | quick | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | `assertion_density`, `weak_ratio`, `no_assertion` | `mock_density` | clojure, go, java, javascript, python, rust, typescript |
+| `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | clojure, go, java, javascript, python, rust, typescript |
 <!-- end:check-table -->
 
 What each check looks for:
@@ -666,39 +666,41 @@ What each check looks for:
 
 ## Languages
 
-Cupel understands **JavaScript, TypeScript, Rust, Go, and Python**. Each language is a tree-sitter grammar plus a declarative spec (queries and tables), and produces the same language-neutral facts: `symbols`, `decisions`, `norm-tree` (the structural hash that gives every function an identity surviving rename, move, and reformat), `mutation-sites`, `test-frames`, `test-conventions`, `module-graph` (imports resolved to files, with Node, `tsconfig` `paths`, Go module, Rust `mod`, and Python package resolution), `api-surface`, `roots`, and `project-info`. Checks consume facts and never see a language, so every check works in every language that produces what it needs.
+Cupel understands **JavaScript, TypeScript, Rust, Go, Python, Java, and Clojure**. Each language is a tree-sitter grammar plus a declarative spec (queries and tables), and produces the same language-neutral facts: `symbols`, `decisions`, `norm-tree` (the structural hash that gives every function an identity surviving rename, move, and reformat), `mutation-sites`, `test-frames`, `test-conventions`, `module-graph` (imports resolved to files, with Node, `tsconfig` `paths`, Go module, Rust `mod`, Python package, Java source-root, and Clojure classpath resolution), `api-surface`, `roots`, and `project-info`. Checks consume facts and never see a language, so every check works in every language that produces what it needs.
 
 The support matrix, from `cupel describe matrix`:
 
 <!-- generated:support-matrix -->
-| Check | go | javascript | python | rust | typescript |
-| --- | --- | --- | --- | --- | --- |
-| `gen.differential` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
-| `gen.metamorphic` | unsupported | unsupported | unconfigured | unsupported | unsupported |
-| `gen.property` | unsupported | supported | supported | supported | supported |
-| `perf.footprint` | supported | supported | supported | supported | supported |
-| `static.analyze` | supported | supported | supported | supported | supported |
-| `static.api-surface` | supported | supported | supported | supported | supported |
-| `static.clones` | supported | supported | supported | supported | supported |
-| `static.complexity` | supported | supported | supported | supported | supported |
-| `static.crap` | supported | supported | supported | supported | supported |
-| `static.dead-code` | supported | supported | supported | supported | supported |
-| `static.deps` | supported | supported | supported | supported | supported |
-| `tests.assertion-density` | supported | supported | supported | supported | supported |
-| `tests.coverage` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
-| `tests.flaky` | supported | supported | supported | supported | supported |
-| `tests.mutation` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
-| `tests.quality` | supported | supported | supported | supported | supported |
-| `tests.weakening` | supported | supported | supported | supported | supported |
+| Check | clojure | go | java | javascript | python | rust | typescript |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `gen.differential` | unsupported | unconfigured | unsupported | unconfigured | unconfigured | unconfigured | unconfigured |
+| `gen.metamorphic` | unsupported | unsupported | unsupported | unsupported | unconfigured | unsupported | unsupported |
+| `gen.property` | unsupported | unsupported | unsupported | supported | supported | supported | supported |
+| `perf.footprint` | unsupported | supported | unsupported | supported | supported | supported | supported |
+| `static.analyze` | unsupported | supported | unsupported | supported | supported | supported | supported |
+| `static.api-surface` | supported | supported | supported | supported | supported | supported | supported |
+| `static.clones` | supported | supported | supported | supported | supported | supported | supported |
+| `static.complexity` | supported | supported | supported | supported | supported | supported | supported |
+| `static.crap` | supported | supported | supported | supported | supported | supported | supported |
+| `static.dead-code` | supported | supported | supported | supported | supported | supported | supported |
+| `static.deps` | supported | supported | supported | supported | supported | supported | supported |
+| `tests.assertion-density` | supported | supported | supported | supported | supported | supported | supported |
+| `tests.coverage` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
+| `tests.flaky` | supported | supported | supported | supported | supported | supported | supported |
+| `tests.mutation` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
+| `tests.quality` | supported | supported | supported | supported | supported | supported | supported |
+| `tests.weakening` | supported | supported | supported | supported | supported | supported | supported |
 <!-- end:support-matrix -->
 
 ```sh
-cupel describe languages           # the five languages, one line each
+cupel describe languages           # the seven languages, one line each
 cupel describe language go         # extensions, facts produced, checks that apply, toolchain row
 cupel describe fact norm-tree      # a fact's schema, version, producers per language, consumers
 ```
 
-JS and TS form one family: `static.clones` reports a TypeScript function copied from JavaScript. Languages in different families are never compared. Every language is held to the same conformance inventory, a shared list of constructs per fact that each language must exhibit in its fixture repository and detect, or mark not applicable with a reason.
+JS and TS form one family: `static.clones` reports a TypeScript function copied from JavaScript. Languages in different families are never compared.
+
+Java is read through its package clauses: a method's name is `package.Class.method`, `public` and `protected` members are public, package-private ones `internal`, and a Maven or Gradle build (`pom.xml`, `build.gradle(.kts)`, `settings.gradle(.kts)`) is a project whose modules are members. Tests are JUnit 5, JUnit 4, and jqwik methods. Clojure is read through its `ns` forms: a var is `namespace/name`, `defn-` and `^:private` make it private, `cond` is its else-if, and a `deps.edn` is a project. Tests are `clojure.test` `deftest`s and test.check `defspec`s. Every language is held to the same conformance inventory, a shared list of constructs per fact that each language must exhibit in its fixture repository and detect, or mark not applicable with a reason.
 
 ## Test runners
 
@@ -710,6 +712,8 @@ Checks that depend on running the test suite read a `test-results` fact, which C
 | Go | `go test -json` | test2json events |
 | Python | `pytest` (when the project mentions it), `unittest` | JUnit XML; `unittest -v` output |
 | JavaScript, TypeScript | `vitest`, `jest` (whichever `package.json` depends on) | the Jest JSON report |
+| Java | Maven (`mvn test`, when a `pom.xml` exists), Gradle (`gradle test --rerun`) | Surefire's and Gradle's JUnit XML, one file per test class |
+| Clojure | `clojure.test` through the Clojure CLI (`clojure -M:test` and a runner script Cupel writes under `.cupel/`) | `clojure.test.junit` XML |
 
 A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in the root's `node_modules/.bin`); otherwise checks that need test results are skipped as `unavailable` with the tool named, and `cupel doctor` says what to install (`cupel doctor --fix --install` installs it). `[lang.<id>] runner` chooses one explicitly, by its name with or without the `tool.` prefix:
 
@@ -744,7 +748,7 @@ With the run cached the first says `test-results+coverage-map+per-test-map(cache
 
 ### Flakiness
 
-`tests.flaky` reruns the tests the baseline ran, three times by default, with the same runner, and compares the outcomes. The reruns differ on purpose: the first two run the tests in their declared order one at a time, differing only in seed; the third runs them reversed (pytest and unittest, which take the tests in order) or in the runner's seeded shuffle (`go test -shuffle`, libtest's `--shuffle-seed`, `jest --randomize`, `vitest --sequence.shuffle`); further reruns shuffle again, alternating between the runner's default parallelism and one test at a time. Every rerun's seed is derived from the run's `--seed`, so `cupel check --only tests.flaky --seed N`, which each finding gives as its `repro`, repeats the same reruns.
+`tests.flaky` reruns the tests the baseline ran, three times by default, with the same runner, and compares the outcomes. The reruns differ on purpose: the first two run the tests in their declared order one at a time, differing only in seed; the third runs them reversed (pytest and unittest, which take the tests in order) or in the runner's seeded shuffle (`go test -shuffle`, libtest's `--shuffle-seed`, `jest --randomize`, `vitest --sequence.shuffle`, Surefire's random class order, which otherwise runs classes alphabetically; Cupel's Clojure runner takes the reversed order); further reruns shuffle again, alternating between the runner's default parallelism and one test at a time. Every rerun's seed is derived from the run's `--seed`, so `cupel check --only tests.flaky --seed N`, which each finding gives as its `repro`, repeats the same reruns.
 
 - `test.flaky`: the test passed and failed in two reruns that ran the tests in the same order. Something besides the code and the order decides it: time, randomness, concurrency, or the environment.
 - `test.order-dependent`: the outcome is the same in every rerun of one order and differs between orders. The evidence lists `preceded_by`, the tests that ran before it in every rerun it failed and after it in some rerun it passed, when the runner reports its order.
@@ -823,6 +827,8 @@ coverage = "npx vitest run --coverage --coverage.reporter=lcov"   # no {out}: co
 | Go | `go test -coverprofile` | no (coverprofile has none) |
 | Python | `pytest-cov` (with pytest), `coverage.py` (with unittest) | with `--cov-branch` |
 | JavaScript, TypeScript | `vitest --coverage`, `jest --coverage`, `c8` | yes |
+| Java | JaCoCo through Maven (its goals by coordinate around `mvn test`), JaCoCo through Gradle (`gradle test jacocoTestReport`, with the `jacoco` plugin applied and XML reports on) | yes |
+| Clojure | Cloverage (`-Sdeps` adds it for the run, `--lcov`) | no |
 
 Without a `coverage` command a language's `tests.coverage` is skipped as `unconfigured` and `static.crap` reports no CRAP; with one but without the tool, it is `unavailable` and `cupel doctor` names the tool. A report is reused instead of rerunning the suite while it is fresh: Cupel records the hash of every file under the project root when it makes one (and trusts files not modified since), and a report the tool left at its default location is used when it is newer than every source. A command that exits non-zero gives no coverage and a `coverage.run-failed` finding, since a red suite has no meaningful coverage.
 
@@ -830,7 +836,7 @@ Without a `coverage` command a language's `tests.coverage` is skipped as `unconf
 
 ## Mutation testing
 
-`tests.mutation` scores a `mutation-outcomes` fact, which the mutation engine makes from the `mutation-sites` every language produces, the coverage report, and the baseline. The engine runs each mutant with the same runner as the baseline; the check only counts and reports, so another producer of the fact (a wrapper around a mutation tool) would feed the same check. Coverage gates which mutants run, so a language without a `coverage` command skips `tests.mutation` as `unconfigured`, as it does `tests.coverage`.
+`tests.mutation` scores a `mutation-outcomes` fact, which the mutation engine makes from the `mutation-sites` every language produces, the coverage report, and the baseline. The engine runs each mutant with the same runner as the baseline; the check only counts and reports, so another producer of the fact feeds the same check. For Java that producer can be PIT, through the [PIT plugin](#the-pit-plugin). Coverage gates which mutants run, so a language without a `coverage` command skips `tests.mutation` as `unconfigured`, as it does `tests.coverage`.
 
 - `mutant.survived` (fails the check): every test that ran against the mutant passed. The finding sits at the mutated site and names the change (`from`, `to`, `operator`), the tests that missed it (`covering_tests`), and the nearest test file. Write a test that fails on the mutant.
 - `mutant.uncovered` (a note): no test runs the site, so its mutant was not run.
@@ -997,9 +1003,26 @@ per-test = "tools/cupel-produce-per-test"      # one executable; a path with "/"
 Each plugin runs in the repository root as `<plugin> describe`, `<plugin> plan`, and `<plugin> run`, the last two with a request on standard input: the files in scope, the plugin's settings, the run's time left, a scratch directory under `.cupel/work/`, and a JSON file for each fact it declared. `cupel describe schema plugin` is the schema of every message.
 
 - **A check plugin** describes itself with the manifest a built-in check has (`cupel describe <check>`), plus `"kind": "check"`: its ID, tier, cost, the facts it needs and wants, its finding kinds with their evidence schemas, and its gate metrics. `run` prints `finding` lines and one `result`.
-- **A producer plugin** describes `"kind": "producer"`, an ID starting with `plugin.`, the fact kind and version it provides, its languages, and its needs. `run` prints one `fact` line. Producers are chosen the same way for plugins and built-ins (a pin in `[lang.<id>]`, then the first producer that is ready); plugins come after the built-in producers, so a plugin fills a gap or stands in for a missing tool rather than displacing a built-in producer that works.
+- **A producer plugin** describes `"kind": "producer"`, an ID starting with `plugin.`, the fact kind and version it provides, its languages, and its needs. `run` prints one `fact` line. Producers are chosen the same way for plugins and built-ins (a pin in `[lang.<id>]`, `runner` for test results and `mutator` for mutation outcomes, then the first producer that is ready); plugins come after the built-in producers, so a plugin fills a gap or stands in for a missing tool rather than displacing a built-in producer that works.
 
 Cupel holds plugins to the protocol. A plugin that cannot describe itself in 10 seconds with a manifest Cupel can register stops the run with exit 2, naming the plugin and the fix. A finding of an undeclared kind, evidence its schema rejects, an undeclared metric, a fact of another kind, version, or shape, or a non-zero exit without a `result` or `fact` makes the check `error`, with the reason in its `notes`, and nothing the plugin printed reaches the envelope. When `--timeout` or `--budget` runs out, the plugin gets SIGTERM, then SIGKILL two seconds later.
+
+### The PIT plugin
+
+[`plugins/pit/cupel_produce_pit.py`](plugins/pit/cupel_produce_pit.py) is a producer plugin that makes `mutation-outcomes` for Java with [PIT](https://pitest.org): it copies the project into its scratch directory, runs PIT there (Maven: the `pitest-maven` plugin with `pitest-junit5-plugin` declared in the `pom.xml`; Gradle: the `info.solidsoft.pitest` plugin with XML output and untimestamped reports), and places each PIT mutation on the Cupel mutation site of its line and operator, with the tests that killed it. `mutator` pins it over the built-in engine:
+
+```toml
+[plugins]
+pit = ["python3", "plugins/pit/cupel_produce_pit.py"]
+
+[lang.java]
+mutator = "plugin.pit"
+pit = "mvn -B -q test-compile org.pitest:pitest-maven:mutationCoverage -DoutputFormats=XML -DtimestampedReports=false -DfullMutationMatrix=true"   # the default for Maven
+```
+
+`pit_report` names where the command leaves `mutations.xml`, and `pit_report_ready = true` reads a report already in the tree instead of running PIT.
+
+### Reference plugins
 
 Reference plugins in Rust, Python, and TypeScript live in [`crates/cupel-fixtures/plugins/`](crates/cupel-fixtures/plugins/): a producer that reads a `per-test-map` for JavaScript and TypeScript from an LCOV file with one `TN:` section per test, and a check that reports the files in scope no test executes. With the Python pair in `[plugins]` of a TypeScript repository, `cupel describe fact per-test-map` lists it beside the built-in producers, `cupel tests --impacted` works for TypeScript, and the check runs:
 

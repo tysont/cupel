@@ -714,7 +714,7 @@ There is no per-language capability struct. What a language supports is exactly 
 
 A JavaScript project is a root with `package.json` and no `tsconfig.json`; a TypeScript project has both. Mixed trees get both languages active and clones are detected across them because they share a family. `[lang.javascript]` and `[lang.typescript]` are both valid config sections; where only one is given it applies to the whole `ecma` family.
 
-Java and Clojure follow after launch (§12, P6) using the same contract; Java mutation delegates to PIT through a producer plugin for `MutationOutcomes`, which `tests.mutation` consumes without knowing the difference.
+Java and Clojure followed launch (§12, P6.4: ADR-108, ADR-109) using the same contract; Java mutation can delegate to PIT through a producer plugin for `MutationOutcomes`, pinned with `[lang.java] mutator = "plugin.pit"`, which `tests.mutation` consumes without knowing the difference (ADR-110).
 
 Per-language decision-point and mutation-operator tables follow crapper/mutator's definitions (§3) as the default operator set `default`; an `extended` set adds statement deletion, return-value replacement, constant replacement, boundary (`+1/-1`), and negation. `extended` is opt-in because it increases equivalent-mutant rate.
 
@@ -792,6 +792,8 @@ Producers are registered per language in a **toolchain table** in `cupel-adapt`,
 | `rust` | cargo test, cargo nextest | cargo llvm-cov → lcov | criterion | nextest + llvm-cov per test | clippy |
 | `go` | go test -json | go test -coverprofile → coverprofile | go test -bench + benchstat | `-run` narrowing per test | go vet, staticcheck |
 | `python` | pytest, unittest | pytest-cov / coverage.py → lcov, Cobertura XML | pytest-benchmark, hyperfine | `--cov-context=test` | mypy `--strict`, ruff |
+| `java` (ADR-108) | Maven Surefire, Gradle → JUnit XML | JaCoCo through Maven or Gradle → JaCoCo XML | — | none (module-graph fallback) | — |
+| `clojure` (ADR-109) | `clojure.test` through the Clojure CLI → JUnit XML | Cloverage → lcov | — | none (module-graph fallback) | — |
 
 Producers ingest existing reports when fresher than the sources (mtime and content hash), avoiding regeneration.
 

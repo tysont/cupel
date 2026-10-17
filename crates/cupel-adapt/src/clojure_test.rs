@@ -9,7 +9,7 @@ use crate::runner::{Executed, Lister, Ran, Root, Runner, RunnerSpec, Selected, V
 
 const ID: &str = "tool.clojure-test";
 
-/// The runner script the CLI runs: loads the test namespaces, runs a selection, writes JUnit XML.
+/// The runner script the CLI runs: loads the test namespaces, runs a selection, writes `JUnit` XML.
 const SCRIPT: &str = include_str!("clojure_test.clj");
 
 static CLOJURE_TEST: RunnerSpec = RunnerSpec {

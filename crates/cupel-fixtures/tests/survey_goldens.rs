@@ -113,7 +113,7 @@ fn owned_by(envelope: &Value, pointer: &str, key: &str, check: &str) -> Value {
 fn survey_matches_its_goldens_for_every_language_fixture() {
     let registries = Registries::builtin();
     let languages = registries.languages.ids();
-    assert_eq!(languages.len(), 5, "the five launch languages");
+    assert_eq!(languages.len(), 7, "the compiled-in languages");
     for lang in languages {
         let dir = tempfile::tempdir().unwrap();
         copy_repo(lang.as_str(), dir.path());

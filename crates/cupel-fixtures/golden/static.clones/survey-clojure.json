@@ -1,0 +1,219 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 1.0,
+        "max_jaccard": 1.0,
+        "pairs": 7.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 31,
+        "unit": "pairs",
+        "value": 7.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settle-invoices` and `reconcile-payments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 21,
+          "end_line": 11,
+          "file": "src/ledger/clones_settlement.clj",
+          "hash": "sh_3cd709fc3e433ea2",
+          "lang": "clojure",
+          "line": 4,
+          "lines": 8,
+          "nodes": 46,
+          "symbol": "ledger.clones-settlement/settle-invoices"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 26,
+          "end_line": 20,
+          "file": "src/ledger/clones_settlement.clj",
+          "hash": "sh_3cd709fc3e433ea2",
+          "lang": "clojure",
+          "line": 13,
+          "lines": 8,
+          "nodes": 46,
+          "symbol": "ledger.clones-settlement/reconcile-payments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_efc44f",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 11,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_3cd709fc3e433ea2",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_efc44f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones-settlement/settle-invoices",
+        "hash": "sh_3cd709fc3e433ea2",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.clones-settlement/settle-invoices` and `ledger.clones-settlement/reconcile-payments` (src/ledger/clones_settlement.clj:13) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `net-total` shares with 3 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 1,
+            "end_col": 11,
+            "end_line": 14,
+            "file": "src/ledger/twins.clj",
+            "hash": "sh_ffaeedc69898c9c1",
+            "lang": "clojure",
+            "line": 10,
+            "lines": 5,
+            "nodes": 23,
+            "symbol": "ledger.twins/net-total"
+          },
+          {
+            "col": 1,
+            "end_col": 11,
+            "end_line": 20,
+            "file": "src/ledger/twins.clj",
+            "hash": "sh_ffaeedc69898c9c1",
+            "lang": "clojure",
+            "line": 16,
+            "lines": 5,
+            "nodes": 23,
+            "symbol": "ledger.twins/sum-after-charge"
+          },
+          {
+            "col": 1,
+            "end_col": 13,
+            "end_line": 26,
+            "file": "src/ledger/twins.clj",
+            "hash": "sh_ffaeedc69898c9c1",
+            "lang": "clojure",
+            "line": 22,
+            "lines": 5,
+            "nodes": 23,
+            "symbol": "ledger.twins/net-total-floor"
+          },
+          {
+            "col": 1,
+            "end_col": 11,
+            "end_line": 35,
+            "file": "src/ledger/twins.clj",
+            "hash": "sh_ffaeedc69898c9c1",
+            "lang": "clojure",
+            "line": 28,
+            "lines": 8,
+            "nodes": 23,
+            "symbol": "ledger.twins/net-total-laid-out"
+          }
+        ],
+        "min_jaccard": 1.0,
+        "pairs": 6,
+        "threshold": 0.82
+      },
+      "id": "fnd_e41f6a",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 14,
+        "file": "src/ledger/twins.clj",
+        "line": 10
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_ffaeedc69898c9c1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e41f6a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins/net-total",
+        "hash": "sh_ffaeedc69898c9c1",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.twins/net-total` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "static.clones",
+      "entries": [
+        {
+          "lang": "clojure",
+          "rank": 1,
+          "target": {
+            "display": "ledger.twins/net-total and 3 others",
+            "location": {
+              "col": 1,
+              "end_col": 11,
+              "end_line": 14,
+              "file": "src/ledger/twins.clj",
+              "line": 10
+            },
+            "symbol": null
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 2,
+          "target": {
+            "display": "ledger.clones-settlement/settle-invoices and 1 other",
+            "location": {
+              "col": 1,
+              "end_col": 21,
+              "end_line": 11,
+              "file": "src/ledger/clones_settlement.clj",
+              "line": 4
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 2,
+      "metric": "cluster_size",
+      "per": "group",
+      "summary": "Symbols in each clone group: 2 for a pair, more for a cluster."
+    }
+  ]
+}

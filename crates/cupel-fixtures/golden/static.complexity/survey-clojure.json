@@ -1,0 +1,515 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 64.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 79,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_a93b67",
+      "kind": "complexity.high",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 18,
+        "file": "src/ledger/complexity.clj",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_3f6b8dd416106191",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_a93b67 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity/label",
+        "hash": "sh_3f6b8dd416106191",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity/label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_e727b9",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 30,
+        "file": "src/ledger/complexity.clj",
+        "line": 20
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_44cec65dd328a478",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e727b9 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity/settle",
+        "hash": "sh_44cec65dd328a478",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity/settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `open-account` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_ade191",
+      "kind": "params.many",
+      "location": {
+        "col": 1,
+        "end_col": 77,
+        "end_line": 35,
+        "file": "src/ledger/complexity.clj",
+        "line": 32
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_07e9a3fcee33ec80",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ade191 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity/open-account",
+        "hash": "sh_07e9a3fcee33ec80",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity/open-account` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `statement-template` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 64
+      },
+      "id": "fnd_75958c",
+      "kind": "function.long",
+      "location": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 100,
+        "file": "src/ledger/complexity.clj",
+        "line": 37
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_53240e95f71b95f7",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_75958c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity/statement-template",
+        "hash": "sh_53240e95f71b95f7",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity/statement-template` is 64 lines long (max 60)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "static.complexity",
+      "entries": [
+        {
+          "lang": "clojure",
+          "rank": 1,
+          "target": {
+            "display": "ledger.complexity/label",
+            "location": {
+              "col": 1,
+              "end_col": 19,
+              "end_line": 18,
+              "file": "src/ledger/complexity.clj",
+              "line": 4
+            },
+            "symbol": "sh_3f6b8dd416106191"
+          },
+          "value": 11.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 2,
+          "target": {
+            "display": "ledger.complexity/settle",
+            "location": {
+              "col": 1,
+              "end_col": 15,
+              "end_line": 30,
+              "file": "src/ledger/complexity.clj",
+              "line": 20
+            },
+            "symbol": "sh_44cec65dd328a478"
+          },
+          "value": 6.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 3,
+          "target": {
+            "display": "ledger.decide/classify",
+            "location": {
+              "col": 1,
+              "end_col": 20,
+              "end_line": 8,
+              "file": "src/ledger/decide.clj",
+              "line": 4
+            },
+            "symbol": "sh_7bce307632666018"
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 4,
+          "target": {
+            "display": "ledger.decide/first-overdraft",
+            "location": {
+              "col": 1,
+              "end_col": 32,
+              "end_line": 15,
+              "file": "src/ledger/decide.clj",
+              "line": 10
+            },
+            "symbol": "sh_b55b0b31d72e03ec"
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 5,
+          "target": {
+            "display": "ledger.decide/parse-cents",
+            "location": {
+              "col": 1,
+              "end_col": 15,
+              "end_line": 24,
+              "file": "src/ledger/decide.clj",
+              "line": 17
+            },
+            "symbol": "sh_b5034596ab2b17bc"
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 6,
+          "target": {
+            "display": "ledger.pricing/discounted",
+            "location": {
+              "col": 1,
+              "end_col": 15,
+              "end_line": 8,
+              "file": "src/ledger/pricing.clj",
+              "line": 4
+            },
+            "symbol": "sh_8739128c583d5cb5"
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 7,
+          "target": {
+            "display": "ledger.quality-test/computed-entries-count-toward-the-balance",
+            "location": {
+              "col": 1,
+              "end_col": 47,
+              "end_line": 32,
+              "file": "test/ledger/quality_test.clj",
+              "line": 29
+            },
+            "symbol": "sh_4a961e99e251307b"
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 8,
+          "target": {
+            "display": "ledger.twins/net-total-capped",
+            "location": {
+              "col": 1,
+              "end_col": 35,
+              "end_line": 47,
+              "file": "src/ledger/twins.clj",
+              "line": 43
+            },
+            "symbol": "sh_360e2b4e0a0fd382"
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 9,
+          "target": {
+            "display": "ledger.clones-settlement/reconcile-payments",
+            "location": {
+              "col": 1,
+              "end_col": 26,
+              "end_line": 20,
+              "file": "src/ledger/clones_settlement.clj",
+              "line": 13
+            },
+            "symbol": "sh_3cd709fc3e433ea2"
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 10,
+          "target": {
+            "display": "ledger.clones-settlement/settle-invoices",
+            "location": {
+              "col": 1,
+              "end_col": 21,
+              "end_line": 11,
+              "file": "src/ledger/clones_settlement.clj",
+              "line": 4
+            },
+            "symbol": "sh_3cd709fc3e433ea2"
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 79,
+      "metric": "cyclomatic",
+      "per": "symbol",
+      "summary": "Modified cyclomatic complexity per function (a match counts once)."
+    },
+    {
+      "check": "static.complexity",
+      "entries": [
+        {
+          "lang": "clojure",
+          "rank": 1,
+          "target": {
+            "display": "ledger.complexity/settle",
+            "location": {
+              "col": 1,
+              "end_col": 15,
+              "end_line": 30,
+              "file": "src/ledger/complexity.clj",
+              "line": 20
+            },
+            "symbol": "sh_44cec65dd328a478"
+          },
+          "value": 15.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 2,
+          "target": {
+            "display": "ledger.complexity/label",
+            "location": {
+              "col": 1,
+              "end_col": 19,
+              "end_line": 18,
+              "file": "src/ledger/complexity.clj",
+              "line": 4
+            },
+            "symbol": "sh_3f6b8dd416106191"
+          },
+          "value": 10.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 3,
+          "target": {
+            "display": "ledger.decide/first-overdraft",
+            "location": {
+              "col": 1,
+              "end_col": 32,
+              "end_line": 15,
+              "file": "src/ledger/decide.clj",
+              "line": 10
+            },
+            "symbol": "sh_b55b0b31d72e03ec"
+          },
+          "value": 6.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 4,
+          "target": {
+            "display": "ledger.decide/classify",
+            "location": {
+              "col": 1,
+              "end_col": 20,
+              "end_line": 8,
+              "file": "src/ledger/decide.clj",
+              "line": 4
+            },
+            "symbol": "sh_7bce307632666018"
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 5,
+          "target": {
+            "display": "ledger.quality-test/computed-entries-count-toward-the-balance",
+            "location": {
+              "col": 1,
+              "end_col": 47,
+              "end_line": 32,
+              "file": "test/ledger/quality_test.clj",
+              "line": 29
+            },
+            "symbol": "sh_4a961e99e251307b"
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 6,
+          "target": {
+            "display": "ledger.twins/net-total-capped",
+            "location": {
+              "col": 1,
+              "end_col": 35,
+              "end_line": 47,
+              "file": "src/ledger/twins.clj",
+              "line": 43
+            },
+            "symbol": "sh_360e2b4e0a0fd382"
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 7,
+          "target": {
+            "display": "ledger.decide/parse-cents",
+            "location": {
+              "col": 1,
+              "end_col": 15,
+              "end_line": 24,
+              "file": "src/ledger/decide.clj",
+              "line": 17
+            },
+            "symbol": "sh_b5034596ab2b17bc"
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 8,
+          "target": {
+            "display": "ledger.pricing/discounted",
+            "location": {
+              "col": 1,
+              "end_col": 15,
+              "end_line": 8,
+              "file": "src/ledger/pricing.clj",
+              "line": 4
+            },
+            "symbol": "sh_8739128c583d5cb5"
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 9,
+          "target": {
+            "display": "ledger.clones-settlement/reconcile-payments",
+            "location": {
+              "col": 1,
+              "end_col": 26,
+              "end_line": 20,
+              "file": "src/ledger/clones_settlement.clj",
+              "line": 13
+            },
+            "symbol": "sh_3cd709fc3e433ea2"
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 10,
+          "target": {
+            "display": "ledger.clones-settlement/settle-invoices",
+            "location": {
+              "col": 1,
+              "end_col": 21,
+              "end_line": 11,
+              "file": "src/ledger/clones_settlement.clj",
+              "line": 4
+            },
+            "symbol": "sh_3cd709fc3e433ea2"
+          },
+          "value": 1.0
+        }
+      ],
+      "measured": 79,
+      "metric": "cognitive",
+      "per": "symbol",
+      "summary": "Cognitive complexity per function."
+    }
+  ]
+}

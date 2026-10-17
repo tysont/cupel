@@ -1,0 +1,568 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 9,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 0.9545454545454546,
+        "no_assertion": 2.0,
+        "weak_ratio": 0.2857142857142857
+      },
+      "oracle": null,
+      "score": {
+        "n": 22,
+        "unit": "assertion_density",
+        "value": 0.9545454545454546
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `members-get-a-discount` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_56aeba",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 49,
+        "end_line": 13,
+        "file": "test/ledger/core_test.clj",
+        "line": 12
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_faed73f9978222db",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_56aeba --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.core-test/members-get-a-discount",
+        "hash": "sh_faed73f9978222db",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`ledger.core-test/members-get-a-discount` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `new-accounts-are-registered` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "not-null"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_216445",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 54,
+        "end_line": 17,
+        "file": "test/ledger/core_test.clj",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_e92d0c47ce81ebf1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_216445 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.core-test/new-accounts-are-registered",
+        "hash": "sh_e92d0c47ce81ebf1",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`ledger.core-test/new-accounts-are-registered` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `parsing-garbage-fails` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_baac8e",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 20,
+        "file": "test/ledger/core_test.clj",
+        "line": 19
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_f9cb8cfd8bbb9998",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_baac8e --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.core-test/parsing-garbage-fails",
+        "hash": "sh_f9cb8cfd8bbb9998",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`ledger.core-test/parsing-garbage-fails` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `new-accounts-have-distinct-ids` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_5206ff",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 81,
+        "end_line": 23,
+        "file": "test/ledger/core_test.clj",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_4586e4d2c1ca4d1b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_5206ff --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.core-test/new-accounts-have-distinct-ids",
+        "hash": "sh_4586e4d2c1ca4d1b",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`ledger.core-test/new-accounts-have-distinct-ids` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `opening-an-account-does-not-throw` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_2de49e",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 34,
+        "file": "test/ledger/core_test.clj",
+        "line": 33
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_552f51a88ec35760",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_2de49e --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.core-test/opening-an-account-does-not-throw",
+        "hash": "sh_552f51a88ec35760",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`ledger.core-test/opening-an-account-does-not-throw` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `statements-are-not-empty` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_566d21",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 57,
+        "end_line": 14,
+        "file": "test/ledger/quality_test.clj",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_7176655bab6a5cd8",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_566d21 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.quality-test/statements-are-not-empty",
+        "hash": "sh_7176655bab6a5cd8",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`ledger.quality-test/statements-are-not-empty` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `classifying-runs` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_a1accb",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 17,
+        "file": "test/ledger/quality_test.clj",
+        "line": 16
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_cbfe659c4025795e",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_a1accb --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.quality-test/classifying-runs",
+        "hash": "sh_cbfe659c4025795e",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`ledger.quality-test/classifying-runs` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `mail-goes-through-every-notifier`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 75,
+        "mock_density_max": 50,
+        "mocks": 3,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "pricing/log-total",
+          "core/open-account",
+          "core/deposit"
+        ]
+      },
+      "id": "fnd_ffbf41",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 1,
+        "end_col": 73,
+        "end_line": 23,
+        "file": "test/ledger/quality_test.clj",
+        "line": 19
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_080529d31c371c71",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ffbf41 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.quality-test/mail-goes-through-every-notifier",
+        "hash": "sh_080529d31c371c71",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`ledger.quality-test/mail-goes-through-every-notifier` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `computed-entries-count-toward-the-balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 1,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 1,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "id": "fnd_bc1c58",
+      "kind": "test.logic",
+      "location": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 32,
+        "file": "test/ledger/quality_test.clj",
+        "line": 29
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_4a961e99e251307b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_bc1c58 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.quality-test/computed-entries-count-toward-the-balance",
+        "hash": "sh_4a961e99e251307b",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`ledger.quality-test/computed-entries-count-toward-the-balance` contains logic: 1 loop(s) or branch(es) (max 0)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "tests.quality",
+      "entries": [
+        {
+          "lang": "clojure",
+          "rank": 1,
+          "target": {
+            "display": "ledger.quality-test/mail-goes-through-every-notifier",
+            "location": {
+              "col": 1,
+              "end_col": 73,
+              "end_line": 23,
+              "file": "test/ledger/quality_test.clj",
+              "line": 19
+            },
+            "symbol": "sh_080529d31c371c71"
+          },
+          "value": 75.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 2,
+          "target": {
+            "display": "ledger.pricing-test/mail-notifies-the-owner",
+            "location": {
+              "col": 1,
+              "end_col": 30,
+              "end_line": 22,
+              "file": "test/ledger/pricing_test.clj",
+              "line": 18
+            },
+            "symbol": "sh_8dec49504009bcef"
+          },
+          "value": 50.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 3,
+          "target": {
+            "display": "ledger.core-test/classify-handles-every-case",
+            "location": {
+              "col": 1,
+              "end_col": 56,
+              "end_line": 28,
+              "file": "test/ledger/core_test.clj",
+              "line": 25
+            },
+            "symbol": "sh_95b936d45a15cde9"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 4,
+          "target": {
+            "display": "ledger.core-test/deposit-adds-to-the-balance",
+            "location": {
+              "col": 1,
+              "end_col": 70,
+              "end_line": 10,
+              "file": "test/ledger/core_test.clj",
+              "line": 9
+            },
+            "symbol": "sh_70a263f4ecf38b74"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 5,
+          "target": {
+            "display": "ledger.core-test/members-get-a-discount",
+            "location": {
+              "col": 1,
+              "end_col": 49,
+              "end_line": 13,
+              "file": "test/ledger/core_test.clj",
+              "line": 12
+            },
+            "symbol": "sh_faed73f9978222db"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 6,
+          "target": {
+            "display": "ledger.core-test/new-accounts-are-registered",
+            "location": {
+              "col": 1,
+              "end_col": 54,
+              "end_line": 17,
+              "file": "test/ledger/core_test.clj",
+              "line": 15
+            },
+            "symbol": "sh_e92d0c47ce81ebf1"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 7,
+          "target": {
+            "display": "ledger.core-test/new-accounts-have-distinct-ids",
+            "location": {
+              "col": 1,
+              "end_col": 81,
+              "end_line": 23,
+              "file": "test/ledger/core_test.clj",
+              "line": 22
+            },
+            "symbol": "sh_4586e4d2c1ca4d1b"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 8,
+          "target": {
+            "display": "ledger.core-test/opening-an-account-does-not-throw",
+            "location": {
+              "col": 1,
+              "end_col": 29,
+              "end_line": 34,
+              "file": "test/ledger/core_test.clj",
+              "line": 33
+            },
+            "symbol": "sh_552f51a88ec35760"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 9,
+          "target": {
+            "display": "ledger.core-test/parse-cents-trims-spaces",
+            "location": {
+              "col": 1,
+              "end_col": 43,
+              "end_line": 31,
+              "file": "test/ledger/core_test.clj",
+              "line": 30
+            },
+            "symbol": "sh_6bfa829b15064c9f"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 10,
+          "target": {
+            "display": "ledger.core-test/parsing-garbage-fails",
+            "location": {
+              "col": 1,
+              "end_col": 42,
+              "end_line": 20,
+              "file": "test/ledger/core_test.clj",
+              "line": 19
+            },
+            "symbol": "sh_f9cb8cfd8bbb9998"
+          },
+          "value": 0.0
+        }
+      ],
+      "measured": 22,
+      "metric": "mock_density",
+      "per": "symbol",
+      "summary": "Test doubles per test as a percentage of its doubles plus assertions."
+    }
+  ]
+}

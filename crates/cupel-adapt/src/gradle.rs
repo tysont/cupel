@@ -37,8 +37,8 @@ inventory::submit!(crate::ToolProducer {
     register: |registry| registry.register_runner(Runner(&GRADLE)),
 });
 
-/// The init script: each project's test tasks write JUnit XML into `<reports>/<project path>`,
-/// and a `cupelSeed` project property shuffles JUnit Jupiter's method order with that seed.
+/// The init script: each project's test tasks write `JUnit` XML into `<reports>/<project path>`,
+/// and a `cupelSeed` project property shuffles `JUnit` Jupiter's method order with that seed.
 const INIT: &str = r"// Written by Cupel (ADR-108): test reports go where Cupel reads them.
 allprojects {
     tasks.withType(Test).configureEach {

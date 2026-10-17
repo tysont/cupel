@@ -75,7 +75,7 @@ fn command(root: &Root) -> Vec<String> {
 /// Surefire's order of test classes (ADR-078): alphabetical, so every machine runs a suite the
 /// same way whatever its file system lists first, or random from a shuffled run's seed (halved:
 /// Surefire reads a signed 64-bit seed). Methods
-/// keep JUnit's order within a class, and a `pom.xml` that sets `runOrder` keeps its own.
+/// keep `JUnit`'s order within a class, and a `pom.xml` that sets `runOrder` keeps its own.
 fn vary(options: &RunOptions) -> Vec<String> {
     match (options.order, options.seed) {
         (RunOrder::Shuffled, Some(seed)) => vec![

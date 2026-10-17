@@ -1,0 +1,251 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 18,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle src/ledger/deps_cycle/alpha.clj → src/ledger/deps_cycle/beta.clj → src/ledger/deps_cycle/alpha.clj: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "src/ledger/deps_cycle/alpha.clj",
+          "src/ledger/deps_cycle/beta.clj"
+        ],
+        "modules": [
+          "src/ledger/deps_cycle/alpha.clj",
+          "src/ledger/deps_cycle/beta.clj"
+        ],
+        "size": 2
+      },
+      "id": "fnd_1eb9c8",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/ledger/deps_cycle/alpha.clj",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1eb9c8 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: src/ledger/deps_cycle/alpha.clj → src/ledger/deps_cycle/beta.clj → src/ledger/deps_cycle/alpha.clj"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `src/ledger/deps_layers/infra/store.clj` from `src/ledger/deps_layers/domain/order.clj`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "src/ledger/deps_layers/domain/order.clj",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "ledger.deps-layers.infra.store",
+        "to": "src/ledger/deps_layers/infra/store.clj",
+        "to_layer": "infra"
+      },
+      "id": "fnd_b6aaf5",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/ledger/deps_layers/domain/order.clj",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b6aaf5 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/ledger/deps_layers/domain/order.clj` (layer domain) imports `src/ledger/deps_layers/infra/store.clj` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `src/ledger/deps_layers/port/port.clj`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 0,
+        "distance": 1.0,
+        "distance_max": 0.7,
+        "efferent": 1,
+        "external": 0,
+        "instability": 1.0,
+        "module": "src/ledger/deps_layers/port/port.clj",
+        "unresolved": 0
+      },
+      "id": "fnd_d1f627",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/ledger/deps_layers/port/port.clj",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d1f627 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/ledger/deps_layers/port/port.clj` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_1eb9c8",
+      "kind": "break_cycle",
+      "priority": 1,
+      "summary": "Break the cycle src/ledger/deps_cycle/alpha.clj → src/ledger/deps_cycle/beta.clj → src/ledger/deps_cycle/alpha.clj: move what the modules share into a module that imports none of them, or invert one import through an interface."
+    },
+    {
+      "command": null,
+      "finding": "fnd_b6aaf5",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Remove the import of `src/ledger/deps_layers/infra/store.clj` from `src/ledger/deps_layers/domain/order.clj`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+    },
+    {
+      "command": null,
+      "finding": "fnd_d1f627",
+      "kind": "review",
+      "priority": 3,
+      "summary": "Review `src/ledger/deps_layers/port/port.clj`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 20,
+      "languages": [
+        "clojure"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 79
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 3
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}

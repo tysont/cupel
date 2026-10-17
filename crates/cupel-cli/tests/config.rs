@@ -257,7 +257,7 @@ fn an_unregistered_language_in_the_config_is_a_usage_error_listing_the_languages
 
 #[test]
 fn doctor_reports_an_unregistered_language_and_init_force_replaces_it() {
-    let dir = repo("[roots.svc]\npath = \"svc\"\nlang = \"java\"\n");
+    let dir = repo("[roots.svc]\npath = \"svc\"\nlang = \"cobol\"\n");
     let doctor = run_with(&mut cupel(), ["doctor", "--cwd", &cwd(dir.path())]);
     let envelope = doctor.envelope();
     let kinds: Vec<&str> = envelope["findings"]

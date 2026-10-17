@@ -119,7 +119,7 @@ fn nextest_junit_names_each_test_by_binary_id_with_its_time_and_failure_output()
     );
 }
 
-/// Every test of a Java JUnit capture, one report file per test class, in file-name order.
+/// Every test of a Java `JUnit` capture, one report file per test class, in file-name order.
 fn java_reports(runner: &str, case: &str, files: &[&str]) -> Vec<TestResult> {
     let capture = Capture::of(runner, case);
     files
@@ -157,7 +157,7 @@ fn surefire_and_gradle_junit_name_each_test_by_class_and_method() {
         "org.opentest4j.AssertionFailedError: totalling 2 and 2 ==> expected: <5> but was: <4>",
         "\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1596)",
     );
-    assert_eq!(outputs(&maven), [failure.clone()]);
+    assert_eq!(outputs(&maven), std::slice::from_ref(&failure));
     assert_eq!(outputs(&gradle), [failure]);
 }
 

@@ -1,0 +1,151 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "static.crap",
+      "metrics": {
+        "max": 42.0,
+        "mean": 15.333333333333334
+      },
+      "oracle": null,
+      "score": {
+        "n": 3,
+        "unit": "max",
+        "value": 42.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "test/grade/core_test.clj"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write tests that cover every branch of `refund` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+      },
+      "check": "static.crap",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "coverage": 0.0,
+        "crap": 42.0,
+        "cyclomatic": 6,
+        "high": 30,
+        "watch": 5
+      },
+      "id": "fnd_470721",
+      "kind": "crap.high",
+      "location": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 25,
+        "file": "src/grade/core.clj",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.crap --symbols sh_75d19e1ba4770b53",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_470721 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "grade.core/refund",
+        "hash": "sh_75d19e1ba4770b53",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`grade.core/refund` has CRAP 42.0 (high at 30): cyclomatic 6 with 0% coverage"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_470721",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Write tests that cover every branch of `refund` (fully covered, its CRAP is its cyclomatic complexity, 6), or split it until CRAP is below 30."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "clojure": {
+            "coverage": "clojure -Sdeps '{:deps {cloverage/cloverage {:mvn/version \"1.2.4\"}}}' -M:test -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "clojure"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 5
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

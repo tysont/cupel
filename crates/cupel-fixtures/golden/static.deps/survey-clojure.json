@@ -1,0 +1,413 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 18,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle src/ledger/deps_cycle/alpha.clj → src/ledger/deps_cycle/beta.clj → src/ledger/deps_cycle/alpha.clj: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "src/ledger/deps_cycle/alpha.clj",
+          "src/ledger/deps_cycle/beta.clj"
+        ],
+        "modules": [
+          "src/ledger/deps_cycle/alpha.clj",
+          "src/ledger/deps_cycle/beta.clj"
+        ],
+        "size": 2
+      },
+      "id": "fnd_1eb9c8",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/ledger/deps_cycle/alpha.clj",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1eb9c8 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: src/ledger/deps_cycle/alpha.clj → src/ledger/deps_cycle/beta.clj → src/ledger/deps_cycle/alpha.clj"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `src/ledger/deps_layers/infra/store.clj` from `src/ledger/deps_layers/domain/order.clj`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "src/ledger/deps_layers/domain/order.clj",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "ledger.deps-layers.infra.store",
+        "to": "src/ledger/deps_layers/infra/store.clj",
+        "to_layer": "infra"
+      },
+      "id": "fnd_b6aaf5",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/ledger/deps_layers/domain/order.clj",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b6aaf5 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/ledger/deps_layers/domain/order.clj` (layer domain) imports `src/ledger/deps_layers/infra/store.clj` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `src/ledger/deps_layers/port/port.clj`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 0,
+        "distance": 1.0,
+        "distance_max": 0.7,
+        "efferent": 1,
+        "external": 0,
+        "instability": 1.0,
+        "module": "src/ledger/deps_layers/port/port.clj",
+        "unresolved": 0
+      },
+      "id": "fnd_d1f627",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/ledger/deps_layers/port/port.clj",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d1f627 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/ledger/deps_layers/port/port.clj` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "clojure",
+          "rank": 1,
+          "target": {
+            "display": "src/ledger/deps_layers/port/port.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/deps_layers/port/port.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 2,
+          "target": {
+            "display": "shapes/src/shapes/geometry.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "shapes/src/shapes/geometry.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "clojure",
+          "rank": 3,
+          "target": {
+            "display": "src/ledger/complexity.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/complexity.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "clojure",
+          "rank": 4,
+          "target": {
+            "display": "src/ledger/core.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/core.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.214
+        }
+      ],
+      "measured": 4,
+      "metric": "distance",
+      "per": "module",
+      "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "clojure",
+          "rank": 1,
+          "target": {
+            "display": "src/ledger/core.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/core.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 7.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 2,
+          "target": {
+            "display": "src/ledger/main.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/main.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 6.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 3,
+          "target": {
+            "display": "src/ledger/decide.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/decide.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 4,
+          "target": {
+            "display": "src/ledger/pricing.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/pricing.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 5,
+          "target": {
+            "display": "test/ledger/core_test.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "test/ledger/core_test.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 6,
+          "target": {
+            "display": "test/ledger/pricing_test.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "test/ledger/pricing_test.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 7,
+          "target": {
+            "display": "test/ledger/quality_test.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "test/ledger/quality_test.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 8,
+          "target": {
+            "display": "src/ledger/deps_cycle/alpha.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/deps_cycle/alpha.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 9,
+          "target": {
+            "display": "src/ledger/deps_cycle/beta.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/deps_cycle/beta.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 10,
+          "target": {
+            "display": "src/ledger/deps_layers/domain/order.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/deps_layers/domain/order.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 18,
+      "metric": "coupling",
+      "per": "module",
+      "summary": "Afferent plus efferent coupling per module."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "clojure",
+          "rank": 1,
+          "target": {
+            "display": "src/ledger/deps_cycle/alpha.clj → src/ledger/deps_cycle/beta.clj → src/ledger/deps_cycle/alpha.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 3,
+              "file": "src/ledger/deps_cycle/alpha.clj",
+              "line": 3
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 1,
+      "metric": "cycle_size",
+      "per": "group",
+      "summary": "Modules in each import cycle."
+    }
+  ]
+}

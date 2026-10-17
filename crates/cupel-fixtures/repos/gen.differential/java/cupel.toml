@@ -1,0 +1,6 @@
+# gen.differential has no Java harness (ADR-108): with an oracle configured, the check reaches the language
+# and records it `unsupported` for the missing divergence-results producer.
+[oracles.quarter]
+kind = "command"
+cmd = "awk -v cents={input} 'BEGIN { print int(cents / 4) }'"
+inputs = ["7", "-8"]

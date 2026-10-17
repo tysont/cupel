@@ -1,0 +1,241 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "extensions": [
+      ".java"
+    ],
+    "facts": [
+      {
+        "kind": "symbols",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "decisions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "norm-tree",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "mutation-sites",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-frames",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "module-graph",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "api-surface",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "roots",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "test-conventions",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "kind": "project-info",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
+      }
+    ],
+    "family": "java",
+    "id": "java",
+    "stability": "experimental",
+    "subject": "language",
+    "toolchain": {
+      "analyzers": [],
+      "bench": [],
+      "coverage": [
+        {
+          "commands": [
+            {
+              "command": "mvn -B --no-transfer-progress org.jacoco:jacoco-maven-plugin:0.8.13:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.13:report",
+              "runner": "tool.maven"
+            }
+          ],
+          "detect": [],
+          "format": "jacoco",
+          "install": null,
+          "producer": "tool.jacoco-maven"
+        },
+        {
+          "commands": [
+            {
+              "command": "gradle test jacocoTestReport --console=plain",
+              "runner": "tool.gradle"
+            }
+          ],
+          "detect": [],
+          "format": "jacoco",
+          "install": null,
+          "producer": "tool.jacoco-gradle"
+        }
+      ],
+      "fuzz": [
+        "jazzer"
+      ],
+      "launchers": [],
+      "property": [
+        "jqwik"
+      ],
+      "race": [],
+      "runners": [
+        {
+          "commands": [
+            {
+              "command": "mvn -B --no-transfer-progress test",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "file `pom.xml` exists"
+          ],
+          "format": null,
+          "install": null,
+          "producer": "tool.maven"
+        },
+        {
+          "commands": [
+            {
+              "command": "gradle test --console=plain",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "install": null,
+          "producer": "tool.gradle"
+        }
+      ]
+    }
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

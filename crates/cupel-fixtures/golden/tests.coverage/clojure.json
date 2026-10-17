@@ -1,0 +1,152 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "tests.coverage",
+      "metrics": {
+        "line": 0.4,
+        "lines": 10.0,
+        "uncovered": 1.0
+      },
+      "notes": [
+        "branches: unavailable (clojure)"
+      ],
+      "oracle": null,
+      "score": {
+        "n": 10,
+        "unit": "line_ratio",
+        "value": 0.4
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "test/grade/core_test.clj"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that calls `refund`."
+      },
+      "check": "tests.coverage",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "covered": 0,
+        "lines": 6
+      },
+      "id": "fnd_2c6772",
+      "kind": "coverage.uncovered-symbol",
+      "location": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 25,
+        "file": "src/grade/core.clj",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.coverage --symbols sh_75d19e1ba4770b53",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_2c6772 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "grade.core/refund",
+        "hash": "sh_75d19e1ba4770b53",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`grade.core/refund` never ran under test: none of its 6 instrumented lines"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_2c6772",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Write a test that calls `refund`."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "clojure": {
+            "coverage": "clojure -Sdeps '{:deps {cloverage/cloverage {:mvn/version \"1.2.4\"}}}' -M:test -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "clojure"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 5
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

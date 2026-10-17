@@ -28,6 +28,9 @@ import xml.etree.ElementTree as ElementTree
 
 PRODUCER = "plugin.pit"
 
+# The facts mutations are placed on: functions, their structural hashes, and Cupel's sites.
+NEEDS = ["symbols", "norm-tree", "mutation-sites"]
+
 # The command that runs PIT, and where its XML report lands, per build tool. Maven needs the
 # PIT plugin (with its JUnit 5 plugin) in the `pom.xml`; Gradle needs the `info.solidsoft.pitest`
 # plugin configured with `outputFormats = ['XML']` and `timestampedReports = false`.
@@ -79,7 +82,7 @@ def manifest():
         "version": 1,
         "provides": {"kind": "mutation-outcomes", "version": 2},
         "languages": ["java"],
-        "needs": ["symbols", "norm-tree", "mutation-sites"],
+        "needs": NEEDS,
         "wants": [],
         "cost": "standard",
         "stability": "experimental",
@@ -327,12 +330,21 @@ def run_pit(request, command):
 
 def report_text(request):
     """PIT's XML report: the one in the tree when the configuration says it is ready, else the
-    one a fresh run of PIT writes."""
+    one a fresh run of PIT writes in its copy of the tree, which is removed once read."""
     config = request.get("config") or {}
     command, report = build_tool(request["root"])
     command = config.get("pit", command)
     report = config.get("pit_report", report)
-    root = request["root"] if config.get("pit_report_ready") else run_pit(request, command)
+    if config.get("pit_report_ready"):
+        return read_text(request["root"], report)
+    work = run_pit(request, command)
+    try:
+        return read_text(work, report)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+def read_text(root, report):
     try:
         with open(os.path.join(root, report), encoding="utf-8") as source:
             return source.read()
@@ -346,7 +358,13 @@ def load(path):
 
 
 def run(request):
-    paths = request["facts"]
+    paths = request.get("facts") or {}
+    if not all(kind in paths for kind in NEEDS):
+        # Without the facts to place mutations on there is nothing to report, so PIT does not run.
+        none = {"symbols": []}
+        facts = Facts(request["root"], none, none, none)
+        emit_outcomes(outcomes([], facts, set(), request.get("depth")))
+        return
     facts = Facts(
         request["root"],
         load(paths["symbols"]),
@@ -355,7 +373,10 @@ def run(request):
     )
     mutations = read_report(report_text(request))
     scope = set(request.get("scope", {}).get("files") or [])
-    payload = outcomes(mutations, facts, scope, request.get("depth"))
+    emit_outcomes(outcomes(mutations, facts, scope, request.get("depth")))
+
+
+def emit_outcomes(payload):
     emit({"ev": "fact", "kind": "mutation-outcomes", "version": 2, "payload": payload})
 
 

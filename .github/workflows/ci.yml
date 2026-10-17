@@ -1,4 +1,4 @@
-# ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, property framework, and analyzer
+# ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, property framework, analyzer, and JVM build tool
 # ABOUTME: installed, and `make dogfood` (Cupel's own gate) for every push and pull request. Rust comes from rust-toolchain.toml.
 name: ci
 
@@ -79,6 +79,26 @@ jobs:
         run: |
           go install honnef.co/go/tools/cmd/staticcheck@2024.1.1
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      # Java and Clojure (P6.4, ADR-108, ADR-109): the JDK, Maven, Gradle, and the Clojure CLI that the Java and
+      # Clojure runner, coverage, and PIT plugin tests and goldens drive for real. Pinned: the coverage fixtures'
+      # committed JaCoCo and Cloverage reports and the PIT capture come from these releases. Each tool downloads the
+      # fixtures' dependencies (JUnit, JaCoCo, PIT, Cloverage, test.check) into its own cache on first use.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Maven 3.9.16
+        run: |
+          curl -sSfL https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz | tar xz -C "$HOME"
+          echo "$HOME/apache-maven-3.9.16/bin" >> "$GITHUB_PATH"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.1'
+      - name: Install the Clojure CLI 1.12.5.1664
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/posix-install.sh" https://github.com/clojure/brew-install/releases/download/1.12.5.1664/posix-install.sh
+          bash "$RUNNER_TEMP/posix-install.sh" --prefix "$HOME/clojure"
+          echo "$HOME/clojure/bin" >> "$GITHUB_PATH"
       - name: make check
         run: make check
       # Every golden-harness run again through the daemon, compared with the cold run (ADR-085 §11).

@@ -103,10 +103,11 @@ fn collect(dir: &Path, found: &mut Vec<PathBuf>) {
         let path = entry.path();
         if path.is_dir() {
             collect(&path, found);
-        } else if entry
-            .file_name()
-            .to_str()
-            .is_some_and(|name| name.starts_with("TEST-") && name.ends_with(".xml"))
+        } else if path.extension().is_some_and(|extension| extension == "xml")
+            && entry
+                .file_name()
+                .to_str()
+                .is_some_and(|name| name.starts_with("TEST-"))
         {
             found.push(path);
         }
