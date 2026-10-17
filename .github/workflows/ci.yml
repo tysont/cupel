@@ -1,4 +1,4 @@
-# ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, property framework, and analyzer
+# ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, property framework, analyzer, race detector, fuzzer, and bench tool
 # ABOUTME: installed, and `make dogfood` (Cupel's own gate) for every push and pull request. Rust comes from rust-toolchain.toml.
 name: ci
 
@@ -79,6 +79,27 @@ jobs:
         run: |
           go install honnef.co/go/tools/cmd/staticcheck@2024.1.1
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      # The race detectors and cargo-fuzz (P6.3, ADR-105, ADR-107) run through `cargo +nightly`.
+      # Pinned to the nightly the conc.race and gen.fuzz goldens were made with (Miri's messages and
+      # rustc's panic text follow it), installed under the name `nightly` the producers ask rustup for.
+      - name: Install the pinned nightly as nightly, with Miri and the standard library's source
+        run: |
+          rustup toolchain install nightly-2026-03-26 --profile minimal --component miri --component rust-src
+          toolchains="$(rustup show home)/toolchains"
+          host="$(rustc -vV | sed -n 's/^host: //p')"
+          ln -sfn "$toolchains/nightly-2026-03-26-$host" "$toolchains/nightly-$host"
+          cargo +nightly miri setup
+      # The fuzzers and bench tools gen.fuzz and perf.bench drive for real (P6.3, ADR-106, ADR-107).
+      # Pinned: the goldens hold their messages. atheris is not installed: it builds only against a
+      # clang that ships libFuzzer, so gen.fuzz stays `unavailable` for Python here as on macOS.
+      - name: Install cargo-fuzz and hyperfine
+        run: |
+          cargo install cargo-fuzz --version 0.13.2 --locked
+          cargo install hyperfine --version 1.20.0 --locked
+      - name: Install pytest-benchmark
+        run: python -m pip install pytest-benchmark==5.1.0
+      - name: Install Jazzer.js
+        run: npm install --global @jazzer.js/core@4.0.0
       - name: make check
         run: make check
       # Every golden-harness run again through the daemon, compared with the cold run (ADR-085 §11).

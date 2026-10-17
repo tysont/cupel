@@ -138,13 +138,13 @@ A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weake
 
 | Flag | Selects |
 |---|---|
-| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`, which adds the checks that run the test suite (`gen.property` among them) to the `quick` ones; `deep` adds `gen.differential` and `gen.metamorphic` |
+| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`, which adds the checks that run the test suite (`gen.property` and `conc.race` among them) to the `quick` ones; `deep` adds `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench` |
 | `--only ID`, `--skip ID` | Checks by ID (`static.clones`) or group (`static`, `tests`); repeatable |
 | `--tier N+` | Only checks at or above evidence tier N, e.g. `--tier 2+` |
 | `--budget DURATION` | A wall-clock budget (`250ms`, `20s`, `10m`): run the most valuable selected checks that fit and skip the rest; `CUPEL_BUDGET` or `budget` in `cupel.toml` also set it |
 | `--jobs N` | How many threads and mutation workers run at once; default the cores (and, for mutation, the language's `mutation.jobs`) |
 | `--oracle NAME` | The oracle checks that compare against one use; default the first verified (see [`cupel oracle`](#cupel-oracle)) |
-| `--cases N` | The case budget of generative checks: how many inputs `gen.differential` and `gen.metamorphic` generate per entry point or relation (default 100), and how many generated cases each property test runs (see [Property tests](#property-tests); default 1 000 at `standard`, ten times more at each deeper depth) |
+| `--cases N` | The case budget of generative checks: how many inputs `gen.differential` and `gen.metamorphic` generate per entry point or relation (default 100), and how many generated cases each property test runs and how many inputs each fuzz target runs on (see [Property tests](#property-tests) and [Fuzzing](#fuzzing); default 1 000 at `standard`, ten times more at each deeper depth) |
 | `--scaffold` | Also write a property-test stub for each `property.missing` finding; without `--write` the envelope's `plan.would_write` shows each file's diff and nothing is written |
 
 **Budget.** `--budget` chooses among the checks the depth and the selection flags already chose; it never adds deeper ones. Each check costs its own run plus the facts it needs that nothing has made yet: the baseline test run, a coverage report, the mutation engine. A fact two checks share is paid once. A cost is the median of the last ten recorded runs of the same kind of work on this repository (the same check, language, and order of magnitude of targets; the same producer and language, run or read from cache), once three are recorded in `.cupel/cupel.db`; before that it comes from the cost class (a `quick` producer 100 ms, `standard` 30 s, `deep` 5 min). A check's value is its evidence tier plus one, doubled when it has never produced a result here, halved when its last result was made at this commit on a clean tree, and doubled again inside a `--changed` or `--base` scope. Checks are taken greedily by value per millisecond while they fit; ties are broken by `--seed`. The budget counts from the start of the invocation, as `--timeout` does: a check is not started when its estimate exceeds what is left, and work still running at the deadline is stopped (its processes are killed), so a run overshoots its budget only by the moment that takes; a mutation run stopped that way reports `partial` with no score, and the mutants it finished are not kept. Anything the budget left out is `skipped` with `reason: budget` and `est_ms`, its estimate, the run is `partial` (exit 5), and `next_actions` offers the command that runs it alone. On a small Python project with a test suite and no recorded runs, one second leaves out everything that needs the suite:
@@ -618,14 +618,17 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 ## Checks
 
-Every check below exists. Each is supported in all five languages except `gen.property`, which Go lacks (Cupel runs no Go property framework), and `gen.metamorphic`, which has a Python harness only; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default, and `gen.differential` and `gen.metamorphic`, which run from `--depth deep` (or by name with `--only`) once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists. Each is supported in all five languages except `gen.property`, which Go lacks (Cupel runs no Go property framework); `gen.metamorphic`, which has a Python harness only; `conc.race`, which has race detectors for Go and Rust only; and `gen.fuzz`, which has no TypeScript fuzzer; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, `tests.mutation`, and `conc.race`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default; and `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`, which run from `--depth deep` (or by name with `--only`), the first two once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
 | --- | --- | --- | --- | --- | --- | --- |
+| `conc.race` | 4 | standard | `race.detected`, `ub.detected` | `races`, `undefined_behavior` | — | go, rust |
 | `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — |  |
+| `gen.fuzz` | 4 | deep | `fuzz.crash`, `fuzz.timeout`, `fuzz.target-missing` | `targets`, `crashes`, `timeouts`, `missing` | — | go, javascript, python, rust |
 | `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — |  |
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
+| `perf.bench` | 0 | deep | `perf.regression`, `perf.improvement` | `benchmarks`, `compared`, `regression`, `regressed`, `improved` | — | go, python, rust |
 | `perf.footprint` | 0 | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
 | `static.analyze` | 1 | standard | `analyze.<tool>.<rule>` | `errors`, `diagnostics` | — | go, javascript, python, rust, typescript |
 | `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | go, javascript, python, rust, typescript |
@@ -661,6 +664,9 @@ What each check looks for:
 - **`tests.mutation`** changes the code in small ways (`<` to `<=`, `+` to `-`, `&&` to `||`, `true` to `false`, `0` to `1`) and runs the tests that cover each change. A mutant every test passes against survived: the tests do not notice that line changing. The score is killed / (killed + survived). See [Mutation testing](#mutation-testing).
 
 - **`gen.metamorphic`** evaluates the metamorphic relations you declare (sorting a list and sorting its reverse give the same result; `add(a, b) == add(b, a)`) on generated inputs, and reports each relation that does not hold, with the smallest failing input it could find and both outputs. See [Metamorphic relations](#metamorphic-relations).
+- **`gen.fuzz`** runs every fuzz target the project has (cargo-fuzz targets, Go `FuzzXxx` functions, Jazzer.js and atheris modules) with the run's seed and an execution budget, and reports each input that crashes a target (`fuzz.crash`) or runs past the per-input limit (`fuzz.timeout`), with the saved input and the command that reruns it; a project root with no fuzz target is `fuzz.target-missing` (`info`). See [Fuzzing](#fuzzing).
+- **`conc.race`** runs the tests under a race detector (Go's `-race`; Miri or ThreadSanitizer for Rust) and reports each data race (`race.detected`) and each operation with undefined behavior (`ub.detected`), with the stacks of the accesses inside the repository. See [Race detectors](#race-detectors).
+- **`perf.bench`** runs the project's benchmarks (Go's, criterion, pytest-benchmark, or commands timed by hyperfine) at the range's base commit and in the working tree, and compares each benchmark's samples with a Mann-Whitney U test: a significant slowdown of at least 5% is `perf.regression` (`warn`), a speedup `perf.improvement` (`info`). Without a range there is nothing to compare, and it says so. See [Benchmarks](#benchmarks).
 
 `cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
 
@@ -673,9 +679,12 @@ The support matrix, from `cupel describe matrix`:
 <!-- generated:support-matrix -->
 | Check | go | javascript | python | rust | typescript |
 | --- | --- | --- | --- | --- | --- |
+| `conc.race` | supported | unsupported | unsupported | supported | unsupported |
 | `gen.differential` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
+| `gen.fuzz` | supported | supported | supported | supported | unsupported |
 | `gen.metamorphic` | unsupported | unsupported | unconfigured | unsupported | unsupported |
 | `gen.property` | unsupported | supported | supported | supported | supported |
+| `perf.bench` | supported | unconfigured | supported | supported | unconfigured |
 | `perf.footprint` | supported | supported | supported | supported | supported |
 | `static.analyze` | supported | supported | supported | supported | supported |
 | `static.api-surface` | supported | supported | supported | supported | supported |
@@ -982,6 +991,89 @@ artifacts = ["target/release/app"]   # files or globs whose sizes the artifact_b
 
 A dependency whose name and version an advisory's `affected` entry lists, or falls in its ranges, is `dep.vuln` (`fail`, with the advisory and the fixed version); a license expression with no alternative free of GPL, AGPL, LGPL, SSPL, EUPL, or OSL is `dep.license` (`warn`). Under `--changed` or `--base` the same files are read at the base commit, and only dependencies whose name and version are new are reported; `footprint.grew` (`warn`) lists what was added and removed when the count grew. The gate keys are `perf.footprint.dependencies`, `vulnerable`, `copyleft`, and `artifact_bytes` (a size budget, such as `"perf.footprint.artifact_bytes" = "<= 4000000"`); what was not measured (licenses, advisories, artifacts) is a note, never a silent zero.
 
+## Race detectors
+
+`conc.race` runs a language's tests in each project root under its race detector, and reports what the detector saw:
+
+| Language | Detector | Run as |
+|---|---|---|
+| Go | Go's race detector | `go test -race -count=1 -json` over the module's packages |
+| Rust | Miri (`tool.miri`, the default) | `cargo +nightly miri test --no-fail-fast`, one test at a time, with full backtraces |
+| Rust | ThreadSanitizer (`tool.tsan`) | `cargo +nightly test -Zbuild-std --target <host> --tests` with `-Zsanitizer=thread` |
+
+Miri interprets every test, so it finds undefined behavior (an out-of-bounds read, a dangling pointer, an invalid value) as well as data races, but it refuses what it cannot model (foreign functions, most file and process calls); ThreadSanitizer runs the tests natively and finds data races only. Both need a nightly toolchain (`rustup toolchain install nightly --component miri --component rust-src`); `[lang.rust] race = "tsan"` picks ThreadSanitizer. Builds go to `.cupel/cache/race/`, so nothing is written in the tree. Python, JavaScript, and TypeScript have no race detector, and the matrix says `unsupported`.
+
+A report's two accesses are listed in the order of their place in the code, whichever happened first, and only frames in the repository are kept, so the same race reads the same on every run and machine. On the Go fixture, where `Publish` reads a variable a goroutine writes without synchronizing:
+
+```text
+$ cupel check --only conc.race --format text
+fail (1)
+  conc.race
+    data race: `write` in `example.com/tally.Publish.func1` and `read` in `example.com/tally.Publish`
+      fnd_c9f4ec · race.detected · tier 4 · confidence 1
+      at tally.go:10
+      evidence: message "data race" · stacks [2] · test "TestPublish" · tool "tool.go-race" (full: cupel explain fnd_c9f4ec)
+      action fix_bug (priority 1): Synchronize the accesses (a lock, an atomic, a channel) or stop sharing the memory, then rerun the race detector.
+      repro: cupel check --only conc.race --paths tally.go
+```
+
+The evidence holds the `tool`, the `test` that was running, the detector's `message` (addresses and allocation IDs masked), and the `stacks`, each an `access` (`read`, `write`, `non-atomic write`; none for undefined behavior) and its `frames`. Under `--changed` a report is kept when one of its frames is in a changed file. A project root whose run could not test what it was given (a build failure, `-race` without cgo, an operation Miri does not support) is a note, beside whatever was found before it. The gate keys are `conc.race.races` and `undefined_behavior`.
+
+## Benchmarks
+
+`perf.bench` compares the project's benchmarks at the range's base commit with the working tree. The producer exports the base commit with `git archive`, measures it, then measures the working tree right after, on the same machine with the same tool; nothing is cached, and everything the tools write goes to `.cupel/cache/bench/`:
+
+| Language | Tool | Run as | Samples |
+|---|---|---|---|
+| Go | `go test -bench` | `go test -run=^$ -bench=. -benchmem -count=<n> -benchtime=100ms -json` | `ns`, `bytes`, and `allocs` per operation |
+| Rust | criterion | `cargo bench --bench <target> -- --noplot` for each bench target of a package that depends on criterion | `ns` per iteration |
+| Python | pytest-benchmark | `python3 -m pytest --benchmark-only` with its storage in the cache | `ns` per call |
+| JavaScript, TypeScript, Python | hyperfine | `hyperfine --runs <n> --export-json` over the commands `[lang.<id>] bench_commands` lists | `ns` per run |
+
+Each benchmark is measured 5 times per side at `--depth standard` (with `--only`), 10 at `deep`, and 20 at `exhaustive`. Every sample is a cost, so lower is better; allocation counts do not depend on the machine's load, and wall time does. The check compares the two sides of each benchmark and unit with benchstat's method, a two-sided Mann-Whitney U test, and the change of the medians: a change with p below `significance_percent` (5) and at least `threshold_percent` (5) slower is `perf.regression`, as much faster `perf.improvement`. On the Go fixture, after a branch makes `Sum` copy its input:
+
+```text
+$ cupel check --only perf.bench --changed --gate --format text
+cupel check: fail (exit 1)
+
+gate      fail (gate.changed)
+  fail  perf.bench.regression < 5%  actual 1.75065491783758
+
+warn (3)
+  perf.bench
+    `example.com/units.BenchmarkSum` regressed 100.0% in bytes (p = 0.0079)
+    `example.com/units.BenchmarkSum` regressed 175.1% in ns (p = 0.0079)
+    `example.com/units.BenchmarkSum` regressed 100.0% in allocs (p = 0.0079)
+```
+
+The evidence holds the `benchmark`, its `unit`, both medians, the `change` (a fraction of the base's median; growth from a median of 0 counts as 1), the `p_value`, both sample counts, and the settings it was judged by. The gate keys are `perf.bench.regression`, the largest significant slowdown as a fraction whatever the threshold (so `"perf.bench.regression" = "< 5%"` fails on a significant 5% slowdown), and `benchmarks`, `compared`, `regressed`, and `improved`. On a whole tree the benchmarks run once and nothing is compared; a note says to run under `--changed` or `--base`. The base side is an export, so ignored files (a virtual environment, `node_modules`) are not there: a benchmark that needs them fails on the base side only, with a note. JavaScript and TypeScript have no bench producer but hyperfine, so `perf.bench` is `unconfigured` for them until `bench_commands` is set.
+
+## Fuzzing
+
+`gen.fuzz` fuzzes every target in each project root that holds a file in scope, each with the same execution budget: `--cases`, else 1 000 inputs at `--depth standard` (with `--only`), 10 000 at `deep`, and 100 000 at `exhaustive`, each input limited to 10 s and each target to 300 s.
+
+| Language | Fuzzer | Targets | Ready when |
+|---|---|---|---|
+| Rust | cargo-fuzz (libFuzzer) | the binaries of a `fuzz/Cargo.toml` with `cargo-fuzz = true`, built with `cargo +nightly fuzz build` and run directly | `cargo-fuzz` and a nightly toolchain are installed |
+| Go | Go's native fuzzer | `FuzzXxx` functions, run with `go test -fuzz=^<Name>$ -fuzztime=<cases>x` | `go` is installed |
+| JavaScript | Jazzer.js | `*.fuzz.js` modules exporting `fuzz` | `jazzer` is in `node_modules/.bin` or on `PATH` |
+| Python | atheris | `fuzz_*.py` scripts that call `atheris.Fuzz(` | `python3` imports `atheris` |
+
+libFuzzer-based fuzzers get the run's `--seed`, so `--seed` and `--cases` repeat a run on one toolchain; Go's fuzzer takes no seed. Nothing is written in the tree: each target's corpus and saved inputs live in `.cupel/cache/fuzz/` and are emptied before each run (a corpus the project commits is read as well), and Go, which saves a failing input into the package's `testdata/`, fuzzes a copy of the module. atheris builds only against a clang that ships libFuzzer, so on macOS with Apple's clang the Python pair is `unavailable`; TypeScript has no producer (Jazzer.js loads only `.js` modules) and is `unsupported`. On the Rust fixture, whose `first` target indexes its input:
+
+```text
+$ cupel check --only gen.fuzz --format text
+fail (1)
+  gen.fuzz
+    fuzz target `first` crashes on the empty input: index out of bounds: the len is 0 but the index is 0
+      fnd_d59cd3 · fuzz.crash · tier 4 · confidence 1
+      at src/lib.rs:5:5-5
+      action fix_bug (priority 1): Fix `first`'s failure on the saved input (`cargo +nightly fuzz run first .cupel/cache/fuzz/rust/root/first/inputs/crash-da39a3ee5e6b4b0d3255bfef95601890afd80709` reruns it), then keep the input in the target's corpus as a regression case.
+      repro: cupel check --only gen.fuzz --paths fuzz/fuzz_targets/first.rs --seed 3 --cases 1000
+```
+
+The evidence holds the `target`, the `tool`, the `message`, the `input` (as text, or `hex:` and its bytes), the `reproducer` file and the `reproduce` command (for Go, the commands that make the input a regression case under `testdata/fuzz/`), the `seed`, and the `cases`. An input that runs past the per-input limit is `fuzz.timeout` (`warn`, confidence 0.7: a slow path under load can cross it). A target that does not build is a note. The gate keys are `gen.fuzz.crashes`, `timeouts`, `targets`, and `missing`.
+
 ## Plugins
 
 A plugin is a check or a fact producer in its own executable, in any language, that speaks JSON over standard input and output. Cupel registers it beside the built-in checks and producers, so `describe`, `--only`, `--dry-run`, gates, `[checks."<id>"]` settings, and the support matrix treat it like one of them.
@@ -1042,6 +1134,10 @@ coverage = "cargo llvm-cov --lcov --output-path {out}"
 runner = "cargo-nextest"           # the test runner Cupel uses; see Test runners
 differential_entries = ["src/money.rs:split"]   # what gen.differential compares
 advisories = "advisories"          # OSV advisories perf.footprint matches dependencies against
+race = "tsan"                      # the race detector conc.race uses; Miri by default
+
+[lang.javascript]
+bench_commands = ["node bench.js"] # what perf.bench times with hyperfine
 
 [checks."static.complexity"]       # check settings, for every language
 cyclomatic_max = 10
@@ -1071,7 +1167,7 @@ ref = "v1.2.0"
 depth = "quick"
 ```
 
-**Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. `static.complexity` takes `cyclomatic_max` (10), `cognitive_max` (15), `nesting_max` (4), `params_max` (5), and `length_max` (60). `static.clones` takes `threshold` (0.82), `min_lines` (4), and `min_nodes` (20). `static.crap` takes `high` (30) and `watch` (5). `static.deps` takes `distance_max` (0.7) and `layers`. `tests.quality` takes `mock_density_max` (50), `mocks_min` (2), `logic_max` (0), and `setup_statements_min` (3). `tests.assertion-density` takes `lines_per_assertion_max` (20), `file_density_percent_min` (50), and `file_tests_min` (3).
+**Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. `static.complexity` takes `cyclomatic_max` (10), `cognitive_max` (15), `nesting_max` (4), `params_max` (5), and `length_max` (60). `static.clones` takes `threshold` (0.82), `min_lines` (4), and `min_nodes` (20). `static.crap` takes `high` (30) and `watch` (5). `static.deps` takes `distance_max` (0.7) and `layers`. `tests.quality` takes `mock_density_max` (50), `mocks_min` (2), `logic_max` (0), and `setup_statements_min` (3). `tests.assertion-density` takes `lines_per_assertion_max` (20), `file_density_percent_min` (50), and `file_tests_min` (3). `perf.bench` takes `threshold_percent` (5) and `significance_percent` (5).
 
 **Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the table above. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening` or `static.api-surface`, which need a range, is rejected when the config loads.
 

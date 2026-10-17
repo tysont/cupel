@@ -596,10 +596,10 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `CoverageMap` | line + optional branch hits; `branches: Option<_>` says whether the producer measures branches | coverage tool | `tests.coverage`, `static.crap`, mutation engine |
 | `PerTestMap` | `test_id → lines` | coverage tool | `tests --impacted`, mutation engine |
 | `MutationOutcomes` | per site: killed/survived/timeout/uncovered, killing tests, duration | mutation engine · PIT/Stryker tool | `tests.mutation` |
-| `BenchSamples` | per benchmark: samples, unit | bench tool | `perf.bench` |
+| `BenchSamples` | per benchmark and unit: samples (costs, lower is better) at head and, under a range, at the base commit, which the producer measures itself (ADR-106) | bench tool | `perf.bench` |
 | `PropertyResults` | per property: passed/falsified, minimized counterexample, seed | property tool | `gen.property` |
-| `FuzzResults` | crashes with reproducers, coverage reached | fuzz tool | `gen.fuzz` |
-| `RaceReports` | races/UB with stacks | race tool | `conc.race` |
+| `FuzzResults` | per fuzz target, fuzzed with an execution budget and the run's seed: how it ended, the crash input with its reproducer, executions and coverage reached; the roots searched (ADR-107) | fuzz tool | `gen.fuzz` |
+| `RaceReports` | data races and undefined behavior a detector saw running the tests, each with its test, masked message, and stacks inside the repository; each root's run (ADR-105) | race tool | `conc.race` |
 | `AnalyzerReport` | per analyzer: ran, missing, unconfigured, or failed; its results normalized to SARIF's rule, level, message, location (ADR-102) | linter/type-checker tool | `static.analyze` |
 | `DivergenceResults` | per generated input: both outputs, minimized | differential engine | `gen.differential`, `gen.metamorphic` |
 | `Footprint` | dependencies from lockfiles and manifests (name, version, direct, license, where listed), whether licenses were read, OSV vulnerabilities and artifact sizes when configured, the range's base dependencies; read offline (ADR-103) | lockfile readers | `perf.footprint` |
