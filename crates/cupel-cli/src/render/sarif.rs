@@ -89,7 +89,8 @@ fn locate(run: &mut Value, envelope: &Envelope, root: &Path) {
 }
 
 /// Each rule's kind and the check it belongs to: every kind the checks that ran declare, in
-/// their order, then every other kind a finding has, each kind once.
+/// their order, then every other kind a finding has, each kind once. A template kind such as
+/// `analyze.<tool>.<rule>` (ADR-102 §3) is no rule itself: the kinds reported under it are.
 fn rule_kinds(envelope: &Envelope, catalog: &Catalog) -> Vec<(String, CheckId)> {
     let declared = envelope.checks.iter().flat_map(|result| {
         catalog
@@ -98,6 +99,7 @@ fn rule_kinds(envelope: &Envelope, catalog: &Catalog) -> Vec<(String, CheckId)> 
             .map(|check| check.manifest().findings.clone())
             .unwrap_or_default()
             .into_iter()
+            .filter(|spec| !spec.is_template())
             .map(|spec| (spec.kind, result.id.clone()))
     });
     let found = envelope
@@ -403,6 +405,38 @@ mod tests {
 
         let ids: Vec<&Value> = rules(&log).iter().map(|rule| &rule["id"]).collect();
         assert_eq!(ids, expected.iter().collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn a_template_kind_is_a_rule_per_reported_kind_not_the_template() {
+        let mut envelope = fixture::envelope();
+        let mut analyze = envelope.checks[0].clone();
+        analyze.id = CheckId::from("static.analyze");
+        envelope.checks.push(analyze);
+        envelope.findings.push(fixture::finding(
+            9,
+            "static.analyze",
+            "analyze.ruff.F401",
+            Severity::Warn,
+        ));
+        let log = log(&envelope, None);
+        let catalog = crate::catalog::Catalog::builtin();
+        let described = catalog.finding("analyze.ruff.F401").unwrap();
+
+        let ids: Vec<&str> = rules(&log)
+            .iter()
+            .filter_map(|r| r["id"].as_str())
+            .collect();
+        assert!(!ids.iter().any(|id| id.contains('<')), "{ids:?}");
+        let rule = rules(&log)
+            .iter()
+            .find(|rule| rule["id"] == json!("analyze.ruff.F401"))
+            .unwrap_or_else(|| panic!("{ids:?}"));
+        assert_eq!(rule["shortDescription"]["text"], json!(described.summary));
+        assert_eq!(rule["properties"]["check"], json!("static.analyze"));
+        let result = results(&log).last().unwrap();
+        assert_eq!(result["ruleId"], json!("analyze.ruff.F401"));
+        assert_eq!(result["ruleIndex"], json!(ids.len() - 1));
     }
 
     #[test]

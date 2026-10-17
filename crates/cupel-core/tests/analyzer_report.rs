@@ -104,6 +104,15 @@ fn spec(kind: &str) -> FindingKindSpec {
 }
 
 #[test]
+fn a_kind_with_a_placeholder_segment_is_a_template() {
+    let templates: Vec<bool> = ["analyze.<tool>.<rule>", "a.<b>.c", "api.breaking", "x.<y"]
+        .iter()
+        .map(|kind| spec(kind).is_template())
+        .collect();
+    assert_eq!(templates, [true, true, false, false]);
+}
+
+#[test]
 fn a_kind_template_matches_one_segment_per_placeholder_and_the_rest_for_the_last() {
     let matched = |spec_kind: &str, kinds: &[&str]| -> Vec<bool> {
         let spec = spec(spec_kind);

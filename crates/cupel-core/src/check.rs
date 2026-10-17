@@ -49,9 +49,17 @@ pub struct FindingKindSpec {
 }
 
 impl FindingKindSpec {
-    /// Whether a finding of `kind` is of this spec: the same kind, or, for a *template* such as
-    /// `analyze.<tool>.<rule>`, each `<…>` segment standing for one non-empty segment of `kind`
-    /// and a final one for one or more (ADR-102 §3).
+    /// Whether this spec is a *template* such as `analyze.<tool>.<rule>`, whose reported kinds
+    /// are only known when a tool reports them (ADR-102 §3).
+    pub fn is_template(&self) -> bool {
+        self.kind
+            .split('.')
+            .any(|segment| segment.starts_with('<') && segment.ends_with('>'))
+    }
+
+    /// Whether a finding of `kind` is of this spec: the same kind, or, for a template, each
+    /// `<…>` segment standing for one non-empty segment of `kind` and a final one for one or
+    /// more (ADR-102 §3).
     pub fn matches(&self, kind: &str) -> bool {
         if self.kind == kind {
             return true;
