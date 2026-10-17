@@ -72,6 +72,7 @@ pub mod metamorphic;
 mod per_test;
 mod property;
 mod pytest;
+mod race;
 pub mod report;
 mod rules;
 mod runner;

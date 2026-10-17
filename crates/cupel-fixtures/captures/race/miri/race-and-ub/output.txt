@@ -1,0 +1,141 @@
+   Compiling tally v0.1.0 (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.32s
+     Running unittests src/lib.rs (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/target-miri/miri/aarch64-apple-darwin/debug/deps/tally-a2cb8ba5bf50f4ef)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/race.rs (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/target-miri/miri/aarch64-apple-darwin/debug/deps/race-7cd29dc40e002d5e)
+
+running 1 test
+test publishes ... error: Undefined Behavior: Data race detected between (1) non-atomic read on thread `publishes` and (2) non-atomic write on thread `unnamed-2` at alloc39912
+  --> src/lib.rs:9:49
+   |
+ 9 |     let writer = thread::spawn(move || unsafe { STORED = value });
+   |                                                 ^^^^^^^^^^^^^^ (2) just happened here
+   |
+help: and (1) occurred earlier here
+  --> src/lib.rs:10:25
+   |
+10 |     let seen = unsafe { STORED };
+   |                         ^^^^^^
+   = help: this indicates a bug in the program: it performed an invalid operation, and caused Undefined Behavior
+   = help: see https://doc.rust-lang.org/nightly/reference/behavior-considered-undefined.html for further information
+   = note: this is on thread `unnamed-2`
+   = note: stack backtrace:
+           0: tally::publish::{closure#0}
+               at src/lib.rs:9:49: 9:63
+           1: std::sys::backtrace::__rust_begin_short_backtrace::<{closure@tally::publish::{closure#0}}, ()>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/sys/backtrace.rs:166:18: 166:21
+           2: std::thread::lifecycle::spawn_unchecked::<'_, {closure@tally::publish::{closure#0}}, ()>::{closure#1}::{closure#0}
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:91:13: 91:67
+           3: <std::panic::AssertUnwindSafe<{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@tally::publish::{closure#0}}, ()>::{closure#1}::{closure#0}}> as std::ops::FnOnce<()>>::call_once
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/panic/unwind_safe.rs:275:9: 275:19
+           4: std::panicking::catch_unwind::do_call::<std::panic::AssertUnwindSafe<{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@tally::publish::{closure#0}}, ()>::{closure#1}::{closure#0}}>, ()>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/panicking.rs:581:40: 581:43
+           5: std::panicking::catch_unwind::<(), std::panic::AssertUnwindSafe<{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@tally::publish::{closure#0}}, ()>::{closure#1}::{closure#0}}>>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/panicking.rs:544:19: 544:88
+           6: std::panic::catch_unwind::<std::panic::AssertUnwindSafe<{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@tally::publish::{closure#0}}, ()>::{closure#1}::{closure#0}}>, ()>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/panic.rs:359:14: 359:40
+           7: std::thread::lifecycle::spawn_unchecked::<'_, {closure@tally::publish::{closure#0}}, ()>::{closure#1}
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:89:26: 92:12
+           8: <{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@tally::publish::{closure#0}}, ()>::{closure#1}} as std::ops::FnOnce<()>>::call_once - shim(vtable)
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5: 250:71
+           9: <std::boxed::Box<dyn std::ops::FnOnce() + std::marker::Send> as std::ops::FnOnce<()>>::call_once
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/alloc/src/boxed.rs:2240:9: 2240:52
+           10: std::sys::thread::unix::Thread::new::thread_start
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/sys/thread/unix.rs:118:17: 118:29
+note: the last function in that backtrace got called indirectly due to this code
+  --> src/lib.rs:9:18
+   |
+ 9 |     let writer = thread::spawn(move || unsafe { STORED = value });
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: aborting due to 1 previous error
+
+error: test failed, to rerun pass `--test race`
+
+Caused by:
+  process didn't exit successfully: `/Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/bin/cargo-miri runner /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/target-miri/miri/aarch64-apple-darwin/debug/deps/race-7cd29dc40e002d5e --test-threads=1` (exit status: 1)
+note: test exited abnormally; to see the full output pass --no-capture to the harness.
+     Running tests/ub.rs (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/target-miri/miri/aarch64-apple-darwin/debug/deps/ub-31220e7d80daac11)
+
+running 1 test
+test reads_the_last_value ... error: Undefined Behavior: memory access failed: attempting to access 1 byte, but got alloc16+0x4 which is at or beyond the end of the allocation of size 4 bytes
+  --> src/lib.rs:18:14
+   |
+18 |     unsafe { *start.add(4) }
+   |              ^^^^^^^^^^^^^ Undefined Behavior occurred here
+   |
+   = help: this indicates a bug in the program: it performed an invalid operation, and caused Undefined Behavior
+   = help: see https://doc.rust-lang.org/nightly/reference/behavior-considered-undefined.html for further information
+   = note: this is on thread `reads_the_last_value`
+   = note: stack backtrace:
+           0: tally::last
+               at src/lib.rs:18:14: 18:27
+           1: reads_the_last_value
+               at tests/ub.rs:3:13: 3:39
+           2: reads_the_last_value::{closure#0}
+               at tests/ub.rs:2:26: 2:26
+           3: <{closure@tests/ub.rs:2:1: 4:2} as std::ops::FnOnce<()>>::call_once - shim
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5: 250:71
+           4: <fn() -> std::result::Result<(), std::string::String> as std::ops::FnOnce<()>>::call_once - shim(fn() -> std::result::Result<(), std::string::String>)
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5: 250:71
+           5: test::__rust_begin_short_backtrace::<std::result::Result<(), std::string::String>, fn() -> std::result::Result<(), std::string::String>>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/test/src/lib.rs:663:18: 663:21
+           6: test::types::RunnableTest::run
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/test/src/types.rs:145:40: 145:71
+           7: test::run_test_in_process::{closure#0}
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/test/src/lib.rs:686:60: 686:79
+           8: <std::panic::AssertUnwindSafe<{closure@test::run_test_in_process::{closure#0}}> as std::ops::FnOnce<()>>::call_once
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/panic/unwind_safe.rs:275:9: 275:19
+           9: std::panicking::catch_unwind::do_call::<std::panic::AssertUnwindSafe<{closure@test::run_test_in_process::{closure#0}}>, std::result::Result<(), std::string::String>>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/panicking.rs:581:40: 581:43
+           10: std::panicking::catch_unwind::<std::result::Result<(), std::string::String>, std::panic::AssertUnwindSafe<{closure@test::run_test_in_process::{closure#0}}>>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/panicking.rs:544:19: 544:88
+           11: std::panic::catch_unwind::<std::panic::AssertUnwindSafe<{closure@test::run_test_in_process::{closure#0}}>, std::result::Result<(), std::string::String>>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/panic.rs:359:14: 359:40
+           12: test::run_test_in_process
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/test/src/lib.rs:686:27: 686:81
+           13: test::run_test::{closure#0}
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/test/src/lib.rs:607:43: 615:18
+           14: test::run_test::{closure#1}
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/test/src/lib.rs:637:41: 637:83
+           15: std::sys::backtrace::__rust_begin_short_backtrace::<{closure@test::run_test::{closure#1}}, ()>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/sys/backtrace.rs:166:18: 166:21
+           16: std::thread::lifecycle::spawn_unchecked::<'_, {closure@test::run_test::{closure#1}}, ()>::{closure#1}::{closure#0}
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:91:13: 91:67
+           17: <std::panic::AssertUnwindSafe<{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@test::run_test::{closure#1}}, ()>::{closure#1}::{closure#0}}> as std::ops::FnOnce<()>>::call_once
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/panic/unwind_safe.rs:275:9: 275:19
+           18: std::panicking::catch_unwind::do_call::<std::panic::AssertUnwindSafe<{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@test::run_test::{closure#1}}, ()>::{closure#1}::{closure#0}}>, ()>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/panicking.rs:581:40: 581:43
+           19: std::panicking::catch_unwind::<(), std::panic::AssertUnwindSafe<{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@test::run_test::{closure#1}}, ()>::{closure#1}::{closure#0}}>>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/panicking.rs:544:19: 544:88
+           20: std::panic::catch_unwind::<std::panic::AssertUnwindSafe<{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@test::run_test::{closure#1}}, ()>::{closure#1}::{closure#0}}>, ()>
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/panic.rs:359:14: 359:40
+           21: std::thread::lifecycle::spawn_unchecked::<'_, {closure@test::run_test::{closure#1}}, ()>::{closure#1}
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/thread/lifecycle.rs:89:26: 92:12
+           22: <{closure@std::thread::lifecycle::spawn_unchecked<'_, {closure@test::run_test::{closure#1}}, ()>::{closure#1}} as std::ops::FnOnce<()>>::call_once - shim(vtable)
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5: 250:71
+           23: <std::boxed::Box<dyn std::ops::FnOnce() + std::marker::Send> as std::ops::FnOnce<()>>::call_once
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/alloc/src/boxed.rs:2240:9: 2240:52
+           24: std::sys::thread::unix::Thread::new::thread_start
+               at /Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/sys/thread/unix.rs:118:17: 118:29
+
+error: aborting due to 1 previous error
+
+error: test failed, to rerun pass `--test ub`
+
+Caused by:
+  process didn't exit successfully: `/Users/tysont/.rustup/toolchains/nightly-aarch64-apple-darwin/bin/cargo-miri runner /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/target-miri/miri/aarch64-apple-darwin/debug/deps/ub-31220e7d80daac11 --test-threads=1` (exit status: 1)
+note: test exited abnormally; to see the full output pass --no-capture to the harness.
+   Doc-tests tally
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: 2 targets failed:
+    `--test race`
+    `--test ub`

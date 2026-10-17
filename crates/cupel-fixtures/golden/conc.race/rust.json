@@ -1,0 +1,222 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "conc.race",
+      "metrics": {
+        "races": 1.0,
+        "undefined_behavior": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 1,
+        "unit": "reports",
+        "value": 2.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 4
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Synchronize the accesses (a lock, an atomic, a channel) or stop sharing the memory, then rerun the race detector."
+      },
+      "check": "conc.race",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "message": "Data race detected between (1) non-atomic read on thread `publishes` and (2) non-atomic write on thread `unnamed-2` at alloc",
+        "stacks": [
+          {
+            "access": "non-atomic write",
+            "frames": [
+              {
+                "file": "src/lib.rs",
+                "function": "tally::publish::{closure#0}",
+                "line": 9
+              }
+            ]
+          },
+          {
+            "access": "non-atomic read",
+            "frames": [
+              {
+                "file": "src/lib.rs",
+                "function": null,
+                "line": 10
+              }
+            ]
+          }
+        ],
+        "test": "publishes",
+        "tool": "tool.miri"
+      },
+      "id": "fnd_5c527f",
+      "kind": "race.detected",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 9,
+        "file": "src/lib.rs",
+        "line": 9
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.race --paths src/lib.rs",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_5c527f --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 4,
+      "title": "data race: `non-atomic write` in `tally::publish::{closure#0}` and `non-atomic read` in an unnamed function"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix the operation the detector names so it stays within what the language defines, then rerun it."
+      },
+      "check": "conc.race",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "message": "memory access failed: attempting to access 1 byte, but got alloc+0x4 which is at or beyond the end of the allocation of size 4 bytes",
+        "stacks": [
+          {
+            "access": null,
+            "frames": [
+              {
+                "file": "src/lib.rs",
+                "function": "tally::last",
+                "line": 18
+              },
+              {
+                "file": "tests/ub.rs",
+                "function": "reads_the_last_value",
+                "line": 3
+              },
+              {
+                "file": "tests/ub.rs",
+                "function": "reads_the_last_value::{closure#0}",
+                "line": 2
+              }
+            ]
+          }
+        ],
+        "test": "reads_the_last_value",
+        "tool": "tool.miri"
+      },
+      "id": "fnd_b2fbc6",
+      "kind": "ub.detected",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 18,
+        "file": "src/lib.rs",
+        "line": 18
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.race --paths src/lib.rs",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_b2fbc6 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 4,
+      "title": "undefined behavior in `tally::last`: memory access failed: attempting to access 1 byte, but got alloc+0x4 which is at or beyond the end of the allocation of size 4 bytes"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_5c527f",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Synchronize the accesses (a lock, an atomic, a channel) or stop sharing the memory, then rerun the race detector."
+    },
+    {
+      "command": null,
+      "finding": "fnd_b2fbc6",
+      "kind": "fix_bug",
+      "priority": 2,
+      "summary": "Fix the operation the detector names so it stays within what the language defines, then rerun it."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 2,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

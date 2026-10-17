@@ -1,7 +1,7 @@
 // ABOUTME: What every coverage producer shares (ADR-079): a `CoverageSpec` names the tool and its default report;
 // ABOUTME: `CoverageTool` ingests a fresh report or runs the configured command per project root.
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use cupel_core::coverage::CoverageMap;
 use cupel_core::{
@@ -17,6 +17,7 @@ use crate::fresh::{
 };
 use crate::runner::{installed, probe, roots};
 use crate::toolchain;
+use crate::tree::canonical;
 
 /// The `[lang.<id>]` key holding the coverage command (design §6.7).
 const KEY: &str = "coverage";
@@ -291,10 +292,6 @@ impl CoverageTool {
                 })
             })
     }
-}
-
-fn canonical(path: &Path) -> PathBuf {
-    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
 
 /// `path` quoted for `sh`.

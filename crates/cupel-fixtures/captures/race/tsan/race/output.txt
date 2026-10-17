@@ -1,0 +1,22 @@
+==================
+WARNING: ThreadSanitizer: data race (pid=83925)
+  Write of size 4 at 0x000102204000 by thread T2:
+    #0 count race.c:7 (race:arm64+0x1000006d0)
+
+  Previous write of size 4 at 0x000102204000 by thread T1:
+    #0 count race.c:7 (race:arm64+0x1000006d0)
+
+  Location is global 'total' at 0x000102204000 (race+0x100008000)
+
+  Thread T2 (tid=72905695, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33834)
+    #1 main race.c:14 (race:arm64+0x100000760)
+
+  Thread T1 (tid=72905694, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33834)
+    #1 main race.c:13 (race:arm64+0x100000748)
+
+SUMMARY: ThreadSanitizer: data race race.c:7 in count
+==================
+2000
+ThreadSanitizer: reported 1 warnings

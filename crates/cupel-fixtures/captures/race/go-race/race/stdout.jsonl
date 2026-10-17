@@ -1,0 +1,53 @@
+{"Time":"2026-10-17T02:59:42.077562-07:00","Action":"start","Package":"example.com/tally"}
+{"Time":"2026-10-17T02:59:42.346606-07:00","Action":"run","Package":"example.com/tally","Test":"TestPublish"}
+{"Time":"2026-10-17T02:59:42.346698-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"=== RUN   TestPublish\n"}
+{"Time":"2026-10-17T02:59:42.347464-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"==================\n"}
+{"Time":"2026-10-17T02:59:42.347503-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"WARNING: DATA RACE\n"}
+{"Time":"2026-10-17T02:59:42.347515-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"Write at 0x00c0001121b8 by goroutine 7:\n"}
+{"Time":"2026-10-17T02:59:42.347529-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  example.com/tally.Publish.func1()\n"}
+{"Time":"2026-10-17T02:59:42.347539-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/go/tally.go:10 +0x3c\n"}
+{"Time":"2026-10-17T02:59:42.347559-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"\n"}
+{"Time":"2026-10-17T02:59:42.347569-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"Previous read at 0x00c0001121b8 by goroutine 6:\n"}
+{"Time":"2026-10-17T02:59:42.34758-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  example.com/tally.Publish()\n"}
+{"Time":"2026-10-17T02:59:42.34759-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/go/tally.go:13 +0x10c\n"}
+{"Time":"2026-10-17T02:59:42.347603-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  example.com/tally.TestPublish()\n"}
+{"Time":"2026-10-17T02:59:42.347613-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/go/tally_test.go:6 +0x28\n"}
+{"Time":"2026-10-17T02:59:42.347623-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  testing.tRunner()\n"}
+{"Time":"2026-10-17T02:59:42.347633-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:1690 +0x184\n"}
+{"Time":"2026-10-17T02:59:42.347651-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  testing.(*T).Run.gowrap1()\n"}
+{"Time":"2026-10-17T02:59:42.347661-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:1743 +0x40\n"}
+{"Time":"2026-10-17T02:59:42.347671-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"\n"}
+{"Time":"2026-10-17T02:59:42.34768-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"Goroutine 7 (running) created at:\n"}
+{"Time":"2026-10-17T02:59:42.34769-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  example.com/tally.Publish()\n"}
+{"Time":"2026-10-17T02:59:42.3477-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/go/tally.go:9 +0x104\n"}
+{"Time":"2026-10-17T02:59:42.34771-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  example.com/tally.TestPublish()\n"}
+{"Time":"2026-10-17T02:59:42.347719-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/go/tally_test.go:6 +0x28\n"}
+{"Time":"2026-10-17T02:59:42.347776-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  testing.tRunner()\n"}
+{"Time":"2026-10-17T02:59:42.347785-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:1690 +0x184\n"}
+{"Time":"2026-10-17T02:59:42.347793-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  testing.(*T).Run.gowrap1()\n"}
+{"Time":"2026-10-17T02:59:42.3478-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:1743 +0x40\n"}
+{"Time":"2026-10-17T02:59:42.347807-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"\n"}
+{"Time":"2026-10-17T02:59:42.347815-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"Goroutine 6 (running) created at:\n"}
+{"Time":"2026-10-17T02:59:42.347822-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  testing.(*T).Run()\n"}
+{"Time":"2026-10-17T02:59:42.34783-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:1743 +0x5e0\n"}
+{"Time":"2026-10-17T02:59:42.347837-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  testing.runTests.func1()\n"}
+{"Time":"2026-10-17T02:59:42.347856-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:2168 +0x80\n"}
+{"Time":"2026-10-17T02:59:42.347867-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  testing.tRunner()\n"}
+{"Time":"2026-10-17T02:59:42.347874-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:1690 +0x184\n"}
+{"Time":"2026-10-17T02:59:42.347882-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  testing.runTests()\n"}
+{"Time":"2026-10-17T02:59:42.347889-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:2166 +0x6e0\n"}
+{"Time":"2026-10-17T02:59:42.347896-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  testing.(*M).Run()\n"}
+{"Time":"2026-10-17T02:59:42.347904-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      /opt/homebrew/Cellar/go/1.23.2/libexec/src/testing/testing.go:2034 +0xb74\n"}
+{"Time":"2026-10-17T02:59:42.347911-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"  main.main()\n"}
+{"Time":"2026-10-17T02:59:42.347919-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"      _testmain.go:47 +0x110\n"}
+{"Time":"2026-10-17T02:59:42.347926-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"==================\n"}
+{"Time":"2026-10-17T02:59:42.347933-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"    testing.go:1399: race detected during execution of test\n"}
+{"Time":"2026-10-17T02:59:42.347964-07:00","Action":"output","Package":"example.com/tally","Test":"TestPublish","Output":"--- FAIL: TestPublish (0.00s)\n"}
+{"Time":"2026-10-17T02:59:42.347974-07:00","Action":"fail","Package":"example.com/tally","Test":"TestPublish","Elapsed":0}
+{"Time":"2026-10-17T02:59:42.347984-07:00","Action":"run","Package":"example.com/tally","Test":"TestSum"}
+{"Time":"2026-10-17T02:59:42.347992-07:00","Action":"output","Package":"example.com/tally","Test":"TestSum","Output":"=== RUN   TestSum\n"}
+{"Time":"2026-10-17T02:59:42.348001-07:00","Action":"output","Package":"example.com/tally","Test":"TestSum","Output":"--- PASS: TestSum (0.00s)\n"}
+{"Time":"2026-10-17T02:59:42.34802-07:00","Action":"pass","Package":"example.com/tally","Test":"TestSum","Elapsed":0}
+{"Time":"2026-10-17T02:59:42.348029-07:00","Action":"output","Package":"example.com/tally","Output":"FAIL\n"}
+{"Time":"2026-10-17T02:59:42.349155-07:00","Action":"output","Package":"example.com/tally","Output":"FAIL\texample.com/tally\t0.271s\n"}
+{"Time":"2026-10-17T02:59:42.349184-07:00","Action":"fail","Package":"example.com/tally","Elapsed":0.272}

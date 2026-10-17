@@ -44,7 +44,7 @@ fn race_reports_serializes_every_field() {
             stacks: vec![RaceStack {
                 access: Some("write".to_owned()),
                 frames: vec![RaceFrame {
-                    function: "example.com/units.Count.func1".to_owned(),
+                    function: Some("example.com/units.Count.func1".to_owned()),
                     file: "count.go".to_owned(),
                     line: 15,
                 }],

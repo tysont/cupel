@@ -65,8 +65,9 @@ pub struct RaceStack {
 /// One frame of a stack, in a file of the repository.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct RaceFrame {
-    /// The function, as the detector names it, without a compiler's hash suffix.
-    pub function: String,
+    /// The function, as the detector names it, without a compiler's hash suffix; `None` when the
+    /// detector gives only a place (Miri's earlier access of a race).
+    pub function: Option<String>,
     /// Relative to the repository root.
     pub file: String,
     pub line: u32,

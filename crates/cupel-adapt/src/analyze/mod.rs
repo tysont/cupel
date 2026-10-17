@@ -13,7 +13,7 @@
 mod tools;
 
 use std::collections::BTreeSet;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use cupel_core::{
     AnalyzerReport, AnalyzerResult, AnalyzerRun, AnalyzerStatus, Availability, CostClass, Ctx,
@@ -23,6 +23,7 @@ use cupel_core::{
 
 use crate::runner::{installed, roots};
 use crate::toolchain;
+use crate::tree::{canonical, relative};
 pub use tools::{Raw, SPECS, Spec, Target};
 
 const ID: &str = "tool.analyzers";
@@ -302,21 +303,8 @@ impl Run<'_> {
 
     /// `file` as the tool named it, relative to the repository root; `None` outside it.
     fn relative(&self, absolute: &Path, file: &str) -> Option<String> {
-        let path = Path::new(file);
-        let full = if path.is_absolute() {
-            canonical(path)
-        } else {
-            canonical(&absolute.join(path))
-        };
-        let relative = full.strip_prefix(self.root).ok()?;
-        let text = relative.to_string_lossy().replace('\\', "/");
-        (!text.is_empty()).then_some(text)
+        relative(self.root, absolute, file)
     }
-}
-
-/// `path` canonical when it exists, else as given.
-fn canonical(path: &Path) -> PathBuf {
-    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
 
 #[cfg(test)]

@@ -111,6 +111,21 @@ impl Seen {
     }
 }
 
+/// What each test printed, then what each package printed outside its tests, as
+/// `(package, test, output)`, from `stdout`, the events of `go test -json`.
+pub fn printed(stdout: &str) -> Vec<(String, Option<String>, String)> {
+    let (tests, packages) = events(stdout);
+    tests
+        .into_iter()
+        .map(|((package, test), seen)| (package, Some(test), seen.output))
+        .chain(
+            packages
+                .into_iter()
+                .map(|(package, seen)| (package, None, seen.output)),
+        )
+        .collect()
+}
+
 /// Each test's ID (`<package>/<Test>`) in the order `stdout`, the events of `go test -json`,
 /// started them: its `run` events, in the order they appear.
 pub fn order(stdout: &str) -> Vec<String> {

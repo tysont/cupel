@@ -1,0 +1,165 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "conc.race",
+      "metrics": {
+        "races": 1.0,
+        "undefined_behavior": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 1,
+        "unit": "reports",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 4
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Synchronize the accesses (a lock, an atomic, a channel) or stop sharing the memory, then rerun the race detector."
+      },
+      "check": "conc.race",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "message": "data race",
+        "stacks": [
+          {
+            "access": "write",
+            "frames": [
+              {
+                "file": "tally.go",
+                "function": "example.com/tally.Publish.func1",
+                "line": 10
+              }
+            ]
+          },
+          {
+            "access": "read",
+            "frames": [
+              {
+                "file": "tally.go",
+                "function": "example.com/tally.Publish",
+                "line": 13
+              },
+              {
+                "file": "tally_test.go",
+                "function": "example.com/tally.TestPublish",
+                "line": 6
+              }
+            ]
+          }
+        ],
+        "test": "TestPublish",
+        "tool": "tool.go-race"
+      },
+      "id": "fnd_c9f4ec",
+      "kind": "race.detected",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 10,
+        "file": "tally.go",
+        "line": 10
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.race --paths tally.go",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_c9f4ec --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 4,
+      "title": "data race: `write` in `example.com/tally.Publish.func1` and `read` in `example.com/tally.Publish`"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_c9f4ec",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Synchronize the accesses (a lock, an atomic, a channel) or stop sharing the memory, then rerun the race detector."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

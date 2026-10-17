@@ -1,0 +1,261 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "standard",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `race.detected` and `ub.detected`: the report as the fact holds it.",
+            "properties": {
+              "message": {
+                "description": "What the detector says happened, with addresses and IDs masked.",
+                "type": "string"
+              },
+              "stacks": {
+                "description": "Each conflicting access of a data race, or where undefined behavior happened.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One stack of a report; inlined, as evidence schemas have no `$defs` (ADR-043).",
+                  "properties": {
+                    "access": {
+                      "description": "The access, such as `read` or `write`; null for undefined behavior.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "frames": {
+                      "description": "Frames in files of the repository, innermost first.",
+                      "items": {
+                        "additionalProperties": false,
+                        "description": "One frame of a stack.",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "function": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "line": {
+                            "format": "uint32",
+                            "minimum": 0,
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "frames"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "test": {
+                "description": "The test that was running, when the detector says.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "tool": {
+                "description": "The detector, such as `tool.go-race` or `tool.miri`.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tool",
+              "message",
+              "stacks"
+            ],
+            "title": "Reported",
+            "type": "object"
+          },
+          "kind": "race.detected",
+          "summary": "Two threads accessed the same memory without synchronization while the tests ran, one of them writing."
+        },
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `race.detected` and `ub.detected`: the report as the fact holds it.",
+            "properties": {
+              "message": {
+                "description": "What the detector says happened, with addresses and IDs masked.",
+                "type": "string"
+              },
+              "stacks": {
+                "description": "Each conflicting access of a data race, or where undefined behavior happened.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One stack of a report; inlined, as evidence schemas have no `$defs` (ADR-043).",
+                  "properties": {
+                    "access": {
+                      "description": "The access, such as `read` or `write`; null for undefined behavior.",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "frames": {
+                      "description": "Frames in files of the repository, innermost first.",
+                      "items": {
+                        "additionalProperties": false,
+                        "description": "One frame of a stack.",
+                        "properties": {
+                          "file": {
+                            "type": "string"
+                          },
+                          "function": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "line": {
+                            "format": "uint32",
+                            "minimum": 0,
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "file",
+                          "line"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "frames"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "test": {
+                "description": "The test that was running, when the detector says.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "tool": {
+                "description": "The detector, such as `tool.go-race` or `tool.miri`.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tool",
+              "message",
+              "stacks"
+            ],
+            "title": "Reported",
+            "type": "object"
+          },
+          "kind": "ub.detected",
+          "summary": "An operation with undefined behavior ran during the tests: an out-of-bounds or dangling access, an invalid value, a broken aliasing rule."
+        }
+      ],
+      "id": "conc.race",
+      "metrics": [
+        {
+          "name": "races",
+          "per": "scope",
+          "summary": "Data races the detector reported."
+        },
+        {
+          "name": "undefined_behavior",
+          "per": "scope",
+          "summary": "Operations with undefined behavior the detector reported."
+        }
+      ],
+      "needs": [
+        "race-reports"
+      ],
+      "stability": "experimental",
+      "summary": "Runs the tests under a race detector (Go's -race, Miri, ThreadSanitizer) and reports each data race and each undefined behavior it sees.",
+      "tier": 4,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

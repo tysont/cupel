@@ -1,0 +1,6 @@
+# Captured from the real tool on the conc.race Rust fixture (P6.3), standard output and error merged;
+# the other files here are its unedited output. `dir` is where it ran.
+tool = "miri 0.1.0 (rustc 1.96.0-nightly 23903d01c 2026-03-26)"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/rust"
+command = "MIRIFLAGS=-Zmiri-backtrace=full cargo +nightly miri test --no-fail-fast -- --test-threads=1"
+exit_code = 101

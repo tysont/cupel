@@ -1,7 +1,7 @@
-// ABOUTME: Whole trees for producers that run code somewhere other than the working tree: a commit exported with
-// ABOUTME: `git archive` (a differential oracle's ref, ADR-093 §7; a bench's base commit, ADR-106).
+// ABOUTME: Trees and paths for producers that run tools: a commit exported with `git archive` (a differential
+// ABOUTME: oracle's ref, ADR-093 §7; a bench's base commit, ADR-106), and a tool's paths made relative to the repository.
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use cupel_core::{Cancellation, Error, Process, output_tail};
 
@@ -34,6 +34,25 @@ pub fn export(
         }
     }
     Ok(())
+}
+
+/// `path` canonical when it exists, else as given.
+pub fn canonical(path: &Path) -> PathBuf {
+    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
+}
+
+/// `file` as a tool running in `dir` named it, relative to `root` (both canonical where they
+/// exist); `None` outside `root`.
+pub fn relative(root: &Path, dir: &Path, file: &str) -> Option<String> {
+    let path = Path::new(file);
+    let full = if path.is_absolute() {
+        canonical(path)
+    } else {
+        canonical(&dir.join(path))
+    };
+    let relative = full.strip_prefix(root).ok()?;
+    let text = relative.to_string_lossy().replace('\\', "/");
+    (!text.is_empty()).then_some(text)
 }
 
 /// A git failure, as a process error.
@@ -89,6 +108,22 @@ mod tests {
             "at the commit\n"
         );
         assert!(!tree.join("build").exists());
+    }
+
+    #[test]
+    fn a_path_inside_the_root_is_relative_to_it_and_one_outside_is_none() {
+        let root = Path::new("/no/such/repo");
+        let dir = root.join("crates/x");
+        assert_eq!(
+            relative(root, &dir, "src/lib.rs").as_deref(),
+            Some("crates/x/src/lib.rs")
+        );
+        assert_eq!(
+            relative(root, &dir, "/no/such/repo/tests/a.rs").as_deref(),
+            Some("tests/a.rs")
+        );
+        assert_eq!(relative(root, &dir, "/usr/lib/rust/std.rs"), None);
+        assert_eq!(relative(root, root, "/no/such/repo"), None);
     }
 
     #[test]

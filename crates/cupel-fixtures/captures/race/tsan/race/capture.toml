@@ -1,0 +1,7 @@
+# Captured from ThreadSanitizer's runtime (compiler-rt, the same report format rustc's
+# -Zsanitizer=thread links) on race.c beside it (P6.3), standard output and error merged; the other
+# files here are its unedited output. `dir` is where it ran.
+tool = "Apple clang version 21.0.0 (clang-2100.1.1.101)"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/cap/c"
+command = "clang -g -fsanitize=thread race.c -o race && ./race"
+exit_code = 134

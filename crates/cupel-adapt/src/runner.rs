@@ -579,7 +579,7 @@ pub(crate) fn installed(tool: &str, node_bin: bool, dir: &Path) -> Option<String
 /// The project roots a runner runs the suite in: none when `ProjectInfo` found no project of
 /// the language, since there is no suite to run (a `Cargo.toml`-less crate cannot be tested),
 /// else [`roots`].
-fn suite_roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
+pub(crate) fn suite_roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
     match ctx.upstream.get::<ProjectInfo>() {
         Some(info) if info.roots.is_empty() => Vec::new(),
         _ => roots(ctx),
