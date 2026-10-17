@@ -668,6 +668,9 @@ pub trait Language: Send + Sync {
     fn grammar(&self, path: &Path) -> tree_sitter::Language;   // one language may own several grammars (js/jsx, ts, tsx)
     fn spec(&self) -> &LanguageSpec;              // queries + tables consumed by the generic producers
     fn stability(&self) -> Stability;
+    /// The build ecosystem whose manifests mark this language's project roots and whose generated directories
+    /// every root walk skips; the registry registers the `ProjectInfo` producer from it (ADR-112).
+    fn ecosystem(&self) -> Option<&'static Ecosystem>;
     /// Register this language's producers. The generic query-driven producers cover most syntactic facts;
     /// a language registers a hand-written producer only where queries cannot express the fact.
     fn register(&self, reg: &mut ProducerRegistry);
@@ -676,7 +679,7 @@ pub trait Language: Send + Sync {
 
 The trait is deliberately small and closed. Language knowledge that checks need does not arrive as new trait methods; it arrives as new facts with new producers (§8.3.1), so the trait does not grow with the check catalog.
 
-Generic producers in `cupel-lang`, each driven entirely by `LanguageSpec`: `QuerySymbols → Symbols`, `QueryDecisions → Decisions`, `TableNormalize → NormTree`, `QueryMutationSites → MutationSites`, `QueryTestFrames → TestFrames`, `QueryImports` (raw edges feeding `ModuleGraph`), `QueryApi → ApiSurface`, `QueryRoots → Roots`, `GlobTestConventions → TestConventions`. Hand-written per language: `ModuleGraph` resolution (Node resolution with `package.json` `exports` and `tsconfig` `paths`; Rust `mod` tree and workspace members; Go module paths; Python packages), `ProjectInfo`, and a schemata strategy registered with the mutation engine for compiled languages.
+Generic producers in `cupel-lang`, each driven entirely by `LanguageSpec`: `QuerySymbols → Symbols`, `QueryDecisions → Decisions`, `TableNormalize → NormTree`, `QueryMutationSites → MutationSites`, `QueryTestFrames → TestFrames`, `QueryImports` (raw edges feeding `ModuleGraph`), `QueryApi → ApiSurface`, `QueryRoots → Roots`, `GlobTestConventions → TestConventions`. Hand-written per language: `ModuleGraph` resolution (Node resolution with `package.json` `exports` and `tsconfig` `paths`; Rust `mod` tree and workspace members; Go module paths; Python packages), the `Ecosystem` table `ProjectInfo` is produced from, and a schemata strategy registered with the mutation engine for compiled languages.
 
 `Symbol.hash` = `blake3(lang ∥ serialize(NormTree))`. This is the join key for metrics, coverage, mutants, baselines, and finding IDs. `NormTree` serialization is language-independent so that symbols in the same family can be compared.
 
@@ -686,7 +689,7 @@ Each language lives in `cupel-lang/src/langs/<id>/`:
 
 ```
 langs/go/
-├── mod.rs              # Language impl: identity, register(), hand-written producers (ModuleGraph, ProjectInfo)
+├── mod.rs              # Language impl: identity, ecosystem(), register(), hand-written producers (ModuleGraph)
 ├── queries/
 │   ├── symbols.scm     # captures: @symbol.name @symbol.body @symbol.ns @symbol.visibility
 │   ├── decisions.scm   # captures: @decision.<kind> — kinds map to weights in tables.toml
@@ -723,7 +726,7 @@ Per-language decision-point and mutation-operator tables follow crapper/mutator'
 Conformance is owned by fact kinds (§8.3.7), so a language's fixture repo under `cupel-fixtures/repos/<lang>/` carries one `inventory.toml` mapping every construct from every fact inventory to the file and symbol that exhibits it, or to `not-applicable = "<reason>"` (Go has no ternary; Rust has no `null`). The checklist:
 
 1. Add the grammar crate to `[workspace.dependencies]`.
-2. Create `langs/<id>/` with queries and `tables.toml`; implement `Language`; in `register()` attach the generic producers and hand-write `ModuleGraph` and `ProjectInfo`.
+2. Create `langs/<id>/` with queries and `tables.toml`; implement `Language`; in `register()` attach the generic producers and hand-write `ModuleGraph`; name the build ecosystem in `ecosystem()`, from which the registry registers `ProjectInfo` (ADR-112).
 3. Create `cupel-fixtures/repos/<id>/` with an `inventory.toml` covering every construct in every fact inventory the language will produce.
 4. Add the toolchain-table row (§8.7): runner producers, coverage producer and format, bench/property/fuzz/race tools.
 5. Run the conformance suite until green. The support matrix now shows which checks the language supports; the matrix test demands a golden for each — generate and review them.
