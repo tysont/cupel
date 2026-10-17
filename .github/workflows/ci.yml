@@ -1,4 +1,4 @@
-# ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner and coverage tool
+# ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, and property framework
 # ABOUTME: installed, and `make dogfood` (Cupel's own gate) for every push and pull request. Rust comes from rust-toolchain.toml.
 name: ci
 
@@ -54,11 +54,21 @@ jobs:
         run: python -m pip install pytest-cov
       - name: Install pytest and pytest-cov
         run: python -m pip install pytest pytest-cov
+      # The property framework the property engine's Python tests drive for real (P5.4, ADR-095).
+      # Pinned: the gen.property fixture's everyday suite passes with a pinned seed, and which
+      # inputs a seed generates can change between releases.
+      - name: Install Hypothesis
+        run: python -m pip install hypothesis==6.170.1
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
       - name: Install vitest, its v8 coverage provider, and jest
         run: npm install --global vitest @vitest/coverage-v8 jest
+      # fast-check for the property engine's JavaScript and TypeScript tests (P5.4, ADR-095); the
+      # gen.property fixtures resolve it beside the global vitest and jest. Pinned for the same
+      # reason as Hypothesis.
+      - name: Install fast-check
+        run: npm install --global fast-check@4.10.2
       - name: make check
         run: make check
       # Every golden-harness run again through the daemon, compared with the cold run (ADR-085 §11).

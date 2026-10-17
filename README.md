@@ -138,11 +138,13 @@ A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weake
 
 | Flag | Selects |
 |---|---|
-| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`. Every check is `quick`, so all seven run at every depth |
+| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`. `quick` runs only the checks that need no test run |
 | `--only ID`, `--skip ID` | Checks by ID (`static.clones`) or group (`static`, `tests`); repeatable |
 | `--tier N+` | Only checks at or above evidence tier N, e.g. `--tier 2+` |
 | `--budget DURATION` | A wall-clock budget (`250ms`, `20s`, `10m`): run the most valuable selected checks that fit and skip the rest; `CUPEL_BUDGET` or `budget` in `cupel.toml` also set it |
 | `--jobs N` | How many threads and mutation workers run at once; default the cores (and, for mutation, the language's `mutation.jobs`) |
+| `--cases N` | How many generated cases each property test runs (see [Property tests](#property-tests)); default 1 000 at `standard`, ten times more at each deeper depth |
+| `--scaffold` | Also write a property-test stub for each `property.missing` finding; without `--write` the envelope's `plan.would_write` shows each file's diff and nothing is written |
 
 **Budget.** `--budget` chooses among the checks the depth and the selection flags already chose; it never adds deeper ones. Each check costs its own run plus the facts it needs that nothing has made yet: the baseline test run, a coverage report, the mutation engine. A fact two checks share is paid once. A cost is the median of the last ten recorded runs of the same kind of work on this repository (the same check, language, and order of magnitude of targets; the same producer and language, run or read from cache), once three are recorded in `.cupel/cupel.db`; before that it comes from the cost class (a `quick` producer 100 ms, `standard` 30 s, `deep` 5 min). A check's value is its evidence tier plus one, doubled when it has never produced a result here, halved when its last result was made at this commit on a clean tree, and doubled again inside a `--changed` or `--base` scope. Checks are taken greedily by value per millisecond while they fit; ties are broken by `--seed`. The budget counts from the start of the invocation, as `--timeout` does: a check is not started when its estimate exceeds what is left, and work still running at the deadline is stopped (its processes are killed), so a run overshoots its budget only by the moment that takes; a mutation run stopped that way reports `partial` with no score, and the mutants it finished are not kept. Anything the budget left out is `skipped` with `reason: budget` and `est_ms`, its estimate, the run is `partial` (exit 5), and `next_actions` offers the command that runs it alone. On a small Python project with a test suite and no recorded runs, one second leaves out everything that needs the suite:
 
@@ -604,7 +606,7 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 | `--cwd PATH` | The repository root; Cupel never relies on the shell's working directory |
 | `--events PATH\|stderr` | Stream progress as JSON lines; stdout stays reserved for the envelope |
 | `--timeout DURATION` | Stop after this long with partial results and exit 5 |
-| `--seed N` | Recorded in the envelope; random by default |
+| `--seed N` | Recorded in the envelope; random by default. Flake reruns, mutation runs, and property tests take it |
 | `--limit N`, `--offset N` | Page findings; the envelope always carries `truncated` and `total_findings` |
 | `--install`, `--no-install` | Install missing tools without asking, or never; without either, Cupel asks when stdout is a terminal and installs nothing otherwise (`doctor --fix`, `check`, `survey`) |
 | `--write` | Permit writes outside `.cupel/`; installing a tool is governed by `--install` instead |
@@ -613,7 +615,7 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 ## Checks
 
-Every check below exists and is supported in all five languages. All run at `--depth quick` except `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite and so run from `--depth standard`, the default. The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists. Each is supported in all five languages except `gen.property`, which Go lacks: Cupel runs no Go property framework (the [support matrix](#languages) says `unsupported`). All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite and so run from `--depth standard`, the default. The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
@@ -641,6 +643,7 @@ What each check looks for:
 - **`tests.quality`** reads every test: tests with no assertions or only weak ones (truthiness, presence, inequality), heavy mocking, loops and branches inside tests, and duplicated setup.
 - **`tests.weakening`** compares the tests at the range's base with the tests now. It reports removed or loosened assertions, skipped or deleted tests, and rewritten snapshots. It needs `--changed` or `--base`.
 - **`tests.flaky`** reruns the test suite several times in different orders and with different seeds, and reports tests whose outcome changes: `test.flaky` when two reruns in the same order disagree, `test.order-dependent` when the outcome follows the order. See [Flakiness](#flakiness).
+- **`gen.property`** runs the project's existing property tests (proptest and quickcheck, Hypothesis, fast-check) with the run's seed and many more generated cases than the suite usually gives them. A property that fails is `property.falsified`, with the framework's shrunk counterexample; a public function that takes arguments, in a file whose tests hold no property test, is `property.missing` (`info`). See [Property tests](#property-tests).
 - **`tests.mutation`** changes the code in small ways (`<` to `<=`, `+` to `-`, `&&` to `||`, `true` to `false`, `0` to `1`) and runs the tests that cover each change. A mutant every test passes against survived: the tests do not notice that line changing. The score is killed / (killed + survived). See [Mutation testing](#mutation-testing).
 
 `cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
@@ -730,6 +733,55 @@ flake_runs = 5      # reruns per check run; 0 turns them off
 ```
 
 The reruns repeat the whole suite (impacted-test selection is not built yet), so they cost about three baseline runs. `cargo nextest` runs each test in its own process, where order cannot matter; with it as the runner, the flake engine does not rerun and `tests.flaky` ends in `error` for that language.
+
+## Property tests
+
+`gen.property` finds the property tests among the tests in scope (Hypothesis's `@given`, each test in a `proptest!` block, `proptest!` inside a test, `#[proptest]`, `#[quickcheck]` and `quickcheck(…)`, and fast-check's `fc.assert` and `fc.check`), runs them once more after the baseline with the same runner, and reads back what each framework reports. Every framework keeps its own shrinking; the counterexample in a finding is the framework's minimized input, as it printed it.
+
+Each framework gets the run's `--seed` and the case budget `--cases` (default 1 000 at `--depth standard`, 10 000 at `deep`, 100 000 at `exhaustive`) its own way, and writes nothing outside `.cupel/` while it runs:
+
+| Framework | Runners | How the budget reaches it |
+|---|---|---|
+| proptest | `cargo test`, `cargo nextest` | `PROPTEST_CASES`, `PROPTEST_RNG_SEED`, and `PROPTEST_DISABLE_FAILURE_PERSISTENCE` (no `proptest-regressions/` files) |
+| quickcheck | `cargo test`, `cargo nextest` | `QUICKCHECK_TESTS`; quickcheck takes no seed, so its findings say `seed: null` |
+| Hypothesis | `pytest` | A plugin Cupel writes under `.cupel/` loads a settings profile with `max_examples` the budget, unpinned and without an example database, after the project's conftests; the seed is `--hypothesis-seed`, and Hypothesis's files stay under `.cupel/` |
+| fast-check | `vitest`, `jest` | A setup file under `.cupel/` calls `fc.configureGlobal` with `numRuns` and `seed`; a configuration file beside it, passed as `--config`, loads the project's own vitest or jest configuration and appends that setup file to its setup files |
+
+A property whose own code fixes its count or seed (`ProptestConfig::with_cases`, `@settings(max_examples=…)`, `fc.assert(p, { numRuns })`) keeps them. A project whose everyday suite runs few cases with a pinned seed is the usual case, and the one `gen.property` exists for: on the fixtures, the suite's ten pinned cases pass and Cupel's thousand find the bug:
+
+```
+$ cupel check --only gen.property --seed 3 --format text
+cupel check: pass (exit 0)
+
+checks
+  gen.property  fail     tier 4 · standard · score 1 falsified (n 1) · metrics falsified 1, missing 1, properties 1 · 2 findings · 1027 ms
+
+fail (1)
+  gen.property
+    `test_digits_counts_decimal_places` is falsified by `n=100000`
+      fnd_2341b0 · property.falsified · tier 4 · confidence 0.95
+      at tests/test_digits.py:7:1-8:36
+      evidence: cases 1000 · counterexample "n=100000" · framework "hypothesis" · runner "tool.pytest" · seed 3 · test "tests/test_digits.py::test_digits_counts…" (full: cupel explain fnd_2341b0)
+      repro: cupel check --only gen.property --paths tests/test_digits.py --seed 3 --cases 1000
+
+info (1)
+  gen.property
+    `units.percent.clamp_percent` has no property test
+      fnd_7307dd · property.missing · tier 4 · confidence 0.5
+      at src/units/percent.py:1:1-3:35
+        nearest_test_file: tests/test_percent.py
+```
+
+With no gate the run passes (exit 0) while the check fails; a `[gate]` rule such as `"gen.property.falsified" = "== 0"` makes it exit 1.
+
+`property.falsified` gives the framework, the runner, the counterexample, the seed, and the case budget as evidence, and a `repro` that runs the same property with the same seed and budget. A property that failed without a counterexample (it errored before any case ran) is reported the same way with `counterexample: null` and lower confidence.
+
+`--scaffold` turns each `property.missing` into a skipped stub that names the function, generates one input per parameter (typed by the function's signature where the language's table maps the type), and calls it, for you to state the property and remove the skip marker: a Hypothesis test appended to the source's nearest test file in Python, a fast-check test in JavaScript and TypeScript (imported the way the file imports), and an ignored proptest test in an inline `#[cfg(test)]` module of the function's own file in Rust, where a parameter type the table does not map (a struct, a generic) gets no stub. Without `--write` nothing is written and `plan.would_write` holds each file's diff; with it the stubs are written, a file's header lines once, and a function already stubbed is left alone.
+
+```sh
+cupel check --only gen.property --scaffold          # preview the stubs
+cupel check --only gen.property --scaffold --write  # write them
+```
 
 ## Coverage
 
