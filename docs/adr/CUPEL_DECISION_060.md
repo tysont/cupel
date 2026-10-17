@@ -1,6 +1,6 @@
 # CUPEL_DECISION_060: Check metrics and gate evaluation
 
-**Date:** 2026-10-14 · **Status:** accepted; the `combine_metric` signature of §2 superseded by [063](CUPEL_DECISION_063.md) · **Phase:** P2.9
+**Date:** 2026-10-14 · **Status:** accepted; the `combine_metric` signature of §2 superseded by [063](CUPEL_DECISION_063.md), the `no-breaking` clause of §6 by [101](CUPEL_DECISION_101.md) · **Phase:** P2.9
 
 ## Context
 
