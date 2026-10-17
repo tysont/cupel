@@ -221,6 +221,33 @@ fn git(dir: &Path, args: &[&str]) {
 /// The fixture of `lang` committed and tagged `v1` with `file` as `old` (rounding toward zero),
 /// then changed back to the fixture's `quarter`, and compared with the `ref` oracle `v1`.
 fn assert_ref_divergence(lang: &str, file: &str, old: &str) {
+    let (dir, results) = against_ref(lang, file, old);
+    let Some(results) = results else {
+        return;
+    };
+    let results = results.unwrap();
+    let commit = results
+        .oracle
+        .as_ref()
+        .and_then(|oracle| oracle.commit.clone());
+    assert_eq!(commit.map(|sha| sha.len()), Some(40), "{results:#?}");
+    assert_quarter_diverges_at_minus_one(&results.entries[0], 2, 10);
+    assert_eq!(
+        fs::read_to_string(dir.path().join(file)).unwrap(),
+        now_of(lang)
+    );
+}
+
+/// The engine's comparison of the fixture of `lang` with the commit `v1`, at which `file` was
+/// `old`, with the directory it ran in.
+fn against_ref(
+    lang: &str,
+    file: &str,
+    old: &str,
+) -> (
+    tempfile::TempDir,
+    Option<cupel_core::Result<DivergenceResults>>,
+) {
     let dir = tempfile::tempdir().unwrap();
     let (table, _) = fixture(lang, dir.path());
     let now = fs::read_to_string(dir.path().join(file)).unwrap();
@@ -242,19 +269,31 @@ fn assert_ref_divergence(lang: &str, file: &str, old: &str) {
         },
     };
     let ctx = run_ctx(lang, dir.path(), &table, Some(oracle), Some(10));
-    let Some(results) = compared(lang, &ctx) else {
+    let results = compared(lang, &ctx);
+    (dir, results)
+}
+
+#[test]
+fn an_entry_the_commit_lacks_is_skipped_naming_the_commit() {
+    let (_dir, results) = against_ref(
+        "python",
+        "quarter.py",
+        "def half(cents: int) -> int:\n    return cents // 2\n",
+    );
+    let Some(results) = results else {
         return;
     };
     let results = results.unwrap();
-    let commit = results
-        .oracle
-        .as_ref()
-        .and_then(|oracle| oracle.commit.clone());
-    assert_eq!(commit.map(|sha| sha.len()), Some(40), "{results:#?}");
-    assert_quarter_diverges_at_minus_one(&results.entries[0], 2, 10);
+    let commit = results.oracle.unwrap().commit.unwrap();
+    let skipped = results.entries[0].skipped.clone().unwrap();
+    let prefix = format!("at {}: the harness did not start (exit 1): ", &commit[..12]);
     assert_eq!(
-        fs::read_to_string(dir.path().join(file)).unwrap(),
-        now_of(lang)
+        (
+            skipped.starts_with(&prefix),
+            skipped.ends_with("has no attribute 'quarter'")
+        ),
+        (true, true),
+        "{skipped}"
     );
 }
 
@@ -511,14 +550,25 @@ fn an_oracle_that_cannot_be_reached_stops_the_comparison() {
     let (Some(missing), Some(unknown)) = (missing, unknown) else {
         return;
     };
-    assert!(
-        matches!(&missing, Err(Error::Process { program, message })
-            if program == "sh" && message.starts_with("the oracle's program is not installed")),
-        "{missing:?}"
-    );
-    assert!(
-        matches!(&unknown, Err(Error::Process { program, .. }) if program == "git"),
-        "{unknown:?}"
+    let failed = |outcome: cupel_core::Result<DivergenceResults>| match outcome {
+        Err(Error::Process { program, message }) => (
+            program,
+            message.split(':').next().unwrap_or_default().to_owned(),
+        ),
+        other => panic!("{other:?}"),
+    };
+    assert_eq!(
+        [failed(missing), failed(unknown)],
+        [
+            (
+                "sh".to_owned(),
+                "the oracle's program is not installed".to_owned()
+            ),
+            (
+                "git".to_owned(),
+                "the repository is not a git work tree".to_owned()
+            ),
+        ]
     );
 }
 

@@ -125,6 +125,16 @@ pub enum Problem {
     Fatal(Error),
 }
 
+impl Problem {
+    /// This problem as it happened at `place`, such as a commit: a skip's reason names it.
+    pub fn at(self, place: &str) -> Self {
+        match self {
+            Self::Skip(reason) => Self::Skip(format!("at {place}: {reason}")),
+            Self::Fatal(error) => Self::Fatal(error),
+        }
+    }
+}
+
 /// A harness ready to answer batches of inputs.
 pub struct Prepared {
     process: Process,

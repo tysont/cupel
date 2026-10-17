@@ -40,46 +40,40 @@ mod tests {
 
     #[test]
     fn returned_values_agree_as_text_or_as_json() {
-        assert!(agree(
-            &returned("[1, 2]"),
-            &returned("[1,2]"),
-            OracleKind::Ref
-        ));
-        assert!(agree(
-            &returned(r#"{"a":1,"b":2}"#),
-            &returned(r#"{"b":2,"a":1}"#),
-            OracleKind::Ref
-        ));
-        assert!(!agree(&returned("-1"), &returned("0"), OracleKind::Command));
+        let pairs = [
+            ("[1, 2]", "[1,2]"),
+            (r#"{"a":1,"b":2}"#, r#"{"b":2,"a":1}"#),
+            ("-1", "0"),
+        ];
+        let agreed =
+            pairs.map(|(ours, theirs)| agree(&returned(ours), &returned(theirs), OracleKind::Ref));
+        assert_eq!(agreed, [true, true, false]);
     }
 
     #[test]
     fn a_json_string_matches_a_commands_bare_text_but_not_a_refs() {
-        assert!(agree(
-            &returned(r#""low""#),
-            &returned("low"),
-            OracleKind::Command
-        ));
-        assert!(!agree(
-            &returned(r#""low""#),
-            &returned("low"),
-            OracleKind::Ref
-        ));
+        let agreed = [OracleKind::Command, OracleKind::Ref]
+            .map(|kind| agree(&returned(r#""low""#), &returned("low"), kind));
+        assert_eq!(agreed, [true, false]);
     }
 
     #[test]
     fn errors_agree_with_a_commands_errors_and_with_a_refs_same_error() {
         let raised = |text: &str| Answer::Raised(text.to_owned());
         let crashed = Answer::Crashed("exit 1".to_owned());
-        assert!(agree(
-            &raised("ValueError: x"),
-            &raised("exit 1: no"),
-            OracleKind::Command
-        ));
-        assert!(agree(&crashed, &raised("exit 1: no"), OracleKind::Command));
-        assert!(agree(&raised("E: x"), &raised("E: x"), OracleKind::Ref));
-        assert!(!agree(&raised("E: x"), &raised("E: y"), OracleKind::Ref));
-        assert!(!agree(&crashed, &raised("E: x"), OracleKind::Ref));
-        assert!(!agree(&raised("E: x"), &returned("0"), OracleKind::Command));
+        let cases = [
+            (
+                raised("ValueError: x"),
+                raised("exit 1: no"),
+                OracleKind::Command,
+            ),
+            (crashed.clone(), raised("exit 1: no"), OracleKind::Command),
+            (raised("E: x"), raised("E: x"), OracleKind::Ref),
+            (raised("E: x"), raised("E: y"), OracleKind::Ref),
+            (crashed, raised("E: x"), OracleKind::Ref),
+            (raised("E: x"), returned("0"), OracleKind::Command),
+        ];
+        let agreed = cases.map(|(ours, theirs, kind)| agree(&ours, &theirs, kind));
+        assert_eq!(agreed, [true, true, true, false, false, false]);
     }
 }

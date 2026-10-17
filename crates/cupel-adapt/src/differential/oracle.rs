@@ -114,8 +114,8 @@ fn git_error(message: &str) -> Error {
 
 /// What answers for the oracle in one entry's comparison.
 pub enum Side<'a> {
-    /// The entry's harness in the ref's tree.
-    Harness(Prepared),
+    /// The entry's harness in the tree of the ref's `commit`.
+    Harness { prepared: Prepared, commit: &'a str },
     /// The command, run in the repository root.
     Command { cmd: &'a str, root: &'a Path },
 }
@@ -138,7 +138,9 @@ impl Side<'_> {
         cancel: &Cancellation,
     ) -> Result<Disagreement, Problem> {
         let theirs: Vec<Answer> = match self {
-            Self::Harness(prepared) => prepared.answers(inputs, cancel)?,
+            Self::Harness { prepared, commit } => prepared
+                .answers(inputs, cancel)
+                .map_err(|problem| problem.at(short(commit)))?,
             Self::Command { cmd, root } => {
                 for (at, (input, ours)) in inputs.iter().zip(ours).enumerate() {
                     let answer = run_command(cmd, root, input, cancel)?;
@@ -165,6 +167,11 @@ impl Side<'_> {
                 .map(|(at, (_, theirs))| (at, theirs)),
         })
     }
+}
+
+/// A commit as a reason names it.
+pub fn short(commit: &str) -> &str {
+    &commit[..commit.len().min(12)]
 }
 
 /// The command's answer to `input`: its output on exit 0, its exit and error output otherwise.

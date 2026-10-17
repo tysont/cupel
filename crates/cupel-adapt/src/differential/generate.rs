@@ -277,14 +277,16 @@ mod tests {
     }
 
     #[test]
-    fn random_integers_stay_in_their_range() {
+    fn random_values_stay_in_their_type() {
         let small = Ty::Int { min: -3, max: 3 };
-        let cases = inputs(&[small], &mut Rng::for_entry(9, "e"), 500);
-        assert!(
-            cases
-                .iter()
-                .all(|case| case[0].as_i64().is_some_and(|n| (-3..=3).contains(&n)))
-        );
+        let cases = inputs(&[small, Ty::Float], &mut Rng::for_entry(9, "e"), 500);
+        let strays = cases
+            .iter()
+            .filter(|case| {
+                !case[0].as_i64().is_some_and(|n| (-3..=3).contains(&n)) || !case[1].is_f64()
+            })
+            .count();
+        assert_eq!((cases.len(), strays), (500, 0));
     }
 
     #[test]

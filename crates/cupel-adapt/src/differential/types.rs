@@ -100,16 +100,28 @@ fn annotated(signature: &str) -> Result<Vec<Option<&str>>, Unsupported> {
         .collect()
 }
 
-/// A Python signature, such as `(_: list[int], _) -> int`.
-pub fn python(signature: &str) -> Result<Signature, Unsupported> {
+/// The parameters of `signature`, each annotation read by `typed`; an unannotated parameter is
+/// `untyped`, or makes the whole signature unsupported without one.
+fn parameters(
+    signature: &str,
+    untyped: Option<&Ty>,
+    typed: fn(&str) -> Result<Ty, Unsupported>,
+) -> Result<Signature, Unsupported> {
     let params = annotated(signature)?
         .into_iter()
-        .map(|ty| match ty {
-            None => Ok(param(Ty::Any, "")),
-            Some(text) => python_type(text).map(|ty| param(ty, text)),
+        .map(|annotation| match annotation {
+            Some(text) => typed(text).map(|ty| param(ty, text)),
+            None => untyped
+                .map(|ty| param(ty.clone(), ""))
+                .ok_or_else(|| signature.to_owned()),
         })
         .collect::<Result<_, _>>()?;
     Ok(Signature::of(params))
+}
+
+/// A Python signature, such as `(_: list[int], _) -> int`.
+pub fn python(signature: &str) -> Result<Signature, Unsupported> {
+    parameters(signature, Some(&Ty::Any), python_type)
 }
 
 fn python_type(text: &str) -> Result<Ty, Unsupported> {
@@ -141,14 +153,7 @@ fn python_type(text: &str) -> Result<Ty, Unsupported> {
 /// A TypeScript signature, such as `(_: number[], _: string): boolean`; an untyped parameter is
 /// `any`, so a JavaScript signature (`(_, _)`) parses the same way.
 pub fn ecma(signature: &str) -> Result<Signature, Unsupported> {
-    let params = annotated(signature)?
-        .into_iter()
-        .map(|ty| match ty {
-            None => Ok(param(Ty::Any, "")),
-            Some(text) => ecma_type(text).map(|ty| param(ty, text)),
-        })
-        .collect::<Result<_, _>>()?;
-    Ok(Signature::of(params))
+    parameters(signature, Some(&Ty::Any), ecma_type)
 }
 
 fn ecma_type(text: &str) -> Result<Ty, Unsupported> {
@@ -229,14 +234,7 @@ fn go_type(text: &str) -> Result<Ty, Unsupported> {
 
 /// A Rust signature, such as `(_: &[i64], _: &str) -> Vec<String>`.
 pub fn rust(signature: &str) -> Result<Signature, Unsupported> {
-    let params = annotated(signature)?
-        .into_iter()
-        .map(|ty| {
-            let text = ty.ok_or_else(|| signature.to_owned())?;
-            rust_type(text).map(|ty| param(ty, text))
-        })
-        .collect::<Result<_, _>>()?;
-    Ok(Signature::of(params))
+    parameters(signature, None, rust_type)
 }
 
 /// What a Rust harness decodes a parameter into, and whether the call passes a reference to it:

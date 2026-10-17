@@ -299,13 +299,8 @@ impl Comparer<'_> {
                 let site = self.site(tree, "ref", index, self.scratch.join("target"));
                 self.language
                     .prepare(call, &site)
-                    .map(Side::Harness)
-                    .map_err(|problem| match problem {
-                        Problem::Skip(reason) => {
-                            Problem::Skip(format!("at {}: {reason}", short(commit)))
-                        }
-                        Problem::Fatal(error) => Problem::Fatal(error),
-                    })
+                    .map(|prepared| Side::Harness { prepared, commit })
+                    .map_err(|problem| problem.at(oracle::short(commit)))
             }
             Opened::Command { cmd, .. } => Ok(Side::Command {
                 cmd,
@@ -353,9 +348,4 @@ impl Comparer<'_> {
         }
         Ok(divergence)
     }
-}
-
-/// A commit as a reason names it.
-fn short(commit: &str) -> &str {
-    &commit[..commit.len().min(12)]
 }

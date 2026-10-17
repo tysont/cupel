@@ -247,7 +247,7 @@ fn a_producer_gets_the_registered_runners() {
 }
 
 #[test]
-fn a_producer_gets_the_runs_depth_changed_lines_and_case_budget() {
+fn a_producer_gets_the_runs_depth_and_changed_lines() {
     assert_eq!(
         seen().focus,
         Some(Focus {
