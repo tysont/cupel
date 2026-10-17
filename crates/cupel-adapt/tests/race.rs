@@ -2,16 +2,18 @@
 // ABOUTME: fixtures report exactly their planted race and undefined behavior, narrowed to the scope, writing nothing there.
 mod support;
 
-use std::path::Path;
-
 use cupel_core::{
     Availability, Cancellation, Ctx, FactKind, RaceKind, RaceReports, RunStatus, Scope,
 };
 use serde_json::json;
 
-/// The reports of the detector `id` for `lang` on the repository at `root`, over `files`;
-/// `None` (reported as skipped) when the detector is not ready here.
-fn detect(id: &str, lang: &str, root: &Path, files: &[&str]) -> Option<RaceReports> {
+/// The reports of the detector `id` for `lang` on a copy of its conc.race fixture, over
+/// `files`, having checked the run wrote nothing in the copy outside `.cupel/`; `None`
+/// (reported as skipped) when the detector is not ready here.
+fn detect(id: &str, lang: &str, files: &[&str]) -> Option<RaceReports> {
+    let fixture = support::own_fixture("conc.race", lang);
+    let root = fixture.path();
+    let before = support::tree(root);
     let producer = support::producer(support::shared_registry(), FactKind::RaceReports, id, lang);
     let ctx = support::produce_ctx(root, lang, Cancellation::new());
     if let Availability::MissingTool { name, .. } = producer.availability(&ctx.ctx) {
@@ -20,6 +22,7 @@ fn detect(id: &str, lang: &str, root: &Path, files: &[&str]) -> Option<RaceRepor
     }
     let scope = Scope::of_files(files.iter().map(|file| (*file).to_owned()).collect());
     let fact = producer.produce(&ctx, &scope, &mut Vec::new()).unwrap();
+    assert_eq!(support::tree(root), before, "{id} wrote in the tree");
     Some(fact.downcast::<RaceReports>().unwrap())
 }
 
@@ -50,28 +53,9 @@ fn summary(reports: &RaceReports) -> serde_json::Value {
     json!(reports)
 }
 
-/// Files under `root` other than the detectors' own cache.
-fn files(root: &Path) -> Vec<String> {
-    let mut found = Vec::new();
-    for entry in ignore::WalkBuilder::new(root)
-        .hidden(false)
-        .build()
-        .flatten()
-    {
-        let relative = entry.path().strip_prefix(root).unwrap().to_string_lossy();
-        if entry.path().is_file() && !relative.starts_with(".cupel") {
-            found.push(relative.into_owned());
-        }
-    }
-    found.sort();
-    found
-}
-
 #[test]
 fn go_race_reports_the_write_and_read_of_the_fixture_and_nothing_outside_the_scope() {
-    let fixture = support::own_fixture("conc.race", "go");
-    let before = files(fixture.path());
-    let Some(reports) = detect("tool.go-race", "go", fixture.path(), &["tally.go"]) else {
+    let Some(reports) = detect("tool.go-race", "go", &["tally.go"]) else {
         return;
     };
     assert_eq!(reports.runs.len(), 1);
@@ -97,16 +81,13 @@ fn go_race_reports_the_write_and_read_of_the_fixture_and_nothing_outside_the_sco
         ]])
     );
     assert_eq!(reports.reports[0].message, "data race");
-    let elsewhere = detect("tool.go-race", "go", fixture.path(), &["other.go"]).unwrap();
+    let elsewhere = detect("tool.go-race", "go", &["other.go"]).unwrap();
     assert_eq!(elsewhere.reports, []);
-    assert_eq!(files(fixture.path()), before);
 }
 
 #[test]
 fn miri_reports_the_race_and_the_out_of_bounds_read_of_the_fixture() {
-    let fixture = support::own_fixture("conc.race", "rust");
-    let before = files(fixture.path());
-    let Some(reports) = detect("tool.miri", "rust", fixture.path(), &["src/lib.rs"]) else {
+    let Some(reports) = detect("tool.miri", "rust", &["src/lib.rs"]) else {
         return;
     };
     assert_eq!(reports.runs[0].status, RunStatus::Ran, "{:?}", reports.runs);
@@ -138,13 +119,11 @@ fn miri_reports_the_race_and_the_out_of_bounds_read_of_the_fixture() {
             ],
         ])
     );
-    assert_eq!(files(fixture.path()), before);
 }
 
 #[test]
 fn thread_sanitizer_reports_the_race_of_the_fixture_where_its_runtime_runs() {
-    let fixture = support::own_fixture("conc.race", "rust");
-    let Some(reports) = detect("tool.tsan", "rust", fixture.path(), &["src/lib.rs"]) else {
+    let Some(reports) = detect("tool.tsan", "rust", &["src/lib.rs"]) else {
         return;
     };
     let run = &reports.runs[0];

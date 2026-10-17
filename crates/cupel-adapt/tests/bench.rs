@@ -2,10 +2,7 @@
 // ABOUTME: sample counts, placement from Symbols, the base commit measured in an export, failures, and a clean tree.
 mod support;
 
-use std::collections::BTreeSet;
 use std::fs;
-use std::path::Path;
-use std::process::Command;
 
 use cupel_core::{
     Availability, BenchSamples, Cancellation, CostClass, FactKind, LangId, ProduceCtx, RunStatus,
@@ -26,7 +23,14 @@ fn fixture(lang: &str, config: Value) -> (tempfile::TempDir, ProduceCtx) {
     (dir, ctx)
 }
 
-/// The producer `id` of `lang`, when its tool is installed; says which is not otherwise.
+/// The fixture of `lang` and its context with `config`, when the producer `id` of `lang` is
+/// ready there; says why not otherwise.
+fn ready_fixture(id: &str, lang: &str, config: Value) -> Option<(tempfile::TempDir, ProduceCtx)> {
+    let (dir, ctx) = fixture(lang, config);
+    ready(id, lang, &ctx).then_some((dir, ctx))
+}
+
+/// Whether the producer `id` of `lang` is ready; says why not otherwise.
 fn ready(id: &str, lang: &str, ctx: &ProduceCtx) -> bool {
     let producer = support::producer(support::shared_registry(), FactKind::BenchSamples, id, lang);
     match producer.availability(&ctx.ctx) {
@@ -46,6 +50,16 @@ fn produce(id: &str, lang: &str, ctx: &ProduceCtx) -> BenchSamples {
         .unwrap()
 }
 
+/// What the producer `id` of `lang` measures in its fixture with `config`, having checked it
+/// wrote nothing there outside `.cupel/`; `None` (reported as skipped) when it is not ready.
+fn measure(id: &str, lang: &str, config: Value) -> Option<BenchSamples> {
+    let (dir, ctx) = ready_fixture(id, lang, config)?;
+    let before = support::tree(dir.path());
+    let samples = produce(id, lang, &ctx);
+    assert_eq!(support::tree(dir.path()), before, "{id} wrote in the tree");
+    Some(samples)
+}
+
 /// (name, unit, samples) of every benchmark.
 fn measured(samples: &BenchSamples) -> Vec<(String, String, usize)> {
     samples
@@ -55,51 +69,11 @@ fn measured(samples: &BenchSamples) -> Vec<(String, String, usize)> {
         .collect()
 }
 
-/// Every path under `root` but `.cupel/`, relative to it.
-fn files(root: &Path) -> BTreeSet<String> {
-    walkdir(root, root)
-}
-
-fn walkdir(root: &Path, dir: &Path) -> BTreeSet<String> {
-    let mut found = BTreeSet::new();
-    for entry in fs::read_dir(dir).unwrap().flatten() {
-        let path = entry.path();
-        let relative = path
-            .strip_prefix(root)
-            .unwrap()
-            .to_string_lossy()
-            .into_owned();
-        if relative == ".cupel" {
-            continue;
-        }
-        if path.is_dir() {
-            found.extend(walkdir(root, &path));
-        }
-        found.insert(relative);
-    }
-    found
-}
-
-fn git(dir: &Path, args: &[&str]) -> String {
-    let output = Command::new("git")
-        .args(["-c", "user.name=t", "-c", "user.email=t@example.com"])
-        .args(["-c", "commit.gpgsign=false"])
-        .args(args)
-        .current_dir(dir)
-        .output()
-        .expect("git runs");
-    assert!(output.status.success(), "git {args:?}");
-    String::from_utf8(output.stdout).unwrap().trim().to_owned()
-}
-
 #[test]
 fn go_benchmarks_are_measured_per_unit_and_placed_at_their_function() {
-    let (dir, ctx) = fixture("go", json!({}));
-    if !ready("tool.go-bench", "go", &ctx) {
+    let Some(samples) = measure("tool.go-bench", "go", json!({})) else {
         return;
-    }
-    let before = files(dir.path());
-    let samples = produce("tool.go-bench", "go", &ctx);
+    };
     let name = "example.com/units.BenchmarkSum".to_owned();
     assert_eq!(
         measured(&samples),
@@ -114,19 +88,17 @@ fn go_benchmarks_are_measured_per_unit_and_placed_at_their_function() {
     );
     assert_eq!(samples.benchmarks[2].samples, [0.0; 5]);
     assert_eq!(samples.base, None);
-    assert_eq!(files(dir.path()), before);
 }
 
 #[test]
 fn under_a_range_the_base_commit_is_measured_in_an_export() {
-    let (dir, mut ctx) = fixture("go", json!({}));
-    if !ready("tool.go-bench", "go", &ctx) {
+    let Some((dir, mut ctx)) = ready_fixture("tool.go-bench", "go", json!({})) else {
         return;
-    }
-    git(dir.path(), &["init", "--quiet"]);
-    git(dir.path(), &["add", "--all"]);
-    git(dir.path(), &["commit", "--quiet", "-m", "base"]);
-    let base = git(dir.path(), &["rev-parse", "HEAD"]);
+    };
+    support::git(dir.path(), &["init", "--quiet"]);
+    support::git(dir.path(), &["add", "--all"]);
+    support::git(dir.path(), &["commit", "--quiet", "-m", "base"]);
+    let base = support::git(dir.path(), &["rev-parse", "HEAD"]);
     let code = dir.path().join("sum.go");
     let text = fs::read_to_string(&code).unwrap();
     fs::write(
@@ -156,10 +128,9 @@ fn under_a_range_the_base_commit_is_measured_in_an_export() {
 
 #[test]
 fn a_base_commit_git_cannot_export_fails_the_base_side_only() {
-    let (_dir, mut ctx) = fixture("go", json!({}));
-    if !ready("tool.go-bench", "go", &ctx) {
+    let Some((_dir, mut ctx)) = ready_fixture("tool.go-bench", "go", json!({})) else {
         return;
-    }
+    };
     ctx.focus.base = Some("0000000".to_owned());
     let samples = produce("tool.go-bench", "go", &ctx);
     let base = samples.base.unwrap();
@@ -178,10 +149,9 @@ fn a_base_commit_git_cannot_export_fails_the_base_side_only() {
 
 #[test]
 fn a_go_build_failure_is_a_failed_run_with_its_output() {
-    let (dir, ctx) = fixture("go", json!({}));
-    if !ready("tool.go-bench", "go", &ctx) {
+    let Some((dir, ctx)) = ready_fixture("tool.go-bench", "go", json!({})) else {
         return;
-    }
+    };
     fs::write(
         dir.path().join("broken.go"),
         "package units\n\nfunc Broken( {\n",
@@ -196,12 +166,9 @@ fn a_go_build_failure_is_a_failed_run_with_its_output() {
 
 #[test]
 fn criterion_benchmarks_are_read_from_a_scratch_criterion_home() {
-    let (dir, ctx) = fixture("rust", json!({}));
-    if !ready("tool.criterion", "rust", &ctx) {
+    let Some(samples) = measure("tool.criterion", "rust", json!({})) else {
         return;
-    }
-    let before = files(dir.path());
-    let samples = produce("tool.criterion", "rust", &ctx);
+    };
     assert_eq!(
         measured(&samples),
         [("sum".to_owned(), "ns".to_owned(), 10)],
@@ -209,17 +176,13 @@ fn criterion_benchmarks_are_read_from_a_scratch_criterion_home() {
         samples.runs
     );
     assert!(samples.benchmarks[0].samples.iter().all(|ns| *ns > 0.0));
-    assert_eq!(files(dir.path()), before);
 }
 
 #[test]
 fn pytest_benchmarks_are_named_by_node_id_and_take_the_asked_rounds() {
-    let (dir, ctx) = fixture("python", json!({}));
-    if !ready("tool.pytest-benchmark", "python", &ctx) {
+    let Some(samples) = measure("tool.pytest-benchmark", "python", json!({})) else {
         return;
-    }
-    let before = files(dir.path());
-    let samples = produce("tool.pytest-benchmark", "python", &ctx);
+    };
     assert_eq!(
         measured(&samples),
         [(
@@ -234,7 +197,6 @@ fn pytest_benchmarks_are_named_by_node_id_and_take_the_asked_rounds() {
         samples.benchmarks[0].file.as_deref(),
         Some("tests/test_bench.py")
     );
-    assert_eq!(files(dir.path()), before);
 }
 
 #[test]
@@ -249,7 +211,7 @@ fn hyperfine_times_each_configured_command() {
         if !ready("tool.hyperfine", lang, &ctx) {
             return;
         }
-        let before = files(dir.path());
+        let before = support::tree(dir.path());
         let samples = produce("tool.hyperfine", lang, &ctx);
         assert_eq!(
             measured(&samples),
@@ -257,16 +219,19 @@ fn hyperfine_times_each_configured_command() {
             "{lang}: {:?}",
             samples.runs
         );
-        assert_eq!(files(dir.path()), before, "{lang}");
+        assert_eq!(support::tree(dir.path()), before, "{lang}");
     }
 }
 
 #[test]
 fn a_command_hyperfine_cannot_run_is_a_failed_run() {
-    let (_dir, ctx) = fixture("javascript", json!({"bench_commands": ["node missing.js"]}));
-    if !ready("tool.hyperfine", "javascript", &ctx) {
+    let Some((_dir, ctx)) = ready_fixture(
+        "tool.hyperfine",
+        "javascript",
+        json!({"bench_commands": ["node missing.js"]}),
+    ) else {
         return;
-    }
+    };
     let samples = produce("tool.hyperfine", "javascript", &ctx);
     assert!(samples.benchmarks.is_empty());
     assert_eq!(samples.runs[0].status, RunStatus::Failed);

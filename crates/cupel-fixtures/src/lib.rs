@@ -52,5 +52,5 @@ pub use cupel_plugin::evidence;
 pub use golden::{GoldenError, GoldenMode, Goldens, assert_golden, canonical_json};
 pub use redact::{redact, redact_sarif};
 pub use repos::{copy_repo, repo_path};
-pub use run::{Outcome, run_cupel};
+pub use run::{Outcome, run_cupel, run_cupel_measuring};
 pub use sarif::sarif_problems;

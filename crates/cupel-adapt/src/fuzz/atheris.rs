@@ -92,11 +92,7 @@ impl Fuzzer for Atheris {
     }
 
     fn failure(&self, root: &Root<'_>, output: &str) -> (String, Option<Location>) {
-        exception(&root.ctx.ctx.root, output).unwrap_or_else(|| {
-            let message =
-                libfuzzer::error(output).unwrap_or_else(|| "the target crashed".to_owned());
-            (message, None)
-        })
+        libfuzzer::reported(exception(&root.ctx.ctx.root, output), output)
     }
 
     fn reproduce(&self, _: &Root<'_>, target: &Found, input: &str) -> String {

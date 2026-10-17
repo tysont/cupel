@@ -7,7 +7,7 @@ use cupel_core::{
 };
 
 use super::cargo::{NIGHTLY, failure, progress};
-use super::report::{Raw, RawFrame, RawStack, Read, after, place};
+use super::report::{Raw, RawFrame, RawStack, Read, access, after, place};
 use super::{Invocation, Spec};
 
 const ID: &str = "tool.tsan";
@@ -138,7 +138,7 @@ impl Warning {
     }
 
     fn read(&mut self, line: &str) {
-        if let Some(access) = access(line) {
+        if let Some(access) = access(line, " of size ") {
             self.raw.stacks.push(RawStack {
                 access: Some(access),
                 frames: Vec::new(),
@@ -155,17 +155,6 @@ impl Warning {
             self.in_access = false;
         }
     }
-}
-
-/// The access an access header names (`Write of size 4 at 0x… by thread T2:`, `Previous
-/// atomic read of size 8 at …`): its words before ` of size`, lowercased, without `previous`.
-fn access(line: &str) -> Option<String> {
-    if !line.ends_with(':') || !line.contains(" at 0x") || !line.contains(" by ") {
-        return None;
-    }
-    let (words, _) = line.split_once(" of size ")?;
-    let words = words.to_lowercase();
-    Some(words.strip_prefix("previous ").unwrap_or(&words).to_owned())
 }
 
 /// A frame line, `#0 tally::publish::{{closure}} /repo/src/lib.rs:9:49 (race-1a2b+0x1234)`; a
@@ -190,14 +179,7 @@ mod tests {
     use cupel_fixtures::Capture;
 
     use super::*;
-
-    fn merged(output: &str) -> Captured {
-        Captured {
-            exit_code: Some(66),
-            stdout: output.to_owned(),
-            stderr: String::new(),
-        }
-    }
+    use crate::race::cargo::merged;
 
     #[test]
     fn a_data_race_is_its_two_accesses_without_the_threads_creation() {

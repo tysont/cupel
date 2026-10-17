@@ -15,8 +15,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    CostClass, Error, Event, EventSink, FactKind, Facts, Finding, Manifest, Measurement, MetricPer,
-    RunId, Scope, Score, SymbolHash, Tier, Writer,
+    CostClass, Error, Event, EventSink, Fact, FactKind, Facts, Finding, Manifest, Measurement,
+    MetricPer, RunId, Scope, Score, SymbolHash, Tier, Writer,
 };
 use serde_json::Value;
 
@@ -151,6 +151,16 @@ pub fn recorded(
     let mut recorded = Recorded::default();
     let result = check.run(&ctx, facts, &plan, &mut recorded)?;
     Ok((result, recorded))
+}
+
+/// The result and findings of the check `id` run over `fact` alone, in a scope of `src/lib.rs`.
+pub fn run_over<F: Fact>(id: &str, fact: F) -> (CheckResult, Vec<Finding>) {
+    let check = check(id);
+    let mut facts = Facts::for_manifest(check.manifest());
+    facts.insert(fact).unwrap();
+    let scope = Scope::of_files(vec!["src/lib.rs".to_owned()]);
+    let (result, recorded) = recorded(check, &facts, scope, serde_json::json!({})).unwrap();
+    (result, recorded.findings)
 }
 
 /// The setting `check` names, and the settings it lists as valid, when planning with `config`

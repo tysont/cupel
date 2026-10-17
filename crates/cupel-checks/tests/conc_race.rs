@@ -3,9 +3,8 @@
 mod support;
 
 use cupel_core::{
-    ActionKind, CheckId, CheckResult, CheckStatus, CostClass, FactKind, Facts, Finding, FindingId,
-    MetricPer, ProducerId, RaceFrame, RaceKind, RaceReport, RaceReports, RaceStack, RootRun,
-    RunStatus, Scope, Severity,
+    ActionKind, CheckId, CheckStatus, CostClass, FactKind, FindingId, MetricPer, ProducerId,
+    RaceFrame, RaceKind, RaceReport, RaceReports, RaceStack, RootRun, RunStatus, Severity,
 };
 use serde_json::json;
 use support::{Shape, score};
@@ -77,18 +76,9 @@ fn reports(runs: Vec<RootRun>, reports: Vec<RaceReport>) -> RaceReports {
     }
 }
 
-fn run(fact: RaceReports) -> (CheckResult, Vec<Finding>) {
-    let check = support::check(ID);
-    let mut facts = Facts::for_manifest(check.manifest());
-    facts.insert(fact).unwrap();
-    let scope = Scope::of_files(vec!["src/lib.rs".to_owned()]);
-    let (result, recorded) = support::recorded(check, &facts, scope, json!({})).unwrap();
-    (result, recorded.findings)
-}
-
 #[test]
 fn a_data_race_is_a_failing_finding_at_its_first_access_with_the_stacks_as_evidence() {
-    let (result, findings) = run(reports(vec![ran(".")], vec![race(12)]));
+    let (result, findings) = support::run_over(ID, reports(vec![ran(".")], vec![race(12)]));
     assert_eq!(findings.len(), 1);
     let finding = &findings[0];
     assert_eq!(
@@ -136,7 +126,8 @@ fn a_data_race_is_a_failing_finding_at_its_first_access_with_the_stacks_as_evide
 #[test]
 fn undefined_behavior_is_a_failing_finding_titled_by_its_message() {
     let message = "memory access failed: attempting to access 1 byte, but got alloc+0x4";
-    let (result, findings) = run(reports(vec![ran(".")], vec![undefined(message)]));
+    let (result, findings) =
+        support::run_over(ID, reports(vec![ran(".")], vec![undefined(message)]));
     let finding = &findings[0];
     assert_eq!(
         (finding.kind.as_str(), finding.severity),
@@ -161,7 +152,7 @@ fn undefined_behavior_is_a_failing_finding_titled_by_its_message() {
 #[test]
 fn a_report_keeps_its_id_when_its_lines_move_and_repeats_are_told_apart() {
     let id_of = |report: Vec<RaceReport>| {
-        let (_, findings) = run(reports(vec![ran(".")], report));
+        let (_, findings) = support::run_over(ID, reports(vec![ran(".")], report));
         findings.into_iter().map(|f| f.id).collect::<Vec<_>>()
     };
     assert_eq!(id_of(vec![race(12)]), id_of(vec![race(40)]));
@@ -186,7 +177,7 @@ fn a_report_without_frames_has_no_location_and_names_no_function() {
         test: None,
         ..race(1)
     };
-    let (_, findings) = run(reports(vec![ran(".")], vec![bare]));
+    let (_, findings) = support::run_over(ID, reports(vec![ran(".")], vec![bare]));
     let finding = &findings[0];
     assert_eq!(finding.location, None);
     assert_eq!(finding.repro, "cupel check --only conc.race");
@@ -198,7 +189,7 @@ fn a_report_without_frames_has_no_location_and_names_no_function() {
         stacks: vec![stack(None, vec![frame(None, "src/lib.rs", 12)])],
         ..undefined("bad")
     };
-    let (_, findings) = run(reports(vec![ran(".")], vec![unnamed]));
+    let (_, findings) = support::run_over(ID, reports(vec![ran(".")], vec![unnamed]));
     assert_eq!(findings[0].title, "undefined behavior: bad");
 }
 
@@ -209,7 +200,7 @@ fn a_failed_run_is_a_note_beside_the_reports_of_the_others() {
         status: RunStatus::Failed,
         detail: Some("error: could not compile `tools`".to_owned()),
     };
-    let (result, findings) = run(reports(vec![ran("."), failed], vec![race(12)]));
+    let (result, findings) = support::run_over(ID, reports(vec![ran("."), failed], vec![race(12)]));
     assert_eq!(findings.len(), 1);
     assert_eq!(
         result.notes,
@@ -220,11 +211,11 @@ fn a_failed_run_is_a_note_beside_the_reports_of_the_others() {
 
 #[test]
 fn nothing_reported_passes_and_no_run_scores_nothing() {
-    let (clean, findings) = run(reports(vec![ran(".")], vec![]));
+    let (clean, findings) = support::run_over(ID, reports(vec![ran(".")], vec![]));
     assert_eq!(findings, []);
     assert_eq!(clean.status, CheckStatus::Pass);
     assert_eq!(clean.score, Some(score(0.0, "reports", 1)));
-    let (none, _) = run(reports(vec![], vec![]));
+    let (none, _) = support::run_over(ID, reports(vec![], vec![]));
     assert_eq!(none.score, None);
     assert!(none.metrics.is_empty());
 }

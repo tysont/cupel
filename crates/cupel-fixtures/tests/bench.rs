@@ -5,7 +5,7 @@ use std::path::Path;
 use std::process::Command;
 
 use cupel_core::{Envelope, find_program};
-use cupel_fixtures::{copy_repo, run_cupel};
+use cupel_fixtures::{copy_repo, run_cupel_measuring};
 
 const CHECK: &str = "perf.bench";
 
@@ -50,9 +50,10 @@ fn history(
     (dir, base)
 }
 
-/// `check --only perf.bench --changed` in `dir`: its exit code and envelope.
+/// `check --only perf.bench --changed` in `dir`: its exit code and envelope. It measures wall
+/// time, so it runs cold only, not through the parity daemon (`run_cupel_measuring`).
 fn changed(dir: &Path) -> (Option<i32>, Envelope) {
-    let outcome = run_cupel(
+    let outcome = run_cupel_measuring(
         &["check", "--only", CHECK, "--changed", "--format", "json"],
         dir,
     );

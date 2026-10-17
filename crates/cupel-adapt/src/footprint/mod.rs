@@ -63,11 +63,7 @@ pub struct Root<'a> {
 impl Root<'_> {
     /// `name` in this root, relative to the repository root.
     pub fn file(&self, name: &str) -> String {
-        if self.dir == "." {
-            name.to_owned()
-        } else {
-            format!("{}/{name}", self.dir)
-        }
+        crate::tree::under(self.dir, name)
     }
 }
 

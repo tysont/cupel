@@ -3,8 +3,8 @@
 mod support;
 
 use cupel_core::{
-    ActionKind, Artifact, CheckId, CheckResult, CheckStatus, CostClass, Dependency, FactKind,
-    Facts, Finding, FindingId, Footprint, FootprintBase, MetricPer, Scope, Severity, Vulnerability,
+    ActionKind, Artifact, CheckId, CheckStatus, CostClass, Dependency, FactKind, Finding,
+    FindingId, Footprint, FootprintBase, MetricPer, Severity, Vulnerability,
 };
 use serde_json::json;
 use support::{Shape, score};
@@ -57,15 +57,6 @@ fn measured() -> Footprint {
     }
 }
 
-fn run(footprint: Footprint) -> (CheckResult, Vec<Finding>) {
-    let check = support::check(ID);
-    let mut facts = Facts::for_manifest(check.manifest());
-    facts.insert(footprint).unwrap();
-    let scope = Scope::of_files(vec!["src/lib.rs".to_owned()]);
-    let (result, recorded) = support::recorded(check, &facts, scope, json!({})).unwrap();
-    (result, recorded.findings)
-}
-
 fn kinds(findings: &[Finding]) -> Vec<(&str, &str)> {
     findings
         .iter()
@@ -78,7 +69,7 @@ fn kinds(findings: &[Finding]) -> Vec<(&str, &str)> {
 
 #[test]
 fn without_a_base_every_dependency_is_reported() {
-    let (result, findings) = run(measured());
+    let (result, findings) = support::run_over(ID, measured());
     assert_eq!(
         kinds(&findings),
         [("dep.vuln", "smallvec"), ("dep.license", "gplthing")]
@@ -141,7 +132,7 @@ fn an_or_alternative_free_of_copyleft_is_not_a_license_finding() {
         let mut footprint = measured();
         footprint.vulnerabilities = None;
         footprint.dependencies = vec![dependency("x", "1.0.0", Some(license), 1)];
-        let (_, findings) = run(footprint);
+        let (_, findings) = support::run_over(ID, footprint);
         assert_eq!(!findings.is_empty(), copyleft, "{license}");
     }
 }
@@ -156,7 +147,7 @@ fn with_a_base_only_added_or_changed_dependencies_are_reported_and_growth_is() {
             dependency("gplthing", "0.1.0", None, 9),
         ],
     });
-    let (result, findings) = run(footprint);
+    let (result, findings) = support::run_over(ID, footprint);
     assert_eq!(
         kinds(&findings),
         [("dep.vuln", "smallvec"), ("footprint.grew", "-")]
@@ -190,7 +181,7 @@ fn an_upgrade_is_reported_but_is_not_growth() {
         commit: "c0ffee".to_owned(),
         dependencies: vec![dependency("gplthing", "0.1.0", None, 9)],
     });
-    let (_, findings) = run(footprint);
+    let (_, findings) = support::run_over(ID, footprint);
     assert_eq!(kinds(&findings), [("dep.license", "gplthing")]);
 }
 
@@ -204,7 +195,7 @@ fn what_was_not_measured_is_a_note_and_counts_as_zero() {
         artifacts: None,
         base: None,
     };
-    let (result, findings) = run(footprint);
+    let (result, findings) = support::run_over(ID, footprint);
     assert_eq!(findings, []);
     assert_eq!(result.status, CheckStatus::Pass);
     assert_eq!(
@@ -220,7 +211,7 @@ fn what_was_not_measured_is_a_note_and_counts_as_zero() {
 
 #[test]
 fn no_manifest_is_a_note_and_scores_zero() {
-    let (result, findings) = run(Footprint::default());
+    let (result, findings) = support::run_over(ID, Footprint::default());
     assert_eq!(findings, []);
     assert_eq!(result.score, Some(score(0.0, "dependencies", 0)));
     assert_eq!(result.notes[0], "no lockfile or manifest found");

@@ -94,9 +94,46 @@ fn config_schema_keys_are_optional_and_closed() {
 #[test]
 fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
     // Every kind of the catalog has a payload type, so producer plugins can provide each one.
-    for kind in FactKind::ALL {
-        assert!(schema::fact(kind).is_some(), "{kind}");
-    }
+    let without: Vec<FactKind> = FactKind::ALL
+        .into_iter()
+        .filter(|kind| schema::fact(*kind).is_none())
+        .collect();
+    assert_eq!(without, []);
+}
+
+#[test]
+fn the_execution_facts_of_wrapped_tools_are_at_version_one_under_their_kind() {
+    let described: Vec<(FactKind, Option<u32>, Value)> = [
+        FactKind::BenchSamples,
+        FactKind::FuzzResults,
+        FactKind::RaceReports,
+    ]
+    .into_iter()
+    .map(|kind| {
+        let id = schema::fact(kind).map(|schema| schema.as_value()["$id"].clone());
+        (kind, schema::fact_version(kind), id.unwrap_or(Value::Null))
+    })
+    .collect();
+    assert_eq!(
+        described,
+        [
+            (
+                FactKind::BenchSamples,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/bench-samples.json")
+            ),
+            (
+                FactKind::FuzzResults,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/fuzz-results.json")
+            ),
+            (
+                FactKind::RaceReports,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/race-reports.json")
+            ),
+        ]
+    );
 }
 
 #[test]

@@ -4,7 +4,6 @@ mod support;
 
 use std::fs;
 use std::path::Path;
-use std::process::Command;
 
 use cupel_core::{
     Availability, Cancellation, Dependency, FactKind, Footprint, ProduceCtx, Scope, Vulnerability,
@@ -206,24 +205,6 @@ fn an_advisory_that_does_not_parse_is_an_error_naming_it() {
     );
 }
 
-fn git(dir: &Path, args: &[&str]) -> String {
-    let output = Command::new("git")
-        .args([
-            "-c",
-            "user.name=t",
-            "-c",
-            "user.email=t@example.com",
-            "-c",
-            "commit.gpgsign=false",
-        ])
-        .args(args)
-        .current_dir(dir)
-        .output()
-        .expect("git runs");
-    assert!(output.status.success(), "git {args:?}");
-    String::from_utf8(output.stdout).unwrap().trim().to_owned()
-}
-
 #[test]
 fn under_a_range_the_same_manifests_are_read_at_the_base_commit() {
     let dir = fixture("go");
@@ -234,10 +215,10 @@ fn under_a_range_the_same_manifests_are_read_at_the_base_commit() {
         head.replace("\texample.com/oldlib v2.0.0 // indirect\n", ""),
     )
     .unwrap();
-    git(dir.path(), &["init", "--quiet"]);
-    git(dir.path(), &["add", "--all"]);
-    git(dir.path(), &["commit", "--quiet", "-m", "base"]);
-    let base = git(dir.path(), &["rev-parse", "HEAD"]);
+    support::git(dir.path(), &["init", "--quiet"]);
+    support::git(dir.path(), &["add", "--all"]);
+    support::git(dir.path(), &["commit", "--quiet", "-m", "base"]);
+    let base = support::git(dir.path(), &["rev-parse", "HEAD"]);
     fs::write(&gomod, head).unwrap();
     let mut ranged = ctx(dir.path(), "go", json!({}));
     ranged.focus.base = Some(base.clone());

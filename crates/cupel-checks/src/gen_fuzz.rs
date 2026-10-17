@@ -1,6 +1,5 @@
 // ABOUTME: `gen.fuzz` (ADR-107): fuzz targets a fuzzer crashed or hung under the run's seed and execution budget, with
 // ABOUTME: the input that reproduces it, and project roots the fuzzer searched that hold no fuzz target.
-use std::collections::BTreeMap;
 
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
@@ -159,22 +158,15 @@ impl Check for GenFuzz {
         let mut result = outcome::result(
             &self.manifest,
             outcome::status(counts[1].1 > 0),
-            Some(score(counts[1].1 + counts[2].1, counts[0].1)),
-            metrics(&counts),
+            Some(outcome::counted(
+                counts[1].1 + counts[2].1,
+                "failing",
+                counts[0].1,
+            )),
+            outcome::counts(&counts),
             reported,
         );
-        result.notes = results
-            .targets
-            .iter()
-            .filter(|target| target.status == FuzzStatus::Failed)
-            .map(|target| {
-                format!(
-                    "{} could not be fuzzed: {}",
-                    target.name,
-                    target.detail.as_deref().unwrap_or("no output")
-                )
-            })
-            .collect();
+        result.notes = unfuzzed(results);
         Ok(result)
     }
 
@@ -188,35 +180,27 @@ impl Check for GenFuzz {
     }
 }
 
-#[expect(
-    clippy::cast_precision_loss,
-    reason = "target and root counts stay far below 2^52, where f64 is exact"
-)]
-fn metrics(counts: &[(&str, usize)]) -> BTreeMap<String, f64> {
-    counts
+/// A note for each target that could not be fuzzed, saying why.
+fn unfuzzed(results: &FuzzResults) -> Vec<String> {
+    results
+        .targets
         .iter()
-        .map(|(name, count)| ((*name).to_owned(), *count as f64))
+        .filter(|target| target.status == FuzzStatus::Failed)
+        .map(|target| {
+            format!(
+                "{} could not be fuzzed: {}",
+                target.name,
+                target.detail.as_deref().unwrap_or("no output")
+            )
+        })
         .collect()
-}
-
-#[expect(
-    clippy::cast_precision_loss,
-    reason = "target counts stay far below 2^52, where f64 is exact"
-)]
-fn score(failing: usize, targets: usize) -> Score {
-    Score {
-        value: failing as f64,
-        unit: "failing".to_owned(),
-        n: targets as u64,
-    }
 }
 
 /// How a title names a failing input.
 fn named(input: &str) -> String {
-    if input.is_empty() {
-        "the empty input".to_owned()
-    } else {
-        format!("`{input}`")
+    match input {
+        "" => "the empty input".to_owned(),
+        _ => format!("`{input}`"),
     }
 }
 

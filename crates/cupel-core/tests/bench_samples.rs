@@ -1,22 +1,7 @@
-// ABOUTME: Tests for the `BenchSamples` payload (ADR-106): its fact kind and versioned schema, and its shape as JSON
-// ABOUTME: with the head side's benchmarks and the range's base side measured by the same tool.
-mod support;
-
-use cupel_core::{BenchBase, BenchSamples, Benchmark, FactKind, ProducerId, RootRun, RunStatus};
+// ABOUTME: Tests for the `BenchSamples` payload (ADR-106): its shape as JSON with the head side's benchmarks and the
+// ABOUTME: range's base side measured by the same tool, and how a benchmark is known on both sides.
+use cupel_core::{BenchBase, BenchSamples, Benchmark, ProducerId, RootRun, RunStatus};
 use serde_json::json;
-
-#[test]
-fn bench_samples_is_an_execution_fact_with_a_versioned_schema() {
-    assert_eq!(
-        support::fact_entry(FactKind::BenchSamples),
-        (
-            "bench-samples",
-            false,
-            Some(1),
-            Some(json!("https://cupel.dev/schema/v1/fact/bench-samples.json")),
-        )
-    );
-}
 
 fn benchmark(samples: Vec<f64>) -> Benchmark {
     Benchmark {

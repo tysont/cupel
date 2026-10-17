@@ -3,9 +3,8 @@
 mod support;
 
 use cupel_core::{
-    ActionKind, CheckId, CheckResult, CheckStatus, CostClass, FactKind, Facts, Finding, FindingId,
-    FuzzCrash, FuzzResults, FuzzStatus, FuzzTarget, Location, MetricPer, ProducerId, Scope,
-    Severity,
+    ActionKind, CheckId, CheckStatus, CostClass, FactKind, Finding, FindingId, FuzzCrash,
+    FuzzResults, FuzzStatus, FuzzTarget, Location, MetricPer, ProducerId, Severity,
 };
 use serde_json::json;
 use support::{Shape, score};
@@ -76,15 +75,6 @@ fn fuzzed(seeded: bool) -> FuzzResults {
     }
 }
 
-fn run(results: FuzzResults) -> (CheckResult, Vec<Finding>) {
-    let check = support::check(ID);
-    let mut facts = Facts::for_manifest(check.manifest());
-    facts.insert(results).unwrap();
-    let scope = Scope::of_files(vec!["src/lib.rs".to_owned()]);
-    let (result, recorded) = support::recorded(check, &facts, scope, json!({})).unwrap();
-    (result, recorded.findings)
-}
-
 fn kinds(findings: &[Finding]) -> Vec<&str> {
     findings
         .iter()
@@ -94,7 +84,7 @@ fn kinds(findings: &[Finding]) -> Vec<&str> {
 
 #[test]
 fn a_crash_is_a_failing_finding_at_the_crash_with_its_reproducer() {
-    let (_, findings) = run(fuzzed(true));
+    let (_, findings) = support::run_over(ID, fuzzed(true));
     assert_eq!(
         kinds(&findings),
         ["fuzz.crash", "fuzz.timeout", "fuzz.target-missing"]
@@ -145,7 +135,7 @@ fn a_crash_is_a_failing_finding_at_the_crash_with_its_reproducer() {
 
 #[test]
 fn a_timeout_is_a_warning_at_the_target_when_the_hang_names_no_place() {
-    let (_, findings) = run(fuzzed(true));
+    let (_, findings) = support::run_over(ID, fuzzed(true));
     let timeout = &findings[1];
     assert_eq!(
         (timeout.severity, timeout.action.kind),
@@ -164,8 +154,11 @@ fn a_timeout_is_a_warning_at_the_target_when_the_hang_names_no_place() {
 
 #[test]
 fn a_root_without_a_target_is_an_information_finding() {
-    let (_, findings) = run(fuzzed(true));
-    let missing = &findings[2];
+    let (_, findings) = support::run_over(ID, fuzzed(true));
+    let missing = findings
+        .iter()
+        .find(|finding| finding.kind == "fuzz.target-missing")
+        .unwrap();
     assert_eq!(
         (missing.severity, missing.action.kind),
         (Severity::Info, ActionKind::WriteTest)
@@ -193,7 +186,7 @@ fn an_unseeded_fuzzer_reports_no_seed_and_a_printable_input_is_quoted() {
         crash.location = None;
     }
     results.targets[0].location = None;
-    let (_, findings) = run(results);
+    let (_, findings) = support::run_over(ID, results);
     let crash = &findings[0];
     assert_eq!(crash.evidence.0["seed"], json!(null));
     assert_eq!(crash.location, None);
@@ -206,7 +199,7 @@ fn an_unseeded_fuzzer_reports_no_seed_and_a_printable_input_is_quoted() {
 
 #[test]
 fn the_score_counts_failing_targets_and_failed_targets_are_notes() {
-    let (result, _) = run(fuzzed(true));
+    let (result, _) = support::run_over(ID, fuzzed(true));
     assert_eq!(result.status, CheckStatus::Fail);
     assert_eq!(result.score, Some(score(2.0, "failing", 4)));
     assert_eq!(
@@ -232,7 +225,7 @@ fn targets_that_all_pass_pass_the_check() {
         targets: vec![target(".", "fine", FuzzStatus::Passed)],
         ..fuzzed(true)
     };
-    let (result, findings) = run(results);
+    let (result, findings) = support::run_over(ID, results);
     assert!(findings.is_empty(), "{findings:?}");
     assert_eq!(result.status, CheckStatus::Pass);
     assert_eq!(result.score, Some(score(0.0, "failing", 1)));
@@ -266,12 +259,9 @@ fn the_manifest_reads_the_fuzz_results() {
                 ("fuzz.timeout", ActionKind::FixBug),
                 ("fuzz.target-missing", ActionKind::WriteTest),
             ],
-            metrics: vec![
-                ("targets", MetricPer::Scope),
-                ("crashes", MetricPer::Scope),
-                ("timeouts", MetricPer::Scope),
-                ("missing", MetricPer::Scope),
-            ],
+            metrics: ["targets", "crashes", "timeouts", "missing"]
+                .map(|metric| (metric, MetricPer::Scope))
+                .to_vec(),
             evidence: vec!["object", "object", "object"],
         }
     );

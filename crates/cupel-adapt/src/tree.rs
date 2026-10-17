@@ -55,6 +55,16 @@ pub fn relative(root: &Path, dir: &Path, file: &str) -> Option<String> {
     (!text.is_empty()).then_some(text)
 }
 
+/// `file`, relative to the project root `dir` (`.` for the repository root), made relative to
+/// the repository root.
+pub fn under(dir: &str, file: &str) -> String {
+    if dir == "." {
+        file.to_owned()
+    } else {
+        format!("{dir}/{file}")
+    }
+}
+
 /// A git failure, as a process error.
 pub fn git_error(message: &str) -> Error {
     Error::Process {
@@ -141,9 +151,11 @@ mod tests {
         )
         .unwrap_err();
 
-        assert!(
-            error.to_string().contains("cannot export no-such-ref"),
-            "{error}"
+        let message = error.to_string();
+        assert_eq!(
+            message.split(": fatal").next(),
+            Some("cannot run `git`: cannot export no-such-ref"),
+            "{message}"
         );
     }
 }

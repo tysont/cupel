@@ -10,6 +10,7 @@ use cupel_core::{
 };
 
 use super::{Ended, Found, FuzzProducer, Fuzzer, Root, libfuzzer, located};
+use crate::runner::probe;
 
 const ID: &str = "tool.cargo-fuzz";
 
@@ -56,11 +57,13 @@ impl Fuzzer for CargoFuzz {
         Availability::Ready
     }
 
-    fn tool(&self, _: &Ctx) -> Option<ToolProbe> {
-        Some(ToolProbe {
-            name: ToolId::from("cargo-fuzz"),
-            version: vec!["cargo-fuzz".to_owned(), "--version".to_owned()],
-        })
+    fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
+        Some(probe(
+            "cargo-fuzz",
+            false,
+            &["cargo-fuzz", "--version"],
+            &ctx.root,
+        ))
     }
 
     /// The `[[bin]]` targets of the root's `fuzz/Cargo.toml` when it is a cargo-fuzz crate;
@@ -113,11 +116,7 @@ impl Fuzzer for CargoFuzz {
     }
 
     fn failure(&self, root: &Root<'_>, output: &str) -> (String, Option<Location>) {
-        panic(&root.ctx.ctx.root, output).unwrap_or_else(|| {
-            let message =
-                libfuzzer::error(output).unwrap_or_else(|| "the target crashed".to_owned());
-            (message, None)
-        })
+        libfuzzer::reported(panic(&root.ctx.ctx.root, output), output)
     }
 
     fn reproduce(&self, _: &Root<'_>, target: &Found, input: &str) -> String {

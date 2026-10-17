@@ -71,11 +71,7 @@ impl Side<'_> {
 
     /// `path`, relative to the project root, made relative to the repository root.
     pub fn file(&self, path: &str) -> String {
-        if self.dir == "." {
-            path.to_owned()
-        } else {
-            format!("{}/{path}", self.dir)
-        }
+        tree::under(self.dir, path)
     }
 
     /// Where a benchmark is defined: the one file under the project root (`.gitignore`

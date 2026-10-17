@@ -91,3 +91,28 @@ fn combined(scores: &[Score], value: fn(f64, f64) -> f64) -> Option<Score> {
         n: scores.iter().map(|score| score.n).sum(),
     })
 }
+
+/// Counts as metrics, by name.
+#[expect(
+    clippy::cast_precision_loss,
+    reason = "counts stay far below 2^52, where f64 is exact"
+)]
+pub fn counts(counts: &[(&str, usize)]) -> BTreeMap<String, f64> {
+    counts
+        .iter()
+        .map(|(name, count)| ((*name).to_owned(), *count as f64))
+        .collect()
+}
+
+/// A score of `value` things in `unit`, over `n` targets.
+#[expect(
+    clippy::cast_precision_loss,
+    reason = "counts stay far below 2^52, where f64 is exact"
+)]
+pub fn counted(value: usize, unit: &str, n: usize) -> Score {
+    Score {
+        value: value as f64,
+        unit: unit.to_owned(),
+        n: n as u64,
+    }
+}

@@ -1,25 +1,10 @@
-// ABOUTME: Tests for the `RaceReports` payload (ADR-105): its fact kind and versioned schema, its shape as JSON,
-// ABOUTME: the spellings of its kinds and statuses, and the `race` key that pins its producer.
-mod support;
-
+// ABOUTME: Tests for the `RaceReports` payload (ADR-105): its shape as JSON, the spellings of its kinds and
+// ABOUTME: statuses, and the `race` key that pins its producer; schemas.rs pins its kind and version.
 use cupel_core::{
     Ctx, FactKind, LangId, ProducerId, RaceFrame, RaceKind, RaceReport, RaceReports, RaceStack,
     RootRun, RunStatus,
 };
 use serde_json::json;
-
-#[test]
-fn race_reports_is_an_execution_fact_with_a_versioned_schema() {
-    assert_eq!(
-        support::fact_entry(FactKind::RaceReports),
-        (
-            "race-reports",
-            false,
-            Some(1),
-            Some(json!("https://cupel.dev/schema/v1/fact/race-reports.json")),
-        )
-    );
-}
 
 #[test]
 fn race_reports_serializes_every_field() {

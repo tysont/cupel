@@ -202,7 +202,7 @@ impl<F: Fuzzer> FuzzProducer<F> {
             root: root.dir.clone(),
             name: target.name.clone(),
             location: target.file.as_ref().map(|file| Location {
-                file: under(&root.dir, file),
+                file: crate::tree::under(&root.dir, file),
                 line: target.line,
                 col: None,
                 end_line: target.line,
@@ -290,13 +290,12 @@ fn slug(dir: &str) -> String {
     }
 }
 
-/// `file` of the project root `dir`, relative to the repository root.
-pub fn under(dir: &str, file: &str) -> String {
-    if dir == "." {
-        file.to_owned()
-    } else {
-        format!("{dir}/{file}")
-    }
+/// The last count after `marker` in `output` (libFuzzer's ` cov: 12`, Go's `execs: 1000`).
+pub fn last_count(output: &str, marker: &str) -> Option<u64> {
+    output.lines().rev().find_map(|line| {
+        let (_, after) = line.split_once(marker)?;
+        after.split_whitespace().next()?.parse().ok()
+    })
 }
 
 /// `.cupel/cache/fuzz/<lang>/<root>/<target>/`, emptied, with its `corpus/` and `inputs/`.
@@ -407,10 +406,13 @@ mod tests {
     #[test]
     fn a_root_is_in_scope_when_it_holds_a_scoped_file_of_the_language() {
         let scope = Scope::of_files(vec!["tools/a.rs".to_owned(), "web/x.js".to_owned()]);
-        assert!(in_scope(&scope, "tools", &["rs"]));
-        assert!(!in_scope(&scope, "web", &["rs"]));
-        assert!(in_scope(&scope, ".", &["js"]));
-        assert!(in_scope(&Scope::default(), "anything", &["rs"]));
+        let kept = [
+            in_scope(&scope, "tools", &["rs"]),
+            in_scope(&scope, "web", &["rs"]),
+            in_scope(&scope, ".", &["js"]),
+            in_scope(&Scope::default(), "anything", &["rs"]),
+        ];
+        assert_eq!(kept, [true, false, true, true]);
     }
 
     #[test]

@@ -9,8 +9,9 @@ use cupel_core::{
 };
 use serde::Deserialize;
 
-use super::{Ended, Found, FuzzProducer, Fuzzer, Root, TARGET_SECONDS, located, walk};
+use super::{Ended, Found, FuzzProducer, Fuzzer, Root, TARGET_SECONDS, last_count, located, walk};
 use crate::go_test::packages;
+use crate::runner::probe;
 use crate::toolchain;
 
 const ID: &str = "tool.go-fuzz";
@@ -49,11 +50,8 @@ impl Fuzzer for GoFuzz {
         }
     }
 
-    fn tool(&self, _: &Ctx) -> Option<ToolProbe> {
-        Some(ToolProbe {
-            name: ToolId::from("go"),
-            version: vec!["go".to_owned(), "version".to_owned()],
-        })
+    fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
+        Some(probe("go", false, &["go", "version"], &ctx.root))
     }
 
     /// The root's `FuzzXxx` functions, as `go test -list` lists them, each at its definition.
@@ -121,7 +119,7 @@ impl Fuzzer for GoFuzz {
         fs::remove_dir_all(&copy).ok();
         Ok(Ended {
             status,
-            executions: executions(&output),
+            executions: last_count(&output, "execs: "),
             coverage: None,
             artifact,
             output,
@@ -233,14 +231,6 @@ fn keep(root: &Root<'_>, saved: &Path, area: &Path) -> cupel_core::Result<PathBu
     )
 }
 
-/// The last execution count Go printed (`execs: N`).
-fn executions(output: &str) -> Option<u64> {
-    output.lines().rev().find_map(|line| {
-        let (_, after) = line.split_once("execs: ")?;
-        after.split_whitespace().next()?.parse().ok()
-    })
-}
-
 /// What failed and where: the first message under the innermost `--- FAIL:`, without its
 /// `<file>.go:<n>: ` prefix; for a panic, the first stack frame in the repository, else the
 /// file the message names.
@@ -350,7 +340,7 @@ mod tests {
             (location.file.as_str(), location.line),
             ("text/first.go", 5)
         );
-        assert_eq!(executions(&output), Some(0));
+        assert_eq!(last_count(&output, "execs: "), Some(0));
     }
 
     #[test]
@@ -370,18 +360,24 @@ mod tests {
 
     #[test]
     fn a_corpus_file_shows_its_one_simple_value_else_its_encoding() {
-        assert_eq!(decoded("go test fuzz v1\nstring(\"\")\n"), "");
-        assert_eq!(decoded("go test fuzz v1\n[]byte(\"FUZ\")\n"), "FUZ");
+        let files = [
+            "go test fuzz v1\nstring(\"\")\n",
+            "go test fuzz v1\n[]byte(\"FUZ\")\n",
+            "go test fuzz v1\nstring(\"a\\n\")\nint(3)\n",
+        ];
         assert_eq!(
-            decoded("go test fuzz v1\nstring(\"a\\n\")\nint(3)\n"),
-            "string(\"a\\n\")\nint(3)"
+            files.map(decoded),
+            ["", "FUZ", "string(\"a\\n\")\nint(3)"].map(str::to_owned)
         );
     }
 
     #[test]
     fn a_passing_run_reports_its_executions() {
         let capture = Capture::of("fuzz/go-fuzz", "pass");
-        assert_eq!(executions(&capture.file("output.txt")), Some(200));
+        assert_eq!(
+            last_count(&capture.file("output.txt"), "execs: "),
+            Some(200)
+        );
     }
 
     #[test]

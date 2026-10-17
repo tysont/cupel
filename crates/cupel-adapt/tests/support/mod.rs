@@ -5,7 +5,9 @@
     reason = "each test binary uses a different subset of these helpers"
 )]
 
+use std::fs;
 use std::path::Path;
+use std::process::Command;
 
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
@@ -92,4 +94,37 @@ pub fn produce_ctx(root: &Path, lang: &str, cancel: Cancellation) -> ProduceCtx 
         .share(),
     );
     ctx
+}
+
+/// Every file under `root` outside `.cupel/` (where producers keep their caches), relative to it
+/// and sorted: what a producer must leave as it found it.
+pub fn tree(root: &Path) -> Vec<String> {
+    let mut files = Vec::new();
+    for entry in fs::read_dir(root).unwrap().flatten() {
+        let path = entry.path();
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if name == ".cupel" {
+            continue;
+        }
+        if path.is_dir() {
+            files.extend(tree(&path).into_iter().map(|file| format!("{name}/{file}")));
+        } else {
+            files.push(name);
+        }
+    }
+    files.sort();
+    files
+}
+
+/// `git <args>` in `dir` under a throwaway identity, with its standard output trimmed.
+pub fn git(dir: &Path, args: &[&str]) -> String {
+    let output = Command::new("git")
+        .args(["-c", "user.name=t", "-c", "user.email=t@example.com"])
+        .args(["-c", "commit.gpgsign=false"])
+        .args(args)
+        .current_dir(dir)
+        .output()
+        .expect("git runs");
+    assert!(output.status.success(), "git {args:?}");
+    String::from_utf8(output.stdout).unwrap().trim().to_owned()
 }

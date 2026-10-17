@@ -139,6 +139,18 @@ pub fn masked(message: &str) -> String {
     out
 }
 
+/// The access an access header names (Go's `Write at 0x… by goroutine 7:`, `ThreadSanitizer`'s
+/// `Previous read of size 4 at 0x… by thread T1:`): its words before `until` (` at ` or
+/// ` of size `), lowercased, without `previous`.
+pub fn access(line: &str, until: &str) -> Option<String> {
+    if !line.ends_with(':') || !line.contains(" at 0x") || !line.contains(" by ") {
+        return None;
+    }
+    let (words, _) = line.split_once(until)?;
+    let words = words.to_lowercase();
+    Some(words.strip_prefix("previous ").unwrap_or(&words).to_owned())
+}
+
 /// The text after `prefix` on `line` once its leading whitespace is gone.
 pub fn after<'a>(line: &'a str, prefix: &str) -> Option<&'a str> {
     line.trim_start().strip_prefix(prefix)
@@ -220,12 +232,19 @@ mod tests {
 
     #[test]
     fn ids_addresses_and_process_ids_are_masked_but_short_offsets_stay() {
+        let messages = [
+            "got alloc16+0x4 at alloc39912 and 0x00c0001121b8",
+            "data race (pid=83925)",
+            "allocation of size 4",
+        ];
         assert_eq!(
-            masked("got alloc16+0x4 at alloc39912 and 0x00c0001121b8"),
-            "got alloc+0x4 at alloc and 0x…"
+            messages.map(masked),
+            [
+                "got alloc+0x4 at alloc and 0x…",
+                "data race",
+                "allocation of size 4"
+            ]
         );
-        assert_eq!(masked("data race (pid=83925)"), "data race");
-        assert_eq!(masked("allocation of size 4"), "allocation of size 4");
     }
 
     #[test]
@@ -247,10 +266,13 @@ mod tests {
             }],
         };
         let scope = Scope::of_files(vec!["a.go".to_owned()]);
-        assert!(in_scope(&report(Some("a.go")), &scope));
-        assert!(!in_scope(&report(Some("b.go")), &scope));
-        assert!(in_scope(&report(None), &scope));
-        assert!(in_scope(&report(Some("b.go")), &Scope::default()));
+        let kept = [
+            in_scope(&report(Some("a.go")), &scope),
+            in_scope(&report(Some("b.go")), &scope),
+            in_scope(&report(None), &scope),
+            in_scope(&report(Some("b.go")), &Scope::default()),
+        ];
+        assert_eq!(kept, [true, false, true, true]);
     }
 
     #[test]

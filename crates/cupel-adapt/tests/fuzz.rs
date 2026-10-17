@@ -23,6 +23,17 @@ fn installed(tool: &str, programs: &[&str]) -> bool {
     }
 }
 
+/// A copy of the gen.fuzz fixture of `lang` and its files, when every program `tool` runs is
+/// installed; `None` (reported as skipped) otherwise.
+fn fixture(tool: &str, programs: &[&str], lang: &str) -> Option<(tempfile::TempDir, Vec<String>)> {
+    if !installed(tool, programs) {
+        return None;
+    }
+    let copy = support::own_fixture("gen.fuzz", lang);
+    let files = support::tree(copy.path());
+    Some((copy, files))
+}
+
 /// What the producer `id` makes of the repository at `root` for `lang`, with `cases`.
 fn fuzz(id: &str, lang: &str, root: &Path, cases: u64) -> FuzzResults {
     let producer = support::producer(support::shared_registry(), FactKind::FuzzResults, id, lang);
@@ -58,32 +69,11 @@ fn summary(results: &FuzzResults) -> Vec<(String, FuzzStatus, Option<Crash>)> {
         .collect()
 }
 
-/// Every file under `dir` outside `.cupel`, relative to it.
-fn tree(dir: &Path) -> Vec<String> {
-    let mut files = Vec::new();
-    for entry in fs::read_dir(dir).unwrap().flatten() {
-        let path = entry.path();
-        let name = entry.file_name().to_string_lossy().into_owned();
-        if name == ".cupel" {
-            continue;
-        }
-        if path.is_dir() {
-            files.extend(tree(&path).into_iter().map(|file| format!("{name}/{file}")));
-        } else {
-            files.push(name);
-        }
-    }
-    files.sort();
-    files
-}
-
 #[test]
 fn cargo_fuzz_crashes_first_on_the_empty_input_and_passes_checked_first() {
-    if !installed("tool.cargo-fuzz", &["cargo-fuzz", "cargo"]) {
+    let Some((copy, before)) = fixture("tool.cargo-fuzz", &["cargo-fuzz", "cargo"], "rust") else {
         return;
-    }
-    let copy = support::own_fixture("gen.fuzz", "rust");
-    let before = tree(copy.path());
+    };
     let results = fuzz("tool.cargo-fuzz", "rust", copy.path(), 200);
     assert_eq!(
         (results.seeded, results.cases, results.roots.clone()),
@@ -122,7 +112,7 @@ fn cargo_fuzz_crashes_first_on_the_empty_input_and_passes_checked_first() {
     );
     assert_eq!(results.targets[1].executions, Some(200));
     assert_eq!(
-        tree(copy.path()),
+        support::tree(copy.path()),
         before,
         "the fuzz run wrote nothing in the tree"
     );
@@ -130,10 +120,9 @@ fn cargo_fuzz_crashes_first_on_the_empty_input_and_passes_checked_first() {
 
 #[test]
 fn a_target_that_hangs_on_an_input_times_out() {
-    if !installed("tool.cargo-fuzz", &["cargo-fuzz", "cargo"]) {
+    let Some((copy, _)) = fixture("tool.cargo-fuzz", &["cargo-fuzz", "cargo"], "rust") else {
         return;
-    }
-    let copy = support::own_fixture("gen.fuzz", "rust");
+    };
     let target = copy.path().join("fuzz/fuzz_targets/first.rs");
     let spinning = fs::read_to_string(&target).unwrap().replace(
         "let _ = units::first(data);",
@@ -159,10 +148,9 @@ fn a_target_that_hangs_on_an_input_times_out() {
 
 #[test]
 fn a_target_that_does_not_build_failed_with_the_build_output() {
-    if !installed("tool.cargo-fuzz", &["cargo-fuzz", "cargo"]) {
+    let Some((copy, _)) = fixture("tool.cargo-fuzz", &["cargo-fuzz", "cargo"], "rust") else {
         return;
-    }
-    let copy = support::own_fixture("gen.fuzz", "rust");
+    };
     fs::write(
         copy.path().join("fuzz/fuzz_targets/checked_first.rs"),
         "#![no_main]\nlibfuzzer_sys::fuzz_target!(|data: &[u8]| { missing(data); });\n",
@@ -185,11 +173,9 @@ fn a_target_that_does_not_build_failed_with_the_build_output() {
 
 #[test]
 fn go_fuzzing_crashes_on_a_one_byte_string_in_a_copy_and_passes_even() {
-    if !installed("tool.go-fuzz", &["go"]) {
+    let Some((copy, before)) = fixture("tool.go-fuzz", &["go"], "go") else {
         return;
-    }
-    let copy = support::own_fixture("gen.fuzz", "go");
-    let before = tree(copy.path());
+    };
     let results = fuzz("tool.go-fuzz", "go", copy.path(), 500);
     assert!(!results.seeded);
     let crash = Some((
@@ -230,7 +216,7 @@ fn go_fuzzing_crashes_on_a_one_byte_string_in_a_copy_and_passes_even() {
         "{crash:?}"
     );
     assert_eq!(
-        tree(copy.path()),
+        support::tree(copy.path()),
         before,
         "nothing was written into the package's testdata"
     );
@@ -238,11 +224,9 @@ fn go_fuzzing_crashes_on_a_one_byte_string_in_a_copy_and_passes_even() {
 
 #[test]
 fn jazzer_crashes_first_on_the_empty_input_and_passes_size() {
-    if !installed("tool.jazzer", &["jazzer", "node"]) {
+    let Some((copy, before)) = fixture("tool.jazzer", &["jazzer", "node"], "javascript") else {
         return;
-    }
-    let copy = support::own_fixture("gen.fuzz", "javascript");
-    let before = tree(copy.path());
+    };
     let results = fuzz("tool.jazzer", "javascript", copy.path(), 200);
     let crash = Some((
         "Error: empty input".to_owned(),
@@ -257,7 +241,7 @@ fn jazzer_crashes_first_on_the_empty_input_and_passes_size() {
         ]
     );
     assert_eq!(
-        tree(copy.path()),
+        support::tree(copy.path()),
         before,
         "the fuzz run wrote nothing in the tree"
     );

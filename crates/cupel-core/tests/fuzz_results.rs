@@ -1,25 +1,10 @@
-// ABOUTME: Tests for the `FuzzResults` payload (ADR-107): its fact kind and versioned schema, its shape as JSON,
-// ABOUTME: and the spellings of a target's statuses.
-mod support;
-
-use cupel_core::{FactKind, FuzzCrash, FuzzResults, FuzzStatus, FuzzTarget, Location, ProducerId};
+// ABOUTME: Tests for the `FuzzResults` payload (ADR-107): its shape as JSON and the spellings of a target's
+// ABOUTME: statuses; schemas.rs pins its kind and version.
+use cupel_core::{FuzzCrash, FuzzResults, FuzzStatus, FuzzTarget, Location, ProducerId};
 use serde_json::json;
 
-#[test]
-fn fuzz_results_is_an_execution_fact_with_a_versioned_schema() {
-    assert_eq!(
-        support::fact_entry(FactKind::FuzzResults),
-        (
-            "fuzz-results",
-            false,
-            Some(1),
-            Some(json!("https://cupel.dev/schema/v1/fact/fuzz-results.json")),
-        )
-    );
-}
-
-#[test]
-fn fuzz_results_serializes_every_field() {
+/// A run of one target that crashed on the empty input.
+fn crashed() -> FuzzResults {
     let at = |line| Location {
         file: "src/lib.rs".to_owned(),
         line,
@@ -27,7 +12,7 @@ fn fuzz_results_serializes_every_field() {
         end_line: line,
         end_col: None,
     };
-    let results = FuzzResults {
+    FuzzResults {
         tool: ProducerId::from("tool.cargo-fuzz"),
         seed: 3,
         seeded: true,
@@ -49,7 +34,12 @@ fn fuzz_results_serializes_every_field() {
                 reproduce: Some("cargo +nightly fuzz run first crash-da39".to_owned()),
             }),
         }],
-    };
+    }
+}
+
+#[test]
+fn fuzz_results_serializes_every_field() {
+    let results = crashed();
     let value = serde_json::to_value(&results).unwrap();
     let location = |line| json!({"file": "src/lib.rs", "line": line, "col": 5, "end_line": line, "end_col": null});
     assert_eq!(

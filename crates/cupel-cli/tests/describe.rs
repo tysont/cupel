@@ -605,13 +605,26 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
 }
 
 #[test]
-fn describe_fact_of_an_execution_fact_has_its_payload_version_and_schema() {
-    let description = run(["describe", "fact", "bench-samples"]).envelope()["description"].clone();
-    assert_eq!(description["syntactic"], json!(false));
-    assert_eq!(description["version"], json!(1));
+fn describe_fact_of_a_wrapped_tool_fact_has_its_payload_version_and_schema() {
+    let described: Vec<Value> = ["bench-samples", "fuzz-results", "race-reports"]
+        .into_iter()
+        .map(|kind| {
+            let description = &run(["describe", "fact", kind]).envelope()["description"];
+            json!([
+                description["syntactic"],
+                description["version"],
+                description["schema"]["$id"]
+            ])
+        })
+        .collect();
+    let url = |kind: &str| format!("https://cupel.dev/schema/v1/fact/{kind}.json");
     assert_eq!(
-        description["schema"]["$id"],
-        json!("https://cupel.dev/schema/v1/fact/bench-samples.json")
+        described,
+        [
+            json!([false, 1, url("bench-samples")]),
+            json!([false, 1, url("fuzz-results")]),
+            json!([false, 1, url("race-reports")]),
+        ]
     );
 }
 

@@ -21,6 +21,38 @@ const ID: &str = "conc.race";
 /// The check has no settings: which detector runs is the language's (`[lang.<id>] race`).
 const SETTINGS: Limits = Limits::new(&[]);
 
+/// What each report kind is: its finding kind, what the kind means, and what its action asks.
+struct Said {
+    kind: &'static str,
+    means: &'static str,
+    asks: &'static str,
+}
+
+const RACE: Said = Said {
+    kind: "race.detected",
+    means: "Two threads accessed the same memory without synchronization while the tests ran, \
+            one of them writing.",
+    asks: "Synchronize the accesses (a lock, an atomic, a channel) or stop sharing the memory, \
+           then rerun the race detector.",
+};
+
+const UNDEFINED: Said = Said {
+    kind: "ub.detected",
+    means: "An operation with undefined behavior ran during the tests: an out-of-bounds or \
+            dangling access, an invalid value, a broken aliasing rule.",
+    asks: "Fix the operation the detector names so it stays within what the language defines, \
+           then rerun it.",
+};
+
+/// The metrics, each with what it counts.
+const METRICS: [(&str, &str); 2] = [
+    ("races", "Data races the detector reported."),
+    (
+        "undefined_behavior",
+        "Operations with undefined behavior the detector reported.",
+    ),
+];
+
 /// Evidence of `race.detected` and `ub.detected`: the report as the fact holds it.
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
@@ -89,28 +121,14 @@ impl ConcRace {
                 cost: CostClass::Standard,
                 needs: vec![FactKind::RaceReports],
                 wants: vec![],
-                findings: vec![
-                    kind::<Reported>(
-                        "race.detected",
-                        ActionKind::FixBug,
-                        "Two threads accessed the same memory without synchronization while the \
-                         tests ran, one of them writing.",
-                    ),
-                    kind::<Reported>(
-                        "ub.detected",
-                        ActionKind::FixBug,
-                        "An operation with undefined behavior ran during the tests: an \
-                         out-of-bounds or dangling access, an invalid value, a broken aliasing \
-                         rule.",
-                    ),
-                ],
-                metrics: vec![
-                    metric("races", "Data races the detector reported."),
-                    metric(
-                        "undefined_behavior",
-                        "Operations with undefined behavior the detector reported.",
-                    ),
-                ],
+                findings: [RACE, UNDEFINED]
+                    .iter()
+                    .map(|said| kind::<Reported>(said.kind, ActionKind::FixBug, said.means))
+                    .collect(),
+                metrics: METRICS
+                    .iter()
+                    .map(|(name, counts)| metric(name, counts))
+                    .collect(),
                 stability: Stability::Experimental,
                 summary: "Runs the tests under a race detector (Go's -race, Miri, \
                           ThreadSanitizer) and reports each data race and each undefined \
@@ -229,25 +247,17 @@ impl ConcRace {
             Some(at) => format!("cupel check --only {ID} --paths {}", at.file),
             None => format!("cupel check --only {ID}"),
         };
-        let (kind, summary) = match report.kind {
-            RaceKind::DataRace => (
-                "race.detected",
-                "Synchronize the accesses (a lock, an atomic, a channel) or stop sharing the \
-                 memory, then rerun the race detector.",
-            ),
-            RaceKind::UndefinedBehavior => (
-                "ub.detected",
-                "Fix the operation the detector names so it stays within what the language \
-                 defines, then rerun it.",
-            ),
+        let said = match report.kind {
+            RaceKind::DataRace => RACE,
+            RaceKind::UndefinedBehavior => UNDEFINED,
         };
         SubjectFinding {
-            kind,
+            kind: said.kind,
             subject,
             severity: Severity::Fail,
             confidence: 1.0,
             title: title(report),
-            summary: summary.to_owned(),
+            summary: said.asks.to_owned(),
             evidence: evidence(&Reported {
                 tool: fact.tool.to_string(),
                 test: report.test.clone(),

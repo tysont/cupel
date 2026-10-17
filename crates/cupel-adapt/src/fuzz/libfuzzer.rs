@@ -2,9 +2,9 @@
 // ABOUTME: seed, limits, and where saved inputs go, and the reader of how a run ended from its output.
 use std::path::{Path, PathBuf};
 
-use cupel_core::{Cancellation, Captured, FuzzStatus, Process};
+use cupel_core::{Cancellation, Captured, FuzzStatus, Location, Process};
 
-use super::{Budget, Ended, INPUT_SECONDS, TARGET_SECONDS};
+use super::{Budget, Ended, INPUT_SECONDS, TARGET_SECONDS, last_count};
 
 /// libFuzzer's flags for one target: the budget's executions and seed, the per-input limit, the
 /// wall-clock cap, saved inputs under `area/inputs/`, and the final statistics.
@@ -86,7 +86,7 @@ pub fn ended(captured: &Captured) -> Ended {
     Ended {
         status,
         executions: stat(&output, "stat::number_of_executed_units:").or_else(|| done(&output)),
-        coverage: coverage(&output),
+        coverage: last_count(&output, " cov: "),
         artifact,
         output,
     }
@@ -105,6 +105,18 @@ pub fn error(output: &str) -> Option<String> {
             return Some("timeout: an input ran past the per-input limit".to_owned());
         }
         Some(masked(what))
+    })
+}
+
+/// `found`, the failure a target's own language reported, else the fuzzer's or a sanitizer's
+/// account of it ([`error`]), placed nowhere.
+pub fn reported(
+    found: Option<(String, Option<Location>)>,
+    output: &str,
+) -> (String, Option<Location>) {
+    found.unwrap_or_else(|| {
+        let message = error(output).unwrap_or_else(|| "the target crashed".to_owned());
+        (message, None)
     })
 }
 
@@ -140,14 +152,6 @@ fn done(output: &str) -> Option<u64> {
             .next()?
             .parse()
             .ok()
-    })
-}
-
-/// The last coverage libFuzzer printed (`cov: N`).
-fn coverage(output: &str) -> Option<u64> {
-    output.lines().rev().find_map(|line| {
-        let (_, after) = line.split_once(" cov: ")?;
-        after.split_whitespace().next()?.parse().ok()
     })
 }
 

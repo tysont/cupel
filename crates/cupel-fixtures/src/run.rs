@@ -83,7 +83,23 @@ impl Outcome {
 /// When the binary has not been built or cannot be started, and when it prints JSON that is
 /// neither an envelope nor a SARIF log, which breaks the output contract.
 pub fn run_cupel(args: &[&str], cwd: &Path) -> Outcome {
-    let twin = crate::parity::enabled().then(|| crate::parity::Twin::of(cwd));
+    run(args, cwd, crate::parity::enabled())
+}
+
+/// Runs `cupel <args>` in `cwd` as [`run_cupel`] does, but never through the parity daemon: for
+/// an invocation whose output holds wall-time measurements (`perf.bench` comparing benchmark
+/// samples, ADR-106), which a second run measures again and cannot print the same. Every other
+/// invocation goes through [`run_cupel`].
+///
+/// # Panics
+///
+/// As [`run_cupel`].
+pub fn run_cupel_measuring(args: &[&str], cwd: &Path) -> Outcome {
+    run(args, cwd, false)
+}
+
+fn run(args: &[&str], cwd: &Path, parity: bool) -> Outcome {
+    let twin = parity.then(|| crate::parity::Twin::of(cwd));
     let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
     command.args(args).current_dir(cwd).stdin(Stdio::null());
     for (key, _) in std::env::vars_os() {

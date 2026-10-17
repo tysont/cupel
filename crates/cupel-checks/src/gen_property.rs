@@ -1,6 +1,5 @@
 // ABOUTME: `gen.property` (ADR-096): properties the property engine falsified under its seed and case budget, with
 // ABOUTME: the frameworks' shrunk counterexamples, and public functions whose tests hold no property test.
-use std::collections::BTreeMap;
 
 use cupel_core::syntax::{
     ApiSurface, Span, SymbolDef, SymbolKind, Symbols, TestConventions, Visibility,
@@ -164,8 +163,8 @@ impl Check for GenProperty {
         Ok(outcome::result(
             &self.manifest,
             outcome::status(failed),
-            Some(score(counts[1].1, counts[0].1)),
-            metrics(&counts),
+            Some(outcome::counted(counts[1].1, "falsified", counts[0].1)),
+            outcome::counts(&counts),
             reported,
         ))
     }
@@ -177,29 +176,6 @@ impl Check for GenProperty {
 
     fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
         sum(name, results)
-    }
-}
-
-#[expect(
-    clippy::cast_precision_loss,
-    reason = "property and function counts stay far below 2^52, where f64 is exact"
-)]
-fn metrics(counts: &[(&str, usize)]) -> BTreeMap<String, f64> {
-    counts
-        .iter()
-        .map(|(name, count)| ((*name).to_owned(), *count as f64))
-        .collect()
-}
-
-#[expect(
-    clippy::cast_precision_loss,
-    reason = "property counts stay far below 2^52, where f64 is exact"
-)]
-fn score(falsified: usize, properties: usize) -> Score {
-    Score {
-        value: falsified as f64,
-        unit: "falsified".to_owned(),
-        n: properties as u64,
     }
 }
 

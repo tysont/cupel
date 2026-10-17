@@ -248,23 +248,8 @@ mod tests {
     use cupel_fixtures::Capture;
 
     use super::*;
+    use crate::race::cargo::merged;
     use crate::race::report::Paths;
-
-    fn frame(function: Option<&str>, file: &str, line: u32) -> RawFrame {
-        RawFrame {
-            function: function.map(str::to_owned),
-            file: file.to_owned(),
-            line,
-        }
-    }
-
-    fn merged(output: &str) -> Captured {
-        Captured {
-            exit_code: Some(101),
-            stdout: output.to_owned(),
-            stderr: String::new(),
-        }
-    }
 
     #[test]
     fn a_race_and_an_out_of_bounds_read_are_two_reports_with_their_tests_and_places() {
@@ -342,10 +327,12 @@ mod tests {
         let output = "running 1 test\ntest t ... error: Undefined Behavior: using uninitialized data\n  \
                       --> src/lib.rs:4:5\n   |\nerror: aborting due to 1 previous error\n";
         let read = read(&merged(output));
-        assert_eq!(
-            read.reports[0].stacks[0].frames,
-            [frame(None, "src/lib.rs", 4)]
-        );
+        let at = RawFrame {
+            function: None,
+            file: "src/lib.rs".to_owned(),
+            line: 4,
+        };
+        assert_eq!(read.reports[0].stacks[0].frames, [at]);
         assert_eq!(read.reports[0].test.as_deref(), Some("t"));
     }
 }

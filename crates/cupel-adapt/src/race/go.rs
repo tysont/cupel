@@ -5,7 +5,7 @@ use cupel_core::{
     output_tail,
 };
 
-use super::report::{Raw, RawFrame, RawStack, Read, place};
+use super::report::{Raw, RawFrame, RawStack, Read, access, place};
 use super::{Invocation, Spec};
 use crate::go_test::packages;
 use crate::report::test2json;
@@ -113,7 +113,7 @@ impl Report {
     }
 
     fn read(&mut self, line: &str) {
-        if let Some(access) = access(line) {
+        if let Some(access) = access(line, " at ") {
             self.raw.stacks.push(RawStack {
                 access: Some(access),
                 frames: Vec::new(),
@@ -149,17 +149,6 @@ impl Report {
     }
 }
 
-/// The access an access header names (`Write at 0x… by goroutine 7:`, `Previous read at …`):
-/// its words before ` at `, lowercased, without `previous`.
-fn access(line: &str) -> Option<String> {
-    if !line.ends_with(':') || !line.contains(" at 0x") || !line.contains(" by ") {
-        return None;
-    }
-    let (words, _) = line.split_once(" at ")?;
-    let words = words.to_lowercase();
-    Some(words.strip_prefix("previous ").unwrap_or(&words).to_owned())
-}
-
 /// A frame's function without the call's arguments (`pkg.F.func1(0x1, {…})` → `pkg.F.func1`);
 /// parentheses inside the name (`testing.(*T).Run`) stay.
 fn called(text: &str) -> &str {
@@ -184,7 +173,7 @@ fn called(text: &str) -> &str {
 
 #[cfg(test)]
 mod tests {
-    use cupel_core::{RaceFrame, RaceReport, RaceStack};
+    use cupel_core::RaceReport;
     use cupel_fixtures::Capture;
 
     use super::*;
@@ -195,14 +184,6 @@ mod tests {
             exit_code: Some(1),
             stdout: stdout.to_owned(),
             stderr: stderr.to_owned(),
-        }
-    }
-
-    fn frame(function: &str, file: &str, line: u32) -> RaceFrame {
-        RaceFrame {
-            function: Some(function.to_owned()),
-            file: file.to_owned(),
-            line,
         }
     }
 
@@ -220,26 +201,21 @@ mod tests {
             .into_iter()
             .map(|raw| raw.normalized(&paths))
             .collect();
+        let frame = |function: &str, file: &str, line: u32| serde_json::json!({"function": function, "file": file, "line": line});
         assert_eq!(
-            reports,
-            [RaceReport {
-                kind: RaceKind::DataRace,
-                test: Some("TestPublish".to_owned()),
-                message: "data race".to_owned(),
-                stacks: vec![
-                    RaceStack {
-                        access: Some("write".to_owned()),
-                        frames: vec![frame("example.com/tally.Publish.func1", "tally.go", 10)],
-                    },
-                    RaceStack {
-                        access: Some("read".to_owned()),
-                        frames: vec![
-                            frame("example.com/tally.Publish", "tally.go", 13),
-                            frame("example.com/tally.TestPublish", "tally_test.go", 6),
-                        ],
-                    },
+            serde_json::to_value(&reports).unwrap(),
+            serde_json::json!([{
+                "kind": "data-race",
+                "test": "TestPublish",
+                "message": "data race",
+                "stacks": [
+                    {"access": "write", "frames": [frame("example.com/tally.Publish.func1", "tally.go", 10)]},
+                    {"access": "read", "frames": [
+                        frame("example.com/tally.Publish", "tally.go", 13),
+                        frame("example.com/tally.TestPublish", "tally_test.go", 6),
+                    ]},
                 ],
-            }]
+            }])
         );
     }
 
@@ -271,9 +247,9 @@ mod tests {
             "testing.(*T).Run.gowrap1"
         );
         assert_eq!(
-            access("Read at 0x00c00019a228 by main goroutine:").as_deref(),
+            access("Read at 0x00c00019a228 by main goroutine:", " at ").as_deref(),
             Some("read")
         );
-        assert_eq!(access("Goroutine 7 (running) created at:"), None);
+        assert_eq!(access("Goroutine 7 (running) created at:", " at "), None);
     }
 }

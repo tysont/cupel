@@ -57,6 +57,16 @@ pub fn failure(output: &str, reported: bool) -> Option<String> {
     None
 }
 
+/// A merged capture of `output`, as the cargo detectors' tests read one.
+#[cfg(test)]
+pub fn merged(output: &str) -> cupel_core::Captured {
+    cupel_core::Captured {
+        exit_code: Some(101),
+        stdout: output.to_owned(),
+        stderr: String::new(),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
