@@ -1,0 +1,6 @@
+# Captured from the real tool on the test-results fixture (P6.4); the other files here are its
+# unedited output. `dir` is where it ran.
+tool = "Clojure CLI version 1.12.5.1664, Clojure 1.12.3"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p64/work/clojure-red"
+command = "clojure -M:test cupel_test_runner.clj <report>"
+exit_code = 1

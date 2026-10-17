@@ -15,6 +15,7 @@
 
 mod c8;
 mod cargo_llvm_cov;
+mod cloverage;
 mod cobertura;
 mod coverage_py;
 mod coverprofile;
@@ -23,6 +24,8 @@ mod format;
 mod go_coverprofile;
 mod istanbul;
 mod jacoco;
+mod jacoco_gradle;
+mod jacoco_maven;
 mod jest_coverage;
 mod lcov;
 mod pytest_cov;

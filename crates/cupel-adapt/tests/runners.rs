@@ -25,8 +25,16 @@ fn preferred(registry: &ProducerRegistry, lang: &str, ctx: &Ctx) -> Vec<String> 
 fn runners_register_for_their_languages_in_toolchain_table_order() {
     let registry = registry();
     let ctx = Ctx::new(std::env::temp_dir().join("cupel-no-such-project"));
-    let ids = ["rust", "go", "python", "javascript", "typescript"]
-        .map(|lang| preferred(&registry, lang, &ctx));
+    let ids = [
+        "rust",
+        "go",
+        "python",
+        "javascript",
+        "typescript",
+        "java",
+        "clojure",
+    ]
+    .map(|lang| preferred(&registry, lang, &ctx));
     assert_eq!(
         ids,
         [
@@ -35,6 +43,8 @@ fn runners_register_for_their_languages_in_toolchain_table_order() {
             vec!["tool.unittest", "tool.pytest"],
             vec!["tool.vitest", "tool.jest"],
             vec!["tool.vitest", "tool.jest"],
+            vec!["tool.gradle", "tool.maven"],
+            vec!["tool.clojure-test"],
         ]
         .map(|ids| ids.into_iter().map(str::to_owned).collect::<Vec<_>>())
     );
@@ -54,12 +64,16 @@ fn detection_puts_the_runner_a_fixture_uses_first() {
         [
             at("python", "python"),
             at("javascript", "javascript"),
-            at("typescript", "typescript")
+            at("typescript", "typescript"),
+            at("java", "java"),
+            at("gradle", "java"),
         ],
         [
             ["tool.pytest", "tool.unittest"],
             ["tool.jest", "tool.vitest"],
             ["tool.vitest", "tool.jest"],
+            ["tool.maven", "tool.gradle"],
+            ["tool.gradle", "tool.maven"],
         ]
         .map(|ids| ids.map(str::to_owned).to_vec())
     );
@@ -252,6 +266,52 @@ const VITEST: Expected = Expected {
     line: "AssertionError: expected 4 to be 5 // Object.is equality",
 };
 
+const MAVEN: Expected = Expected {
+    runner: "tool.maven",
+    lang: "java",
+    repo: "java",
+    tests: &[
+        ("tally.TallyTest#totalsAHugeList", Skipped),
+        ("tally.TallyTest#totalsAList", Passed),
+    ],
+    red: "tally.RedTest#reportsAWrongTotal",
+    line: "org.opentest4j.AssertionFailedError: totalling 2 and 2 ==> expected: <5> but was: <4>",
+};
+
+const GRADLE: Expected = Expected {
+    runner: "tool.gradle",
+    lang: "java",
+    repo: "gradle",
+    ..MAVEN
+};
+
+const CLOJURE_TEST: Expected = Expected {
+    runner: "tool.clojure-test",
+    lang: "clojure",
+    repo: "clojure",
+    tests: &[
+        ("tally.core-test/totals-a-list", Passed),
+        ("tally.core-test/totals-nothing", Passed),
+    ],
+    red: "tally.red-test/reports-a-wrong-total",
+    line: "totalling 2 and 2",
+};
+
+#[test]
+fn maven_runs_the_java_fixture() {
+    assert_runs(&MAVEN);
+}
+
+#[test]
+fn gradle_runs_the_java_fixture() {
+    assert_runs(&GRADLE);
+}
+
+#[test]
+fn clojure_test_runs_the_clojure_fixture() {
+    assert_runs(&CLOJURE_TEST);
+}
+
 #[test]
 fn cargo_test_runs_the_rust_fixture() {
     assert_runs(&CARGO_TEST);
@@ -330,6 +390,9 @@ fn a_runner_runs_nothing_where_its_language_has_no_project() {
         ("tool.vitest", "typescript"),
         ("tool.pytest", "python"),
         ("tool.unittest", "python"),
+        ("tool.maven", "java"),
+        ("tool.gradle", "java"),
+        ("tool.clojure-test", "clojure"),
     ]
     .into_iter()
     .map(|(id, lang)| {
@@ -341,7 +404,7 @@ fn a_runner_runs_nothing_where_its_language_has_no_project() {
         )
     })
     .collect();
-    assert_eq!(ran, [(0, 0, true); 7]);
+    assert_eq!(ran, [(0, 0, true); 10]);
 }
 
 #[test]

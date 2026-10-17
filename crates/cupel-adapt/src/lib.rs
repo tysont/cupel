@@ -61,13 +61,17 @@
 mod analyze;
 mod cargo_nextest;
 mod cargo_test;
+mod clojure_test;
 pub mod coverage;
 pub mod differential;
 pub mod flake;
 mod footprint;
 mod fresh;
 mod go_test;
+mod gradle;
+mod java_tests;
 mod jest;
+mod maven;
 pub mod metamorphic;
 mod per_test;
 mod property;

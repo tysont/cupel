@@ -1,4 +1,4 @@
-// ABOUTME: Parses JUnit XML, the report `pytest --junitxml` and `cargo nextest`'s JUnit profile write:
+// ABOUTME: Parses JUnit XML, as pytest, `cargo nextest`, Maven Surefire, Gradle, and `clojure.test.junit` write it:
 // ABOUTME: every `<testcase>` with its class, name, file, time, outcome, and the output of a failure.
 use cupel_core::{TestOutcome, TestResult, output_tail};
 
@@ -95,6 +95,35 @@ pub fn pytest(xml: &str) -> Option<Vec<TestResult>> {
             .into_iter()
             .map(|case| {
                 let id = node_id(&case.classname, &case.name, case.file.as_deref());
+                case.into_test(id)
+            })
+            .collect(),
+    )
+}
+
+/// The tests in a Maven Surefire or Gradle `JUnit` report (one test class per file), with IDs
+/// `<class>#<method>`, the form Surefire's `-Dtest` takes; Gradle's `()` after a method name is
+/// dropped. Files are left for the runner to find.
+pub fn java(xml: &str) -> Option<Vec<TestResult>> {
+    Some(
+        parse(xml)?
+            .into_iter()
+            .map(|case| {
+                let method = case.name.strip_suffix("()").unwrap_or(&case.name);
+                let id = format!("{}#{method}", case.classname);
+                case.into_test(id)
+            })
+            .collect(),
+    )
+}
+
+/// The tests in a `clojure.test.junit` report, with IDs the tests' vars, `<namespace>/<name>`.
+pub fn clojure(xml: &str) -> Option<Vec<TestResult>> {
+    Some(
+        parse(xml)?
+            .into_iter()
+            .map(|case| {
+                let id = format!("{}/{}", case.classname, case.name);
                 case.into_test(id)
             })
             .collect(),

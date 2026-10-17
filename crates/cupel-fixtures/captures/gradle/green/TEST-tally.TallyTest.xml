@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="tally.TallyTest" tests="2" skipped="1" failures="0" errors="0" timestamp="2026-10-17T10:39:39.439Z" hostname="Grimlock.local" time="0.023">
+  <testcase name="totalsAHugeList()" classname="tally.TallyTest" time="0.0">
+    <skipped/>
+  </testcase>
+  <testcase name="totalsAList()" classname="tally.TallyTest" time="0.01"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -119,6 +119,69 @@ fn nextest_junit_names_each_test_by_binary_id_with_its_time_and_failure_output()
     );
 }
 
+/// Every test of a Java JUnit capture, one report file per test class, in file-name order.
+fn java_reports(runner: &str, case: &str, files: &[&str]) -> Vec<TestResult> {
+    let capture = Capture::of(runner, case);
+    files
+        .iter()
+        .flat_map(|file| junit::java(&capture.file(file)).unwrap())
+        .collect()
+}
+
+#[test]
+fn surefire_and_gradle_junit_name_each_test_by_class_and_method() {
+    let files = ["TEST-tally.RedTest.xml", "TEST-tally.TallyTest.xml"];
+    let expected = |durations: [Option<u64>; 3]| {
+        vec![
+            row(
+                "tally.RedTest#reportsAWrongTotal",
+                None,
+                Failed,
+                durations[0],
+            ),
+            row(
+                "tally.TallyTest#totalsAHugeList",
+                None,
+                Skipped,
+                durations[1],
+            ),
+            row("tally.TallyTest#totalsAList", None, Passed, durations[2]),
+        ]
+    };
+    let maven = java_reports("maven", "red", &files);
+    let gradle = java_reports("gradle", "red", &files);
+    assert_eq!(shape(&maven), expected([Some(10), Some(0), Some(0)]));
+    assert_eq!(shape(&gradle), expected([Some(13), Some(0), Some(0)]));
+    let failure = output(
+        "tally.RedTest#reportsAWrongTotal",
+        "org.opentest4j.AssertionFailedError: totalling 2 and 2 ==> expected: <5> but was: <4>",
+        "\tat java.base/java.util.ArrayList.forEach(ArrayList.java:1596)",
+    );
+    assert_eq!(outputs(&maven), [failure.clone()]);
+    assert_eq!(outputs(&gradle), [failure]);
+}
+
+#[test]
+fn clojure_test_junit_names_each_test_by_its_var() {
+    let tests = junit::clojure(&Capture::of("clojure-test", "red").file("report.xml")).unwrap();
+    assert_eq!(
+        shape(&tests),
+        [
+            row("tally.core-test/totals-a-list", None, Passed, None),
+            row("tally.core-test/totals-nothing", None, Passed, None),
+            row("tally.red-test/reports-a-wrong-total", None, Failed, None),
+        ]
+    );
+    assert_eq!(
+        outputs(&tests),
+        [output(
+            "tally.red-test/reports-a-wrong-total",
+            "totalling 2 and 2",
+            "      at: MultiFn.java:229"
+        )]
+    );
+}
+
 #[test]
 fn pytest_junit_names_each_test_by_node_id_and_file() {
     let tests = junit::pytest(&Capture::of("pytest", "red").file("junit.xml")).unwrap();
@@ -372,6 +435,17 @@ fn a_green_run_of_every_runner_has_no_failing_test() {
         )),
         failing(jest_json::parse(&jest.file("report.json"), &jest.ran_in).unwrap()),
         failing(jest_json::parse(&vitest.file("report.json"), &vitest.ran_in).unwrap()),
+        failing(java_reports(
+            "maven",
+            "green",
+            &["TEST-tally.TallyTest.xml"],
+        )),
+        failing(java_reports(
+            "gradle",
+            "green",
+            &["TEST-tally.TallyTest.xml"],
+        )),
+        failing(junit::clojure(&Capture::of("clojure-test", "green").file("report.xml")).unwrap()),
     ];
-    assert_eq!(counts, [0; 6]);
+    assert_eq!(counts, [0; 9]);
 }
