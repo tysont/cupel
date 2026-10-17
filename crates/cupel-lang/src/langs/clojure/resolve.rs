@@ -22,12 +22,11 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Arc;
 
 use cupel_core::ProducerRegistry;
-use cupel_core::syntax::{ImportEdge, ImportTarget, ModuleGraph, ProjectInfo, RootImports};
+use cupel_core::syntax::{ImportEdge, ImportTarget, ModuleGraph, RootImports};
 
 use crate::imports::{ImportGraph, Imports, join};
 use crate::language::Language;
 use crate::parse::ParseCache;
-use crate::project::ProjectRoots;
 
 /// The extensions of Clojure files a namespace may live in, in the order the loader tries them.
 const EXTENSIONS: [&str; 2] = [".clj", ".cljc"];
@@ -41,14 +40,9 @@ const GENERATED: [&str; 3] = ["target", ".cpcache", "node_modules"];
 /// How deep below the repository root `deps.edn` files are searched for.
 const SEARCH_DEPTH: usize = 6;
 
-/// Registers the producers that read the file system: project roots from `deps.edn` files, and
-/// the module graph, since which file defines a namespace depends on the classpath's roots.
+/// Registers the module graph, which reads the file system, since which file defines a namespace
+/// depends on the classpath's roots.
 pub fn register(language: Arc<dyn Language>, cache: &Arc<ParseCache>, reg: &mut ProducerRegistry) {
-    reg.register::<ProjectInfo, _>(ProjectRoots::new(
-        Arc::clone(&language),
-        &super::project::ECOSYSTEM,
-        &crate::langs::ecosystems::KNOWN,
-    ));
     reg.register::<ModuleGraph, _>(ImportGraph::new(language, Arc::clone(cache), graph));
 }
 

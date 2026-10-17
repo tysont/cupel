@@ -1,10 +1,11 @@
 // ABOUTME: Project roots (`ProjectInfo`, ADR-037): the walk that finds an ecosystem's manifests, the
-// ABOUTME: nesting rule that makes workspace members, and the producer each language registers with it.
+// ABOUTME: nesting rule that makes workspace members, and the producer registered with it per language.
 //!
 //! An [`Ecosystem`] is a language's build files: the manifests that mark its roots, the
 //! directories it generates, and how a root is described. Each language defines its ecosystem
-//! in `langs/<dir>/project.rs` and registers [`ProjectRoots`] with it and the list of every
-//! known ecosystem (`langs::ecosystems::KNOWN`). The walk visits directories in sorted order,
+//! in `langs/<dir>/project.rs` and names it from `Language::ecosystem`; the language registry
+//! registers [`ProjectRoots`] with it and with every known ecosystem, which it collects from
+//! its languages (ADR-112). The walk visits directories in sorted order,
 //! skipping hidden ones and every known ecosystem's generated directories, so a language's roots do not depend on which other languages exist. A
 //! directory with one of the ecosystem's manifests is a root, or a member of the root above it
 //! when there is one (ADR-021 §2).
@@ -187,14 +188,14 @@ pub struct ProjectRoots {
     language: Arc<dyn Language>,
     ecosystem: &'static Ecosystem,
     /// Every known ecosystem, whose generated directories the walk skips.
-    known: &'static [&'static Ecosystem],
+    known: Vec<&'static Ecosystem>,
 }
 
 impl ProjectRoots {
     pub fn new(
         language: Arc<dyn Language>,
         ecosystem: &'static Ecosystem,
-        known: &'static [&'static Ecosystem],
+        known: Vec<&'static Ecosystem>,
     ) -> Self {
         Self {
             language,
@@ -228,7 +229,7 @@ impl Producer<ProjectInfo> for ProjectRoots {
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<ProjectInfo> {
         ctx.cancel.checkpoint()?;
         let lang = self.language.id();
-        let roots = roots(&ctx.ctx.root, self.ecosystem, self.known, &ctx.ctx.exclude)
+        let roots = roots(&ctx.ctx.root, self.ecosystem, &self.known, &ctx.ctx.exclude)
             .into_iter()
             .filter(|root| root.lang == lang)
             .collect();

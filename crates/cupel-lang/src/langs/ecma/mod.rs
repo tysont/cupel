@@ -6,13 +6,13 @@ mod resolve;
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::{ModuleGraph, ProjectInfo};
+use cupel_core::syntax::ModuleGraph;
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
-use crate::project::ProjectRoots;
+use crate::project::Ecosystem;
 use crate::spec::{LanguageSpec, QueryFile};
 
 const TABLES: &str = include_str!("tables.toml");
@@ -131,15 +131,13 @@ impl Language for Ecma {
         Stability::Experimental
     }
 
+    fn ecosystem(&self) -> Option<&'static Ecosystem> {
+        Some(&project::ECOSYSTEM)
+    }
+
     fn register(&self, reg: &mut ProducerRegistry) {
         let language: Arc<dyn Language> = Arc::new(self.clone());
         crate::generic::register(&language, &self.cache, reg);
-        // Project roots come from build manifests on disk, which queries cannot see.
-        reg.register::<ProjectInfo, _>(ProjectRoots::new(
-            Arc::clone(&language),
-            &project::ECOSYSTEM,
-            &super::ecosystems::KNOWN,
-        ));
         // Module resolution needs package manifests and tsconfig, which queries cannot see.
         let resolve = match self.dialect {
             Dialect::JavaScript => resolve::javascript,

@@ -5,6 +5,7 @@ use std::path::Path;
 use cupel_core::Exclude;
 use cupel_core::syntax::ProjectRoot;
 
+use crate::language::LanguageRegistry;
 use crate::project::{Ecosystem, roots};
 
 /// Ecosystems that are recognized but whose language is not registered; `init` reports their
@@ -12,22 +13,24 @@ use crate::project::{Ecosystem, roots};
 /// registered, so there are none.
 const UNREGISTERED: [&Ecosystem; 0] = [];
 
-/// Every known ecosystem, whose generated directories every project-root walk skips.
-pub const KNOWN: [&Ecosystem; 6] = [
-    &super::rust::project::ECOSYSTEM,
-    &super::go::project::ECOSYSTEM,
-    &super::ecma::project::ECOSYSTEM,
-    &super::python::project::ECOSYSTEM,
-    &super::java::project::ECOSYSTEM,
-    &super::clojure::project::ECOSYSTEM,
-];
+/// Every known ecosystem, whose generated directories every project-root walk skips: each of
+/// `languages`' ecosystems in ID order (one shared by two languages appears twice), then the
+/// unregistered ones (ADR-112).
+pub(crate) fn known(languages: &LanguageRegistry) -> Vec<&'static Ecosystem> {
+    languages
+        .iter()
+        .filter_map(|language| language.ecosystem())
+        .chain(UNREGISTERED)
+        .collect()
+}
 
 /// Roots of languages that are recognized but not registered outside `exclude`, ordered by
 /// path, then language.
 pub fn unregistered_roots(root: &Path, exclude: &Exclude) -> Vec<ProjectRoot> {
+    let known = known(&LanguageRegistry::builtin());
     let mut roots: Vec<ProjectRoot> = UNREGISTERED
         .into_iter()
-        .flat_map(|ecosystem| roots(root, ecosystem, &KNOWN, exclude))
+        .flat_map(|ecosystem| roots(root, ecosystem, &known, exclude))
         .collect();
     roots.sort_by(|a, b| (&a.path, &a.lang).cmp(&(&b.path, &b.lang)));
     roots

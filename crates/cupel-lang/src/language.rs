@@ -3,10 +3,13 @@
 use std::path::Path;
 use std::sync::Arc;
 
+use cupel_core::syntax::ProjectInfo;
 use cupel_core::{Cancellation, Lang, LangFamily, LangId, ProducerRegistry, Stability};
 use rayon::prelude::*;
 
+use crate::langs::ecosystems;
 use crate::parse::{ParseCache, ParseProblem, Parsed};
+use crate::project::{Ecosystem, ProjectRoots};
 use crate::spec::LanguageSpec;
 
 /// A language: a grammar, a declarative spec, and the producers it registers.
@@ -22,6 +25,11 @@ pub trait Language: Send + Sync {
     /// Queries and tables consumed by the generic producers.
     fn spec(&self) -> &LanguageSpec;
     fn stability(&self) -> Stability;
+    /// The build ecosystem whose manifests mark this language's project roots, if it has one.
+    /// Project roots come from build files on disk, which queries cannot see, so the registry
+    /// registers the language's `ProjectInfo` producer with it, and every project-root walk
+    /// skips its generated directories (ADR-112).
+    fn ecosystem(&self) -> Option<&'static Ecosystem>;
     /// Register this language's producers. The generic query-driven producers cover most
     /// syntactic facts; a language registers a hand-written producer only where queries
     /// cannot express the fact.
@@ -95,10 +103,19 @@ impl LanguageRegistry {
         &self.cache
     }
 
-    /// Every language registers its producers, in ID order.
+    /// Every language registers its producers, in ID order, and each language with an ecosystem
+    /// its project roots, whose walk skips the generated directories of every known ecosystem.
     pub fn register_producers(&self, reg: &mut ProducerRegistry) {
+        let known = ecosystems::known(self);
         for language in &self.languages {
             language.register(reg);
+            if let Some(ecosystem) = language.ecosystem() {
+                reg.register::<ProjectInfo, _>(ProjectRoots::new(
+                    Arc::clone(language),
+                    ecosystem,
+                    known.clone(),
+                ));
+            }
         }
     }
 

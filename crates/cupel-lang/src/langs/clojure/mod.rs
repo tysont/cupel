@@ -11,6 +11,7 @@ use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::language::Language;
 use crate::parse::ParseCache;
+use crate::project::Ecosystem;
 use crate::spec::{LanguageSpec, QueryFile};
 
 static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
@@ -65,8 +66,12 @@ impl Language for Clojure {
         Stability::Experimental
     }
 
+    fn ecosystem(&self) -> Option<&'static Ecosystem> {
+        Some(&project::ECOSYSTEM)
+    }
+
     /// The generic producers, Clojure's own `NormTree` (what a list calls is its first element,
-    /// which no `[normalize]` table can name), and the producers that read the file system.
+    /// which no `[normalize]` table can name), and the module graph, which reads `deps.edn`.
     fn register(&self, reg: &mut ProducerRegistry) {
         let language: Arc<dyn Language> = Arc::new(self.clone());
         crate::generic::register(&language, &self.cache, reg);

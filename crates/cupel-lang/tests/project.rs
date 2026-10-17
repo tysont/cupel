@@ -2,11 +2,13 @@
 // ABOUTME: registered languages, with members, packages, and skip dirs; no recognized root is unregistered.
 mod support;
 
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{Exclude, FactKind, LangId, ProducerRegistry};
 use cupel_lang::LanguageRegistry;
+use cupel_lang::project::Ecosystem;
 use support::{produce, produce_excluding, tree};
 
 fn detect_fixture(case: &str) -> PathBuf {
@@ -167,6 +169,52 @@ fn deps_edn_roots_are_clojure_roots_and_no_recognized_root_is_unregistered() {
         }]
     );
     assert!(cupel_lang::unregistered_roots(dir.path(), &Exclude::default()).is_empty());
+}
+
+/// Every registered language's ecosystem, from the registry alone.
+fn registered_ecosystems(registry: &LanguageRegistry) -> Vec<&'static Ecosystem> {
+    registry
+        .iter()
+        .filter_map(|language| language.ecosystem())
+        .collect()
+}
+
+#[test]
+fn every_walk_skips_the_generated_directories_of_every_registered_ecosystem() {
+    let ecosystems = registered_ecosystems(&LanguageRegistry::builtin());
+    // Hidden directories are skipped anyway, so only the visible ones test the registry.
+    let generated: BTreeSet<&str> = ecosystems
+        .iter()
+        .flat_map(|ecosystem| ecosystem.skip_dirs.iter().copied())
+        .filter(|dir| !dir.starts_with('.'))
+        .collect();
+    let manifests: BTreeSet<&str> = ecosystems
+        .iter()
+        .map(|ecosystem| ecosystem.manifests[0])
+        .collect();
+    let files: Vec<String> = std::iter::once("control")
+        .chain(generated.iter().copied())
+        .flat_map(|parent| {
+            manifests
+                .iter()
+                .enumerate()
+                .map(move |(index, manifest)| format!("{parent}/p{index}/{manifest}"))
+        })
+        .collect();
+    let dir = tree(
+        &files
+            .iter()
+            .map(|path| (path.as_str(), "{}\n"))
+            .collect::<Vec<_>>(),
+    );
+    let paths: BTreeSet<String> = all_roots(dir.path())
+        .into_iter()
+        .map(|root| root.path)
+        .collect();
+    let expected: BTreeSet<String> = (0..manifests.len())
+        .map(|index| format!("control/p{index}"))
+        .collect();
+    assert_eq!(paths, expected);
 }
 
 #[test]
