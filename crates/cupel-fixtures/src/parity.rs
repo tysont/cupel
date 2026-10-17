@@ -244,18 +244,40 @@ impl Drop for Daemon {
 
 /// Copies the tree at `from` to `into`: directories, files, and symbolic links; anything else
 /// (a socket) is left out.
+/// Copies the tree at `from` into `into`. An entry that is gone by the time it is reached (a lock
+/// git's detached maintenance held for a moment under `.git`) is left out: the twin is what the
+/// tree holds, and a failure names the path it stopped at.
 fn copy(from: &Path, into: &Path) -> io::Result<()> {
     fs::create_dir_all(into)?;
     for entry in fs::read_dir(from)? {
         let entry = entry?;
-        let (kind, target) = (entry.file_type()?, into.join(entry.file_name()));
-        if kind.is_dir() {
-            copy(&entry.path(), &target)?;
-        } else if kind.is_symlink() {
-            std::os::unix::fs::symlink(fs::read_link(entry.path())?, &target)?;
-        } else if kind.is_file() {
-            fs::copy(entry.path(), &target)?;
+        let (path, target) = (entry.path(), into.join(entry.file_name()));
+        match entry.file_type() {
+            Ok(kind) if kind.is_dir() => copy(&path, &target)?,
+            Ok(kind) => match copy_entry(kind, &path, &target) {
+                Ok(()) => {}
+                Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+                Err(error) => return Err(at(&path, &error)),
+            },
+            Err(error) if error.kind() == io::ErrorKind::NotFound => {}
+            Err(error) => return Err(at(&path, &error)),
         }
     }
     Ok(())
+}
+
+/// Copies one symlink or regular file; anything else (a socket, a pipe) is left out.
+fn copy_entry(kind: fs::FileType, path: &Path, target: &Path) -> io::Result<()> {
+    if kind.is_symlink() {
+        std::os::unix::fs::symlink(fs::read_link(path)?, target)
+    } else if kind.is_file() {
+        fs::copy(path, target).map(|_| ())
+    } else {
+        Ok(())
+    }
+}
+
+/// `error` with the path it happened at in its message.
+fn at(path: &Path, error: &io::Error) -> io::Error {
+    io::Error::new(error.kind(), format!("{}: {error}", path.display()))
 }
