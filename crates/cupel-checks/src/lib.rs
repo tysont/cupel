@@ -41,6 +41,7 @@
 //! [`Scope`]: cupel_core::Scope
 //! [`Facts`]: cupel_core::Facts
 
+mod conc_model_check;
 mod conc_race;
 mod finding;
 mod gen_differential;
@@ -53,6 +54,7 @@ mod outcome;
 mod perf_bench;
 mod perf_footprint;
 mod settings;
+mod spec_prove;
 mod spec_trace;
 mod static_analyze;
 mod static_api_surface;
