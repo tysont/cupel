@@ -10,7 +10,7 @@ use std::time::Duration;
 use cupel_core::Cancellation;
 
 use crate::format::Rendering;
-use crate::session::{Session, Stream};
+use crate::session::{Input, Session, Stream};
 
 /// Everything an invocation reads from its process. `main` gathers it once; nothing else looks
 /// at the process environment or working directory. The daemon builds one per request from what
@@ -31,6 +31,13 @@ pub struct Environment {
     pub path: Option<String>,
     /// Where `--events stderr` and `serve`'s notices are written as they happen.
     pub stderr: Stream,
+    /// What `serve --mcp` reads its requests from (ADR-121).
+    pub stdin: Input,
+    /// Where `serve --mcp` writes its messages; every other verb's output is in [`Output`].
+    pub stdout: Stream,
+    /// Where events go when the invocation names no `--events`: a tool call's progress stream
+    /// under `serve --mcp` (ADR-121); nowhere for a process.
+    pub events: Option<Stream>,
     /// The caches the invocation may find warm: its own, or the daemon's.
     pub session: Arc<Session>,
     /// A token the run's own cancellation sits under: the daemon's, for a request it serves.
@@ -39,7 +46,7 @@ pub struct Environment {
 
 impl Environment {
     /// `args` run in `current_dir` with nothing else from a process: stdout not a terminal, no
-    /// variables, standard error for streams, and a fresh session.
+    /// variables, standard error for streams, no input, and a fresh session.
     pub fn new(args: Vec<OsString>, current_dir: Option<PathBuf>) -> Self {
         Self {
             args,
@@ -49,6 +56,9 @@ impl Environment {
             no_color_variable: false,
             path: None,
             stderr: Stream::stderr(),
+            stdin: Input::default(),
+            stdout: Stream::new(std::io::sink()),
+            events: None,
             session: Arc::default(),
             cancel: Cancellation::new(),
         }
@@ -65,6 +75,8 @@ impl Environment {
                 .collect(),
             no_color_variable: std::env::var_os("NO_COLOR").is_some_and(|value| !value.is_empty()),
             path: std::env::var("PATH").ok(),
+            stdin: Input::stdin(),
+            stdout: Stream::new(std::io::stdout()),
             ..Self::new(
                 std::env::args_os().skip(1).collect(),
                 std::env::current_dir().ok(),

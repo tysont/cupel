@@ -1,6 +1,6 @@
 // ABOUTME: What outlives one invocation (ADR-085 §3): a cold process's own, used once, or the daemon's, shared by
-// ABOUTME: every request it serves; and `Stream`, where an invocation writes to standard error as it goes.
-use std::io::{self, Write};
+// ABOUTME: every request it serves; `Stream`, where an invocation writes as it goes; and `Input`, what it reads.
+use std::io::{self, Read, Write};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, PoisonError};
 
@@ -32,8 +32,9 @@ impl Session {
     }
 }
 
-/// A destination for text written while the invocation runs: this process's standard error,
-/// or, in the daemon, the client's connection. Clones write to the same destination.
+/// A destination for text written while the invocation runs: this process's standard error or
+/// standard output, or, in the daemon, the client's connection. Clones write to the same
+/// destination.
 #[derive(Clone)]
 pub struct Stream(Arc<Mutex<Box<dyn Write + Send>>>);
 
@@ -61,5 +62,30 @@ impl Write for Stream {
             .lock()
             .unwrap_or_else(PoisonError::into_inner)
             .flush()
+    }
+}
+
+/// What an invocation may read as its input: this process's standard input, which only
+/// `serve --mcp` reads (ADR-121), or nothing. Clones share it; the first to take it gets it.
+#[derive(Clone, Default)]
+pub struct Input(Arc<Mutex<Option<Box<dyn Read + Send>>>>);
+
+impl Input {
+    /// This process's standard input.
+    pub fn stdin() -> Self {
+        Self::new(io::stdin())
+    }
+
+    pub fn new(input: impl Read + Send + 'static) -> Self {
+        Self(Arc::new(Mutex::new(Some(Box::new(input)))))
+    }
+
+    /// The input, once; empty after it has been taken, and for an invocation that has none.
+    pub fn take(&self) -> Box<dyn Read + Send> {
+        self.0
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .take()
+            .unwrap_or_else(|| Box::new(io::empty()))
     }
 }
