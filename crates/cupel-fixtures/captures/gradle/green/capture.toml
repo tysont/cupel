@@ -1,0 +1,6 @@
+# Captured from the real tool on the test-results fixture (P6.4); the other files here are its
+# output, unedited but for the `<properties>` block of system properties, removed. `dir` is where it ran.
+tool = "Gradle 9.6.1, JUnit Jupiter 5.13.4"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p64/work/gradle-green"
+command = "gradle --console=plain test"
+exit_code = 0

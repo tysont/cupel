@@ -1,0 +1,1107 @@
+{
+  "symbols": [
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "shapes/src/shapes/geometry.clj",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "shapes/src/shapes/geometry.clj",
+        "line": 14
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "shapes/src/shapes/geometry.clj",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 15,
+        "file": "shapes/src/shapes/geometry.clj",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 31
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 2,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 3,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 4,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 20
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 37
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 102
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/ledger/complexity.clj",
+        "line": 114
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 117
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/ledger/core.clj",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 35
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 40
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 43
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 48
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 53
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 11,
+        "file": "src/ledger/core.clj",
+        "line": 56
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 60
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 15,
+        "file": "src/ledger/core.clj",
+        "line": 63
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_export.clj",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_helpers.clj",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 2,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "catch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 26
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 35
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_cycle/alpha.clj",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_cycle/beta.clj",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_cycle/beta.clj",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_layers/domain/order.clj",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_layers/infra/store.clj",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/main.clj",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.clj",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.clj",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.clj",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.clj",
+        "line": 19
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/report.clj",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 37
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 43
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 49
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 19
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 30
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 35,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 19
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/property_test.clj",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 19
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 35,
+        "file": "test/ledger/quality_test.clj",
+        "line": 20
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 35,
+        "file": "test/ledger/quality_test.clj",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 30,
+        "file": "test/ledger/quality_test.clj",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 29
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 34
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 40
+      }
+    }
+  ]
+}

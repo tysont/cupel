@@ -15,7 +15,15 @@ use cupel_fixtures::{Capture, copy_repo, repo_path};
 use serde_json::{Map, Value, json};
 use support::registry;
 
-const LANGS: [&str; 5] = ["rust", "go", "python", "javascript", "typescript"];
+const LANGS: [&str; 7] = [
+    "rust",
+    "go",
+    "python",
+    "javascript",
+    "typescript",
+    "java",
+    "clojure",
+];
 
 fn producer<'a>(
     registry: &'a ProducerRegistry,
@@ -28,9 +36,9 @@ fn producer<'a>(
         .unwrap_or_else(|| panic!("{id} produces coverage for {lang}"))
 }
 
-/// The `[lang.<lang>]` table of the coverage fixture's `cupel.toml`.
-fn fixture_table(lang: &str) -> Map<String, Value> {
-    let text = fs::read_to_string(repo_path(&format!("coverage/{lang}/cupel.toml"))).unwrap();
+/// The `[lang.<lang>]` table of the `cupel.toml` of the coverage fixture copied to `root`.
+fn fixture_table(root: &Path, lang: &str) -> Map<String, Value> {
+    let text = fs::read_to_string(root.join("cupel.toml")).unwrap();
     let config: Value = toml::from_str(&text).unwrap();
     config["lang"][lang].as_object().unwrap().clone()
 }
@@ -40,7 +48,8 @@ fn fixture_table(lang: &str) -> Map<String, Value> {
 fn ctx(root: &Path, lang: &str, configured: bool) -> Ctx {
     let mut ctx = Ctx::new(root.to_path_buf());
     if configured {
-        ctx.lang.insert(LangId::from(lang), fixture_table(lang));
+        ctx.lang
+            .insert(LangId::from(lang), fixture_table(root, lang));
     }
     ctx
 }
@@ -54,12 +63,14 @@ fn produce_ctx(root: &Path, lang: &str, configured: bool) -> ProduceCtx {
         Cancellation::new(),
     );
     if configured {
-        produce.config = fixture_table(lang);
+        produce.config = fixture_table(root, lang);
     }
     let skip_dirs = match lang {
         "rust" => vec!["target"],
         "python" => vec![".venv", "venv", "__pycache__", ".tox"],
         "javascript" | "typescript" => vec!["node_modules", "dist", "coverage"],
+        "java" => vec!["target", "build", ".gradle"],
+        "clojure" => vec!["target", ".cpcache"],
         _ => vec!["vendor"],
     };
     produce.upstream.insert(
@@ -78,10 +89,11 @@ fn produce_ctx(root: &Path, lang: &str, configured: bool) -> ProduceCtx {
     produce
 }
 
-/// A copy of the coverage fixture for `lang` without its committed cache.
-fn fixture(lang: &str) -> tempfile::TempDir {
+/// A copy of the coverage fixture `repo` (named for its language, or its build tool) without its
+/// committed cache.
+fn fixture(repo: &str) -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
-    copy_repo(&format!("coverage/{lang}"), dir.path());
+    copy_repo(&format!("coverage/{repo}"), dir.path());
     let _ = fs::remove_dir_all(dir.path().join(".cupel"));
     dir
 }
@@ -130,6 +142,8 @@ fn coverage_producers_register_for_their_languages_in_toolchain_table_order() {
             vec!["tool.pytest-cov", "tool.coverage-py"],
             ecma.to_vec(),
             ecma.to_vec(),
+            vec!["tool.jacoco-maven", "tool.jacoco-gradle"],
+            vec!["tool.cloverage"],
         ]
         .map(|ids| ids.into_iter().map(str::to_owned).collect::<Vec<_>>())
     );
@@ -161,6 +175,8 @@ fn with_a_coverage_command_a_producer_needs_its_tool() {
         ("tool.pytest-cov", "python", "pytest"),
         ("tool.jest-coverage", "javascript", "jest"),
         ("tool.vitest-coverage", "typescript", "vitest"),
+        ("tool.jacoco-maven", "java", "mvn"),
+        ("tool.cloverage", "clojure", "clojure"),
     ] {
         let dir = fixture(lang);
         let found = producer(&registry, id, lang).availability(&ctx(dir.path(), lang, true));
@@ -197,6 +213,8 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
     let javascript = Ctx::new(repo_path("coverage/javascript"));
     let typescript = Ctx::new(repo_path("coverage/typescript"));
     let python = Ctx::new(repo_path("coverage/python"));
+    let maven = Ctx::new(repo_path("coverage/java"));
+    let gradle = Ctx::new(repo_path("coverage/gradle"));
     let mut unittest = Ctx::new(repo_path("coverage/python"));
     unittest.lang.insert(
         LangId::from("python"),
@@ -208,12 +226,16 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
             preferred("typescript", &typescript),
             preferred("python", &python),
             preferred("python", &unittest),
+            preferred("java", &maven),
+            preferred("java", &gradle),
         ],
         [
             "tool.jest-coverage",
             "tool.vitest-coverage",
             "tool.pytest-cov",
-            "tool.coverage-py"
+            "tool.coverage-py",
+            "tool.jacoco-maven",
+            "tool.jacoco-gradle",
         ]
     );
 }
@@ -304,6 +326,8 @@ fn a_failing_coverage_command_reports_why_and_produces_nothing() {
 struct Expected {
     producer: &'static str,
     lang: &'static str,
+    /// The coverage fixture it runs on, `coverage/<repo>`.
+    repo: &'static str,
     tool: &'static str,
     /// `(file, instrumented lines, lines that ran, branches)` of the fixture's source file.
     source: (&'static str, usize, usize, Option<usize>),
@@ -322,7 +346,7 @@ fn assert_covers(expected: &Expected) {
         return;
     }
     let registry = registry();
-    let dir = fixture(expected.lang);
+    let dir = fixture(expected.repo);
     let tool = producer(&registry, expected.producer, expected.lang);
 
     let (map, events) = produce(tool, &produce_ctx(dir.path(), expected.lang, true));
@@ -356,10 +380,11 @@ fn assert_covers(expected: &Expected) {
 }
 
 /// Every coverage producer the fixtures configure, with what it must report.
-const EXPECTED: [Expected; 5] = [
+const EXPECTED: [Expected; 8] = [
     Expected {
         producer: "tool.cargo-llvm-cov",
         lang: "rust",
+        repo: "rust",
         tool: "cargo-llvm-cov",
         source: ("src/lib.rs", 31, 14, None),
         test: "tests/grade.rs",
@@ -367,6 +392,7 @@ const EXPECTED: [Expected; 5] = [
     Expected {
         producer: "tool.go-coverprofile",
         lang: "go",
+        repo: "go",
         tool: "go",
         source: ("grade.go", 28, 13, None),
         test: "grade_test.go",
@@ -374,6 +400,7 @@ const EXPECTED: [Expected; 5] = [
     Expected {
         producer: "tool.pytest-cov",
         lang: "python",
+        repo: "python",
         tool: "pytest",
         source: ("grade.py", 21, 11, Some(14)),
         test: "tests/test_grade.py",
@@ -381,6 +408,7 @@ const EXPECTED: [Expected; 5] = [
     Expected {
         producer: "tool.jest-coverage",
         lang: "javascript",
+        repo: "javascript",
         tool: "jest",
         source: ("grade.js", 19, 9, Some(14)),
         test: "grade.test.js",
@@ -388,9 +416,34 @@ const EXPECTED: [Expected; 5] = [
     Expected {
         producer: "tool.vitest-coverage",
         lang: "typescript",
+        repo: "typescript",
         tool: "vitest",
         source: ("src/grade.ts", 18, 8, Some(14)),
         test: "src/grade.test.ts",
+    },
+    Expected {
+        producer: "tool.jacoco-maven",
+        lang: "java",
+        repo: "java",
+        tool: "mvn",
+        source: ("src/main/java/grade/Grade.java", 18, 8, Some(16)),
+        test: "src/test/java/grade/GradeTest.java",
+    },
+    Expected {
+        producer: "tool.jacoco-gradle",
+        lang: "java",
+        repo: "gradle",
+        tool: "gradle",
+        source: ("src/main/java/grade/Grade.java", 18, 8, Some(16)),
+        test: "src/test/java/grade/GradeTest.java",
+    },
+    Expected {
+        producer: "tool.cloverage",
+        lang: "clojure",
+        repo: "clojure",
+        tool: "clojure",
+        source: ("src/grade/core.clj", 14, 8, None),
+        test: "test/grade/core_test.clj",
     },
 ];
 

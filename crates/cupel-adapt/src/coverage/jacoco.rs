@@ -2,6 +2,8 @@
 // ABOUTME: instructions, and its branches are its covered and missed branch counts (no execution counts).
 use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage, LineHits};
 
+use std::path::Path;
+
 use super::error::{ReportError, xml_number};
 
 const FORMAT: &str = "JaCoCo XML";
@@ -76,4 +78,26 @@ fn source_coverage(
         lines,
         branches: measured.then_some(branches),
     })
+}
+
+/// `map` with each file's `<package>/<File>.java` name placed below the first of the root `dir`'s
+/// main and test source sets that has it (`src/main/java`, then `src/test/java`); a file in
+/// neither keeps its name. Maven and Gradle builds give these to `JaCoCo` (ADR-108).
+pub(crate) fn source_paths(map: CoverageMap, dir: &Path) -> CoverageMap {
+    let placed = |file: &str| {
+        ["src/main/java", "src/test/java"]
+            .into_iter()
+            .map(|root| format!("{root}/{file}"))
+            .find(|candidate| dir.join(candidate).is_file())
+            .unwrap_or_else(|| file.to_owned())
+    };
+    CoverageMap::new(
+        map.files
+            .into_iter()
+            .map(|mut file| {
+                file.file = placed(&file.file);
+                file
+            })
+            .collect(),
+    )
 }

@@ -1,0 +1,665 @@
+{
+  "files": [
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "custom",
+              "span": {
+                "col": 9,
+                "end_col": 60,
+                "end_line": 9,
+                "line": 9
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "balanceOfOneEntryIsTheEntry",
+          "property": "jqwik",
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 10,
+            "line": 7
+          }
+        }
+      ],
+      "file": "src/test/java/ledger/LedgerPropertyTest.java",
+      "framework": "jqwik",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 62,
+                "end_line": 14,
+                "line": 14
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "membersPayExactlyTheDiscountedPrice",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 15,
+            "line": 12
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 9,
+                "end_col": 82,
+                "end_line": 19,
+                "line": 19
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "blankAmountsAreRejected",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 20,
+            "line": 17
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 9,
+                "end_col": 62,
+                "end_line": 24,
+                "line": 24
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "statementsAreNotEmpty",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 25,
+            "line": 22
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "classifyingRuns",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 30,
+            "line": 27
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 61,
+                "end_line": 37,
+                "line": 37
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 28,
+                "end_col": 48,
+                "end_line": 34,
+                "line": 34
+              },
+              "target": "Notifier"
+            },
+            {
+              "span": {
+                "col": 27,
+                "end_col": 47,
+                "end_line": 35,
+                "line": 35
+              },
+              "target": "Notifier"
+            },
+            {
+              "span": {
+                "col": 26,
+                "end_col": 46,
+                "end_line": 36,
+                "line": 36
+              },
+              "target": "Notifier"
+            }
+          ],
+          "name": "mailGoesThroughEveryNotifier",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 38,
+            "line": 32
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 13,
+                "end_col": 68,
+                "end_line": 43,
+                "line": 43
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "everyEntryCountsTowardTheBalance",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 45,
+            "line": 40
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 13,
+                "end_col": 68,
+                "end_line": 50,
+                "line": 50
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "computedEntriesCountTowardTheBalance",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 52,
+            "line": 47
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 45,
+                "end_line": 59,
+                "line": 59
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "depositsKeepTheOwner",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 60,
+            "line": 54
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 33,
+                "end_line": 68,
+                "line": 68
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "depositsAccumulate",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 69,
+            "line": 62
+          }
+        }
+      ],
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "framework": "junit5",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 43,
+                "end_line": 29,
+                "line": 29
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "depositAddsToTheBalance",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 30,
+            "line": 26
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 9,
+                "end_col": 60,
+                "end_line": 34,
+                "line": 34
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "membersGetADiscount",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 35,
+            "line": 32
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "not-null",
+              "span": {
+                "col": 9,
+                "end_col": 57,
+                "end_line": 39,
+                "line": 39
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "newAccountsAreRegistered",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 40,
+            "line": 37
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 9,
+                "end_col": 49,
+                "end_line": 44,
+                "line": 44
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "parsingGarbageFails",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 45,
+            "line": 42
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 65,
+                "end_line": 49,
+                "line": 49
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "newAccountsHaveDistinctIds",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 50,
+            "line": 47
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 13,
+                "end_col": 81,
+                "end_line": 56,
+                "line": 56
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "classify",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 58,
+            "line": 52
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 9,
+                "end_col": 51,
+                "end_line": 63,
+                "line": 63
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "statementIsMailed",
+          "property": null,
+          "skip": {
+            "reason": "talks to the network",
+            "span": {
+              "col": 5,
+              "end_col": 38,
+              "end_line": 61,
+              "line": 61
+            }
+          },
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 64,
+            "line": 60
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 52,
+                "end_line": 68,
+                "line": 68
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "parseCentsTrimsSpaces",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 69,
+            "line": 66
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "openingAnAccountDoesNotThrow",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 74,
+            "line": 71
+          }
+        }
+      ],
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "framework": "junit5",
+      "setup": [
+        {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 19,
+          "line": 16
+        },
+        {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 24,
+          "line": 21
+        }
+      ]
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 40,
+                "end_line": 24,
+                "line": 24
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 9,
+                "end_col": 38,
+                "end_line": 25,
+                "line": 25
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "tallyReportsOverdraft",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 26,
+            "line": 21
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 54,
+                "end_line": 30,
+                "line": 30
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "parseCentsAcceptsDigits",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 31,
+            "line": 28
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 9,
+                "end_col": 84,
+                "end_line": 35,
+                "line": 35
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "parseCentsRejectsBlanks",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 36,
+            "line": 33
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "snapshot",
+              "span": {
+                "col": 9,
+                "end_col": 66,
+                "end_line": 40,
+                "line": 40
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "discountSnapshot",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 41,
+            "line": 38
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 73,
+                "end_line": 47,
+                "line": 47
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "custom",
+              "span": {
+                "col": 9,
+                "end_col": 25,
+                "end_line": 48,
+                "line": 48
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 29,
+                "end_col": 49,
+                "end_line": 45,
+                "line": 45
+              },
+              "target": "Notifier"
+            }
+          ],
+          "name": "mailNotifiesTheOwner",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 49,
+            "line": 43
+          }
+        }
+      ],
+      "file": "src/test/java/ledger/PricingTest.java",
+      "framework": "junit5",
+      "setup": []
+    }
+  ]
+}

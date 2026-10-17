@@ -1,0 +1,20 @@
+{
+  "pairs": [
+    {
+      "source": "src/main/java/ledger/Ledger.java",
+      "tests": [
+        "src/test/java/ledger/LedgerTest.java"
+      ]
+    },
+    {
+      "source": "src/main/java/ledger/Pricing.java",
+      "tests": [
+        "src/test/java/ledger/PricingTest.java"
+      ]
+    }
+  ],
+  "test_globs": [
+    "src/test/**",
+    "**/src/test/**"
+  ]
+}

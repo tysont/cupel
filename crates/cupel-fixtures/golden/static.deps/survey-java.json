@@ -1,0 +1,509 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 18,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle src/main/java/ledger/depscycle/alpha/Alpha.java → src/main/java/ledger/depscycle/beta/Beta.java → src/main/java/ledger/depscycle/alpha/Alpha.java: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "src/main/java/ledger/depscycle/alpha/Alpha.java",
+          "src/main/java/ledger/depscycle/beta/Beta.java"
+        ],
+        "modules": [
+          "src/main/java/ledger/depscycle/alpha/Alpha.java",
+          "src/main/java/ledger/depscycle/beta/Beta.java"
+        ],
+        "size": 2
+      },
+      "id": "fnd_d4d202",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d4d202 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: src/main/java/ledger/depscycle/alpha/Alpha.java → src/main/java/ledger/depscycle/beta/Beta.java → src/main/java/ledger/depscycle/alpha/Alpha.java"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `src/main/java/ledger/depslayers/infra/Store.java` from `src/main/java/ledger/depslayers/domain/Order.java`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "src/main/java/ledger/depslayers/domain/Order.java",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "ledger.depslayers.infra.Store",
+        "to": "src/main/java/ledger/depslayers/infra/Store.java",
+        "to_layer": "infra"
+      },
+      "id": "fnd_eae2a4",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/main/java/ledger/depslayers/domain/Order.java",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_eae2a4 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/main/java/ledger/depslayers/domain/Order.java` (layer domain) imports `src/main/java/ledger/depslayers/infra/Store.java` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `src/main/java/ledger/depslayers/port/Port.java`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 0,
+        "distance": 1.0,
+        "distance_max": 0.7,
+        "efferent": 1,
+        "external": 0,
+        "instability": 1.0,
+        "module": "src/main/java/ledger/depslayers/port/Port.java",
+        "unresolved": 0
+      },
+      "id": "fnd_d52ef7",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/main/java/ledger/depslayers/port/Port.java",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d52ef7 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/main/java/ledger/depslayers/port/Port.java` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "java",
+          "rank": 1,
+          "target": {
+            "display": "shapes/src/main/java/shapes/Geometry.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "shapes/src/main/java/shapes/Geometry.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "java",
+          "rank": 2,
+          "target": {
+            "display": "src/main/java/ledger/Account.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/Account.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "java",
+          "rank": 3,
+          "target": {
+            "display": "src/main/java/ledger/depslayers/infra/Store.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depslayers/infra/Store.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "java",
+          "rank": 4,
+          "target": {
+            "display": "src/main/java/ledger/depslayers/port/Port.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depslayers/port/Port.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "java",
+          "rank": 5,
+          "target": {
+            "display": "src/main/java/ledger/report/Format.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/report/Format.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "java",
+          "rank": 6,
+          "target": {
+            "display": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "java",
+          "rank": 7,
+          "target": {
+            "display": "src/main/java/ledger/depscycle/beta/Beta.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "java",
+          "rank": 8,
+          "target": {
+            "display": "src/main/java/ledger/depslayers/domain/Order.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depslayers/domain/Order.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "java",
+          "rank": 9,
+          "target": {
+            "display": "src/main/java/ledger/Ledger.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/Ledger.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.333
+        },
+        {
+          "lang": "java",
+          "rank": 10,
+          "target": {
+            "display": "src/main/java/ledger/cmd/Main.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/cmd/Main.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.0
+        }
+      ],
+      "measured": 10,
+      "metric": "distance",
+      "per": "module",
+      "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "java",
+          "rank": 1,
+          "target": {
+            "display": "src/main/java/ledger/Ledger.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/Ledger.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "java",
+          "rank": 2,
+          "target": {
+            "display": "src/main/java/ledger/cmd/Main.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/cmd/Main.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "java",
+          "rank": 3,
+          "target": {
+            "display": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "java",
+          "rank": 4,
+          "target": {
+            "display": "src/main/java/ledger/depscycle/beta/Beta.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "java",
+          "rank": 5,
+          "target": {
+            "display": "src/main/java/ledger/depslayers/domain/Order.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depslayers/domain/Order.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "java",
+          "rank": 6,
+          "target": {
+            "display": "shapes/src/main/java/shapes/Geometry.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "shapes/src/main/java/shapes/Geometry.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "java",
+          "rank": 7,
+          "target": {
+            "display": "src/main/java/ledger/Account.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/Account.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "java",
+          "rank": 8,
+          "target": {
+            "display": "src/main/java/ledger/depslayers/infra/Store.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depslayers/infra/Store.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "java",
+          "rank": 9,
+          "target": {
+            "display": "src/main/java/ledger/depslayers/port/Port.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/depslayers/port/Port.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "java",
+          "rank": 10,
+          "target": {
+            "display": "src/main/java/ledger/report/Format.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/main/java/ledger/report/Format.java",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        }
+      ],
+      "measured": 18,
+      "metric": "coupling",
+      "per": "module",
+      "summary": "Afferent plus efferent coupling per module."
+    },
+    {
+      "check": "static.deps",
+      "entries": [
+        {
+          "lang": "java",
+          "rank": 1,
+          "target": {
+            "display": "src/main/java/ledger/depscycle/alpha/Alpha.java → src/main/java/ledger/depscycle/beta/Beta.java → src/main/java/ledger/depscycle/alpha/Alpha.java",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 3,
+              "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+              "line": 3
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        }
+      ],
+      "measured": 1,
+      "metric": "cycle_size",
+      "per": "group",
+      "summary": "Modules in each import cycle."
+    }
+  ]
+}

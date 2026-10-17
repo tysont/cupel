@@ -1,0 +1,205 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "tests.flaky",
+      "metrics": {
+        "flaky": 1.0,
+        "order_dependent": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 3,
+        "unit": "unstable",
+        "value": 2.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "investigate_flake",
+        "priority": 2,
+        "summary": "Make `balance-starts-at-zero` independent of the tests before it: reset the shared state they leave behind, or set up what it relies on itself."
+      },
+      "check": "tests.flaky",
+      "confidence": 0.9,
+      "detail": null,
+      "evidence": {
+        "failed": 1,
+        "orders": [
+          "declared",
+          "declared",
+          "reversed"
+        ],
+        "outcomes": [
+          "passed",
+          "passed",
+          "failed"
+        ],
+        "passed": 2,
+        "preceded_by": [
+          "ledger.settle-test/settles-on-every-other-run",
+          "ledger.core-test/deposit-changes-balance"
+        ],
+        "reruns": 3,
+        "runner": "tool.clojure-test",
+        "test": "ledger.core-test/balance-starts-at-zero"
+      },
+      "id": "fnd_548738",
+      "kind": "test.order-dependent",
+      "location": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 7,
+        "file": "test/ledger/core_test.clj",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.flaky --seed 3",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_548738 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 2,
+      "title": "`balance-starts-at-zero` passes or fails depending on the test order"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "investigate_flake",
+        "priority": 2,
+        "summary": "Find what `settles-on-every-other-run` depends on besides its code and the test order: time, randomness, concurrency, or the environment; make it deterministic."
+      },
+      "check": "tests.flaky",
+      "confidence": 0.95,
+      "detail": null,
+      "evidence": {
+        "failed": 2,
+        "outcomes": [
+          "failed",
+          "passed",
+          "failed"
+        ],
+        "passed": 1,
+        "reruns": 3,
+        "runner": "tool.clojure-test",
+        "same_order": [
+          0,
+          1
+        ],
+        "test": "ledger.settle-test/settles-on-every-other-run"
+      },
+      "id": "fnd_809b27",
+      "kind": "test.flaky",
+      "location": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 11,
+        "file": "test/ledger/settle_test.clj",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.flaky --seed 3",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_809b27 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 2,
+      "title": "`settles-on-every-other-run` passed and failed in reruns of the same order"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_548738",
+      "kind": "investigate_flake",
+      "priority": 1,
+      "summary": "Make `balance-starts-at-zero` independent of the tests before it: reset the shared state they leave behind, or set up what it relies on itself."
+    },
+    {
+      "command": null,
+      "finding": "fnd_809b27",
+      "kind": "investigate_flake",
+      "priority": 2,
+      "summary": "Find what `settles-on-every-other-run` depends on besides its code and the test order: time, randomness, concurrency, or the environment; make it deterministic."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "clojure"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 2
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

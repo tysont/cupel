@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+    <testsuite name="core-test" package="tally">
+        <testcase name="totals-a-list" classname="tally.core-test">
+        </testcase>
+        <testcase name="totals-nothing" classname="tally.core-test">
+        </testcase>
+    </testsuite>
+</testsuites>

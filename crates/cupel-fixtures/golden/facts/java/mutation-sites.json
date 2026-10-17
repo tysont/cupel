@@ -1,0 +1,6480 @@
+{
+  "symbols": [
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f77be8b00bd925bc",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "761a7804a47903be",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "f77be8b00bd925bc",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 9,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 16
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "new Circle(times.applyAsDouble(radius))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "89aaca9dd30605e9",
+          "span": {
+            "col": 20,
+            "end_col": 59,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 9,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 20
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "7b9fc5d23ef06280",
+          "span": {
+            "col": 75,
+            "end_col": 76,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 13,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 21
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 12
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "id",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b95e59cf7d8b5d92",
+          "span": {
+            "col": 16,
+            "end_col": 18,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 18
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "owner",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b95e59cf7d8b5d92",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 23
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "cents",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "4f53b7393a802fb9",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 27
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "cents += amount;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "39f7f6dcbae6d8fc",
+          "span": {
+            "col": 15,
+            "end_col": 17,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "-="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 32
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Ledger.header(this)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f2d7d04258a02a3b",
+          "span": {
+            "col": 16,
+            "end_col": 35,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 37
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "List.of(id)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f2d7d04258a02a3b",
+          "span": {
+            "col": 16,
+            "end_col": 27,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 41
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": ">=",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "638130466d2f1a63",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            ">"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c81ba68022517fae",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "d33ce479b83ebf67",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 46
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 12
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "802846bef65ad0b9",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b11a2ad3b4d589e9",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "!invoice.paid()",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d8f68a70224e8f44",
+          "span": {
+            "col": 17,
+            "end_col": 32,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "!(!invoice.paid())"
+          ]
+        },
+        {
+          "from": "owed += invoice.amount();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "f98f32893ca00ff5",
+          "span": {
+            "col": 17,
+            "end_col": 42,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b5cd7160a16dce2f",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "open++;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a3798f935759795c",
+          "span": {
+            "col": 17,
+            "end_col": 24,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "++",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "54ed0a643cf51b5d",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "--"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "3473e097154952e0",
+          "span": {
+            "col": 38,
+            "end_col": 39,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "6f20932c90d08749",
+          "span": {
+            "col": 48,
+            "end_col": 49,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "new long[] {balance, open}",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "63eab429404c20a1",
+          "span": {
+            "col": 16,
+            "end_col": 42,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 15
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "802846bef65ad0b9",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b11a2ad3b4d589e9",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "!payment.paid()",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d8f68a70224e8f44",
+          "span": {
+            "col": 17,
+            "end_col": 32,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "!(!payment.paid())"
+          ]
+        },
+        {
+          "from": "due += payment.amount();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "f98f32893ca00ff5",
+          "span": {
+            "col": 17,
+            "end_col": 41,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b5cd7160a16dce2f",
+          "span": {
+            "col": 21,
+            "end_col": 23,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "pending++;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a3798f935759795c",
+          "span": {
+            "col": 17,
+            "end_col": 27,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "++",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "54ed0a643cf51b5d",
+          "span": {
+            "col": 24,
+            "end_col": 26,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "--"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "3473e097154952e0",
+          "span": {
+            "col": 39,
+            "end_col": 40,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7a208ff9103c1abf",
+          "span": {
+            "col": 52,
+            "end_col": 54,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "new long[] {remainder, pending}",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "63eab429404c20a1",
+          "span": {
+            "col": 16,
+            "end_col": 47,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 28
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b11a2ad3b4d589e9",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "dbe804547986cdf1",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d52e35dbcbd51a27",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "index < quantities.length",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b070ca88af0c213f",
+          "span": {
+            "col": 29,
+            "end_col": 54,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "!(index < quantities.length)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "31fc506d93b02c1b",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "++",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "fc6ca62c73d8cad0",
+          "span": {
+            "col": 61,
+            "end_col": 63,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "--"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d73f7b5fd56c58bc",
+          "span": {
+            "col": 43,
+            "end_col": 44,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "c5558cae1dae8945",
+          "span": {
+            "col": 59,
+            "end_col": 60,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "total += cost;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e1e20c0b0a41ebf9",
+          "span": {
+            "col": 13,
+            "end_col": 27,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "6eee4f298be8fa8a",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "count += quantities[index];",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "39a673312af52045",
+          "span": {
+            "col": 13,
+            "end_col": 40,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "69bb61cf4d82c783",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "lines.add(cost);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "39a1753bc026e853",
+          "span": {
+            "col": 13,
+            "end_col": 29,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "bf62d91c8f4d6386",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "a27643c52455ad31",
+          "span": {
+            "col": 48,
+            "end_col": 49,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "lines.add(total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4502fbe9d94f2b5c",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines.add(average);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e0943a8086fbc067",
+          "span": {
+            "col": 9,
+            "end_col": 28,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "c3d00c1fbc6f1fbc",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 41
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b11a2ad3b4d589e9",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 59,
+            "line": 59
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "dbe804547986cdf1",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 60,
+            "line": 60
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d52e35dbcbd51a27",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "index < quantities.length",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "b070ca88af0c213f",
+          "span": {
+            "col": 29,
+            "end_col": 54,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "!(index < quantities.length)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "31fc506d93b02c1b",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "++",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "fc6ca62c73d8cad0",
+          "span": {
+            "col": 61,
+            "end_col": 63,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "--"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d73f7b5fd56c58bc",
+          "span": {
+            "col": 43,
+            "end_col": 44,
+            "end_line": 62,
+            "line": 62
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "c5558cae1dae8945",
+          "span": {
+            "col": 59,
+            "end_col": 60,
+            "end_line": 62,
+            "line": 62
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "total += cost;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e1e20c0b0a41ebf9",
+          "span": {
+            "col": 13,
+            "end_col": 27,
+            "end_line": 63,
+            "line": 63
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "6eee4f298be8fa8a",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 63,
+            "line": 63
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "count += quantities[index];",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "39a673312af52045",
+          "span": {
+            "col": 13,
+            "end_col": 40,
+            "end_line": 64,
+            "line": 64
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "69bb61cf4d82c783",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 64,
+            "line": 64
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "lines.add(cost);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "39a1753bc026e853",
+          "span": {
+            "col": 13,
+            "end_col": 29,
+            "end_line": 65,
+            "line": 65
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines.add(count);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "85106360966efc62",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 67,
+            "line": 67
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d06aefe02d48767f",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "e7676d54062c39a6",
+          "span": {
+            "col": 48,
+            "end_col": 49,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "lines.add(total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e0943a8086fbc067",
+          "span": {
+            "col": 9,
+            "end_col": 26,
+            "end_line": 69,
+            "line": 69
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines.add(average);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "bddeee5e10818b99",
+          "span": {
+            "col": 9,
+            "end_col": 28,
+            "end_line": 70,
+            "line": 70
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "lines",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "893cb261fede6116",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 71,
+            "line": 71
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 57
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "!(amount < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "6e520f983cebb6f4",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "06fc8e6278b02027",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "2e3eca702a36694d",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "label = \"refund\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d77ed854c2d71899",
+          "span": {
+            "col": 13,
+            "end_col": 30,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount == 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "1a4e631accaee41a",
+          "span": {
+            "col": 20,
+            "end_col": 31,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "!(amount == 0)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "543e25671ae1ee9c",
+          "span": {
+            "col": 27,
+            "end_col": 29,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "780660ba540c2ee1",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "label = \"empty\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "3b9a56a7f3d6e8bf",
+          "span": {
+            "col": 13,
+            "end_col": 29,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit * 100",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "1f9b7f2d89cf82ba",
+          "span": {
+            "col": 20,
+            "end_col": 40,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "!(amount > limit * 100)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7a5f5d1c6e901122",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "2741312549d1edb1",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "86b371df606bdbde",
+          "span": {
+            "col": 37,
+            "end_col": 40,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"huge\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "918b48af32a861e1",
+          "span": {
+            "col": 13,
+            "end_col": 28,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit * 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "82eebdb671f79806",
+          "span": {
+            "col": 20,
+            "end_col": 39,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "!(amount > limit * 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "49223146dcb4ce02",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "ddb05877ac34004b",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "30fe648ce909af05",
+          "span": {
+            "col": 37,
+            "end_col": 39,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"large\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "fc16316e7d4e1d94",
+          "span": {
+            "col": 13,
+            "end_col": 29,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "47fb0e08f42bd060",
+          "span": {
+            "col": 20,
+            "end_col": 34,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "!(amount > limit)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "faeda0bea077e2bb",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "label = \"over\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "fad5ed5dadc3859c",
+          "span": {
+            "col": 13,
+            "end_col": 28,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount == limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "61b0041eaa55d518",
+          "span": {
+            "col": 20,
+            "end_col": 35,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "!(amount == limit)"
+          ]
+        },
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "9bb2030909909427",
+          "span": {
+            "col": 27,
+            "end_col": 29,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "!="
+          ]
+        },
+        {
+          "from": "label = \"at-limit\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d7c02253e12b561e",
+          "span": {
+            "col": 13,
+            "end_col": 32,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 2",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d8667ceb651e49c7",
+          "span": {
+            "col": 20,
+            "end_col": 38,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "!(amount > limit / 2)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "03f884394827c010",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "26854a56b83e9c97",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "651eb3d09c48cd09",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"high\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "38e3a6427f47120a",
+          "span": {
+            "col": 13,
+            "end_col": 28,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 4",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ed663f57608bebf7",
+          "span": {
+            "col": 20,
+            "end_col": 38,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "!(amount > limit / 4)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "621907f660214d92",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "8bdf53bc53273259",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "78ff9c76a9020793",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"medium\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "dcf3e5533120060f",
+          "span": {
+            "col": 13,
+            "end_col": 30,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit / 10",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ef9cc99c709d7b53",
+          "span": {
+            "col": 20,
+            "end_col": 39,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "!(amount > limit / 10)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "44dc4d640128d85e",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "216a0a36dac5c9a8",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c56729275de91e5c",
+          "span": {
+            "col": 37,
+            "end_col": 39,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "label = \"low\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "bd29edf57f62c694",
+          "span": {
+            "col": 13,
+            "end_col": 27,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > 1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "31b56bbaa910d41e",
+          "span": {
+            "col": 20,
+            "end_col": 30,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "!(amount > 1)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "c8c3c1278929343e",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "08a797ecea7810da",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "46281430b6e944e3",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "1 + 1",
+            "1 - 1"
+          ]
+        },
+        {
+          "from": "label = \"tiny\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "6c3e93fc57183668",
+          "span": {
+            "col": 13,
+            "end_col": 28,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "label = \"unit\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "946307927930b3c1",
+          "span": {
+            "col": 13,
+            "end_col": 28,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "label",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 11
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "802846bef65ad0b9",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "batch.length > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "34fe2dcd9017e14a",
+          "span": {
+            "col": 17,
+            "end_col": 33,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "!(batch.length > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "4781c5932ebc5000",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9afa12fc7eb0e26e",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "1d2cab527e58746b",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "amount > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "e2576ce2764796bf",
+          "span": {
+            "col": 25,
+            "end_col": 35,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "!(amount > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "9019fc9002d12481",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "8bc3115723951ea8",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "b5dcbc2ae1e222df",
+          "span": {
+            "col": 34,
+            "end_col": 35,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "settled < limit",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "efc358dd0765de28",
+          "span": {
+            "col": 32,
+            "end_col": 47,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "!(settled < limit)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "1c62a065529ca035",
+          "span": {
+            "col": 40,
+            "end_col": 41,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "settled += amount;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "c1c94e9cbdb8ad6b",
+          "span": {
+            "col": 29,
+            "end_col": 47,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "2d3b42442c001bf0",
+          "span": {
+            "col": 37,
+            "end_col": 39,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "settled",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 16,
+            "end_col": 23,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 40
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "String.format(\"%s/%s/%d/%b/%d/%d\", owner, currency, limit, overdraft, branch, opened)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f2d7d04258a02a3b",
+          "span": {
+            "col": 16,
+            "end_col": 101,
+            "end_line": 58,
+            "line": 58
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 57
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "List.of(\n            \"ACME LEDGER\",\n            \"===========\",\n            \"\",\n            \"Account holder:\",\n            \"Account number:\",\n            \"Branch:\",\n            \"Currency:\",\n            \"Statement period:\",\n            \"\",\n            \"Opening balance\",\n            \"---------------\",\n            \"Balance brought forward:\",\n            \"Pending credits:\",\n            \"Pending debits:\",\n            \"\",\n            \"Credits\",\n            \"-------\",\n            \"Deposits:\",\n            \"Transfers in:\",\n            \"Interest:\",\n            \"Refunds:\",\n            \"Adjustments:\",\n            \"\",\n            \"Debits\",\n            \"------\",\n            \"Withdrawals:\",\n            \"Transfers out:\",\n            \"Card payments:\",\n            \"Direct debits:\",\n            \"Standing orders:\",\n            \"Fees:\",\n            \"Charges:\",\n            \"\",\n            \"Closing balance\",\n            \"---------------\",\n            \"Balance carried forward:\",\n            \"Available balance:\",\n            \"Overdraft limit:\",\n            \"Overdraft used:\",\n            \"\",\n            \"Notices\",\n            \"-------\",\n            \"Rates changed this period.\",\n            \"Fees are listed above.\",\n            \"Keep this statement for your records.\",\n            \"Report errors within thirty days.\",\n            \"\",\n            \"Contact\",\n            \"-------\",\n            \"Telephone:\",\n            \"Email:\",\n            \"Post:\",\n            \"\",\n            \"Opening hours\",\n            \"-------------\",\n            \"Weekdays: 9 to 5\",\n            \"Saturday: 9 to 12\",\n            \"Sunday: closed\",\n            \"\",\n            \"Page 1 of 1\",\n            \"End of statement\")",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f2d7d04258a02a3b",
+          "span": {
+            "col": 16,
+            "end_col": 32,
+            "end_line": 124,
+            "line": 63
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 62
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bc35f1b5464c132c",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 129,
+            "line": 129
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 128
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c0d6f5f682cd1f28",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 135,
+            "line": 135
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c57ba127daf07a9f",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 137,
+            "line": 137
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "561b7573439c9592",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 139,
+            "line": 139
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1f5ec17ce604589b",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 141,
+            "line": 141
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3b0ecd1b34582974",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 143,
+            "line": 143
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "6",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "879e435f549dc1ee",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 145,
+            "line": 145
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "7",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "97e8b99e2b50a14c",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 147,
+            "line": 147
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "8",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "fd4b7692bbf40915",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 149,
+            "line": 149
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "9",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e4c4b7d6d7402450",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 151,
+            "line": 151
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "66d0ddcc8484a372",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 153,
+            "line": 153
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "11",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1c2b5c59f0609250",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 155,
+            "line": 155
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "12",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ed4de4c544a90477",
+          "span": {
+            "col": 18,
+            "end_col": 20,
+            "end_line": 157,
+            "line": 157
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 133
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 169
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "561b61820d2383c9",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 175,
+            "line": 175
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "9f83db52978643f8",
+          "span": {
+            "col": 33,
+            "end_col": 34,
+            "end_line": 175,
+            "line": 175
+          },
+          "to": [
+            "-"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 9,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 174
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 23,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "!(amount < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "6e520f983cebb6f4",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "06fc8e6278b02027",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "2e3eca702a36694d",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "kind = \"debit\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d77ed854c2d71899",
+          "span": {
+            "col": 13,
+            "end_col": 28,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "amount > limit && limit > 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "1a4e631accaee41a",
+          "span": {
+            "col": 20,
+            "end_col": 47,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "!(amount > limit && limit > 0)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "1f42125c4e8b3ae4",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "&&",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "77fc8af6190ce10a",
+          "span": {
+            "col": 35,
+            "end_col": 37,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "||"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "16f9309c0b51ac58",
+          "span": {
+            "col": 44,
+            "end_col": 45,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "0998ff3f8c7662e3",
+          "span": {
+            "col": 46,
+            "end_col": 47,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "7347dd3ea03779f6",
+          "span": {
+            "col": 46,
+            "end_col": 47,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "kind = \"large\";",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "3b9a56a7f3d6e8bf",
+          "span": {
+            "col": 13,
+            "end_col": 28,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "kind",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 16,
+            "end_col": 20,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b8b55cf74ef19733",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "index < balances.length",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "785781ba7ae05aae",
+          "span": {
+            "col": 29,
+            "end_col": 52,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "!(index < balances.length)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "99c002e55ea06b70",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "++",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "056362bd8542b0b3",
+          "span": {
+            "col": 59,
+            "end_col": 61,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "--"
+          ]
+        },
+        {
+          "from": "balances[index] < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "00c6ca2841169119",
+          "span": {
+            "col": 17,
+            "end_col": 36,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "!(balances[index] < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "c30c5dd3213d46eb",
+          "span": {
+            "col": 33,
+            "end_col": 34,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "97ed91bb9c036476",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "f84cae4d3fd2fcba",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "index",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7f8aae92812dfc56",
+          "span": {
+            "col": 24,
+            "end_col": 29,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "null"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9f4dae0269d8423d",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 18
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "trimmed.isEmpty()",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "424e2687594b24b3",
+          "span": {
+            "col": 13,
+            "end_col": 30,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "!(trimmed.isEmpty())"
+          ]
+        },
+        {
+          "from": "Long.parseLong(trimmed)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "76c2e7fd780d97fd",
+          "span": {
+            "col": 20,
+            "end_col": 43,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "null"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "1109cd1594d38624",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 27
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c0d6f5f682cd1f28",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "2f0cbb13d216f762",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "561b7573439c9592",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 39
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount < 0 ? \"-\" : \"+\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7c8dd8aa69c8eae2",
+          "span": {
+            "col": 16,
+            "end_col": 38,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "null"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "f187ea9416ef05e5",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "6216b5c2af562666",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "665b851585a77001",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 51
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "18b522e3a60caedd",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "0e40a24fc35a2ae6",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 58,
+            "line": 58
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 55
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "802846bef65ad0b9",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 64,
+            "line": 64
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "entries.hasNext()",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "0292f026eadf01a3",
+          "span": {
+            "col": 16,
+            "end_col": 33,
+            "end_line": 65,
+            "line": 65
+          },
+          "to": [
+            "!(entries.hasNext())"
+          ]
+        },
+        {
+          "from": "total += entries.next();",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "13ab95eecaba33d3",
+          "span": {
+            "col": 13,
+            "end_col": 37,
+            "end_line": 66,
+            "line": 66
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "f6878eb5cbbb85c7",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 66,
+            "line": 66
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "total -= 1;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "b00c12ec387537f1",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 69,
+            "line": 69
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "-=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "dd5f806294e796c1",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 69,
+            "line": 69
+          },
+          "to": [
+            "+="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "35cd8d780bb480e1",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 69,
+            "line": 69
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "total > 1000",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "8e99305626774073",
+          "span": {
+            "col": 18,
+            "end_col": 30,
+            "end_line": 70,
+            "line": 70
+          },
+          "to": [
+            "!(total > 1000)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "5c35a735f42ff3a2",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 70,
+            "line": 70
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "8dca6785840a1c71",
+          "span": {
+            "col": 26,
+            "end_col": 30,
+            "end_line": 70,
+            "line": 70
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "9e9948611503c57e",
+          "span": {
+            "col": 26,
+            "end_col": 30,
+            "end_line": 70,
+            "line": 70
+          },
+          "to": [
+            "1000 + 1",
+            "1000 - 1"
+          ]
+        },
+        {
+          "from": "total",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "3f4e1c82c7591a2d",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 71,
+            "line": 71
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 63
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 24
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "registry.put(account.id(), account);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 45,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "account",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 16,
+            "end_col": 23,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 28
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "scale(entries, 1)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f2d7d04258a02a3b",
+          "span": {
+            "col": 16,
+            "end_col": 33,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "null"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4610c5a0ce67be31",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 35
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "802846bef65ad0b9",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "total += entry * factor;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "f19f54d216e474fc",
+          "span": {
+            "col": 13,
+            "end_col": 37,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "4c5442c336d0364a",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "d6698a79b04e710d",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "total",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 39
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Geometry.square(side)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f2d7d04258a02a3b",
+          "span": {
+            "col": 16,
+            "end_col": 37,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 48
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "3aa3040895690be8",
+          "span": {
+            "col": 45,
+            "end_col": 46,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "9c4697320c09921c",
+          "span": {
+            "col": 52,
+            "end_col": 53,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bafb756c683946e7",
+          "span": {
+            "col": 85,
+            "end_col": 86,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bfe3faab187f5dd4",
+          "span": {
+            "col": 107,
+            "end_col": 108,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 53
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "f11823c3a27cc373",
+          "span": {
+            "col": 57,
+            "end_col": 58,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "1fe5ed773789112e",
+          "span": {
+            "col": 64,
+            "end_col": 65,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "912ff7ba8a11913f",
+          "span": {
+            "col": 81,
+            "end_col": 82,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            "-"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 9,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 54
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 13
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "61eeb5f392bce4f4",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "6a21ffaedd721fec",
+          "span": {
+            "col": 36,
+            "end_col": 37,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4708f82d6e8bd878",
+          "span": {
+            "col": 38,
+            "end_col": 41,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "member && cut != 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 31,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "!(member && cut != 0)"
+          ]
+        },
+        {
+          "from": "&&",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "278463edc13fcce9",
+          "span": {
+            "col": 20,
+            "end_col": 22,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "||"
+          ]
+        },
+        {
+          "from": "!=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "ec7730311308e83d",
+          "span": {
+            "col": 27,
+            "end_col": 29,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "=="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "5af3ddf4b4df1bcc",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ad36646334644f21",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "price",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 16
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "802846bef65ad0b9",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "false",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "7ede547883676c8f",
+          "span": {
+            "col": 29,
+            "end_col": 34,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "true"
+          ]
+        },
+        {
+          "from": "total += entry;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "2da023a1f4a5f322",
+          "span": {
+            "col": 13,
+            "end_col": 28,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "abb6db8555abe39f",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "total < -1",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6ffb3c20ced06996",
+          "span": {
+            "col": 17,
+            "end_col": 27,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "!(total < -1)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "6f89aa3612ab67b2",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4c72b5fb227ca544",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "overdrawn = true;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "8b73ea77cb583f90",
+          "span": {
+            "col": 17,
+            "end_col": 34,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "c6666f8847b7dc35",
+          "span": {
+            "col": 29,
+            "end_col": 33,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "logTotal(total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "28903e4d345660ea",
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "new Tally(total, overdrawn)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "6e8081aa2ad8c272",
+          "span": {
+            "col": 16,
+            "end_col": 43,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 24
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "LOG.info(\"total \" + total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 36,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "22b6721125be25f7",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "-"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 37
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "notifier.send(account.owner(), account.statement())",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f2d7d04258a02a3b",
+          "span": {
+            "col": 16,
+            "end_col": 67,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 42
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7ee722d100e1ff7e",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ad36646334644f21",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "72fdf2bdf87eb953",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "subtotal > charge",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 30,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "!(subtotal > charge)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7ee722d100e1ff7e",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ad36646334644f21",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "72fdf2bdf87eb953",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 16
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7ee722d100e1ff7e",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ad36646334644f21",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "547c810c0fa4d409",
+          "span": {
+            "col": 16,
+            "end_col": 19,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 24
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7ee722d100e1ff7e",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ad36646334644f21",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "72fdf2bdf87eb953",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 32
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7ee722d100e1ff7e",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e74e353907f3b353",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "72fdf2bdf87eb953",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 44
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7ee722d100e1ff7e",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 54,
+            "line": 54
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ad36646334644f21",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "gross < 0",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "1a4e631accaee41a",
+          "span": {
+            "col": 20,
+            "end_col": 29,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            "!(gross < 0)"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8b2c4ff4cd9b5f01",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "780660ba540c2ee1",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "18140fba32008691",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "gross",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "10a2a51247d28b33",
+          "span": {
+            "col": 20,
+            "end_col": 25,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            "null"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "72fdf2bdf87eb953",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 59,
+            "line": 59
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 52
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "gross > fee",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ede9c57391a54e59",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 64,
+            "line": 64
+          },
+          "to": [
+            "!(gross > fee)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7ee722d100e1ff7e",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 64,
+            "line": 64
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "ad36646334644f21",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 65,
+            "line": 65
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "72fdf2bdf87eb953",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 67,
+            "line": 67
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 62
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "802846bef65ad0b9",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 71,
+            "line": 71
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "total += item;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "f19f54d216e474fc",
+          "span": {
+            "col": 13,
+            "end_col": 27,
+            "end_line": 73,
+            "line": 73
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "4c5442c336d0364a",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 73,
+            "line": 73
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "total",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 75,
+            "line": 75
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 70
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "802846bef65ad0b9",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 79,
+            "line": 79
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "total *= item;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "f19f54d216e474fc",
+          "span": {
+            "col": 13,
+            "end_col": 27,
+            "end_line": 81,
+            "line": 81
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "*=",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "5a5826640fa00b32",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 81,
+            "line": 81
+          },
+          "to": [
+            "/="
+          ]
+        },
+        {
+          "from": "total",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "7fcc308681d10de7",
+          "span": {
+            "col": 16,
+            "end_col": 21,
+            "end_line": 83,
+            "line": 83
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 78
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/cmd/Main.java",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account.deposit(1250);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 31,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1250",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c70c074acd7ffaa8",
+          "span": {
+            "col": 25,
+            "end_col": 29,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "System.out.println(account.statement());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 9,
+            "end_col": 49,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/cmd/Main.java",
+        "line": 11
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/deadexport/DeadExport.java",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "entries.length",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "8d45bc0faba15080",
+          "span": {
+            "col": 16,
+            "end_col": 30,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/deadexport/DeadExport.java",
+        "line": 9
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/deadhelpers/DeadHelpers.java",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "bb2b232490a42345",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "baef3e1ae5f297bf",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/deadhelpers/DeadHelpers.java",
+        "line": 7
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "9f83db52978643f8",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c81ba68022517fae",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+        "line": 11
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "55ae961a599713bd",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+        "line": 11
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "new int[] {Alpha.alpha(), beta()}",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "24422efb3c0ca6b9",
+          "span": {
+            "col": 16,
+            "end_col": 49,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+        "line": 16
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "store.rows()",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f2d7d04258a02a3b",
+          "span": {
+            "col": 16,
+            "end_col": 28,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depslayers/domain/Order.java",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "new Store(0)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "18b8f0ac599c6bfb",
+          "span": {
+            "col": 16,
+            "end_col": 28,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "null"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "93b6b9c7c98fb0ed",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depslayers/infra/Store.java",
+        "line": 6
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/report/Format.java",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "String.format(\"%d.%02d\", cents / 100, cents % 100)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f2d7d04258a02a3b",
+          "span": {
+            "col": 16,
+            "end_col": 66,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "null"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "67a9aabdfd36a989",
+          "span": {
+            "col": 47,
+            "end_col": 48,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9f393ee9c1797fd7",
+          "span": {
+            "col": 49,
+            "end_col": 52,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c5893f528de8b91c",
+          "span": {
+            "col": 62,
+            "end_col": 65,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/report/Format.java",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "55270c73c5e07c61",
+          "span": {
+            "col": 51,
+            "end_col": 53,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerPropertyTest.java",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertEquals(900, Pricing.discounted(1000, 10, true));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 63,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "900",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ccdedc12d92b2f22",
+          "span": {
+            "col": 22,
+            "end_col": 25,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7d84d276b03cc5c1",
+          "span": {
+            "col": 46,
+            "end_col": 50,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e7b9594f2755d099",
+          "span": {
+            "col": 52,
+            "end_col": 54,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "fdf4f20f29f7fa19",
+          "span": {
+            "col": 56,
+            "end_col": 60,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "false"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 12
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertThrows(IllegalArgumentException.class, () -> Decide.parseCents(\"\"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 83,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 17
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertFalse(Ledger.open(\"ann\").statement().isEmpty());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 63,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Decide.classify(100, 50);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 34,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c6ee048f30caec6a",
+          "span": {
+            "col": 25,
+            "end_col": 28,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "41ae853a21c90bf4",
+          "span": {
+            "col": 30,
+            "end_col": 32,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 27
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertNull(Pricing.mail(primary, Ledger.open(\"bo\")));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "28903e4d345660ea",
+          "span": {
+            "col": 9,
+            "end_col": 62,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 32
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "2d1b219679848a4c",
+          "span": {
+            "col": 39,
+            "end_col": 40,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "20",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2ce6a758372f81b3",
+          "span": {
+            "col": 42,
+            "end_col": 44,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "300",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c49efbcdb19a53be",
+          "span": {
+            "col": 46,
+            "end_col": 49,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assertEquals(cents, Ledger.balance(new long[] {cents}));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7a22bae7ddf0fe53",
+          "span": {
+            "col": 13,
+            "end_col": 69,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 40
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "acba919788b0479a",
+          "span": {
+            "col": 27,
+            "end_col": 30,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "cents <= 300",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "785781ba7ae05aae",
+          "span": {
+            "col": 32,
+            "end_col": 44,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "!(cents <= 300)"
+          ]
+        },
+        {
+          "from": "<=",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "4b14cd443b45c843",
+          "span": {
+            "col": 38,
+            "end_col": 40,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "<"
+          ]
+        },
+        {
+          "from": "300",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "68a7bf4308472c87",
+          "span": {
+            "col": 41,
+            "end_col": 44,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "300",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "64b2d60615ab718b",
+          "span": {
+            "col": 41,
+            "end_col": 44,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "300 + 1",
+            "300 - 1"
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "799ec4bc99f4f918",
+          "span": {
+            "col": 52,
+            "end_col": 54,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "124678a595bdb2a8",
+          "span": {
+            "col": 55,
+            "end_col": 58,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assertEquals(cents, Ledger.balance(new long[] {cents}));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "942c72955eb0a6e7",
+          "span": {
+            "col": 13,
+            "end_col": 69,
+            "end_line": 50,
+            "line": 50
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 47
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account.deposit(100);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 30,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c70c074acd7ffaa8",
+          "span": {
+            "col": 25,
+            "end_col": 28,
+            "end_line": 57,
+            "line": 57
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "account.deposit(50);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 9,
+            "end_col": 29,
+            "end_line": 58,
+            "line": 58
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "daf1765e02d3da77",
+          "span": {
+            "col": 25,
+            "end_col": 27,
+            "end_line": 58,
+            "line": 58
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assertEquals(\"kim\", account.owner());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "28903e4d345660ea",
+          "span": {
+            "col": 9,
+            "end_col": 46,
+            "end_line": 59,
+            "line": 59
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 54
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account.deposit(200);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 30,
+            "end_line": 65,
+            "line": 65
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c70c074acd7ffaa8",
+          "span": {
+            "col": 25,
+            "end_col": 28,
+            "end_line": 65,
+            "line": 65
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "account.deposit(25);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 9,
+            "end_col": 29,
+            "end_line": 66,
+            "line": 66
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "25",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "daf1765e02d3da77",
+          "span": {
+            "col": 25,
+            "end_col": 27,
+            "end_line": 66,
+            "line": 66
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assertEquals(225, total);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "85106360966efc62",
+          "span": {
+            "col": 9,
+            "end_col": 34,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "225",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9c776a8c5154f4b4",
+          "span": {
+            "col": 22,
+            "end_col": 25,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 62
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account = Ledger.open(\"ada\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 38,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 16
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Ledger.registry.remove(account.id());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 46,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "account.deposit(250);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 30,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "250",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c6ee048f30caec6a",
+          "span": {
+            "col": 25,
+            "end_col": 28,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assertEquals(250, account.cents());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 44,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "250",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "220509b336bc909e",
+          "span": {
+            "col": 22,
+            "end_col": 25,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 26
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertTrue(Pricing.discounted(200, 50, true) < 200);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 61,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "705ce077daaf7d2b",
+          "span": {
+            "col": 39,
+            "end_col": 42,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c647dc2d8bdfa22b",
+          "span": {
+            "col": 44,
+            "end_col": 46,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "26fcf8b446c151f9",
+          "span": {
+            "col": 48,
+            "end_col": 52,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "2468d65f85ff9c0e",
+          "span": {
+            "col": 54,
+            "end_col": 55,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9e57197479ecef6d",
+          "span": {
+            "col": 56,
+            "end_col": 59,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "c901b2b1fcba2134",
+          "span": {
+            "col": 56,
+            "end_col": 59,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "200 + 1",
+            "200 - 1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 32
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertNotNull(Ledger.registry.get(account.id()));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 58,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 37
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertTrue(Decide.parseCents(\"12x\") < 0);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 50,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "2468d65f85ff9c0e",
+          "span": {
+            "col": 45,
+            "end_col": 46,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b652a0b93112254e",
+          "span": {
+            "col": 47,
+            "end_col": 48,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "c901b2b1fcba2134",
+          "span": {
+            "col": 47,
+            "end_col": 48,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 42
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertNotEquals(account.id(), Ledger.open(\"grace\").id());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 66,
+            "end_line": 49,
+            "line": 49
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 47
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertEquals(each[1], Decide.classify(Long.parseLong(each[0]), 100));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "f19f54d216e474fc",
+          "span": {
+            "col": 13,
+            "end_col": 82,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "ecf204543281d6c7",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "ba1cb60b45460332",
+          "span": {
+            "col": 71,
+            "end_col": 72,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d581614d29b3cbf6",
+          "span": {
+            "col": 76,
+            "end_col": 79,
+            "end_line": 56,
+            "line": 56
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 52
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertTrue(!account.statement().isEmpty());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 52,
+            "end_line": 63,
+            "line": 63
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 60
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertEquals(42, Decide.parseCents(\" 42 \"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 53,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "42",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ccdedc12d92b2f22",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 68,
+            "line": 68
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 66
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "Ledger.open(\"ada\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 28,
+            "end_line": 73,
+            "line": 73
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 71
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b1d55beb1fb868b0",
+          "span": {
+            "col": 57,
+            "end_col": 58,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3485ca9c31042cbc",
+          "span": {
+            "col": 61,
+            "end_col": 63,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7f5f96e14f373fbc",
+          "span": {
+            "col": 65,
+            "end_col": 66,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assertEquals(-3, tally.total());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 41,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "98d244064d92cdfb",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "assertTrue(tally.overdrawn());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 9,
+            "end_col": 39,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertEquals(125, Decide.parseCents(\" 125 \"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 55,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "125",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ccdedc12d92b2f22",
+          "span": {
+            "col": 22,
+            "end_col": 25,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 28
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assertThrows(IllegalArgumentException.class, () -> Decide.parseCents(\"  \"));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 85,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 33
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect.toMatchSnapshot(Pricing.discounted(200, 50, true));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 67,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "224f924c34dfdd82",
+          "span": {
+            "col": 51,
+            "end_col": 54,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f7fbd384f68b874e",
+          "span": {
+            "col": 56,
+            "end_col": 58,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "e47947661d3acdf5",
+          "span": {
+            "col": 60,
+            "end_col": 64,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "false"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 38
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "when(notifier.send(eq(\"ada\"), anyString())).thenReturn(\"sent\");",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 72,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "assertEquals(\"sent\", Pricing.mail(notifier, Ledger.open(\"ada\")));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 9,
+            "end_col": 74,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "verify(notifier).send(eq(\"ada\"), anyString());",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "28903e4d345660ea",
+          "span": {
+            "col": 9,
+            "end_col": 55,
+            "end_line": 48,
+            "line": 48
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 43
+      }
+    }
+  ]
+}

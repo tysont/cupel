@@ -1,0 +1,289 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 64.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 79,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_a93b67",
+      "kind": "complexity.high",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 18,
+        "file": "src/ledger/complexity.clj",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_3f6b8dd416106191",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_a93b67 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity/label",
+        "hash": "sh_3f6b8dd416106191",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity/label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_e727b9",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 30,
+        "file": "src/ledger/complexity.clj",
+        "line": 20
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_44cec65dd328a478",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e727b9 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity/settle",
+        "hash": "sh_44cec65dd328a478",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity/settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `open-account` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_ade191",
+      "kind": "params.many",
+      "location": {
+        "col": 1,
+        "end_col": 77,
+        "end_line": 35,
+        "file": "src/ledger/complexity.clj",
+        "line": 32
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_07e9a3fcee33ec80",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ade191 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity/open-account",
+        "hash": "sh_07e9a3fcee33ec80",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity/open-account` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `statement-template` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 64
+      },
+      "id": "fnd_75958c",
+      "kind": "function.long",
+      "location": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 100,
+        "file": "src/ledger/complexity.clj",
+        "line": 37
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_53240e95f71b95f7",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_75958c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.complexity/statement-template",
+        "hash": "sh_53240e95f71b95f7",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.complexity/statement-template` is 64 lines long (max 60)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_a93b67",
+      "kind": "reduce_complexity",
+      "priority": 1,
+      "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e727b9",
+      "kind": "reduce_complexity",
+      "priority": 2,
+      "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ade191",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Group related parameters of `open-account` into a type, or split it so each part needs at most 5."
+    },
+    {
+      "command": null,
+      "finding": "fnd_75958c",
+      "kind": "refactor_extract",
+      "priority": 4,
+      "summary": "Extract cohesive blocks of `statement-template` into named functions until it is at most 60 lines."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 20,
+      "languages": [
+        "clojure"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 79
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 4
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 4,
+  "truncated": false
+}

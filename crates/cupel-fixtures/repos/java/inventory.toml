@@ -1,0 +1,330 @@
+# Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
+# repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+not-applicable = "Java has no functions outside a type: every named function is a method of a class, interface, enum, or record."
+
+[symbols.method]
+file = "src/main/java/ledger/Account.java"
+name = "ledger.Account.deposit"
+
+[symbols.static-method]
+file = "src/main/java/ledger/Ledger.java"
+name = "ledger.Ledger.balance"
+expect = { kind = "method" }
+
+[symbols.nested-function]
+not-applicable = "Java has no named functions inside a method's body; a lambda bound to a name is a closure, and a local class's methods are methods."
+
+[symbols.closure]
+file = "src/main/java/ledger/Ledger.java"
+name = "ledger.Ledger.header.title"
+
+[symbols.public]
+file = "src/main/java/ledger/Account.java"
+name = "ledger.Account.deposit"
+
+[symbols.internal]
+file = "src/main/java/ledger/Ledger.java"
+name = "ledger.Ledger.scale"
+
+[symbols.private]
+file = "src/main/java/ledger/Account.java"
+name = "ledger.Account.audited"
+
+[symbols.file-namespace]
+file = "src/main/java/ledger/report/Format.java"
+name = "ledger.report.Format.render"
+expect = { namespace = "ledger.report.Format" }
+
+[symbols.parameters]
+file = "src/main/java/ledger/Complexity.java"
+name = "ledger.Complexity.openAccount"
+expect = { parameters = 6 }
+
+[symbols.receiver]
+file = "src/main/java/ledger/Complexity.java"
+name = "ledger.Complexity.Statement.line"
+expect = { parameters = 1 }
+
+[decisions.if]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.classify"
+
+[decisions.else-if]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.firstOverdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.drain"
+
+[decisions.boolean-op]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.classify"
+
+[decisions.early-return]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.firstOverdraft"
+
+[decisions.case]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.describe"
+
+[decisions.ternary]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.sign"
+
+[decisions.catch]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.parseCents"
+
+[norm-tree.rename]
+file = "src/main/java/ledger/Twins.java"
+name = "ledger.Twins.netTotal"
+twin = "ledger.Twins.sumAfterCharge"
+
+[norm-tree.literal]
+file = "src/main/java/ledger/Twins.java"
+name = "ledger.Twins.netTotal"
+twin = "ledger.Twins.netTotalFloor"
+
+[norm-tree.layout]
+file = "src/main/java/ledger/Twins.java"
+name = "ledger.Twins.netTotal"
+twin = "ledger.Twins.netTotalLaidOut"
+
+[norm-tree.operator]
+file = "src/main/java/ledger/Twins.java"
+name = "ledger.Twins.netTotal"
+twin = "ledger.Twins.netTotalPlus"
+
+[norm-tree.branch]
+file = "src/main/java/ledger/Twins.java"
+name = "ledger.Twins.netTotal"
+twin = "ledger.Twins.netTotalCapped"
+
+[norm-tree.call]
+file = "src/main/java/ledger/Twins.java"
+name = "ledger.Twins.netTotal"
+twin = "ledger.Twins.netTotalProduct"
+
+[mutation-sites.relational]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.discounted"
+expect = { from = "!=", to = ["=="] }
+
+[mutation-sites.arith-add-sub]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.tally"
+expect = { from = "+=", to = ["-="] }
+
+[mutation-sites.arith-mul-div]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.discounted"
+expect = { from = "&&", to = ["||"] }
+
+[mutation-sites.boolean-literal]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.tally"
+expect = { from = "false", to = ["true"] }
+
+[mutation-sites.zero-one]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.tally"
+expect = { from = "logTotal(total);", to = [""] }
+
+[mutation-sites.return-value]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.mail"
+expect = { from = "notifier.send(account.owner(), account.statement())", to = ["null"] }
+
+[mutation-sites.constant]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "src/main/java/ledger/Decide.java"
+name = "ledger.Decide.classify"
+expect = { from = "0", to = ["0 + 1", "0 - 1"] }
+
+[mutation-sites.negation]
+file = "src/main/java/ledger/Pricing.java"
+name = "ledger.Pricing.discounted"
+expect = { from = "member && cut != 0", to = ["!(member && cut != 0)"] }
+
+[test-frames.case]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "depositAddsToTheBalance"
+
+[test-frames.assertion-equality]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "depositAddsToTheBalance"
+
+[test-frames.assertion-truthiness]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "membersGetADiscount"
+
+[test-frames.assertion-not-null]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "newAccountsAreRegistered"
+
+[test-frames.assertion-throws]
+file = "src/test/java/ledger/PricingTest.java"
+name = "parseCentsRejectsBlanks"
+
+[test-frames.assertion-snapshot]
+file = "src/test/java/ledger/PricingTest.java"
+name = "discountSnapshot"
+
+[test-frames.weak-assertion]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "newAccountsHaveDistinctIds"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "openingAnAccountDoesNotThrow"
+
+[test-frames.skip]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "statementIsMailed"
+expect = { skip = { reason = "talks to the network" } }
+
+[test-frames.mock]
+file = "src/test/java/ledger/PricingTest.java"
+name = "mailNotifiesTheOwner"
+expect = { target = "Notifier" }
+
+[test-frames.setup]
+file = "src/test/java/ledger/LedgerTest.java"
+
+[test-frames.framework]
+file = "src/test/java/ledger/LedgerTest.java"
+expect = { framework = "junit5" }
+
+[test-frames.property]
+file = "src/test/java/ledger/LedgerPropertyTest.java"
+name = "balanceOfOneEntryIsTheEntry"
+expect = { property = "jqwik" }
+
+[test-conventions.separate-test-file]
+file = "src/main/java/ledger/Ledger.java"
+name = "src/test/java/ledger/LedgerTest.java"
+
+[test-conventions.inline-tests]
+not-applicable = "Maven and Gradle compile and run tests only from the test source set (`src/test/java`); a main source file cannot contain its own tests."
+
+[module-graph.relative]
+not-applicable = "Java imports name a type by its fully qualified package path; there is no path-relative import."
+
+[module-graph.absolute]
+file = "src/main/java/ledger/Ledger.java"
+name = "ledger.report.Format"
+expect = { relative = false, target = { path = "src/main/java/ledger/report/Format.java" } }
+
+[module-graph.workspace-member]
+file = "src/main/java/ledger/Ledger.java"
+name = "shapes.Geometry"
+expect = { target = { path = "shapes/src/main/java/shapes/Geometry.java" } }
+
+[module-graph.external]
+file = "src/main/java/ledger/Ledger.java"
+name = "com.google.common.base.Strings"
+expect = { target = { package = "com.google.common.base" } }
+
+[module-graph.standard-library]
+file = "src/main/java/ledger/Ledger.java"
+name = "java.util.HashMap"
+expect = { target = { package = "jdk" } }
+
+[module-graph.unresolved]
+file = "src/main/java/ledger/Ledger.java"
+name = "ledger.gen.Version"
+
+[module-graph.declaration]
+not-applicable = "Java declares no child modules in source: a package is a directory, and every file names its package."
+
+[module-graph.re-export]
+not-applicable = "A Java import makes names visible in its own file only; nothing an importer sees is re-exported (a module descriptor's `exports` names its own packages)."
+
+[api-surface.function]
+not-applicable = "Java has no functions outside a type; public static methods are methods of their class."
+
+[api-surface.method]
+file = "src/main/java/ledger/Account.java"
+name = "ledger.Account.deposit"
+expect = { signature = "void deposit(long _)" }
+
+[api-surface.type]
+file = "src/main/java/ledger/Account.java"
+name = "ledger.Account"
+
+[api-surface.interface]
+file = "src/main/java/ledger/Audited.java"
+name = "ledger.Audited"
+
+[api-surface.constant]
+file = "src/main/java/ledger/Ledger.java"
+name = "ledger.Ledger.MAX_ENTRIES"
+
+[api-surface.variable]
+file = "src/main/java/ledger/Ledger.java"
+name = "ledger.Ledger.currency"
+
+[api-surface.module]
+file = "src/main/java/module-info.java"
+name = "ledger"
+
+[roots.entry-point]
+file = "src/main/java/ledger/cmd/Main.java"
+name = "ledger.cmd.Main.main"
+
+[roots.export]
+file = "src/main/java/ledger/Ledger.java"
+name = "ledger.Ledger.balance"
+
+[roots.test]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "ledger.LedgerTest.depositAddsToTheBalance"
+
+[roots.hook]
+file = "src/main/java/ledger/Account.java"
+name = "ledger.Account.auditTrail"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "java", build_files = ["build.gradle", "settings.gradle", "shapes/build.gradle"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["shapes"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = ["target", "build", ".gradle"] }
+
+[project-info.packages]
+not-applicable = "Maven and Gradle select modules and projects by name (`-pl`, `:shapes:test`), not by path patterns."

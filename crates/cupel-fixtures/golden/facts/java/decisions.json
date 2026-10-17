@@ -1,0 +1,1545 @@
+{
+  "symbols": [
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 9,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 9,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 20
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 13,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 23
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 27
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 37
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 41
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 46
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 41
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 57
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 2,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 3,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 4,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 40
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 57
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 62
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 128
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 133
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 169
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 174
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 2,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "catch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 27
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 39
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "ternary",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 51
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 0,
+          "continues": true,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 55
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 63
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 24
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 35
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 39
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 48
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 53
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 9,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 54
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "boolean-op",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 24
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 37
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 42
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 24
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 44
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 52
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 62
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 70
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 78
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/cmd/Main.java",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/cmd/Main.java",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/deadexport/DeadExport.java",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/deadexport/DeadExport.java",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/deadhelpers/DeadHelpers.java",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/deadhelpers/DeadHelpers.java",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depslayers/domain/Order.java",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depslayers/infra/Store.java",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/report/Format.java",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/report/Format.java",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerPropertyTest.java",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 27
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 40
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 47
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 54
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 62
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 16
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 26
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 37
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 42
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 47
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "table": true
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 52
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 60
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 66
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 71
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 38
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 43
+      }
+    }
+  ]
+}

@@ -170,12 +170,12 @@ fn describe_matrix_shows_tests_impacted_unsupported_where_no_per_test_map_exists
     );
     assert_eq!(
         unsupported_languages(&verbs[0]),
-        ["javascript", "typescript"]
+        ["clojure", "java", "javascript", "typescript"]
     );
 }
 
 #[test]
-fn describe_fact_per_test_map_lists_producers_for_every_language_but_the_ecma_family() {
+fn describe_fact_per_test_map_lists_producers_for_go_python_and_rust() {
     let description = described(&["fact", "per-test-map"]);
     assert_eq!(description["version"], json!(2));
     let producers: Vec<(String, usize)> = description["producers"]
@@ -192,7 +192,9 @@ fn describe_fact_per_test_map_lists_producers_for_every_language_but_the_ecma_fa
     assert_eq!(
         producers,
         [
+            ("clojure", 0),
             ("go", 1),
+            ("java", 0),
             ("javascript", 0),
             ("python", 1),
             ("rust", 1),

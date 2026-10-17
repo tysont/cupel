@@ -12,6 +12,9 @@ go = "go version"
 cargo = "cargo is part of the Rust toolchain, which Cupel does not install: install Rust with rustup (https://rustup.rs) and put cargo on PATH."
 go = "go is the Go toolchain, which Cupel does not install: install Go from https://go.dev/dl/ and put go on PATH."
 python3 = "python3 is the Python toolchain, which Cupel does not install: install Python 3 from https://www.python.org/downloads/ or a package manager and put python3 on PATH."
+mvn = "mvn is Apache Maven, which Cupel does not install: install a JDK and Maven from https://maven.apache.org/download.cgi or a package manager and put mvn on PATH."
+gradle = "gradle is the Gradle build tool, which Cupel does not install: install a JDK and Gradle from https://gradle.org/install/ or a package manager and put gradle on PATH."
+clojure = "clojure is the Clojure CLI, which Cupel does not install: install a JDK and the CLI from https://clojure.org/guides/install_clojure and put clojure on PATH."
 
 # --- JavaScript and TypeScript ------------------------------------------------------------------
 
@@ -258,3 +261,50 @@ command = "go vet -json <packages>"
 id = "tool.staticcheck"
 command = "staticcheck -f json <packages>"
 install = "go install honnef.co/go/tools/cmd/staticcheck@2024.1.1"
+
+# --- Java (ADR-108) -----------------------------------------------------------------------------
+
+[[rows]]
+langs = ["java"]
+property = ["jqwik"]
+fuzz = ["jazzer"]
+race = []
+
+[[rows.runners]]
+id = "tool.maven"
+detect = [{ file = "pom.xml" }]
+command = "mvn -B --no-transfer-progress test"
+
+[[rows.runners]]
+id = "tool.gradle"
+command = "gradle test --console=plain"
+
+# JaCoCo by coordinate needs no `pom.xml` change; under Gradle the build must apply the `jacoco`
+# plugin with XML reports on.
+[[rows.coverage]]
+id = "tool.jacoco-maven"
+format = "jacoco"
+commands = { "tool.maven" = "mvn -B --no-transfer-progress org.jacoco:jacoco-maven-plugin:0.8.13:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.13:report" }
+
+[[rows.coverage]]
+id = "tool.jacoco-gradle"
+format = "jacoco"
+commands = { "tool.gradle" = "gradle test jacocoTestReport --console=plain" }
+
+# --- Clojure (ADR-109) --------------------------------------------------------------------------
+
+[[rows]]
+langs = ["clojure"]
+property = ["test.check"]
+fuzz = []
+race = []
+
+[[rows.runners]]
+id = "tool.clojure-test"
+command = "clojure -M:test"
+
+# Cloverage by coordinate needs no `deps.edn` change; it instruments `src` and runs `test`.
+[[rows.coverage]]
+id = "tool.cloverage"
+format = "lcov"
+commands = { "tool.clojure-test" = "clojure -Sdeps '{:deps {cloverage/cloverage {:mvn/version \"1.2.4\"}}}' -M:test -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary" }

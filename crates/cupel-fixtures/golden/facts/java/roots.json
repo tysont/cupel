@@ -1,0 +1,460 @@
+{
+  "roots": [
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 9,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 16
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 12
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 18
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 23
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 32
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 37
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 41
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 41
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 40
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 57
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 62
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 128
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 133
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 9,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 169
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 9,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 174
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 28
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 35
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 48
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Ledger.java",
+        "line": 53
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Pricing.java",
+        "line": 42
+      }
+    },
+    {
+      "reason": "entry-point",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/cmd/Main.java",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/cmd/Main.java",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/deadexport/DeadExport.java",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+        "line": 11
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+        "line": 16
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depslayers/domain/Order.java",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/depslayers/infra/Store.java",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/report/Format.java",
+        "line": 9
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerPropertyTest.java",
+        "line": 7
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 12
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 17
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 22
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 27
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 32
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 40
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 47
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 54
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 62
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 16
+      }
+    },
+    {
+      "reason": "framework-hook",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 21
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 26
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 32
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 37
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 42
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 47
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 52
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 60
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 66
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 71
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 21
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 28
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 33
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 38
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/PricingTest.java",
+        "line": 43
+      }
+    }
+  ]
+}

@@ -1,0 +1,593 @@
+{
+  "files": [
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 69,
+                "end_line": 10,
+                "line": 10
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "deposit-adds-to-the-balance",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 70,
+            "end_line": 10,
+            "line": 9
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 3,
+                "end_col": 48,
+                "end_line": 13,
+                "line": 13
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "members-get-a-discount",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 49,
+            "end_line": 13,
+            "line": 12
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "not-null",
+              "span": {
+                "col": 5,
+                "end_col": 52,
+                "end_line": 17,
+                "line": 17
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "new-accounts-are-registered",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 54,
+            "end_line": 17,
+            "line": 15
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 3,
+                "end_col": 41,
+                "end_line": 20,
+                "line": 20
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "parsing-garbage-fails",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 42,
+            "end_line": 20,
+            "line": 19
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 80,
+                "end_line": 23,
+                "line": 23
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "new-accounts-have-distinct-ids",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 81,
+            "end_line": 23,
+            "line": 22
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 7,
+                "end_col": 53,
+                "end_line": 28,
+                "line": 28
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "classify-handles-every-case",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 56,
+            "end_line": 28,
+            "line": 25
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 42,
+                "end_line": 31,
+                "line": 31
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "parse-cents-trims-spaces",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 43,
+            "end_line": 31,
+            "line": 30
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "opening-an-account-does-not-throw",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 29,
+            "end_line": 34,
+            "line": 33
+          }
+        }
+      ],
+      "file": "test/ledger/core_test.clj",
+      "framework": "clojure-test",
+      "setup": [
+        {
+          "col": 1,
+          "end_col": 64,
+          "end_line": 7,
+          "line": 7
+        }
+      ]
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 31,
+                "end_line": 9,
+                "line": 9
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 5,
+                "end_col": 28,
+                "end_line": 10,
+                "line": 10
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "tally-reports-overdraft",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 30,
+            "end_line": 10,
+            "line": 7
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 44,
+                "end_line": 13,
+                "line": 13
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "parse-cents-accepts-digits",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 45,
+            "end_line": 13,
+            "line": 12
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 3,
+                "end_col": 68,
+                "end_line": 16,
+                "line": 16
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "parse-cents-rejects-blanks",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 69,
+            "end_line": 16,
+            "line": 15
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 7,
+                "end_col": 27,
+                "end_line": 22,
+                "line": 22
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 17,
+                "end_col": 34,
+                "end_line": 19,
+                "line": 19
+              },
+              "target": "pricing/log-total"
+            }
+          ],
+          "name": "mail-notifies-the-owner",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 30,
+            "end_line": 22,
+            "line": 18
+          }
+        }
+      ],
+      "file": "test/ledger/pricing_test.clj",
+      "framework": "clojure-test",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "custom",
+              "span": {
+                "col": 3,
+                "end_col": 38,
+                "end_line": 9,
+                "line": 8
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "balance-of-one-entry-is-the-entry",
+          "property": "test-check",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 39,
+            "end_line": 9,
+            "line": 7
+          }
+        }
+      ],
+      "file": "test/ledger/property_test.clj",
+      "framework": "clojure-test",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 49,
+                "end_line": 8,
+                "line": 8
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "members-pay-exactly-the-discounted-price",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 50,
+            "end_line": 8,
+            "line": 7
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "throws",
+              "span": {
+                "col": 3,
+                "end_col": 66,
+                "end_line": 11,
+                "line": 11
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "blank-amounts-are-rejected",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 67,
+            "end_line": 11,
+            "line": 10
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 3,
+                "end_col": 56,
+                "end_line": 14,
+                "line": 14
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "statements-are-not-empty",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 57,
+            "end_line": 14,
+            "line": 13
+          }
+        },
+        {
+          "assertions": [],
+          "mocks": [],
+          "name": "classifying-runs",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 28,
+            "end_line": 17,
+            "line": 16
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 71,
+                "end_line": 23,
+                "line": 23
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [
+            {
+              "span": {
+                "col": 17,
+                "end_col": 34,
+                "end_line": 20,
+                "line": 20
+              },
+              "target": "pricing/log-total"
+            },
+            {
+              "span": {
+                "col": 17,
+                "end_col": 34,
+                "end_line": 21,
+                "line": 21
+              },
+              "target": "core/open-account"
+            },
+            {
+              "span": {
+                "col": 17,
+                "end_col": 29,
+                "end_line": 22,
+                "line": 22
+              },
+              "target": "core/deposit"
+            }
+          ],
+          "name": "mail-goes-through-every-notifier",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 73,
+            "end_line": 23,
+            "line": 19
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 42,
+                "end_line": 27,
+                "line": 27
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "every-entry-counts-toward-the-balance",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 44,
+            "end_line": 27,
+            "line": 25
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 7,
+                "end_col": 44,
+                "end_line": 32,
+                "line": 32
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "computed-entries-count-toward-the-balance",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 47,
+            "end_line": 32,
+            "line": 29
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 36,
+                "end_line": 38,
+                "line": 38
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "deposits-keep-the-owner",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 38,
+            "end_line": 38,
+            "line": 34
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 71,
+                "end_line": 44,
+                "line": 44
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "deposits-accumulate",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 73,
+            "end_line": 44,
+            "line": 40
+          }
+        }
+      ],
+      "file": "test/ledger/quality_test.clj",
+      "framework": "clojure-test",
+      "setup": []
+    }
+  ]
+}

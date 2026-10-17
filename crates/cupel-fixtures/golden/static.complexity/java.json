@@ -1,0 +1,289 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 15.0,
+        "cyclomatic_max": 11.0,
+        "length_max": 64.0,
+        "nesting_max": 5.0,
+        "params_max": 6.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 98,
+        "unit": "cyclomatic_max",
+        "value": 11.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 10,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_3e8c8d",
+      "kind": "complexity.high",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 37,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 11
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_2d30bc640f6376a8",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3e8c8d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Complexity.label",
+        "hash": "sh_2d30bc640f6376a8",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Complexity.label` is too complex: cyclomatic 11 (max 10), cognitive 10 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "depth": 5,
+        "nesting_max": 4
+      },
+      "id": "fnd_734f42",
+      "kind": "nesting.deep",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 54,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 40
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_6519bb6d84c93862",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_734f42 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Complexity.settle",
+        "hash": "sh_6519bb6d84c93862",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Complexity.settle` nests 5 levels deep (max 4)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Group related parameters of `openAccount` into a type, or split it so each part needs at most 5."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "parameters": 6,
+        "params_max": 5
+      },
+      "id": "fnd_6f80c2",
+      "kind": "params.many",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 59,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 57
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_7cffa2a2aeeddbfa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_6f80c2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Complexity.openAccount",
+        "hash": "sh_7cffa2a2aeeddbfa",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Complexity.openAccount` takes 6 parameters (max 5)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `statementTemplate` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 64
+      },
+      "id": "fnd_42c3ae",
+      "kind": "function.long",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 125,
+        "file": "src/main/java/ledger/Complexity.java",
+        "line": 62
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_0239427f4a754522",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_42c3ae --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Complexity.statementTemplate",
+        "hash": "sh_0239427f4a754522",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Complexity.statementTemplate` is 64 lines long (max 60)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_3e8c8d",
+      "kind": "reduce_complexity",
+      "priority": 1,
+      "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+    },
+    {
+      "command": null,
+      "finding": "fnd_734f42",
+      "kind": "reduce_complexity",
+      "priority": 2,
+      "summary": "Flatten `settle` with guard clauses and early exits, or extract the inner levels into named functions, until it nests at most 4 deep."
+    },
+    {
+      "command": null,
+      "finding": "fnd_6f80c2",
+      "kind": "refactor_extract",
+      "priority": 3,
+      "summary": "Group related parameters of `openAccount` into a type, or split it so each part needs at most 5."
+    },
+    {
+      "command": null,
+      "finding": "fnd_42c3ae",
+      "kind": "refactor_extract",
+      "priority": 4,
+      "summary": "Extract cohesive blocks of `statementTemplate` into named functions until it is at most 60 lines."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/depslayers/domain/**",
+                "infra": "**/depslayers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 24,
+      "languages": [
+        "java"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 98
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 4
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 4,
+  "truncated": false
+}

@@ -1,0 +1,251 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "static.deps",
+      "metrics": {
+        "cycles": 1.0,
+        "max_distance": 1.0,
+        "violations": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 18,
+        "unit": "cycles",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "break_cycle",
+        "priority": 2,
+        "summary": "Break the cycle src/main/java/ledger/depscycle/alpha/Alpha.java → src/main/java/ledger/depscycle/beta/Beta.java → src/main/java/ledger/depscycle/alpha/Alpha.java: move what the modules share into a module that imports none of them, or invert one import through an interface."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cycle": [
+          "src/main/java/ledger/depscycle/alpha/Alpha.java",
+          "src/main/java/ledger/depscycle/beta/Beta.java"
+        ],
+        "modules": [
+          "src/main/java/ledger/depscycle/alpha/Alpha.java",
+          "src/main/java/ledger/depscycle/beta/Beta.java"
+        ],
+        "size": 2
+      },
+      "id": "fnd_d4d202",
+      "kind": "dep.cycle",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d4d202 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "Import cycle of 2 modules: src/main/java/ledger/depscycle/alpha/Alpha.java → src/main/java/ledger/depscycle/beta/Beta.java → src/main/java/ledger/depscycle/alpha/Alpha.java"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Remove the import of `src/main/java/ledger/depslayers/infra/Store.java` from `src/main/java/ledger/depslayers/domain/Order.java`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "from": "src/main/java/ledger/depslayers/domain/Order.java",
+        "from_layer": "domain",
+        "order": [
+          "domain",
+          "infra"
+        ],
+        "specifier": "ledger.depslayers.infra.Store",
+        "to": "src/main/java/ledger/depslayers/infra/Store.java",
+        "to_layer": "infra"
+      },
+      "id": "fnd_eae2a4",
+      "kind": "dep.layer-violation",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/main/java/ledger/depslayers/domain/Order.java",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_eae2a4 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/main/java/ledger/depslayers/domain/Order.java` (layer domain) imports `src/main/java/ledger/depslayers/infra/Store.java` (layer infra)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `src/main/java/ledger/depslayers/port/Port.java`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+      },
+      "check": "static.deps",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "abstractness": 1.0,
+        "afferent": 0,
+        "distance": 1.0,
+        "distance_max": 0.7,
+        "efferent": 1,
+        "external": 0,
+        "instability": 1.0,
+        "module": "src/main/java/ledger/depslayers/port/Port.java",
+        "unresolved": 0
+      },
+      "id": "fnd_d52ef7",
+      "kind": "dep.unstable-abstract",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 1,
+        "file": "src/main/java/ledger/depslayers/port/Port.java",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.deps",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d52ef7 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 0,
+      "title": "`src/main/java/ledger/depslayers/port/Port.java` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_d4d202",
+      "kind": "break_cycle",
+      "priority": 1,
+      "summary": "Break the cycle src/main/java/ledger/depscycle/alpha/Alpha.java → src/main/java/ledger/depscycle/beta/Beta.java → src/main/java/ledger/depscycle/alpha/Alpha.java: move what the modules share into a module that imports none of them, or invert one import through an interface."
+    },
+    {
+      "command": null,
+      "finding": "fnd_eae2a4",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Remove the import of `src/main/java/ledger/depslayers/infra/Store.java` from `src/main/java/ledger/depslayers/domain/Order.java`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
+    },
+    {
+      "command": null,
+      "finding": "fnd_d52ef7",
+      "kind": "review",
+      "priority": 3,
+      "summary": "Review `src/main/java/ledger/depslayers/port/Port.java`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/depslayers/domain/**",
+                "infra": "**/depslayers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 24,
+      "languages": [
+        "java"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 98
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 3
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}

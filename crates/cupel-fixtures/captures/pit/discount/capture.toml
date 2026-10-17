@@ -1,0 +1,6 @@
+# Captured from the real tool on the tests.mutation/java fixture (P6.4); mutations.xml is its unedited
+# output. `dir` is where it ran: the PIT plugin's copy of the fixture in its scratch directory.
+tool = "PIT 1.29.10, pitest-junit5-plugin 1.2.3, Maven 3.9.16, JUnit Jupiter 5.13.4"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p64/try/tests.mutation_java/.cupel/work/plugins/plugin.pit/tree"
+command = "mvn -B -q --no-transfer-progress test-compile org.pitest:pitest-maven:mutationCoverage -DoutputFormats=XML -DtimestampedReports=false -DfullMutationMatrix=true"
+exit_code = 0

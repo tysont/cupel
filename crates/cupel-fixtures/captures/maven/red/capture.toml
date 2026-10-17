@@ -1,0 +1,6 @@
+# Captured from the real tool on the test-results fixture (P6.4); the other files here are its
+# output, unedited but for the `<properties>` block of system properties, removed. `dir` is where it ran.
+tool = "Apache Maven 3.9.16 (2bdd9fddda4b155ebf8000e807eb73fd829a51d5), Surefire 3.5.3, JUnit Jupiter 5.13.4"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p64/work/java-red"
+command = "mvn -B --no-transfer-progress test -Dsurefire.failIfNoSpecifiedTests=false"
+exit_code = 1

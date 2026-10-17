@@ -1,0 +1,1347 @@
+{
+  "symbols": [
+    {
+      "body": null,
+      "display": "shapes.geometry/square",
+      "file": "shapes/src/shapes/geometry.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "square",
+      "namespace": "shapes.geometry",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 7,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "shapes.geometry/Circle/area",
+      "file": "shapes/src/shapes/geometry.clj",
+      "kind": "method",
+      "lang": "clojure",
+      "name": "area",
+      "namespace": "shapes.geometry/Circle",
+      "parameters": 0,
+      "span": {
+        "col": 3,
+        "end_col": 31,
+        "end_line": 15,
+        "line": 14
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "shapes.geometry/scaled",
+      "file": "shapes/src/shapes/geometry.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "scaled",
+      "namespace": "shapes.geometry",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 19,
+        "line": 17
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "shapes.geometry/scaled/times",
+      "file": "shapes/src/shapes/geometry.clj",
+      "kind": "closure",
+      "lang": "clojure",
+      "name": "times",
+      "namespace": "shapes.geometry/scaled",
+      "parameters": 1,
+      "span": {
+        "col": 15,
+        "end_col": 44,
+        "end_line": 18,
+        "line": 18
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.clones-settlement/settle-invoices",
+      "file": "src/ledger/clones_settlement.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "settle-invoices",
+      "namespace": "ledger.clones-settlement",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 11,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.clones-settlement/reconcile-payments",
+      "file": "src/ledger/clones_settlement.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "reconcile-payments",
+      "namespace": "ledger.clones-settlement",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 20,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.clones-settlement/order-lines",
+      "file": "src/ledger/clones_settlement.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "order-lines",
+      "namespace": "ledger.clones-settlement",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.clones-settlement/refund-lines",
+      "file": "src/ledger/clones_settlement.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "refund-lines",
+      "namespace": "ledger.clones-settlement",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 45,
+        "end_line": 39,
+        "line": 31
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.complexity/label",
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "label",
+      "namespace": "ledger.complexity",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 18,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.complexity/settle",
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "settle",
+      "namespace": "ledger.complexity",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 30,
+        "line": 20
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.complexity/open-account",
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "open-account",
+      "namespace": "ledger.complexity",
+      "parameters": 6,
+      "span": {
+        "col": 1,
+        "end_col": 77,
+        "end_line": 35,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.complexity/statement-template",
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "statement-template",
+      "namespace": "ledger.complexity",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 100,
+        "line": 37
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.complexity/net",
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "net",
+      "namespace": "ledger.complexity",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 22,
+        "end_line": 105,
+        "line": 102
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.complexity/Statement/line",
+      "file": "src/ledger/complexity.clj",
+      "kind": "method",
+      "lang": "clojure",
+      "name": "line",
+      "namespace": "ledger.complexity/Statement",
+      "parameters": 1,
+      "span": {
+        "col": 3,
+        "end_col": 42,
+        "end_line": 115,
+        "line": 114
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.complexity/month",
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "month",
+      "namespace": "ledger.complexity",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 133,
+        "line": 117
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/Account/audit-trail",
+      "file": "src/ledger/core.clj",
+      "kind": "method",
+      "lang": "clojure",
+      "name": "audit-trail",
+      "namespace": "ledger.core/Account",
+      "parameters": 0,
+      "span": {
+        "col": 3,
+        "end_col": 10,
+        "end_line": 26,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/open-account",
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "open-account",
+      "namespace": "ledger.core",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 14,
+        "end_line": 33,
+        "line": 28
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/deposit",
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "deposit",
+      "namespace": "ledger.core",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 35,
+        "end_line": 38,
+        "line": 35
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/scale",
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "scale",
+      "namespace": "ledger.core",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 41,
+        "line": 40
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/balance",
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "balance",
+      "namespace": "ledger.core",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 46,
+        "line": 43
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/floor-area",
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "floor-area",
+      "namespace": "ledger.core",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 51,
+        "line": 48
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/statement",
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "statement",
+      "namespace": "ledger.core",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 76,
+        "end_line": 58,
+        "line": 53
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/statement/header",
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "header",
+      "namespace": "ledger.core/statement",
+      "parameters": 1,
+      "span": {
+        "col": 11,
+        "end_col": 46,
+        "end_line": 57,
+        "line": 56
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/as-json",
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "as-json",
+      "namespace": "ledger.core",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 77,
+        "end_line": 64,
+        "line": 60
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core/as-json/title",
+      "file": "src/ledger/core.clj",
+      "kind": "closure",
+      "lang": "clojure",
+      "name": "title",
+      "namespace": "ledger.core/as-json",
+      "parameters": 1,
+      "span": {
+        "col": 15,
+        "end_col": 50,
+        "end_line": 63,
+        "line": 63
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.dead-export/unused-total",
+      "file": "src/ledger/dead_export.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "unused-total",
+      "namespace": "ledger.dead-export",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 7,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.dead-helpers/forgotten-rate",
+      "file": "src/ledger/dead_helpers.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "forgotten-rate",
+      "namespace": "ledger.dead-helpers",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 4,
+        "line": 3
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.decide/classify",
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "classify",
+      "namespace": "ledger.decide",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 20,
+        "end_line": 8,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.decide/first-overdraft",
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "first-overdraft",
+      "namespace": "ledger.decide",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 15,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.decide/parse-cents",
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "parse-cents",
+      "namespace": "ledger.decide",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 24,
+        "line": 17
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.decide/describe",
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "describe",
+      "namespace": "ledger.decide",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 30,
+        "line": 26
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.decide/sign",
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "sign",
+      "namespace": "ledger.decide",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 33,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.decide/drain",
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "drain",
+      "namespace": "ledger.decide",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 39,
+        "line": 35
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.deps-cycle.alpha/alpha",
+      "file": "src/ledger/deps_cycle/alpha.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "alpha",
+      "namespace": "ledger.deps-cycle.alpha",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 8,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.deps-cycle.beta/beta",
+      "file": "src/ledger/deps_cycle/beta.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "beta",
+      "namespace": "ledger.deps-cycle.beta",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 5,
+        "end_line": 8,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.deps-cycle.beta/both",
+      "file": "src/ledger/deps_cycle/beta.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "both",
+      "namespace": "ledger.deps-cycle.beta",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 13,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.deps-layers.domain.order/rows",
+      "file": "src/ledger/deps_layers/domain/order.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "rows",
+      "namespace": "ledger.deps-layers.domain.order",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 8,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.deps-layers.infra.store/rows",
+      "file": "src/ledger/deps_layers/infra/store.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "rows",
+      "namespace": "ledger.deps-layers.infra.store",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 7,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.main/-main",
+      "file": "src/ledger/main.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "-main",
+      "namespace": "ledger.main",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 13,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.pricing/discounted",
+      "file": "src/ledger/pricing.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "discounted",
+      "namespace": "ledger.pricing",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 8,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.pricing/log-total",
+      "file": "src/ledger/pricing.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "log-total",
+      "namespace": "ledger.pricing",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 27,
+        "end_line": 11,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.pricing/tally",
+      "file": "src/ledger/pricing.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "tally",
+      "namespace": "ledger.pricing",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 17,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.pricing/mail",
+      "file": "src/ledger/pricing.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "mail",
+      "namespace": "ledger.pricing",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 54,
+        "end_line": 22,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.report/render",
+      "file": "src/ledger/report.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "render",
+      "namespace": "ledger.report",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 55,
+        "end_line": 7,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.twins/sum",
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "sum",
+      "namespace": "ledger.twins",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 22,
+        "end_line": 5,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.twins/product",
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "product",
+      "namespace": "ledger.twins",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 22,
+        "end_line": 8,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.twins/net-total",
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "net-total",
+      "namespace": "ledger.twins",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 14,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.twins/sum-after-charge",
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "sum-after-charge",
+      "namespace": "ledger.twins",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 20,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.twins/net-total-floor",
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "net-total-floor",
+      "namespace": "ledger.twins",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 26,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.twins/net-total-laid-out",
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "net-total-laid-out",
+      "namespace": "ledger.twins",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 35,
+        "line": 28
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.twins/net-total-plus",
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "net-total-plus",
+      "namespace": "ledger.twins",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 41,
+        "line": 37
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.twins/net-total-capped",
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "net-total-capped",
+      "namespace": "ledger.twins",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 35,
+        "end_line": 47,
+        "line": 43
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.twins/net-total-product",
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "net-total-product",
+      "namespace": "ledger.twins",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 53,
+        "line": 49
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core-test/deposit-adds-to-the-balance",
+      "file": "test/ledger/core_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "deposit-adds-to-the-balance",
+      "namespace": "ledger.core-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 70,
+        "end_line": 10,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core-test/members-get-a-discount",
+      "file": "test/ledger/core_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "members-get-a-discount",
+      "namespace": "ledger.core-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 49,
+        "end_line": 13,
+        "line": 12
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core-test/new-accounts-are-registered",
+      "file": "test/ledger/core_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "new-accounts-are-registered",
+      "namespace": "ledger.core-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 54,
+        "end_line": 17,
+        "line": 15
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core-test/parsing-garbage-fails",
+      "file": "test/ledger/core_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "parsing-garbage-fails",
+      "namespace": "ledger.core-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 20,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core-test/new-accounts-have-distinct-ids",
+      "file": "test/ledger/core_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "new-accounts-have-distinct-ids",
+      "namespace": "ledger.core-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 81,
+        "end_line": 23,
+        "line": 22
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core-test/classify-handles-every-case",
+      "file": "test/ledger/core_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "classify-handles-every-case",
+      "namespace": "ledger.core-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 56,
+        "end_line": 28,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core-test/parse-cents-trims-spaces",
+      "file": "test/ledger/core_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "parse-cents-trims-spaces",
+      "namespace": "ledger.core-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 43,
+        "end_line": 31,
+        "line": 30
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.core-test/opening-an-account-does-not-throw",
+      "file": "test/ledger/core_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "opening-an-account-does-not-throw",
+      "namespace": "ledger.core-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 34,
+        "line": 33
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.pricing-test/tally-reports-overdraft",
+      "file": "test/ledger/pricing_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "tally-reports-overdraft",
+      "namespace": "ledger.pricing-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 10,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.pricing-test/parse-cents-accepts-digits",
+      "file": "test/ledger/pricing_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "parse-cents-accepts-digits",
+      "namespace": "ledger.pricing-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 45,
+        "end_line": 13,
+        "line": 12
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.pricing-test/parse-cents-rejects-blanks",
+      "file": "test/ledger/pricing_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "parse-cents-rejects-blanks",
+      "namespace": "ledger.pricing-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 69,
+        "end_line": 16,
+        "line": 15
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.pricing-test/mail-notifies-the-owner",
+      "file": "test/ledger/pricing_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "mail-notifies-the-owner",
+      "namespace": "ledger.pricing-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 22,
+        "line": 18
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.pricing-test/mail-notifies-the-owner/log-total",
+      "file": "test/ledger/pricing_test.clj",
+      "kind": "closure",
+      "lang": "clojure",
+      "name": "log-total",
+      "namespace": "ledger.pricing-test/mail-notifies-the-owner",
+      "parameters": 1,
+      "span": {
+        "col": 35,
+        "end_col": 47,
+        "end_line": 19,
+        "line": 19
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.property-test/balance-of-one-entry-is-the-entry",
+      "file": "test/ledger/property_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "balance-of-one-entry-is-the-entry",
+      "namespace": "ledger.property-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 9,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/members-pay-exactly-the-discounted-price",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "members-pay-exactly-the-discounted-price",
+      "namespace": "ledger.quality-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 50,
+        "end_line": 8,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/blank-amounts-are-rejected",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "blank-amounts-are-rejected",
+      "namespace": "ledger.quality-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 67,
+        "end_line": 11,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/statements-are-not-empty",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "statements-are-not-empty",
+      "namespace": "ledger.quality-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 57,
+        "end_line": 14,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/classifying-runs",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "classifying-runs",
+      "namespace": "ledger.quality-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 28,
+        "end_line": 17,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/mail-goes-through-every-notifier",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "mail-goes-through-every-notifier",
+      "namespace": "ledger.quality-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 73,
+        "end_line": 23,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/mail-goes-through-every-notifier/log-total",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "closure",
+      "lang": "clojure",
+      "name": "log-total",
+      "namespace": "ledger.quality-test/mail-goes-through-every-notifier",
+      "parameters": 1,
+      "span": {
+        "col": 35,
+        "end_col": 47,
+        "end_line": 20,
+        "line": 20
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/mail-goes-through-every-notifier/open-account",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "closure",
+      "lang": "clojure",
+      "name": "open-account",
+      "namespace": "ledger.quality-test/mail-goes-through-every-notifier",
+      "parameters": 1,
+      "span": {
+        "col": 35,
+        "end_col": 71,
+        "end_line": 21,
+        "line": 21
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/mail-goes-through-every-notifier/deposit",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "closure",
+      "lang": "clojure",
+      "name": "deposit",
+      "namespace": "ledger.quality-test/mail-goes-through-every-notifier",
+      "parameters": 2,
+      "span": {
+        "col": 30,
+        "end_col": 54,
+        "end_line": 22,
+        "line": 22
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/every-entry-counts-toward-the-balance",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "every-entry-counts-toward-the-balance",
+      "namespace": "ledger.quality-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 44,
+        "end_line": 27,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/computed-entries-count-toward-the-balance",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "computed-entries-count-toward-the-balance",
+      "namespace": "ledger.quality-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 47,
+        "end_line": 32,
+        "line": 29
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/deposits-keep-the-owner",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "deposits-keep-the-owner",
+      "namespace": "ledger.quality-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 38,
+        "end_line": 38,
+        "line": 34
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.quality-test/deposits-accumulate",
+      "file": "test/ledger/quality_test.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "deposits-accumulate",
+      "namespace": "ledger.quality-test",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 73,
+        "end_line": 44,
+        "line": 40
+      },
+      "visibility": "public"
+    }
+  ]
+}

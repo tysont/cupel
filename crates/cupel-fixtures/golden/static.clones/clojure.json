@@ -1,0 +1,276 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 1.0,
+        "max_jaccard": 1.0,
+        "pairs": 7.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 31,
+        "unit": "pairs",
+        "value": 7.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `settle-invoices` and `reconcile-payments` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 21,
+          "end_line": 11,
+          "file": "src/ledger/clones_settlement.clj",
+          "hash": "sh_3cd709fc3e433ea2",
+          "lang": "clojure",
+          "line": 4,
+          "lines": 8,
+          "nodes": 46,
+          "symbol": "ledger.clones-settlement/settle-invoices"
+        },
+        "right": {
+          "col": 1,
+          "end_col": 26,
+          "end_line": 20,
+          "file": "src/ledger/clones_settlement.clj",
+          "hash": "sh_3cd709fc3e433ea2",
+          "lang": "clojure",
+          "line": 13,
+          "lines": 8,
+          "nodes": 46,
+          "symbol": "ledger.clones-settlement/reconcile-payments"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_efc44f",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 11,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_3cd709fc3e433ea2",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_efc44f --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.clones-settlement/settle-invoices",
+        "hash": "sh_3cd709fc3e433ea2",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.clones-settlement/settle-invoices` and `ledger.clones-settlement/reconcile-payments` (src/ledger/clones_settlement.clj:13) are type-2 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `net-total` shares with 3 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 1,
+            "end_col": 11,
+            "end_line": 14,
+            "file": "src/ledger/twins.clj",
+            "hash": "sh_ffaeedc69898c9c1",
+            "lang": "clojure",
+            "line": 10,
+            "lines": 5,
+            "nodes": 23,
+            "symbol": "ledger.twins/net-total"
+          },
+          {
+            "col": 1,
+            "end_col": 11,
+            "end_line": 20,
+            "file": "src/ledger/twins.clj",
+            "hash": "sh_ffaeedc69898c9c1",
+            "lang": "clojure",
+            "line": 16,
+            "lines": 5,
+            "nodes": 23,
+            "symbol": "ledger.twins/sum-after-charge"
+          },
+          {
+            "col": 1,
+            "end_col": 13,
+            "end_line": 26,
+            "file": "src/ledger/twins.clj",
+            "hash": "sh_ffaeedc69898c9c1",
+            "lang": "clojure",
+            "line": 22,
+            "lines": 5,
+            "nodes": 23,
+            "symbol": "ledger.twins/net-total-floor"
+          },
+          {
+            "col": 1,
+            "end_col": 11,
+            "end_line": 35,
+            "file": "src/ledger/twins.clj",
+            "hash": "sh_ffaeedc69898c9c1",
+            "lang": "clojure",
+            "line": 28,
+            "lines": 8,
+            "nodes": 23,
+            "symbol": "ledger.twins/net-total-laid-out"
+          }
+        ],
+        "min_jaccard": 1.0,
+        "pairs": 6,
+        "threshold": 0.82
+      },
+      "id": "fnd_e41f6a",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 14,
+        "file": "src/ledger/twins.clj",
+        "line": 10
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_ffaeedc69898c9c1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e41f6a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.twins/net-total",
+        "hash": "sh_ffaeedc69898c9c1",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.twins/net-total` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_efc44f",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract what `settle-invoices` and `reconcile-payments` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_e41f6a",
+      "kind": "refactor_extract",
+      "priority": 2,
+      "summary": "Extract the structure `net-total` shares with 3 other symbols into one function and call it from each."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "static.deps": {
+            "layers": {
+              "map": {
+                "domain": "**/deps_layers/domain/**",
+                "infra": "**/deps_layers/infra/**"
+              },
+              "order": [
+                "domain",
+                "infra"
+              ]
+            }
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 20,
+      "languages": [
+        "clojure"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 79
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 2
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

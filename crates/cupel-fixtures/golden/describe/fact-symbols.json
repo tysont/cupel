@@ -8,11 +8,31 @@
     "kind": "symbols",
     "producers": [
       {
+        "lang": "clojure",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.clojure",
+            "needs": []
+          }
+        ]
+      },
+      {
         "lang": "go",
         "producers": [
           {
             "cost": "quick",
             "id": "lang.go",
+            "needs": []
+          }
+        ]
+      },
+      {
+        "lang": "java",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
             "needs": []
           }
         ]

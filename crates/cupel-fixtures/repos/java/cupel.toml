@@ -1,0 +1,3 @@
+[checks."static.deps".layers]
+order = ["domain", "infra"]
+map = { domain = "**/depslayers/domain/**", infra = "**/depslayers/infra/**" }

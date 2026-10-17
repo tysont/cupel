@@ -1,0 +1,16 @@
+{
+  "dir": ".",
+  "ran_in": "/Users/tysont/Workspace/cupel/.claude/worktrees/agent-afcc5fc0c4c6b4423/crates/cupel-fixtures/repos/coverage/java",
+  "skip_dirs": [
+    "target",
+    "build",
+    ".gradle"
+  ],
+  "report": "ccf22ccb9872a454b0c11774f03cc999870a0e35b986266fbc5972da070c44ba",
+  "files": {
+    "cupel.toml": "6c830900c84b1b57d3992550878177ab7472fd6c7668d4bc054a1ad07e92c868",
+    "pom.xml": "04929de4b6925d46ab2553fa394b5ac1bf5291af1444d5d9db20d1efcd867d69",
+    "src/main/java/grade/Grade.java": "fac91bd1f5039e7877b322dedf4842d0eefee251e75ae09da2f10e23e95bf1aa",
+    "src/test/java/grade/GradeTest.java": "f1523078a12c44919d9cbcf15746705441d315646ff4c2538f12eaed33048fd7"
+  }
+}

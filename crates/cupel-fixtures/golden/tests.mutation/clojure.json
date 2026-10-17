@@ -1,0 +1,270 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "tests.mutation",
+      "metrics": {
+        "equivalent": 0.0,
+        "executed": 5.0,
+        "fallback": 0.0,
+        "killed": 3.0,
+        "reused": 0.0,
+        "schemata": 0.0,
+        "score": 0.6,
+        "survived": 2.0,
+        "timeout": 0.0,
+        "uncovered": 1.0,
+        "unviable": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 5,
+        "unit": "killed_ratio",
+        "value": 0.6
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 3
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "covering_tests": [
+            "discount.large-test/discounts-a-large-member-order",
+            "discount.small-test/keeps-a-small-order"
+          ]
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add a test that fails when `>=` at src/discount/core.clj:7 becomes `>`."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.95,
+      "detail": null,
+      "evidence": {
+        "covering_tests": [
+          "discount.large-test/discounts-a-large-member-order",
+          "discount.small-test/keeps-a-small-order"
+        ],
+        "mutation": {
+          "from": ">=",
+          "operator": "relational",
+          "to": ">"
+        },
+        "tests_run": 2
+      },
+      "id": "fnd_c139f6",
+      "kind": "mutant.survived",
+      "location": {
+        "col": 13,
+        "end_col": 15,
+        "end_line": 7,
+        "file": "src/discount/core.clj",
+        "line": 7
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_d8dd268ac6db7d03",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_c139f6 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.core/discount",
+        "hash": "sh_d8dd268ac6db7d03",
+        "lang": "clojure"
+      },
+      "tier": 3,
+      "title": "Mutant survived: `>=` → `>` at src/discount/core.clj:7"
+    },
+    {
+      "action": {
+        "hints": {
+          "covering_tests": [
+            "discount.large-test/discounts-a-large-member-order",
+            "discount.small-test/keeps-a-small-order"
+          ]
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add a test that fails when `*` at src/discount/core.clj:9 becomes `/`."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.95,
+      "detail": null,
+      "evidence": {
+        "covering_tests": [
+          "discount.large-test/discounts-a-large-member-order",
+          "discount.small-test/keeps-a-small-order"
+        ],
+        "mutation": {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "to": "/"
+        },
+        "tests_run": 2
+      },
+      "id": "fnd_727a04",
+      "kind": "mutant.survived",
+      "location": {
+        "col": 6,
+        "end_col": 7,
+        "end_line": 9,
+        "file": "src/discount/core.clj",
+        "line": 9
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_d8dd268ac6db7d03",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_727a04 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.core/discount",
+        "hash": "sh_d8dd268ac6db7d03",
+        "lang": "clojure"
+      },
+      "tier": 3,
+      "title": "Mutant survived: `*` → `/` at src/discount/core.clj:9"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that runs line 14 of src/discount/core.clj."
+      },
+      "check": "tests.mutation",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "to": "+"
+        }
+      },
+      "id": "fnd_592a1a",
+      "kind": "mutant.uncovered",
+      "location": {
+        "col": 4,
+        "end_col": 5,
+        "end_line": 14,
+        "file": "src/discount/core.clj",
+        "line": 14
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_b831442f77972ff1",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_592a1a --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "discount.core/refund",
+        "hash": "sh_b831442f77972ff1",
+        "lang": "clojure"
+      },
+      "tier": 3,
+      "title": "No test runs src/discount/core.clj:14; its mutant `-` → `+` was not run"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_c139f6",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Add a test that fails when `>=` at src/discount/core.clj:7 becomes `>`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_727a04",
+      "kind": "write_test",
+      "priority": 2,
+      "summary": "Add a test that fails when `*` at src/discount/core.clj:9 becomes `/`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_592a1a",
+      "kind": "write_test",
+      "priority": 3,
+      "summary": "Write a test that runs line 14 of src/discount/core.clj."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "clojure": {
+            "coverage": "clojure -Sdeps '{:deps {cloverage/cloverage {:mvn/version \"1.2.4\"}}}' -M:test -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "clojure"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 2,
+      "info": 1,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}

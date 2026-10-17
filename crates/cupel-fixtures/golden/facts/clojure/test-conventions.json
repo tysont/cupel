@@ -1,0 +1,20 @@
+{
+  "pairs": [
+    {
+      "source": "src/ledger/core.clj",
+      "tests": [
+        "test/ledger/core_test.clj"
+      ]
+    },
+    {
+      "source": "src/ledger/pricing.clj",
+      "tests": [
+        "test/ledger/pricing_test.clj"
+      ]
+    }
+  ],
+  "test_globs": [
+    "test/**",
+    "**/test/**"
+  ]
+}

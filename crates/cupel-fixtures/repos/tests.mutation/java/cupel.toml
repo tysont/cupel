@@ -1,0 +1,10 @@
+# The Java mutation fixture (ADR-110): PIT runs through Cupel's PIT producer plugin, which the pin
+# selects over the native engine. `plugins` links to the repository's `plugins/` directory.
+[scope]
+exclude = ["plugins/**"]
+
+[plugins]
+pit = ["python3", "plugins/pit/cupel_produce_pit.py"]
+
+[lang.java]
+mutator = "plugin.pit"

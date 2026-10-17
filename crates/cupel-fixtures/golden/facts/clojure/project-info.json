@@ -1,0 +1,20 @@
+{
+  "roots": [
+    {
+      "build_files": [
+        "deps.edn",
+        "shapes/deps.edn"
+      ],
+      "lang": "clojure",
+      "members": [
+        "shapes"
+      ],
+      "packages": [],
+      "path": ".",
+      "skip_dirs": [
+        "target",
+        ".cpcache"
+      ]
+    }
+  ]
+}

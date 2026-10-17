@@ -1,0 +1,4485 @@
+{
+  "symbols": [
+    {
+      "sites": [
+        {
+          "from": "(* side side)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 16,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "7851eee8dc5a5e84",
+          "span": {
+            "col": 4,
+            "end_col": 5,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "shapes/src/shapes/geometry.clj",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "31ffe8b668b8585e",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 3,
+        "file": "shapes/src/shapes/geometry.clj",
+        "line": 14
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [times (fn [value] (* value factor))]\n    (->Circle (times (:radius circle))))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 41,
+            "end_line": 19,
+            "line": 18
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "shapes/src/shapes/geometry.clj",
+        "line": 17
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "31ffe8b668b8585e",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "/"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 15,
+        "file": "shapes/src/shapes/geometry.clj",
+        "line": 18
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [unpaid (remove :paid invoices)\n        owed (reduce + 0 (map :amount unpaid))\n        open (count unpaid)\n        balance (max (- owed credit) 0)]\n    (when (pos? open)\n      (println \"open invoices\" open))\n    [balance open])",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 20,
+            "end_line": 11,
+            "line": 5
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "492575cacc80fa46",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "191a209dc44299db",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4382e4d24654b9f7",
+          "span": {
+            "col": 38,
+            "end_col": 39,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "(when (pos? open)\n      (println \"open invoices\" open))",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "81a0351e2df6958d",
+          "span": {
+            "col": 5,
+            "end_col": 38,
+            "end_line": 10,
+            "line": 9
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "(pos? open)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 11,
+            "end_col": 22,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "(not (pos? open))"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [pending-payments (remove :paid payments)\n        due (reduce + 0 (map :amount pending-payments))\n        pending (count pending-payments)\n        remainder (max (- due allowance) 10)]\n    (when (pos? pending)\n      (println \"open invoices\" pending))\n    [remainder pending])",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 25,
+            "end_line": 20,
+            "line": 14
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "492575cacc80fa46",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "191a209dc44299db",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c8a622ac157ce43a",
+          "span": {
+            "col": 42,
+            "end_col": 44,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "(when (pos? pending)\n      (println \"open invoices\" pending))",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "81a0351e2df6958d",
+          "span": {
+            "col": 5,
+            "end_col": 41,
+            "end_line": 19,
+            "line": 18
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "(pos? pending)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 11,
+            "end_col": 25,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "(not (pos? pending))"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 13
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [costs (map (fn [quantity price] (- (* quantity price) discount)) quantities prices)\n        total (reduce + 0 costs)\n        count (reduce + 0 quantities)\n        average (quot total (max count 1))]\n    (println \"order of\" count \"items\")\n    (println \"order totals\" total average)\n    (conj (vec costs) total average))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 38,
+            "end_line": 29,
+            "line": 23
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bb6d5121a088195a",
+          "span": {
+            "col": 42,
+            "end_col": 43,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "82e9a82752f122d2",
+          "span": {
+            "col": 45,
+            "end_col": 46,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "492575cacc80fa46",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9eb981621ba87777",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4054f6a2facd980c",
+          "span": {
+            "col": 40,
+            "end_col": 41,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "(println \"order of\" count \"items\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "81a0351e2df6958d",
+          "span": {
+            "col": 5,
+            "end_col": 39,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "(println \"order totals\" total average)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e11b7481432e9ac8",
+          "span": {
+            "col": 5,
+            "end_col": 43,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [costs (map (fn [quantity price] (- (* quantity price) discount)) quantities prices)\n        total (reduce + 0 costs)\n        count (reduce + 0 quantities)\n        average (quot total (max count 1))]\n    (println \"order of\" count \"items\")\n    (println \"order totals\" total average)\n    (println \"refund of\" count \"items\")\n    (conj (vec costs) count total average))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 44,
+            "end_line": 39,
+            "line": 32
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "bb6d5121a088195a",
+          "span": {
+            "col": 42,
+            "end_col": 43,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "82e9a82752f122d2",
+          "span": {
+            "col": 45,
+            "end_col": 46,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "492575cacc80fa46",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "9eb981621ba87777",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4054f6a2facd980c",
+          "span": {
+            "col": 40,
+            "end_col": 41,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "(println \"order of\" count \"items\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "81a0351e2df6958d",
+          "span": {
+            "col": 5,
+            "end_col": 39,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "(println \"order totals\" total average)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "e11b7481432e9ac8",
+          "span": {
+            "col": 5,
+            "end_col": 43,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "(println \"refund of\" count \"items\")",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "47b4097fe31aeb7a",
+          "span": {
+            "col": 5,
+            "end_col": 40,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/clones_settlement.clj",
+        "line": 31
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(cond\n    (< amount 0) \"refund\"\n    (= amount 0) \"empty\"\n    (> amount (* limit 100)) \"huge\"\n    (> amount (* limit 10)) \"large\"\n    (> amount limit) \"over\"\n    (= amount limit) \"at-limit\"\n    (> amount (/ limit 2)) \"high\"\n    (> amount (/ limit 4)) \"medium\"\n    (> amount (/ limit 10)) \"low\"\n    (> amount 1) \"tiny\"\n    :else \"unit\")",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 18,
+            "end_line": 18,
+            "line": 7
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "17952d21dead7c51",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "6e3467a3edf33c1d",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "5bbd43489c6441c4",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "(inc 0)",
+            "(dec 0)"
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "bb6b48568b857d2f",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "not="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "2d60ec3d5c2f63cb",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "b610e620c4347b5e",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "336f5fb53ac26c03",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7c823e8e7b3e0129",
+          "span": {
+            "col": 24,
+            "end_col": 27,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "031f064dd47d2144",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "982058ae18f0b47f",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e20e74372155079c",
+          "span": {
+            "col": 24,
+            "end_col": 26,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "b0412e40cc385f56",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "98128dd956cac99f",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "not="
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "892e09080dfe7baf",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "79c57d876ecb0568",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "848e821564457291",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "5c9999a2672daa07",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "49fcce33bd1fbd16",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3c8a4d6c26e2ee8e",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "f98862e123505dd3",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "03f5d28b5e87c1a8",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f3bfb60080c4040e",
+          "span": {
+            "col": 24,
+            "end_col": 26,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "5b0d106241fd072c",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "2a435015759d303d",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "1d902c26e49be80d",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "(inc 1)",
+            "(dec 1)"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [settled (atom 0)]\n    (doseq [batch batches]\n      (when (seq batch)\n        (doseq [amount batch]\n          (when (pos? amount)\n            (while (< @settled limit)\n              (swap! settled + amount))))))\n    @settled)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 14,
+            "end_line": 30,
+            "line": 23
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "2a777fa493ed7c2f",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "(doseq [batch batches]\n      (when (seq batch)\n        (doseq [amount batch]\n          (when (pos? amount)\n            (while (< @settled limit)\n              (swap! settled + amount))))))",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "026c545898713053",
+          "span": {
+            "col": 5,
+            "end_col": 44,
+            "end_line": 29,
+            "line": 24
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "(seq batch)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "a229f2815069cdf6",
+          "span": {
+            "col": 13,
+            "end_col": 24,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "(not (seq batch))"
+          ]
+        },
+        {
+          "from": "(pos? amount)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "7d071f2f20debbb5",
+          "span": {
+            "col": 17,
+            "end_col": 30,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "(not (pos? amount))"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "7ed22564d4496b8d",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "<="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 20
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(format \"%s/%s/%d/%b/%d/%d\" owner currency limit overdraft branch opened)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 76,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 32
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 37
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(- credits debits)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 21,
+            "end_line": 105,
+            "line": 105
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "80a3b57021cd8eb4",
+          "span": {
+            "col": 4,
+            "end_col": 5,
+            "end_line": 105,
+            "line": 105
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 102
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/ledger/complexity.clj",
+        "line": 114
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(case number\n    1 \"jan\"\n    2 \"feb\"\n    3 \"mar\"\n    4 \"apr\"\n    5 \"may\"\n    6 \"jun\"\n    7 \"jul\"\n    8 \"aug\"\n    9 \"sep\"\n    10 \"oct\"\n    11 \"nov\"\n    12 \"dec\"\n    \"none\")",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 12,
+            "end_line": 133,
+            "line": 120
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b3e0911b075341d8",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 121,
+            "line": 121
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "be44e94d19c0ceca",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 122,
+            "line": 122
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2570f5b210df6afa",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 123,
+            "line": 123
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "6a034ffd06632722",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 124,
+            "line": 124
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a9b9a71019a0d0ff",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 125,
+            "line": 125
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "6",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "39310d8986a18d2d",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 126,
+            "line": 126
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "7",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9e46160785ed2133",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 127,
+            "line": 127
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "8",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c43d49988ea1247b",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 128,
+            "line": 128
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "9",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0bac5f823531c9e1",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 129,
+            "line": 129
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c776b6fa896f1817",
+          "span": {
+            "col": 5,
+            "end_col": 7,
+            "end_line": 130,
+            "line": 130
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "11",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4fad1133b3b55d90",
+          "span": {
+            "col": 5,
+            "end_col": 7,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "12",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "94b0628ba41a49db",
+          "span": {
+            "col": 5,
+            "end_col": 7,
+            "end_line": 132,
+            "line": 132
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/complexity.clj",
+        "line": 117
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/ledger/core.clj",
+        "line": 25
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [account (->Account (str (UUID/randomUUID)) owner 0)]\n    (swap! registry assoc (:id account) account)\n    account)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 13,
+            "end_line": 33,
+            "line": 31
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "e4b08811873df9a8",
+          "span": {
+            "col": 58,
+            "end_col": 59,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "(swap! registry assoc (:id account) account)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "026c545898713053",
+          "span": {
+            "col": 5,
+            "end_col": 49,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 28
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(update account :cents + cents)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 34,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 35
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(reduce + (map #(* % factor) entries))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 41,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 40
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(scale entries 1)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 20,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b3e0911b075341d8",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 43
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(geometry/square side)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 25,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 48
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(letfn [(header [owner]\n            (str owner \" (\" gen/version \")\"))]\n    (str (header (:owner account)) \"\\n\" (report/render (:cents account))))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 75,
+            "end_line": 58,
+            "line": 56
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 53
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 11,
+        "file": "src/ledger/core.clj",
+        "line": 56
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [title (fn [owner] (str/upper-case owner))]\n    (json/generate-string (assoc account :owner (title (:owner account)))))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 76,
+            "end_line": 64,
+            "line": 63
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/core.clj",
+        "line": 60
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 15,
+        "file": "src/ledger/core.clj",
+        "line": 63
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(count entries)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 18,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_export.clj",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(quot amount 2)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 18,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bdc0d3fd3bb34692",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/dead_helpers.clj",
+        "line": 3
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(cond\n    (< amount 0) :debit\n    (and (> amount limit) (> limit 0)) :large\n    :else :credit)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 19,
+            "end_line": 8,
+            "line": 5
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "0ace5cb14ed230f1",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "47c6f0215e49c190",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "99df147d588dc865",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "(inc 0)",
+            "(dec 0)"
+          ]
+        },
+        {
+          "from": "and",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "a4b58619b2692e76",
+          "span": {
+            "col": 6,
+            "end_col": 9,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "or"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "73e124fb68e9c0e7",
+          "span": {
+            "col": 11,
+            "end_col": 12,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "8a4efb1bff26873a",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "52ba8b0e5d08da8a",
+          "span": {
+            "col": 36,
+            "end_col": 37,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "4263110dbcf1d712",
+          "span": {
+            "col": 36,
+            "end_col": 37,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "(inc 0)",
+            "(dec 0)"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(loop [index 0]\n    (when (< index (count balances))\n      (if (neg? (nth balances index))\n        index\n        (recur (inc index)))))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 31,
+            "end_line": 15,
+            "line": 11
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "a707b3a6dc25c379",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "(< index (count balances))",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 11,
+            "end_col": 37,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "(not (< index (count balances)))"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "09efa0d749cddf91",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "(neg? (nth balances index))",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ed34c80bab541434",
+          "span": {
+            "col": 11,
+            "end_col": 38,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "(not (neg? (nth balances index)))"
+          ]
+        },
+        {
+          "from": "inc",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "b19046acb821bce9",
+          "span": {
+            "col": 17,
+            "end_col": 20,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "dec"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [trimmed (clojure.string/trim text)]\n    (when (empty? trimmed)\n      (throw (IllegalArgumentException. \"empty amount\")))\n    (try\n      (Long/parseLong trimmed)\n      (catch NumberFormatException _\n        -1)))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 14,
+            "end_line": 24,
+            "line": 18
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(when (empty? trimmed)\n      (throw (IllegalArgumentException. \"empty amount\")))",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "81a0351e2df6958d",
+          "span": {
+            "col": 5,
+            "end_col": 58,
+            "end_line": 20,
+            "line": 19
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "(empty? trimmed)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 11,
+            "end_col": 27,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "(not (empty? trimmed))"
+          ]
+        },
+        {
+          "from": "-1",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "8af7ff139ce31241",
+          "span": {
+            "col": 9,
+            "end_col": 11,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 17
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(case code\n    0 \"ok\"\n    (1 2) \"retry\"\n    \"fail\")",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 12,
+            "end_line": 30,
+            "line": 27
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "e5c47331c966e097",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "bae5b730388b7912",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b537333df0ae6095",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 26
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(if (neg? amount) \"-\" \"+\")",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 29,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(neg? amount)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "656338dcb68b3cb8",
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "(not (neg? amount))"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 32
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [total (atom 0)]\n    (doseq [entry entries]\n      (swap! total + entry))\n    @total)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 12,
+            "end_line": 39,
+            "line": 36
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c428f0c7045b93fb",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "(doseq [entry entries]\n      (swap! total + entry))",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "81a0351e2df6958d",
+          "span": {
+            "col": 5,
+            "end_col": 29,
+            "end_line": 38,
+            "line": 37
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/decide.clj",
+        "line": 35
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(inc (beta/beta))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 20,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "inc",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "80a3b57021cd8eb4",
+          "span": {
+            "col": 4,
+            "end_col": 7,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "dec"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_cycle/alpha.clj",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9919b9e4f210b1da",
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_cycle/beta.clj",
+        "line": 5
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_cycle/beta.clj",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(store/rows (:store order))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 30,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_layers/domain/order.clj",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(:rows store 0)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 18,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b3e0911b075341d8",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/deps_layers/infra/store.clj",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [account (core/deposit (core/open-account (System/getenv \"USER\")) 1250)]\n    (println (core/statement account)))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 40,
+            "end_line": 13,
+            "line": 12
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "1250",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "42beb0d634617347",
+          "span": {
+            "col": 74,
+            "end_col": 78,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/main.clj",
+        "line": 11
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [cut (/ (* price percent) 100)]\n    (if (and member (not= cut 0))\n      (- price cut)\n      price))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 14,
+            "end_line": 8,
+            "line": 5
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "1b0c3027c6eeb429",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "62a245514b719e0f",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "42beb0d634617347",
+          "span": {
+            "col": 34,
+            "end_col": 37,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "(and member (not= cut 0))",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 9,
+            "end_col": 34,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "(not (and member (not= cut 0)))"
+          ]
+        },
+        {
+          "from": "and",
+          "operator": "boolean-op",
+          "set": "default",
+          "site_hash": "b5e1b5d0894d9699",
+          "span": {
+            "col": 10,
+            "end_col": 13,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "or"
+          ]
+        },
+        {
+          "from": "not=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "abad556587dba18b",
+          "span": {
+            "col": 22,
+            "end_col": 26,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "cc9f843d5ef477e6",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "77291f1f9f4faf48",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.clj",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(println \"total\" total)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 26,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.clj",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [total (reduce + 0 entries)\n        overdrawn (if (< total -1) true false)]\n    (log-total total)\n    {:total total :overdrawn overdrawn})",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 41,
+            "end_line": 17,
+            "line": 14
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "8e2504771aad65c6",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "(< total -1)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "05bdd17b5cd33135",
+          "span": {
+            "col": 23,
+            "end_col": 35,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "(not (< total -1))"
+          ]
+        },
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "60c9ff0bb69e8dd0",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "-1",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "362232250c65cb10",
+          "span": {
+            "col": 32,
+            "end_col": 34,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "-1",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "29d29864629f0c54",
+          "span": {
+            "col": 32,
+            "end_col": 34,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "(inc -1)",
+            "(dec -1)"
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "c2958cc65f5b82b4",
+          "span": {
+            "col": 36,
+            "end_col": 40,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "false",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "a40d5c2227dc9813",
+          "span": {
+            "col": 41,
+            "end_col": 46,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "true"
+          ]
+        },
+        {
+          "from": "(log-total total)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "81a0351e2df6958d",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.clj",
+        "line": 13
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(notifier (:owner account) (str (:cents account)))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 53,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/pricing.clj",
+        "line": 19
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(format \"%d.%02d\" (quot cents 100) (rem cents 100))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 54,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "49d0db3c1434e669",
+          "span": {
+            "col": 33,
+            "end_col": 36,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "29cff2f99125f5bd",
+          "span": {
+            "col": 49,
+            "end_col": 52,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/report.clj",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(reduce + 0 items)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 21,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "e5c47331c966e097",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(reduce * 1 items)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 21,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "e5c47331c966e097",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [gross (sum items)]\n    (if (> gross fee)\n      (- gross fee)\n      0))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 10,
+            "end_line": 14,
+            "line": 11
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(> gross fee)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "(not (> gross fee))"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "09efa0d749cddf91",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "77291f1f9f4faf48",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "40b26ddb6137a0e3",
+          "span": {
+            "col": 7,
+            "end_col": 8,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [subtotal (sum values)]\n    (if (> subtotal charge)\n      (- subtotal charge)\n      0))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 10,
+            "end_line": 20,
+            "line": 17
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(> subtotal charge)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 9,
+            "end_col": 28,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "(not (> subtotal charge))"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "09efa0d749cddf91",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "77291f1f9f4faf48",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "40b26ddb6137a0e3",
+          "span": {
+            "col": 7,
+            "end_col": 8,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 16
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [gross (sum items)]\n    (if (> gross fee)\n      (- gross fee)\n      100))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 12,
+            "end_line": 26,
+            "line": 23
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(> gross fee)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "(not (> gross fee))"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "09efa0d749cddf91",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "77291f1f9f4faf48",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e22c481b09a71f73",
+          "span": {
+            "col": 7,
+            "end_col": 10,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [gross (sum\n               items)]\n\n    (if (> gross fee)\n      (- gross fee) ; what is left after the fee\n      0))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 10,
+            "end_line": 35,
+            "line": 30
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(> gross fee)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d9403f9f19edc426",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            "(not (> gross fee))"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "c3d334ff4ebfcde1",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 33,
+            "line": 33
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "d2079d0e2fa1a448",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 34,
+            "line": 34
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d78d7f542fc8cbfc",
+          "span": {
+            "col": 7,
+            "end_col": 8,
+            "end_line": 35,
+            "line": 35
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 28
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [gross (sum items)]\n    (if (> gross fee)\n      (+ gross fee)\n      0))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 10,
+            "end_line": 41,
+            "line": 38
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(> gross fee)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            "(not (> gross fee))"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "09efa0d749cddf91",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 39,
+            "line": 39
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "77291f1f9f4faf48",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 40,
+            "line": 40
+          },
+          "to": [
+            "-"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "40b26ddb6137a0e3",
+          "span": {
+            "col": 7,
+            "end_col": 8,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 37
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [gross (sum items)]\n    (if (> gross fee)\n      (- gross fee)\n      (if (neg? gross) gross 0)))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 34,
+            "end_line": 47,
+            "line": 44
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(> gross fee)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            "(not (> gross fee))"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "09efa0d749cddf91",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 45,
+            "line": 45
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "77291f1f9f4faf48",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 46,
+            "line": 46
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "(neg? gross)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "618d277c0db92fb9",
+          "span": {
+            "col": 11,
+            "end_col": 23,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            "(not (neg? gross))"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "da52ea18759cafe3",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 47,
+            "line": 47
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 43
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(let [gross (product items)]\n    (if (> gross fee)\n      (- gross fee)\n      0))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 10,
+            "end_line": 53,
+            "line": 50
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(> gross fee)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "ff8f6d9f34ea4722",
+          "span": {
+            "col": 9,
+            "end_col": 22,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            "(not (> gross fee))"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "09efa0d749cddf91",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 51,
+            "line": 51
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "77291f1f9f4faf48",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 52,
+            "line": 52
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "40b26ddb6137a0e3",
+          "span": {
+            "col": 7,
+            "end_col": 8,
+            "end_line": 53,
+            "line": 53
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/twins.clj",
+        "line": 49
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "47d796d50759a0f1",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "not="
+          ]
+        },
+        {
+          "from": "250",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bb81803bf09bfb6b",
+          "span": {
+            "col": 10,
+            "end_col": 13,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "250",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "93bc078a4f67d965",
+          "span": {
+            "col": 62,
+            "end_col": 65,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "<",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "75347b7a21d7fe18",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "<="
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bf8e6448b9e159a7",
+          "span": {
+            "col": 30,
+            "end_col": 33,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1670ec758d1b3296",
+          "span": {
+            "col": 34,
+            "end_col": 36,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "26d8273f65ced9d7",
+          "span": {
+            "col": 37,
+            "end_col": 41,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "false"
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "41084cabb3f4b439",
+          "span": {
+            "col": 43,
+            "end_col": 46,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "49f4e402debe1dfd",
+          "span": {
+            "col": 43,
+            "end_col": 46,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "(inc 200)",
+            "(dec 200)"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 12
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 15
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 19
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "not=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "47d796d50759a0f1",
+          "span": {
+            "col": 8,
+            "end_col": 12,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "-5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e4c5c094026a3d8e",
+          "span": {
+            "col": 31,
+            "end_col": 33,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "500",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "36951a4157869418",
+          "span": {
+            "col": 43,
+            "end_col": 46,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "66bede36e8c2cc08",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "not="
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "09f675f6f0ac19b0",
+          "span": {
+            "col": 47,
+            "end_col": 50,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 25
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "47d796d50759a0f1",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "not="
+          ]
+        },
+        {
+          "from": "42",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bb81803bf09bfb6b",
+          "span": {
+            "col": 10,
+            "end_col": 12,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 30
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/core_test.clj",
+        "line": 33
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0c0db65d72da8775",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "-10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9a063a9d9b0e698e",
+          "span": {
+            "col": 33,
+            "end_col": 36,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1f9520d2b232c16d",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "(is (= -3 (:total tally)))",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a37f5840f7770016",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "2c1e6482f4d8d888",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "not="
+          ]
+        },
+        {
+          "from": "-3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "60489dfa2bce834a",
+          "span": {
+            "col": 12,
+            "end_col": 14,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "47d796d50759a0f1",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "not="
+          ]
+        },
+        {
+          "from": "125",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bb81803bf09bfb6b",
+          "span": {
+            "col": 10,
+            "end_col": 13,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 12
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 15
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(pricing/mail (fn [owner _] (reset! sent owner)) (core/open-account \"ada\"))",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4cb48fb25fb40e9c",
+          "span": {
+            "col": 7,
+            "end_col": 82,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "9eecd88e7f3443cb",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "not="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 18
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 35,
+        "file": "test/ledger/pricing_test.clj",
+        "line": 19
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "9354651f2fc933e9",
+          "span": {
+            "col": 44,
+            "end_col": 47,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "e5a50e5d73df3e91",
+          "span": {
+            "col": 6,
+            "end_col": 7,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "not="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/property_test.clj",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "47d796d50759a0f1",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "not="
+          ]
+        },
+        {
+          "from": "900",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bb81803bf09bfb6b",
+          "span": {
+            "col": 10,
+            "end_col": 13,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1000",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "eada8dabacc53a41",
+          "span": {
+            "col": 34,
+            "end_col": 38,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "6342f21a38aba093",
+          "span": {
+            "col": 39,
+            "end_col": 41,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "true",
+          "operator": "boolean-literal",
+          "set": "default",
+          "site_hash": "e84c97cf2031cd06",
+          "span": {
+            "col": 42,
+            "end_col": 46,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "false"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 7
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 10
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 13
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bede0444ee8d6148",
+          "span": {
+            "col": 20,
+            "end_col": 23,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1f8ddf2f260be4a4",
+          "span": {
+            "col": 24,
+            "end_col": 26,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 16
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 19
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 35,
+        "file": "test/ledger/quality_test.clj",
+        "line": 20
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "98c1522e7a511eb5",
+          "span": {
+            "col": 68,
+            "end_col": 69,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "1"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 35,
+        "file": "test/ledger/quality_test.clj",
+        "line": 21
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 30,
+        "file": "test/ledger/quality_test.clj",
+        "line": 22
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "8431065f884c70bb",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "20",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "8f0483ce57c133c5",
+          "span": {
+            "col": 20,
+            "end_col": 22,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "300",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "df6862d4ccb9b1ab",
+          "span": {
+            "col": 23,
+            "end_col": 26,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "2c1e6482f4d8d888",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "not="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 25
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3aa888ec573009fd",
+          "span": {
+            "col": 24,
+            "end_col": 27,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "400",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4134362ffcef73df",
+          "span": {
+            "col": 28,
+            "end_col": 31,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f6b49f38273430a2",
+          "span": {
+            "col": 32,
+            "end_col": 35,
+            "end_line": 30,
+            "line": 30
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "(pos? cents)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "fb11da2b253197b3",
+          "span": {
+            "col": 11,
+            "end_col": 23,
+            "end_line": 31,
+            "line": 31
+          },
+          "to": [
+            "(not (pos? cents))"
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "66bede36e8c2cc08",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "not="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 29
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(core/deposit account 100)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a37f5840f7770016",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "6ed53a4e06c4ae4e",
+          "span": {
+            "col": 27,
+            "end_col": 30,
+            "end_line": 36,
+            "line": 36
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "(core/deposit account 50)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "cce5fb61e5360404",
+          "span": {
+            "col": 5,
+            "end_col": 30,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "50",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "143010e107111b76",
+          "span": {
+            "col": 27,
+            "end_col": 29,
+            "end_line": 37,
+            "line": 37
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "83a8bacbc79d0892",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 38,
+            "line": 38
+          },
+          "to": [
+            "not="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 34
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(core/deposit account 200)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "a37f5840f7770016",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "6ed53a4e06c4ae4e",
+          "span": {
+            "col": 27,
+            "end_col": 30,
+            "end_line": 42,
+            "line": 42
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "(core/deposit account 25)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "cce5fb61e5360404",
+          "span": {
+            "col": 5,
+            "end_col": 30,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "25",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "143010e107111b76",
+          "span": {
+            "col": 27,
+            "end_col": 29,
+            "end_line": 43,
+            "line": 43
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "83a8bacbc79d0892",
+          "span": {
+            "col": 10,
+            "end_col": 11,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "not="
+          ]
+        },
+        {
+          "from": "225",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "8cc07be0356da590",
+          "span": {
+            "col": 12,
+            "end_col": 15,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "200",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "57831c2c322dbac1",
+          "span": {
+            "col": 60,
+            "end_col": 63,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "25",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7fe723d2ca1ea39e",
+          "span": {
+            "col": 65,
+            "end_col": 67,
+            "end_line": 44,
+            "line": 44
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "test/ledger/quality_test.clj",
+        "line": 40
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+    <testsuite name="core-test" package="tally">
+        <testcase name="totals-a-list" classname="tally.core-test">
+        </testcase>
+        <testcase name="totals-nothing" classname="tally.core-test">
+        </testcase>
+    </testsuite>
+    <testsuite name="red-test" package="tally">
+        <testcase name="reports-a-wrong-total" classname="tally.red-test">
+            <failure message="totalling 2 and 2">totalling 2 and 2
+expected: (= 5 (tally/total [2 2]))
+  actual: (not (= 5 4))
+      at: MultiFn.java:229</failure>
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -1,0 +1,39 @@
+; Clojure imports: the libspecs of an `ns` form's `:require` and `:use` clauses (`[a.b :as c]` or a
+; bare `a.b`), one specifier per libspec, and the Java packages and classes of its `:import`
+; clause (`(java.util Date UUID)` or `java.io.File`). The resolver maps a namespace to its file.
+
+(list_lit
+  .
+  (sym_lit name: (sym_name) @_ns)
+  (list_lit
+    .
+    (kwd_lit name: (kwd_name) @_require)
+    (vec_lit
+      .
+      (sym_lit) @import.specifier) @import)
+  (#eq? @_ns "ns")
+  (#any-of? @_require "require" "use"))
+
+(list_lit
+  .
+  (sym_lit name: (sym_name) @_ns)
+  (list_lit
+    .
+    (kwd_lit name: (kwd_name) @_require)
+    (sym_lit) @import.specifier @import)
+  (#eq? @_ns "ns")
+  (#any-of? @_require "require" "use"))
+
+(list_lit
+  .
+  (sym_lit name: (sym_name) @_ns)
+  (list_lit
+    .
+    (kwd_lit name: (kwd_name) @_import)
+    [
+      (list_lit . (sym_lit) @import.specifier)
+      (vec_lit . (sym_lit) @import.specifier)
+      (sym_lit) @import.specifier
+    ] @import)
+  (#eq? @_ns "ns")
+  (#eq? @_import "import"))

@@ -1,0 +1,107 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "static.dead-code",
+      "metrics": {
+        "dead_exports": 1.0,
+        "dead_symbols": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 79,
+        "unit": "dead_symbols",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `unused-total` from src/ledger/dead_export.clj if nothing outside the repository uses it, or import src/ledger/dead_export.clj where `unused-total` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/ledger/dead_export.clj or another file of its module, and nothing in it is an entry point, test, or framework hook. If `unused-total` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "file": "src/ledger/dead_export.clj",
+        "module": "ledger.dead-export",
+        "module_files": [
+          "src/ledger/dead_export.clj"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_3669f3",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 7,
+        "file": "src/ledger/dead_export.clj",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_64b3f64ec07cf39e",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_3669f3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.dead-export/unused-total",
+        "hash": "sh_64b3f64ec07cf39e",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.dead-export/unused-total` is exported but no import resolves to src/ledger/dead_export.clj"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `forgotten-rate` from src/ledger/dead_helpers.clj if nothing outside the repository uses it, or import src/ledger/dead_helpers.clj where `forgotten-rate` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.8,
+      "detail": "No import in the repository resolves to src/ledger/dead_helpers.clj or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `forgotten-rate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
+      "evidence": {
+        "file": "src/ledger/dead_helpers.clj",
+        "module": "ledger.dead-helpers",
+        "module_files": [
+          "src/ledger/dead_helpers.clj"
+        ],
+        "suspect_imports": []
+      },
+      "id": "fnd_2c6a07",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 4,
+        "file": "src/ledger/dead_helpers.clj",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_924d6c2911a16a83",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_2c6a07 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.dead-helpers/forgotten-rate",
+        "hash": "sh_924d6c2911a16a83",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`ledger.dead-helpers/forgotten-rate` is unreachable: no import resolves to src/ledger/dead_helpers.clj"
+    }
+  ],
+  "rankings": []
+}

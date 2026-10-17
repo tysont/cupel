@@ -1,0 +1,540 @@
+{
+  "roots": [
+    {
+      "edges": [
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Account.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "java.util.List",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Audited.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "java.util.List",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/ClonesSettlement.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "java.util.ArrayList",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/ClonesSettlement.java",
+          "line": 4,
+          "relative": false,
+          "specifier": "java.util.List",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Complexity.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "java.util.List",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Ledger.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "java.util.HashMap",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Ledger.java",
+          "line": 4,
+          "relative": false,
+          "specifier": "java.util.Map",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Ledger.java",
+          "line": 5,
+          "relative": false,
+          "specifier": "java.util.UUID",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Ledger.java",
+          "line": 6,
+          "relative": false,
+          "specifier": "java.util.function.Function",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Ledger.java",
+          "line": 8,
+          "relative": false,
+          "specifier": "com.google.common.base.Strings",
+          "target": {
+            "kind": "external",
+            "package": "com.google.common.base"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Ledger.java",
+          "line": 10,
+          "relative": false,
+          "specifier": "ledger.gen.Version",
+          "target": {
+            "kind": "unresolved"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Ledger.java",
+          "line": 11,
+          "relative": false,
+          "specifier": "ledger.report.Format",
+          "target": {
+            "kind": "file",
+            "path": "src/main/java/ledger/report/Format.java"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Ledger.java",
+          "line": 12,
+          "relative": false,
+          "specifier": "shapes.Geometry",
+          "target": {
+            "kind": "file",
+            "path": "shapes/src/main/java/shapes/Geometry.java"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/Pricing.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "java.util.logging.Logger",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/cmd/Main.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.Account",
+          "target": {
+            "kind": "file",
+            "path": "src/main/java/ledger/Account.java"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/cmd/Main.java",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.Ledger",
+          "target": {
+            "kind": "file",
+            "path": "src/main/java/ledger/Ledger.java"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.depscycle.beta.Beta",
+          "target": {
+            "kind": "file",
+            "path": "src/main/java/ledger/depscycle/beta/Beta.java"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/depscycle/beta/Beta.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.depscycle.alpha.Alpha",
+          "target": {
+            "kind": "file",
+            "path": "src/main/java/ledger/depscycle/alpha/Alpha.java"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/depslayers/domain/Order.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.depslayers.infra.Store",
+          "target": {
+            "kind": "file",
+            "path": "src/main/java/ledger/depslayers/infra/Store.java"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/main/java/ledger/depslayers/port/Port.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.depslayers.domain.Order",
+          "target": {
+            "kind": "file",
+            "path": "src/main/java/ledger/depslayers/domain/Order.java"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerPropertyTest.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "net.jqwik.api.ForAll",
+          "target": {
+            "kind": "external",
+            "package": "net.jqwik.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerPropertyTest.java",
+          "line": 4,
+          "relative": false,
+          "specifier": "net.jqwik.api.Property",
+          "target": {
+            "kind": "external",
+            "package": "net.jqwik.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerQualityTest.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertEquals",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerQualityTest.java",
+          "line": 4,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertFalse",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerQualityTest.java",
+          "line": 5,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertNull",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerQualityTest.java",
+          "line": 6,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertThrows",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerQualityTest.java",
+          "line": 7,
+          "relative": false,
+          "specifier": "org.mockito.Mockito.mock",
+          "target": {
+            "kind": "external",
+            "package": "org.mockito"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerQualityTest.java",
+          "line": 9,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Test",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerTest.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertEquals",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerTest.java",
+          "line": 4,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertNotEquals",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerTest.java",
+          "line": 5,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertNotNull",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerTest.java",
+          "line": 6,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertTrue",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerTest.java",
+          "line": 8,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.AfterEach",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerTest.java",
+          "line": 9,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.BeforeEach",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerTest.java",
+          "line": 10,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Disabled",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerTest.java",
+          "line": 11,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Test",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 3,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertEquals",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 4,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertThrows",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 5,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertTrue",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 6,
+          "relative": false,
+          "specifier": "org.mockito.ArgumentMatchers.anyString",
+          "target": {
+            "kind": "external",
+            "package": "org.mockito"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 7,
+          "relative": false,
+          "specifier": "org.mockito.ArgumentMatchers.eq",
+          "target": {
+            "kind": "external",
+            "package": "org.mockito"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 8,
+          "relative": false,
+          "specifier": "org.mockito.Mockito.mock",
+          "target": {
+            "kind": "external",
+            "package": "org.mockito"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 9,
+          "relative": false,
+          "specifier": "org.mockito.Mockito.verify",
+          "target": {
+            "kind": "external",
+            "package": "org.mockito"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 10,
+          "relative": false,
+          "specifier": "org.mockito.Mockito.when",
+          "target": {
+            "kind": "external",
+            "package": "org.mockito"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 12,
+          "relative": false,
+          "specifier": "au.com.origin.snapshots.Expect",
+          "target": {
+            "kind": "external",
+            "package": "au.com.origin.snapshots"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 13,
+          "relative": false,
+          "specifier": "au.com.origin.snapshots.junit5.SnapshotExtension",
+          "target": {
+            "kind": "external",
+            "package": "au.com.origin.snapshots.junit5"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 14,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Test",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/PricingTest.java",
+          "line": 15,
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.extension.ExtendWith",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api.extension"
+          }
+        }
+      ],
+      "root": "."
+    },
+    {
+      "edges": [],
+      "root": "shapes"
+    }
+  ]
+}

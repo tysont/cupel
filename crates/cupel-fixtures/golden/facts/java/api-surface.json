@@ -1,0 +1,604 @@
+{
+  "items": [
+    {
+      "file": "shapes/src/main/java/shapes/Geometry.java",
+      "kind": "type",
+      "path": "shapes.Geometry",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 25,
+        "line": 4
+      }
+    },
+    {
+      "file": "shapes/src/main/java/shapes/Geometry.java",
+      "kind": "method",
+      "path": "shapes.Geometry.square",
+      "signature": "double square(double _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 9
+      }
+    },
+    {
+      "file": "shapes/src/main/java/shapes/Geometry.java",
+      "kind": "type",
+      "path": "shapes.Geometry.Circle",
+      "signature": "(double _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 24,
+        "line": 14
+      }
+    },
+    {
+      "file": "shapes/src/main/java/shapes/Geometry.java",
+      "kind": "method",
+      "path": "shapes.Geometry.Circle.area",
+      "signature": "double area()",
+      "span": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 18,
+        "line": 16
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "type",
+      "path": "ledger.Account",
+      "signature": "implements Audited",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 49,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "path": "ledger.Account.Account",
+      "signature": "(String _, String _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 12
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "path": "ledger.Account.id",
+      "signature": "String id()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 20,
+        "line": 18
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "path": "ledger.Account.owner",
+      "signature": "String owner()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 25,
+        "line": 23
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "path": "ledger.Account.deposit",
+      "signature": "void deposit(long _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 34,
+        "line": 32
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "path": "ledger.Account.statement",
+      "signature": "String statement()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 39,
+        "line": 37
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "path": "ledger.Account.auditTrail",
+      "signature": "List<String> auditTrail()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 44,
+        "line": 41
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Audited.java",
+      "kind": "interface",
+      "path": "ledger.Audited",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Audited.java",
+      "kind": "method",
+      "path": "ledger.Audited.auditTrail",
+      "signature": "List<String> auditTrail()",
+      "span": {
+        "col": 5,
+        "end_col": 31,
+        "end_line": 8,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "type",
+      "path": "ledger.Complexity",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 178,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "path": "ledger.Complexity.label",
+      "signature": "String label(long _, long _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 11
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "path": "ledger.Complexity.settle",
+      "signature": "long settle(long[] [] _, long _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 54,
+        "line": 40
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "path": "ledger.Complexity.openAccount",
+      "signature": "String openAccount(String _, String _, long _, boolean _, int _, long _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 59,
+        "line": 57
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "path": "ledger.Complexity.statementTemplate",
+      "signature": "List<String> statementTemplate()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 125,
+        "line": 62
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "path": "ledger.Complexity.net",
+      "signature": "long net(long _, long _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 130,
+        "line": 128
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "path": "ledger.Complexity.month",
+      "signature": "String month(int _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 162,
+        "line": 133
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "type",
+      "path": "ledger.Complexity.Statement",
+      "signature": "",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 177,
+        "line": 165
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "path": "ledger.Complexity.Statement.Statement",
+      "signature": "(String _)",
+      "span": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 171,
+        "line": 169
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "path": "ledger.Complexity.Statement.line",
+      "signature": "String line(long _)",
+      "span": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 176,
+        "line": 174
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "type",
+      "path": "ledger.Ledger",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 57,
+        "line": 15
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "constant",
+      "path": "ledger.Ledger.MAX_ENTRIES",
+      "signature": "int",
+      "span": {
+        "col": 5,
+        "end_col": 47,
+        "end_line": 17,
+        "line": 17
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "variable",
+      "path": "ledger.Ledger.currency",
+      "signature": "String",
+      "span": {
+        "col": 5,
+        "end_col": 43,
+        "end_line": 20,
+        "line": 20
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "path": "ledger.Ledger.open",
+      "signature": "Account open(String _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 32,
+        "line": 28
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "path": "ledger.Ledger.balance",
+      "signature": "long balance(long[] _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 35
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "path": "ledger.Ledger.floorArea",
+      "signature": "double floorArea(double _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 50,
+        "line": 48
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "path": "ledger.Ledger.header",
+      "signature": "String header(Account _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 56,
+        "line": 53
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Notifier.java",
+      "kind": "interface",
+      "path": "ledger.Notifier",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Notifier.java",
+      "kind": "method",
+      "path": "ledger.Notifier.send",
+      "signature": "String send(String _, String _)",
+      "span": {
+        "col": 5,
+        "end_col": 49,
+        "end_line": 6,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/main/java/ledger/cmd/Main.java",
+      "kind": "type",
+      "path": "ledger.cmd.Main",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 16,
+        "line": 7
+      }
+    },
+    {
+      "file": "src/main/java/ledger/cmd/Main.java",
+      "kind": "method",
+      "path": "ledger.cmd.Main.main",
+      "signature": "void main(String[] _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 11
+      }
+    },
+    {
+      "file": "src/main/java/ledger/deadexport/DeadExport.java",
+      "kind": "type",
+      "path": "ledger.deadexport.DeadExport",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/main/java/ledger/deadexport/DeadExport.java",
+      "kind": "method",
+      "path": "ledger.deadexport.DeadExport.unusedTotal",
+      "signature": "long unusedTotal(long[] _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+      "kind": "type",
+      "path": "ledger.depscycle.alpha.Alpha",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+      "kind": "method",
+      "path": "ledger.depscycle.alpha.Alpha.alpha",
+      "signature": "int alpha()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 13,
+        "line": 11
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+      "kind": "type",
+      "path": "ledger.depscycle.beta.Beta",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+      "kind": "method",
+      "path": "ledger.depscycle.beta.Beta.beta",
+      "signature": "int beta()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 13,
+        "line": 11
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+      "kind": "method",
+      "path": "ledger.depscycle.beta.Beta.both",
+      "signature": "int[] both()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 18,
+        "line": 16
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depslayers/domain/Order.java",
+      "kind": "type",
+      "path": "ledger.depslayers.domain.Order",
+      "signature": "(Store _)",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depslayers/domain/Order.java",
+      "kind": "method",
+      "path": "ledger.depslayers.domain.Order.rows",
+      "signature": "int rows()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depslayers/infra/Store.java",
+      "kind": "type",
+      "path": "ledger.depslayers.infra.Store",
+      "signature": "(int _)",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depslayers/infra/Store.java",
+      "kind": "method",
+      "path": "ledger.depslayers.infra.Store.empty",
+      "signature": "Store empty()",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 8,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depslayers/port/Port.java",
+      "kind": "interface",
+      "path": "ledger.depslayers.port.Port",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 9,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/main/java/ledger/depslayers/port/Port.java",
+      "kind": "method",
+      "path": "ledger.depslayers.port.Port.place",
+      "signature": "void place(Order _)",
+      "span": {
+        "col": 5,
+        "end_col": 29,
+        "end_line": 8,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/main/java/ledger/report/Format.java",
+      "kind": "type",
+      "path": "ledger.report.Format",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/main/java/ledger/report/Format.java",
+      "kind": "method",
+      "path": "ledger.report.Format.render",
+      "signature": "String render(long _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/main/java/module-info.java",
+      "kind": "module",
+      "path": "ledger",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 1
+      }
+    }
+  ]
+}

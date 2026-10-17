@@ -251,16 +251,36 @@ fn selection_names_the_producers_it_chose() {
 }
 
 #[test]
-fn every_launch_language_has_one_row_and_unknown_languages_none() {
-    let found = ["javascript", "typescript", "rust", "go", "python", "java"]
-        .map(|lang| toolchain::for_lang(&LangId::from(lang)).is_some());
-    assert_eq!(found, [true, true, true, true, true, false]);
+fn every_language_has_one_row_and_unknown_languages_none() {
+    let found = [
+        "javascript",
+        "typescript",
+        "rust",
+        "go",
+        "python",
+        "java",
+        "clojure",
+        "cobol",
+    ]
+    .map(|lang| toolchain::for_lang(&LangId::from(lang)).is_some());
+    assert_eq!(found, [true, true, true, true, true, true, true, false]);
     let mut langs: Vec<&str> = toolchain::rows()
         .iter()
         .flat_map(|row| row.langs.iter().map(LangId::as_str))
         .collect();
     langs.sort_unstable();
-    assert_eq!(langs, ["go", "javascript", "python", "rust", "typescript"]);
+    assert_eq!(
+        langs,
+        [
+            "clojure",
+            "go",
+            "java",
+            "javascript",
+            "python",
+            "rust",
+            "typescript"
+        ]
+    );
 }
 
 /// How `row` breaks the table's rules: every producer is `tool.<name>`, unique in its row, and

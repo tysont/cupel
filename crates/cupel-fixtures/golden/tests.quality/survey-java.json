@@ -1,0 +1,655 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 11,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 1.0,
+        "no_assertion": 2.0,
+        "weak_ratio": 0.2916666666666667
+      },
+      "oracle": null,
+      "score": {
+        "n": 24,
+        "unit": "assertion_density",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `statementsAreNotEmpty` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_d54232",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 25,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_e77f936707c5555a",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d54232 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerQualityTest.statementsAreNotEmpty",
+        "hash": "sh_e77f936707c5555a",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerQualityTest.statementsAreNotEmpty` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `classifyingRuns` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_a62d91",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 30,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 27
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_c4d3c0dfba256d30",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_a62d91 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerQualityTest.classifyingRuns",
+        "hash": "sh_c4d3c0dfba256d30",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerQualityTest.classifyingRuns` asserts nothing"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Use real collaborators or simple fakes for some of the doubles in `mailGoesThroughEveryNotifier`, or split it, so it checks behavior rather than wiring."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "judgment",
+        "assertions": 1,
+        "density": 75,
+        "mock_density_max": 50,
+        "mocks": 3,
+        "mocks_min": 2,
+        "remediation_mode": "decouple",
+        "targets": [
+          "Notifier",
+          "Notifier",
+          "Notifier"
+        ]
+      },
+      "id": "fnd_ab4c09",
+      "kind": "test.mock-heavy",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 38,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 32
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_3020cbedab696579",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ab4c09 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerQualityTest.mailGoesThroughEveryNotifier",
+        "hash": "sh_3020cbedab696579",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerQualityTest.mailGoesThroughEveryNotifier` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `computedEntriesCountTowardTheBalance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 0,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 1,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "id": "fnd_d4f44c",
+      "kind": "test.logic",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 52,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 47
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_f7108c885b3aade5",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d4f44c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerQualityTest.computedEntriesCountTowardTheBalance",
+        "hash": "sh_f7108c885b3aade5",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerQualityTest.computedEntriesCountTowardTheBalance` contains logic: 1 loop(s) or branch(es) (max 0)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `depositsKeepTheOwner`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          54,
+          62
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 3,
+        "statements": 3,
+        "tests": [
+          "ledger.LedgerQualityTest.depositsKeepTheOwner",
+          "ledger.LedgerQualityTest.depositsAccumulate"
+        ]
+      },
+      "id": "fnd_9833a8",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 60,
+        "file": "src/test/java/ledger/LedgerQualityTest.java",
+        "line": 54
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_6c91d12a2e208192",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_9833a8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerQualityTest.depositsKeepTheOwner",
+        "hash": "sh_6c91d12a2e208192",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerQualityTest.depositsKeepTheOwner` and 1 other test(s) repeat the same 3 leading statements"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `membersGetADiscount` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_3cef39",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 35,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 32
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_05bc76ac829de082",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3cef39 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerTest.membersGetADiscount",
+        "hash": "sh_05bc76ac829de082",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerTest.membersGetADiscount` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `newAccountsAreRegistered` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "not-null"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_13c85c",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 40,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 37
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_df3b3e8e6c8dfa89",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_13c85c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerTest.newAccountsAreRegistered",
+        "hash": "sh_df3b3e8e6c8dfa89",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerTest.newAccountsAreRegistered` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `parsingGarbageFails` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_dc9cb6",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 45,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 42
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_4c9cae135381f3a7",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_dc9cb6 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerTest.parsingGarbageFails",
+        "hash": "sh_4c9cae135381f3a7",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerTest.parsingGarbageFails` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `newAccountsHaveDistinctIds` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "equality"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_d7637c",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 50,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 47
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_80190dc045168527",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d7637c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerTest.newAccountsHaveDistinctIds",
+        "hash": "sh_80190dc045168527",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerTest.newAccountsHaveDistinctIds` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `statementIsMailed` with an assertion that pins the expected value."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "truthiness"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "id": "fnd_3dde04",
+      "kind": "test.weak-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 64,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 60
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_a6c5b500d2dc0fa8",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3dde04 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerTest.statementIsMailed",
+        "hash": "sh_a6c5b500d2dc0fa8",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerTest.statementIsMailed` asserts only weakly: 1 weak assertion(s), none pinning a value"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `openingAnAccountDoesNotThrow` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_eab9bd",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 74,
+        "file": "src/test/java/ledger/LedgerTest.java",
+        "line": 71
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_102d75c5c156af08",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_eab9bd --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.LedgerTest.openingAnAccountDoesNotThrow",
+        "hash": "sh_102d75c5c156af08",
+        "lang": "java"
+      },
+      "tier": 2,
+      "title": "`ledger.LedgerTest.openingAnAccountDoesNotThrow` asserts nothing"
+    }
+  ],
+  "rankings": [
+    {
+      "check": "tests.quality",
+      "entries": [
+        {
+          "lang": "java",
+          "rank": 1,
+          "target": {
+            "display": "ledger.LedgerQualityTest.mailGoesThroughEveryNotifier",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 38,
+              "file": "src/test/java/ledger/LedgerQualityTest.java",
+              "line": 32
+            },
+            "symbol": "sh_3020cbedab696579"
+          },
+          "value": 75.0
+        },
+        {
+          "lang": "java",
+          "rank": 2,
+          "target": {
+            "display": "ledger.PricingTest.mailNotifiesTheOwner",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 49,
+              "file": "src/test/java/ledger/PricingTest.java",
+              "line": 43
+            },
+            "symbol": "sh_43b48d88eff9c528"
+          },
+          "value": 33.0
+        },
+        {
+          "lang": "java",
+          "rank": 3,
+          "target": {
+            "display": "ledger.LedgerPropertyTest.balanceOfOneEntryIsTheEntry",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 10,
+              "file": "src/test/java/ledger/LedgerPropertyTest.java",
+              "line": 7
+            },
+            "symbol": "sh_bed5c9d653a3dae0"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "java",
+          "rank": 4,
+          "target": {
+            "display": "ledger.LedgerQualityTest.blankAmountsAreRejected",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 20,
+              "file": "src/test/java/ledger/LedgerQualityTest.java",
+              "line": 17
+            },
+            "symbol": "sh_a38c103ca522feb7"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "java",
+          "rank": 5,
+          "target": {
+            "display": "ledger.LedgerQualityTest.classifyingRuns",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 30,
+              "file": "src/test/java/ledger/LedgerQualityTest.java",
+              "line": 27
+            },
+            "symbol": "sh_c4d3c0dfba256d30"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "java",
+          "rank": 6,
+          "target": {
+            "display": "ledger.LedgerQualityTest.computedEntriesCountTowardTheBalance",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 52,
+              "file": "src/test/java/ledger/LedgerQualityTest.java",
+              "line": 47
+            },
+            "symbol": "sh_f7108c885b3aade5"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "java",
+          "rank": 7,
+          "target": {
+            "display": "ledger.LedgerQualityTest.depositsAccumulate",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 69,
+              "file": "src/test/java/ledger/LedgerQualityTest.java",
+              "line": 62
+            },
+            "symbol": "sh_5a6d7e2f9c491b39"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "java",
+          "rank": 8,
+          "target": {
+            "display": "ledger.LedgerQualityTest.depositsKeepTheOwner",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 60,
+              "file": "src/test/java/ledger/LedgerQualityTest.java",
+              "line": 54
+            },
+            "symbol": "sh_6c91d12a2e208192"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "java",
+          "rank": 9,
+          "target": {
+            "display": "ledger.LedgerQualityTest.everyEntryCountsTowardTheBalance",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 45,
+              "file": "src/test/java/ledger/LedgerQualityTest.java",
+              "line": 40
+            },
+            "symbol": "sh_2999142567b3696e"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "java",
+          "rank": 10,
+          "target": {
+            "display": "ledger.LedgerQualityTest.membersPayExactlyTheDiscountedPrice",
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 15,
+              "file": "src/test/java/ledger/LedgerQualityTest.java",
+              "line": 12
+            },
+            "symbol": "sh_5d90fb7659dc895c"
+          },
+          "value": 0.0
+        }
+      ],
+      "measured": 24,
+      "metric": "mock_density",
+      "per": "symbol",
+      "summary": "Test doubles per test as a percentage of its doubles plus assertions."
+    }
+  ]
+}

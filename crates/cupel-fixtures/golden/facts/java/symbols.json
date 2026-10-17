@@ -1,0 +1,2160 @@
+{
+  "symbols": [
+    {
+      "body": {
+        "col": 24,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "display": "shapes.Geometry.Geometry",
+      "file": "shapes/src/main/java/shapes/Geometry.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Geometry",
+      "namespace": "shapes.Geometry",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "shapes.Geometry.square",
+      "file": "shapes/src/main/java/shapes/Geometry.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "square",
+      "namespace": "shapes.Geometry",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 30,
+        "end_col": 10,
+        "end_line": 18,
+        "line": 16
+      },
+      "display": "shapes.Geometry.Circle.area",
+      "file": "shapes/src/main/java/shapes/Geometry.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "area",
+      "namespace": "shapes.Geometry.Circle",
+      "parameters": 0,
+      "span": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 18,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 10,
+        "end_line": 23,
+        "line": 20
+      },
+      "display": "shapes.Geometry.Circle.scaled",
+      "file": "shapes/src/main/java/shapes/Geometry.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "scaled",
+      "namespace": "shapes.Geometry.Circle",
+      "parameters": 1,
+      "span": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 23,
+        "line": 20
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 69,
+        "end_col": 83,
+        "end_line": 21,
+        "line": 21
+      },
+      "display": "shapes.Geometry.Circle.scaled.times",
+      "file": "shapes/src/main/java/shapes/Geometry.java",
+      "kind": "closure",
+      "lang": "java",
+      "name": "times",
+      "namespace": "shapes.Geometry.Circle.scaled",
+      "parameters": 1,
+      "span": {
+        "col": 13,
+        "end_col": 84,
+        "end_line": 21,
+        "line": 21
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 12
+      },
+      "display": "ledger.Account.Account",
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Account",
+      "namespace": "ledger.Account",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 12
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 24,
+        "end_col": 6,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "ledger.Account.id",
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "id",
+      "namespace": "ledger.Account",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 20,
+        "line": 18
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 27,
+        "end_col": 6,
+        "end_line": 25,
+        "line": 23
+      },
+      "display": "ledger.Account.owner",
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "owner",
+      "namespace": "ledger.Account",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 25,
+        "line": 23
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 18,
+        "end_col": 6,
+        "end_line": 29,
+        "line": 27
+      },
+      "display": "ledger.Account.cents",
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "cents",
+      "namespace": "ledger.Account",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 29,
+        "line": 27
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 6,
+        "end_line": 34,
+        "line": 32
+      },
+      "display": "ledger.Account.deposit",
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "deposit",
+      "namespace": "ledger.Account",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 34,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 6,
+        "end_line": 39,
+        "line": 37
+      },
+      "display": "ledger.Account.statement",
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "statement",
+      "namespace": "ledger.Account",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 39,
+        "line": 37
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 6,
+        "end_line": 44,
+        "line": 42
+      },
+      "display": "ledger.Account.auditTrail",
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "auditTrail",
+      "namespace": "ledger.Account",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 44,
+        "line": 41
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 6,
+        "end_line": 48,
+        "line": 46
+      },
+      "display": "ledger.Account.audited",
+      "file": "src/main/java/ledger/Account.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "audited",
+      "namespace": "ledger.Account",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 48,
+        "line": 46
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 6,
+        "end_line": 13,
+        "line": 12
+      },
+      "display": "ledger.ClonesSettlement.ClonesSettlement",
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "ClonesSettlement",
+      "namespace": "ledger.ClonesSettlement",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 13,
+        "line": 12
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 71,
+        "end_col": 6,
+        "end_line": 26,
+        "line": 15
+      },
+      "display": "ledger.ClonesSettlement.settleInvoices",
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "settleInvoices",
+      "namespace": "ledger.ClonesSettlement",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 26,
+        "line": 15
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 77,
+        "end_col": 6,
+        "end_line": 39,
+        "line": 28
+      },
+      "display": "ledger.ClonesSettlement.reconcilePayments",
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "reconcilePayments",
+      "namespace": "ledger.ClonesSettlement",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 39,
+        "line": 28
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 83,
+        "end_col": 6,
+        "end_line": 55,
+        "line": 41
+      },
+      "display": "ledger.ClonesSettlement.orderLines",
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "orderLines",
+      "namespace": "ledger.ClonesSettlement",
+      "parameters": 3,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 55,
+        "line": 41
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 84,
+        "end_col": 6,
+        "end_line": 72,
+        "line": 57
+      },
+      "display": "ledger.ClonesSettlement.refundLines",
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "refundLines",
+      "namespace": "ledger.ClonesSettlement",
+      "parameters": 3,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 72,
+        "line": 57
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 6,
+        "end_line": 8,
+        "line": 7
+      },
+      "display": "ledger.Complexity.Complexity",
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Complexity",
+      "namespace": "ledger.Complexity",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 8,
+        "line": 7
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 11
+      },
+      "display": "ledger.Complexity.label",
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "label",
+      "namespace": "ledger.Complexity",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 61,
+        "end_col": 6,
+        "end_line": 54,
+        "line": 40
+      },
+      "display": "ledger.Complexity.settle",
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "settle",
+      "namespace": "ledger.Complexity",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 54,
+        "line": 40
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 125,
+        "end_col": 6,
+        "end_line": 59,
+        "line": 57
+      },
+      "display": "ledger.Complexity.openAccount",
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "openAccount",
+      "namespace": "ledger.Complexity",
+      "parameters": 6,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 59,
+        "line": 57
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 6,
+        "end_line": 125,
+        "line": 62
+      },
+      "display": "ledger.Complexity.statementTemplate",
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "statementTemplate",
+      "namespace": "ledger.Complexity",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 125,
+        "line": 62
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 55,
+        "end_col": 6,
+        "end_line": 130,
+        "line": 128
+      },
+      "display": "ledger.Complexity.net",
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "net",
+      "namespace": "ledger.Complexity",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 130,
+        "line": 128
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 6,
+        "end_line": 162,
+        "line": 133
+      },
+      "display": "ledger.Complexity.month",
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "month",
+      "namespace": "ledger.Complexity",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 162,
+        "line": 133
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 10,
+        "end_line": 171,
+        "line": 169
+      },
+      "display": "ledger.Complexity.Statement.Statement",
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Statement",
+      "namespace": "ledger.Complexity.Statement",
+      "parameters": 1,
+      "span": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 171,
+        "line": 169
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 10,
+        "end_line": 176,
+        "line": 174
+      },
+      "display": "ledger.Complexity.Statement.line",
+      "file": "src/main/java/ledger/Complexity.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "line",
+      "namespace": "ledger.Complexity.Statement",
+      "parameters": 1,
+      "span": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 176,
+        "line": 174
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 22,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "display": "ledger.Decide.Decide",
+      "file": "src/main/java/ledger/Decide.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Decide",
+      "namespace": "ledger.Decide",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 53,
+        "end_col": 6,
+        "end_line": 16,
+        "line": 8
+      },
+      "display": "ledger.Decide.classify",
+      "file": "src/main/java/ledger/Decide.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "classify",
+      "namespace": "ledger.Decide",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 16,
+        "line": 8
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 6,
+        "end_line": 25,
+        "line": 18
+      },
+      "display": "ledger.Decide.firstOverdraft",
+      "file": "src/main/java/ledger/Decide.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "firstOverdraft",
+      "namespace": "ledger.Decide",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 25,
+        "line": 18
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 27
+      },
+      "display": "ledger.Decide.parseCents",
+      "file": "src/main/java/ledger/Decide.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "parseCents",
+      "namespace": "ledger.Decide",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 27
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 6,
+        "end_line": 49,
+        "line": 39
+      },
+      "display": "ledger.Decide.describe",
+      "file": "src/main/java/ledger/Decide.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "describe",
+      "namespace": "ledger.Decide",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 49,
+        "line": 39
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 6,
+        "end_line": 53,
+        "line": 51
+      },
+      "display": "ledger.Decide.sign",
+      "file": "src/main/java/ledger/Decide.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "sign",
+      "namespace": "ledger.Decide",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 53,
+        "line": 51
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 35,
+        "end_col": 6,
+        "end_line": 61,
+        "line": 55
+      },
+      "display": "ledger.Decide.size",
+      "file": "src/main/java/ledger/Decide.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "size",
+      "namespace": "ledger.Decide",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 61,
+        "line": 55
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 6,
+        "end_line": 72,
+        "line": 63
+      },
+      "display": "ledger.Decide.drain",
+      "file": "src/main/java/ledger/Decide.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "drain",
+      "namespace": "ledger.Decide",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 72,
+        "line": 63
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 22,
+        "end_col": 6,
+        "end_line": 25,
+        "line": 24
+      },
+      "display": "ledger.Ledger.Ledger",
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Ledger",
+      "namespace": "ledger.Ledger",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 25,
+        "line": 24
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 46,
+        "end_col": 6,
+        "end_line": 32,
+        "line": 28
+      },
+      "display": "ledger.Ledger.open",
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "open",
+      "namespace": "ledger.Ledger",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 32,
+        "line": 28
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 35
+      },
+      "display": "ledger.Ledger.balance",
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "balance",
+      "namespace": "ledger.Ledger",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 37,
+        "line": 35
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 6,
+        "end_line": 45,
+        "line": 39
+      },
+      "display": "ledger.Ledger.scale",
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "scale",
+      "namespace": "ledger.Ledger",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 45,
+        "line": 39
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 49,
+        "end_col": 6,
+        "end_line": 50,
+        "line": 48
+      },
+      "display": "ledger.Ledger.floorArea",
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "floorArea",
+      "namespace": "ledger.Ledger",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 50,
+        "line": 48
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 50,
+        "end_col": 6,
+        "end_line": 56,
+        "line": 53
+      },
+      "display": "ledger.Ledger.header",
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "header",
+      "namespace": "ledger.Ledger",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 56,
+        "line": 53
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 51,
+        "end_col": 86,
+        "end_line": 54,
+        "line": 54
+      },
+      "display": "ledger.Ledger.header.title",
+      "file": "src/main/java/ledger/Ledger.java",
+      "kind": "closure",
+      "lang": "java",
+      "name": "title",
+      "namespace": "ledger.Ledger.header",
+      "parameters": 1,
+      "span": {
+        "col": 9,
+        "end_col": 87,
+        "end_line": 54,
+        "line": 54
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 23,
+        "end_col": 6,
+        "end_line": 14,
+        "line": 13
+      },
+      "display": "ledger.Pricing.Pricing",
+      "file": "src/main/java/ledger/Pricing.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Pricing",
+      "namespace": "ledger.Pricing",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 14,
+        "line": 13
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 70,
+        "end_col": 6,
+        "end_line": 22,
+        "line": 16
+      },
+      "display": "ledger.Pricing.discounted",
+      "file": "src/main/java/ledger/Pricing.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "discounted",
+      "namespace": "ledger.Pricing",
+      "parameters": 3,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 22,
+        "line": 16
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 40,
+        "end_col": 6,
+        "end_line": 35,
+        "line": 24
+      },
+      "display": "ledger.Pricing.tally",
+      "file": "src/main/java/ledger/Pricing.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "tally",
+      "namespace": "ledger.Pricing",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 35,
+        "line": 24
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 6,
+        "end_line": 39,
+        "line": 37
+      },
+      "display": "ledger.Pricing.logTotal",
+      "file": "src/main/java/ledger/Pricing.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "logTotal",
+      "namespace": "ledger.Pricing",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 39,
+        "line": 37
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 67,
+        "end_col": 6,
+        "end_line": 44,
+        "line": 42
+      },
+      "display": "ledger.Pricing.mail",
+      "file": "src/main/java/ledger/Pricing.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "mail",
+      "namespace": "ledger.Pricing",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 44,
+        "line": 42
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 21,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "display": "ledger.Twins.Twins",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Twins",
+      "namespace": "ledger.Twins",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 50,
+        "end_col": 6,
+        "end_line": 14,
+        "line": 8
+      },
+      "display": "ledger.Twins.netTotal",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "netTotal",
+      "namespace": "ledger.Twins",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 14,
+        "line": 8
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 60,
+        "end_col": 6,
+        "end_line": 22,
+        "line": 16
+      },
+      "display": "ledger.Twins.sumAfterCharge",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "sumAfterCharge",
+      "namespace": "ledger.Twins",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 22,
+        "line": 16
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 55,
+        "end_col": 6,
+        "end_line": 30,
+        "line": 24
+      },
+      "display": "ledger.Twins.netTotalFloor",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "netTotalFloor",
+      "namespace": "ledger.Twins",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 30,
+        "line": 24
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 6,
+        "end_line": 42,
+        "line": 32
+      },
+      "display": "ledger.Twins.netTotalLaidOut",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "netTotalLaidOut",
+      "namespace": "ledger.Twins",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 42,
+        "line": 32
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 54,
+        "end_col": 6,
+        "end_line": 50,
+        "line": 44
+      },
+      "display": "ledger.Twins.netTotalPlus",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "netTotalPlus",
+      "namespace": "ledger.Twins",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 50,
+        "line": 44
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 56,
+        "end_col": 6,
+        "end_line": 60,
+        "line": 52
+      },
+      "display": "ledger.Twins.netTotalCapped",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "netTotalCapped",
+      "namespace": "ledger.Twins",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 60,
+        "line": 52
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 6,
+        "end_line": 68,
+        "line": 62
+      },
+      "display": "ledger.Twins.netTotalProduct",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "netTotalProduct",
+      "namespace": "ledger.Twins",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 68,
+        "line": 62
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 35,
+        "end_col": 6,
+        "end_line": 76,
+        "line": 70
+      },
+      "display": "ledger.Twins.sum",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "sum",
+      "namespace": "ledger.Twins",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 76,
+        "line": 70
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 6,
+        "end_line": 84,
+        "line": 78
+      },
+      "display": "ledger.Twins.product",
+      "file": "src/main/java/ledger/Twins.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "product",
+      "namespace": "ledger.Twins",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 84,
+        "line": 78
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 20,
+        "end_col": 6,
+        "end_line": 9,
+        "line": 8
+      },
+      "display": "ledger.cmd.Main.Main",
+      "file": "src/main/java/ledger/cmd/Main.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Main",
+      "namespace": "ledger.cmd.Main",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 9,
+        "line": 8
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 11
+      },
+      "display": "ledger.cmd.Main.main",
+      "file": "src/main/java/ledger/cmd/Main.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "main",
+      "namespace": "ledger.cmd.Main",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "display": "ledger.deadexport.DeadExport.DeadExport",
+      "file": "src/main/java/ledger/deadexport/DeadExport.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "DeadExport",
+      "namespace": "ledger.deadexport.DeadExport",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "ledger.deadexport.DeadExport.unusedTotal",
+      "file": "src/main/java/ledger/deadexport/DeadExport.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "unusedTotal",
+      "namespace": "ledger.deadexport.DeadExport",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 27,
+        "end_col": 6,
+        "end_line": 5,
+        "line": 4
+      },
+      "display": "ledger.deadhelpers.DeadHelpers.DeadHelpers",
+      "file": "src/main/java/ledger/deadhelpers/DeadHelpers.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "DeadHelpers",
+      "namespace": "ledger.deadhelpers.DeadHelpers",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 5,
+        "line": 4
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 6,
+        "end_line": 9,
+        "line": 7
+      },
+      "display": "ledger.deadhelpers.DeadHelpers.forgottenRate",
+      "file": "src/main/java/ledger/deadhelpers/DeadHelpers.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "forgottenRate",
+      "namespace": "ledger.deadhelpers.DeadHelpers",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 9,
+        "line": 7
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 21,
+        "end_col": 6,
+        "end_line": 8,
+        "line": 7
+      },
+      "display": "ledger.depscycle.alpha.Alpha.Alpha",
+      "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Alpha",
+      "namespace": "ledger.depscycle.alpha.Alpha",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 8,
+        "line": 7
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 6,
+        "end_line": 13,
+        "line": 11
+      },
+      "display": "ledger.depscycle.alpha.Alpha.alpha",
+      "file": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "alpha",
+      "namespace": "ledger.depscycle.alpha.Alpha",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 13,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 20,
+        "end_col": 6,
+        "end_line": 8,
+        "line": 7
+      },
+      "display": "ledger.depscycle.beta.Beta.Beta",
+      "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Beta",
+      "namespace": "ledger.depscycle.beta.Beta",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 8,
+        "line": 7
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 30,
+        "end_col": 6,
+        "end_line": 13,
+        "line": 11
+      },
+      "display": "ledger.depscycle.beta.Beta.beta",
+      "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "beta",
+      "namespace": "ledger.depscycle.beta.Beta",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 13,
+        "line": 11
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 6,
+        "end_line": 18,
+        "line": 16
+      },
+      "display": "ledger.depscycle.beta.Beta.both",
+      "file": "src/main/java/ledger/depscycle/beta/Beta.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "both",
+      "namespace": "ledger.depscycle.beta.Beta",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 18,
+        "line": 16
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 23,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "ledger.depslayers.domain.Order.rows",
+      "file": "src/main/java/ledger/depslayers/domain/Order.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "rows",
+      "namespace": "ledger.depslayers.domain.Order",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 6,
+        "end_line": 8,
+        "line": 6
+      },
+      "display": "ledger.depslayers.infra.Store.empty",
+      "file": "src/main/java/ledger/depslayers/infra/Store.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "empty",
+      "namespace": "ledger.depslayers.infra.Store",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 8,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 22,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "display": "ledger.report.Format.Format",
+      "file": "src/main/java/ledger/report/Format.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Format",
+      "namespace": "ledger.report.Format",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "ledger.report.Format.render",
+      "file": "src/main/java/ledger/report/Format.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "render",
+      "namespace": "ledger.report.Format",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 61,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "ledger.LedgerPropertyTest.balanceOfOneEntryIsTheEntry",
+      "file": "src/test/java/ledger/LedgerPropertyTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "balanceOfOneEntryIsTheEntry",
+      "namespace": "ledger.LedgerPropertyTest",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 7
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 48,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 13
+      },
+      "display": "ledger.LedgerQualityTest.membersPayExactlyTheDiscountedPrice",
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "membersPayExactlyTheDiscountedPrice",
+      "namespace": "ledger.LedgerQualityTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 12
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 6,
+        "end_line": 20,
+        "line": 18
+      },
+      "display": "ledger.LedgerQualityTest.blankAmountsAreRejected",
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "blankAmountsAreRejected",
+      "namespace": "ledger.LedgerQualityTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 20,
+        "line": 17
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 6,
+        "end_line": 25,
+        "line": 23
+      },
+      "display": "ledger.LedgerQualityTest.statementsAreNotEmpty",
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "statementsAreNotEmpty",
+      "namespace": "ledger.LedgerQualityTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 25,
+        "line": 22
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 28,
+        "end_col": 6,
+        "end_line": 30,
+        "line": 28
+      },
+      "display": "ledger.LedgerQualityTest.classifyingRuns",
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "classifyingRuns",
+      "namespace": "ledger.LedgerQualityTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 30,
+        "line": 27
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 6,
+        "end_line": 38,
+        "line": 33
+      },
+      "display": "ledger.LedgerQualityTest.mailGoesThroughEveryNotifier",
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "mailGoesThroughEveryNotifier",
+      "namespace": "ledger.LedgerQualityTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 38,
+        "line": 32
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 6,
+        "end_line": 45,
+        "line": 41
+      },
+      "display": "ledger.LedgerQualityTest.everyEntryCountsTowardTheBalance",
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "everyEntryCountsTowardTheBalance",
+      "namespace": "ledger.LedgerQualityTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 45,
+        "line": 40
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 49,
+        "end_col": 6,
+        "end_line": 52,
+        "line": 48
+      },
+      "display": "ledger.LedgerQualityTest.computedEntriesCountTowardTheBalance",
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "computedEntriesCountTowardTheBalance",
+      "namespace": "ledger.LedgerQualityTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 52,
+        "line": 47
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 6,
+        "end_line": 60,
+        "line": 55
+      },
+      "display": "ledger.LedgerQualityTest.depositsKeepTheOwner",
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "depositsKeepTheOwner",
+      "namespace": "ledger.LedgerQualityTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 60,
+        "line": 54
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 31,
+        "end_col": 6,
+        "end_line": 69,
+        "line": 63
+      },
+      "display": "ledger.LedgerQualityTest.depositsAccumulate",
+      "file": "src/test/java/ledger/LedgerQualityTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "depositsAccumulate",
+      "namespace": "ledger.LedgerQualityTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 69,
+        "line": 62
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 24,
+        "end_col": 6,
+        "end_line": 19,
+        "line": 17
+      },
+      "display": "ledger.LedgerTest.openAccount",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "openAccount",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 19,
+        "line": 16
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 25,
+        "end_col": 6,
+        "end_line": 24,
+        "line": 22
+      },
+      "display": "ledger.LedgerTest.closeAccount",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "closeAccount",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 24,
+        "line": 21
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 6,
+        "end_line": 30,
+        "line": 27
+      },
+      "display": "ledger.LedgerTest.depositAddsToTheBalance",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "depositAddsToTheBalance",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 30,
+        "line": 26
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 6,
+        "end_line": 35,
+        "line": 33
+      },
+      "display": "ledger.LedgerTest.membersGetADiscount",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "membersGetADiscount",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 35,
+        "line": 32
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 6,
+        "end_line": 40,
+        "line": 38
+      },
+      "display": "ledger.LedgerTest.newAccountsAreRegistered",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "newAccountsAreRegistered",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 40,
+        "line": 37
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 6,
+        "end_line": 45,
+        "line": 43
+      },
+      "display": "ledger.LedgerTest.parsingGarbageFails",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "parsingGarbageFails",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 45,
+        "line": 42
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 6,
+        "end_line": 50,
+        "line": 48
+      },
+      "display": "ledger.LedgerTest.newAccountsHaveDistinctIds",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "newAccountsHaveDistinctIds",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 50,
+        "line": 47
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 21,
+        "end_col": 6,
+        "end_line": 58,
+        "line": 53
+      },
+      "display": "ledger.LedgerTest.classify",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "classify",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 58,
+        "line": 52
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 30,
+        "end_col": 6,
+        "end_line": 64,
+        "line": 62
+      },
+      "display": "ledger.LedgerTest.statementIsMailed",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "statementIsMailed",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 64,
+        "line": 60
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 6,
+        "end_line": 69,
+        "line": 67
+      },
+      "display": "ledger.LedgerTest.parseCentsTrimsSpaces",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "parseCentsTrimsSpaces",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 69,
+        "line": 66
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 6,
+        "end_line": 74,
+        "line": 72
+      },
+      "display": "ledger.LedgerTest.openingAnAccountDoesNotThrow",
+      "file": "src/test/java/ledger/LedgerTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "openingAnAccountDoesNotThrow",
+      "namespace": "ledger.LedgerTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 74,
+        "line": 71
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 6,
+        "end_line": 26,
+        "line": 22
+      },
+      "display": "ledger.PricingTest.tallyReportsOverdraft",
+      "file": "src/test/java/ledger/PricingTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "tallyReportsOverdraft",
+      "namespace": "ledger.PricingTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 26,
+        "line": 21
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 6,
+        "end_line": 31,
+        "line": 29
+      },
+      "display": "ledger.PricingTest.parseCentsAcceptsDigits",
+      "file": "src/test/java/ledger/PricingTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "parseCentsAcceptsDigits",
+      "namespace": "ledger.PricingTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 31,
+        "line": 28
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 36,
+        "end_col": 6,
+        "end_line": 36,
+        "line": 34
+      },
+      "display": "ledger.PricingTest.parseCentsRejectsBlanks",
+      "file": "src/test/java/ledger/PricingTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "parseCentsRejectsBlanks",
+      "namespace": "ledger.PricingTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 36,
+        "line": 33
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 6,
+        "end_line": 41,
+        "line": 39
+      },
+      "display": "ledger.PricingTest.discountSnapshot",
+      "file": "src/test/java/ledger/PricingTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "discountSnapshot",
+      "namespace": "ledger.PricingTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 41,
+        "line": 38
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 33,
+        "end_col": 6,
+        "end_line": 49,
+        "line": 44
+      },
+      "display": "ledger.PricingTest.mailNotifiesTheOwner",
+      "file": "src/test/java/ledger/PricingTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "mailNotifiesTheOwner",
+      "namespace": "ledger.PricingTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 49,
+        "line": 43
+      },
+      "visibility": "internal"
+    }
+  ]
+}

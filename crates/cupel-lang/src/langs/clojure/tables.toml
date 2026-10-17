@@ -1,0 +1,95 @@
+# ABOUTME: Tables the generic producers read for clojure, alongside its queries.
+# ABOUTME: Keys and shapes are documented in the cupel-lang crate docs; unknown keys are errors.
+
+# The `ns` form names a file's namespace (`@namespace.name`); a var's full name is
+# `namespace/name`, so `/` joins segments. Paths matter for test conventions: sources sit below
+# `src` and tests below `test`.
+[namespace]
+separator = "/"
+source_roots = ["src", "test"]
+
+# `defn-` defines a private var; `^:private` metadata makes any var private (symbols.scm). Clojure
+# has no package-level visibility.
+[visibility]
+default = "private"
+modifiers = { "defn" = "public", "defmacro" = "public", "defn-" = "private" }
+
+# A `cond`'s tests are siblings in one list, so none is nested in another; no chain rule is
+# needed (ADR-109).
+[decisions]
+condition_fields = []
+
+# No `[normalize]` table: Clojure's `NormTree` is hand-written (langs/clojure/normalize.rs), since
+# a call's function is its list's first element, which no table rule can name.
+
+[mutations.relational]
+replace = { "<" = ["<="], "<=" = ["<"], ">" = [">="], ">=" = [">"] }
+
+[mutations.equality]
+replace = { "=" = ["not="], "==" = ["not="], "not=" = ["="] }
+
+[mutations.arith-add-sub]
+replace = { "+" = ["-"], "-" = ["+"], "inc" = ["dec"], "dec" = ["inc"] }
+
+[mutations.arith-mul-div]
+replace = { "*" = ["/"], "/" = ["*"] }
+
+[mutations.boolean-op]
+replace = { "and" = ["or"], "or" = ["and"] }
+
+[mutations.boolean-literal]
+replace = { "true" = ["false"], "false" = ["true"] }
+
+[mutations.zero-one]
+replace = { "0" = ["1"], "1" = ["0"] }
+
+[mutations.statement-deletion]
+templates = [""]
+
+# `nil` is every type's empty value.
+[mutations.return-value]
+templates = ["nil"]
+
+[mutations.constant]
+templates = ["0"]
+
+[mutations.boundary]
+templates = ["(inc {})", "(dec {})"]
+
+[mutations.negation]
+templates = ["(not {})"]
+
+[tests]
+framework = "clojure-test"
+
+[tests.assertions]
+# The predicate `is` tests, by name (`(is (= a b))` is `=`).
+"=" = { kind = "equality", strength = "strong" }
+"==" = { kind = "equality", strength = "strong" }
+"nil?" = { kind = "equality", strength = "strong" }
+"match?" = { kind = "equality", strength = "strong" }
+"not=" = { kind = "equality", strength = "weak" }
+"true?" = { kind = "truthiness", strength = "weak" }
+"false?" = { kind = "truthiness", strength = "weak" }
+"empty?" = { kind = "truthiness", strength = "weak" }
+seq = { kind = "truthiness", strength = "weak" }
+"some?" = { kind = "not-null", strength = "weak" }
+"thrown?" = { kind = "throws", strength = "strong" }
+"thrown-with-msg?" = { kind = "throws", strength = "strong" }
+# Idioms: `(is (not (nil? x)))`, a bare `(is x)`, and a property's `for-all` (ADR-095).
+not-nil = { kind = "not-null", strength = "weak" }
+truthy = { kind = "truthiness", strength = "weak" }
+property = { kind = "custom", strength = "strong" }
+
+# Tests sit below `test/` in a namespace named for the one they test with a `-test` suffix:
+# `src/ledger/core.clj` is tested by `test/ledger/core_test.clj`.
+[conventions]
+test_globs = ["test/**", "**/test/**"]
+
+[[conventions.tests_for]]
+template = "{base}test/{module}_test{ext}"
+
+# `clojure -M -m ns` calls `-main`; `:gen-class` makes it a Java class's `main`.
+[roots]
+entry_points = ["-main"]
+hooks = []

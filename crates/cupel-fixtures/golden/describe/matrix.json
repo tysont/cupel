@@ -6,7 +6,9 @@
   },
   "description": {
     "languages": [
+      "clojure",
       "go",
+      "java",
       "javascript",
       "python",
       "rust",
