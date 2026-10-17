@@ -1188,7 +1188,7 @@ Added after P3.6's second measurement (P3 Notes "P3.6 — measurement with schem
 
 #### P6.5 Extension drill
 
-**Status:** complete ([ADR-104](adr/CUPEL_DECISION_104.md))
+**Status:** complete (2026-10-16, 6fd747e; [ADR-104](adr/CUPEL_DECISION_104.md))
 
 - Add one genuinely new check over existing facts (candidate: `tests.assertion-density` over `TestFrames` and `Symbols`, or `static.fan-out` over `ModuleGraph`) and record in Notes the files touched. The target is: one module in `cupel-checks`, one line registering it, goldens. Anything else is an extension-model defect to fix before P7.
 
