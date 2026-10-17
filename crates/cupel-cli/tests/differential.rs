@@ -63,10 +63,21 @@ fn a_ref_oracle_caps_the_result_until_it_is_verified() {
     assert_eq!(finding_fields(&verified, "kind"), ["diff.divergence"]);
     let evidence = &verified["findings"][0]["evidence"];
     assert_eq!(
-        (&evidence["input"], &evidence["implementation"], &evidence["reference"]),
-        (&json!([-1]), &json!({"returned": "-1"}), &json!({"returned": "0"}))
+        (
+            &evidence["input"],
+            &evidence["implementation"],
+            &evidence["reference"]
+        ),
+        (
+            &json!([-1]),
+            &json!({"returned": "-1"}),
+            &json!({"returned": "0"})
+        )
     );
-    assert_eq!(evidence["oracle"]["commit"].as_str().map(str::len), Some(40));
+    assert_eq!(
+        evidence["oracle"]["commit"].as_str().map(str::len),
+        Some(40)
+    );
 }
 
 #[test]
@@ -77,7 +88,10 @@ fn the_repro_regenerates_the_same_finding() {
     let first = differential(&repo, &["--seed", "11", "--cases", "7"]).envelope();
     let finding = &first["findings"][0];
     let repro = finding["repro"].as_str().unwrap();
-    assert!(repro.ends_with("--oracle release --seed 11 --cases 7"), "{repro}");
+    assert!(
+        repro.ends_with("--oracle release --seed 11 --cases 7"),
+        "{repro}"
+    );
     let mut words: Vec<&str> = repro.split_whitespace().skip(1).collect();
     words.extend(["--format", "json"]);
     let again = repo.run(&words).envelope();
