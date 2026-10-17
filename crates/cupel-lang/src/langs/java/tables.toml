@@ -1,0 +1,148 @@
+# ABOUTME: Tables the generic producers read for java, alongside its queries.
+# ABOUTME: Keys and shapes are documented in the cupel-lang crate docs; unknown keys are errors.
+
+# The package clause names a file's namespace (`@namespace.name`), so the path matters only for
+# a file without one: the default package, and `module-info.java`, whose module is a top-level
+# item. Paths are taken below the `java` directory of a source set (`src/main/java`).
+[namespace]
+separator = "."
+source_roots = ["java"]
+index_files = ["module-info", "package-info"]
+
+# A member without `public`, `protected`, or `private` is visible throughout its package:
+# `internal` (ADR-108). symbols.scm fixes the other three.
+[visibility]
+default = "internal"
+
+# `else if` is an `if_statement` in the `alternative` field of the branch it continues.
+[decisions]
+chain_parents = ["if_statement"]
+
+# Types are names like any other, so `long` stays a keyword and `Money` becomes `$id`.
+# Annotations and modifiers say nothing about what a method does.
+[normalize]
+identifiers = ["identifier", "type_identifier"]
+literals = [
+  "decimal_integer_literal",
+  "hex_integer_literal",
+  "octal_integer_literal",
+  "binary_integer_literal",
+  "decimal_floating_point_literal",
+  "hex_floating_point_literal",
+  "string_literal",
+  "character_literal",
+  "true",
+  "false",
+  "null_literal",
+]
+erase = ["modifiers"]
+
+# `account.deposit(x)` keeps `deposit`; the object before the dot normalizes as usual.
+[[normalize.calls]]
+kind = "method_invocation"
+callee = "name"
+
+# `new Account(…)` keeps the type it constructs.
+[[normalize.calls]]
+kind = "object_creation_expression"
+callee = "type"
+
+[mutations.relational]
+replace = { "<" = ["<="], "<=" = ["<"], ">" = [">="], ">=" = [">"] }
+
+[mutations.equality]
+replace = { "==" = ["!="], "!=" = ["=="] }
+
+[mutations.arith-add-sub]
+replace = { "+" = ["-"], "-" = ["+"], "+=" = ["-="], "-=" = ["+="], "++" = ["--"], "--" = ["++"] }
+
+[mutations.arith-mul-div]
+replace = { "*" = ["/"], "/" = ["*"], "*=" = ["/="], "/=" = ["*="] }
+
+[mutations.boolean-op]
+replace = { "&&" = ["||"], "||" = ["&&"] }
+
+[mutations.boolean-literal]
+replace = { "true" = ["false"], "false" = ["true"] }
+
+[mutations.zero-one]
+replace = { "0" = ["1"], "1" = ["0"] }
+
+[mutations.statement-deletion]
+templates = [""]
+
+# `null` fits every reference type; a method returning a primitive does not compile with it,
+# which the mutation engine reports as unviable (ADR-108).
+[mutations.return-value]
+templates = ["null"]
+
+[mutations.constant]
+templates = ["0"]
+
+[mutations.boundary]
+templates = ["{} + 1", "{} - 1"]
+
+[mutations.negation]
+templates = ["!({})"]
+
+[tests]
+framework = "junit5"
+
+[tests.assertions]
+# JUnit 5 (`Assertions`) and JUnit 4 (`Assert`), by method name.
+assertEquals = { kind = "equality", strength = "strong" }
+assertArrayEquals = { kind = "equality", strength = "strong" }
+assertIterableEquals = { kind = "equality", strength = "strong" }
+assertLinesMatch = { kind = "equality", strength = "strong" }
+assertSame = { kind = "equality", strength = "strong" }
+assertNull = { kind = "equality", strength = "strong" }
+assertNotEquals = { kind = "equality", strength = "weak" }
+assertNotSame = { kind = "equality", strength = "weak" }
+assertTrue = { kind = "truthiness", strength = "weak" }
+assertFalse = { kind = "truthiness", strength = "weak" }
+fail = { kind = "truthiness", strength = "weak" }
+assertNotNull = { kind = "not-null", strength = "weak" }
+assertDoesNotThrow = { kind = "not-null", strength = "weak" }
+assertThrows = { kind = "throws", strength = "strong" }
+assertThrowsExactly = { kind = "throws", strength = "strong" }
+# JUnit 4's `@Test(expected = X.class)` names the exception.
+expected = { kind = "throws", strength = "strong" }
+# AssertJ, by the first matcher after `assertThat(…)`; `assertThatThrownBy(…)` is `thrown`.
+isEqualTo = { kind = "equality", strength = "strong" }
+isSameAs = { kind = "equality", strength = "strong" }
+isNull = { kind = "equality", strength = "strong" }
+hasSize = { kind = "equality", strength = "strong" }
+containsExactly = { kind = "equality", strength = "strong" }
+containsExactlyInAnyOrder = { kind = "equality", strength = "strong" }
+isNotEqualTo = { kind = "equality", strength = "weak" }
+isTrue = { kind = "truthiness", strength = "weak" }
+isFalse = { kind = "truthiness", strength = "weak" }
+isEmpty = { kind = "truthiness", strength = "weak" }
+isNotEmpty = { kind = "truthiness", strength = "weak" }
+contains = { kind = "truthiness", strength = "weak" }
+isNotNull = { kind = "not-null", strength = "weak" }
+thrown = { kind = "throws", strength = "strong" }
+# java-snapshot-testing.
+toMatchSnapshot = { kind = "snapshot", strength = "strong" }
+# A jqwik property returning a boolean asserts it for every generated input (ADR-095).
+property = { kind = "custom", strength = "strong" }
+
+# Maven and Gradle keep tests in the test source set, `src/test/java`, in the package of the code
+# they test; a test class is named for its subject with a `Test` or `Tests` suffix.
+[conventions]
+test_globs = ["src/test/**", "**/src/test/**"]
+
+[[conventions.tests_for]]
+template = "**/src/test/java/{module}Test.java"
+
+[[conventions.tests_for]]
+template = "**/src/test/java/{module}Tests.java"
+
+# `<T>`, `[]`, and `...` read without spaces; annotations on parameters keep their `@`.
+[api]
+tight_after = ["@"]
+
+# The runtime calls these serialization hooks by name.
+[roots]
+entry_points = []
+hooks = ["readObject", "writeObject", "readResolve", "writeReplace"]

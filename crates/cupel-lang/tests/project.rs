@@ -1,5 +1,5 @@
 // ABOUTME: Tests for the `ProjectInfo` producers: every detect fixture yields its roots through the
-// ABOUTME: registered languages, with members, packages, and skip dirs; Java and Clojure roots are unregistered.
+// ABOUTME: registered languages, with members, packages, and skip dirs; Clojure roots are unregistered.
 mod support;
 
 use std::path::{Path, PathBuf};
@@ -32,6 +32,7 @@ const CARGO_SKIP: &[&str] = &["target"];
 const GO_SKIP: &[&str] = &["vendor"];
 const NODE_SKIP: &[&str] = &["node_modules", "dist", "coverage"];
 const PYTHON_SKIP: &[&str] = &[".venv", "venv", "__pycache__", ".tox"];
+const JAVA_SKIP: &[&str] = &["target", "build", ".gradle"];
 
 /// A root with no members or packages.
 fn plain(path: &str, lang: &str, build_files: &[&str], skip: &[&str]) -> ProjectRoot {
@@ -118,24 +119,39 @@ fn the_monorepo_yields_four_roots_with_the_right_languages() {
 }
 
 #[test]
-fn maven_gradle_and_deps_edn_roots_are_unregistered() {
-    assert!(all_roots(&detect_fixture("maven")).is_empty());
+fn maven_and_gradle_roots_are_java_roots_with_their_subprojects_as_members() {
     assert_eq!(
-        cupel_lang::unregistered_roots(&detect_fixture("maven"), &Exclude::default()),
-        [plain(
-            ".",
-            "java",
-            &["pom.xml"],
-            &["target", "build", ".gradle"]
-        )]
+        all_roots(&detect_fixture("maven")),
+        [plain(".", "java", &["pom.xml"], JAVA_SKIP)]
     );
-    let dir = tree(&[("android/build.gradle.kts", ""), ("tools/deps.edn", "{}\n")]);
-    let roots = cupel_lang::unregistered_roots(dir.path(), &Exclude::default());
+    let dir = tree(&[
+        ("android/build.gradle.kts", ""),
+        ("android/settings.gradle.kts", "include(\"app\")\n"),
+        ("android/app/build.gradle.kts", ""),
+    ]);
+    assert_eq!(
+        produce::<ProjectInfo>("java", dir.path()).roots,
+        [ProjectRoot {
+            members: strings(&["app"]),
+            ..plain(
+                "android",
+                "java",
+                &[
+                    "build.gradle.kts",
+                    "settings.gradle.kts",
+                    "app/build.gradle.kts"
+                ],
+                JAVA_SKIP
+            )
+        }]
+    );
+    let tools = tree(&[("tools/deps.edn", "{}\n")]);
+    let roots = cupel_lang::unregistered_roots(tools.path(), &Exclude::default());
     let shape: Vec<(&str, &str)> = roots
         .iter()
         .map(|root| (root.path.as_str(), root.lang.as_str()))
         .collect();
-    assert_eq!(shape, [("android", "java"), ("tools", "clojure")]);
+    assert_eq!(shape, [("tools", "clojure")]);
 }
 
 #[test]
@@ -224,10 +240,12 @@ fn every_language_registers_exactly_one_project_info_producer() {
                 .collect()
         })
         .collect();
-    assert_eq!(
-        ids,
-        ["go", "javascript", "python", "rust", "typescript"].map(|id| vec![format!("lang.{id}")])
-    );
+    let expected: Vec<Vec<String>> = languages
+        .ids()
+        .iter()
+        .map(|id| vec![format!("lang.{id}")])
+        .collect();
+    assert_eq!(ids, expected);
 }
 
 #[test]

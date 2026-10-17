@@ -1,4 +1,4 @@
-// ABOUTME: Tests for the language registry: the five launch languages, their families and extensions,
+// ABOUTME: Tests for the language registry: the compiled-in languages, their families and extensions,
 // ABOUTME: lookup by ID and by path, and which grammar each path is parsed with.
 use std::path::Path;
 
@@ -18,7 +18,7 @@ fn parses_cleanly(path: &str, source: &str) -> bool {
 }
 
 #[test]
-fn the_five_launch_languages_are_registered_with_their_families() {
+fn the_compiled_in_languages_are_registered_with_their_families() {
     let registry = LanguageRegistry::builtin();
     let languages: Vec<(String, String, Stability)> = registry
         .iter()
@@ -34,6 +34,7 @@ fn the_five_launch_languages_are_registered_with_their_families() {
         languages,
         [
             ("go", "go"),
+            ("java", "java"),
             ("javascript", "ecma"),
             ("python", "python"),
             ("rust", "rust"),
@@ -68,6 +69,7 @@ fn every_extension_maps_to_exactly_one_language() {
         ("src/lib.rs", "rust"),
         ("cmd/main.go", "go"),
         ("pkg/mod.py", "python"),
+        ("src/main/java/a/A.java", "java"),
     ];
     for (path, id) in cases {
         let language = registry.for_path(path).unwrap_or_else(|| panic!("{path}"));
@@ -84,7 +86,8 @@ fn every_extension_maps_to_exactly_one_language() {
     assert_eq!(
         extensions,
         [
-            ".cjs", ".cts", ".go", ".js", ".jsx", ".mjs", ".mts", ".py", ".rs", ".ts", ".tsx"
+            ".cjs", ".cts", ".go", ".java", ".js", ".jsx", ".mjs", ".mts", ".py", ".rs", ".ts",
+            ".tsx"
         ],
         "each extension is claimed once"
     );

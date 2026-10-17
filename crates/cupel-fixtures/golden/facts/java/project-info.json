@@ -1,0 +1,22 @@
+{
+  "roots": [
+    {
+      "build_files": [
+        "build.gradle",
+        "settings.gradle",
+        "shapes/build.gradle"
+      ],
+      "lang": "java",
+      "members": [
+        "shapes"
+      ],
+      "packages": [],
+      "path": ".",
+      "skip_dirs": [
+        "target",
+        "build",
+        ".gradle"
+      ]
+    }
+  ]
+}
