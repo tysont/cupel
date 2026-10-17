@@ -1,5 +1,5 @@
 // ABOUTME: `tool.go-bench` (ADR-106): `go test -bench -benchmem -json` per Go root, each result line's ns/op, B/op, and
-// ABOUTME: allocs/op a sample of its benchmark named with its package, placed at the `_test.go` function of that name.
+// ABOUTME: allocs/op a sample of its benchmark named with its package, placed at the one `_test.go` function of that name.
 use cupel_core::{Benchmark, FactKind, Process, Result};
 use serde::Deserialize;
 
@@ -12,7 +12,7 @@ pub static GO_BENCH: BenchTool = BenchTool {
     program: "go",
     version: &["go", "version"],
     needs: &[FactKind::ProjectInfo],
-    wants: &[FactKind::Symbols],
+    wants: &[],
     per_root: true,
     availability: installed_program,
     measure,
@@ -127,7 +127,8 @@ fn result_line(output: &str) -> Option<(&str, Vec<(f64, &'static str)>)> {
     (!measures.is_empty()).then_some((bare, measures))
 }
 
-/// Places `benchmark` at the `_test.go` function its name (after the package) names.
+/// Places `benchmark` at the `_test.go` function its name (after the package) names, when one
+/// file under the root defines it.
 fn place(side: &Side<'_>, benchmark: &mut Benchmark) {
     let function = benchmark
         .name
@@ -135,9 +136,10 @@ fn place(side: &Side<'_>, benchmark: &mut Benchmark) {
         .next()
         .and_then(|name| name.split('/').next())
         .unwrap_or_default();
-    if let Some(symbol) = side.locate(function, |file| file.ends_with("_test.go")) {
-        benchmark.file = Some(symbol.file.clone());
-        benchmark.line = Some(symbol.span.line);
+    let prefix = format!("func {function}(");
+    if let Some((file, line)) = side.define(&prefix, |file| file.ends_with("_test.go")) {
+        benchmark.file = Some(file);
+        benchmark.line = Some(line);
     }
 }
 

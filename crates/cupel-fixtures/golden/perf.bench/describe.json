@@ -1,0 +1,252 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "deep",
+      "findings": [
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `perf.regression` and `perf.improvement`.",
+            "properties": {
+              "base_median": {
+                "format": "double",
+                "type": "number"
+              },
+              "base_samples": {
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "benchmark": {
+                "description": "The benchmark, as the bench tool names it.",
+                "type": "string"
+              },
+              "change": {
+                "description": "(head − base) / base, the medians' relative change; 1 when the base's median is 0.",
+                "format": "double",
+                "type": "number"
+              },
+              "head_median": {
+                "format": "double",
+                "type": "number"
+              },
+              "head_samples": {
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "p_value": {
+                "description": "The two-sided Mann-Whitney U test's p-value.",
+                "format": "double",
+                "type": "number"
+              },
+              "significance": {
+                "description": "The level the p-value is held to.",
+                "format": "double",
+                "type": "number"
+              },
+              "threshold": {
+                "description": "The smallest relative change reported.",
+                "format": "double",
+                "type": "number"
+              },
+              "unit": {
+                "description": "What a sample measures per iteration: `ns`, `bytes`, or `allocs`.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "benchmark",
+              "unit",
+              "base_median",
+              "head_median",
+              "change",
+              "p_value",
+              "base_samples",
+              "head_samples",
+              "significance",
+              "threshold"
+            ],
+            "title": "Compared",
+            "type": "object"
+          },
+          "kind": "perf.regression",
+          "summary": "A benchmark is significantly slower, or allocates significantly more, than at the range's base commit, by at least the threshold."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `perf.regression` and `perf.improvement`.",
+            "properties": {
+              "base_median": {
+                "format": "double",
+                "type": "number"
+              },
+              "base_samples": {
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "benchmark": {
+                "description": "The benchmark, as the bench tool names it.",
+                "type": "string"
+              },
+              "change": {
+                "description": "(head − base) / base, the medians' relative change; 1 when the base's median is 0.",
+                "format": "double",
+                "type": "number"
+              },
+              "head_median": {
+                "format": "double",
+                "type": "number"
+              },
+              "head_samples": {
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "p_value": {
+                "description": "The two-sided Mann-Whitney U test's p-value.",
+                "format": "double",
+                "type": "number"
+              },
+              "significance": {
+                "description": "The level the p-value is held to.",
+                "format": "double",
+                "type": "number"
+              },
+              "threshold": {
+                "description": "The smallest relative change reported.",
+                "format": "double",
+                "type": "number"
+              },
+              "unit": {
+                "description": "What a sample measures per iteration: `ns`, `bytes`, or `allocs`.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "benchmark",
+              "unit",
+              "base_median",
+              "head_median",
+              "change",
+              "p_value",
+              "base_samples",
+              "head_samples",
+              "significance",
+              "threshold"
+            ],
+            "title": "Compared",
+            "type": "object"
+          },
+          "kind": "perf.improvement",
+          "summary": "A benchmark is significantly faster, or allocates significantly less, than at the range's base commit, by at least the threshold."
+        }
+      ],
+      "id": "perf.bench",
+      "metrics": [
+        {
+          "name": "benchmarks",
+          "per": "scope",
+          "summary": "Benchmarks measured at head."
+        },
+        {
+          "name": "compared",
+          "per": "scope",
+          "summary": "Benchmarks measured at head and at the base commit."
+        },
+        {
+          "name": "regression",
+          "per": "scope",
+          "summary": "The largest significant slowdown, as a fraction of the base's median (0.05 is 5%); 0 when none or without a base."
+        },
+        {
+          "name": "regressed",
+          "per": "scope",
+          "summary": "Benchmarks reported as regressions."
+        },
+        {
+          "name": "improved",
+          "per": "scope",
+          "summary": "Benchmarks reported as improvements."
+        }
+      ],
+      "needs": [
+        "bench-samples"
+      ],
+      "stability": "experimental",
+      "summary": "Runs each language's benchmarks at head and at the range's base commit and compares their samples with a Mann-Whitney U test.",
+      "tier": 0,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

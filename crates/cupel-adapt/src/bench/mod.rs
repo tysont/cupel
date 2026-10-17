@@ -18,7 +18,6 @@ mod pytest;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use cupel_core::syntax::{SymbolDef, Symbols};
 use cupel_core::{
     Availability, BenchBase, BenchSamples, Benchmark, Captured, CostClass, Ctx, Error, EventSink,
     FactKind, LangId, Langs, Process, ProduceCtx, Producer, ProducerId, Result, RootRun, RunStatus,
@@ -62,8 +61,6 @@ pub struct Side<'a> {
     pub scratch: PathBuf,
     /// A directory the tool may keep builds in across runs, per side.
     pub build: PathBuf,
-    /// The language's symbols at head, to place benchmarks; `None` on the base side.
-    pub symbols: Option<&'a Symbols>,
 }
 
 impl Side<'_> {
@@ -81,13 +78,28 @@ impl Side<'_> {
         }
     }
 
-    /// The symbol named `name` in a file `wanted` accepts, when exactly one is.
-    pub fn locate(&self, name: &str, wanted: impl Fn(&str) -> bool) -> Option<&SymbolDef> {
-        let mut found = self
-            .symbols?
-            .symbols
-            .iter()
-            .filter(|symbol| symbol.name == name && wanted(&symbol.file));
+    /// Where a benchmark is defined: the one file under the project root (`.gitignore`
+    /// honoured) that `wanted` accepts, by its path relative to the repository root, with a
+    /// line starting with `prefix` after its indentation; that file and line. `None` when no
+    /// file or more than one has such a line.
+    pub fn define(&self, prefix: &str, wanted: impl Fn(&str) -> bool) -> Option<(String, u32)> {
+        let root = self.root();
+        let mut found = ignore::WalkBuilder::new(&root)
+            .build()
+            .flatten()
+            .filter(|entry| entry.file_type().is_some_and(|kind| kind.is_file()))
+            .filter_map(|entry| {
+                let relative = entry.path().strip_prefix(&root).ok()?;
+                let file = self.file(&relative.to_string_lossy());
+                if !wanted(&file) {
+                    return None;
+                }
+                let text = fs::read_to_string(entry.path()).ok()?;
+                let line = text
+                    .lines()
+                    .position(|line| line.trim_start().starts_with(prefix))?;
+                Some((file, u32::try_from(line + 1).ok()?))
+            });
         let first = found.next()?;
         found.next().is_none().then_some(first)
     }
@@ -245,8 +257,7 @@ impl Producer<BenchSamples> for BenchProducer {
             Some(commit) => Some(run.base(commit)?),
             None => None,
         };
-        let symbols = ctx.upstream.get::<Symbols>();
-        let (runs, benchmarks) = run.side(&ctx.ctx.root, "head", symbols)?;
+        let (runs, benchmarks) = run.side(&ctx.ctx.root, "head")?;
         Ok(BenchSamples {
             tool: self.id(),
             samples: run.samples,
@@ -278,7 +289,7 @@ impl Run<'_> {
             &exported,
             &self.ctx.cancel,
         ) {
-            Ok(()) => self.side(&exported, "base", None)?,
+            Ok(()) => self.side(&exported, "base")?,
             Err(Error::Cancelled) => return Err(Error::Cancelled),
             Err(error) => (
                 vec![RootRun {
@@ -297,12 +308,7 @@ impl Run<'_> {
     }
 
     /// Every root measured in `tree`, the side `name`.
-    fn side(
-        &self,
-        tree: &Path,
-        name: &str,
-        symbols: Option<&Symbols>,
-    ) -> Result<(Vec<RootRun>, Vec<Benchmark>)> {
+    fn side(&self, tree: &Path, name: &str) -> Result<(Vec<RootRun>, Vec<Benchmark>)> {
         let mut runs = Vec::new();
         let mut benchmarks = Vec::new();
         for (index, (dir, packages)) in self.roots.iter().enumerate() {
@@ -320,7 +326,6 @@ impl Run<'_> {
                 samples: self.samples,
                 scratch,
                 build: self.cache.join(format!("{name}-build")),
-                symbols,
             })?;
             runs.push(RootRun {
                 dir: dir.clone(),

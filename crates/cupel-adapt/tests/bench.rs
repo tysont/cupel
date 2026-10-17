@@ -7,10 +7,9 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use cupel_core::syntax::{Span, SymbolDef, SymbolKind, Symbols, Visibility};
 use cupel_core::{
-    Availability, BenchSamples, Cancellation, CostClass, FactKind, LangId, ProduceCtx, Produced,
-    RunStatus, Scope,
+    Availability, BenchSamples, Cancellation, CostClass, FactKind, LangId, ProduceCtx, RunStatus,
+    Scope,
 };
 use serde_json::{Value, json};
 
@@ -22,7 +21,7 @@ fn fixture(lang: &str, config: Value) -> (tempfile::TempDir, ProduceCtx) {
     let Value::Object(config) = config else {
         panic!("config is a table")
     };
-    ctx.config = config.clone();
+    ctx.config.clone_from(&config);
     ctx.ctx.lang.insert(LangId::from(lang), config);
     (dir, ctx)
 }
@@ -95,33 +94,11 @@ fn git(dir: &Path, args: &[&str]) -> String {
 
 #[test]
 fn go_benchmarks_are_measured_per_unit_and_placed_at_their_function() {
-    let (dir, mut ctx) = fixture("go", json!({}));
+    let (dir, ctx) = fixture("go", json!({}));
     if !ready("tool.go-bench", "go", &ctx) {
         return;
     }
     let before = files(dir.path());
-    ctx.upstream.insert(
-        Produced::new(Symbols {
-            symbols: vec![SymbolDef {
-                name: "BenchmarkSum".to_owned(),
-                namespace: String::new(),
-                display: "BenchmarkSum".to_owned(),
-                kind: SymbolKind::Function,
-                visibility: Visibility::Public,
-                lang: LangId::from("go"),
-                file: "sum_test.go".to_owned(),
-                span: Span {
-                    line: 5,
-                    col: 1,
-                    end_line: 10,
-                    end_col: 2,
-                },
-                body: None,
-                parameters: 1,
-            }],
-        })
-        .share(),
-    );
     let samples = produce("tool.go-bench", "go", &ctx);
     let name = "example.com/units.BenchmarkSum".to_owned();
     assert_eq!(

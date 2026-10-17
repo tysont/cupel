@@ -12,7 +12,7 @@ pub static PYTEST_BENCHMARK: BenchTool = BenchTool {
     program: "python3",
     version: &["python3", "-m", "pytest", "--version"],
     needs: &[FactKind::ProjectInfo],
-    wants: &[FactKind::Symbols],
+    wants: &[],
     per_root: true,
     availability,
     measure,
@@ -120,8 +120,9 @@ fn place(side: &Side<'_>, benchmark: &mut Benchmark) {
     };
     let function = test.rsplit("::").next().unwrap_or(test);
     let function = function.split('[').next().unwrap_or(function);
-    if let Some(symbol) = side.locate(function, |candidate| candidate == file) {
-        benchmark.line = Some(symbol.span.line);
+    let prefix = format!("def {function}(");
+    if let Some((_, line)) = side.define(&prefix, |candidate| candidate == file) {
+        benchmark.line = Some(line);
     }
     benchmark.file = Some(file.to_owned());
     benchmark.name = name;
