@@ -8,6 +8,7 @@ use serde_json::{Value, json};
 use crate::analyzer::AnalyzerReport;
 use crate::bench::BenchSamples;
 use crate::config::ConfigFile;
+use crate::contract::ContractViolations;
 use crate::coverage::CoverageMap;
 use crate::divergence::DivergenceResults;
 use crate::envelope::Envelope;
@@ -85,7 +86,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 23] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 24] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -112,6 +113,10 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 23] = [
     ),
     (FactKind::RelationResults, fact_schema::<RelationResults>),
     (FactKind::Footprint, fact_schema::<Footprint>),
+    (
+        FactKind::ContractViolations,
+        fact_schema::<ContractViolations>,
+    ),
 ];
 
 /// The payload version of a fact kind, or `None` for a kind without a payload type.

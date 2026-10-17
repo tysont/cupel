@@ -1,0 +1,21 @@
+# ABOUTME: Conformance inventory for the `contract-violations` fact (ADR-113): the contracts a contract producer
+# ABOUTME: must read from its library's reports; each producer's capture test requires every one on a real capture.
+fact = "contract-violations"
+
+[[constructs]]
+id = "precondition"
+summary = "A function called with arguments its precondition rejects."
+within = "violations"
+expect = { kind = "precondition" }
+
+[[constructs]]
+id = "postcondition"
+summary = "A function returning a result its postcondition rejects."
+within = "violations"
+expect = { kind = "postcondition" }
+
+[[constructs]]
+id = "invariant"
+summary = "A method leaving its value in a state the type's invariant rejects."
+within = "violations"
+expect = { kind = "invariant" }

@@ -11,6 +11,7 @@ pub mod budget;
 mod cancel;
 mod check;
 pub mod config;
+mod contract;
 pub mod coverage;
 mod delta;
 mod describe;
@@ -69,6 +70,7 @@ pub use check::{
     Stability,
 };
 pub use config::{ConfigEcho, ConfigSource};
+pub use contract::{ContractKind, ContractPlace, ContractViolation, ContractViolations};
 pub use delta::{Deltas, deltas};
 pub use describe::{
     AllDescription, ArgDescription, CheckDescription, CheckSupport, CliDescription,

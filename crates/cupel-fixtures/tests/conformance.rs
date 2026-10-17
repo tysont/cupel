@@ -36,11 +36,16 @@ fn every_registered_language_has_a_fixture_repository_and_inventory() {
     }
 }
 
+/// Execution facts whose inventories their producers' capture tests check, construct by
+/// construct, on real tool output (ADR-113), rather than languages' fixture repositories.
+const CHECKED_ON_CAPTURES: [FactKind; 1] = [FactKind::ContractViolations];
+
 #[test]
-fn every_fact_inventory_loads_and_names_a_syntactic_fact() {
+fn every_fact_inventory_loads_and_names_a_syntactic_fact_or_one_checked_on_captures() {
     for inventory in fact_inventories() {
         assert!(
-            FactKind::SYNTACTIC.contains(&inventory.fact),
+            FactKind::SYNTACTIC.contains(&inventory.fact)
+                || CHECKED_ON_CAPTURES.contains(&inventory.fact),
             "{}",
             inventory.fact
         );

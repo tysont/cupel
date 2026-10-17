@@ -107,6 +107,7 @@ fn the_execution_facts_of_wrapped_tools_are_at_version_one_under_their_kind() {
         FactKind::BenchSamples,
         FactKind::FuzzResults,
         FactKind::RaceReports,
+        FactKind::ContractViolations,
     ]
     .into_iter()
     .map(|kind| {
@@ -131,6 +132,11 @@ fn the_execution_facts_of_wrapped_tools_are_at_version_one_under_their_kind() {
                 FactKind::RaceReports,
                 Some(1),
                 json!("https://cupel.dev/schema/v1/fact/race-reports.json")
+            ),
+            (
+                FactKind::ContractViolations,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/contract-violations.json")
             ),
         ]
     );
