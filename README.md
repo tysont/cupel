@@ -138,7 +138,7 @@ A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weake
 
 | Flag | Selects |
 |---|---|
-| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`, which adds the checks that run the test suite (`gen.property` and `conc.race` among them) to the `quick` ones; `deep` adds `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench` |
+| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`, which adds the checks that run the test suite (`gen.property` and `conc.race` among them) to the `quick` ones; `deep` adds `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`; `exhaustive` adds `spec.trace`, `conc.model-check`, and `spec.prove` |
 | `--only ID`, `--skip ID` | Checks by ID (`static.clones`) or group (`static`, `tests`); repeatable |
 | `--tier N+` | Only checks at or above evidence tier N, e.g. `--tier 2+` |
 | `--budget DURATION` | A wall-clock budget (`250ms`, `20s`, `10m`): run the most valuable selected checks that fit and skip the rest; `CUPEL_BUDGET` or `budget` in `cupel.toml` also set it |
@@ -485,7 +485,7 @@ oracles  3
 
 The envelope of every `oracle` command carries the oracles it reported in `oracles`: each one's `name`, `definition`, `state`, identity `hash`, `verified_at`, and `verified_run`.
 
-A check that compares against an oracle names it in its result's `oracle` member. It uses `--oracle NAME` on `check` or `survey`, else the first verified oracle, else the first defined one; with no oracle defined, the check is skipped as `unconfigured`. When the run is graded, a result against an oracle that is not verified at that moment is capped at tier 3 and the run carries a `warn` finding, `oracle.unverified` (`cupel describe finding oracle.unverified`), whose action is `verify_oracle`. Only `cupel oracle verify` lifts the cap; suppressing the finding does not. `gen.differential` is the built-in check that compares against an oracle (see [Differential testing](#differential-testing)); it compares against `ref` and `command` oracles and skips itself, as `unconfigured`, when the run's oracle is a spec.
+A check that compares against an oracle names it in its result's `oracle` member. It uses `--oracle NAME` on `check` or `survey`, else the first verified oracle, else the first defined one; with no oracle defined, the check is skipped as `unconfigured`. When the run is graded, a result against an oracle that is not verified at that moment is capped at tier 3 and the run carries a `warn` finding, `oracle.unverified` (`cupel describe finding oracle.unverified`), whose action is `verify_oracle`. Only `cupel oracle verify` lifts the cap; suppressing the finding does not. `gen.differential` is the built-in check that compares against an oracle (see [Differential testing](#differential-testing)); it compares against `ref` and `command` oracles and skips itself, as `unconfigured`, when the run's oracle is a spec. `spec.trace` compares against `spec` oracles (see [Trace validation](#trace-validation)): name one with `--oracle` when the repository defines oracles of both kinds.
 
 ### `cupel suppress`
 
@@ -618,7 +618,7 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 ## Checks
 
-Every check below exists. Each is supported in all seven languages except `gen.property`, which Go, Java, and Clojure lack (Cupel runs no property framework for them); `gen.metamorphic`, which has a Python harness only; `conc.race`, which has race detectors for Go and Rust only; `gen.fuzz`, which has no TypeScript, Java, or Clojure fuzzer; `perf.bench`, which has no Java or Clojure bench tool; and `gen.differential`, `static.analyze`, and `perf.footprint`, which have no Java or Clojure harness, analyzer, or lockfile reader yet; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, `tests.mutation`, and `conc.race`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default; and `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`, which run from `--depth deep` (or by name with `--only`), the first two once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists. Each is supported in all seven languages except `gen.property`, which Go, Java, and Clojure lack (Cupel runs no property framework for them); `gen.metamorphic`, which has a Python harness only; `conc.race`, which has race detectors for Go and Rust only; `gen.fuzz`, which has no TypeScript, Java, or Clojure fuzzer; `perf.bench`, which has no Java or Clojure bench tool; `conc.model-check`, which has a model checker for Rust only; and `gen.differential`, `static.analyze`, and `perf.footprint`, which have no Java or Clojure harness, analyzer, or lockfile reader yet; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, `tests.mutation`, and `conc.race`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default; and `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`, which run from `--depth deep` (or by name with `--only`), the first two once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). `spec.trace`, `conc.model-check`, and `spec.prove` run from `--depth exhaustive` (or by name with `--only`), `spec.trace` once a spec oracle is defined (see [Trace validation](#trace-validation)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
@@ -667,6 +667,9 @@ What each check looks for:
 - **`gen.fuzz`** runs every fuzz target the project has (cargo-fuzz targets, Go `FuzzXxx` functions, Jazzer.js and atheris modules) with the run's seed and an execution budget, and reports each input that crashes a target (`fuzz.crash`) or runs past the per-input limit (`fuzz.timeout`), with the saved input and the command that reruns it; a project root with no fuzz target is `fuzz.target-missing` (`info`). See [Fuzzing](#fuzzing).
 - **`conc.race`** runs the tests under a race detector (Go's `-race`; Miri or ThreadSanitizer for Rust) and reports each data race (`race.detected`) and each operation with undefined behavior (`ub.detected`), with the stacks of the accesses inside the repository. See [Race detectors](#race-detectors).
 - **`perf.bench`** runs the project's benchmarks (Go's, criterion, pytest-benchmark, or commands timed by hyperfine) at the range's base commit and in the working tree, and compares each benchmark's samples with a Mann-Whitney U test: a significant slowdown of at least 5% is `perf.regression` (`warn`), a speedup `perf.improvement` (`info`). Without a range there is nothing to compare, and it says so. See [Benchmarks](#benchmarks).
+- **`spec.trace`** runs the tests with `CUPEL_TRACE_DIR` set, so the implementation logs each step it takes (its state, and the spec action it took) as JSON lines, and validates every recorded trace against the run's TLA+ spec oracle with TLC. A trace with a step the spec does not allow is `trace.diverged`, at the step, with the state logged there and the last state the spec allows. See [Trace validation](#trace-validation).
+- **`conc.model-check`** model-checks the project's proof harnesses (Kani's `#[kani::proof]` functions for Rust) over every input within their bounds, and reports each property an input breaks (an assertion, an overflow, an out-of-bounds access) as `model.counterexample`, with the values that break it and a test that replays them. See [Model checking](#model-checking).
+- **`spec.prove`** verifies the project's Dafny proofs, and reports each proof obligation the verifier could not prove (`proof.failed`) and each the proofs assume instead of proving or leave undecided in the verifier's budget (`proof.obligation-open`, `warn`). See [Proofs](#proofs).
 
 `cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
 
@@ -1079,6 +1082,74 @@ fail (1)
 ```
 
 The evidence holds the `target`, the `tool`, the `message`, the `input` (as text, or `hex:` and its bytes), the `reproducer` file and the `reproduce` command (for Go, the commands that make the input a regression case under `testdata/fuzz/`), the `seed`, and the `cases`. An input that runs past the per-input limit is `fuzz.timeout` (`warn`, confidence 0.7: a slow path under load can cross it). A target that does not build is a note. The gate keys are `gen.fuzz.crashes`, `timeouts`, `targets`, and `missing`.
+
+## Trace validation
+
+`spec.trace` checks that what the implementation did is a behavior of its specification. The specification is a `spec` oracle in TLA+ (`cupel oracle add counter --kind spec --spec spec/Counter.tla --lang tla+ --write`), and the evidence is a trace the implementation logs while its tests run. The convention is a file format, so it needs no build step or library in any of the seven languages: when the variable `CUPEL_TRACE_DIR` is set, a test writes one `.jsonl` file per behavior into that directory, one JSON object per step, and writes nothing when it is unset.
+
+```json
+{"state": {"count": 0, "done": false}}
+{"action": "Inc", "state": {"count": 1, "done": false}, "file": "counter.go", "line": 24}
+```
+
+`state` holds the values of the spec's variables after the step (a variable left out is left to the spec); `action` names the spec action the step took, `file` and `line` where it was logged, all three optional. Integers, strings, booleans, arrays (sequences), and objects (records) map to TLA+ values, and `{"$tla": "{1, 2}"}` is any TLA+ expression (a set, a model value). The producer reruns the suite once with `CUPEL_TRACE_DIR` pointing at a fresh `.cupel/cache/trace/` directory, then runs TLC (`tlc` on `PATH`, as tla-bin installs it) on a module that extends the spec and allows from each logged state only the spec's next-state relation (or the named action) to the next logged state. The spec's `INIT`, `NEXT`, and `CONSTANTS` come from the `.cfg` beside it, else `Init` and `Next`. On the Go fixture, whose `Bump` adds two but logs an `Inc`:
+
+```text
+$ cupel check --only spec.trace --format text
+fail (1)
+  spec.trace
+    trace `bumps.jsonl` leaves spec/Counter.tla at step 3: `Inc` to {"count":3,"done":false} is not a step the spec allows from {"count":1,"done":false}
+      fnd_c58eaf · trace.diverged · tier 5 · confidence 1
+      at counter.go:29
+      evidence: action "Inc" · oracle "counter" · previous {2} · spec "spec/Counter.tla" · state {2} · step 3 · steps 3 · tool "tool.tlc" · trace "bumps.jsonl" (full: cupel explain fnd_c58eaf)
+      repro: cupel check --only spec.trace --oracle counter --paths counter.go
+```
+
+A trace whose first state is not an initial state of the spec diverges at step 1. A trace that is not JSON lines of steps, or that TLC rejects (a variable or action the spec does not have), is a note, and so is a recording run whose tests failed or that recorded nothing. The result is against an oracle, so it is tier 5 only while `cupel oracle verify` holds for the spec; otherwise it is capped at tier 3 with `oracle.unverified` (see [`cupel oracle`](#cupel-oracle)). Quint and P specs are oracles TLC does not read, and the result says so. The gate keys are `spec.trace.diverged`, `traces`, and `unvalidated`.
+
+## Model checking
+
+`conc.model-check` runs Kani (`cargo kani`, with concrete playback) in each Rust project root and checks every `#[kani::proof]` harness over all the inputs its `kani::any()` values can take, within the harness's bounds. Builds go to `.cupel/cache/model-check/`. Each property an input breaks is a finding at the place it breaks, with the values, in the order the harness drew them, and the unit test Kani wrote to replay them:
+
+```text
+$ cupel check --only conc.model-check --format text
+fail (2)
+  conc.model-check
+    harness `proofs::average_never_overflows` refutes `attempt to add with overflow` in `average` with 128, 128
+      fnd_f4c6a6 · model.counterexample · tier 5 · confidence 1
+      at src/lib.rs:3
+      evidence: description "attempt to add with overflow" · function "average" · harness "proofs::average_never_overflows" · replay "/// Test generated for harness `proofs::…" · tool "tool.kani" · values [2] (full: cupel explain fnd_f4c6a6)
+      repro: cupel check --only conc.model-check --paths src/lib.rs
+    harness `proofs::at_stays_in_bounds` refutes `index out of bounds: the length is less than or equal to the given index` in `at` with 4ul
+      …
+```
+
+A harness Kani cannot decide is a note, and so is a root that does not build. Kani needs `cargo install --locked kani-verifier` and `cargo kani setup`, which downloads its bundle and the nightly it builds with. The other languages have no model checker, and the matrix says `unsupported`. The gate keys are `conc.model-check.failed`, `harnesses`, `verified`, and `undetermined`.
+
+## Proofs
+
+`spec.prove` runs `dafny verify` over the `.dfy` files in each project root of every language (Dafny compiles to several of them, and its proofs stand on their own), and reports each obligation the verifier did not discharge, at its place:
+
+```text
+$ cupel check --only spec.prove --format text
+fail (1)
+  spec.prove
+    proof fails at proofs/tally.dfy:24: a postcondition could not be proved on this return path
+      fnd_993483 · proof.failed · tier 6 · confidence 1
+      at proofs/tally.dfy:24:1-24:2
+      evidence: message "a postcondition could not be proved on t…" · related [1] · tool "tool.dafny" (full: cupel explain fnd_993483)
+      repro: cupel check --only spec.prove --paths proofs/tally.dfy
+
+warn (2)
+  spec.prove
+    proof obligation open at proofs/tally.dfy:31: assume statement has no {:axiom} annotation
+      fnd_6f1c03 · proof.obligation-open · tier 6 · confidence 1
+      …
+    proof obligation open at proofs/tally.dfy:35: This ensures clause is part of a bodyless method. Add the {:axiom} attribute to it or the enclosing method to suppress this warning
+      …
+```
+
+An obligation the verifier could not prove is `proof.failed` (`fail`), with the places it relates (the postcondition a return path breaks). One the proofs assume (an `assume` without `{:axiom}`, a lemma or method without a body) or that ran out of time or resources is `proof.obligation-open` (`warn`): nothing refutes it, and nothing proves it either. A file that does not parse or resolve is a note. Dafny's releases bundle Z3; put `dafny` on `PATH`. The gate keys are `spec.prove.failed`, `open`, and `verified`.
 
 ## Plugins
 
