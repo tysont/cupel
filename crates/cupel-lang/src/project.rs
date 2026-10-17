@@ -11,16 +11,12 @@
 //! when there is one (ADR-021 §2).
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
     Availability, CostClass, Ctx, EventSink, Exclude, FactKind, LangId, Langs, ProduceCtx,
     Producer, ProducerId, Result, Scope,
 };
-
-use crate::language::Language;
-use crate::producer::producer_id;
 
 /// One build ecosystem: the files that mark its roots, the directories it generates, and how a
 /// root of it is described.
@@ -185,7 +181,10 @@ fn relative(path: &Path, base: &Path) -> String {
 /// The `ProjectInfo` producer: a language's roots of its ecosystem. It reads the repository
 /// root, not the scope, because project layout is repository-wide.
 pub struct ProjectRoots {
-    language: Arc<dyn Language>,
+    /// The language whose roots this producer reports.
+    lang: LangId,
+    /// The ID its language's producers carry.
+    id: ProducerId,
     ecosystem: &'static Ecosystem,
     /// Every known ecosystem, whose generated directories the walk skips.
     known: Vec<&'static Ecosystem>,
@@ -193,12 +192,14 @@ pub struct ProjectRoots {
 
 impl ProjectRoots {
     pub fn new(
-        language: Arc<dyn Language>,
+        lang: LangId,
+        id: ProducerId,
         ecosystem: &'static Ecosystem,
         known: Vec<&'static Ecosystem>,
     ) -> Self {
         Self {
-            language,
+            lang,
+            id,
             ecosystem,
             known,
         }
@@ -207,11 +208,11 @@ impl ProjectRoots {
 
 impl Producer<ProjectInfo> for ProjectRoots {
     fn id(&self) -> ProducerId {
-        producer_id(self.language.as_ref())
+        self.id.clone()
     }
 
     fn languages(&self) -> Langs {
-        Langs::Only(vec![self.language.id()])
+        Langs::Only(vec![self.lang.clone()])
     }
 
     fn needs(&self) -> &[FactKind] {
@@ -228,10 +229,9 @@ impl Producer<ProjectInfo> for ProjectRoots {
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<ProjectInfo> {
         ctx.cancel.checkpoint()?;
-        let lang = self.language.id();
         let roots = roots(&ctx.ctx.root, self.ecosystem, &self.known, &ctx.ctx.exclude)
             .into_iter()
-            .filter(|root| root.lang == lang)
+            .filter(|root| root.lang == self.lang)
             .collect();
         Ok(ProjectInfo { roots })
     }

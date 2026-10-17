@@ -10,9 +10,8 @@ use cupel_core::{
 };
 use globset::GlobBuilder;
 
-use crate::language::{Language, owns};
+use crate::language::{Language, owns, producer_id};
 use crate::namespace::file_namespace_root;
-use crate::producer::producer_id;
 use crate::tables::ConventionRules;
 
 inventory::submit!(crate::generic::GenericProducer {

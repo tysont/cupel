@@ -13,7 +13,7 @@ use cupel_core::{
 use rayon::prelude::*;
 use serde_json::json;
 
-use crate::language::{Language, owns, parse_one};
+use crate::language::{Language, owns, parse_one, producer_id};
 use crate::parse::{ParseCache, ParseProblem, Parsed};
 
 /// What an extractor sees: one parsed file and the language it belongs to.
@@ -104,11 +104,6 @@ impl<F: Fact + Merge + Clone> Producer<F> for QueryProducer<F> {
         }
         Ok(fact)
     }
-}
-
-/// `lang.<id>`, the ID every producer a language registers carries.
-pub fn producer_id(language: &dyn Language) -> ProducerId {
-    ProducerId::from(format!("lang.{}", language.id()))
 }
 
 /// Parses the files in `scope` that `language` owns, in scope order, reporting each file that

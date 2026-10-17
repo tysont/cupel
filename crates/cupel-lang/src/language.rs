@@ -4,7 +4,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use cupel_core::syntax::ProjectInfo;
-use cupel_core::{Cancellation, Lang, LangFamily, LangId, ProducerRegistry, Stability};
+use cupel_core::{Cancellation, Lang, LangFamily, LangId, ProducerId, ProducerRegistry, Stability};
 use rayon::prelude::*;
 
 use crate::langs::ecosystems;
@@ -42,6 +42,11 @@ pub fn lang(language: &dyn Language) -> Lang {
         id: language.id(),
         family: language.family(),
     }
+}
+
+/// `lang.<id>`, the ID every producer a language registers carries.
+pub fn producer_id(language: &dyn Language) -> ProducerId {
+    ProducerId::from(format!("lang.{}", language.id()))
 }
 
 /// Whether `path` has one of the language's extensions.
@@ -121,7 +126,8 @@ impl LanguageRegistry {
             language.register(reg);
             if let Some(ecosystem) = language.ecosystem() {
                 reg.register::<ProjectInfo, _>(ProjectRoots::new(
-                    Arc::clone(language),
+                    language.id(),
+                    producer_id(language.as_ref()),
                     ecosystem,
                     known.clone(),
                 ));

@@ -73,9 +73,9 @@ mod walk;
 pub use contract::{Contract, capture, contract};
 pub use conventions::GlobTestConventions;
 pub use langs::unregistered_roots;
-pub use language::{Language, LanguageRegistry, lang, owns};
+pub use language::{Language, LanguageRegistry, lang, owns, producer_id};
 pub use parse::{CacheStats, ParseCache, ParseProblem, Parsed, Reparse, Syntax};
-pub use producer::{Extract, Merge, QueryProducer, Source, parse_scope, producer_id};
+pub use producer::{Extract, Merge, QueryProducer, Source, parse_scope};
 pub use property_stubs::{
     Stub, StubRules, StubTarget, StubVariant, Subject, merged_stubs, property_stub,
 };

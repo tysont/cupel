@@ -32,9 +32,9 @@ use cupel_core::{
 use globset::Glob;
 
 use crate::contract::capture;
-use crate::language::{Language, owns, parse_one};
+use crate::language::{Language, owns, parse_one, producer_id};
 use crate::parse::{ParseCache, Parsed};
-use crate::producer::{parse_scope, producer_id};
+use crate::producer::parse_scope;
 use crate::query::{Match, encloses, matches};
 use crate::spec::QueryFile;
 
