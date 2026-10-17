@@ -62,7 +62,10 @@ fn reruns(envelope: &Value) -> Vec<String> {
 
 #[test]
 fn a_one_second_budget_skips_mutation_and_says_so() {
-    let Some((repo, envelope)) = ran(&["check", "--budget", "1s", "--no-gate"], 5) else {
+    // The `tests` group alone: `next_actions` holds at most ten actions, and every check of
+    // the catalog skipped for the budget would ask for a rerun ahead of `tests.mutation`.
+    let budgeted = ["check", "--budget", "1s", "--no-gate", "--only", "tests"];
+    let Some((repo, envelope)) = ran(&budgeted, 5) else {
         return;
     };
     assert_eq!(envelope["status"], "partial");
@@ -81,7 +84,7 @@ fn a_one_second_budget_skips_mutation_and_says_so() {
         "{envelope}"
     );
     assert_eq!(repo.store().last_mutant_outcomes().unwrap().len(), 0);
-    let text = repo.run(&["check", "--budget", "1s", "--no-gate", "--format", "text"]);
+    let text = repo.run(&[&budgeted[..], &["--format", "text"]].concat());
     assert!(
         text.stdout.contains("skipped: budget (lang python, est "),
         "{}",
