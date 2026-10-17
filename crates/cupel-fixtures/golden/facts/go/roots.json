@@ -148,6 +148,22 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "ledger_property_test.go",
+        "line": 8
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_property_test.go",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "ledger_quality_test.go",
         "line": 9
       }

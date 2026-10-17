@@ -82,13 +82,21 @@
   (#any-of? @_test "it" "test" "specify" "fit"))
 
 ; Property tests: fast-check's runners, `fc.assert(…)` and `fc.check(…)`, generate the case's
-; inputs (ADR-095).
+; inputs (ADR-095). `fc.assert` throws the shrunk counterexample, so it is also an assertion;
+; `fc.check` returns it.
 (call_expression
   function: (member_expression
     object: (identifier) @_fc
     property: (property_identifier) @_run)
   (#eq? @_fc "fc")
-  (#any-of? @_run "assert" "check")) @property.fast-check
+  (#eq? @_run "assert")) @property.fast-check @test.assertion @assertion.idiom.property
+
+(call_expression
+  function: (member_expression
+    object: (identifier) @_fc
+    property: (property_identifier) @_run)
+  (#eq? @_fc "fc")
+  (#eq? @_run "check")) @property.fast-check
 
 ; A skip at run time: `t.skip("why")` (node:test), `this.skip()` (mocha), `ctx.skip()`.
 (call_expression

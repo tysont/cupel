@@ -6501,6 +6501,30 @@
     {
       "sites": [
         {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "28c760800f97fe25",
+          "span": {
+            "col": 36,
+            "end_col": 38,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_properties.py",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "1000",
           "operator": "constant",
           "set": "extended",

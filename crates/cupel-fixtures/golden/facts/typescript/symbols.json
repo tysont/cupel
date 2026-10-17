@@ -1605,6 +1605,28 @@
         "line": 13
       },
       "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 5
+      },
+      "display": "test.properties.sums do not depend on the order",
+      "file": "test/properties.test.ts",
+      "kind": "closure",
+      "lang": "typescript",
+      "name": "sums do not depend on the order",
+      "namespace": "test.properties",
+      "parameters": 0,
+      "span": {
+        "col": 41,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 5
+      },
+      "visibility": "private"
     }
   ]
 }

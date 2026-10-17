@@ -105,6 +105,8 @@ framework = "jest"
 # Keys are expect matchers (the last link of `expect(…).…`), chai assertions, `assert.*`
 # calls, and the idioms tests.scm captures as @assertion.idiom.<key>.
 [tests.assertions]
+# A property check (`fc.assert(…)`) throws the shrunk counterexample (ADR-095).
+property = { kind = "custom", strength = "strong" }
 toBe = { kind = "equality", strength = "strong" }
 toEqual = { kind = "equality", strength = "strong" }
 toStrictEqual = { kind = "equality", strength = "strong" }

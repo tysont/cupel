@@ -1342,6 +1342,14 @@
       "decisions": [],
       "symbol": {
         "col": 1,
+        "file": "tests/test_properties.py",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
         "file": "tests/test_quality_signals.py",
         "line": 8
       }

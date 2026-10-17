@@ -676,6 +676,22 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "tests/test_properties.py",
+        "line": 7
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_properties.py",
+        "line": 7
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "tests/test_quality_signals.py",
         "line": 8
       }

@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 17,
+        "n": 18,
         "unit": "cycles",
         "value": 1.0
       },
@@ -254,6 +254,22 @@
           "lang": "python",
           "rank": 2,
           "target": {
+            "display": "src/ledger/decide.py",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/decide.py",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 3.0
+        },
+        {
+          "lang": "python",
+          "rank": 3,
+          "target": {
             "display": "src/ledger/report/format.py",
             "location": {
               "col": null,
@@ -268,7 +284,7 @@
         },
         {
           "lang": "python",
-          "rank": 3,
+          "rank": 4,
           "target": {
             "display": "tests/test_ledger.py",
             "location": {
@@ -284,7 +300,7 @@
         },
         {
           "lang": "python",
-          "rank": 4,
+          "rank": 5,
           "target": {
             "display": "tests/test_quality_signals.py",
             "location": {
@@ -300,7 +316,7 @@
         },
         {
           "lang": "python",
-          "rank": 5,
+          "rank": 6,
           "target": {
             "display": "src/deps_cycle/alpha.py",
             "location": {
@@ -316,7 +332,7 @@
         },
         {
           "lang": "python",
-          "rank": 6,
+          "rank": 7,
           "target": {
             "display": "src/deps_cycle/beta.py",
             "location": {
@@ -332,7 +348,7 @@
         },
         {
           "lang": "python",
-          "rank": 7,
+          "rank": 8,
           "target": {
             "display": "src/deps_layers/domain/order.py",
             "location": {
@@ -348,7 +364,7 @@
         },
         {
           "lang": "python",
-          "rank": 8,
+          "rank": 9,
           "target": {
             "display": "src/ledger/account.py",
             "location": {
@@ -356,22 +372,6 @@
               "end_col": null,
               "end_line": 1,
               "file": "src/ledger/account.py",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 2.0
-        },
-        {
-          "lang": "python",
-          "rank": 9,
-          "target": {
-            "display": "src/ledger/decide.py",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "src/ledger/decide.py",
               "line": 1
             },
             "symbol": null
@@ -395,7 +395,7 @@
           "value": 2.0
         }
       ],
-      "measured": 17,
+      "measured": 18,
       "metric": "coupling",
       "per": "module",
       "summary": "Afferent plus efferent coupling per module."

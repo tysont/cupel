@@ -10370,6 +10370,236 @@
       }
     },
     {
+      "hash": "sh_b4dd2bd290cd220f",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [],
+            "label": "=>"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "assert"
+                          }
+                        ],
+                        "label": "member_expression"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "property"
+                                  }
+                                ],
+                                "label": "member_expression"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "integer"
+                                          }
+                                        ],
+                                        "label": "member_expression"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "arguments"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "integer"
+                                          }
+                                        ],
+                                        "label": "member_expression"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "arguments"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "formal_parameters"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "=>"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [
+                                                          {
+                                                            "children": [],
+                                                            "label": "expect"
+                                                          },
+                                                          {
+                                                            "children": [
+                                                              {
+                                                                "children": [
+                                                                  {
+                                                                    "children": [],
+                                                                    "label": "add"
+                                                                  },
+                                                                  {
+                                                                    "children": [
+                                                                      {
+                                                                        "children": [],
+                                                                        "label": "$id"
+                                                                      },
+                                                                      {
+                                                                        "children": [],
+                                                                        "label": "$id"
+                                                                      }
+                                                                    ],
+                                                                    "label": "arguments"
+                                                                  }
+                                                                ],
+                                                                "label": "call_expression"
+                                                              }
+                                                            ],
+                                                            "label": "arguments"
+                                                          }
+                                                        ],
+                                                        "label": "call_expression"
+                                                      },
+                                                      {
+                                                        "children": [],
+                                                        "label": "toBe"
+                                                      }
+                                                    ],
+                                                    "label": "member_expression"
+                                                  },
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [
+                                                          {
+                                                            "children": [],
+                                                            "label": "add"
+                                                          },
+                                                          {
+                                                            "children": [
+                                                              {
+                                                                "children": [],
+                                                                "label": "$id"
+                                                              },
+                                                              {
+                                                                "children": [],
+                                                                "label": "$id"
+                                                              }
+                                                            ],
+                                                            "label": "arguments"
+                                                          }
+                                                        ],
+                                                        "label": "call_expression"
+                                                      }
+                                                    ],
+                                                    "label": "arguments"
+                                                  }
+                                                ],
+                                                "label": "call_expression"
+                                              }
+                                            ],
+                                            "label": "expression_statement"
+                                          }
+                                        ],
+                                        "label": "statement_block"
+                                      }
+                                    ],
+                                    "label": "arrow_function"
+                                  }
+                                ],
+                                "label": "arguments"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "expression_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "arrow_function"
+      },
+      "symbol": {
+        "col": 41,
+        "file": "test/properties.test.js",
+        "line": 5
+      }
+    },
+    {
       "hash": "sh_cbd20b63964501b5",
       "root": {
         "children": [

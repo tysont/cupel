@@ -543,6 +543,14 @@
         "file": "test/decide.test.ts",
         "line": 13
       }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 41,
+        "file": "test/properties.test.ts",
+        "line": 5
+      }
     }
   ]
 }

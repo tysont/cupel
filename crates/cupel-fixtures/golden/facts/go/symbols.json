@@ -706,6 +706,50 @@
     },
     {
       "body": {
+        "col": 52,
+        "end_col": 2,
+        "end_line": 13,
+        "line": 8
+      },
+      "display": "ledger.TestBalanceOfOneEntryIsTheEntry",
+      "file": "ledger_property_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestBalanceOfOneEntryIsTheEntry",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 13,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 32,
+        "end_col": 75,
+        "end_line": 9,
+        "line": 9
+      },
+      "display": "ledger.TestBalanceOfOneEntryIsTheEntry.one",
+      "file": "ledger_property_test.go",
+      "kind": "closure",
+      "lang": "go",
+      "name": "one",
+      "namespace": "ledger.TestBalanceOfOneEntryIsTheEntry",
+      "parameters": 1,
+      "span": {
+        "col": 2,
+        "end_col": 75,
+        "end_line": 9,
+        "line": 9
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
         "col": 60,
         "end_col": 2,
         "end_line": 11,

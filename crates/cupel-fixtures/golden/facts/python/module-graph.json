@@ -311,6 +311,39 @@
         },
         {
           "edge_kind": "import",
+          "from": "tests/test_properties.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "hypothesis.given",
+          "target": {
+            "kind": "external",
+            "package": "hypothesis"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_properties.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "hypothesis.strategies",
+          "target": {
+            "kind": "external",
+            "package": "hypothesis"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_properties.py",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.decide.parse_cents",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.py"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "tests/test_quality_signals.py",
           "line": 1,
           "relative": false,

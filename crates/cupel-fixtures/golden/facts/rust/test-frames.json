@@ -27,6 +27,7 @@
           ],
           "mocks": [],
           "name": "tally_reports_overdraft",
+          "property": null,
           "skip": null,
           "span": {
             "col": 5,
@@ -50,6 +51,7 @@
           ],
           "mocks": [],
           "name": "discount_snapshot",
+          "property": null,
           "skip": null,
           "span": {
             "col": 5,
@@ -72,6 +74,7 @@
             }
           ],
           "name": "the_log_is_written_once",
+          "property": null,
           "skip": null,
           "span": {
             "col": 5,
@@ -109,6 +112,7 @@
           ],
           "mocks": [],
           "name": "deposit_adds_to_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -132,6 +136,7 @@
           ],
           "mocks": [],
           "name": "members_get_a_discount",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -155,6 +160,7 @@
           ],
           "mocks": [],
           "name": "statements_mention_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -178,6 +184,7 @@
           ],
           "mocks": [],
           "name": "parsing_garbage_fails",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -201,6 +208,7 @@
           ],
           "mocks": [],
           "name": "huge_deposits_overflow",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -224,6 +232,7 @@
           ],
           "mocks": [],
           "name": "statement_is_mailed",
+          "property": null,
           "skip": {
             "reason": "talks to the network",
             "span": {
@@ -244,6 +253,7 @@
           "assertions": [],
           "mocks": [],
           "name": "opening_an_account_does_not_panic",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -254,6 +264,37 @@
         }
       ],
       "file": "tests/ledger.rs",
+      "framework": "rust-test",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "truthiness",
+              "span": {
+                "col": 9,
+                "end_col": 20,
+                "end_line": 7,
+                "line": 7
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "discounts_never_raise_the_price",
+          "property": "proptest",
+          "skip": null,
+          "span": {
+            "col": 85,
+            "end_col": 6,
+            "end_line": 8,
+            "line": 6
+          }
+        }
+      ],
+      "file": "tests/properties.rs",
       "framework": "rust-test",
       "setup": []
     },
@@ -274,6 +315,7 @@
           ],
           "mocks": [],
           "name": "members_pay_exactly_the_discounted_price",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -297,6 +339,7 @@
           ],
           "mocks": [],
           "name": "overflowing_balances_panic",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -320,6 +363,7 @@
           ],
           "mocks": [],
           "name": "statements_are_not_empty",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -332,6 +376,7 @@
           "assertions": [],
           "mocks": [],
           "name": "classifying_runs",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -383,6 +428,7 @@
             }
           ],
           "name": "tallies_are_logged_and_mailed",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -406,6 +452,7 @@
           ],
           "mocks": [],
           "name": "every_entry_counts_toward_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -429,6 +476,7 @@
           ],
           "mocks": [],
           "name": "computed_entries_count_toward_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -452,6 +500,7 @@
           ],
           "mocks": [],
           "name": "display_shows_owner_and_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -475,6 +524,7 @@
           ],
           "mocks": [],
           "name": "statements_show_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -498,6 +548,7 @@
           ],
           "mocks": [],
           "name": "a_comparison_inside_assert_pins_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -521,6 +572,7 @@
           ],
           "mocks": [],
           "name": "an_assertion_helper_is_an_assertion",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -544,6 +596,7 @@
           ],
           "mocks": [],
           "name": "every_listed_entry_counts_toward_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -567,6 +620,7 @@
           ],
           "mocks": [],
           "name": "an_assertion_helper_called_with_a_turbofish_is_an_assertion",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,

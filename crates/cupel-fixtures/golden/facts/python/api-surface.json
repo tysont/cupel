@@ -901,6 +901,18 @@
       }
     },
     {
+      "file": "tests/test_properties.py",
+      "kind": "function",
+      "path": "tests.test_properties.test_parsed_cents_round_trip",
+      "signature": "(_)",
+      "span": {
+        "col": 1,
+        "end_col": 44,
+        "end_line": 8,
+        "line": 7
+      }
+    },
+    {
       "file": "tests/test_quality_signals.py",
       "kind": "function",
       "path": "tests.test_quality_signals.test_members_pay_exactly_the_discounted_price",

@@ -1630,6 +1630,28 @@
     },
     {
       "body": {
+        "col": 47,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 5
+      },
+      "display": "test.properties.sums do not depend on the order",
+      "file": "test/properties.test.js",
+      "kind": "closure",
+      "lang": "javascript",
+      "name": "sums do not depend on the order",
+      "namespace": "test.properties",
+      "parameters": 0,
+      "span": {
+        "col": 41,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 40,
         "end_col": 2,
         "end_line": 7,

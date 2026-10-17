@@ -8335,6 +8335,83 @@
       }
     },
     {
+      "hash": "sh_4c5d266047ba89e3",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "parse_cents"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "str"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "argument_list"
+                                  }
+                                ],
+                                "label": "call"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "call"
+                      },
+                      {
+                        "children": [],
+                        "label": "=="
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "comparison_operator"
+                  }
+                ],
+                "label": "assert_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/test_properties.py",
+        "line": 7
+      }
+    },
+    {
       "hash": "sh_b89aa2cb6e590462",
       "root": {
         "children": [

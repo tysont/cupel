@@ -7549,6 +7549,424 @@
       }
     },
     {
+      "hash": "sh_d0d1d42bda20fc23",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "*"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "qualified_type"
+                      }
+                    ],
+                    "label": "pointer_type"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "parameter_declaration"
+                                  }
+                                ],
+                                "label": "parameter_list"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [],
+                                                        "label": "Balance"
+                                                      },
+                                                      {
+                                                        "children": [
+                                                          {
+                                                            "children": [
+                                                              {
+                                                                "children": [
+                                                                  {
+                                                                    "children": [],
+                                                                    "label": "$id"
+                                                                  }
+                                                                ],
+                                                                "label": "slice_type"
+                                                              },
+                                                              {
+                                                                "children": [
+                                                                  {
+                                                                    "children": [
+                                                                      {
+                                                                        "children": [],
+                                                                        "label": "$id"
+                                                                      }
+                                                                    ],
+                                                                    "label": "literal_element"
+                                                                  }
+                                                                ],
+                                                                "label": "literal_value"
+                                                              }
+                                                            ],
+                                                            "label": "composite_literal"
+                                                          }
+                                                        ],
+                                                        "label": "argument_list"
+                                                      }
+                                                    ],
+                                                    "label": "call_expression"
+                                                  },
+                                                  {
+                                                    "children": [],
+                                                    "label": "=="
+                                                  },
+                                                  {
+                                                    "children": [],
+                                                    "label": "$id"
+                                                  }
+                                                ],
+                                                "label": "binary_expression"
+                                              }
+                                            ],
+                                            "label": "expression_list"
+                                          }
+                                        ],
+                                        "label": "return_statement"
+                                      }
+                                    ],
+                                    "label": "statement_list"
+                                  }
+                                ],
+                                "label": "block"
+                              }
+                            ],
+                            "label": "func_literal"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "short_var_declaration"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "expression_list"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "Check"
+                                      }
+                                    ],
+                                    "label": "selector_expression"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "nil"
+                                      }
+                                    ],
+                                    "label": "argument_list"
+                                  }
+                                ],
+                                "label": "call_expression"
+                              }
+                            ],
+                            "label": "expression_list"
+                          }
+                        ],
+                        "label": "short_var_declaration"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "!="
+                          },
+                          {
+                            "children": [],
+                            "label": "nil"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "Error"
+                                          }
+                                        ],
+                                        "label": "selector_expression"
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "argument_list"
+                                      }
+                                    ],
+                                    "label": "call_expression"
+                                  }
+                                ],
+                                "label": "expression_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "if_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "ledger_property_test.go",
+        "line": 8
+      }
+    },
+    {
+      "hash": "sh_b8cf4737e2a4ea0b",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "expression_list"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "parameter_declaration"
+                      }
+                    ],
+                    "label": "parameter_list"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "Balance"
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [],
+                                                        "label": "$id"
+                                                      }
+                                                    ],
+                                                    "label": "slice_type"
+                                                  },
+                                                  {
+                                                    "children": [
+                                                      {
+                                                        "children": [
+                                                          {
+                                                            "children": [],
+                                                            "label": "$id"
+                                                          }
+                                                        ],
+                                                        "label": "literal_element"
+                                                      }
+                                                    ],
+                                                    "label": "literal_value"
+                                                  }
+                                                ],
+                                                "label": "composite_literal"
+                                              }
+                                            ],
+                                            "label": "argument_list"
+                                          }
+                                        ],
+                                        "label": "call_expression"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "=="
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "binary_expression"
+                                  }
+                                ],
+                                "label": "expression_list"
+                              }
+                            ],
+                            "label": "return_statement"
+                          }
+                        ],
+                        "label": "statement_list"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "func_literal"
+              }
+            ],
+            "label": "expression_list"
+          }
+        ],
+        "label": "short_var_declaration"
+      },
+      "symbol": {
+        "col": 2,
+        "file": "ledger_property_test.go",
+        "line": 9
+      }
+    },
+    {
       "hash": "sh_18365bf0581e770c",
       "root": {
         "children": [

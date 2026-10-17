@@ -377,6 +377,27 @@
         },
         {
           "edge_kind": "import",
+          "from": "tests/properties.rs",
+          "line": 1,
+          "relative": false,
+          "specifier": "ledger::pricing::discounted",
+          "target": {
+            "kind": "file",
+            "path": "src/pricing.rs"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/properties.rs",
+          "line": 2,
+          "relative": false,
+          "specifier": "proptest::prelude::*",
+          "target": {
+            "kind": "unresolved"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 1,
           "relative": false,

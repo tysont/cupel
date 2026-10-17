@@ -300,6 +300,39 @@
         },
         {
           "edge_kind": "import",
+          "from": "test/properties.test.js",
+          "line": 1,
+          "relative": false,
+          "specifier": "fast-check",
+          "target": {
+            "kind": "external",
+            "package": "fast-check"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/properties.test.js",
+          "line": 2,
+          "relative": false,
+          "specifier": "vitest",
+          "target": {
+            "kind": "external",
+            "package": "vitest"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/properties.test.js",
+          "line": 3,
+          "relative": true,
+          "specifier": "../src/math.js",
+          "target": {
+            "kind": "file",
+            "path": "src/math.js"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "test/report.test.js",
           "line": 1,
           "relative": true,

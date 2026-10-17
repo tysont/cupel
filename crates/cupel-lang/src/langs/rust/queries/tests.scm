@@ -113,7 +113,7 @@
   (attribute_item)*
   .
   (function_item
-    return_type: (_) @test.assertion @assertion.idiom.process) @test.case)
+    return_type: (_) @test.assertion @assertion.idiom.property) @test.case)
 
 ; `quickcheck(prop as fn(…) -> bool)` and `QuickCheck::new().quickcheck(…)` in a test check a
 ; property, failing the test with the shrunk arguments.
@@ -123,7 +123,7 @@
     (scoped_identifier name: (identifier) @_quickcheck)
     (field_expression field: (field_identifier) @_quickcheck)
   ]
-  (#eq? @_quickcheck "quickcheck")) @test.assertion @assertion.idiom.process @property.quickcheck
+  (#eq? @_quickcheck "quickcheck")) @test.assertion @assertion.idiom.property @property.quickcheck
 
 ; Assertion idioms come before plain assertion macros: the earliest pattern wins. A `==` at the top
 ; level of `assert!`'s arguments compares two values, as `assert_eq!` does; a `!=` rules one out.

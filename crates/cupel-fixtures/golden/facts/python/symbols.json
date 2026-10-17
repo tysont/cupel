@@ -1565,6 +1565,28 @@
     {
       "body": {
         "col": 5,
+        "end_col": 44,
+        "end_line": 8,
+        "line": 8
+      },
+      "display": "tests.test_properties.test_parsed_cents_round_trip",
+      "file": "tests/test_properties.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "test_parsed_cents_round_trip",
+      "namespace": "tests.test_properties",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 44,
+        "end_line": 8,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
         "end_col": 41,
         "end_line": 9,
         "line": 9

@@ -411,7 +411,11 @@ test("example", () => {
         assert_eq!(
             properties(lang, dir.path(), path),
             [
-                property("digits", Some("fast-check"), &[(Equality, Strong)]),
+                property(
+                    "digits",
+                    Some("fast-check"),
+                    &[(Custom, Strong), (Equality, Strong)]
+                ),
                 property("checks", Some("fast-check"), &[(Equality, Strong)]),
                 property("example", None, &[(Equality, Strong)]),
             ],

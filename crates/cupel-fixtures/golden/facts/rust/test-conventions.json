@@ -4,6 +4,7 @@
       "source": "src/lib.rs",
       "tests": [
         "tests/ledger.rs",
+        "tests/properties.rs",
         "tests/quality_signals.rs"
       ]
     },

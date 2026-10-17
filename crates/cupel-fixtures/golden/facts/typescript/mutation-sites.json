@@ -6997,6 +6997,45 @@
         "file": "test/decide.test.ts",
         "line": 13
       }
+    },
+    {
+      "sites": [
+        {
+          "from": "fc.assert(\n    fc.property(fc.integer(), fc.integer(), (a: number, b: number) => {\n      expect(add(a, b)).toBe(add(b, a));\n    }),\n  );",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d726a6af6972bcdd",
+          "span": {
+            "col": 3,
+            "end_col": 5,
+            "end_line": 10,
+            "line": 6
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "expect(add(a, b)).toBe(add(b, a));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "7b7fc90e7a569dc1",
+          "span": {
+            "col": 7,
+            "end_col": 41,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 41,
+        "file": "test/properties.test.ts",
+        "line": 5
+      }
     }
   ]
 }

@@ -220,7 +220,11 @@ func TestExample(t *testing.T) {
     assert_eq!(
         properties("go", dir.path(), "digits_test.go"),
         [
-            property("TestDigits", Some("testing-quick"), &[(NotNull, Weak)]),
+            property(
+                "TestDigits",
+                Some("testing-quick"),
+                &[(Custom, Strong), (NotNull, Weak)]
+            ),
             property("TestExample", None, &[(Equality, Strong)]),
         ]
     );

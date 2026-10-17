@@ -563,6 +563,14 @@
     {
       "reason": "test",
       "symbol": {
+        "col": 41,
+        "file": "test/properties.test.js",
+        "line": 5
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
         "col": 34,
         "file": "test/report.test.js",
         "line": 5

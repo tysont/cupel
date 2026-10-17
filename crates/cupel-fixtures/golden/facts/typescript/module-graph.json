@@ -308,6 +308,39 @@
             "kind": "file",
             "path": "src/decide.ts"
           }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/properties.test.ts",
+          "line": 1,
+          "relative": false,
+          "specifier": "fast-check",
+          "target": {
+            "kind": "external",
+            "package": "fast-check"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/properties.test.ts",
+          "line": 2,
+          "relative": false,
+          "specifier": "vitest",
+          "target": {
+            "kind": "external",
+            "package": "vitest"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/properties.test.ts",
+          "line": 3,
+          "relative": true,
+          "specifier": "../src/math",
+          "target": {
+            "kind": "file",
+            "path": "src/math.ts"
+          }
         }
       ],
       "root": "."

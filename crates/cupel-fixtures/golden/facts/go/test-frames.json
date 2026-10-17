@@ -5,6 +5,47 @@
         {
           "assertions": [
             {
+              "kind": "custom",
+              "span": {
+                "col": 12,
+                "end_col": 33,
+                "end_line": 10,
+                "line": 10
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "not-null",
+              "span": {
+                "col": 3,
+                "end_col": 15,
+                "end_line": 11,
+                "line": 11
+              },
+              "strength": "weak"
+            }
+          ],
+          "mocks": [],
+          "name": "TestBalanceOfOneEntryIsTheEntry",
+          "property": "testing-quick",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 13,
+            "line": 8
+          }
+        }
+      ],
+      "file": "ledger_property_test.go",
+      "framework": "go-test",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
               "kind": "equality",
               "span": {
                 "col": 2,
@@ -17,6 +58,7 @@
           ],
           "mocks": [],
           "name": "TestMembersPayExactlyTheDiscountedPrice",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -40,6 +82,7 @@
           ],
           "mocks": [],
           "name": "TestBlankAmountsAreRejected",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -63,6 +106,7 @@
           ],
           "mocks": [],
           "name": "TestStatementsAreNotEmpty",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -75,6 +119,7 @@
           "assertions": [],
           "mocks": [],
           "name": "TestClassifyingRuns",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -126,6 +171,7 @@
             }
           ],
           "name": "TestMailGoesThroughEveryNotifier",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -149,6 +195,7 @@
           ],
           "mocks": [],
           "name": "TestEveryEntryCountsTowardTheBalance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -172,6 +219,7 @@
           ],
           "mocks": [],
           "name": "TestComputedEntriesCountTowardTheBalance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -195,6 +243,7 @@
           ],
           "mocks": [],
           "name": "TestDepositsKeepTheOwner",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -218,6 +267,7 @@
           ],
           "mocks": [],
           "name": "TestDepositsAccumulate",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -248,6 +298,7 @@
           ],
           "mocks": [],
           "name": "TestDepositAddsToTheBalance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -271,6 +322,7 @@
           ],
           "mocks": [],
           "name": "TestMembersGetADiscount",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -294,6 +346,7 @@
           ],
           "mocks": [],
           "name": "TestNewAccountsAreRegistered",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -317,6 +370,7 @@
           ],
           "mocks": [],
           "name": "TestParsingGarbageFails",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -340,6 +394,7 @@
           ],
           "mocks": [],
           "name": "TestNewAccountsHaveDistinctIDs",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -363,6 +418,7 @@
           ],
           "mocks": [],
           "name": "TestClassify",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -386,6 +442,7 @@
           ],
           "mocks": [],
           "name": "TestStatementIsMailed",
+          "property": null,
           "skip": {
             "reason": "talks to the network",
             "span": {
@@ -427,6 +484,7 @@
           ],
           "mocks": [],
           "name": "TestParseCentsTrimsSpaces",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -439,6 +497,7 @@
           "assertions": [],
           "mocks": [],
           "name": "TestOpeningAnAccountDoesNotPanic",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -492,6 +551,7 @@
           ],
           "mocks": [],
           "name": "TestTallyReportsOverdraft",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -525,6 +585,7 @@
           ],
           "mocks": [],
           "name": "TestParseCentsAcceptsDigits",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -548,6 +609,7 @@
           ],
           "mocks": [],
           "name": "TestParseCentsRejectsBlanks",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -571,6 +633,7 @@
           ],
           "mocks": [],
           "name": "TestDiscountSnapshot",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -614,6 +677,7 @@
             }
           ],
           "name": "TestMailNotifiesTheOwner",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,

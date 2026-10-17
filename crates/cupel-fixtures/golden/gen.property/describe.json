@@ -1,0 +1,208 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "standard",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `property.falsified`.",
+            "properties": {
+              "cases": {
+                "description": "The generated cases it was asked to pass.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "counterexample": {
+                "description": "The framework's shrunk failing input, as it printed it; null when it failed without one.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "framework": {
+                "description": "The framework that generated its inputs, such as `proptest`.",
+                "type": "string"
+              },
+              "runner": {
+                "description": "The runner that ran it.",
+                "type": "string"
+              },
+              "seed": {
+                "description": "The seed the framework was given; null for a framework that takes none.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "test": {
+                "description": "The test's ID, as its runner names it; null when no test the runner reported is the case.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "framework",
+              "runner",
+              "cases"
+            ],
+            "title": "Falsified",
+            "type": "object"
+          },
+          "kind": "property.falsified",
+          "summary": "A property test failed under the run's seed and case budget; the counterexample is the framework's shrunk failing input."
+        },
+        {
+          "action": "add_property",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `property.missing`.",
+            "properties": {
+              "frameworks": {
+                "description": "The language's property frameworks, in preference order.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "function": {
+                "description": "The function, as `namespace.name` or the language's spelling of it.",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "namespace": {
+                "type": "string"
+              },
+              "parameters": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "signature": {
+                "description": "Its normalized signature, when the language reports one.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "function",
+              "name",
+              "namespace",
+              "parameters",
+              "frameworks"
+            ],
+            "title": "Missing",
+            "type": "object"
+          },
+          "kind": "property.missing",
+          "summary": "A public function that takes arguments, in a file whose tests hold no property test."
+        }
+      ],
+      "id": "gen.property",
+      "metrics": [
+        {
+          "name": "properties",
+          "per": "scope",
+          "summary": "Property tests in scope."
+        },
+        {
+          "name": "falsified",
+          "per": "scope",
+          "summary": "Property tests falsified, or failed, under the case budget."
+        },
+        {
+          "name": "missing",
+          "per": "scope",
+          "summary": "Public functions taking arguments whose tests hold no property test."
+        }
+      ],
+      "needs": [
+        "property-results",
+        "symbols",
+        "test-conventions"
+      ],
+      "stability": "experimental",
+      "summary": "Runs the existing property tests (proptest, quickcheck, Hypothesis, fast-check) with the run's seed and a case budget; reports the shrunk counterexamples, and functions with no property test.",
+      "tier": 4,
+      "version": 1,
+      "wants": [
+        "api-surface"
+      ]
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

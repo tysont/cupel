@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 21,
+        "n": 22,
         "unit": "cycles",
         "value": 1.0
       },
@@ -270,28 +270,28 @@
           "lang": "typescript",
           "rank": 1,
           "target": {
-            "display": "src/ledger.ts",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "src/ledger.ts",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 5.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 2,
-          "target": {
             "display": "src/math.ts",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
               "file": "src/math.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 6.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 2,
+          "target": {
+            "display": "src/ledger.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger.ts",
               "line": 1
             },
             "symbol": null
@@ -427,7 +427,7 @@
           "value": 1.0
         }
       ],
-      "measured": 21,
+      "measured": 22,
       "metric": "coupling",
       "per": "module",
       "summary": "Afferent plus efferent coupling per module."

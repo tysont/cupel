@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 21,
+        "n": 22,
         "unit": "cycles",
         "value": 1.0
       },
@@ -318,6 +318,22 @@
           "lang": "rust",
           "rank": 5,
           "target": {
+            "display": "src/pricing.rs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/pricing.rs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 4.0
+        },
+        {
+          "lang": "rust",
+          "rank": 6,
+          "target": {
             "display": "src/deps_cycle/alpha.rs",
             "location": {
               "col": null,
@@ -332,7 +348,7 @@
         },
         {
           "lang": "rust",
-          "rank": 6,
+          "rank": 7,
           "target": {
             "display": "src/deps_cycle/beta.rs",
             "location": {
@@ -348,7 +364,7 @@
         },
         {
           "lang": "rust",
-          "rank": 7,
+          "rank": 8,
           "target": {
             "display": "src/deps_cycle/mod.rs",
             "location": {
@@ -364,7 +380,7 @@
         },
         {
           "lang": "rust",
-          "rank": 8,
+          "rank": 9,
           "target": {
             "display": "src/deps_layers/infra/mod.rs",
             "location": {
@@ -380,7 +396,7 @@
         },
         {
           "lang": "rust",
-          "rank": 9,
+          "rank": 10,
           "target": {
             "display": "src/deps_tree/mod.rs",
             "location": {
@@ -393,25 +409,9 @@
             "symbol": null
           },
           "value": 3.0
-        },
-        {
-          "lang": "rust",
-          "rank": 10,
-          "target": {
-            "display": "src/pricing.rs",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "src/pricing.rs",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 3.0
         }
       ],
-      "measured": 21,
+      "measured": 22,
       "metric": "coupling",
       "per": "module",
       "summary": "Afferent plus efferent coupling per module."

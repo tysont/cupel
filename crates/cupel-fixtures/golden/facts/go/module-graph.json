@@ -245,6 +245,28 @@
         },
         {
           "edge_kind": "import",
+          "from": "ledger_property_test.go",
+          "line": 4,
+          "relative": false,
+          "specifier": "testing",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "ledger_property_test.go",
+          "line": 5,
+          "relative": false,
+          "specifier": "testing/quick",
+          "target": {
+            "kind": "external",
+            "package": "std"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "ledger_quality_test.go",
           "line": 4,
           "relative": false,

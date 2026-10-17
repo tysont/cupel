@@ -17,6 +17,7 @@
           ],
           "mocks": [],
           "name": "members pay less",
+          "property": null,
           "skip": null,
           "span": {
             "col": 28,
@@ -60,6 +61,7 @@
             }
           ],
           "name": "tallies stay within bounds",
+          "property": null,
           "skip": null,
           "span": {
             "col": 38,
@@ -90,6 +92,7 @@
           ],
           "mocks": [],
           "name": "doubles",
+          "property": null,
           "skip": null,
           "span": {
             "col": 17,
@@ -120,6 +123,7 @@
           ],
           "mocks": [],
           "name": "adds exactly",
+          "property": null,
           "skip": null,
           "span": {
             "col": 22,
@@ -143,6 +147,7 @@
           ],
           "mocks": [],
           "name": "rejects non-finite sums",
+          "property": null,
           "skip": null,
           "span": {
             "col": 33,
@@ -166,6 +171,7 @@
           ],
           "mocks": [],
           "name": "returns something",
+          "property": null,
           "skip": null,
           "span": {
             "col": 27,
@@ -178,6 +184,7 @@
           "assertions": [],
           "mocks": [],
           "name": "runs without checking",
+          "property": null,
           "skip": null,
           "span": {
             "col": 31,
@@ -229,6 +236,7 @@
             }
           ],
           "name": "logs and mails every sum",
+          "property": null,
           "skip": null,
           "span": {
             "col": 34,
@@ -252,6 +260,7 @@
           ],
           "mocks": [],
           "name": "counts every value in a range",
+          "property": null,
           "skip": null,
           "span": {
             "col": 39,
@@ -275,6 +284,7 @@
           ],
           "mocks": [],
           "name": "adds every pair in the table",
+          "property": null,
           "skip": null,
           "span": {
             "col": 38,
@@ -298,6 +308,7 @@
           ],
           "mocks": [],
           "name": "keeps values in order",
+          "property": null,
           "skip": null,
           "span": {
             "col": 31,
@@ -321,6 +332,7 @@
           ],
           "mocks": [],
           "name": "ends with the last sum",
+          "property": null,
           "skip": null,
           "span": {
             "col": 32,
@@ -361,6 +373,7 @@
             }
           ],
           "name": "adds two numbers",
+          "property": null,
           "skip": null,
           "span": {
             "col": 26,
@@ -394,6 +407,7 @@
             }
           ],
           "name": "is truthy for non-zero sums",
+          "property": null,
           "skip": null,
           "span": {
             "col": 37,
@@ -427,6 +441,7 @@
             }
           ],
           "name": "returns a defined value",
+          "property": null,
           "skip": null,
           "span": {
             "col": 33,
@@ -460,6 +475,7 @@
             }
           ],
           "name": "does not return zero",
+          "property": null,
           "skip": null,
           "span": {
             "col": 30,
@@ -493,6 +509,7 @@
             }
           ],
           "name": "handles huge numbers",
+          "property": null,
           "skip": {
             "reason": null,
             "span": {
@@ -523,6 +540,7 @@
             }
           ],
           "name": "can be called without checking",
+          "property": null,
           "skip": null,
           "span": {
             "col": 40,
@@ -556,6 +574,7 @@
             }
           ],
           "name": "matches its snapshot",
+          "property": null,
           "skip": null,
           "span": {
             "col": 30,
@@ -598,6 +617,7 @@
             }
           ],
           "name": "is consumed by a spy",
+          "property": null,
           "skip": null,
           "span": {
             "col": 30,
@@ -635,6 +655,7 @@
           ],
           "mocks": [],
           "name": "renders a count",
+          "property": null,
           "skip": null,
           "span": {
             "col": 23,
@@ -665,6 +686,7 @@
           ],
           "mocks": [],
           "name": "classifies overdrawn balances",
+          "property": null,
           "skip": null,
           "span": {
             "col": 39,
@@ -688,6 +710,7 @@
           ],
           "mocks": [],
           "name": "rejects empty amounts",
+          "property": null,
           "skip": null,
           "span": {
             "col": 31,
@@ -711,6 +734,7 @@
           ],
           "mocks": [],
           "name": "waits for the ledger server",
+          "property": null,
           "skip": {
             "reason": "needs a ledger server",
             "span": {
@@ -730,6 +754,47 @@
       ],
       "file": "test/decide.test.ts",
       "framework": "node-test",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "custom",
+              "span": {
+                "col": 3,
+                "end_col": 4,
+                "end_line": 10,
+                "line": 6
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 7,
+                "end_col": 40,
+                "end_line": 8,
+                "line": 8
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "sums do not depend on the order",
+          "property": "fast-check",
+          "skip": null,
+          "span": {
+            "col": 41,
+            "end_col": 2,
+            "end_line": 11,
+            "line": 5
+          }
+        }
+      ],
+      "file": "test/properties.test.ts",
+      "framework": "vitest",
       "setup": []
     }
   ]

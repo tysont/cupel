@@ -116,13 +116,13 @@
   (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow")) @test.assertion @assertion.idiom.fails
 
 ; Property tests: `quick.Check(…)` and `quick.CheckEqual(…)` generate the case's inputs with
-; testing/quick (ADR-095).
+; testing/quick (ADR-095); the check is also an assertion, whose error the test reports.
 (call_expression
   function: (selector_expression
     operand: (identifier) @_quick
     field: (field_identifier) @_check)
   (#eq? @_quick "quick")
-  (#any-of? @_check "Check" "CheckEqual")) @property.testing-quick
+  (#any-of? @_check "Check" "CheckEqual")) @property.testing-quick @test.assertion @assertion.idiom.property
 
 ; testify (`assert.Equal`, `require.NoError`) and go-snaps (`snaps.MatchSnapshot`).
 (call_expression

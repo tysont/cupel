@@ -110,6 +110,9 @@ process = { kind = "custom", strength = "strong" }
 is-present = { kind = "not-null", strength = "weak" }
 is-err = { kind = "throws", strength = "weak" }
 should-panic = { kind = "throws", strength = "strong" }
+# A property check (`quickcheck(…)`, a `#[quickcheck]` function's result) fails the test with
+# the shrunk counterexample (ADR-095).
+property = { kind = "custom", strength = "strong" }
 
 [conventions]
 test_globs = ["**/tests/**/*.rs"]

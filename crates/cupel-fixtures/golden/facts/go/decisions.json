@@ -865,6 +865,31 @@
       }
     },
     {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_property_test.go",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 2,
+        "file": "ledger_property_test.go",
+        "line": 9
+      }
+    },
+    {
       "decisions": [],
       "symbol": {
         "col": 1,

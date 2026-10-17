@@ -17,6 +17,7 @@
           ],
           "mocks": [],
           "name": "test_deposit_adds_to_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -40,6 +41,7 @@
           ],
           "mocks": [],
           "name": "test_statements_mention_the_owner",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -63,6 +65,7 @@
           ],
           "mocks": [],
           "name": "test_parsing_garbage_gives_nothing",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -86,6 +89,7 @@
           ],
           "mocks": [],
           "name": "test_an_opening_account_exists",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -109,6 +113,7 @@
           ],
           "mocks": [],
           "name": "test_negative_deposits_are_rejected",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -132,6 +137,7 @@
           ],
           "mocks": [],
           "name": "test_rounding_is_close",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -155,6 +161,7 @@
           ],
           "mocks": [],
           "name": "test_statement_is_published",
+          "property": null,
           "skip": {
             "reason": "talks to the network",
             "span": {
@@ -186,6 +193,7 @@
           ],
           "mocks": [],
           "name": "test_report_matches_snapshot",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -219,6 +227,7 @@
             }
           ],
           "name": "test_publish_posts_once",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -252,6 +261,7 @@
             }
           ],
           "name": "test_rendering_can_be_replaced",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -264,6 +274,7 @@
           "assertions": [],
           "mocks": [],
           "name": "test_opening_an_account_does_not_raise",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -304,6 +315,7 @@
           ],
           "mocks": [],
           "name": "test_tally_reports_overdraft",
+          "property": null,
           "skip": null,
           "span": {
             "col": 5,
@@ -327,6 +339,7 @@
           ],
           "mocks": [],
           "name": "test_members_get_a_discount",
+          "property": null,
           "skip": {
             "reason": "pricing tables are being revised",
             "span": {
@@ -368,6 +381,7 @@
             }
           ],
           "name": "test_tally_logs_once",
+          "property": null,
           "skip": null,
           "span": {
             "col": 5,
@@ -396,6 +410,37 @@
               "kind": "equality",
               "span": {
                 "col": 5,
+                "end_col": 44,
+                "end_line": 8,
+                "line": 8
+              },
+              "strength": "strong"
+            }
+          ],
+          "mocks": [],
+          "name": "test_parsed_cents_round_trip",
+          "property": "hypothesis",
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 44,
+            "end_line": 8,
+            "line": 7
+          }
+        }
+      ],
+      "file": "tests/test_properties.py",
+      "framework": "pytest",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
                 "end_col": 41,
                 "end_line": 9,
                 "line": 9
@@ -405,6 +450,7 @@
           ],
           "mocks": [],
           "name": "test_members_pay_exactly_the_discounted_price",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -428,6 +474,7 @@
           ],
           "mocks": [],
           "name": "test_negative_amounts_are_rejected",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -451,6 +498,7 @@
           ],
           "mocks": [],
           "name": "test_statements_are_not_empty",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -463,6 +511,7 @@
           "assertions": [],
           "mocks": [],
           "name": "test_classifying_runs",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -514,6 +563,7 @@
             }
           ],
           "name": "test_tallies_are_logged_and_mailed",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -537,6 +587,7 @@
           ],
           "mocks": [],
           "name": "test_every_entry_counts_toward_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -560,6 +611,7 @@
           ],
           "mocks": [],
           "name": "test_computed_entries_count_toward_the_balance",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -583,6 +635,7 @@
           ],
           "mocks": [],
           "name": "test_deposits_keep_the_owner",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,
@@ -606,6 +659,7 @@
           ],
           "mocks": [],
           "name": "test_deposits_accumulate",
+          "property": null,
           "skip": null,
           "span": {
             "col": 1,

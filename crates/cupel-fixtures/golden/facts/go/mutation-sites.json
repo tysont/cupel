@@ -3540,6 +3540,84 @@
     {
       "sites": [
         {
+          "from": "err != nil",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "6783dc4c1124e4a4",
+          "span": {
+            "col": 35,
+            "end_col": 45,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "!(err != nil)"
+          ]
+        },
+        {
+          "from": "!=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "ef071f3771ea3711",
+          "span": {
+            "col": 39,
+            "end_col": 41,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "=="
+          ]
+        },
+        {
+          "from": "t.Error(err)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "328667eb4da2d930",
+          "span": {
+            "col": 3,
+            "end_col": 15,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_property_test.go",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "0cdc1351e1ac4086",
+          "span": {
+            "col": 65,
+            "end_col": 67,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 2,
+        "file": "ledger_property_test.go",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "assert.Equal(t, int64(900), discounted(1000, 10, true))",
           "operator": "statement-deletion",
           "set": "extended",
