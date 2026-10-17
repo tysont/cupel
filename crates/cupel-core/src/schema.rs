@@ -7,6 +7,7 @@ use serde_json::{Value, json};
 
 use crate::config::ConfigFile;
 use crate::coverage::CoverageMap;
+use crate::divergence::DivergenceResults;
 use crate::envelope::Envelope;
 use crate::event::Event;
 use crate::fact::{Fact, FactKind};
@@ -77,7 +78,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 15] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 16] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -93,6 +94,10 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 15] = [
     (FactKind::CoverageMap, fact_schema::<CoverageMap>),
     (FactKind::PerTestMap, fact_schema::<PerTestMap>),
     (FactKind::MutationOutcomes, fact_schema::<MutationOutcomes>),
+    (
+        FactKind::DivergenceResults,
+        fact_schema::<DivergenceResults>,
+    ),
 ];
 
 /// The payload version of a fact kind, or `None` for kinds whose payload type does not exist yet.

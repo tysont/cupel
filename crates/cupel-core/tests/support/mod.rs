@@ -77,6 +77,8 @@ pub fn job<'a>(
         depth: cupel_core::CostClass::Standard,
         changed: None,
         resources: cupel_core::budget::Resources::default(),
+        oracle: None,
+        cases: None,
     }
 }
 

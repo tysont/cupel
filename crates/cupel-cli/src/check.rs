@@ -130,6 +130,8 @@ pub fn run(
         depth: config.effective.depth,
         changed: changed_lines(writer.root(), &request, &resolved)?,
         resources: resources::of(invocation, config, args, git.as_ref())?,
+        oracle: oracle.run_oracle(config),
+        cases: args.cases,
     };
     let scheduler = Scheduler {
         checks: catalog.checks(),

@@ -1,16 +1,17 @@
 // ABOUTME: What the scheduler hands a producer beside its needs (ADR-080): the facts it wants when they can be
-// ABOUTME: made, the registered runners, the run's depth, and the lines a range changed.
+// ABOUTME: made, the registered runners, the run's depth, the lines a range changed, its oracle, and `--cases`.
 mod support;
 
 use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex};
 
+use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{ProjectInfo, Roots as EntryPoints, Symbols};
 use cupel_core::{
     Availability, CheckRegistry, CostClass, Ctx, Error, Estimate, EventSink, FactKind, Focus,
-    Langs, ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, Scheduler, Scope, Upstream,
-    Writer,
+    Langs, ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, RunOracle, Scheduler, Scope,
+    Upstream, Writer,
 };
 
 /// What the recording producer saw: the kinds upstream held and the runners it was handed.
@@ -21,6 +22,7 @@ struct Seen {
     roots: bool,
     runners: String,
     focus: Option<Focus>,
+    oracle: Option<String>,
 }
 
 /// A `Symbols` producer that wants `ProjectInfo` and `CoverageMap` and records what it got.
@@ -62,6 +64,7 @@ impl Producer<Symbols> for Recording {
             roots: ctx.upstream.get::<EntryPoints>().is_some(),
             runners: format!("{:?}", ctx.runners),
             focus: Some(ctx.focus.clone()),
+            oracle: ctx.oracle.as_ref().map(|oracle| oracle.name.clone()),
         });
         Ok(Symbols::default())
     }
@@ -206,6 +209,18 @@ fn seen_in(depth: CostClass, cached: bool) -> Seen {
     let mut job = support::job(&writer, &config, &checks, &["rust"]);
     job.depth = depth;
     job.changed = Some(changed());
+    job.cases = Some(7);
+    job.oracle = Some(RunOracle {
+        name: "release".to_owned(),
+        definition: OracleConfig {
+            kind: OracleKind::Ref,
+            reference: Some("v1".to_owned()),
+            cmd: None,
+            spec: None,
+            lang: None,
+            inputs: Vec::new(),
+        },
+    });
     Scheduler {
         checks: &checks,
         producers: &producers,
@@ -232,7 +247,7 @@ fn a_producer_gets_the_registered_runners() {
 }
 
 #[test]
-fn a_producer_gets_the_runs_depth_and_changed_lines() {
+fn a_producer_gets_the_runs_depth_changed_lines_and_case_budget() {
     assert_eq!(
         seen().focus,
         Some(Focus {
@@ -240,8 +255,14 @@ fn a_producer_gets_the_runs_depth_and_changed_lines() {
             symbols: None,
             changed: Some(changed()),
             jobs: None,
+            cases: Some(7),
         })
     );
+}
+
+#[test]
+fn a_producer_gets_the_runs_oracle() {
+    assert_eq!(seen().oracle.as_deref(), Some("release"));
 }
 
 #[test]

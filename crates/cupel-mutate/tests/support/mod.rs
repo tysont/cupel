@@ -67,6 +67,8 @@ pub fn produce(root: &Path, lang: &str, run: &Run) -> Result<MutationOutcomes, E
         depth: run.depth.unwrap_or(CostClass::Standard),
         changed: run.changed.clone(),
         resources: cupel_core::budget::Resources::default(),
+        oracle: None,
+        cases: None,
     };
     let scheduler = Scheduler {
         checks: &registries.checks,

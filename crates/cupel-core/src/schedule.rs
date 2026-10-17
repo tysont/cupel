@@ -21,6 +21,7 @@ use crate::joint::Deciding;
 use crate::lang::Lang;
 use crate::matrix::{Support, SupportMatrix};
 use crate::mutation::MutationOutcomes;
+use crate::oracle::RunOracle;
 use crate::producer::{
     Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, SharedFact, Upstream,
 };
@@ -65,6 +66,10 @@ pub struct Job<'a> {
     pub changed: Option<ChangedLines>,
     /// The run's budget, concurrency cap, and the store's history of durations (ADR-086).
     pub resources: Resources,
+    /// The oracle the run's checks compare against, handed to every producer (ADR-093 §2).
+    pub oracle: Option<RunOracle>,
+    /// `--cases`, handed to every producer (ADR-094 §5).
+    pub cases: Option<u64>,
 }
 
 /// What a run (or a dry run's planning) produced.
@@ -942,6 +947,8 @@ struct FactStore<'a> {
     jobs: Option<NonZeroUsize>,
     /// How long each production took, for the store's history (ADR-086 §2).
     durations: Vec<TaskDuration>,
+    oracle: Option<RunOracle>,
+    cases: Option<u64>,
 }
 
 impl<'a> FactStore<'a> {
@@ -992,6 +999,8 @@ impl<'a> FactStore<'a> {
             joints_run: HashSet::new(),
             jobs: job.resources.jobs,
             durations: Vec::new(),
+            oracle: job.oracle.clone(),
+            cases: job.cases,
         }
     }
 
@@ -1170,7 +1179,9 @@ impl<'a> FactStore<'a> {
                 symbols: self.selected.get(&lang.id).cloned(),
                 changed: self.changed.clone(),
                 jobs: self.jobs,
+                cases: self.cases,
             },
+            oracle: self.oracle.clone(),
         }
     }
 
