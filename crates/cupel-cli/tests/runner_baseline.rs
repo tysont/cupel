@@ -237,7 +237,13 @@ fn doctor_reports_the_version_of_the_runner_the_checks_need() {
         .keys()
         .map(String::as_str)
         .collect();
-    assert_eq!((code, tools), (0, vec!["python3"]));
+    // static.analyze's producer reports its first installed analyzer beside the runner.
+    let analyzer = ["mypy", "ruff"]
+        .into_iter()
+        .find(|program| cupel_core::find_program(program).is_some());
+    let mut expected: Vec<&str> = analyzer.into_iter().chain(["python3"]).collect();
+    expected.sort_unstable();
+    assert_eq!((code, tools), (0, expected));
     assert_eq!(
         envelope["run"]["toolchain"]["python3"]
             .as_str()
