@@ -165,6 +165,23 @@ fn property_cases<'a>(frames: Option<&'a TestFrames>, scope: &Scope) -> Vec<Case
     cases
 }
 
+/// The options that hand every property framework of the cases in scope the run's seed and
+/// case budget, as the engine's own run does, for another run of the suite (the contract run,
+/// ADR-113); none for a framework the runner cannot take them under, whose properties then run
+/// at their own budget.
+pub(crate) fn budgeted(
+    ctx: &ProduceCtx,
+    runner: &ProducerId,
+    frames: Option<&TestFrames>,
+    scope: &Scope,
+) -> RunOptions {
+    let budget = Budget {
+        cases: ctx.focus.case_budget(),
+        seed: ctx.seed,
+    };
+    options(ctx, runner, &property_cases(frames, scope), &budget).unwrap_or_default()
+}
+
 /// The options that hand every framework among `cases` the budget, merged.
 fn options(
     ctx: &ProduceCtx,

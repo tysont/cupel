@@ -1,0 +1,6 @@
+# Captured from the real tool on the spec.contracts Rust fixture (P7.1) with the contract run's switch,
+# standard output and error merged; output.txt is its unedited output. `dir` is where it ran.
+tool = "cargo 1.92.0 (contracts 0.6.11)"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/contracts/cap/rust"
+command = "CARGO_PROFILE_DEV_DEBUG_ASSERTIONS=true CARGO_TERM_COLOR=never cargo test --workspace --no-fail-fast"
+exit_code = 101

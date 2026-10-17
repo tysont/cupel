@@ -63,6 +63,7 @@ mod bench;
 mod cargo_nextest;
 mod cargo_test;
 mod clojure_test;
+mod contracts;
 pub mod coverage;
 pub mod differential;
 pub mod flake;

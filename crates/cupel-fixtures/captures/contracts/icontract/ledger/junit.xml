@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="4" time="0.055" timestamp="2026-10-17T15:07:59.556885-07:00" hostname="Grimlock.local"><testcase classname="tests.test_ledger" name="test_shares_nothing_among_no_parts" file="tests/test_ledger.py" line="3" time="0.002"><failure message="icontract.errors.ViolationError: File /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/contracts/cap/python/src/ledger.py, line 6 in &lt;module&gt;:&#10;parts &gt; 0:&#10;parts was 0&#10;total was 10">def test_shares_nothing_among_no_parts():
+&gt;       assert share(10, 0) == 0
+               ^^^^^^^^^^^^
+
+tests/test_ledger.py:5: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (10, 0), kwargs = {}
+
+    def wrapper(*args, **kwargs):  # type: ignore
+        """Wrap func by checking the preconditions and postconditions."""
+        kwargs_error = _assert_no_invalid_kwargs(kwargs)
+        if kwargs_error:
+            raise kwargs_error
+    
+        # We need to create a new in-progress set if it is None as the ``ContextVar`` does not accept
+        # a factory function for the default argument. If we didn't do this, and simply set an empty
+        # set as the default, ``ContextVar`` would always point to the same set by copying the default
+        # by reference.
+        in_progress = _IN_PROGRESS.get()
+        if in_progress is None:
+            in_progress = set()
+            _IN_PROGRESS.set(in_progress)
+    
+        # Use try-finally instead of ExitStack for performance.
+        try:
+            # If the wrapper is already checking the contracts for the wrapped function, avoid a recursive loop
+            # by skipping any subsequent contract checks for the same function.
+            if id_func in in_progress:
+                return func(*args, **kwargs)
+    
+            in_progress.add(id_func)
+    
+            (preconditions, snapshots, postconditions) = _unpack_pre_snap_posts(
+                wrapper
+            )
+    
+            resolved_kwargs = kwargs_from_call(
+                param_names=param_names,
+                kwdefaults=kwdefaults,
+                args=args,
+                kwargs=kwargs,
+            )
+    
+            type_error = _assert_resolved_kwargs_valid(
+                postconditions=postconditions, resolved_kwargs=resolved_kwargs
+            )
+            if type_error:
+                raise type_error
+    
+            violation_error = _assert_preconditions(
+                preconditions=preconditions,
+                resolved_kwargs=resolved_kwargs,
+                func=func,
+            )
+            if violation_error:
+&gt;               raise violation_error
+E               icontract.errors.ViolationError: File /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/contracts/cap/python/src/ledger.py, line 6 in &lt;module&gt;:
+E               parts &gt; 0:
+E               parts was 0
+E               total was 10
+
+../../site/icontract/_checkers.py:823: ViolationError</failure><system-out>--------------------------------- Captured Log ---------------------------------
+
+--------------------------------- Captured Out ---------------------------------
+
+</system-out><system-err>--------------------------------- Captured Err ---------------------------------
+
+</system-err></testcase><testcase classname="tests.test_ledger" name="test_halves_one" file="tests/test_ledger.py" line="7" time="0.001"><failure message="icontract.errors.ViolationError: File /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/contracts/cap/python/src/ledger.py, line 11 in &lt;module&gt;:&#10;result &gt; 0:&#10;amount was 1&#10;result was 0">def test_halves_one():
+&gt;       assert half(1) == 0
+               ^^^^^^^
+
+tests/test_ledger.py:9: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+args = (1,), kwargs = {}
+
+    def wrapper(*args, **kwargs):  # type: ignore
+        """Wrap func by checking the preconditions and postconditions."""
+        kwargs_error = _assert_no_invalid_kwargs(kwargs)
+        if kwargs_error:
+            raise kwargs_error
+    
+        # We need to create a new in-progress set if it is None as the ``ContextVar`` does not accept
+        # a factory function for the default argument. If we didn't do this, and simply set an empty
+        # set as the default, ``ContextVar`` would always point to the same set by copying the default
+        # by reference.
+        in_progress = _IN_PROGRESS.get()
+        if in_progress is None:
+            in_progress = set()
+            _IN_PROGRESS.set(in_progress)
+    
+        # Use try-finally instead of ExitStack for performance.
+        try:
+            # If the wrapper is already checking the contracts for the wrapped function, avoid a recursive loop
+            # by skipping any subsequent contract checks for the same function.
+            if id_func in in_progress:
+                return func(*args, **kwargs)
+    
+            in_progress.add(id_func)
+    
+            (preconditions, snapshots, postconditions) = _unpack_pre_snap_posts(
+                wrapper
+            )
+    
+            resolved_kwargs = kwargs_from_call(
+                param_names=param_names,
+                kwdefaults=kwdefaults,
+                args=args,
+                kwargs=kwargs,
+            )
+    
+            type_error = _assert_resolved_kwargs_valid(
+                postconditions=postconditions, resolved_kwargs=resolved_kwargs
+            )
+            if type_error:
+                raise type_error
+    
+            violation_error = _assert_preconditions(
+                preconditions=preconditions,
+                resolved_kwargs=resolved_kwargs,
+                func=func,
+            )
+            if violation_error:
+                raise violation_error
+    
+            # Capture the snapshots
+            if postconditions and snapshots:
+                resolved_kwargs["OLD"] = _capture_old(
+                    snapshots=snapshots, resolved_kwargs=resolved_kwargs, func=func
+                )
+    
+            # Ideally, we would catch any exception here and strip the checkers from the traceback.
+            # Unfortunately, this can not be done in Python 3, see
+            # https://stackoverflow.com/questions/44813333/how-can-i-elide-a-function-wrapper-from-the-traceback-in-python-3
+            result = func(*args, **kwargs)
+    
+            if postconditions:
+                resolved_kwargs["result"] = result
+    
+                violation_error = _assert_postconditions(
+                    postconditions=postconditions,
+                    resolved_kwargs=resolved_kwargs,
+                    func=func,
+                )
+                if violation_error:
+&gt;                   raise violation_error
+E                   icontract.errors.ViolationError: File /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/contracts/cap/python/src/ledger.py, line 11 in &lt;module&gt;:
+E                   result &gt; 0:
+E                   amount was 1
+E                   result was 0
+
+../../site/icontract/_checkers.py:845: ViolationError</failure><system-out>--------------------------------- Captured Log ---------------------------------
+
+--------------------------------- Captured Out ---------------------------------
+
+</system-out><system-err>--------------------------------- Captured Err ---------------------------------
+
+</system-err></testcase><testcase classname="tests.test_ledger" name="test_credits_within_the_limit" file="tests/test_ledger.py" line="11" time="0.001"><system-out>--------------------------------- Captured Log ---------------------------------
+
+--------------------------------- Captured Out ---------------------------------
+
+</system-out><system-err>--------------------------------- Captured Err ---------------------------------
+
+</system-err></testcase><testcase classname="tests.test_ledger" name="test_posts_three_entries" file="tests/test_ledger.py" line="15" time="0.001"><failure message="icontract.errors.ViolationError: File /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/contracts/cap/python/src/ledger.py, line 21 in &lt;module&gt;:&#10;len(self.entries) &lt;= 2:&#10;len(self.entries) was 3&#10;self was &lt;ledger.Account object at 0x10a47cad0&gt;&#10;self.entries was [1, 2, 3]">def test_posts_three_entries():
+        account = Account()
+        for amount in [1, 2, 3]:
+&gt;           account.post(amount)
+
+tests/test_ledger.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../site/icontract/_checkers.py:1171: in wrapper
+    _assert_invariant(contract=invariant, instance=instance)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+contract = &lt;icontract._types.Invariant object at 0x10a367e00&gt;
+instance = &lt;ledger.Account object at 0x10a47cad0&gt;
+
+    def _assert_invariant(contract: Contract, instance: Any) -&gt; None:
+        """Assert that the contract holds as a class invariant given the instance of the class."""
+        if "self" in contract.condition_arg_set:
+            check = contract.condition(self=instance)
+        else:
+            check = contract.condition()
+    
+        if not_check(check=check, contract=contract):
+&gt;           raise _create_violation_error(
+                contract=contract, resolved_kwargs={"self": instance}
+            )
+E           icontract.errors.ViolationError: File /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/contracts/cap/python/src/ledger.py, line 21 in &lt;module&gt;:
+E           len(self.entries) &lt;= 2:
+E           len(self.entries) was 3
+E           self was &lt;ledger.Account object at 0x10a47cad0&gt;
+E           self.entries was [1, 2, 3]
+
+../../site/icontract/_checkers.py:532: ViolationError</failure><system-out>--------------------------------- Captured Log ---------------------------------
+
+--------------------------------- Captured Out ---------------------------------
+
+</system-out><system-err>--------------------------------- Captured Err ---------------------------------
+
+</system-err></testcase></testsuite></testsuites>

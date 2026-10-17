@@ -11,7 +11,7 @@
 mod cargo;
 mod go;
 mod miri;
-mod report;
+pub(crate) mod report;
 mod tsan;
 
 use std::path::{Path, PathBuf};

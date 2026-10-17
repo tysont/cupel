@@ -1,0 +1,6 @@
+# Captured from the real tool on the spec.contracts Python fixture (P7.1) with the contract run's switch;
+# junit.xml is pytest's unedited report. `dir` is where it ran.
+tool = "pytest 9.1.1, icontract 2.7.3"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/contracts/cap/python"
+command = "ICONTRACT_SLOW=1 pytest -p no:cacheprovider -o junit_family=xunit1 -o junit_logging=all --junitxml=junit.xml"
+exit_code = 1

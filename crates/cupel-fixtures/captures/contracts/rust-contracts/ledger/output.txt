@@ -1,0 +1,50 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling syn v3.0.9
+   Compiling contracts v0.6.11
+   Compiling ledger v0.1.0 (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/contracts/cap/rust)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.10s
+     Running unittests src/lib.rs (target/debug/deps/ledger-955bee821b8efeba)
+
+running 4 tests
+test tests::credits_within_the_limit ... ok
+test tests::posts_three_entries ... FAILED
+test tests::halves_one ... FAILED
+test tests::shares_nothing_among_no_parts ... FAILED
+
+failures:
+
+---- tests::posts_three_entries stdout ----
+
+thread 'tests::posts_three_entries' (92990617) panicked at src/lib.rs:25:19:
+Invariant (as post-condition) of post violated: an account holds two entries: self.entries.len() <= 2
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- tests::halves_one stdout ----
+
+thread 'tests::halves_one' (92990616) panicked at src/lib.rs:10:17:
+Post-condition of half violated: half of a positive amount is positive: ret > 0
+
+---- tests::shares_nothing_among_no_parts stdout ----
+
+thread 'tests::shares_nothing_among_no_parts' (92990618) panicked at src/lib.rs:4:18:
+Pre-condition of share violated: a share needs at least one part: parts > 0
+
+
+failures:
+    tests::halves_one
+    tests::posts_three_entries
+    tests::shares_nothing_among_no_parts
+
+test result: FAILED. 1 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`
+   Doc-tests ledger
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: 1 target failed:
+    `--lib`
