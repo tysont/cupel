@@ -43,6 +43,88 @@
   (function_item
     name: (identifier) @test.name) @test.case)
 
+; Property tests (ADR-095). Each `fn` in a `proptest! { … }` block is a test of its own; the block is
+; a token tree, so the case is the function's body token tree, named by the identifier after `fn`.
+(macro_invocation
+  macro: (identifier) @_proptest
+  (token_tree
+    "fn"
+    .
+    (identifier) @test.name
+    .
+    (token_tree)
+    .
+    (token_tree) @test.case @property.proptest)
+  (#eq? @_proptest "proptest"))
+
+; `proptest!(|(x in …)| { … })` inside a test function makes it a property test.
+(macro_invocation
+  macro: (identifier) @_proptest
+  (#eq? @_proptest "proptest")) @property.proptest
+
+; Assertion macros in a `proptest!` body (or closure), at its top level and one block in: inside a
+; token tree a macro call is its name, `!`, and its arguments.
+(macro_invocation
+  macro: (identifier) @_proptest
+  (token_tree
+    (token_tree
+      (identifier) @test.assertion @assertion.name
+      .
+      "!"
+      .
+      (token_tree)))
+  (#eq? @_proptest "proptest")
+  (#any-of? @assertion.name "prop_assert" "prop_assert_eq" "prop_assert_ne" "assert" "assert_eq" "assert_ne"))
+
+(macro_invocation
+  macro: (identifier) @_proptest
+  (token_tree
+    (token_tree
+      (token_tree
+        (identifier) @test.assertion @assertion.name
+        .
+        "!"
+        .
+        (token_tree))))
+  (#eq? @_proptest "proptest")
+  (#any-of? @assertion.name "prop_assert" "prop_assert_eq" "prop_assert_ne" "assert" "assert_eq" "assert_ne"))
+
+; `#[proptest]` (test-strategy) and `#[quickcheck]` (quickcheck_macros) make a function a test whose
+; arguments the framework generates; a `#[quickcheck]` function's result is what quickcheck checks.
+((attribute_item
+  (attribute (identifier) @_proptest (#eq? @_proptest "proptest"))) @property.proptest
+  .
+  (attribute_item)*
+  .
+  (function_item
+    name: (identifier) @test.name) @test.case)
+
+((attribute_item
+  (attribute (identifier) @_quickcheck (#eq? @_quickcheck "quickcheck"))) @property.quickcheck
+  .
+  (attribute_item)*
+  .
+  (function_item
+    name: (identifier) @test.name) @test.case)
+
+((attribute_item
+  (attribute (identifier) @_quickcheck (#eq? @_quickcheck "quickcheck")))
+  .
+  (attribute_item)*
+  .
+  (function_item
+    return_type: (_) @test.assertion @assertion.idiom.process) @test.case)
+
+; `quickcheck(prop as fn(…) -> bool)` and `QuickCheck::new().quickcheck(…)` in a test check a
+; property, failing the test with the shrunk arguments.
+(call_expression
+  function: [
+    (identifier) @_quickcheck
+    (scoped_identifier name: (identifier) @_quickcheck)
+    (field_expression field: (field_identifier) @_quickcheck)
+  ]
+  (#eq? @_quickcheck "quickcheck")) @test.assertion @assertion.idiom.process @property.quickcheck
+
 ; Assertion idioms come before plain assertion macros: the earliest pattern wins. A `==` at the top
 ; level of `assert!`'s arguments compares two values, as `assert_eq!` does; a `!=` rules one out.
 (macro_invocation

@@ -81,6 +81,15 @@
     [(arrow_function) (function_expression)] @test.case)
   (#any-of? @_test "it" "test" "specify" "fit"))
 
+; Property tests: fast-check's runners, `fc.assert(…)` and `fc.check(…)`, generate the case's
+; inputs (ADR-095).
+(call_expression
+  function: (member_expression
+    object: (identifier) @_fc
+    property: (property_identifier) @_run)
+  (#eq? @_fc "fc")
+  (#any-of? @_run "assert" "check")) @property.fast-check
+
 ; A skip at run time: `t.skip("why")` (node:test), `this.skip()` (mocha), `ctx.skip()`.
 (call_expression
   function: (member_expression

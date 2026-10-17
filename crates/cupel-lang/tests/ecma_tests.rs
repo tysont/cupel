@@ -5,7 +5,7 @@ mod support;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
 use support::{
-    Expected, assert_framework, assert_test_file, case, expected, fixture, produce, rows, tree,
+    Expected, assert_framework, assert_test_file, case, expected, fixture, produce, rows, tree, properties, property,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -378,4 +378,38 @@ fn conventions_pair_sources_with_sibling_test_directory_and_in_source_tests() {
         typescript.test_files_for("src/inline.ts"),
         ["src/inline.ts"]
     );
+}
+
+#[test]
+fn fast_check_assertions_make_property_cases_in_both_languages() {
+    let source = r#"import fc from "fast-check";
+
+test("digits", () => {
+  fc.assert(
+    fc.property(fc.integer(), (n) => {
+      expect(digits(n)).toBe(String(n).length);
+    }),
+  );
+});
+
+it("checks", () => {
+  expect(fc.check(fc.property(fc.nat(), (n) => n >= 0)).failed).toBe(false);
+});
+
+test("example", () => {
+  expect(digits(7)).toBe(1);
+});
+"#;
+    for (lang, path) in [("javascript", "props.test.js"), ("typescript", "props.test.ts")] {
+        let dir = tree(&[(path, source)]);
+        assert_eq!(
+            properties(lang, dir.path(), path),
+            [
+                property("digits", Some("fast-check"), &[(Equality, Strong)]),
+                property("checks", Some("fast-check"), &[(Equality, Strong)]),
+                property("example", None, &[(Equality, Strong)]),
+            ],
+            "{lang}"
+        );
+    }
 }

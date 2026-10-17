@@ -225,6 +225,11 @@ file = "test/math.test.js"
 file = "test/math.test.js"
 expect = { framework = "vitest" }
 
+[test-frames.property]
+file = "test/properties.test.js"
+name = "sums do not depend on the order"
+expect = { property = "fast-check" }
+
 [test-conventions.separate-test-file]
 file = "src/math.js"
 name = "test/math.test.js"

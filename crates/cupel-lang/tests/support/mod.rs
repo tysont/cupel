@@ -281,6 +281,46 @@ pub fn file<'a>(frames: &'a TestFrames, path: &str) -> &'a TestFile {
         .unwrap_or_else(|| panic!("no test file {path}"))
 }
 
+/// Each case of the test file `path` in a tree produced for `lang`: its name, the property
+/// framework that generates its inputs, and its assertions (ADR-095).
+pub fn properties(lang: &str, root: &Path, path: &str) -> Vec<PropertyRow> {
+    let frames: TestFrames = produce(lang, root);
+    file(&frames, path)
+        .cases
+        .iter()
+        .map(|case| {
+            (
+                case.name.clone(),
+                case.property.clone(),
+                case.assertions
+                    .iter()
+                    .map(|a| (a.kind, a.strength))
+                    .collect(),
+            )
+        })
+        .collect()
+}
+
+/// A case's name, property framework, and assertions.
+pub type PropertyRow = (
+    String,
+    Option<String>,
+    Vec<(AssertionKind, AssertionStrength)>,
+);
+
+/// The row of a case named `name` driven by `framework` (`None` for fixed inputs).
+pub fn property(
+    name: &str,
+    framework: Option<&str>,
+    assertions: &[(AssertionKind, AssertionStrength)],
+) -> PropertyRow {
+    (
+        name.to_owned(),
+        framework.map(str::to_owned),
+        assertions.to_vec(),
+    )
+}
+
 pub fn case_row(case: &TestCase) -> CaseRow {
     (
         case.name.clone(),

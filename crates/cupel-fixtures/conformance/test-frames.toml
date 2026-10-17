@@ -67,3 +67,8 @@ expect = {}
 [[constructs]]
 id = "framework"
 summary = "The framework a test file is written for. Map the file only; the mapping's `expect` names the framework."
+
+[[constructs]]
+id = "property"
+summary = "A property test case whose inputs a framework generates (proptest, Hypothesis `@given`, fast-check `fc.assert`, `quick.Check`); the mapping's `expect` names the framework (ADR-095)."
+expect = {}

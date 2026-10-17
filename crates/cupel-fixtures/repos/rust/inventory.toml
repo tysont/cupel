@@ -224,6 +224,11 @@ file = "src/pricing.rs"
 file = "tests/ledger.rs"
 expect = { framework = "rust-test" }
 
+[test-frames.property]
+file = "tests/properties.rs"
+name = "discounts_never_raise_the_price"
+expect = { property = "proptest" }
+
 [test-conventions.separate-test-file]
 file = "src/lib.rs"
 name = "tests/ledger.rs"

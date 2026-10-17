@@ -221,6 +221,11 @@ file = "ledger_test.go"
 file = "ledger_test.go"
 expect = { framework = "go-test" }
 
+[test-frames.property]
+file = "ledger_property_test.go"
+name = "TestBalanceOfOneEntryIsTheEntry"
+expect = { property = "testing-quick" }
+
 [test-conventions.separate-test-file]
 file = "ledger.go"
 name = "ledger_test.go"

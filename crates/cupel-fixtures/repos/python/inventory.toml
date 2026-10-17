@@ -226,6 +226,11 @@ file = "tests/test_pricing.py"
 file = "tests/test_pricing.py"
 expect = { framework = "unittest" }
 
+[test-frames.property]
+file = "tests/test_properties.py"
+name = "test_parsed_cents_round_trip"
+expect = { property = "hypothesis" }
+
 [test-conventions.separate-test-file]
 file = "src/ledger/pricing.py"
 name = "tests/test_pricing.py"

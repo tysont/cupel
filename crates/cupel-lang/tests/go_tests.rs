@@ -4,7 +4,9 @@ mod support;
 
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
-use support::{assert_framework, assert_test_file, case, fixture, produce, rows, tree};
+use support::{
+    assert_framework, assert_test_file, case, fixture, produce, properties, property, rows, tree,
+};
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
 use AssertionStrength::{Strong, Weak};
@@ -187,5 +189,38 @@ fn conventions_find_test_files_in_nested_packages() {
     assert_eq!(
         conventions.test_files_for("internal/vault/vault.go"),
         ["internal/vault/vault_test.go"]
+    );
+}
+
+#[test]
+fn testing_quick_checks_make_property_cases() {
+    let dir = tree(&[(
+        "digits_test.go",
+        r#"package digits
+
+import (
+	"testing"
+	"testing/quick"
+)
+
+func TestDigits(t *testing.T) {
+	if err := quick.Check(func(n uint32) bool { return Digits(n) >= 1 }, nil); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestExample(t *testing.T) {
+	if Digits(7) != 1 {
+		t.Errorf("want 1")
+	}
+}
+"#,
+    )]);
+    assert_eq!(
+        properties("go", dir.path(), "digits_test.go"),
+        [
+            property("TestDigits", Some("testing-quick"), &[(NotNull, Weak)]),
+            property("TestExample", None, &[(Equality, Strong)]),
+        ]
     );
 }

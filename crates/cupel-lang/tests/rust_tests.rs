@@ -4,7 +4,10 @@ mod support;
 
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
-use support::{assert_framework, assert_test_file, case, file, fixture, produce, rows, tree};
+use support::{
+    assert_framework, assert_test_file, case, file, fixture, produce, properties, property, rows,
+    tree,
+};
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
 use AssertionStrength::{Strong, Weak};
@@ -190,4 +193,71 @@ fn each_assertion_form_has_its_kind_and_strength() {
     for (body, expected) in ASSERTION_FORMS {
         assert_eq!(assertions_in(body), *expected, "{body}");
     }
+}
+
+#[test]
+fn property_tests_name_their_framework_and_proptest_blocks_hold_cases() {
+    let dir = tree(&[(
+        "tests/props.rs",
+        r#"use proptest::prelude::*;
+
+proptest! {
+    #![proptest_config(ProptestConfig::with_cases(8))]
+
+    #[test]
+    fn digits_count(n in 0u32..110_000) {
+        prop_assert_eq!(digits(n), n.to_string().len() as u32);
+        for _ in 0..2 {
+            assert!(n < 110_000);
+        }
+    }
+
+    #[test]
+    fn halves(a in any::<u8>()) {
+        prop_assert!(a / 2 <= a);
+    }
+}
+
+#[test]
+fn closure_form() {
+    proptest!(|(n in 0u32..10)| {
+        prop_assert!(n < 10);
+    });
+}
+
+#[quickcheck]
+fn reversing_twice_is_identity(xs: Vec<u32>) -> bool {
+    xs.clone() == xs
+}
+
+#[test]
+fn runner_form() {
+    quickcheck(reversing_twice_is_identity as fn(Vec<u32>) -> bool);
+}
+
+#[test]
+fn example() {
+    assert_eq!(1, 1);
+}
+"#,
+    )]);
+    assert_eq!(
+        properties("rust", dir.path(), "tests/props.rs"),
+        [
+            property(
+                "digits_count",
+                Some("proptest"),
+                &[(Equality, Strong), (Truthiness, Weak)]
+            ),
+            property("halves", Some("proptest"), &[(Truthiness, Weak)]),
+            property("closure_form", Some("proptest"), &[(Truthiness, Weak)]),
+            property(
+                "reversing_twice_is_identity",
+                Some("quickcheck"),
+                &[(Custom, Strong)]
+            ),
+            property("runner_form", Some("quickcheck"), &[(Custom, Strong)]),
+            property("example", None, &[(Equality, Strong)]),
+        ]
+    );
 }

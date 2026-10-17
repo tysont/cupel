@@ -6,7 +6,7 @@ use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, Test
 use support::Skip::{Because, Runs};
 use support::{
     Expected, assert_framework, assert_source_file, assert_test_file, case, expected, fixture,
-    produce, rows, tree,
+    produce, rows, tree, properties, property,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -303,5 +303,44 @@ fn conventions_find_sibling_nested_and_per_project_test_files() {
     assert_eq!(
         conventions.test_files_for("services/api/src/api/routes.py"),
         ["services/api/tests/test_routes.py"]
+    );
+}
+
+#[test]
+fn hypothesis_tests_are_property_cases() {
+    let dir = tree(&[(
+        "tests/test_props.py",
+        r#"import hypothesis
+from hypothesis import given, strategies as st
+
+
+@given(st.integers())
+def test_digits(n):
+    assert digits(n) >= 1
+
+
+@hypothesis.given(st.text())
+def test_text(s):
+    assert s == s
+
+
+class TestThing:
+    @given(st.integers())
+    def test_method(self, n):
+        assert n == n
+
+
+def test_example():
+    assert 1 == 1
+"#,
+    )]);
+    assert_eq!(
+        properties("python", dir.path(), "tests/test_props.py"),
+        [
+            property("test_digits", Some("hypothesis"), &[(Custom, Weak)]),
+            property("test_text", Some("hypothesis"), &[(Equality, Strong)]),
+            property("test_method", Some("hypothesis"), &[(Equality, Strong)]),
+            property("test_example", None, &[(Equality, Strong)]),
+        ]
     );
 }

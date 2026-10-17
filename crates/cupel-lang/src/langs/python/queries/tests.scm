@@ -46,6 +46,20 @@
   ]
   (#match? @test.name "^test"))
 
+; Property tests: Hypothesis's `@given(…)` (or `@hypothesis.given(…)`) generates the case's inputs
+; (ADR-095).
+(decorated_definition
+  (decorator
+    (call
+      function: [
+        (identifier) @_given
+        (attribute attribute: (identifier) @_given)
+      ])) @property.hypothesis
+  definition: (function_definition
+    name: (identifier) @test.name) @test.case
+  (#eq? @_given "given")
+  (#match? @test.name "^test"))
+
 ; Skip decorators: `@pytest.mark.skip(reason=…)`, `skipif`, `xfail`; `@unittest.skip("…")`,
 ; `skipIf`, `skipUnless`, `expectedFailure`.
 (decorated_definition

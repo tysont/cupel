@@ -225,6 +225,11 @@ file = "src/math.test.ts"
 file = "src/math.test.ts"
 expect = { framework = "vitest" }
 
+[test-frames.property]
+file = "test/properties.test.ts"
+name = "sums do not depend on the order"
+expect = { property = "fast-check" }
+
 [test-conventions.separate-test-file]
 file = "src/math.ts"
 name = "src/math.test.ts"
