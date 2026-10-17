@@ -35,8 +35,8 @@ const SEE: &str = "cupel describe gen.differential";
 struct Diverged {
     /// The entry point as configured: `<file>:<function>`.
     entry: String,
-    /// The oracle compared against: its name, its kind, and a ref's commit.
-    oracle: ComparedOracle,
+    /// The oracle compared against.
+    oracle: Against,
     /// The minimized arguments.
     input: Vec<Value>,
     /// The arguments as first generated.
@@ -46,9 +46,52 @@ struct Diverged {
     /// Minimization steps from `found` to `input`.
     shrinks: u32,
     /// What the working tree answered on `input`.
-    implementation: Answer,
+    implementation: Said,
     /// What the oracle answered on `input`.
-    reference: Answer,
+    reference: Said,
+}
+
+/// The oracle a divergence is against; inlined, as evidence schemas have no `$defs` (ADR-043).
+#[derive(Serialize, JsonSchema)]
+#[schemars(inline)]
+#[serde(deny_unknown_fields)]
+struct Against {
+    name: String,
+    /// `ref` or `command`.
+    kind: String,
+    /// The commit a `ref` oracle resolved to.
+    commit: Option<String>,
+}
+
+/// How one call ended: exactly one key, `returned` (the value's rendering), `raised` (the
+/// error), or `crashed` (why there was no answer).
+#[derive(Serialize, JsonSchema)]
+#[schemars(inline)]
+#[serde(deny_unknown_fields)]
+struct Said {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    returned: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    raised: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    crashed: Option<String>,
+}
+
+impl From<&Answer> for Said {
+    fn from(answer: &Answer) -> Self {
+        let text = Some(answer.text().to_owned());
+        let mut said = Self {
+            returned: None,
+            raised: None,
+            crashed: None,
+        };
+        match answer {
+            Answer::Returned(_) => said.returned = text,
+            Answer::Raised(_) => said.raised = text,
+            Answer::Crashed(_) => said.crashed = text,
+        }
+        said
+    }
 }
 
 pub struct GenDifferential {
@@ -189,13 +232,17 @@ impl GenDifferential {
         let call = format!("`{}({})`", symbol.name, arguments(&divergence.input));
         let evidence = Diverged {
             entry: entry.entry.clone(),
-            oracle: oracle.clone(),
+            oracle: Against {
+                name: oracle.name.clone(),
+                kind: oracle.kind.as_str().to_owned(),
+                commit: oracle.commit.clone(),
+            },
             input: divergence.input.clone(),
             found: divergence.found.clone(),
             case: divergence.case,
             shrinks: divergence.shrinks,
-            implementation: divergence.implementation.clone(),
-            reference: divergence.oracle.clone(),
+            implementation: Said::from(&divergence.implementation),
+            reference: Said::from(&divergence.oracle),
         };
         let mut finding = SymbolFinding::new(&self.manifest, KIND, symbol, hash, evidence)
             .described(

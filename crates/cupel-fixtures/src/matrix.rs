@@ -94,10 +94,7 @@ impl Registries {
     /// When the fixture's `cupel.toml` does not parse, or a plugin it names cannot be used.
     pub fn of_fixture(fixture: &str) -> Option<Self> {
         let root = repo_path(fixture);
-        let config = root.join("cupel.toml");
-        let text = fs::read_to_string(&config).ok()?;
-        let file = ConfigFile::parse(&text, &config)
-            .unwrap_or_else(|error| panic!("fixture {fixture}: {error}"));
+        let file = fixture_config(fixture)?;
         if file.plugins.is_empty() || !programs_installed(&file, fixture) {
             return None;
         }
@@ -193,9 +190,10 @@ impl Registries {
         pairs
     }
 
-    /// The support matrix in the fixture repository `fixture`, with its plugins.
+    /// The support matrix in the fixture repository `fixture`, with its plugins and its
+    /// `[lang.*]` tables (ADR-094 §7).
     fn matrix_in(&self, fixture: &str) -> SupportMatrix {
-        let ctx = Ctx::new(repo_path(fixture));
+        let ctx = fixture_ctx(fixture);
         let langs = self.languages.langs();
         match Self::of_fixture(fixture) {
             Some(own) => SupportMatrix::compute(&own.checks, &own.producers, &langs, &ctx),
@@ -239,6 +237,30 @@ impl Registries {
     }
 }
 
+/// The fixture `fixture`'s configuration, when it has a `cupel.toml`.
+///
+/// # Panics
+///
+/// When the fixture's `cupel.toml` does not parse.
+fn fixture_config(fixture: &str) -> Option<ConfigFile> {
+    let config = repo_path(fixture).join("cupel.toml");
+    let text = fs::read_to_string(&config).ok()?;
+    Some(
+        ConfigFile::parse(&text, &config)
+            .unwrap_or_else(|error| panic!("fixture {fixture}: {error}")),
+    )
+}
+
+/// What a producer sees in the fixture `fixture`: its root and its `[lang.*]` tables, as a run
+/// there would (support is per repository, ADR-079, ADR-094 §7).
+fn fixture_ctx(fixture: &str) -> Ctx {
+    let mut ctx = Ctx::new(repo_path(fixture));
+    if let Some(file) = fixture_config(fixture) {
+        ctx.lang = file.lang;
+    }
+    ctx
+}
+
 /// Whether every bare program `file`'s plugins run (such as `python3`) is on `PATH`; says which is
 /// not, as runners' tests do.
 fn programs_installed(file: &ConfigFile, fixture: &str) -> bool {
@@ -279,6 +301,7 @@ fn run_on_fixture(
 ) -> Result<(Envelope, std::path::PathBuf, tempfile::TempDir), String> {
     let dir = tempfile::tempdir().map_err(|error| error.to_string())?;
     copy_repo(&pair.fixture(), dir.path());
+    verify_oracles(&pair.fixture(), dir.path())?;
     let outcome = run_cupel(
         &[
             "check",
@@ -303,6 +326,23 @@ fn run_on_fixture(
         ));
     }
     Ok((envelope, outcome.cwd, dir))
+}
+
+/// Verifies the oracles of a fixture that defines any, in its copy at `dir`, so its golden is
+/// the result against a verified oracle (ADR-094 §7).
+fn verify_oracles(fixture: &str, dir: &Path) -> Result<(), String> {
+    if fixture_config(fixture).is_none_or(|file| file.oracles.is_empty()) {
+        return Ok(());
+    }
+    let outcome = run_cupel(&["oracle", "verify", "--all", "--format", "json"], dir);
+    if outcome.code == Some(0) {
+        Ok(())
+    } else {
+        Err(format!(
+            "oracle verify --all exited {:?}: {}",
+            outcome.code, outcome.stdout
+        ))
+    }
 }
 
 /// A supported pair runs and matches its golden. A check that reads a range's base side
@@ -454,13 +494,19 @@ pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
     let root = repo_path(&pair.fixture());
     let scratch = tempfile::tempdir().map_err(|error| error.to_string())?;
     let files = walk(&root, &registries.languages, &ProjectInfo::default());
-    let produce_ctx = ProduceCtx::new(
-        Ctx::new(root.clone()),
+    let mut produce_ctx = ProduceCtx::new(
+        fixture_ctx(&pair.fixture()),
         Writer::new(scratch.path(), false)
             .map_err(|error| error.to_string())?
             .confined(),
         Cancellation::new(),
     );
+    produce_ctx.config = produce_ctx
+        .ctx
+        .lang
+        .get(&pair.lang)
+        .cloned()
+        .unwrap_or_default();
     let scope = Scope::of_files(files.clone());
     // The producer the scheduler would choose: the first ready candidate; a want with none is
     // not served, as in a run.
