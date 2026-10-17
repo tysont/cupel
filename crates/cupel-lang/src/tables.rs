@@ -24,6 +24,8 @@ pub struct Tables {
     /// Present when the language has a `Roots` producer.
     pub roots: Option<RootRules>,
     pub api: ApiRules,
+    /// Present when `check --scaffold` writes property stubs for the language (ADR-096 §4).
+    pub property_stubs: Option<crate::property_stubs::StubRules>,
 }
 
 impl Tables {

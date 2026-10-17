@@ -191,3 +191,27 @@ hooks = [
   "setup_module",
   "teardown_module",
 ]
+
+# Property stubs `check --scaffold` writes (ADR-096 §4): a skipped Hypothesis test in the nearest
+# test file, one strategy per argument.
+[property_stubs]
+target = "test"
+file = "test_{stem}.py"
+header = ["import pytest", "from hypothesis import given, strategies as st", "import {namespace}"]
+marker = "def test_{name}_property("
+stub = """
+
+
+@pytest.mark.skip(reason="state the property {name} keeps, then remove this mark")
+@given({generators})
+def test_{name}_property({arguments}):
+    {namespace}.{name}({arguments})
+"""
+generator = "st.from_type(object)"
+
+[property_stubs.types]
+int = "st.integers()"
+float = "st.floats()"
+str = "st.text()"
+bool = "st.booleans()"
+bytes = "st.binary()"

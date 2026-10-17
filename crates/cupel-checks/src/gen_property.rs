@@ -14,6 +14,7 @@ use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::Value;
 
+use crate::finding::with_nearest_test;
 use crate::manifest::{evidence, kind, metric};
 use crate::metrics::sum;
 use crate::outcome;
@@ -146,7 +147,13 @@ impl Check for GenProperty {
             .symbols
             .iter()
             .filter(|symbol| lacks_property(symbol, properties, conventions, &ctx.scope))
-            .map(|symbol| self.missing(symbol, properties, api))
+            .map(|symbol| {
+                with_nearest_test(
+                    self.missing(symbol, properties, api),
+                    symbol,
+                    Some(conventions),
+                )
+            })
             .collect();
         let counts = [
             ("properties", properties.properties.len()),

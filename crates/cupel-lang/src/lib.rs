@@ -61,6 +61,7 @@ pub mod normalize;
 mod parse;
 mod producer;
 pub mod project;
+mod property_stubs;
 mod query;
 pub mod roots;
 mod spec;
@@ -75,6 +76,9 @@ pub use langs::ecosystems::unregistered_roots;
 pub use language::{Language, LanguageRegistry, lang, owns};
 pub use parse::{CacheStats, ParseCache, ParseProblem, Parsed, Reparse, Syntax};
 pub use producer::{Extract, Merge, QueryProducer, Source, parse_scope, producer_id};
+pub use property_stubs::{
+    Stub, StubRules, StubTarget, StubVariant, Subject, merged_stubs, property_stub,
+};
 pub use query::{Match, matches, span};
 pub use spec::{LanguageSpec, QueryFile, SpecError};
 pub use tables::{DecisionRules, NameRule, NamespaceRules, Tables, VisibilityRules, Weight};

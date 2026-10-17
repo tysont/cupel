@@ -130,3 +130,47 @@ contains = "#[cfg(test)]"
 
 [roots]
 entry_points = ["main"]
+
+# Property stubs `check --scaffold` writes (ADR-096 §4): an ignored proptest test in an inline test
+# module of the function's own file, one strategy per parameter; a parameter type this table does
+# not map gets no stub.
+[property_stubs]
+target = "source"
+marker = "mod {name}_properties"
+stub = """
+
+#[cfg(test)]
+mod {name}_properties {
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #[test]
+        #[ignore = "state the property `{name}` keeps, then remove this attribute"]
+        fn {name}_property({bindings}) {
+            let _ = {name}({passed});
+        }
+    }
+}
+"""
+borrow = "&"
+
+[property_stubs.types]
+i8 = "any::<i8>()"
+i16 = "any::<i16>()"
+i32 = "any::<i32>()"
+i64 = "any::<i64>()"
+i128 = "any::<i128>()"
+isize = "any::<isize>()"
+u8 = "any::<u8>()"
+u16 = "any::<u16>()"
+u32 = "any::<u32>()"
+u64 = "any::<u64>()"
+u128 = "any::<u128>()"
+usize = "any::<usize>()"
+f32 = "any::<f32>()"
+f64 = "any::<f64>()"
+bool = "any::<bool>()"
+char = "any::<char>()"
+String = "any::<String>()"
+str = "any::<String>()"

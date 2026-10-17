@@ -213,3 +213,33 @@ contains = "import.meta.vitest"
 # captured in api.scm.
 [roots]
 entry_points = ["main"]
+
+# Property stubs `check --scaffold` writes (ADR-096 §4): a skipped fast-check test in the nearest
+# test file, one arbitrary per parameter, imported the way the file (or its source) imports.
+[property_stubs]
+target = "test"
+file = "{stem}.test{ext}"
+header = ["import fc from \"fast-check\";", "import * as {subject} from \"{import}\";"]
+import_extensions = [".js", ".mjs", ".cjs"]
+marker = "\"{name} keeps its property\""
+stub = """
+
+test.skip("{name} keeps its property", () => {
+  fc.assert(
+    fc.property({generators}, ({arguments}) => {
+      {subject}.{name}({arguments});
+    }),
+  );
+});
+"""
+generator = "fc.anything()"
+
+[property_stubs.types]
+number = "fc.double()"
+string = "fc.string()"
+boolean = "fc.boolean()"
+bigint = "fc.bigInt()"
+
+[[property_stubs.variants]]
+when = "require("
+header = ["const fc = require(\"fast-check\");", "const {subject} = require(\"{import}\");"]

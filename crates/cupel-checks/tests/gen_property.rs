@@ -317,6 +317,10 @@ fn a_public_function_whose_tests_hold_no_property_is_missing_one() {
     );
     assert_eq!(finding.title, "`units.clamp_percent` has no property test");
     assert!(finding.action.summary.contains("--scaffold"));
+    assert_eq!(
+        finding.action.hints.get("nearest_test_file"),
+        Some(&json!("tests/test_percent.py"))
+    );
 }
 
 #[test]
