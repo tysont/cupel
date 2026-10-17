@@ -618,6 +618,7 @@ Every check below exists and is supported in all five languages. All run at `--d
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
 | --- | --- | --- | --- | --- | --- | --- |
+| `gen.property` | 4 | standard | `property.falsified`, `property.missing` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | go, javascript, python, rust, typescript |
 | `static.complexity` | 0 | quick | `complexity.high`, `nesting.deep`, `params.many`, `function.long` | `cyclomatic_max`, `cognitive_max`, `nesting_max`, `params_max`, `length_max` | `cyclomatic`, `cognitive` | go, javascript, python, rust, typescript |
 | `static.crap` | 0 | quick | `crap.high`, `crap.watch` | `max`, `mean` | `crap` | go, javascript, python, rust, typescript |
@@ -653,6 +654,7 @@ The support matrix, from `cupel describe matrix`:
 <!-- generated:support-matrix -->
 | Check | go | javascript | python | rust | typescript |
 | --- | --- | --- | --- | --- | --- |
+| `gen.property` | unsupported | supported | supported | supported | supported |
 | `static.clones` | supported | supported | supported | supported | supported |
 | `static.complexity` | supported | supported | supported | supported | supported |
 | `static.crap` | supported | supported | supported | supported | supported |

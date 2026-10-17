@@ -31,6 +31,7 @@ mod registry;
 mod render;
 mod resources;
 mod run;
+mod scaffold;
 mod serve;
 mod session;
 mod suppress;

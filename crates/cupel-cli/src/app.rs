@@ -25,7 +25,7 @@ use crate::problem::Problem;
 use crate::run::{Invocation, Run};
 use crate::{
     against, baseline, catalog, check, describe, doctor, explain, init, oracle, persist, registry,
-    render, serve, suppress, survey, tests_verb,
+    render, scaffold, serve, suppress, survey, tests_verb,
 };
 
 /// How an envelope reaches stdout: its renderer, whether text is colored, and the findings page.
@@ -383,7 +383,7 @@ fn run_verb(
             serve::verb(invocation, args, (cli.global.quiet, self::run), environment)
         }
         VerbArgs::Init { force } => init_verb(invocation, cli, *force, events),
-        VerbArgs::Check { scope } => check::verb(invocation, scope, events),
+        VerbArgs::Check { scope, .. } => check::verb(invocation, scope, events),
         VerbArgs::Survey { scope } => survey::verb(invocation, scope, events),
         VerbArgs::Tests { impacted, scope } => {
             tests_verb::verb(invocation, *impacted, scope, events)
@@ -449,7 +449,7 @@ fn graded(
         Some(VerbArgs::Init { .. } | VerbArgs::Doctor { .. } | VerbArgs::Tests { .. }) => {
             suppress::apply(&mut envelope, writer)?;
         }
-        Some(VerbArgs::Check { scope } | VerbArgs::Survey { scope }) => {
+        Some(VerbArgs::Check { scope, .. } | VerbArgs::Survey { scope }) => {
             if let Ok(config) = config {
                 oracle::cap::cap(&mut envelope, writer, config, &invocation.run.repro())?;
             }
@@ -457,6 +457,15 @@ fn graded(
             against::compare(&mut envelope, writer, scope.against.as_deref())?;
             if let (Some(verb), Ok(config)) = (envelope.run.verb, config) {
                 check::grade(&mut envelope, verb, scope, config);
+            }
+            if let Some(VerbArgs::Check { scaffold: true, .. }) = &cli.verb {
+                scaffold::apply(
+                    &mut envelope,
+                    writer,
+                    invocation.catalog().language_registry(),
+                    &invocation.run.repro(),
+                    cli.global.write,
+                )?;
             }
         }
         _ => {}

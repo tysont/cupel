@@ -98,14 +98,18 @@ fn describe_verb_describes_its_arguments_sub_verbs_and_pending_flags() {
     assert_eq!(envelope["description"]["subject"], json!("command"));
     assert_eq!(envelope["description"]["name"], json!("oracle"));
     assert_eq!(envelope["description"]["pending_step"], json!(null));
-    let check = described(&["check"]);
-    let cases = check["arguments"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|argument| argument["name"] == json!("--cases"))
-        .unwrap();
-    assert_eq!(cases["pending_step"], json!("P5.4"));
+    let argument = |verb: &str, name: &str| {
+        described(&[verb])["arguments"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|argument| argument["name"] == json!(name))
+            .cloned()
+            .unwrap_or_else(|| panic!("{verb} {name}"))
+    };
+    assert_eq!(argument("check", "--cases")["pending_step"], json!(null));
+    assert_eq!(argument("check", "--scaffold")["pending_step"], json!(null));
+    assert_eq!(argument("serve", "--mcp")["pending_step"], json!("P7.7"));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
 }
 

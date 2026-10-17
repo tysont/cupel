@@ -241,11 +241,16 @@ fn describe_verb() -> CommandDescription {
 }
 
 fn check_verb() -> CommandDescription {
+    let mut arguments = scope_flags();
+    arguments.push(switch(
+        "--scaffold",
+        "Write a property stub for each `property.missing` finding; previewed without --write.",
+    ));
     verb(
         "check",
         "Run checks over a scope at a depth and evaluate the gate.",
         None,
-        scope_flags(),
+        arguments,
         examples(&[
             (
                 "cupel check --only static.complexity",
@@ -799,9 +804,8 @@ fn scope_which_flags() -> Vec<ArgDescription> {
             "--cases",
             ValueType::Integer,
             "N",
-            "The case budget for generative checks.",
-        )
-        .pending("P5.4"),
+            "The generated cases each property runs; default 1000 at standard depth, 10× per depth.",
+        ),
     ]
 }
 

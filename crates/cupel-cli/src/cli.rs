@@ -180,6 +180,9 @@ pub enum VerbArgs {
     Check {
         #[command(flatten)]
         scope: ScopeArgs,
+        /// Write property stubs for `property.missing` findings (ADR-096 §4); with `--write`.
+        #[arg(long)]
+        scaffold: bool,
     },
     Survey {
         #[command(flatten)]
@@ -251,7 +254,7 @@ impl VerbArgs {
     /// The scope, depth, and selection flags, for the verbs that take them.
     pub fn scope(&self) -> Option<&ScopeArgs> {
         match self {
-            Self::Check { scope }
+            Self::Check { scope, .. }
             | Self::Survey { scope }
             | Self::Explain { scope, .. }
             | Self::Tests { scope, .. } => Some(scope),
