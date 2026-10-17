@@ -379,6 +379,28 @@
         "symbols",
         "norm-tree"
       ],
+      "settings": [
+        {
+          "default": 50,
+          "name": "mock_density_max",
+          "summary": "The highest share, in percent, of doubles among a test's doubles and assertions before test.mock-heavy."
+        },
+        {
+          "default": 2,
+          "name": "mocks_min",
+          "summary": "The fewest test doubles that can make a test test.mock-heavy."
+        },
+        {
+          "default": 0,
+          "name": "logic_max",
+          "summary": "The most loops, alternatives, and unguarded branches a test may have before test.logic."
+        },
+        {
+          "default": 3,
+          "name": "setup_statements_min",
+          "summary": "The fewest leading statements tests in one file must share to be test.duplicate-setup."
+        }
+      ],
       "stability": "experimental",
       "summary": "SCRAP-style test quality: assertion density, weak and missing assertions, mock density, logic in tests, and duplicated setup.",
       "tier": 2,

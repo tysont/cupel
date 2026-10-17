@@ -63,3 +63,4 @@ Nothing in `cupel-core`, `cupel-cli`, `cupel-lang`, `cupel-adapt`, `cupel-mutate
 - A test case with no `Symbols` entry at its key (one written inside a macro invocation, for example) is outside a symbol-resolved scope, as it is for `tests.quality`; on Cupel's own tree 20 of 1568 cases are (the cause of each was not traced). They still count toward the repository's density.
 - One structural equality assertion (`assert_eq!(actual, expected_table)`) counts as one assertion however much it pins, so table-driven tests read as sparse; this shows in the dogfood (P6.5 Notes). A future `AssertionKind` weight, or counting expected elements, is a `TestFrames` question, not this check's.
 - No gate rule is added to Cupel's `cupel.toml`; the dogfood findings are recorded in the plan.
+- The settings defect is fixed by [ADR-111](CUPEL_DECISION_111.md): `Manifest.settings`, listed by `describe` and generated into the README.

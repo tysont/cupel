@@ -100,6 +100,7 @@ impl GenProperty {
                     ])
                     .map(|(name, summary)| metric(name, summary))
                     .collect(),
+                settings: LIMITS.specs(),
                 stability: Stability::Experimental,
                 summary: "Runs the existing property tests (proptest, quickcheck, Hypothesis, \
                           fast-check) with the run's seed and a case budget; reports the shrunk \

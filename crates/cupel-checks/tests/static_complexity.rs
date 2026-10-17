@@ -102,6 +102,20 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
 }
 
 #[test]
+fn the_manifest_declares_its_settings_with_their_defaults() {
+    assert_eq!(
+        support::declared_settings(ID),
+        [
+            ("cyclomatic_max", json!(10)),
+            ("cognitive_max", json!(15)),
+            ("nesting_max", json!(4)),
+            ("params_max", json!(5)),
+            ("length_max", json!(60))
+        ]
+    );
+}
+
+#[test]
 fn metrics_follow_the_weights_and_nesting_the_producer_attached() {
     use DecisionKind::{BooleanOp, Branch, Case, EarlyReturn, Loop};
     let world = World {

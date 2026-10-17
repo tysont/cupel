@@ -126,6 +126,18 @@
         "decisions",
         "norm-tree"
       ],
+      "settings": [
+        {
+          "default": 30,
+          "name": "high",
+          "summary": "The CRAP score at or above which a symbol is crap.high."
+        },
+        {
+          "default": 5,
+          "name": "watch",
+          "summary": "The CRAP score at or above which a symbol below high is crap.watch."
+        }
+      ],
       "stability": "experimental",
       "summary": "CRAP per function: cyclomatic complexity weighted by missing test coverage. Limitation: CRAP exists only where coverage was measured; without a coverage map (no `[lang.<id>] coverage` command and no fresh report) the check passes with no score, no metrics, and no findings, and a function with no instrumented line is not scored. `static.complexity` reports cyclomatic complexity alone.",
       "tier": 0,

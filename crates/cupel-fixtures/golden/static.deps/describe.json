@@ -203,6 +203,18 @@
         "module-graph",
         "api-surface"
       ],
+      "settings": [
+        {
+          "default": 0.7,
+          "name": "distance_max",
+          "summary": "The most A + I − 1 an abstract module may reach before dep.unstable-abstract, from 0 to 1."
+        },
+        {
+          "default": null,
+          "name": "layers",
+          "summary": "Layers as order (names, lowest first) and map (a glob per layer); a module importing a higher layer is dep.layer-violation. No layering rule when unset."
+        }
+      ],
       "stability": "experimental",
       "summary": "Module graph: import cycles, afferent and efferent coupling, instability, abstractness, distance from the main sequence, and layering rules from configuration.",
       "tier": 0,

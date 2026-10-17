@@ -8,7 +8,8 @@ use cupel_core::plugin::{
 };
 use cupel_core::syntax::SymbolKey;
 use cupel_core::{
-    CheckId, CheckStatus, CostClass, FactKind, LangId, Manifest, ProducerId, Score, Stability, Tier,
+    CheckId, CheckStatus, CostClass, FactKind, LangId, Manifest, ProducerId, Score, SettingSpec,
+    Stability, Tier,
 };
 use proptest::prelude::*;
 use serde_json::{Map, Value, json};
@@ -23,6 +24,7 @@ fn check_manifest() -> Manifest {
         wants: Vec::new(),
         findings: Vec::new(),
         metrics: Vec::new(),
+        settings: Vec::new(),
         stability: Stability::Experimental,
         summary: "Files no test executes.".to_owned(),
     }
@@ -36,6 +38,32 @@ fn a_check_manifest_is_the_native_manifest_tagged_check() {
     assert_eq!(json["needs"], json!(["per-test-map"]));
     let back: PluginManifest = serde_json::from_value(json).unwrap();
     assert_eq!(back, PluginManifest::Check(check_manifest()));
+}
+
+#[test]
+fn a_check_manifest_without_settings_leaves_them_out() {
+    let json = serde_json::to_value(check_manifest()).unwrap();
+    assert_eq!(json.get("settings"), None);
+    let manifest: Manifest = serde_json::from_value(json).unwrap();
+    assert_eq!(manifest.settings, Vec::<SettingSpec>::new());
+}
+
+#[test]
+fn a_setting_is_its_name_default_and_summary() {
+    let manifest = Manifest {
+        settings: vec![SettingSpec {
+            name: "files_max".to_owned(),
+            default: json!(3),
+            summary: "The most untested files.".to_owned(),
+        }],
+        ..check_manifest()
+    };
+    let json = serde_json::to_value(&manifest).unwrap();
+    assert_eq!(
+        json["settings"],
+        json!([{"name": "files_max", "default": 3, "summary": "The most untested files."}])
+    );
+    assert_eq!(serde_json::from_value::<Manifest>(json).unwrap(), manifest);
 }
 
 #[test]

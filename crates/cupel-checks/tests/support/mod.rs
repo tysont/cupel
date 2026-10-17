@@ -174,6 +174,16 @@ pub fn setting_error(check: &dyn Check, config: Value) -> (String, Vec<String>) 
     (key, valid)
 }
 
+/// Each setting the check `id` declares, as its name and default (ADR-111).
+pub fn declared_settings(id: &str) -> Vec<(&'static str, Value)> {
+    check(id)
+        .manifest()
+        .settings
+        .iter()
+        .map(|setting| (setting.name.as_str(), setting.default.clone()))
+        .collect()
+}
+
 /// Asserts the check `id` has no settings: any key is a configuration error that lists none.
 pub fn assert_refuses_settings(id: &str) {
     let (key, valid) = setting_error(check(id), serde_json::json!({"anything": 1}));

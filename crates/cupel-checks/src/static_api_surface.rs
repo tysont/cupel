@@ -66,6 +66,7 @@ impl StaticApiSurface {
             wants: vec![],
             findings: Vec::new(),
             metrics: Vec::new(),
+            settings: SETTINGS.specs(),
             stability: Stability::Experimental,
             summary: "Diff of the public API against the range's base: removed and changed items \
                       are breaking, added ones widen it. Runs only with --changed or --base."

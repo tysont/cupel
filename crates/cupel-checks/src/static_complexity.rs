@@ -22,11 +22,31 @@ const ID: &str = "static.complexity";
 
 /// The settings and their defaults (ADR-042). A finding fires when a metric exceeds its limit.
 const LIMITS: Limits = Limits::new(&[
-    ("cyclomatic_max", 10),
-    ("cognitive_max", 15),
-    ("nesting_max", 4),
-    ("params_max", 5),
-    ("length_max", 60),
+    (
+        "cyclomatic_max",
+        10,
+        "The highest cyclomatic complexity a symbol may have; above it is complexity.high.",
+    ),
+    (
+        "cognitive_max",
+        15,
+        "The highest cognitive complexity a symbol may have; above it is complexity.high.",
+    ),
+    (
+        "nesting_max",
+        4,
+        "The deepest control-flow nesting a symbol may have; deeper is nesting.deep.",
+    ),
+    (
+        "params_max",
+        5,
+        "The most parameters a symbol may declare, not counting a receiver; more is params.many.",
+    ),
+    (
+        "length_max",
+        60,
+        "The most lines a symbol may span; more is function.long.",
+    ),
 ]);
 
 /// Evidence of `complexity.high`.
@@ -87,6 +107,7 @@ impl StaticComplexity {
                 wants: vec![],
                 findings: finding_kinds(),
                 metrics: metrics(),
+                settings: LIMITS.specs(),
                 stability: Stability::Experimental,
                 summary: "Cyclomatic and cognitive complexity, nesting depth, parameter count, \
                           and length per function, against configurable limits. Cyclomatic \

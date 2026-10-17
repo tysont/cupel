@@ -156,6 +156,14 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
 }
 
 #[test]
+fn the_manifest_declares_its_settings_with_their_defaults() {
+    assert_eq!(
+        support::declared_settings(ID),
+        [("distance_max", json!(0.7)), ("layers", Value::Null)]
+    );
+}
+
+#[test]
 fn an_acyclic_graph_has_no_cycle_and_a_zero_score() {
     let world = World::default()
         .edge("a", "b", 1)

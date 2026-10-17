@@ -101,6 +101,7 @@ impl TestsFlaky {
                     ])
                     .map(|(name, summary)| metric(name, summary))
                     .collect(),
+                settings: LIMITS.specs(),
                 stability: Stability::Experimental,
                 summary: "Reruns the tests several times with shuffled order, varied seeds, and \
                           varied parallelism; reports tests whose outcome changes."

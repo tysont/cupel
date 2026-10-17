@@ -311,6 +311,23 @@
         "symbols",
         "norm-tree"
       ],
+      "settings": [
+        {
+          "default": 0.82,
+          "name": "threshold",
+          "summary": "The least Jaccard similarity of two symbols' fingerprint sets that makes a clone, greater than 0 and at most 1."
+        },
+        {
+          "default": 4,
+          "name": "min_lines",
+          "summary": "The fewest lines a symbol must span to be compared."
+        },
+        {
+          "default": 20,
+          "name": "min_nodes",
+          "summary": "The fewest normalized-tree nodes a symbol must have to be compared."
+        }
+      ],
       "stability": "experimental",
       "summary": "Type 1, 2, and 3 clones: functions whose normalized syntax trees share most subtree fingerprints, compared within a language family. Limitation: type 1 is reported as type 2, because NormTree keeps no identifier or literal text, so two functions that differ only in literals (two lookup tables of the same shape) are reported as clones (ADR-050; a raw-token digest is a P3 follow-up).",
       "tier": 0,

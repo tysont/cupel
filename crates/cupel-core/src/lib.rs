@@ -65,7 +65,8 @@ pub use base::{BaseTree, Range};
 pub use bench::{BenchBase, BenchSamples, Benchmark};
 pub use cancel::Cancellation;
 pub use check::{
-    Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,
+    Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, SettingSpec,
+    Stability,
 };
 pub use config::{ConfigEcho, ConfigSource};
 pub use delta::{Deltas, deltas};

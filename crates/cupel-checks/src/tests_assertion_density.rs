@@ -26,9 +26,22 @@ const SPARSE_FILE: &str = "density.sparse-file";
 
 /// The settings and their defaults (ADR-104).
 const LIMITS: Limits = Limits::new(&[
-    ("lines_per_assertion_max", 20),
-    ("file_density_percent_min", 50),
-    ("file_tests_min", 3),
+    (
+        "lines_per_assertion_max",
+        20,
+        "The most lines per assertion a test may span before density.sparse-test.",
+    ),
+    (
+        "file_density_percent_min",
+        50,
+        "The least assertions per test a file may make, in percent of the repository's, before \
+         density.sparse-file.",
+    ),
+    (
+        "file_tests_min",
+        3,
+        "The fewest tests a file needs to be compared with the repository.",
+    ),
 ]);
 
 /// Evidence of `density.sparse-test`.
@@ -119,6 +132,7 @@ impl TestsAssertionDensity {
                 .into_iter()
                 .map(|(name, summary)| metric(name, summary))
                 .collect(),
+                settings: LIMITS.specs(),
                 stability: Stability::Experimental,
                 summary: "Assertion density: assertions per test and per tested public \
                           function, long tests that assert little, and test files far below \

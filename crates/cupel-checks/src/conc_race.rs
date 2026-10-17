@@ -129,6 +129,7 @@ impl ConcRace {
                     .iter()
                     .map(|(name, counts)| metric(name, counts))
                     .collect(),
+                settings: SETTINGS.specs(),
                 stability: Stability::Experimental,
                 summary: "Runs the tests under a race detector (Go's -race, Miri, \
                           ThreadSanitizer) and reports each data race and each undefined \

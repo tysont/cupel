@@ -73,6 +73,7 @@ impl StaticDeadCode {
                 wants: vec![],
                 findings: finding_kinds(),
                 metrics: metrics(),
+                settings: SETTINGS.specs(),
                 stability: Stability::Experimental,
                 summary: "Symbols and exports in modules that no import reaches and no entry \
                           point, test, or framework hook keeps alive. Limitation: no fact carries \

@@ -130,6 +130,7 @@ impl GenDifferential {
                         "Inputs both the implementation and the oracle answered.",
                     ),
                 ],
+                settings: LIMITS.specs(),
                 stability: Stability::Experimental,
                 summary: "Calls configured entry points on generated inputs in the working tree \
                           and against the run's oracle (a ref's commit or a command); reports the \

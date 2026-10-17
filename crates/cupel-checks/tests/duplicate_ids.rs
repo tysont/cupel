@@ -31,6 +31,7 @@ inventory::submit!(cupel_checks::NativeCheck(|| Box::new(Twin(Manifest {
     wants: vec![],
     findings: vec![],
     metrics: vec![],
+    settings: Vec::new(),
     stability: Stability::Experimental,
     summary: String::new(),
 }))));

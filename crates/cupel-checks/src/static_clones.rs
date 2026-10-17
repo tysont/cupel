@@ -9,8 +9,8 @@ use cupel_core::syntax::{NormNode, NormTree, SymbolDef, Symbols};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
-    Measurement, MetricPer, MetricSpec, Plan, Result, Scope, Score, Severity, SiteHash, Stability,
-    Symbol, SymbolHash, Target, Tier,
+    Measurement, MetricPer, MetricSpec, Plan, Result, Scope, Score, SettingSpec, Severity,
+    SiteHash, Stability, Symbol, SymbolHash, Target, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -18,7 +18,7 @@ use serde_json::{Map, Value};
 
 use similarity::{Fingerprints, Similar, combine, mix, search};
 
-use crate::manifest::{evidence, kind, metric, ranked};
+use crate::manifest::{evidence, kind, metric, ranked, setting};
 use crate::metrics::{largest, sum, trees_by_symbol};
 use crate::outcome;
 
@@ -43,19 +43,40 @@ const DEFAULTS: Settings = Settings {
     min_nodes: 20,
 };
 
-const KEYS: [&str; 3] = ["threshold", "min_lines", "min_nodes"];
-
 impl Settings {
+    /// Every setting as the manifest declares it, with its default (ADR-111).
+    fn specs() -> Vec<SettingSpec> {
+        vec![
+            setting(
+                "threshold",
+                Value::from(DEFAULTS.threshold),
+                "The least Jaccard similarity of two symbols' fingerprint sets that makes a \
+                 clone, greater than 0 and at most 1.",
+            ),
+            setting(
+                "min_lines",
+                Value::from(DEFAULTS.min_lines),
+                "The fewest lines a symbol must span to be compared.",
+            ),
+            setting(
+                "min_nodes",
+                Value::from(DEFAULTS.min_nodes),
+                "The fewest normalized-tree nodes a symbol must have to be compared.",
+            ),
+        ]
+    }
+
     /// The configured settings over the defaults; unknown keys, a threshold outside (0, 1],
     /// and counts that are not non-negative integers are configuration errors.
     fn read(check: &CheckId, config: &Table) -> Result<Self> {
+        let keys: Vec<String> = Self::specs().into_iter().map(|spec| spec.name).collect();
         let error = |key: &str, reason: String| ConfigError::CheckSetting {
             check: check.to_string(),
             key: key.to_owned(),
             reason,
-            valid: KEYS.iter().map(|key| (*key).to_owned()).collect(),
+            valid: keys.clone(),
         };
-        if let Some(unknown) = config.keys().find(|key| !KEYS.contains(&key.as_str())) {
+        if let Some(unknown) = config.keys().find(|key| !keys.contains(key)) {
             return Err(error(unknown, "not a setting of this check".to_owned()).into());
         }
         let threshold = match config.get("threshold") {
@@ -152,6 +173,7 @@ impl StaticClones {
                 wants: vec![],
                 findings: finding_kinds(),
                 metrics: metrics(),
+                settings: Settings::specs(),
                 stability: Stability::Experimental,
                 summary: "Type 1, 2, and 3 clones: functions whose normalized syntax trees share \
                           most subtree fingerprints, compared within a language family. \

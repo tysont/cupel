@@ -23,6 +23,7 @@ inventory::submit!(cupel_checks::NativeCheck(|| Box::new(AgainstOracle(
         wants: Vec::new(),
         findings: Vec::new(),
         metrics: Vec::new(),
+        settings: Vec::new(),
         stability: Stability::Experimental,
         summary: "Compares against the run's oracle (test binary only).".to_owned(),
     }

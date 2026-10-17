@@ -128,6 +128,7 @@ impl TestsWeakening {
                     "Tests and snapshots the range weakened; the gate key \
                      `tests.weakening = \"none\"` requires zero.",
                 )],
+                settings: SETTINGS.specs(),
                 stability: Stability::Experimental,
                 summary: "Diff of the test suite against the range's base: removed and loosened \
                           assertions, skipped and deleted tests, rewritten snapshots. Runs only \

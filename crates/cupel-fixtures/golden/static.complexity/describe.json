@@ -181,6 +181,33 @@
         "decisions",
         "norm-tree"
       ],
+      "settings": [
+        {
+          "default": 10,
+          "name": "cyclomatic_max",
+          "summary": "The highest cyclomatic complexity a symbol may have; above it is complexity.high."
+        },
+        {
+          "default": 15,
+          "name": "cognitive_max",
+          "summary": "The highest cognitive complexity a symbol may have; above it is complexity.high."
+        },
+        {
+          "default": 4,
+          "name": "nesting_max",
+          "summary": "The deepest control-flow nesting a symbol may have; deeper is nesting.deep."
+        },
+        {
+          "default": 5,
+          "name": "params_max",
+          "summary": "The most parameters a symbol may declare, not counting a receiver; more is params.many."
+        },
+        {
+          "default": 60,
+          "name": "length_max",
+          "summary": "The most lines a symbol may span; more is function.long."
+        }
+      ],
       "stability": "experimental",
       "summary": "Cyclomatic and cognitive complexity, nesting depth, parameter count, and length per function, against configurable limits. Cyclomatic complexity is the modified form: a match or switch counts as one decision however many arms it has.",
       "tier": 0,

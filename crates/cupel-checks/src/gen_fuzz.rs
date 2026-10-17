@@ -97,6 +97,7 @@ impl GenFuzz {
                     ])
                     .map(|(name, summary)| metric(name, summary))
                     .collect(),
+                settings: LIMITS.specs(),
                 stability: Stability::Experimental,
                 summary: "Runs the existing fuzz targets (cargo-fuzz, Go native fuzzing, \
                           atheris, Jazzer.js) with the run's seed and an execution budget; \

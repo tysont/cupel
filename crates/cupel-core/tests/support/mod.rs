@@ -50,6 +50,7 @@ pub fn manifest(id: &str, needs: &[FactKind], wants: &[FactKind]) -> Manifest {
         wants: wants.to_vec(),
         findings: vec![],
         metrics: vec![],
+        settings: Vec::new(),
         stability: Stability::Experimental,
         summary: String::new(),
     }

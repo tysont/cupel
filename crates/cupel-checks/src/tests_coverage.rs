@@ -84,6 +84,7 @@ fn manifest() -> Manifest {
             ),
         ],
         metrics: metrics(),
+        settings: SETTINGS.specs(),
         stability: Stability::Experimental,
         summary: "Line and branch coverage per function, from the coverage tool the \
                   language's `[lang.<id>] coverage` command runs (or a fresh report it \

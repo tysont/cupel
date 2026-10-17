@@ -63,6 +63,7 @@ impl StaticAnalyze {
                     ),
                     metric("diagnostics", "Every result the analyzers reported."),
                 ],
+                settings: SETTINGS.specs(),
                 stability: Stability::Experimental,
                 summary: "Runs each language's type checker at its strictest and its linters \
                           with the project's configuration, and reports what they find."

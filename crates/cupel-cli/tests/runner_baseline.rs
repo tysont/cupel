@@ -27,6 +27,7 @@ inventory::submit!(cupel_checks::NativeCheck(|| Box::new(NeedsTestResults(
         wants: Vec::new(),
         findings: Vec::new(),
         metrics: Vec::new(),
+        settings: Vec::new(),
         stability: Stability::Experimental,
         summary: "Counts the baseline's passing tests (test binary only).".to_owned(),
     }

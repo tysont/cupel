@@ -1,5 +1,5 @@
 // ABOUTME: Validates the manifest a plugin's `describe` printed beyond what its type says (ADR-089 §1): ID shapes,
-// ABOUTME: declared finding kinds and metrics, and for a producer its prefix, languages, and provided kind and version.
+// ABOUTME: declared finding kinds, metrics, and settings, and for a producer its prefix, languages, and provided kind and version.
 use std::collections::BTreeSet;
 
 use cupel_core::config::parse_check_id;
@@ -23,6 +23,10 @@ pub(crate) fn check(manifest: &Manifest) -> Result<(), String> {
     let mut metrics = BTreeSet::new();
     for spec in &manifest.metrics {
         once(&mut metrics, &spec.name, "metric")?;
+    }
+    let mut settings = BTreeSet::new();
+    for spec in &manifest.settings {
+        once(&mut settings, &spec.name, "setting")?;
     }
     Ok(())
 }
@@ -92,6 +96,7 @@ mod tests {
             "id": "ref.sample", "version": 1, "tier": 2, "cost": "quick", "needs": [], "wants": [],
             "findings": [{"kind": "ref.sample-file", "action": "review", "summary": "", "evidence": {}}],
             "metrics": [{"name": "untested", "summary": "", "per": "scope"}],
+            "settings": [{"name": "files_max", "default": 3, "summary": ""}],
             "stability": "experimental", "summary": ""
         }))
         .unwrap()
@@ -130,7 +135,9 @@ mod tests {
         bad_kind.findings[0].kind = "untested".to_owned();
         let mut metrics = manifest();
         metrics.metrics.push(metrics.metrics[0].clone());
-        let problems: Vec<String> = [zero, twice, bad_kind, metrics]
+        let mut settings = manifest();
+        settings.settings.push(settings.settings[0].clone());
+        let problems: Vec<String> = [zero, twice, bad_kind, metrics, settings]
             .iter()
             .map(|manifest| check(manifest).unwrap_err())
             .collect();
@@ -141,6 +148,7 @@ mod tests {
                 "finding kind `ref.sample-file` is declared twice",
                 "finding kind `untested` must be `<group>.<name>`",
                 "metric `untested` is declared twice",
+                "setting `files_max` is declared twice",
             ]
         );
     }

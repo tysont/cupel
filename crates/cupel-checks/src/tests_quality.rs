@@ -27,10 +27,27 @@ const ID: &str = "tests.quality";
 
 /// The settings and their defaults (ADR-054). A finding fires when a value exceeds its maximum.
 const LIMITS: Limits = Limits::new(&[
-    ("mock_density_max", 50),
-    ("mocks_min", 2),
-    ("logic_max", 0),
-    ("setup_statements_min", 3),
+    (
+        "mock_density_max",
+        50,
+        "The highest share, in percent, of doubles among a test's doubles and assertions before \
+         test.mock-heavy.",
+    ),
+    (
+        "mocks_min",
+        2,
+        "The fewest test doubles that can make a test test.mock-heavy.",
+    ),
+    (
+        "logic_max",
+        0,
+        "The most loops, alternatives, and unguarded branches a test may have before test.logic.",
+    ),
+    (
+        "setup_statements_min",
+        3,
+        "The fewest leading statements tests in one file must share to be test.duplicate-setup.",
+    ),
 ]);
 
 /// How a finding is fixed, after SCRAP's remediation modes.
@@ -151,6 +168,7 @@ impl TestsQuality {
                 wants: vec![FactKind::Decisions],
                 findings: finding_kinds(),
                 metrics: metrics(),
+                settings: LIMITS.specs(),
                 stability: Stability::Experimental,
                 summary: "SCRAP-style test quality: assertion density, weak and missing \
                           assertions, mock density, logic in tests, and duplicated setup."

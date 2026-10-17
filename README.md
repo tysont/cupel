@@ -1190,9 +1190,35 @@ ref = "v1.2.0"
 depth = "quick"
 ```
 
-**Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. `static.complexity` takes `cyclomatic_max` (10), `cognitive_max` (15), `nesting_max` (4), `params_max` (5), and `length_max` (60). `static.clones` takes `threshold` (0.82), `min_lines` (4), and `min_nodes` (20). `static.crap` takes `high` (30) and `watch` (5). `static.deps` takes `distance_max` (0.7) and `layers`. `tests.quality` takes `mock_density_max` (50), `mocks_min` (2), `logic_max` (0), and `setup_statements_min` (3). `tests.assertion-density` takes `lines_per_assertion_max` (20), `file_density_percent_min` (50), and `file_tests_min` (3). `perf.bench` takes `threshold_percent` (5) and `significance_percent` (5).
+**Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. Each check declares its settings in its manifest, and `cupel describe <check>` lists them with their defaults; a key a check does not declare is a configuration error that lists the ones it does. The checks that take settings:
 
-**Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the table above. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening` or `static.api-surface`, which need a range, is rejected when the config loads.
+<!-- generated:check-settings -->
+| Check | Setting | Default | What it sets |
+| --- | --- | --- | --- |
+| `perf.bench` | `threshold_percent` | `5` | The smallest change of a benchmark's median, in percent of the base's, that is reported. |
+| `perf.bench` | `significance_percent` | `5` | The Mann-Whitney U test's level, in percent: a change with a lower p is significant. |
+| `static.clones` | `threshold` | `0.82` | The least Jaccard similarity of two symbols' fingerprint sets that makes a clone, greater than 0 and at most 1. |
+| `static.clones` | `min_lines` | `4` | The fewest lines a symbol must span to be compared. |
+| `static.clones` | `min_nodes` | `20` | The fewest normalized-tree nodes a symbol must have to be compared. |
+| `static.complexity` | `cyclomatic_max` | `10` | The highest cyclomatic complexity a symbol may have; above it is complexity.high. |
+| `static.complexity` | `cognitive_max` | `15` | The highest cognitive complexity a symbol may have; above it is complexity.high. |
+| `static.complexity` | `nesting_max` | `4` | The deepest control-flow nesting a symbol may have; deeper is nesting.deep. |
+| `static.complexity` | `params_max` | `5` | The most parameters a symbol may declare, not counting a receiver; more is params.many. |
+| `static.complexity` | `length_max` | `60` | The most lines a symbol may span; more is function.long. |
+| `static.crap` | `high` | `30` | The CRAP score at or above which a symbol is crap.high. |
+| `static.crap` | `watch` | `5` | The CRAP score at or above which a symbol below high is crap.watch. |
+| `static.deps` | `distance_max` | `0.7` | The most A + I − 1 an abstract module may reach before dep.unstable-abstract, from 0 to 1. |
+| `static.deps` | `layers` | — | Layers as order (names, lowest first) and map (a glob per layer); a module importing a higher layer is dep.layer-violation. No layering rule when unset. |
+| `tests.assertion-density` | `lines_per_assertion_max` | `20` | The most lines per assertion a test may span before density.sparse-test. |
+| `tests.assertion-density` | `file_density_percent_min` | `50` | The least assertions per test a file may make, in percent of the repository's, before density.sparse-file. |
+| `tests.assertion-density` | `file_tests_min` | `3` | The fewest tests a file needs to be compared with the repository. |
+| `tests.quality` | `mock_density_max` | `50` | The highest share, in percent, of doubles among a test's doubles and assertions before test.mock-heavy. |
+| `tests.quality` | `mocks_min` | `2` | The fewest test doubles that can make a test test.mock-heavy. |
+| `tests.quality` | `logic_max` | `0` | The most loops, alternatives, and unguarded branches a test may have before test.logic. |
+| `tests.quality` | `setup_statements_min` | `3` | The fewest leading statements tests in one file must share to be test.duplicate-setup. |
+<!-- end:check-settings -->
+
+**Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the check table under Checks. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening` or `static.api-surface`, which need a range, is rejected when the config loads.
 
 Cupel writes only under `.cupel/` (run records, the SQLite fact store, `cache/` with coverage reports and per-test maps, scratch space) unless `--write` is given. An install you allow (`--install`, or yes to the question) runs your package manager, which for the JavaScript launchers, uv, and poetry adds a dev dependency to `package.json` or `pyproject.toml` and its lockfile. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
 

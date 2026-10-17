@@ -231,6 +231,7 @@ mod tests {
                 evidence: serde_json::Map::new(),
             }],
             metrics: vec![],
+            settings: Vec::new(),
             stability: Stability::Experimental,
             summary: String::new(),
         }

@@ -341,6 +341,14 @@ expression: pretty(&schema)
             "$ref": "#/$defs/FactKind"
           }
         },
+        "settings": {
+          "description": "What the check reads from `[checks.\"<id>\"]`, each with its default (ADR-111). Absent when\nempty, as `CheckResult.notes` is (ADR-079), so a check or plugin without settings leaves\nit out.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SettingSpec"
+          },
+          "x-cupel-optional": true
+        },
         "stability": {
           "$ref": "#/$defs/Stability"
         },
@@ -930,6 +938,26 @@ expression: pretty(&schema)
         "n",
         "unit",
         "value"
+      ]
+    },
+    "SettingSpec": {
+      "description": "A setting a check reads from `[checks.\"<id>\"]`, with its default (ADR-111).",
+      "type": "object",
+      "properties": {
+        "default": {
+          "description": "The value in force when the setting is not configured; null when an unconfigured\nsetting turns its rule off."
+        },
+        "name": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "default",
+        "name",
+        "summary"
       ]
     },
     "Severity": {

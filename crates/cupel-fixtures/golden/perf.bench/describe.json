@@ -184,6 +184,18 @@
       "needs": [
         "bench-samples"
       ],
+      "settings": [
+        {
+          "default": 5,
+          "name": "threshold_percent",
+          "summary": "The smallest change of a benchmark's median, in percent of the base's, that is reported."
+        },
+        {
+          "default": 5,
+          "name": "significance_percent",
+          "summary": "The Mann-Whitney U test's level, in percent: a change with a lower p is significant."
+        }
+      ],
       "stability": "experimental",
       "summary": "Runs each language's benchmarks at head and at the range's base commit and compares their samples with a Mann-Whitney U test.",
       "tier": 0,

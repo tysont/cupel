@@ -387,7 +387,7 @@ expression: pretty(&schema)
           "default": {}
         },
         "notes": {
-          "description": "What the result could not take into account, such as `branches: unavailable` when the\ncoverage map measured no branches. Absent when empty: the one optional property of an\nemitted type, so results without notes are unchanged (ADR-079).",
+          "description": "What the result could not take into account, such as `branches: unavailable` when the\ncoverage map measured no branches. Absent when empty: an optional property of an\nemitted type (with `Manifest.settings`, ADR-111), so results without notes are unchanged\n(ADR-079).",
           "type": "array",
           "items": {
             "type": "string"
@@ -1706,6 +1706,14 @@ expression: pretty(&schema)
             "$ref": "#/$defs/FactKind"
           }
         },
+        "settings": {
+          "description": "What the check reads from `[checks.\"<id>\"]`, each with its default (ADR-111). Absent when\nempty, as `CheckResult.notes` is (ADR-079), so a check or plugin without settings leaves\nit out.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SettingSpec"
+          },
+          "x-cupel-optional": true
+        },
         "stability": {
           "$ref": "#/$defs/Stability"
         },
@@ -2609,6 +2617,26 @@ expression: pretty(&schema)
         "n",
         "unit",
         "value"
+      ]
+    },
+    "SettingSpec": {
+      "description": "A setting a check reads from `[checks.\"<id>\"]`, with its default (ADR-111).",
+      "type": "object",
+      "properties": {
+        "default": {
+          "description": "The value in force when the setting is not configured; null when an unconfigured\nsetting turns its rule off."
+        },
+        "name": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "default",
+        "name",
+        "summary"
       ]
     },
     "Severity": {

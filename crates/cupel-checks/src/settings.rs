@@ -3,19 +3,28 @@
 use std::collections::BTreeMap;
 
 use cupel_core::config::{ConfigError, Table};
-use cupel_core::{CheckCtx, CheckId, Manifest, Plan, Result, Scope};
+use cupel_core::{CheckCtx, CheckId, Manifest, Plan, Result, Scope, SettingSpec};
 
+use crate::manifest::setting;
 use crate::outcome;
 use serde_json::Value;
 
-/// Non-negative integer settings, each name with its default.
+/// Non-negative integer settings, each name with its default and what it sets.
 pub struct Limits {
-    defaults: &'static [(&'static str, u32)],
+    defaults: &'static [(&'static str, u32, &'static str)],
 }
 
 impl Limits {
-    pub const fn new(defaults: &'static [(&'static str, u32)]) -> Self {
+    pub const fn new(defaults: &'static [(&'static str, u32, &'static str)]) -> Self {
         Self { defaults }
+    }
+
+    /// Every setting as the manifest declares it, in declaration order (ADR-111).
+    pub fn specs(&self) -> Vec<SettingSpec> {
+        self.defaults
+            .iter()
+            .map(|(name, default, summary)| setting(name, Value::from(*default), summary))
+            .collect()
     }
 
     /// `plan`, once the check `manifest` describes has only valid settings in `ctx`
@@ -42,7 +51,7 @@ impl Limits {
         }
         self.defaults
             .iter()
-            .map(|(name, default)| match config.get(*name) {
+            .map(|(name, default, _)| match config.get(*name) {
                 None => Ok((*name, *default)),
                 Some(Value::Number(number)) => number
                     .as_u64()
@@ -66,7 +75,7 @@ impl Limits {
 
     /// Every setting name, in declaration order.
     fn names(&self) -> impl Iterator<Item = &'static str> {
-        self.defaults.iter().map(|(name, _)| *name)
+        self.defaults.iter().map(|(name, _, _)| *name)
     }
 
     /// A `CheckSetting` error about a key of `check`, listing every valid name.

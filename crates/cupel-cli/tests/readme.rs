@@ -1,4 +1,4 @@
-// ABOUTME: Keeps the README's generated sections (exit codes, check table, support matrix)
+// ABOUTME: Keeps the README's generated sections (exit codes, check table, support matrix, check settings)
 // ABOUTME: equal to the binary's `describe` output; `make readme` rewrites them (ADR-073).
 
 mod support;
@@ -112,6 +112,39 @@ fn check_table(matrix: &Value, manifests: &[Value]) -> String {
     markdown_table(&header, &rows)
 }
 
+/// One row per setting of every check that has settings (ADR-111); a setting without a default
+/// shows a dash.
+fn check_settings(manifests: &[Value]) -> String {
+    let header = owned(&["Check", "Setting", "Default", "What it sets"]);
+    let rows: Vec<Vec<String>> = manifests
+        .iter()
+        .flat_map(|manifest| {
+            let id = manifest["id"].as_str().expect("id");
+            // A manifest without settings leaves the field out (ADR-111).
+            manifest["settings"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .map(move |setting| {
+                    let default = match &setting["default"] {
+                        Value::Null => "—".to_owned(),
+                        value => format!("`{value}`"),
+                    };
+                    vec![
+                        format!("`{id}`"),
+                        format!("`{}`", setting["name"].as_str().expect("setting name")),
+                        default,
+                        setting["summary"]
+                            .as_str()
+                            .expect("setting summary")
+                            .to_owned(),
+                    ]
+                })
+        })
+        .collect();
+    markdown_table(&header, &rows)
+}
+
 fn support_matrix(matrix: &Value) -> String {
     let languages = strings(&matrix["languages"]);
     let header: Vec<String> = std::iter::once("Check".to_owned())
@@ -169,13 +202,14 @@ fn exit_codes(cli: &Value) -> String {
 }
 
 /// Each generated section's name and body, rendered from the binary's `describe` output.
-fn generated() -> [(&'static str, String); 3] {
+fn generated() -> [(&'static str, String); 4] {
     let matrix = described(&["matrix"]);
     let manifests = manifests(&matrix);
     [
         ("exit-codes", exit_codes(&described(&[]))),
         ("check-table", check_table(&matrix, &manifests)),
         ("support-matrix", support_matrix(&matrix)),
+        ("check-settings", check_settings(&manifests)),
     ]
 }
 

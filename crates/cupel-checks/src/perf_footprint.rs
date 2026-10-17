@@ -116,6 +116,7 @@ impl PerfFootprint {
                         "Total size of the configured artifacts, for a size budget.",
                     ),
                 ],
+                settings: SETTINGS.specs(),
                 stability: Stability::Experimental,
                 summary: "Dependencies, their licenses and known vulnerabilities, and artifact \
                           sizes, read offline; against the range's base under --changed or \

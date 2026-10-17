@@ -114,6 +114,7 @@ fn manifest() -> Manifest {
             ),
         ],
         metrics: metrics(),
+        settings: SETTINGS.specs(),
         stability: Stability::Experimental,
         summary: "Mutates the code in scope and runs the tests that cover each mutant; a \
                   mutant every test passes against survived. Score: killed / (killed + \

@@ -67,20 +67,43 @@ fn render_check(check: &CheckDescription, paint: &Paint) -> String {
         .iter()
         .map(|m| (m.name.clone(), format!("{} · {}", name(m.per), m.summary)))
         .collect();
+    let settings: Vec<(String, String)> = manifest
+        .settings
+        .iter()
+        .map(|s| {
+            (
+                s.name.clone(),
+                format!("{} · {}", default(&s.default), s.summary),
+            )
+        })
+        .collect();
     let languages = check
         .languages
         .iter()
         .map(|l| (l.lang.as_str().to_owned(), support(&l.support)))
         .collect();
-    for (heading, rows) in [
+    let mut sections = vec![
         ("facts", facts),
         ("findings", findings),
         ("metrics", metrics),
-        ("languages", languages),
-    ] {
+    ];
+    // A check without settings has no settings section; every other section is always shown.
+    if !settings.is_empty() {
+        sections.push(("settings", settings));
+    }
+    sections.push(("languages", languages));
+    for (heading, rows) in sections {
         section(&mut out, heading, &rows, paint);
     }
     out
+}
+
+/// A setting's default as text: its JSON, or `none` when it has no default.
+fn default(value: &serde_json::Value) -> String {
+    match value {
+        serde_json::Value::Null => "none".to_owned(),
+        value => value.to_string(),
+    }
 }
 
 /// A blank line, a bold heading, and `rows` as aligned `key  value` lines.

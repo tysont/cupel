@@ -1,6 +1,6 @@
 // ABOUTME: Builders every native check's manifest and evidence share: finding kinds whose evidence is a
-// ABOUTME: JSON Schema, `scope` and per-target metric specs, and evidence serialization (ADR-012, ADR-062).
-use cupel_core::{ActionKind, FindingKindSpec, MetricPer, MetricSpec};
+// ABOUTME: JSON Schema, `scope` and per-target metric specs, settings, and evidence (ADR-012, ADR-062, ADR-111).
+use cupel_core::{ActionKind, FindingKindSpec, MetricPer, MetricSpec, SettingSpec};
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -30,6 +30,15 @@ pub fn ranked(name: &str, per: MetricPer, summary: &str) -> MetricSpec {
         name: name.to_owned(),
         summary: summary.to_owned(),
         per,
+    }
+}
+
+/// A setting read from `[checks."<id>"]`, with its default (ADR-111).
+pub fn setting(name: &str, default: Value, summary: &str) -> SettingSpec {
+    SettingSpec {
+        name: name.to_owned(),
+        default,
+        summary: summary.to_owned(),
     }
 }
 

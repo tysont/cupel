@@ -34,7 +34,23 @@ pub struct Manifest {
     /// What the check measures: `scope` metrics are gate keys (`<check-id>.<metric>`), the others
     /// are `survey` ranking dimensions (ADR-060, ADR-062).
     pub metrics: Vec<MetricSpec>,
+    /// What the check reads from `[checks."<id>"]`, each with its default (ADR-111). Absent when
+    /// empty, as `CheckResult.notes` is (ADR-079), so a check or plugin without settings leaves
+    /// it out.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub settings: Vec<SettingSpec>,
     pub stability: Stability,
+    pub summary: String,
+}
+
+/// A setting a check reads from `[checks."<id>"]`, with its default (ADR-111).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct SettingSpec {
+    pub name: String,
+    /// The value in force when the setting is not configured; null when an unconfigured
+    /// setting turns its rule off.
+    pub default: Value,
     pub summary: String,
 }
 

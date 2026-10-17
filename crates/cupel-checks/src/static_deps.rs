@@ -7,25 +7,40 @@ use cupel_core::syntax::{ApiItemKind, ApiSurface, EdgeKind, ImportTarget, Module
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
-    Measurement, MetricPer, MetricSpec, Plan, Result, Scope, Score, Severity, Stability, Target,
-    Tier,
+    Measurement, MetricPer, MetricSpec, Plan, Result, Scope, Score, SettingSpec, Severity,
+    Stability, Target, Tier,
 };
 use globset::{GlobBuilder, GlobMatcher};
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
 
-use crate::manifest::{evidence, kind, metric, ranked};
+use crate::manifest::{evidence, kind, metric, ranked, setting};
 use crate::metrics::{largest, sum};
 use crate::outcome;
 
 const ID: &str = "static.deps";
 
-/// The settings this check accepts (ADR-052, ADR-053).
-const SETTINGS: [&str; 2] = ["distance_max", "layers"];
-
 /// `dep.unstable-abstract` fires when A + I − 1 exceeds this (ADR-052).
 const DISTANCE_MAX: f64 = 0.7;
+
+/// The settings this check accepts, with their defaults (ADR-052, ADR-053, ADR-111).
+fn settings() -> Vec<SettingSpec> {
+    vec![
+        setting(
+            "distance_max",
+            Value::from(DISTANCE_MAX),
+            "The most A + I − 1 an abstract module may reach before dep.unstable-abstract, from 0 \
+             to 1.",
+        ),
+        setting(
+            "layers",
+            Value::Null,
+            "Layers as order (names, lowest first) and map (a glob per layer); a module importing \
+             a higher layer is dep.layer-violation. No layering rule when unset.",
+        ),
+    ]
+}
 
 /// Evidence of `dep.cycle`.
 #[derive(Serialize, JsonSchema)]
@@ -96,6 +111,7 @@ impl StaticDeps {
                 wants: vec![],
                 findings: finding_kinds(),
                 metrics: metrics(),
+                settings: settings(),
                 stability: Stability::Experimental,
                 summary: "Module graph: import cycles, afferent and efferent coupling, \
                           instability, abstractness, distance from the main sequence, and \
@@ -783,16 +799,17 @@ impl Layers {
 
 impl Settings {
     fn read(check: &CheckId, config: &Table) -> Result<Self> {
+        let keys: Vec<String> = settings().into_iter().map(|spec| spec.name).collect();
         let error = |key: &str, reason: String| -> cupel_core::Error {
             ConfigError::CheckSetting {
                 check: check.to_string(),
                 key: key.to_owned(),
                 reason,
-                valid: SETTINGS.iter().map(|name| (*name).to_owned()).collect(),
+                valid: keys.clone(),
             }
             .into()
         };
-        if let Some(unknown) = config.keys().find(|key| !SETTINGS.contains(&key.as_str())) {
+        if let Some(unknown) = config.keys().find(|key| !keys.contains(key)) {
             return Err(error(unknown, "not a setting of this check".to_owned()));
         }
         let distance_max = match config.get("distance_max") {

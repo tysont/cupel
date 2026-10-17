@@ -126,6 +126,7 @@ impl GenMetamorphic {
                     ])
                     .map(|(name, summary)| metric(name, summary))
                     .collect(),
+                settings: LIMITS.specs(),
                 stability: Stability::Experimental,
                 summary: "Evaluates the metamorphic relations declared in configuration on \
                           generated inputs; reports each relation that does not hold, with a \

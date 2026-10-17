@@ -22,7 +22,18 @@ const ID: &str = "perf.bench";
 
 /// `threshold_percent`: the smallest change, in percent of the base's median, a finding reports;
 /// `significance_percent`: the test's level, in percent (ADR-106).
-const SETTINGS: Limits = Limits::new(&[("threshold_percent", 5), ("significance_percent", 5)]);
+const SETTINGS: Limits = Limits::new(&[
+    (
+        "threshold_percent",
+        5,
+        "The smallest change of a benchmark's median, in percent of the base's, that is reported.",
+    ),
+    (
+        "significance_percent",
+        5,
+        "The Mann-Whitney U test's level, in percent: a change with a lower p is significant.",
+    ),
+]);
 
 /// Evidence of `perf.regression` and `perf.improvement`.
 #[derive(Serialize, JsonSchema)]
@@ -90,6 +101,7 @@ impl PerfBench {
                     metric("regressed", "Benchmarks reported as regressions."),
                     metric("improved", "Benchmarks reported as improvements."),
                 ],
+                settings: SETTINGS.specs(),
                 stability: Stability::Experimental,
                 summary: "Runs each language's benchmarks at head and at the range's base commit \
                           and compares their samples with a Mann-Whitney U test."

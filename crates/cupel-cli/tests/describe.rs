@@ -338,6 +338,65 @@ fn describe_check_shows_its_manifest_and_support_per_language() {
 }
 
 #[test]
+fn describe_check_lists_its_settings_with_their_defaults() {
+    let description = assert_described(&["describe", "static.clones"], "check");
+    let settings: Vec<(&str, &Value)> = description["manifest"]["settings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|setting| (setting["name"].as_str().unwrap(), &setting["default"]))
+        .collect();
+    assert_eq!(
+        settings,
+        [
+            ("threshold", &json!(0.82)),
+            ("min_lines", &json!(4)),
+            ("min_nodes", &json!(20))
+        ]
+    );
+}
+
+/// The rows of the `heading` section of a text description, as words; empty when it has none.
+fn section_rows(text: &str, heading: &str) -> Vec<Vec<String>> {
+    text.lines()
+        .skip_while(|line| *line != heading)
+        .skip(1)
+        .take_while(|line| line.starts_with("  "))
+        .map(words)
+        .collect()
+}
+
+#[test]
+fn describe_check_text_lists_each_setting_with_its_default_and_summary() {
+    let outcome = run(["describe", "static.deps", "--format", "text"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let settings = described(&["static.deps"])["manifest"]["settings"].clone();
+    let expected: Vec<Vec<String>> = settings
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|setting| {
+            let default = match &setting["default"] {
+                Value::Null => "none".to_owned(),
+                value => value.to_string(),
+            };
+            let row = format!(
+                "{} {default} · {}",
+                setting["name"].as_str().unwrap(),
+                setting["summary"].as_str().unwrap()
+            );
+            words(&row)
+        })
+        .collect();
+    assert_eq!(section_rows(&outcome.stdout, "settings"), expected);
+    let without = run(["describe", "static.dead-code", "--format", "text"]);
+    assert_eq!(
+        section_rows(&without.stdout, "settings"),
+        Vec::<Vec<String>>::new()
+    );
+}
+
+#[test]
 fn describe_finding_shows_its_check_action_and_evidence_schema() {
     let description = assert_described(&["describe", "finding", "complexity.high"], "finding");
     let required = json!(["cyclomatic", "cognitive", "cyclomatic_max", "cognitive_max"]);

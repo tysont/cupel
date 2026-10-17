@@ -247,6 +247,18 @@ fn the_manifest_states_its_known_limitation() {
 }
 
 #[test]
+fn the_manifest_declares_its_settings_with_their_defaults() {
+    assert_eq!(
+        support::declared_settings(ID),
+        [
+            ("threshold", json!(0.82)),
+            ("min_lines", json!(4)),
+            ("min_nodes", json!(20))
+        ]
+    );
+}
+
+#[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
     let check = support::check(ID);
     let manifest = check.manifest();

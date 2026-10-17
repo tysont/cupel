@@ -886,6 +886,7 @@ mod tests {
             wants: Vec::new(),
             findings: Vec::new(),
             metrics: Vec::new(),
+            settings: Vec::new(),
             stability: cupel_core::Stability::Experimental,
             summary: String::new(),
         });

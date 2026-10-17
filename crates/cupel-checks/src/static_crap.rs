@@ -27,7 +27,18 @@ const ID: &str = "static.crap";
 
 /// The settings and their defaults (ADR-048). A symbol whose CRAP is at least `high` is
 /// `crap.high`; at least `watch` but below `high`, `crap.watch`.
-const SETTINGS: Limits = Limits::new(&[("high", 30), ("watch", 5)]);
+const SETTINGS: Limits = Limits::new(&[
+    (
+        "high",
+        30,
+        "The CRAP score at or above which a symbol is crap.high.",
+    ),
+    (
+        "watch",
+        5,
+        "The CRAP score at or above which a symbol below high is crap.watch.",
+    ),
+]);
 
 /// Evidence of `crap.high` and `crap.watch`.
 #[derive(Serialize, JsonSchema)]
@@ -61,6 +72,7 @@ impl StaticCrap {
                 wants: vec![FactKind::CoverageMap, FactKind::TestConventions],
                 findings: finding_kinds(),
                 metrics: metrics(),
+                settings: SETTINGS.specs(),
                 stability: Stability::Experimental,
                 summary: "CRAP per function: cyclomatic complexity weighted by missing test \
                           coverage. Limitation: CRAP exists only where coverage was measured; \
