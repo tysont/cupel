@@ -70,8 +70,10 @@ notify = "8.2.0"
 # JUnit XML from pytest and cargo nextest (P3.1); read-only, no dependencies of its own.
 roxmltree = "0.21.1"
 # The fixture harness validates `--format sarif` output against the vendored SARIF 2.1.0 schema
-# (P6.1); no default features, so it never fetches a remote schema.
-jsonschema = { version = "0.58.2", default-features = false }
+# (P6.1); no default features, so it never fetches a remote schema. 0.46, not 0.47+: later versions
+# turn on serde_json's `float_roundtrip`, which feature unification would put into the `cupel` binary
+# the tests run, changing the last digit of parsed coverage floats in goldens.
+jsonschema = { version = "0.46.10", default-features = false }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
