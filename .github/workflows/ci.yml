@@ -92,6 +92,11 @@ jobs:
       # The fuzzers and bench tools gen.fuzz and perf.bench drive for real (P6.3, ADR-106, ADR-107).
       # Pinned: the goldens hold their messages. atheris is not installed: it builds only against a
       # clang that ships libFuzzer, so gen.fuzz stays `unavailable` for Python here as on macOS.
+      # ThreadSanitizer symbolizes its stacks through llvm-symbolizer; without it a report's frames are
+      # addresses, none in the repository, and conc.race keeps the race without a place (ADR-105).
+      - name: Install llvm-symbolizer
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y llvm
       - name: Install cargo-fuzz and hyperfine
         run: |
           cargo install cargo-fuzz --version 0.13.2 --locked

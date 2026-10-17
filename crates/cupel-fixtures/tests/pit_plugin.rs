@@ -238,8 +238,8 @@ fn a_pit_report_becomes_mutants_on_cupels_sites_with_their_tests() {
             "src/main/java/discount/Discount.java",
             true,
             vec![
-                "discount.SmallTest#keepsASmallOrder".to_owned(),
-                "discount.LargeTest#discountsALargeMemberOrder".to_owned()
+                "discount.LargeTest#discountsALargeMemberOrder".to_owned(),
+                "discount.SmallTest#keepsASmallOrder".to_owned()
             ]
         )
     );

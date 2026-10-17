@@ -117,8 +117,10 @@ def runner_id(name):
 
 
 def named_tests(element, tag):
+    """The runner IDs PIT lists under `tag`, sorted: PIT names them in the order it ran them,
+    which follows the file system's listing of the test classes."""
     text = element.findtext(tag) or ""
-    return [runner_id(name) for name in text.split("|") if name]
+    return sorted(runner_id(name) for name in text.split("|") if name)
 
 
 def read_report(text):

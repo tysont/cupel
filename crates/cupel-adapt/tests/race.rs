@@ -150,7 +150,9 @@ fn thread_sanitizer_reports_the_race_of_the_fixture_where_its_runtime_runs() {
         .collect();
     assert_eq!(
         lines,
-        [("src/lib.rs".to_owned(), 9), ("src/lib.rs".to_owned(), 10)]
+        [("src/lib.rs".to_owned(), 9), ("src/lib.rs".to_owned(), 10)],
+        "{:?}",
+        races[0]
     );
 }
 

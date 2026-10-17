@@ -69,4 +69,5 @@ Open: what the fact holds so that a check written once reads three tools whose r
 - Under `--changed`, a race that a changed test exposes in unchanged code is reported when one of its frames is in a changed file; one entirely in unchanged code is not.
 - Messages and frames follow tool versions; CI pins the nightly toolchain (and so Miri) the goldens were made with.
 - Loom, Shuttle, and other model-checking harnesses are not wrapped; they fit `conc.model-check` (P7) or a later producer of this fact.
+- ThreadSanitizer symbolizes its stacks through `llvm-symbolizer` on `PATH` (Linux); without it the frames are addresses, none in the repository, so a race is kept without a place and `race.detected` has no location. The first Ubuntu CI run (39060938864) ran that way; CI installs `llvm`.
 - ThreadSanitizer is exercised by its parser's tests on real compiler-rt output and by a real-tool test that runs where an instrumented binary can run (on this machine's macOS it crashes the binary at start, and the test says `SKIPPED`).

@@ -42,8 +42,8 @@
       "action": {
         "hints": {
           "covering_tests": [
-            "discount.SmallTest#keepsASmallOrder",
-            "discount.LargeTest#discountsALargeMemberOrder"
+            "discount.LargeTest#discountsALargeMemberOrder",
+            "discount.SmallTest#keepsASmallOrder"
           ]
         },
         "kind": "write_test",
@@ -55,8 +55,8 @@
       "detail": null,
       "evidence": {
         "covering_tests": [
-          "discount.SmallTest#keepsASmallOrder",
-          "discount.LargeTest#discountsALargeMemberOrder"
+          "discount.LargeTest#discountsALargeMemberOrder",
+          "discount.SmallTest#keepsASmallOrder"
         ],
         "mutation": {
           "from": ">=",
