@@ -5,8 +5,8 @@ use std::fmt::Write as _;
 use cupel_core::{
     AllDescription, ArgDescription, CheckDescription, CliDescription, CommandDescription,
     Description, FactDescription, FindingDescription, LanguageDescription, LanguagesDescription,
-    MatrixDescription, ProducerDescription, SchemaDescription, Stability, SupportDescription,
-    ToolDescription, ToolchainDescription, ValueType,
+    Manifest, MatrixDescription, ProducerDescription, SchemaDescription, Stability,
+    SupportDescription, ToolDescription, ToolchainDescription, ValueType,
 };
 
 use super::{Paint, continued, name};
@@ -44,6 +44,21 @@ fn render_check(check: &CheckDescription, paint: &Paint) -> String {
         name(manifest.stability),
         manifest.summary
     );
+    let languages = check
+        .languages
+        .iter()
+        .map(|l| (l.lang.as_str().to_owned(), support(&l.support)))
+        .collect();
+    let mut sections = manifest_sections(manifest);
+    sections.push(("languages", languages));
+    for (heading, rows) in sections {
+        section(&mut out, heading, &rows, paint);
+    }
+    out
+}
+
+/// A manifest's sections: facts, findings, metrics, and settings when it has any.
+fn manifest_sections(manifest: &Manifest) -> Vec<(&'static str, Vec<(String, String)>)> {
     let kinds = |list: &[cupel_core::FactKind]| {
         let names: Vec<String> = list.iter().map(ToString::to_string).collect();
         none_if_empty(&names.join(", "))
@@ -77,11 +92,6 @@ fn render_check(check: &CheckDescription, paint: &Paint) -> String {
             )
         })
         .collect();
-    let languages = check
-        .languages
-        .iter()
-        .map(|l| (l.lang.as_str().to_owned(), support(&l.support)))
-        .collect();
     let mut sections = vec![
         ("facts", facts),
         ("findings", findings),
@@ -91,11 +101,7 @@ fn render_check(check: &CheckDescription, paint: &Paint) -> String {
     if !settings.is_empty() {
         sections.push(("settings", settings));
     }
-    sections.push(("languages", languages));
-    for (heading, rows) in sections {
-        section(&mut out, heading, &rows, paint);
-    }
-    out
+    sections
 }
 
 /// A setting's default as text: its JSON, or `none` when it has no default.

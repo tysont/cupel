@@ -103,10 +103,20 @@ impl LanguageRegistry {
         &self.cache
     }
 
+    /// Every ecosystem a project-root walk skips the generated directories of: each language's,
+    /// in ID order, then those recognized before their language is registered (ADR-112).
+    pub(crate) fn known_ecosystems(&self) -> Vec<&'static Ecosystem> {
+        ecosystems::known(
+            self.languages
+                .iter()
+                .filter_map(|language| language.ecosystem()),
+        )
+    }
+
     /// Every language registers its producers, in ID order, and each language with an ecosystem
     /// its project roots, whose walk skips the generated directories of every known ecosystem.
     pub fn register_producers(&self, reg: &mut ProducerRegistry) {
-        let known = ecosystems::known(self);
+        let known = self.known_ecosystems();
         for language in &self.languages {
             language.register(reg);
             if let Some(ecosystem) = language.ecosystem() {

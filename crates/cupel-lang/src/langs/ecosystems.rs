@@ -5,7 +5,6 @@ use std::path::Path;
 use cupel_core::Exclude;
 use cupel_core::syntax::ProjectRoot;
 
-use crate::language::LanguageRegistry;
 use crate::project::{Ecosystem, roots};
 
 /// Ecosystems that are recognized but whose language is not registered; `init` reports their
@@ -13,24 +12,25 @@ use crate::project::{Ecosystem, roots};
 /// registered, so there are none.
 const UNREGISTERED: [&Ecosystem; 0] = [];
 
-/// Every known ecosystem, whose generated directories every project-root walk skips: each of
-/// `languages`' ecosystems in ID order (one shared by two languages appears twice), then the
-/// unregistered ones (ADR-112).
-pub(crate) fn known(languages: &LanguageRegistry) -> Vec<&'static Ecosystem> {
-    languages
-        .iter()
-        .filter_map(|language| language.ecosystem())
-        .chain(UNREGISTERED)
-        .collect()
+/// Every known ecosystem, whose generated directories every project-root walk skips: the
+/// `registered` languages' ecosystems as given (one shared by two languages appears twice), then
+/// the unregistered ones (ADR-112).
+pub(crate) fn known(
+    registered: impl IntoIterator<Item = &'static Ecosystem>,
+) -> Vec<&'static Ecosystem> {
+    registered.into_iter().chain(UNREGISTERED).collect()
 }
 
 /// Roots of languages that are recognized but not registered outside `exclude`, ordered by
-/// path, then language.
-pub fn unregistered_roots(root: &Path, exclude: &Exclude) -> Vec<ProjectRoot> {
-    let known = known(&LanguageRegistry::builtin());
+/// path, then language; the walks skip the generated directories of every `known` ecosystem.
+pub(crate) fn unregistered_roots(
+    root: &Path,
+    exclude: &Exclude,
+    known: &[&'static Ecosystem],
+) -> Vec<ProjectRoot> {
     let mut roots: Vec<ProjectRoot> = UNREGISTERED
         .into_iter()
-        .flat_map(|ecosystem| roots(root, ecosystem, &known, exclude))
+        .flat_map(|ecosystem| roots(root, ecosystem, known, exclude))
         .collect();
     roots.sort_by(|a, b| (&a.path, &a.lang).cmp(&(&b.path, &b.lang)));
     roots

@@ -72,7 +72,7 @@ mod walk;
 
 pub use contract::{Contract, capture, contract};
 pub use conventions::GlobTestConventions;
-pub use langs::ecosystems::unregistered_roots;
+pub use langs::unregistered_roots;
 pub use language::{Language, LanguageRegistry, lang, owns};
 pub use parse::{CacheStats, ParseCache, ParseProblem, Parsed, Reparse, Syntax};
 pub use producer::{Extract, Merge, QueryProducer, Source, parse_scope, producer_id};

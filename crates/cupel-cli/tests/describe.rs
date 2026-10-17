@@ -366,6 +366,14 @@ fn section_rows(text: &str, heading: &str) -> Vec<Vec<String>> {
         .collect()
 }
 
+/// How the text rendering shows a setting's default: its JSON, or `none` without one.
+fn default_text(default: &Value) -> String {
+    match default {
+        Value::Null => "none".to_owned(),
+        value => value.to_string(),
+    }
+}
+
 #[test]
 fn describe_check_text_lists_each_setting_with_its_default_and_summary() {
     let outcome = run(["describe", "static.deps", "--format", "text"]);
@@ -376,13 +384,10 @@ fn describe_check_text_lists_each_setting_with_its_default_and_summary() {
         .unwrap()
         .iter()
         .map(|setting| {
-            let default = match &setting["default"] {
-                Value::Null => "none".to_owned(),
-                value => value.to_string(),
-            };
             let row = format!(
-                "{} {default} · {}",
+                "{} {} · {}",
                 setting["name"].as_str().unwrap(),
+                default_text(&setting["default"]),
                 setting["summary"].as_str().unwrap()
             );
             words(&row)

@@ -1,5 +1,5 @@
 // ABOUTME: The compiled-in languages, one module per language directory (design §8.4.2), and the
-// ABOUTME: registry that holds them; `javascript` and `typescript` share the `ecma` module.
+// ABOUTME: registry that holds them, and the roots `init` reports for unregistered ecosystems (ADR-038).
 pub mod clojure;
 pub mod ecma;
 pub mod ecosystems;
@@ -8,7 +8,11 @@ pub mod java;
 pub mod python;
 pub mod rust;
 
+use std::path::Path;
 use std::sync::Arc;
+
+use cupel_core::Exclude;
+use cupel_core::syntax::ProjectRoot;
 
 use crate::language::{Language, LanguageRegistry};
 use crate::parse::ParseCache;
@@ -33,4 +37,11 @@ impl LanguageRegistry {
         ];
         Self::of(languages, cache)
     }
+}
+
+/// Roots of languages that are recognized but not registered outside `exclude`, ordered by
+/// path, then language (ADR-038); their walks skip what every registered language's walk skips.
+pub fn unregistered_roots(root: &Path, exclude: &Exclude) -> Vec<ProjectRoot> {
+    let known = LanguageRegistry::builtin().known_ecosystems();
+    ecosystems::unregistered_roots(root, exclude, &known)
 }
