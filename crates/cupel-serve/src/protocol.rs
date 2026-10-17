@@ -199,6 +199,20 @@ pub fn read_message_within<T: DeserializeOwned>(
     input: &mut impl BufRead,
     limit: usize,
 ) -> Result<Option<T>, FrameError> {
+    let Some(line) = read_line_within(input, limit)? else {
+        return Ok(None);
+    };
+    serde_json::from_slice(&line)
+        .map(Some)
+        .map_err(|error| FrameError::Malformed(error.to_string()))
+}
+
+/// Reads the next line, newline included, of at most `limit` bytes; `None` when the input ends
+/// before its first byte.
+pub(crate) fn read_line_within(
+    input: &mut impl BufRead,
+    limit: usize,
+) -> Result<Option<Vec<u8>>, FrameError> {
     let mut line = Vec::new();
     let allowed = u64::try_from(limit).unwrap_or(u64::MAX);
     input
@@ -215,7 +229,5 @@ pub fn read_message_within<T: DeserializeOwned>(
             FrameError::Truncated
         });
     }
-    serde_json::from_slice(&line)
-        .map(Some)
-        .map_err(|error| FrameError::Malformed(error.to_string()))
+    Ok(Some(line))
 }
