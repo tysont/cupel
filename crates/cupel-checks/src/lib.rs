@@ -53,6 +53,7 @@ mod outcome;
 mod perf_bench;
 mod perf_footprint;
 mod settings;
+mod spec_contracts;
 mod static_analyze;
 mod static_api_surface;
 mod static_clones;
