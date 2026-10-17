@@ -105,7 +105,7 @@ def operators_of(mutator, description):
     return MUTATORS.get(name, ([], False))
 
 
-def test_id(name):
+def runner_id(name):
     """A PIT test name as the Maven runner's ID, `<class>#<method>`."""
     found = re.search(r"\[class:([^\]]+)\].*\[method:([^\](]+)", name)
     if found:
@@ -116,9 +116,9 @@ def test_id(name):
     return name
 
 
-def tests_of(element, tag):
+def named_tests(element, tag):
     text = element.findtext(tag) or ""
-    return [test_id(name) for name in text.split("|") if name]
+    return [runner_id(name) for name in text.split("|") if name]
 
 
 def read_report(text):
@@ -136,8 +136,8 @@ def read_report(text):
                 "mutator": element.findtext("mutator") or "",
                 "indexes": [index.text for index in element.iter("index")],
                 "description": element.findtext("description") or "",
-                "killing": tests_of(element, "killingTests"),
-                "succeeding": tests_of(element, "succeedingTests"),
+                "killing": named_tests(element, "killingTests"),
+                "succeeding": named_tests(element, "succeedingTests"),
             }
         )
     return mutations

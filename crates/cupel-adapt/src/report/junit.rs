@@ -76,11 +76,16 @@ fn case(node: roxmltree::Node<'_, '_>) -> Case {
 
 /// The tests in a `cargo nextest` `JUnit` report, with IDs nextest's own `<binary-id> <test path>`.
 pub fn nextest(xml: &str) -> Option<Vec<TestResult>> {
+    joined(xml, " ")
+}
+
+/// The tests in `xml`, each with the ID its class and name make joined by `separator`.
+fn joined(xml: &str, separator: &str) -> Option<Vec<TestResult>> {
     Some(
         parse(xml)?
             .into_iter()
             .map(|case| {
-                let id = format!("{} {}", case.classname, case.name);
+                let id = format!("{}{separator}{}", case.classname, case.name);
                 case.into_test(id)
             })
             .collect(),
@@ -119,15 +124,7 @@ pub fn java(xml: &str) -> Option<Vec<TestResult>> {
 
 /// The tests in a `clojure.test.junit` report, with IDs the tests' vars, `<namespace>/<name>`.
 pub fn clojure(xml: &str) -> Option<Vec<TestResult>> {
-    Some(
-        parse(xml)?
-            .into_iter()
-            .map(|case| {
-                let id = format!("{}/{}", case.classname, case.name);
-                case.into_test(id)
-            })
-            .collect(),
-    )
+    joined(xml, "/")
 }
 
 impl Case {

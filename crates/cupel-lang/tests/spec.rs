@@ -115,13 +115,15 @@ fn query_files(dir: &str) -> Vec<PathBuf> {
 fn every_language_has_tables_that_parse() {
     let registry = LanguageRegistry::builtin();
     // Reading the tables forces the one-time parse; a malformed file panics here.
-    let frameworks: Vec<&str> = registry
+    let without_framework: Vec<String> = registry
         .iter()
-        .map(|language| language.spec().tables().tests.framework.as_str())
+        .filter(|language| language.spec().tables().tests.framework.is_empty())
+        .map(|language| language.id().to_string())
         .collect();
-    assert!(
-        frameworks.iter().all(|framework| !framework.is_empty()),
-        "every language names its default test framework: {frameworks:?}"
+    assert_eq!(
+        without_framework,
+        Vec::<String>::new(),
+        "every language names its default test framework"
     );
 }
 

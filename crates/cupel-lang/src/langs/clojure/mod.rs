@@ -8,7 +8,7 @@ use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
 use cupel_core::syntax::{ModuleGraph, NormTree, ProjectInfo};
-use cupel_core::{FactKind, LangFamily, LangId, ProducerRegistry, Stability};
+use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::imports::ImportGraph;
 use crate::language::Language;
@@ -74,7 +74,8 @@ impl Language for Clojure {
     fn register(&self, reg: &mut ProducerRegistry) {
         let language: Arc<dyn Language> = Arc::new(self.clone());
         let cache = &self.cache;
-        crate::generic::register_except(&language, cache, reg, &[FactKind::NormTree]);
+        // No `[normalize]` table drives the generic NormTree, so every generic producer applies.
+        crate::generic::register(&language, cache, reg);
         reg.register::<NormTree, _>(QueryProducer::new(
             Arc::clone(&language),
             Arc::clone(cache),

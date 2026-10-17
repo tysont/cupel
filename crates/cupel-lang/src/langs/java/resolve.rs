@@ -289,12 +289,16 @@ mod tests {
 
     #[test]
     fn a_source_root_is_the_directory_above_the_package_path() {
-        assert_eq!(
-            declared_root("src/main/java/a/b/X.java", "a.b").as_deref(),
-            Some("src/main/java")
-        );
-        assert_eq!(declared_root("a/b/X.java", "a.b").as_deref(), Some("."));
-        assert_eq!(declared_root("src/X.java", "").as_deref(), Some("src"));
-        assert_eq!(declared_root("src/elsewhere/X.java", "a.b"), None);
+        let roots: Vec<Option<String>> = [
+            ("src/main/java/a/b/X.java", "a.b"),
+            ("a/b/X.java", "a.b"),
+            ("src/X.java", ""),
+            ("src/elsewhere/X.java", "a.b"),
+        ]
+        .into_iter()
+        .map(|(file, package)| declared_root(file, package))
+        .collect();
+        let expected = [Some("src/main/java"), Some("."), Some("src"), None];
+        assert_eq!(roots, expected.map(|root| root.map(str::to_owned)));
     }
 }

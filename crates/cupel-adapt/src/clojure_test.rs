@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use cupel_core::{LangId, Langs, RunOptions, RunOrder, RunOrdering, TestResult};
 
 use crate::report::junit;
-use crate::runner::{Executed, Lister, Ran, Root, Runner, RunnerSpec, Selected, Varying};
+use crate::runner::{Executed, Lister, Ran, Root, Runner, RunnerSpec, Varying, tests_or_files};
 
 const ID: &str = "tool.clojure-test";
 
@@ -22,7 +22,8 @@ static CLOJURE_TEST: RunnerSpec = RunnerSpec {
     env: &[],
     merged: false,
     read,
-    select,
+    // Test IDs (vars) and test files are both arguments the script runs, in the order given.
+    select: tests_or_files,
     list: Some(Lister {
         command: list_command,
         parse: |stdout| stdout.lines().map(str::to_owned).collect(),
@@ -65,17 +66,6 @@ fn list_command(root: &Root) -> Vec<String> {
     let mut command = command(root);
     command.push("--list".to_owned());
     command
-}
-
-/// Test IDs (vars) and test files are both arguments the script runs, in the order given.
-#[allow(
-    clippy::unnecessary_wraps,
-    reason = "every runner narrows through `RunnerSpec::select`; the script narrows to anything"
-)]
-fn select(selected: &Selected<'_>) -> Option<Vec<String>> {
-    match selected {
-        Selected::Tests(paths) | Selected::Files(paths) => Some(paths.to_vec()),
-    }
 }
 
 /// A shuffled run's seed, which the script shuffles its tests with (ADR-078).

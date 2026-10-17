@@ -91,13 +91,17 @@
       "--seed" (recur (drop 2 args) (assoc parsed :seed (Long/parseLong (second args))))
       (recur (rest args) (update parsed :selectors conj (first args))))))
 
-(let [[report & args] *command-line-args*
-      {:keys [list seed selectors]} (options args)
-      vars (cond-> (vec (selected-vars selectors)) seed (shuffled seed))]
-  (if list
-    (do (doseq [v vars] (println (id-of v)))
+(defn -main
+  "Runs or lists the selected tests, writing the report; exits 0 only when every test passed."
+  [report & args]
+  (let [{:keys [list seed selectors]} (options args)
+        vars (cond-> (vec (selected-vars selectors)) seed (shuffled seed))]
+    (if list
+      (do (doseq [v vars] (println (id-of v)))
+          (shutdown-agents)
+          (System/exit 0))
+      (let [{:keys [fail error]} (run-suites vars report)]
         (shutdown-agents)
-        (System/exit 0))
-    (let [{:keys [fail error]} (run-suites vars report)]
-      (shutdown-agents)
-      (System/exit (if (zero? (+ fail error)) 0 1)))))
+        (System/exit (if (zero? (+ fail error)) 0 1))))))
+
+(apply -main *command-line-args*)

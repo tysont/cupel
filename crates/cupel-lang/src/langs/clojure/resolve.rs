@@ -216,20 +216,16 @@ fn manifests_below(imports: &Imports<'_>, dir: &str, depth: usize, found: &mut V
     }
 }
 
-/// The project directory of `file`: the nearest directory above it with a `deps.edn`.
+/// The project directory of `file`: the nearest directory above it with a `deps.edn`, `.` when
+/// none has one.
 fn project_of(imports: &Imports<'_>, file: &str) -> String {
-    let mut dir = file.rsplit_once('/').map_or("", |(dir, _)| dir).to_owned();
-    loop {
-        let at = if dir.is_empty() { "." } else { dir.as_str() };
-        if imports.is_file(&join(at, MANIFEST)) {
-            return at.to_owned();
-        }
-        match dir.rsplit_once('/') {
-            Some((parent, _)) => dir = parent.to_owned(),
-            None if !dir.is_empty() => dir.clear(),
-            None => return ".".to_owned(),
-        }
-    }
+    std::path::Path::new(file)
+        .ancestors()
+        .skip(1)
+        .map(|dir| dir.to_string_lossy().into_owned())
+        .find(|dir| imports.is_file(&join(dir, MANIFEST)))
+        .filter(|dir| !dir.is_empty())
+        .unwrap_or_else(|| ".".to_owned())
 }
 
 #[cfg(test)]

@@ -3,7 +3,7 @@
 use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::{junit, listing};
-use crate::runner::{Lister, PYTHON, Ran, Root, Runner, RunnerSpec, Selected};
+use crate::runner::{Lister, PYTHON, Ran, Root, Runner, RunnerSpec, tests_or_files};
 
 const ID: &str = "tool.pytest";
 
@@ -17,7 +17,8 @@ static PYTEST: RunnerSpec = RunnerSpec {
     env: &[("PYTHONDONTWRITEBYTECODE", "1")],
     merged: false,
     read,
-    select,
+    // Node IDs and test files are both arguments pytest runs.
+    select: tests_or_files,
     list: Some(Lister {
         command: collect,
         parse: listing::pytest,
@@ -50,17 +51,6 @@ fn command(root: &Root) -> Vec<String> {
 
 fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
     junit::pytest(ran.report.as_deref()?)
-}
-
-/// Node IDs and test files are both arguments pytest runs.
-#[allow(
-    clippy::unnecessary_wraps,
-    reason = "every runner narrows through `RunnerSpec::select`; pytest narrows to anything"
-)]
-fn select(selected: &Selected<'_>) -> Option<Vec<String>> {
-    match selected {
-        Selected::Tests(paths) | Selected::Files(paths) => Some(paths.to_vec()),
-    }
 }
 
 /// Collects the suite without running it, one node ID per line.

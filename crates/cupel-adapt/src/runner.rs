@@ -144,6 +144,17 @@ pub fn as_arguments(selected: &Selected<'_>, files: bool) -> Option<Vec<String>>
     }
 }
 
+/// A spec's `select` for runners that take test IDs and test files alike as arguments.
+#[allow(
+    clippy::unnecessary_wraps,
+    reason = "every runner narrows through `RunnerSpec::select`; these narrow to anything"
+)]
+pub fn tests_or_files(selected: &Selected<'_>) -> Option<Vec<String>> {
+    match selected {
+        Selected::Tests(paths) | Selected::Files(paths) => Some(paths.to_vec()),
+    }
+}
+
 /// A spec's `select` for runners that take test files as arguments, and no test IDs.
 pub fn files(selected: &Selected<'_>) -> Option<Vec<String>> {
     as_arguments(selected, true)
