@@ -1105,7 +1105,7 @@ Added after P3.6's second measurement (P3 Notes "P3.6 — measurement with schem
 
 #### P5.4 `gen.property`
 
-**Status:** not started
+**Status:** in progress (2026-10-16) · [ADR-095](adr/CUPEL_DECISION_095.md) · [ADR-096](adr/CUPEL_DECISION_096.md)
 
 - Wrap Hypothesis, proptest/quickcheck, fast-check with seed and case budget; minimized counterexamples; `--scaffold` emits property stubs from signatures (written only with `--write`). Kinds `property.falsified`, `property.missing`.
 
