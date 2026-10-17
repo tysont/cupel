@@ -1,9 +1,10 @@
 // ABOUTME: Runs the built `cupel` binary in a chosen directory with a clean `CUPEL_*` environment and captures
-// ABOUTME: its exit code, stdout, stderr, and envelope; under DAEMON_PARITY=1 also proves the daemon prints the same.
+// ABOUTME: its exit code, stdout, stderr, and envelope or SARIF log; under DAEMON_PARITY=1 also proves the daemon prints the same.
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 use cupel_core::Envelope;
+use serde_json::Value;
 
 /// What one invocation of `cupel` produced.
 #[derive(Debug)]
@@ -12,7 +13,8 @@ pub struct Outcome {
     pub code: Option<i32>,
     pub stdout: String,
     pub stderr: String,
-    /// Stdout parsed as an envelope; `None` when stdout is not a JSON object (text output).
+    /// Stdout parsed as an envelope; `None` when stdout is not a JSON object (text output) or is
+    /// a SARIF log (`--format sarif`).
     pub envelope: Option<Envelope>,
     /// The directory `cupel` ran in, which redaction treats as the repository root.
     pub cwd: PathBuf,
@@ -38,6 +40,34 @@ impl Outcome {
     pub fn assert_golden(&self, name: &str) {
         crate::assert_golden(name, self.envelope(), &self.cwd);
     }
+
+    /// The SARIF log stdout carried.
+    ///
+    /// # Panics
+    ///
+    /// When stdout is not a SARIF log; the message shows the exit code, stdout, and stderr.
+    pub fn sarif(&self) -> Value {
+        crate::sarif::sarif_log(&self.stdout).unwrap_or_else(|| {
+            panic!(
+                "cupel printed no SARIF log (exit {:?})\nstdout:\n{}\nstderr:\n{}",
+                self.code, self.stdout, self.stderr
+            )
+        })
+    }
+
+    /// Checks this run's SARIF log, redacted by [`crate::redact_sarif`], against the golden
+    /// `name`.
+    ///
+    /// # Panics
+    ///
+    /// When stdout is not a SARIF log, or it differs from the golden.
+    #[track_caller]
+    pub fn assert_sarif_golden(&self, name: &str) {
+        let actual = crate::redact_sarif(&self.sarif(), &self.cwd);
+        if let Err(error) = crate::Goldens::from_env().check(name, &actual) {
+            panic!("{error}");
+        }
+    }
 }
 
 /// Runs `cupel <args>` in `cwd` and captures everything it produced.
@@ -51,7 +81,7 @@ impl Outcome {
 /// # Panics
 ///
 /// When the binary has not been built or cannot be started, and when it prints JSON that is
-/// not an envelope, which breaks the output contract.
+/// neither an envelope nor a SARIF log, which breaks the output contract.
 pub fn run_cupel(args: &[&str], cwd: &Path) -> Outcome {
     let twin = crate::parity::enabled().then(|| crate::parity::Twin::of(cwd));
     let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
@@ -70,7 +100,9 @@ pub fn run_cupel(args: &[&str], cwd: &Path) -> Outcome {
     if let Some(twin) = twin {
         twin.assert_same(args, (output.status.code(), &stdout, &stderr));
     }
-    let envelope = stdout.trim_start().starts_with('{').then(|| {
+    let is_envelope =
+        stdout.trim_start().starts_with('{') && crate::sarif::sarif_log(&stdout).is_none();
+    let envelope = is_envelope.then(|| {
         serde_json::from_str(&stdout).unwrap_or_else(|error| {
             panic!("cupel {args:?} printed JSON that is not an envelope ({error}):\n{stdout}")
         })

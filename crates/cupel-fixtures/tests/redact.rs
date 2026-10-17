@@ -3,7 +3,7 @@
 use std::path::Path;
 
 use cupel_core::Envelope;
-use cupel_fixtures::redact;
+use cupel_fixtures::{redact, redact_sarif};
 use serde_json::{Value, json};
 
 /// An envelope with every volatile field set to a value that appears nowhere else.
@@ -232,4 +232,113 @@ fn an_oracles_verification_time_and_run_are_redacted_and_an_unverified_ones_stay
         (&json!("<timestamp>"), &json!("<run-id>"), &json!("ab12"))
     );
     assert_eq!(pointer(&redacted, "/oracles/1/verified_run"), &Value::Null);
+}
+
+/// A SARIF log shaped as `--format sarif` renders `volatile_envelope`: the run in the
+/// invocation's properties, the rest of the envelope in the run's, the root as file URIs.
+fn volatile_sarif(root: &str, canonical_root: &str) -> Value {
+    let envelope = serde_json::to_value(volatile_envelope(root, canonical_root)).unwrap();
+    let mut rest = envelope.as_object().unwrap().clone();
+    rest.remove("run");
+    rest.remove("findings");
+    let uri = format!("file://{canonical_root}/");
+    json!({
+        "version": "2.1.0",
+        "runs": [{
+            "tool": {"driver": {"name": "cupel", "version": "9.8.7-volatile", "semanticVersion": "9.8.7-volatile"}},
+            "automationDetails": {"id": "cupel/check/run_01ARZ3NDEKTSV4RRFFQ69G5FAV"},
+            "invocations": [{
+                "executionSuccessful": true,
+                "exitCode": 1,
+                "startTimeUtc": "1999-12-31T23:59:59Z",
+                "properties": envelope["run"],
+            }],
+            "originalUriBaseIds": {"SRCROOT": {"uri": uri}},
+            "versionControlProvenance": [{"repositoryUri": uri, "revisionId": "deadbeefcafe", "branch": "volatile-branch"}],
+            "results": [{
+                "ruleId": "complexity.high",
+                "message": {"text": format!("Read {root}/src/lib.rs")},
+                "properties": {"evidence": envelope["findings"][0]["evidence"]},
+            }],
+            "properties": rest,
+        }],
+    })
+}
+
+#[test]
+fn a_sarif_log_is_redacted_where_its_envelope_would_be() {
+    let dir = tempfile::tempdir().unwrap();
+    let root = dir.path().to_str().unwrap().to_owned();
+    let canonical = dir.path().canonicalize().unwrap();
+    let canonical = canonical.to_str().unwrap().to_owned();
+
+    let redacted = redact_sarif(&volatile_sarif(&root, &canonical), dir.path());
+
+    let text = redacted.to_string();
+    for volatile in [
+        "9.8.7-volatile",
+        "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+        "01BX5ZZKBKACTAV9WEVGEMMVRZ",
+        "1999-12-31",
+        "987654",
+        "876543",
+        "765432",
+        "424242",
+        "1.111.0-volatile",
+        "deadbeefcafe",
+        "feedface0123",
+        "volatile-branch",
+        root.as_str(),
+        canonical.as_str(),
+    ] {
+        assert!(
+            !text.contains(volatile),
+            "{volatile:?} survived redaction:\n{text}"
+        );
+    }
+    let run = "/runs/0";
+    let invocation = "/runs/0/invocations/0";
+    for (path, placeholder) in [
+        (format!("{run}/tool/driver/version"), "<version>"),
+        (format!("{run}/tool/driver/semanticVersion"), "<version>"),
+        (
+            format!("{run}/automationDetails/id"),
+            "cupel/check/<run-id>",
+        ),
+        (format!("{invocation}/startTimeUtc"), "<timestamp>"),
+        (format!("{invocation}/properties/id"), "<run-id>"),
+        (format!("{invocation}/properties/git/sha"), "<sha>"),
+        (
+            format!("{invocation}/properties/toolchain/rust"),
+            "<version>",
+        ),
+        (
+            format!("{run}/originalUriBaseIds/SRCROOT/uri"),
+            "file://<root>/",
+        ),
+        (
+            format!("{run}/versionControlProvenance/0/revisionId"),
+            "<sha>",
+        ),
+        (
+            format!("{run}/versionControlProvenance/0/branch"),
+            "<branch>",
+        ),
+        (
+            format!("{run}/results/0/message/text"),
+            "Read <root>/src/lib.rs",
+        ),
+        (format!("{run}/properties/cupel/version"), "<version>"),
+        (format!("{run}/properties/description/version"), "<version>"),
+        (
+            format!("{run}/properties/checks/0/duration_ms"),
+            "<duration-ms>",
+        ),
+    ] {
+        assert_eq!(pointer(&redacted, &path), &json!(placeholder), "at {path}");
+    }
+    assert_eq!(
+        pointer(&redacted, "/runs/0/invocations/0/exitCode"),
+        &json!(1)
+    );
 }

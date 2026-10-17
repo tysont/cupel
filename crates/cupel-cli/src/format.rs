@@ -5,14 +5,14 @@ use std::ffi::OsString;
 use cupel_core::config::Format;
 
 use crate::cli::format_named;
-use crate::error::CupelError;
 
-/// The renderers that exist. Formats without one are reported as not implemented.
+/// The renderers that exist, one per format.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Rendering {
     Json,
     Jsonl,
     Text,
+    Sarif,
 }
 
 /// The format used when no configuration layer chose one.
@@ -24,13 +24,13 @@ pub fn default_for(stdout_is_terminal: bool) -> Format {
     }
 }
 
-/// The renderer for `format`, or the plan step that builds it.
-pub fn rendering(format: Format) -> Result<Rendering, CupelError> {
+/// The renderer for `format`.
+pub fn rendering(format: Format) -> Rendering {
     match format {
-        Format::Json => Ok(Rendering::Json),
-        Format::Text => Ok(Rendering::Text),
-        Format::Jsonl => Ok(Rendering::Jsonl),
-        Format::Sarif => Err(CupelError::pending_format(format.as_str(), "P6.1")),
+        Format::Json => Rendering::Json,
+        Format::Text => Rendering::Text,
+        Format::Jsonl => Rendering::Jsonl,
+        Format::Sarif => Rendering::Sarif,
     }
 }
 
@@ -87,14 +87,11 @@ mod tests {
     }
 
     #[test]
-    fn json_jsonl_and_text_render_and_sarif_names_its_step() {
-        assert_eq!(rendering(Format::Json), Ok(Rendering::Json));
-        assert_eq!(rendering(Format::Jsonl), Ok(Rendering::Jsonl));
-        assert_eq!(rendering(Format::Text), Ok(Rendering::Text));
-        assert_eq!(
-            rendering(Format::Sarif),
-            Err(CupelError::pending_format("sarif", "P6.1"))
-        );
+    fn every_format_has_its_renderer() {
+        assert_eq!(rendering(Format::Json), Rendering::Json);
+        assert_eq!(rendering(Format::Jsonl), Rendering::Jsonl);
+        assert_eq!(rendering(Format::Text), Rendering::Text);
+        assert_eq!(rendering(Format::Sarif), Rendering::Sarif);
     }
 
     #[test]

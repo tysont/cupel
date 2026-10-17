@@ -91,6 +91,22 @@ fn describe_cli_lists_every_verb_exit_code_and_schema() {
 }
 
 #[test]
+fn the_format_flag_offers_every_renderer_and_says_what_sarif_is() {
+    let description = run(["describe"]).envelope()["description"].clone();
+    let format = description["global_flags"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|flag| flag["name"] == json!("--format"))
+        .expect("--format is a global flag")
+        .clone();
+    assert_eq!(format["values"], json!(["json", "jsonl", "text", "sarif"]));
+    assert_eq!(format["pending_step"], Value::Null);
+    let summary = format["summary"].as_str().unwrap();
+    assert!(summary.contains("sarif (SARIF 2.1.0)"), "{summary}");
+}
+
+#[test]
 fn describe_verb_describes_its_arguments_sub_verbs_and_pending_flags() {
     let outcome = run(["describe", "oracle"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);

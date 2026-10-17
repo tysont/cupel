@@ -28,11 +28,13 @@ use crate::{
     render, scaffold, serve, suppress, survey, tests_verb,
 };
 
-/// How an envelope reaches stdout: its renderer, whether text is colored, and the findings page.
+/// How an envelope reaches stdout: its renderer, whether text is colored, the findings page, and
+/// the repository root SARIF locates files against, once one is resolved.
 struct Presentation {
     rendering: Rendering,
     color: bool,
     page: Page,
+    root: Option<PathBuf>,
 }
 
 impl Presentation {
@@ -46,6 +48,15 @@ impl Presentation {
             rendering,
             color: environment.color(rendering, no_color_flag),
             page,
+            root: None,
+        }
+    }
+
+    /// This presentation for a run in the repository at `root`.
+    fn rooted(self, root: &Path) -> Self {
+        Self {
+            root: Some(root.to_path_buf()),
+            ..self
         }
     }
 }
@@ -114,7 +125,11 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     if keeps_run_record(run, cli) {
         record(&writer, &envelope, &run.take_executions(), &mut stderr);
     }
-    output(envelope, &presentation(rendering), stderr)
+    output(
+        envelope,
+        &presentation(rendering).rooted(writer.root()),
+        stderr,
+    )
 }
 
 /// The writer for the repository the invocation names: recording, for a run that only plans.
@@ -198,10 +213,7 @@ fn configured(
         .effective
         .format
         .unwrap_or_else(|| format::default_for(environment.stdout_is_terminal));
-    let rendering = match format::rendering(format) {
-        Ok(rendering) => rendering,
-        Err(error) => return (run.failed(&error), Rendering::Json, said),
-    };
+    let rendering = format::rendering(format);
     if cli.global.verbose {
         let config_path = config.path.as_deref().map(Path::display);
         let _ = writeln!(stderr, "cupel: root: {}", writer.root().display());
@@ -316,7 +328,7 @@ fn recovered_rendering(environment: &Environment) -> Rendering {
         environment.variable(Setting::Format.env_var()),
         environment.stdout_is_terminal,
     );
-    format::rendering(recovered.format).unwrap_or(Rendering::Json)
+    format::rendering(recovered.format)
 }
 
 /// Runs the verb with `config`, the loaded configuration or why it did not load. A dry run
@@ -499,7 +511,7 @@ fn rejected(environment: &Environment, run: &mut Run, error: &clap::Error) -> Ou
         environment.variable(Setting::Format.env_var()),
         environment.stdout_is_terminal,
     );
-    let rendering = format::rendering(recovered.format).unwrap_or(Rendering::Json);
+    let rendering = format::rendering(recovered.format);
     // Paging flags are not trusted from a command line that did not parse.
     let presentation =
         Presentation::new(environment, rendering, recovered.no_color, Page::default());
@@ -527,7 +539,12 @@ fn rejected(environment: &Environment, run: &mut Run, error: &clap::Error) -> Ou
 fn output(mut envelope: Envelope, presentation: &Presentation, stderr: String) -> Output {
     presentation.page.apply(&mut envelope);
     Output {
-        stdout: render::render(&envelope, presentation.rendering, presentation.color),
+        stdout: render::render(
+            &envelope,
+            presentation.rendering,
+            presentation.color,
+            presentation.root.as_deref(),
+        ),
         stderr,
         code: envelope.exit_code.code(),
     }

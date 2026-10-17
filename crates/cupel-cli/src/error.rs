@@ -90,16 +90,6 @@ impl CupelError {
         })
     }
 
-    /// An output format whose renderer arrives in `step`.
-    pub fn pending_format(name: &str, step: &str) -> Self {
-        Self::NotImplemented(Pending {
-            subject: format!("--format {name}"),
-            what: format!("`--format {name}`"),
-            step: step.to_owned(),
-            fix: "Use --format json or --format text.".to_owned(),
-        })
-    }
-
     /// A `describe` subject whose data arrives in `step`; `subject` names it, such as
     /// `describe matrix`.
     pub fn pending_description(subject: &str, step: &str) -> Self {
@@ -565,14 +555,10 @@ mod tests {
 
     #[test]
     fn findings_are_identified_by_check_kind_and_subject() {
-        let finding = CupelError::pending_format("jsonl", "P0.5").finding("cupel x");
+        let finding = CupelError::pending_flag("--mcp", "P7.7").finding("cupel x");
         assert_eq!(
             finding.id,
-            FindingId::for_subject(
-                &CheckId::from("cli"),
-                "cli.not-implemented",
-                "--format jsonl"
-            )
+            FindingId::for_subject(&CheckId::from("cli"), "cli.not-implemented", "--mcp")
         );
         assert_eq!(finding.repro, "cupel x");
         assert_eq!(finding.check.as_str(), "cli");

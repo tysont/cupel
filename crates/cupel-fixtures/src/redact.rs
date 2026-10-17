@@ -1,5 +1,5 @@
 // ABOUTME: Redaction of the envelope fields that vary between identical runs (ADR-003 §2, and an oracle's verification),
-// ABOUTME: replacing each present value with a placeholder string and leaving nulls alone.
+// ABOUTME: in an envelope or where a SARIF log renders them, each present value becoming a placeholder.
 use std::path::Path;
 
 use cupel_core::Envelope;
@@ -15,17 +15,26 @@ const BRANCH: &str = "<branch>";
 const DIRTY: &str = "<dirty>";
 const ROOT: &str = "<root>";
 
-/// Volatile fields at fixed positions, as JSON pointers, and their placeholders.
-const FIXED: [(&str, &str); 9] = [
-    ("/cupel/version", VERSION),
-    ("/run/id", RUN_ID),
-    ("/run/baseline/id", RUN_ID),
-    ("/run/started", TIMESTAMP),
-    ("/run/seed", SEED),
-    ("/run/git/sha", SHA),
-    ("/run/git/base", SHA),
-    ("/run/git/branch", BRANCH),
-    ("/run/git/dirty", DIRTY),
+/// Volatile fields of the envelope's `run`, as JSON pointers relative to it, and their
+/// placeholders.
+const RUN_FIXED: [(&str, &str); 8] = [
+    ("/id", RUN_ID),
+    ("/baseline/id", RUN_ID),
+    ("/started", TIMESTAMP),
+    ("/seed", SEED),
+    ("/git/sha", SHA),
+    ("/git/base", SHA),
+    ("/git/branch", BRANCH),
+    ("/git/dirty", DIRTY),
+];
+
+/// Volatile fields a SARIF log adds where it renders them, and their placeholders.
+const SARIF_FIXED: [(&str, &str); 5] = [
+    ("/runs/0/tool/driver/version", VERSION),
+    ("/runs/0/tool/driver/semanticVersion", VERSION),
+    ("/runs/0/invocations/0/startTimeUtc", TIMESTAMP),
+    ("/runs/0/versionControlProvenance/0/revisionId", SHA),
+    ("/runs/0/versionControlProvenance/0/branch", BRANCH),
 ];
 
 /// The envelope as JSON with every volatile value replaced by its placeholder.
@@ -38,21 +47,67 @@ const FIXED: [(&str, &str); 9] = [
 /// Only if the envelope cannot be serialized, which its types rule out.
 pub fn redact(envelope: &Envelope, root: &Path) -> Value {
     let mut value = serde_json::to_value(envelope).expect("an envelope always serializes");
-    for (pointer, placeholder) in FIXED {
+    if let Some(run) = value.get_mut("run") {
+        mask_run(run);
+    }
+    mask_outside_run(&mut value);
+    mask_durations(&mut value);
+    replace_root(&mut value, &root_spellings(root));
+    value
+}
+
+/// A `--format sarif` log with every volatile value replaced by its placeholder: the envelope's
+/// `run` (the invocation's properties) and the rest of it (the run's properties) as [`redact`]
+/// masks them, the run ID inside the automation ID, and the version, start time, and
+/// revision where SARIF shows them; `root` as in [`redact`].
+pub fn redact_sarif(log: &Value, root: &Path) -> Value {
+    let mut value = log.clone();
+    let run_id = value
+        .pointer("/runs/0/invocations/0/properties/id")
+        .and_then(Value::as_str)
+        .map(str::to_owned);
+    if let (Some(run_id), Some(Value::String(id))) =
+        (run_id, value.pointer_mut("/runs/0/automationDetails/id"))
+    {
+        *id = id.replace(&run_id, RUN_ID);
+    }
+    for (pointer, placeholder) in SARIF_FIXED {
         mask(&mut value, pointer, placeholder);
     }
+    if let Some(run) = value.pointer_mut("/runs/0/invocations/0/properties") {
+        mask_run(run);
+    }
+    if let Some(rest) = value.pointer_mut("/runs/0/properties") {
+        mask_outside_run(rest);
+    }
+    mask_durations(&mut value);
+    replace_root(&mut value, &root_spellings(root));
+    value
+}
+
+/// Masks the volatile fields of an envelope's `run`, the toolchain versions included.
+fn mask_run(run: &mut Value) {
+    for (pointer, placeholder) in RUN_FIXED {
+        mask(run, pointer, placeholder);
+    }
+    if let Some(Value::Object(tools)) = run.get_mut("toolchain") {
+        for version in tools.values_mut() {
+            *version = VERSION.into();
+        }
+    }
+}
+
+/// Masks the volatile fields of an envelope outside its `run`: the binary's version, the CLI
+/// version `describe` reports, and each oracle's verification.
+fn mask_outside_run(value: &mut Value) {
+    mask(value, "/cupel/version", VERSION);
     match value
         .pointer("/description/subject")
         .and_then(Value::as_str)
     {
-        Some("cli") => mask(&mut value, "/description/version", VERSION),
-        Some("all") => mask(&mut value, "/description/cli/version", VERSION),
+        Some("cli") => mask(value, "/description/version", VERSION),
+        Some("all") => mask(value, "/description/cli/version", VERSION),
         _ => {}
-    }
-    if let Some(Value::Object(tools)) = value.pointer_mut("/run/toolchain") {
-        for version in tools.values_mut() {
-            *version = VERSION.into();
-        }
     }
     if let Some(Value::Array(oracles)) = value.get_mut("oracles") {
         for oracle in oracles {
@@ -60,9 +115,6 @@ pub fn redact(envelope: &Envelope, root: &Path) -> Value {
             mask(oracle, "/verified_run", RUN_ID);
         }
     }
-    mask_durations(&mut value);
-    replace_root(&mut value, &root_spellings(root));
-    value
 }
 
 /// Replaces the value at `pointer` unless it is absent or null.

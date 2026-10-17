@@ -204,7 +204,7 @@ Without `--budget`, checks run in the order `cupel describe --all` lists them; w
 | `--gate`, `--no-gate` | Evaluate `[gate.changed]` for range scopes or `[gate.tree]` otherwise. On by default when the table exists; `--gate` without the table is exit 2 |
 | `--against baseline\|REF\|run:ID` | What `new_since_baseline` and each check's `delta` are computed against |
 | `--dry-run` | Return the plan (checks, targets, facts, estimates, files it would write) and run nothing |
-| `--format json\|jsonl\|text` | JSON when stdout is not a terminal, text when it is |
+| `--format json\|jsonl\|text\|sarif` | JSON when stdout is not a terminal, text when it is |
 
 Here is a small Python repository. An agent's branch added a shipping calculator, loosened one test's assertion, and skipped another test. The gate fails:
 
@@ -342,6 +342,8 @@ The same run as JSON, trimmed to two checks, one finding, and one action:
 ```
 
 Every object has a fixed key set; an absent value is `null`, never a missing key (a check result's `notes`, omitted when empty, is the one exception). `status` is one of `pass`, `fail`, `partial`, `error`, or `plan`. A check result in `error` says why in its `notes`, such as a tool that could not run. `--format jsonl` writes the envelope header and then one finding per line. `cupel describe schema run` and `cupel describe schema finding` are the full schemas.
+
+`--format sarif` writes the envelope as a [SARIF 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/) log for code-scanning tools and editors, from every verb. Each finding is a result: its kind is the `ruleId`, its severity the `level` (`fail` is `error`, `warn` is `warning`, `info` is `note`), its location a region relative to the `SRCROOT` base (the repository root), and its ID `partialFingerprints["cupel/findingId"]`; a suppressed finding carries an `accepted` suppression, and `fixes` is always empty. The rules are the finding kinds of the checks that ran, described as `cupel describe finding` describes them. The commit is in `versionControlProvenance` and the exit code in the invocation. What SARIF has no place for is kept in `properties`: a result's holds the finding's check, tier, confidence, evidence, action, and repro; the invocation's holds the envelope's `run`; the run's holds the rest of the envelope (checks, summary and gate, `next_actions`, and each verb's own payload).
 
 ### `cupel survey`
 
@@ -600,7 +602,7 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 | Flag | Meaning |
 |---|---|
-| `--format json\|jsonl\|text` | JSON when stdout is not a terminal, text when it is; `CUPEL_FORMAT` also sets it |
+| `--format json\|jsonl\|text\|sarif` | JSON when stdout is not a terminal, text when it is; `CUPEL_FORMAT` also sets it |
 | `--dry-run` | Preview what would run or be written; change nothing |
 | `--describe` | Describe the verb instead of running it |
 | `--config PATH`, `--profile NAME` | Use this `cupel.toml`, or apply `[profile.NAME]` from it |
@@ -632,6 +634,7 @@ Every check below exists. Each is supported in all five languages except `gen.pr
 | `static.crap` | 0 | quick | `crap.high`, `crap.watch` | `max`, `mean` | `crap` | go, javascript, python, rust, typescript |
 | `static.dead-code` | 0 | quick | `dead.symbol`, `dead.export` | `dead_symbols`, `dead_exports` | — | go, javascript, python, rust, typescript |
 | `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | go, javascript, python, rust, typescript |
+| `tests.assertion-density` | 2 | quick | `density.sparse-test`, `density.sparse-file` | `assertions_per_test`, `assertions_per_public_function`, `tested_public_functions`, `sparse_tests`, `sparse_files` | — | go, javascript, python, rust, typescript |
 | `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines` |  |
 | `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | go, javascript, python, rust, typescript |
 | `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.uncovered`, `mutant.equivalent?` | `score`, `killed`, `survived`, `timeout`, `uncovered`, `unviable`, `equivalent`, `executed`, `reused`, `schemata`, `fallback` | `survivors` |  |
@@ -650,6 +653,7 @@ What each check looks for:
 - **`static.api-surface`** compares the public API at the range's base with the API now, path by path. A public item that is gone (deleted, renamed, or made private) or lost a signature is `api.breaking` (`warn`); one that is new or gained a signature (an overload) is `api.widened` (`info`). It needs `--changed` or `--base`, and the gate rule `"static.api-surface" = "no-breaking"` holds a branch to no unsuppressed break.
 - **`static.analyze`** runs each language's type checker at its strictest and its linters, and reports every result in a file in scope as `analyze.<tool>.<rule>` (`analyze.mypy.arg-type`, `analyze.clippy.needless_return`): errors `fail`, warnings `warn`, notes `info`. See [Analyzers](#analyzers).
 - **`perf.footprint`** reads the dependencies the lockfiles list, without network access, and reports those with a known vulnerability (`dep.vuln`) or a copyleft license (`dep.license`); under a range it reports only dependencies the range added or changed, and `footprint.grew` when there are more than at the base. See [Dependencies and footprint](#dependencies-and-footprint).
+- **`tests.assertion-density`** measures assertions per test and per tested public function (one whose file has tests). It reports long tests that assert little for their length (`density.sparse-test`) and test files whose assertions per test fall far below the repository's (`density.sparse-file`); a test that asserts nothing is `tests.quality`'s.
 - **`tests.weakening`** compares the tests at the range's base with the tests now. It reports removed or loosened assertions, skipped or deleted tests, and rewritten snapshots. It needs `--changed` or `--base`.
 - **`tests.flaky`** reruns the test suite several times in different orders and with different seeds, and reports tests whose outcome changes: `test.flaky` when two reruns in the same order disagree, `test.order-dependent` when the outcome follows the order. See [Flakiness](#flakiness).
 - **`gen.differential`** calls the functions you name on generated inputs, in the working tree and against an oracle (the same code at an earlier commit, or a command that computes the reference answer), and reports the smallest input on which the two answer differently, with both answers. See [Differential testing](#differential-testing).
@@ -680,6 +684,7 @@ The support matrix, from `cupel describe matrix`:
 | `static.crap` | supported | supported | supported | supported | supported |
 | `static.dead-code` | supported | supported | supported | supported | supported |
 | `static.deps` | supported | supported | supported | supported | supported |
+| `tests.assertion-density` | supported | supported | supported | supported | supported |
 | `tests.coverage` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
 | `tests.flaky` | supported | supported | supported | supported | supported |
 | `tests.mutation` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
@@ -1066,7 +1071,7 @@ ref = "v1.2.0"
 depth = "quick"
 ```
 
-**Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. `static.complexity` takes `cyclomatic_max` (10), `cognitive_max` (15), `nesting_max` (4), `params_max` (5), and `length_max` (60). `static.clones` takes `threshold` (0.82), `min_lines` (4), and `min_nodes` (20). `static.crap` takes `high` (30) and `watch` (5). `static.deps` takes `distance_max` (0.7) and `layers`. `tests.quality` takes `mock_density_max` (50), `mocks_min` (2), `logic_max` (0), and `setup_statements_min` (3).
+**Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. `static.complexity` takes `cyclomatic_max` (10), `cognitive_max` (15), `nesting_max` (4), `params_max` (5), and `length_max` (60). `static.clones` takes `threshold` (0.82), `min_lines` (4), and `min_nodes` (20). `static.crap` takes `high` (30) and `watch` (5). `static.deps` takes `distance_max` (0.7) and `layers`. `tests.quality` takes `mock_density_max` (50), `mocks_min` (2), `logic_max` (0), and `setup_statements_min` (3). `tests.assertion-density` takes `lines_per_assertion_max` (20), `file_density_percent_min` (50), and `file_tests_min` (3).
 
 **Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the table above. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening` or `static.api-surface`, which need a range, is rejected when the config loads.
 

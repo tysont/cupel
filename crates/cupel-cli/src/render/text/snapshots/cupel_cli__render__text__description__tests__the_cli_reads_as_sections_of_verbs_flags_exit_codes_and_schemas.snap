@@ -18,7 +18,7 @@ verbs
   serve     Run the daemon that answers this repository's invocations with warm caches, or stop it.
 
 global flags
-  --format FORMAT       Output format; json when stdout is not a terminal, text when it is.
+  --format FORMAT       Output format: json (the envelope), jsonl, text, or sarif (SARIF 2.1.0); json when stdout is not a terminal, text when it is.
                         one of json, jsonl, text, sarif · env CUPEL_FORMAT
   --dry-run             Preview what would run or be written; change nothing.
   --describe            Describe this verb instead of running it, and exit 0.

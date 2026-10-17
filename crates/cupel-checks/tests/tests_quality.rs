@@ -14,18 +14,9 @@ use cupel_core::{
     MetricPer, Plan, Scope, Score, Severity, SymbolHash,
 };
 use serde_json::{Value, json};
-use support::{Recorded, combined, language, pairs};
+use support::{Recorded, combined, language, pairs, span};
 
 const ID: &str = "tests.quality";
-
-fn span(line: u32, lines: u32) -> Span {
-    Span {
-        line,
-        col: 1,
-        end_line: line + lines - 1,
-        end_col: 2,
-    }
-}
 
 /// A statement whose structure is named by `shape`: equal shapes are equal statements.
 fn statement(shape: &str) -> NormNode {

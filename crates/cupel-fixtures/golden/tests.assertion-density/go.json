@@ -1,0 +1,187 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "tests.assertion-density",
+      "metrics": {
+        "assertions_per_public_function": 3.75,
+        "assertions_per_test": 2.5,
+        "sparse_files": 1.0,
+        "sparse_tests": 1.0,
+        "tested_public_functions": 4.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 6,
+        "unit": "assertions_per_test",
+        "value": 2.5
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Pin more of what the tests in `report_test.go` exercise: they assert less than the rest of the suite."
+      },
+      "check": "tests.assertion-density",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "assertions": 3,
+        "file_density_percent_min": 50,
+        "file_tests_min": 3,
+        "percent": 40,
+        "repository_assertions": 15,
+        "repository_tests": 6,
+        "tests": 3
+      },
+      "id": "fnd_7bc4b9",
+      "kind": "density.sparse-file",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 45,
+        "file": "report_test.go",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.assertion-density --paths report_test.go",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_7bc4b9 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 2,
+      "title": "`report_test.go` makes 1 assertion(s) per test, 40% of the repository's 2.5 (min 50%)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Assert what `TestAMonthOfEntriesEndsInOneStatement` exercises as it goes, or split it into tests that each pin one outcome."
+      },
+      "check": "tests.assertion-density",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "assertions": 1,
+        "lines": 26,
+        "lines_per_assertion": 26,
+        "lines_per_assertion_max": 20,
+        "test": "TestAMonthOfEntriesEndsInOneStatement"
+      },
+      "id": "fnd_14ee50",
+      "kind": "density.sparse-test",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 45,
+        "file": "report_test.go",
+        "line": 20
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.assertion-density --paths report_test.go",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_14ee50 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 2,
+      "title": "`TestAMonthOfEntriesEndsInOneStatement` makes 1 assertion(s) in 26 lines (max 20 lines per assertion)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_7bc4b9",
+      "kind": "strengthen_assertion",
+      "priority": 1,
+      "summary": "Pin more of what the tests in `report_test.go` exercise: they assert less than the rest of the suite."
+    },
+    {
+      "command": null,
+      "finding": "fnd_14ee50",
+      "kind": "strengthen_assertion",
+      "priority": 2,
+      "summary": "Assert what `TestAMonthOfEntriesEndsInOneStatement` exercises as it goes, or split it into tests that each pin one outcome."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 4,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 10
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 2
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}
