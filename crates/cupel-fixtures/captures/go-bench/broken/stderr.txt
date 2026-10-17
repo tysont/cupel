@@ -1,0 +1,2 @@
+# example.com/units [example.com/units.test]
+./broken.go:3:14: syntax error: unexpected {, expected )

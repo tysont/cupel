@@ -1,0 +1,6 @@
+# Captured from the real tool on the perf.bench Python fixture (P6.3); report.json is its
+# unedited `--benchmark-json` report. `dir` is where it ran.
+tool = "pytest-benchmark 5.1.0, pytest 9.1.1"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/bench-fork/py-green"
+command = "python3 -m pytest -p no:cacheprovider --benchmark-only --benchmark-json=report.json --benchmark-min-rounds=5 --benchmark-max-time=0.000001 --benchmark-warmup=off"
+exit_code = 0

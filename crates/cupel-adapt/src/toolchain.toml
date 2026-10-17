@@ -95,10 +95,12 @@ id = "tool.bench-script"
 detect = [{ json = "package.json", path = ["scripts", "bench"] }]
 command = "<run> bench"
 
-# hyperfine times the commands `[lang.<id>] bench_commands` lists (ADR-106); with no command of
-# its own, `init` never writes it.
+# hyperfine times the commands `[lang.<id>] bench_commands` lists, appended to this command
+# (ADR-106); it is detected where `cupel.toml` lists them, so `init` never writes it.
 [[rows.bench]]
 id = "tool.hyperfine"
+detect = [{ contains = "bench_commands", in = "cupel.toml" }]
+command = "hyperfine --export-json {out}"
 install = "cargo install hyperfine --locked"
 
 # Analyzers (ADR-102): the type checker runs for TypeScript only; ESLint runs where the root has
@@ -179,6 +181,8 @@ install = "<add> pytest-benchmark"
 
 [[rows.bench]]
 id = "tool.hyperfine"
+detect = [{ contains = "bench_commands", in = "cupel.toml" }]
+command = "hyperfine --export-json {out}"
 install = "cargo install hyperfine --locked"
 
 [[rows.analyzers]]

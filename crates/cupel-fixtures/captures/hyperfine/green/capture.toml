@@ -1,0 +1,6 @@
+# Captured from the real tool on the perf.bench JavaScript fixture (P6.3); report.json is its
+# unedited `--export-json` report. `dir` is where it ran.
+tool = "hyperfine 1.20.0, node v25.2.1"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/bench-fork/js-green"
+command = "hyperfine --runs 3 --warmup 1 --style none --export-json report.json 'node bench.js'"
+exit_code = 0

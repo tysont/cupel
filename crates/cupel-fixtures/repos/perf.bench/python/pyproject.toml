@@ -1,0 +1,10 @@
+[project]
+name = "units"
+version = "0.1.0"
+dependencies = []
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-benchmark"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

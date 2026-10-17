@@ -157,8 +157,15 @@
           "producer": "tool.pytest-benchmark"
         },
         {
-          "commands": [],
-          "detect": [],
+          "commands": [
+            {
+              "command": "hyperfine --export-json {out}",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "`cupel.toml` contains `bench_commands`"
+          ],
           "format": null,
           "install": "cargo install hyperfine --locked",
           "producer": "tool.hyperfine"

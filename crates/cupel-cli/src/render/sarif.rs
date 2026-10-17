@@ -387,17 +387,22 @@ mod tests {
     #[test]
     fn rules_are_the_kinds_of_the_checks_that_ran_then_every_other_finding_kind_once() {
         let catalog = crate::catalog::Catalog::builtin();
-        let mutation = catalog
-            .checks()
-            .get(&"tests.mutation".into())
-            .expect("tests.mutation is built in")
-            .manifest()
-            .findings
-            .iter()
-            .map(|spec| spec.kind.clone());
-        // `perf.bench` ran too but is not built in, so it declares nothing; `crap.high` comes
-        // from a finding of a check that is not in `checks`.
-        let expected: Vec<Value> = mutation
+        let kinds = |id: &str| -> Vec<String> {
+            catalog
+                .checks()
+                .get(&id.into())
+                .expect("the check is built in")
+                .manifest()
+                .findings
+                .iter()
+                .map(|spec| spec.kind.clone())
+                .collect()
+        };
+        // The checks that ran, in envelope order; `crap.high` comes from a finding of a check
+        // that is not in `checks`.
+        let expected: Vec<Value> = kinds("tests.mutation")
+            .into_iter()
+            .chain(kinds("perf.bench"))
             .chain(["crap.high".to_owned()])
             .map(Value::from)
             .collect();

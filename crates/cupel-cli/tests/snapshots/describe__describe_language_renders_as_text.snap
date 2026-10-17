@@ -53,7 +53,8 @@ toolchain
   bench
     tool.bench-script  when `package.json` has `scripts.bench`
       <run> bench
-    tool.hyperfine  always
+    tool.hyperfine  when `cupel.toml` contains `bench_commands`
+      hyperfine --export-json {out}
       install: cargo install hyperfine --locked
   property  fast-check
   fuzz      jazzer.js
