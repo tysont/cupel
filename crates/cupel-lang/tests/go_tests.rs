@@ -121,6 +121,7 @@ fn files_without_test_cases_have_no_frames() {
     assert_eq!(
         files,
         [
+            "ledger_property_test.go",
             "ledger_quality_test.go",
             "ledger_test.go",
             "pricing_test.go"

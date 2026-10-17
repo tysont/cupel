@@ -145,6 +145,7 @@ fn files_without_test_cases_have_no_frames() {
         [
             "tests/test_ledger.py",
             "tests/test_pricing.py",
+            "tests/test_properties.py",
             "tests/test_quality_signals.py"
         ]
     );

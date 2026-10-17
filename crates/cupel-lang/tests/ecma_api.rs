@@ -210,8 +210,8 @@ fn main_exports_tests_and_default_exports_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixtures_is_a_test_root() {
-    assert_every_case_is_a_test_root("javascript", 28);
-    assert_every_case_is_a_test_root("typescript", 24);
+    assert_every_case_is_a_test_root("javascript", 29);
+    assert_every_case_is_a_test_root("typescript", 25);
 }
 
 #[test]

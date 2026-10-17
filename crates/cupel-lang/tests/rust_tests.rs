@@ -94,6 +94,7 @@ fn files_without_test_cases_have_no_frames() {
         [
             ("src/pricing.rs", false),
             ("tests/ledger.rs", false),
+            ("tests/properties.rs", false),
             ("tests/quality_signals.rs", false),
         ],
         "only files with test cases; src/lib.rs has none"
@@ -122,7 +123,11 @@ fn conventions_pair_sources_with_integration_and_inline_tests() {
     assert!(!conventions.is_test("src/pricing.rs"));
     assert_eq!(
         conventions.test_files_for("src/lib.rs"),
-        ["tests/ledger.rs", "tests/quality_signals.rs"]
+        [
+            "tests/ledger.rs",
+            "tests/properties.rs",
+            "tests/quality_signals.rs"
+        ]
     );
     assert_eq!(
         conventions.test_files_for("src/pricing.rs"),

@@ -190,6 +190,27 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
         "src/ledger/pricing.py",
         false,
     ),
+    (
+        "tests/test_properties.py",
+        1,
+        "hypothesis.given",
+        "external:hypothesis",
+        false,
+    ),
+    (
+        "tests/test_properties.py",
+        1,
+        "hypothesis.strategies",
+        "external:hypothesis",
+        false,
+    ),
+    (
+        "tests/test_properties.py",
+        3,
+        "ledger.decide.parse_cents",
+        "src/ledger/decide.py",
+        false,
+    ),
 ];
 
 #[test]

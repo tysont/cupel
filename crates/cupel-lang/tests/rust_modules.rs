@@ -70,6 +70,20 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
         "src/pricing.rs",
         false,
     ),
+    (
+        "tests/properties.rs",
+        1,
+        "ledger::pricing::discounted",
+        "src/pricing.rs",
+        false,
+    ),
+    (
+        "tests/properties.rs",
+        2,
+        "proptest::prelude::*",
+        "unresolved",
+        false,
+    ),
 ];
 
 #[test]

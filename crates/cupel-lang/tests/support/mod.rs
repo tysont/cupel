@@ -387,6 +387,13 @@ pub fn rows(file: &TestFile) -> Vec<CaseRow> {
 /// Asserts that every test case of `lang`'s fixture repository is a `test` root, and that there
 /// are `cases` of them.
 pub fn assert_every_case_is_a_test_root(lang: &str, cases: usize) {
+    assert_every_case_but_these_is_a_test_root(lang, cases, &[]);
+}
+
+/// Asserts that every test case of `lang`'s fixture repository is a `test` root except exactly
+/// `symbolless`, cases no symbol spans (a test a macro defines, such as a `proptest!` block's,
+/// is a token tree to the grammar), and that there are `cases` in all.
+pub fn assert_every_case_but_these_is_a_test_root(lang: &str, cases: usize, symbolless: &[&str]) {
     let root = fixture(lang);
     let roots: Roots = produce(lang, &root);
     let symbols: Symbols = produce(lang, &root);
@@ -416,8 +423,7 @@ pub fn assert_every_case_is_a_test_root(lang: &str, cases: usize) {
         .map(|(name, _)| *name)
         .collect();
     assert_eq!(
-        unrooted,
-        Vec::<&str>::new(),
+        unrooted, symbolless,
         "{lang}: test cases that are not test roots"
     );
     assert_eq!(all.len(), cases, "{lang}");

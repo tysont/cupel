@@ -275,22 +275,24 @@ fn typescript_node_test_jest_and_tsx_test_files_are_recognized() {
     );
 }
 
-const JAVASCRIPT_TEST_FILES: [&str; 6] = [
+const JAVASCRIPT_TEST_FILES: [&str; 7] = [
     "src/inline.js",
     "test/decide.test.js",
     "test/format.spec.js",
     "test/math.quality.test.js",
     "test/math.test.js",
+    "test/properties.test.js",
     "test/report.test.js",
 ];
 
-const TYPESCRIPT_TEST_FILES: [&str; 6] = [
+const TYPESCRIPT_TEST_FILES: [&str; 7] = [
     "src/__tests__/pricing.test.ts",
     "src/inline.ts",
     "src/math.quality.test.ts",
     "src/math.test.ts",
     "src/widget.test.tsx",
     "test/decide.test.ts",
+    "test/properties.test.ts",
 ];
 
 #[test]
