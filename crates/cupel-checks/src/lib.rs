@@ -43,6 +43,7 @@
 
 mod finding;
 mod gen_differential;
+mod gen_fuzz;
 mod gen_metamorphic;
 mod gen_property;
 mod manifest;
