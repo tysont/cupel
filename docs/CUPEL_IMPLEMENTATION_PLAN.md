@@ -1160,7 +1160,7 @@ Added after P3.6's second measurement (P3 Notes "P3.6 — measurement with schem
 
 ### P6 — Wrapped tiers, SARIF, additional languages
 
-**Status:** complete (2026-10-17, e084f42)
+**Status:** complete (2026-10-17, 04d1e27)
 
 #### P6.1 SARIF renderer
 
