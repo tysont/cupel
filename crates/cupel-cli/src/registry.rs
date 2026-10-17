@@ -800,8 +800,7 @@ fn scope_which_flags() -> Vec<ArgDescription> {
             ValueType::Integer,
             "N",
             "The case budget for generative checks.",
-        )
-        .pending("P5.4"),
+        ),
     ]
 }
 

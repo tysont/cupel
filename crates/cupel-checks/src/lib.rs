@@ -42,6 +42,7 @@
 //! [`Facts`]: cupel_core::Facts
 
 mod finding;
+mod gen_differential;
 mod manifest;
 mod metrics;
 mod outcome;

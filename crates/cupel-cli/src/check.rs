@@ -17,7 +17,7 @@ use cupel_lang::LanguageRegistry;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::install::{self, Permission};
-use crate::oracle;
+use crate::oracle::select::Selected;
 use crate::project;
 use crate::resources;
 use crate::run::{Executions, Invocation, Run, shell_quote};
@@ -107,8 +107,7 @@ pub fn run(
         ..
     } = resolve(writer, config, &request, catalog.language_registry())?;
     let mut selected = selection(config, args).select(catalog.checks())?;
-    let oracle =
-        oracle::select::Selected::choose(writer, config, args.oracle.as_deref(), &mut selected)?;
+    let oracle = Selected::choose(writer, config, args.oracle.as_deref(), &mut selected)?;
     let base_files = base_files(catalog.language_registry(), &resolved);
     let langs = languages_of(
         catalog.language_registry(),
@@ -130,6 +129,8 @@ pub fn run(
         depth: config.effective.depth,
         changed: changed_lines(writer.root(), &request, &resolved)?,
         resources: resources::of(invocation, config, args, git.as_ref())?,
+        oracle: oracle.run_oracle(config),
+        cases: args.cases,
     };
     let scheduler = Scheduler {
         checks: catalog.checks(),

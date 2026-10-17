@@ -99,13 +99,17 @@ fn describe_verb_describes_its_arguments_sub_verbs_and_pending_flags() {
     assert_eq!(envelope["description"]["name"], json!("oracle"));
     assert_eq!(envelope["description"]["pending_step"], json!(null));
     let check = described(&["check"]);
-    let cases = check["arguments"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|argument| argument["name"] == json!("--cases"))
-        .unwrap();
-    assert_eq!(cases["pending_step"], json!("P5.4"));
+    let pending = |name: &str| {
+        check["arguments"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|argument| argument["name"] == json!(name))
+            .unwrap()["pending_step"]
+            .clone()
+    };
+    assert_eq!(pending("--since-baseline"), json!("P2.1"));
+    assert_eq!(pending("--cases"), json!(null));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
 }
 

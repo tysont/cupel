@@ -1,0 +1,178 @@
+{
+  "checks": [
+    {
+      "cost": "deep",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "gen.differential",
+      "metrics": {
+        "cases": 5.0,
+        "divergences": 1.0
+      },
+      "oracle": "quarter",
+      "score": {
+        "n": 1,
+        "unit": "divergent",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 4
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 2,
+        "summary": "Decide which answer is right for `quarter(-1)`: fix the implementation, or, if the change is intended, the oracle."
+      },
+      "check": "gen.differential",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "case": 4,
+        "entry": "src/lib.rs:quarter",
+        "found": [
+          -1
+        ],
+        "implementation": {
+          "returned": "-1"
+        },
+        "input": [
+          -1
+        ],
+        "oracle": {
+          "commit": null,
+          "kind": "command",
+          "name": "quarter"
+        },
+        "reference": {
+          "returned": "0"
+        },
+        "shrinks": 0
+      },
+      "id": "fnd_af6634",
+      "kind": "diff.divergence",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 4,
+        "file": "src/lib.rs",
+        "line": 2
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only gen.differential --symbols sh_a7dfc2f1a1df51e8 --oracle quarter --seed 3 --cases 100",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_af6634 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "quarter",
+        "hash": "sh_a7dfc2f1a1df51e8",
+        "lang": "rust"
+      },
+      "tier": 4,
+      "title": "`quarter(-1)` returned `-1`, but oracle `quarter` returned `0`"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_af6634",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Decide which answer is right for `quarter(-1)`: fix the implementation, or, if the change is intended, the oracle."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "rust": {
+            "differential_entries": [
+              "src/lib.rs:quarter"
+            ]
+          }
+        },
+        "oracles": {
+          "quarter": {
+            "cmd": "awk -v cents={input} 'BEGIN { print int(cents / 4) }'",
+            "inputs": [
+              "7",
+              "-8"
+            ],
+            "kind": "command",
+            "lang": null,
+            "ref": null,
+            "spec": null
+          }
+        },
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 1
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

@@ -20,10 +20,11 @@ roxmltree.workspace = true
 blake3.workspace = true
 ignore.workspace = true
 similar.workspace = true
+# The differential engine exports a ref's tree into a temporary directory (ADR-093 §7).
+tempfile.workspace = true
 
 [dev-dependencies]
 cupel-fixtures.workspace = true
-tempfile.workspace = true
 
 [lints]
 workspace = true

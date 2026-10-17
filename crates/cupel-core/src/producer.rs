@@ -21,6 +21,7 @@ use crate::flake::RunOrder;
 use crate::grade::CostClass;
 use crate::id::{LangId, ProducerId, ToolId};
 use crate::lang::{Lang, Langs};
+use crate::oracle::RunOracle;
 use crate::scope::Scope;
 use crate::syntax::SymbolKey;
 use crate::test_results::TestResults;
@@ -75,6 +76,9 @@ pub struct ProduceCtx {
     pub runners: Runners,
     /// What the run asked to look at, for producers that narrow their work to it (ADR-080).
     pub focus: Focus,
+    /// The oracle the run compares against (`--oracle`, ADR-091 §2), for producers that run it
+    /// (ADR-093 §2); `None` outside a run whose checks use one.
+    pub oracle: Option<RunOracle>,
 }
 
 /// What a run asked to look at beyond its files: its depth, the symbols `--symbols` selected,
@@ -91,6 +95,9 @@ pub struct Focus {
     /// How many processes or threads a producer may run at once (`--jobs`, ADR-086 §11);
     /// `None` for its own default.
     pub jobs: Option<NonZeroUsize>,
+    /// How many inputs a generative producer generates (`--cases`, ADR-094 §5); `None` for its
+    /// own default.
+    pub cases: Option<u64>,
 }
 
 /// Per file, the 1-based inclusive line ranges a change touched.
@@ -104,6 +111,7 @@ impl Default for Focus {
             symbols: None,
             changed: None,
             jobs: None,
+            cases: None,
         }
     }
 }
@@ -131,6 +139,7 @@ impl ProduceCtx {
             seed: 0,
             runners: Runners::default(),
             focus: Focus::default(),
+            oracle: None,
         }
     }
 }

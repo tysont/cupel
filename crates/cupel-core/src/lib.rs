@@ -12,6 +12,7 @@ pub mod config;
 pub mod coverage;
 mod delta;
 mod describe;
+mod divergence;
 mod dry_run;
 mod envelope;
 mod error;
@@ -66,6 +67,7 @@ pub use describe::{
     MatrixDescription, ProducerDescription, SchemaDescription, SchemaRef, SupportDescription,
     ToolDescription, ToolchainDescription, ValueType, VerbSupport,
 };
+pub use divergence::{Answer, ComparedOracle, Divergence, DivergenceResults, EntryComparison};
 pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPlan};
 pub use envelope::{
     BaselineRef, CheckResult, CheckStatus, CupelInfo, Delta, Envelope, ExitCode, GateOutcome,
@@ -87,7 +89,7 @@ pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
 pub use mutation::{Mutant, MutantOutcome, MutationOutcomes, MutationStrategy};
-pub use oracle::{OracleReport, OracleState, oracle_content_digest, oracle_identity};
+pub use oracle::{OracleReport, OracleState, RunOracle, oracle_content_digest, oracle_identity};
 pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
