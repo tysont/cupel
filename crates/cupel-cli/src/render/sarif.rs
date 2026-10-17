@@ -327,13 +327,10 @@ mod tests {
         log["runs"][0]["results"].as_array().expect("results")
     }
 
-    fn rule_ids(log: &Value) -> Vec<String> {
+    fn rules(log: &Value) -> &Vec<Value> {
         log["runs"][0]["tool"]["driver"]["rules"]
             .as_array()
             .expect("rules")
-            .iter()
-            .map(|rule| rule["id"].as_str().expect("a rule ID").to_owned())
-            .collect()
     }
 
     /// An envelope from a command line that named no verb: no git, scope, findings, or checks.
@@ -398,18 +395,20 @@ mod tests {
             .map(|spec| spec.kind.clone());
         // `perf.bench` ran too but is not built in, so it declares nothing; `crap.high` comes
         // from a finding of a check that is not in `checks`.
-        let expected: Vec<String> = mutation.chain(["crap.high".to_owned()]).collect();
+        let expected: Vec<Value> = mutation
+            .chain(["crap.high".to_owned()])
+            .map(Value::from)
+            .collect();
+        let log = fixture_log();
 
-        assert_eq!(rule_ids(&fixture_log()), expected);
+        let ids: Vec<&Value> = rules(&log).iter().map(|rule| &rule["id"]).collect();
+        assert_eq!(ids, expected.iter().collect::<Vec<_>>());
     }
 
     #[test]
     fn a_rule_describes_its_kind_from_the_catalog() {
         let log = fixture_log();
-        let rules = log["runs"][0]["tool"]["driver"]["rules"]
-            .as_array()
-            .unwrap();
-        let rule = rules
+        let rule = rules(&log)
             .iter()
             .find(|rule| rule["id"] == json!("crap.high"))
             .unwrap();
@@ -451,7 +450,7 @@ mod tests {
             Severity::Warn,
         )];
         let log = log(&envelope, None);
-        let rule = &log["runs"][0]["tool"]["driver"]["rules"][0];
+        let rule = &rules(&log)[0];
 
         assert_eq!(rule["id"], json!("lint.odd"));
         assert_eq!(
@@ -466,12 +465,11 @@ mod tests {
     #[test]
     fn each_finding_is_a_result_pointing_at_its_rule() {
         let log = fixture_log();
-        let ids = rule_ids(&log);
         let kinds: Vec<Value> = results(&log)
             .iter()
             .map(|result| {
                 let index = usize::try_from(result["ruleIndex"].as_u64().unwrap()).unwrap();
-                assert_eq!(json!(ids[index]), result["ruleId"]);
+                assert_eq!(rules(&log)[index]["id"], result["ruleId"]);
                 result["ruleId"].clone()
             })
             .collect();
