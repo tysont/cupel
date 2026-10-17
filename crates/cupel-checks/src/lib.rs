@@ -48,6 +48,7 @@ mod gen_fuzz;
 mod gen_metamorphic;
 mod gen_property;
 mod manifest;
+mod meta_oracle_independence;
 mod meta_traceability;
 mod metrics;
 mod outcome;
