@@ -197,8 +197,6 @@ fn manifests_that_cannot_be_registered_are_refused_with_the_reason() {
     no_prefix["id"] = json!("tool.sample");
     let mut old_version = producer_manifest();
     old_version["provides"]["version"] = json!(1);
-    let mut no_payload = producer_manifest();
-    no_payload["provides"] = json!({"kind": "bench-samples", "version": 1});
     let mut unknown_language = producer_manifest();
     unknown_language["languages"] = json!(["cobol"]);
     let mut taken = check_manifest();
@@ -216,7 +214,6 @@ fn manifests_that_cannot_be_registered_are_refused_with_the_reason() {
             old_version,
             "provides `per-test-map` version 1, but this Cupel reads version 2",
         ),
-        (no_payload, "`bench-samples` facts have no payload type yet"),
         (
             unknown_language,
             "language `cobol` is not registered; registered: `python`, `typescript`",

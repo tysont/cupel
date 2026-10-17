@@ -77,6 +77,7 @@ mod rules;
 mod runner;
 mod suite;
 pub mod toolchain;
+mod tree;
 mod unittest;
 mod vitest;
 

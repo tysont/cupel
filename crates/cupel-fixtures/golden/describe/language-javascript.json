@@ -165,6 +165,13 @@
           "format": null,
           "install": null,
           "producer": "tool.bench-script"
+        },
+        {
+          "commands": [],
+          "detect": [],
+          "format": null,
+          "install": "cargo install hyperfine --locked",
+          "producer": "tool.hyperfine"
         }
       ],
       "coverage": [

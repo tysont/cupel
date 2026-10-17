@@ -95,6 +95,12 @@ id = "tool.bench-script"
 detect = [{ json = "package.json", path = ["scripts", "bench"] }]
 command = "<run> bench"
 
+# hyperfine times the commands `[lang.<id>] bench_commands` lists (ADR-106); with no command of
+# its own, `init` never writes it.
+[[rows.bench]]
+id = "tool.hyperfine"
+install = "cargo install hyperfine --locked"
+
 # Analyzers (ADR-102): the type checker runs for TypeScript only; ESLint runs where the root has
 # a flat config, and is `unconfigured` elsewhere.
 [[rows.analyzers]]
@@ -169,6 +175,11 @@ detect = [
   { mentions = "pytest-benchmark", in = ["pyproject.toml", "setup.cfg", "requirements*.txt"] },
 ]
 commands = { "tool.pytest" = "<m> pytest --benchmark-only --benchmark-json={out}" }
+install = "<add> pytest-benchmark"
+
+[[rows.bench]]
+id = "tool.hyperfine"
+install = "cargo install hyperfine --locked"
 
 [[rows.analyzers]]
 id = "tool.mypy"
@@ -186,7 +197,7 @@ install = "<add> ruff"
 langs = ["rust"]
 property = ["proptest", "quickcheck"]
 fuzz = ["cargo-fuzz"]
-race = ["miri", "loom"]
+race = ["miri", "tsan"]
 
 [[rows.runners]]
 id = "tool.cargo-nextest"

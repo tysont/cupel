@@ -6,6 +6,7 @@
 mod actions;
 mod analyzer;
 mod base;
+mod bench;
 pub mod budget;
 mod cancel;
 mod check;
@@ -25,6 +26,7 @@ mod facts;
 mod finding;
 mod flake;
 mod footprint;
+mod fuzz;
 mod gate;
 pub mod git;
 mod grade;
@@ -41,10 +43,12 @@ pub mod plugin;
 mod process;
 mod producer;
 mod property;
+mod race;
 mod rank;
 mod ranking;
 mod relation;
 mod result;
+mod root_run;
 mod schedule;
 pub mod schema;
 mod scope;
@@ -58,6 +62,7 @@ mod writer;
 pub use actions::{NEXT_ACTIONS, next_actions};
 pub use analyzer::{AnalyzerLevel, AnalyzerReport, AnalyzerResult, AnalyzerRun, AnalyzerStatus};
 pub use base::{BaseTree, Range};
+pub use bench::{BenchBase, BenchSamples, Benchmark};
 pub use cancel::Cancellation;
 pub use check::{
     Check, CheckCtx, CheckRegistry, FindingKindSpec, Manifest, MetricSpec, Plan, Stability,
@@ -88,6 +93,7 @@ pub use facts::Facts;
 pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Symbol};
 pub use flake::{RunOrder, TestRerun, TestReruns};
 pub use footprint::{Artifact, Dependency, Footprint, FootprintBase, Vulnerability};
+pub use fuzz::{FuzzCrash, FuzzResults, FuzzStatus, FuzzTarget};
 pub use gate::{GATE_CHANGED, GATE_TREE, apply_gate, evaluate_gate, gate_for};
 pub use grade::{CostClass, Tier};
 pub use hash::{FindingId, SiteHash, SymbolHash};
@@ -105,6 +111,7 @@ pub use producer::{
     Runners, SharedFact, TestRun, TestSelection, ToolProbe, Upstream,
 };
 pub use property::{PropertyOutcome, PropertyResult, PropertyResults};
+pub use race::{RaceFrame, RaceKind, RaceReport, RaceReports, RaceStack};
 pub use rank::{
     Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,
 };
@@ -113,6 +120,7 @@ pub use relation::{
     Evaluated, InputType, RELATIONS_KEY, Relation, RelationResult, RelationResults, Violation,
     relations,
 };
+pub use root_run::{RootRun, RunStatus};
 pub use schedule::{Job, Outcome, Production, Scheduler};
 pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;

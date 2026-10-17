@@ -6,6 +6,7 @@ use schemars::{JsonSchema, Schema};
 use serde_json::{Value, json};
 
 use crate::analyzer::AnalyzerReport;
+use crate::bench::BenchSamples;
 use crate::config::ConfigFile;
 use crate::coverage::CoverageMap;
 use crate::divergence::DivergenceResults;
@@ -15,10 +16,12 @@ use crate::fact::{Fact, FactKind};
 use crate::finding::Finding;
 use crate::flake::TestReruns;
 use crate::footprint::Footprint;
+use crate::fuzz::FuzzResults;
 use crate::mutation::MutationOutcomes;
 use crate::per_test::PerTestMap;
 use crate::plugin::PluginMessage;
 use crate::property::PropertyResults;
+use crate::race::RaceReports;
 use crate::relation::RelationResults;
 use crate::syntax::{
     ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, ProjectInfo, Roots, Symbols,
@@ -72,8 +75,8 @@ pub fn plugin() -> Schema {
     root::<PluginMessage>(&url("plugin"))
 }
 
-/// Schema of a fact kind's payload, or `None` for kinds whose payload type does not exist yet.
-/// Execution-fact payloads are added in the phase that first produces them.
+/// Schema of a fact kind's payload, or `None` for a kind without a payload type (none, now that
+/// every execution fact has one; a kind added to the catalog gets its payload with its producer).
 pub fn fact(kind: FactKind) -> Option<Schema> {
     FACT_SCHEMAS
         .iter()
@@ -82,7 +85,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 20] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 23] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -98,7 +101,10 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 20] = [
     (FactKind::CoverageMap, fact_schema::<CoverageMap>),
     (FactKind::PerTestMap, fact_schema::<PerTestMap>),
     (FactKind::MutationOutcomes, fact_schema::<MutationOutcomes>),
+    (FactKind::BenchSamples, fact_schema::<BenchSamples>),
     (FactKind::PropertyResults, fact_schema::<PropertyResults>),
+    (FactKind::FuzzResults, fact_schema::<FuzzResults>),
+    (FactKind::RaceReports, fact_schema::<RaceReports>),
     (FactKind::AnalyzerReport, fact_schema::<AnalyzerReport>),
     (
         FactKind::DivergenceResults,
@@ -108,7 +114,7 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 20] = [
     (FactKind::Footprint, fact_schema::<Footprint>),
 ];
 
-/// The payload version of a fact kind, or `None` for kinds whose payload type does not exist yet.
+/// The payload version of a fact kind, or `None` for a kind without a payload type.
 pub fn fact_version(kind: FactKind) -> Option<u32> {
     fact(kind)?
         .get("x-cupel-fact-version")

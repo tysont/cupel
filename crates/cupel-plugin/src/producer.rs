@@ -9,9 +9,10 @@ use cupel_core::syntax::{
     TestConventions, TestFrames,
 };
 use cupel_core::{
-    AnalyzerReport, Availability, CostClass, Ctx, DivergenceResults, EventSink, Fact, FactKind,
-    Footprint, Langs, MutationOutcomes, PerTestMap, ProduceCtx, Producer, ProducerId,
-    ProducerRegistry, PropertyResults, RelationResults, Result, Scope, TestReruns, TestResults,
+    AnalyzerReport, Availability, BenchSamples, CostClass, Ctx, DivergenceResults, EventSink, Fact,
+    FactKind, Footprint, FuzzResults, Langs, MutationOutcomes, PerTestMap, ProduceCtx, Producer,
+    ProducerId, ProducerRegistry, PropertyResults, RaceReports, RelationResults, Result, Scope,
+    TestReruns, TestResults,
 };
 
 use crate::command::PluginCommand;
@@ -22,7 +23,7 @@ use crate::request::{self, Inputs};
 type Register = fn(&mut ProducerRegistry, ProducerManifest, PluginCommand);
 
 /// Every kind a plugin may provide (those with a payload type, ADR-088 §8), with its registration.
-const KINDS: [(FactKind, Register); 20] = [
+const KINDS: [(FactKind, Register); 23] = [
     (FactKind::Symbols, register_as::<Symbols>),
     (FactKind::Decisions, register_as::<Decisions>),
     (FactKind::NormTree, register_as::<NormTree>),
@@ -38,7 +39,10 @@ const KINDS: [(FactKind, Register); 20] = [
     (FactKind::CoverageMap, register_as::<CoverageMap>),
     (FactKind::PerTestMap, register_as::<PerTestMap>),
     (FactKind::MutationOutcomes, register_as::<MutationOutcomes>),
+    (FactKind::BenchSamples, register_as::<BenchSamples>),
     (FactKind::PropertyResults, register_as::<PropertyResults>),
+    (FactKind::FuzzResults, register_as::<FuzzResults>),
+    (FactKind::RaceReports, register_as::<RaceReports>),
     (FactKind::AnalyzerReport, register_as::<AnalyzerReport>),
     (
         FactKind::DivergenceResults,

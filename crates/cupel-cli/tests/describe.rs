@@ -557,7 +557,10 @@ fn describe_language_shows_its_toolchain_row_in_default_order() {
         toolchain["launchers"][2]["values"]["add"],
         json!("python -m pip install")
     );
-    assert_eq!(ids("bench", "producer"), ["tool.pytest-benchmark"]);
+    assert_eq!(
+        ids("bench", "producer"),
+        ["tool.pytest-benchmark", "tool.hyperfine"]
+    );
     assert_eq!(toolchain["property"], json!(["hypothesis"]));
     assert_eq!(toolchain["fuzz"], json!(["atheris"]));
 }
@@ -602,11 +605,14 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
 }
 
 #[test]
-fn describe_fact_without_a_payload_type_yet_has_no_version_or_schema() {
+fn describe_fact_of_an_execution_fact_has_its_payload_version_and_schema() {
     let description = run(["describe", "fact", "bench-samples"]).envelope()["description"].clone();
     assert_eq!(description["syntactic"], json!(false));
-    assert_eq!(description["version"], Value::Null);
-    assert_eq!(description["schema"], Value::Null);
+    assert_eq!(description["version"], json!(1));
+    assert_eq!(
+        description["schema"]["$id"],
+        json!("https://cupel.dev/schema/v1/fact/bench-samples.json")
+    );
 }
 
 #[test]
@@ -851,7 +857,7 @@ fn describe_language_text_lists_the_toolchain_with_rules_and_commands() {
         "      cargo nextest run --workspace",
         "    tool.cargo-test  otherwise",
         "    tool.cargo-llvm-cov  lcov · always",
-        "  race      miri, loom",
+        "  race      miri, tsan",
     ]
     .into_iter()
     .filter(|line| !toolchain.lines().any(|shown| shown == *line))

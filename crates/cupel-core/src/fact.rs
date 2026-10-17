@@ -50,10 +50,12 @@ impl FactKind {
     }
 
     /// The `[lang.<id>]` key that pins this kind's producer, such as `runner = "unittest"` for
-    /// `TestResults` (ADR-076); `None` for kinds whose producer cannot be chosen.
+    /// `TestResults` (ADR-076) or `race = "tsan"` for `RaceReports` (ADR-105); `None` for kinds
+    /// whose producer cannot be chosen.
     pub fn pin_key(self) -> Option<&'static str> {
         match self {
             Self::TestResults => Some("runner"),
+            Self::RaceReports => Some("race"),
             _ => None,
         }
     }

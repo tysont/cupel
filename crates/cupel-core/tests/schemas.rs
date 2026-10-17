@@ -93,25 +93,9 @@ fn config_schema_keys_are_optional_and_closed() {
 
 #[test]
 fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
+    // Every kind of the catalog has a payload type, so producer plugins can provide each one.
     for kind in FactKind::ALL {
-        assert_eq!(
-            schema::fact(kind).is_some(),
-            FactKind::SYNTACTIC.contains(&kind)
-                || matches!(
-                    kind,
-                    FactKind::CoverageMap
-                        | FactKind::TestResults
-                        | FactKind::PerTestMap
-                        | FactKind::TestReruns
-                        | FactKind::MutationOutcomes
-                        | FactKind::DivergenceResults
-                        | FactKind::RelationResults
-                        | FactKind::PropertyResults
-                        | FactKind::AnalyzerReport
-                        | FactKind::Footprint
-                ),
-            "{kind}"
-        );
+        assert!(schema::fact(kind).is_some(), "{kind}");
     }
 }
 

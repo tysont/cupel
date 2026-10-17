@@ -3,14 +3,15 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use cupel_core::{
-    Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Dependency, Event,
-    EventSink, Evidence, FactKind, Facts, Finding, FindingId, Footprint, Location, Manifest, Plan,
-    Result, Scope, Score, Severity, Stability, Tier, Vulnerability,
+    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Dependency, Event, EventSink,
+    FactKind, Facts, Finding, Footprint, Location, Manifest, Plan, Result, Scope, Score, Severity,
+    Stability, Tier, Vulnerability,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
-use serde_json::{Map, Value};
+use serde_json::Value;
 
+use crate::finding::SubjectFinding;
 use crate::manifest::{evidence, kind, metric};
 use crate::metrics::sum;
 use crate::outcome;
@@ -359,25 +360,14 @@ impl PerfFootprint {
     }
 
     fn finding(&self, said: Said<'_>) -> Finding {
-        let id = FindingId::for_subject(&self.manifest.id, said.kind, &said.subject);
-        let action = if said.kind == "dep.vuln" {
-            ActionKind::FixBug
-        } else {
-            ActionKind::Review
-        };
-        Finding {
-            suppress: format!("cupel suppress {id} --reason '…'"),
-            repro: match said.commit {
-                Some(commit) => format!("cupel check --only {} --base {commit}", self.manifest.id),
-                None => format!("cupel check --only {}", self.manifest.id),
-            },
-            id,
-            check: self.manifest.id.clone(),
-            kind: said.kind.to_owned(),
+        SubjectFinding {
+            kind: said.kind,
+            subject: said.subject,
             severity: said.severity,
             confidence: 1.0,
-            tier: self.manifest.tier,
-            symbol: None,
+            title: said.title,
+            summary: said.summary,
+            evidence: said.evidence,
             location: said.at.map(|dependency| Location {
                 file: dependency.file.clone(),
                 line: dependency.line,
@@ -385,25 +375,12 @@ impl PerfFootprint {
                 end_line: dependency.line,
                 end_col: None,
             }),
-            title: said.title,
-            detail: None,
-            evidence: Evidence(match said.evidence {
-                Value::Object(fields) => fields,
-                _ => Map::new(),
-            }),
-            action: Action {
-                kind: action,
-                priority: if said.severity == Severity::Fail {
-                    1
-                } else {
-                    2
-                },
-                summary: said.summary,
-                hints: Map::new(),
+            repro: match said.commit {
+                Some(commit) => format!("cupel check --only {} --base {commit}", self.manifest.id),
+                None => format!("cupel check --only {}", self.manifest.id),
             },
-            new_since_baseline: false,
-            suppressed: false,
         }
+        .finding(&self.manifest)
     }
 }
 

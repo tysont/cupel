@@ -153,8 +153,15 @@
             "`pyproject.toml` or `setup.cfg` or `requirements*.txt` in the root or a member mentions `pytest-benchmark`"
           ],
           "format": null,
-          "install": null,
+          "install": "<add> pytest-benchmark",
           "producer": "tool.pytest-benchmark"
+        },
+        {
+          "commands": [],
+          "detect": [],
+          "format": null,
+          "install": "cargo install hyperfine --locked",
+          "producer": "tool.hyperfine"
         }
       ],
       "coverage": [
