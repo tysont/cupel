@@ -24,7 +24,7 @@ use cupel_core::{
     Scope, ToolId, ToolProbe, output_tail,
 };
 
-use crate::runner::{installed, probe, roots};
+use crate::runner::{installed, probe, suite_roots};
 use crate::{toolchain, tree};
 
 /// What differs between bench tools.
@@ -239,7 +239,7 @@ impl Producer<BenchSamples> for BenchProducer {
             tool: self.0,
             samples: samples_for(ctx.focus.depth),
             roots: if self.0.per_root {
-                roots(ctx)
+                suite_roots(ctx)
             } else {
                 vec![(".".to_owned(), Vec::new())]
             },

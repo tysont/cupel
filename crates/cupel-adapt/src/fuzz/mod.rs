@@ -20,13 +20,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use cupel_core::{
-    Availability, CostClass, Ctx, Error, EventSink, FactKind, FuzzCrash, FuzzResults, FuzzStatus,
-    FuzzTarget, LangId, Langs, Location, ProduceCtx, Producer, ProducerId, Result, Scope,
-    ToolProbe, output_tail,
+    Availability, CostClass, Ctx, Error, EventSink, Exclude, FactKind, FuzzCrash, FuzzResults,
+    FuzzStatus, FuzzTarget, LangId, Langs, Location, ProduceCtx, Producer, ProducerId, Result,
+    Scope, ToolProbe, output_tail,
 };
 
 use crate::analyze::extensions;
-use crate::runner::roots;
+use crate::runner::suite_roots;
 
 /// The longest any one input may run before the fuzzer calls it a hang, in seconds.
 pub const INPUT_SECONDS: u64 = 10;
@@ -160,7 +160,7 @@ impl<F: Fuzzer> Producer<FuzzResults> for FuzzProducer<F> {
             targets: Vec::new(),
         };
         let lang = LangId::from(self.0.lang());
-        for (dir, packages) in roots(ctx) {
+        for (dir, packages) in suite_roots(ctx) {
             if !in_scope(scope, &dir, extensions(&lang)) {
                 continue;
             }
@@ -181,6 +181,7 @@ impl<F: Fuzzer> Producer<FuzzResults> for FuzzProducer<F> {
             let Some(found) = self.0.targets(&root)? else {
                 continue;
             };
+            let found = outside_excluded(&ctx.ctx.exclude, &root.dir, found);
             results.roots.push(root.dir.clone());
             for target in &found {
                 ctx.cancel.checkpoint()?;
@@ -242,6 +243,20 @@ fn in_scope(scope: &Scope, dir: &str, extensions: &[&str]) -> bool {
                     .extension()
                     .is_some_and(|ext| extensions.iter().any(|known| ext == *known))
         })
+}
+
+/// `targets` of the project root `dir` less those defined in a file `[scope] exclude` leaves
+/// out of the run (a fixture, vendored code); a target placed nowhere stays.
+fn outside_excluded(exclude: &Exclude, dir: &str, targets: Vec<Found>) -> Vec<Found> {
+    targets
+        .into_iter()
+        .filter(|target| {
+            target
+                .file
+                .as_ref()
+                .is_none_or(|file| !exclude.excludes(&crate::tree::under(dir, file)))
+        })
+        .collect()
 }
 
 /// Directories never searched for targets or copied: version control, Cupel's own, and
@@ -413,6 +428,39 @@ mod tests {
             in_scope(&Scope::default(), "anything", &["rs"]),
         ];
         assert_eq!(kept, [true, false, true, true]);
+    }
+
+    #[test]
+    fn a_target_defined_in_an_excluded_file_is_not_fuzzed() {
+        let found = |name: &str, file: Option<&str>| Found {
+            name: name.to_owned(),
+            file: file.map(str::to_owned),
+            line: 1,
+        };
+        let targets = vec![
+            found("kept", Some("fuzz/first.fuzz.js")),
+            found("left", Some("fixtures/first.fuzz.js")),
+            found("unplaced", None),
+        ];
+        let names = |pattern: &str, dir: &str| -> Vec<String> {
+            let exclude = Exclude::new(vec![pattern.to_owned()]).unwrap();
+            outside_excluded(&exclude, dir, targets.clone())
+                .into_iter()
+                .map(|target| target.name)
+                .collect()
+        };
+        assert_eq!(
+            [
+                names("fixtures/**", "."),
+                names("web/fixtures/**", "web"),
+                names("vendor-fixtures/**", "."),
+            ],
+            [
+                vec!["kept", "unplaced"],
+                vec!["kept", "unplaced"],
+                vec!["kept", "left", "unplaced"],
+            ]
+        );
     }
 
     #[test]

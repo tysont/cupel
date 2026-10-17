@@ -42,7 +42,7 @@ FuzzResults {
 
    `input` is the failing input as text when it is printable UTF-8, else `hex:` and its bytes, at most 256 characters; `reproducer` the saved file relative to the repository root; `reproduce` the command that reruns the target on it from its project root.
 
-2. **Producers** (`cupel-adapt/src/fuzz/`), one per fuzzer, each a `Fuzzer` that lists a root's targets and fuzzes one; `FuzzProducer` does the rest for all of them. Each needs `ProjectInfo`, cost `deep`, runs in every project root of its language that holds a file of the scope with the language's extension (every root for an empty scope), and records every root it searched. Each target runs in `.cupel/cache/fuzz/<lang>/<root>/<target>/`, emptied first, with `corpus/` and `inputs/` (saved crash and timeout inputs).
+2. **Producers** (`cupel-adapt/src/fuzz/`), one per fuzzer, each a `Fuzzer` that lists a root's targets and fuzzes one; `FuzzProducer` does the rest for all of them. Each needs `ProjectInfo`, cost `deep`, runs in every project root of its language that `ProjectInfo` names (none: nothing is searched, as for the test runners) and that holds a file of the scope with the language's extension (every root for an empty scope), records every root it searched, and leaves out a target defined in a file `[scope] exclude` excludes (a fixture, vendored code). Each target runs in `.cupel/cache/fuzz/<lang>/<root>/<target>/`, emptied first, with `corpus/` and `inputs/` (saved crash and timeout inputs).
 
 | Producer | Language | Targets | Run | Ready when |
 |---|---|---|---|---|

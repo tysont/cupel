@@ -41,7 +41,7 @@ Open: what "baseline" is when a check cannot read the store or git (§8.3.1); wh
 
 3. **Samples per side** by depth: 5 at `quick` and `standard` (the fewest for which a complete separation is significant: 2/C(10,5) ≈ 0.008), 10 at `deep`, 20 at `exhaustive`. criterion takes at least its own minimum of 10.
 
-4. **Producers** (`cupel-adapt/src/bench/`, one module per tool on a shared `BenchTool` spec; cost `deep`; nothing written in the tree: reports, tool storage, and build directories go under `.cupel/cache/bench/<tool>/`):
+4. **Producers** (`cupel-adapt/src/bench/`, one module per tool on a shared `BenchTool` spec; cost `deep`; per tool, in every project root of its language that `ProjectInfo` names (none: nothing is measured), except hyperfine, which runs its commands once from the repository root; nothing written in the tree: reports, tool storage, and build directories go under `.cupel/cache/bench/<tool>/`):
 
 | Producer | Languages | Invocation (per project root unless noted) | Samples |
 |---|---|---|---|
