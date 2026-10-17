@@ -138,12 +138,13 @@ A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weake
 
 | Flag | Selects |
 |---|---|
-| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`. `quick` runs only the checks that need no test run |
+| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`, which adds the checks that run the test suite (`gen.property` among them) to the `quick` ones; `deep` adds `gen.differential` and `gen.metamorphic` |
 | `--only ID`, `--skip ID` | Checks by ID (`static.clones`) or group (`static`, `tests`); repeatable |
 | `--tier N+` | Only checks at or above evidence tier N, e.g. `--tier 2+` |
 | `--budget DURATION` | A wall-clock budget (`250ms`, `20s`, `10m`): run the most valuable selected checks that fit and skip the rest; `CUPEL_BUDGET` or `budget` in `cupel.toml` also set it |
 | `--jobs N` | How many threads and mutation workers run at once; default the cores (and, for mutation, the language's `mutation.jobs`) |
-| `--cases N` | How many generated cases each property test runs (see [Property tests](#property-tests)); default 1 000 at `standard`, ten times more at each deeper depth |
+| `--oracle NAME` | The oracle checks that compare against one use; default the first verified (see [`cupel oracle`](#cupel-oracle)) |
+| `--cases N` | The case budget of generative checks: how many inputs `gen.differential` and `gen.metamorphic` generate per entry point or relation (default 100), and how many generated cases each property test runs (see [Property tests](#property-tests); default 1 000 at `standard`, ten times more at each deeper depth) |
 | `--scaffold` | Also write a property-test stub for each `property.missing` finding; without `--write` the envelope's `plan.would_write` shows each file's diff and nothing is written |
 
 **Budget.** `--budget` chooses among the checks the depth and the selection flags already chose; it never adds deeper ones. Each check costs its own run plus the facts it needs that nothing has made yet: the baseline test run, a coverage report, the mutation engine. A fact two checks share is paid once. A cost is the median of the last ten recorded runs of the same kind of work on this repository (the same check, language, and order of magnitude of targets; the same producer and language, run or read from cache), once three are recorded in `.cupel/cupel.db`; before that it comes from the cost class (a `quick` producer 100 ms, `standard` 30 s, `deep` 5 min). A check's value is its evidence tier plus one, doubled when it has never produced a result here, halved when its last result was made at this commit on a clean tree, and doubled again inside a `--changed` or `--base` scope. Checks are taken greedily by value per millisecond while they fit; ties are broken by `--seed`. The budget counts from the start of the invocation, as `--timeout` does: a check is not started when its estimate exceeds what is left, and work still running at the deadline is stopped (its processes are killed), so a run overshoots its budget only by the moment that takes; a mutation run stopped that way reports `partial` with no score, and the mutants it finished are not kept. Anything the budget left out is `skipped` with `reason: budget` and `est_ms`, its estimate, the run is `partial` (exit 5), and `next_actions` offers the command that runs it alone. On a small Python project with a test suite and no recorded runs, one second leaves out everything that needs the suite:
@@ -482,7 +483,7 @@ oracles  3
 
 The envelope of every `oracle` command carries the oracles it reported in `oracles`: each one's `name`, `definition`, `state`, identity `hash`, `verified_at`, and `verified_run`.
 
-A check that compares against an oracle names it in its result's `oracle` member. It uses `--oracle NAME` on `check` or `survey`, else the first verified oracle, else the first defined one; with no oracle defined, the check is skipped as `unconfigured`. When the run is graded, a result against an oracle that is not verified at that moment is capped at tier 3 and the run carries a `warn` finding, `oracle.unverified` (`cupel describe finding oracle.unverified`), whose action is `verify_oracle`. Only `cupel oracle verify` lifts the cap; suppressing the finding does not. None of the built-in checks listed under [Checks](#checks) compares against an oracle.
+A check that compares against an oracle names it in its result's `oracle` member. It uses `--oracle NAME` on `check` or `survey`, else the first verified oracle, else the first defined one; with no oracle defined, the check is skipped as `unconfigured`. When the run is graded, a result against an oracle that is not verified at that moment is capped at tier 3 and the run carries a `warn` finding, `oracle.unverified` (`cupel describe finding oracle.unverified`), whose action is `verify_oracle`. Only `cupel oracle verify` lifts the cap; suppressing the finding does not. `gen.differential` is the built-in check that compares against an oracle (see [Differential testing](#differential-testing)); it compares against `ref` and `command` oracles and skips itself, as `unconfigured`, when the run's oracle is a spec.
 
 ### `cupel suppress`
 
@@ -615,11 +616,13 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 ## Checks
 
-Every check below exists. Each is supported in all five languages except `gen.property`, which Go lacks: Cupel runs no Go property framework (the [support matrix](#languages) says `unsupported`). All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite and so run from `--depth standard`, the default. The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists. Each is supported in all five languages except `gen.property`, which Go lacks (Cupel runs no Go property framework), and `gen.metamorphic`, which has a Python harness only; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite and so run from `--depth standard`, the default, and `gen.differential` and `gen.metamorphic`, which run from `--depth deep` (or by name with `--only`) once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
 | --- | --- | --- | --- | --- | --- | --- |
+| `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — |  |
+| `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — |  |
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | go, javascript, python, rust, typescript |
 | `static.complexity` | 0 | quick | `complexity.high`, `nesting.deep`, `params.many`, `function.long` | `cyclomatic_max`, `cognitive_max`, `nesting_max`, `params_max`, `length_max` | `cyclomatic`, `cognitive` | go, javascript, python, rust, typescript |
@@ -643,8 +646,11 @@ What each check looks for:
 - **`tests.quality`** reads every test: tests with no assertions or only weak ones (truthiness, presence, inequality), heavy mocking, loops and branches inside tests, and duplicated setup.
 - **`tests.weakening`** compares the tests at the range's base with the tests now. It reports removed or loosened assertions, skipped or deleted tests, and rewritten snapshots. It needs `--changed` or `--base`.
 - **`tests.flaky`** reruns the test suite several times in different orders and with different seeds, and reports tests whose outcome changes: `test.flaky` when two reruns in the same order disagree, `test.order-dependent` when the outcome follows the order. See [Flakiness](#flakiness).
+- **`gen.differential`** calls the functions you name on generated inputs, in the working tree and against an oracle (the same code at an earlier commit, or a command that computes the reference answer), and reports the smallest input on which the two answer differently, with both answers. See [Differential testing](#differential-testing).
 - **`gen.property`** runs the project's existing property tests (proptest and quickcheck, Hypothesis, fast-check) with the run's seed and many more generated cases than the suite usually gives them. A property that fails is `property.falsified`, with the framework's shrunk counterexample; a public function that takes arguments, in a file whose tests hold no property test, is `property.missing` (`info`). See [Property tests](#property-tests).
 - **`tests.mutation`** changes the code in small ways (`<` to `<=`, `+` to `-`, `&&` to `||`, `true` to `false`, `0` to `1`) and runs the tests that cover each change. A mutant every test passes against survived: the tests do not notice that line changing. The score is killed / (killed + survived). See [Mutation testing](#mutation-testing).
+
+- **`gen.metamorphic`** evaluates the metamorphic relations you declare (sorting a list and sorting its reverse give the same result; `add(a, b) == add(b, a)`) on generated inputs, and reports each relation that does not hold, with the smallest failing input it could find and both outputs. See [Metamorphic relations](#metamorphic-relations).
 
 `cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
 
@@ -657,6 +663,8 @@ The support matrix, from `cupel describe matrix`:
 <!-- generated:support-matrix -->
 | Check | go | javascript | python | rust | typescript |
 | --- | --- | --- | --- | --- | --- |
+| `gen.differential` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
+| `gen.metamorphic` | unsupported | unsupported | unconfigured | unsupported | unsupported |
 | `gen.property` | unsupported | supported | supported | supported | supported |
 | `static.clones` | supported | supported | supported | supported | supported |
 | `static.complexity` | supported | supported | supported | supported | supported |
@@ -841,6 +849,90 @@ A Rust file's mutants cost one build per worker plus one test run each; outside 
 
 On the Cupel repository itself (1377 tests, release build, 8-core Apple silicon, a quiet machine), a one-function change checked at `standard` with a warm cache takes about 10.5 minutes: one instrumented run of the suite (5.3 min) and the mutants (5.2 min, two mutants with sixteen covering tests each); an unchanged rerun takes 2 seconds.
 
+## Differential testing
+
+`gen.differential` compares functions with an [oracle](#cupel-oracle) on generated inputs. You name the functions, per language, as `<file>:<function>`; the file is relative to the repository root:
+
+```toml
+[oracles.release]
+kind = "ref"
+ref = "v1"
+
+[lang.python]
+differential_entries = ["shipping.py:shipping"]
+```
+
+For each entry in scope, the differential engine reads the function's parameter types from its signature, generates inputs from them (boundary values first: 0, 1, -1, the type's extremes, empty strings and lists; then random values that grow in size), and calls the function on every input in the working tree and through the oracle. A `ref` oracle runs the same function at the commit its ref names, exported into a temporary directory; a `command` oracle runs once per input with `{input}` replaced by the argument (a string's text, any other value's JSON) or, for several parameters, the JSON array of them, and its standard output is its answer; a command oracle's known inputs (`--input`) are compared first. The first input on which the answers differ is shrunk step by step (integers toward 0, strings and lists shorter) while the answers still differ, so the finding shows the smallest such input. Nothing is written in the working tree.
+
+```console
+$ cupel oracle verify release
+$ cupel check --only gen.differential --seed 7 --format text
+cupel check: pass (exit 0)
+
+summary   1 finding · fail 1 · warn 0 · info 0 · new 0 · resolved 0 · suppressed 0
+
+checks
+  gen.differential  fail     tier 4 · deep · score 1 divergent (n 1) · metrics cases 100, divergences 1 · 1 finding · 5993 ms · oracle release
+
+fail (1)
+  gen.differential
+    `shipping(20001)` returned `2500`, but oracle `release` returned `2600`
+      fnd_fb42fe · diff.divergence · tier 4 · confidence 1
+      at shipping.py:1:1-3:52 in shipping.shipping (python, sh_d5d28ffa7e1a1f68)
+      …
+      action fix_bug (priority 2): Decide which answer is right for `shipping(20001)`: fix the implementation, or, if the change is intended, the oracle.
+      repro: cupel check --only gen.differential --symbols sh_d5d28ffa7e1a1f68 --oracle release --seed 7 --cases 100
+```
+
+The change capped the cost at 2500; the boundary input `9223372036854775807` diverged first and shrank in 53 steps to `20001`. The finding's evidence holds the `entry`, the `oracle` (`name`, `kind`, and a ref's `commit`), the minimized `input`, the input as `found`, its `case` index, the `shrinks`, and both answers, `implementation` and `reference`, each one of `{"returned": …}`, `{"raised": …}`, or `{"crashed": …}`. The repro regenerates the same inputs: the seed decides them, and `--cases` sets how many are generated per entry (100 by default). The gate keys are `gen.differential.divergences` (entries that diverged) and `cases` (inputs compared); when no entry could be compared, the check passes with no score and no metrics, and its notes say why.
+
+| Language | How it is called | Parameter types it generates |
+|---|---|---|
+| Python | `python3 -B` imports the module and calls the function; answers are JSON (or `repr`), exceptions `raised` | `int`, `float`, `bool`, `str`, `list[T]`, `Optional[T]` / `T \| None`; unannotated parameters get mixed values |
+| JavaScript, TypeScript | `node` imports the file (TypeScript by Node's type stripping, Node 22.18 or later) and calls the named export | `number`, `string`, `boolean`, `T[]`, `T \| null`; JavaScript's untyped parameters get mixed values |
+| Go | an internal test file laid over the package with `go test -overlay`, built once | integer types, `float32`, `float64`, `bool`, `string`, `[]T` |
+| Rust | a separate crate that depends on the entry's crate by path, built once into `.cupel/cache/differential/` | integer types, `f32`, `f64`, `bool`, `String`, `&str`, `Vec<T>`, `&[T]`, `Option<T>` |
+
+An entry is called with whatever side effects it has, so name functions that are safe to call with any argument. It must be a module-level, public function (in Rust, one reachable from the crate root): an entry that is missing, private, a method, or has a parameter of another type is not compared, and the result's notes say why. Without `differential_entries` a language is skipped as `unconfigured`; without its program (`python3`, `node`, `go`, `cargo`) it is `unavailable`. A command answers in text, so against a command oracle a returned string matches the same text unquoted, and any error matches any error; against a `ref` oracle answers match when they are equal as text or as JSON.
+## Metamorphic relations
+
+A metamorphic relation says how a function's output changes when its input does, without saying what the output is: sorting a list and sorting its reverse give the same list. `gen.metamorphic` checks relations you declare in `cupel.toml`, per language, under `[lang.<id>.relations.<name>]`. Python is the language with a harness today.
+
+```toml
+[lang.python.relations.sort-reverse]
+function = "sorting:sort_list"          # module:name, imported from the repository root
+input = "list[int]"                     # bool, int, str, list[T], tuple[T, ...]
+transform = "lambda xs: list(reversed(xs))"   # the follow-up input, from the input
+
+[lang.python.relations.add-commutes]
+function = "arith:add"                  # a tuple input is spread into the arguments: add(a, b)
+input = "tuple[int, int]"
+transform = "lambda pair: (pair[1], pair[0])"
+relation = "lambda a, b: a == b"        # how the two outputs relate; default ==
+cases = 50                              # inputs to generate; default 100
+```
+
+`transform` and `relation` are Python expressions evaluated in the function's module. For every input the harness calls the function on it, the transform on it, and the function on the transform's result, each on its own copy; the relation is violated when it returns false or when any of those calls raises. A relation whose function cannot be imported, or whose expressions do not evaluate to callables, makes the check `error` with the reason in its `notes`; a key that is not one of these five, a missing one, or an input type outside the list is a usage error (exit 2) when `cupel.toml` loads.
+
+Inputs are generated from `--seed`, the relation's name, and the case number alone, starting small (lists of at most one element, integers within ±16) and growing to lists and strings of up to eight elements and integers within ±1024. `--cases N` sets how many inputs every relation gets, over its `cases`. The first input that breaks a relation is minimized: integers move toward zero, lists and strings shrink and their elements get simpler, as long as the relation still breaks. The finding's evidence has the minimized input, the transformed input, both outputs (each `{"value": …}`, `{"raised": "Type: message"}`, or `{"repr": …}` for a value JSON cannot hold), the generated input it started from, and the seed; its `repro` reruns the same inputs. A relation is one finding however many inputs break it, located at the function's definition. In the fixture, `sort_list` makes a single bubble pass:
+
+```text
+$ cupel check --only gen.metamorphic --seed 3 --format text
+checks
+  gen.metamorphic  fail     tier 4 · deep · score 1 violated (n 2) · metrics relations 2, violated 1 · 1 finding · 1042 ms
+
+fail (1)
+  gen.metamorphic
+    `sorting:sort_list` breaks the relation `sort-reverse`
+      fnd_30a135 · metamorphic.violated · tier 4 · confidence 1
+      at sorting.py:1-7
+      evidence: case 11 · followup_output {1} · function "sorting:sort_list" · input [3] · input_type "list[int]" · original_input [3] · relation "sort-reverse" · seed 3 · shrinks 10 · source_output {1} · transformed {1} (full: cupel explain fnd_30a135)
+      action fix_bug (priority 1): Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,1,1]; the evidence has the follow-up input and both outputs.
+      repro: cupel check --only gen.metamorphic --seed 3
+```
+
+The minimized input `[0, 1, 1]` sorts to `[0, 1, 1]`, its reverse `[1, 1, 0]` to `[1, 0, 1]`. A failing check does not fail the run by itself; a gate rule such as `"gen.metamorphic.violated" = "== 0"` does. Without any relation declared for a language, the check is skipped there as `unconfigured` (`lang.python.relations`); the support matrix above, which knows no repository's configuration, shows Python that way. The other four languages have no harness yet, so the check is `unsupported` for them. Every relation is evaluated whatever the scope, and only those whose function is defined in a file in scope are reported.
+
 ## Plugins
 
 A plugin is a check or a fact producer in its own executable, in any language, that speaks JSON over standard input and output. Cupel registers it beside the built-in checks and producers, so `describe`, `--only`, `--dry-run`, gates, `[checks."<id>"]` settings, and the support matrix treat it like one of them.
@@ -899,6 +991,7 @@ exclude = ["generated/**", "*.pb.go"]   # gitignore-style; a pattern without "/"
 test = "cargo test --workspace"
 coverage = "cargo llvm-cov --lcov --output-path {out}"
 runner = "cargo-nextest"           # the test runner Cupel uses; see Test runners
+differential_entries = ["src/money.rs:split"]   # what gen.differential compares
 
 [checks."static.complexity"]       # check settings, for every language
 cyclomatic_max = 10

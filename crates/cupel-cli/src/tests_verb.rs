@@ -127,10 +127,11 @@ fn job<'a>(
         selectors_must_match: false,
         base: None,
         seed: invocation.run.seed,
-        cases: None,
         depth: config.effective.depth,
         changed: None,
         resources: cupel_core::budget::Resources::default(),
+        oracle: None,
+        cases: None,
     }
 }
 

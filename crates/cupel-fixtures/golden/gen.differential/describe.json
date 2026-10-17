@@ -1,0 +1,220 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "deep",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `diff.divergence`.",
+            "properties": {
+              "case": {
+                "description": "The index of `found` among the entry's inputs.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "entry": {
+                "description": "The entry point as configured: `<file>:<function>`.",
+                "type": "string"
+              },
+              "found": {
+                "description": "The arguments as first generated.",
+                "items": true,
+                "type": "array"
+              },
+              "implementation": {
+                "additionalProperties": false,
+                "description": "What the working tree answered on `input`.",
+                "properties": {
+                  "crashed": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "raised": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "returned": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "type": "object"
+              },
+              "input": {
+                "description": "The minimized arguments.",
+                "items": true,
+                "type": "array"
+              },
+              "oracle": {
+                "additionalProperties": false,
+                "description": "The oracle compared against.",
+                "properties": {
+                  "commit": {
+                    "description": "The commit a `ref` oracle resolved to.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "kind": {
+                    "description": "`ref` or `command`.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "kind"
+                ],
+                "type": "object"
+              },
+              "reference": {
+                "additionalProperties": false,
+                "description": "What the oracle answered on `input`.",
+                "properties": {
+                  "crashed": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "raised": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "returned": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "type": "object"
+              },
+              "shrinks": {
+                "description": "Minimization steps from `found` to `input`.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "entry",
+              "oracle",
+              "input",
+              "found",
+              "case",
+              "shrinks",
+              "implementation",
+              "reference"
+            ],
+            "title": "Diverged",
+            "type": "object"
+          },
+          "kind": "diff.divergence",
+          "summary": "An entry point answered a generated input differently from the oracle; the input is minimized and both answers are in the evidence."
+        }
+      ],
+      "id": "gen.differential",
+      "metrics": [
+        {
+          "name": "divergences",
+          "per": "scope",
+          "summary": "Entry points whose answers differ from the oracle's."
+        },
+        {
+          "name": "cases",
+          "per": "scope",
+          "summary": "Inputs both the implementation and the oracle answered."
+        }
+      ],
+      "needs": [
+        "divergence-results",
+        "symbols",
+        "norm-tree"
+      ],
+      "stability": "experimental",
+      "summary": "Calls configured entry points on generated inputs in the working tree and against the run's oracle (a ref's commit or a command); reports the minimized inputs on which they answer differently.",
+      "tier": 4,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

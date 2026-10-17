@@ -4,6 +4,8 @@ use std::collections::BTreeMap;
 
 use cupel_core::config::{ConfigError, Table};
 use cupel_core::{CheckCtx, CheckId, Manifest, Plan, Result, Scope};
+
+use crate::outcome;
 use serde_json::Value;
 
 /// Non-negative integer settings, each name with its default.
@@ -22,9 +24,10 @@ impl Limits {
         self.read(&manifest.id, &ctx.config).map(|_| plan)
     }
 
-    /// A plan of one target per file in `scope`, once the settings in `ctx` are valid.
+    /// A plan over every file in `scope` ([`outcome::plan_files`]), once the settings in `ctx`
+    /// are valid.
     pub fn plan_files(&self, manifest: &Manifest, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        self.plan(manifest, ctx, crate::outcome::plan_files(manifest, scope))
+        self.plan(manifest, ctx, outcome::plan_files(manifest, scope))
     }
 
     /// The value of every setting, configured or default, by name. Any key that is not a

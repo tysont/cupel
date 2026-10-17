@@ -133,7 +133,8 @@ expression: pretty(&schema)
         "fuzz-results",
         "race-reports",
         "analyzer-report",
-        "divergence-results"
+        "divergence-results",
+        "relation-results"
       ]
     },
     "Finding": {
@@ -806,6 +807,9 @@ expression: pretty(&schema)
             "race-reports": {
               "type": "string"
             },
+            "relation-results": {
+              "type": "string"
+            },
             "roots": {
               "type": "string"
             },
@@ -842,6 +846,7 @@ expression: pretty(&schema)
             "project-info",
             "property-results",
             "race-reports",
+            "relation-results",
             "roots",
             "symbols",
             "test-conventions",

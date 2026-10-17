@@ -21,6 +21,7 @@ use crate::flake::RunOrder;
 use crate::grade::CostClass;
 use crate::id::{LangId, ProducerId, ToolId};
 use crate::lang::{Lang, Langs};
+use crate::oracle::RunOracle;
 use crate::scope::Scope;
 use crate::syntax::SymbolKey;
 use crate::test_results::TestResults;
@@ -75,6 +76,9 @@ pub struct ProduceCtx {
     pub runners: Runners,
     /// What the run asked to look at, for producers that narrow their work to it (ADR-080).
     pub focus: Focus,
+    /// The oracle the run compares against (`--oracle`, ADR-091 §2), for producers that run it
+    /// (ADR-093 §2); `None` outside a run whose checks use one.
+    pub oracle: Option<RunOracle>,
 }
 
 /// What a run asked to look at beyond its files: its depth, the symbols `--symbols` selected,
@@ -91,9 +95,10 @@ pub struct Focus {
     /// How many processes or threads a producer may run at once (`--jobs`, ADR-086 §11);
     /// `None` for its own default.
     pub jobs: Option<NonZeroUsize>,
-    /// `--cases`: the generated cases a generative producer runs per property or relation;
-    /// `None` for [`case_budget`](Self::case_budget)'s default for the depth.
-    pub cases: Option<u32>,
+    /// `--cases`: how many inputs a generative producer generates per entry or relation, or the
+    /// cases a property runs (ADR-094 §5, ADR-095 §3, ADR-098); `None` for the producer's own
+    /// default, or [`case_budget`](Self::case_budget)'s for the depth.
+    pub cases: Option<u64>,
 }
 
 /// Per file, the 1-based inclusive line ranges a change touched.
@@ -124,12 +129,14 @@ impl Focus {
     /// The generated cases a generative producer runs per property: `--cases`, else ten times
     /// as many at each depth above `quick`'s 100 (ADR-095 §3).
     pub fn case_budget(&self) -> u32 {
-        self.cases.unwrap_or(match self.depth {
+        let default = match self.depth {
             CostClass::Quick => 100,
             CostClass::Standard => 1_000,
             CostClass::Deep => 10_000,
             CostClass::Exhaustive => 100_000,
-        })
+        };
+        self.cases
+            .map_or(default, |cases| u32::try_from(cases).unwrap_or(u32::MAX))
     }
 }
 
@@ -146,6 +153,7 @@ impl ProduceCtx {
             seed: 0,
             runners: Runners::default(),
             focus: Focus::default(),
+            oracle: None,
         }
     }
 }

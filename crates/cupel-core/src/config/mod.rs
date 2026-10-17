@@ -3,7 +3,7 @@
 mod echo;
 pub(crate) mod error;
 mod file;
-mod gate;
+pub(crate) mod gate;
 mod registered;
 mod resolve;
 mod settings;

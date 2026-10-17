@@ -1,0 +1,9 @@
+# gen.differential's fixture (ADR-094 §7): `quarter` rounds down, and the oracle, awk's `int`,
+# rounds toward zero, so the two first differ at -1. They agree on the known inputs.
+[oracles.quarter]
+kind = "command"
+cmd = "awk -v cents={input} 'BEGIN { print int(cents / 4) }'"
+inputs = ["7", "-8"]
+
+[lang.python]
+differential_entries = ["quarter.py:quarter"]

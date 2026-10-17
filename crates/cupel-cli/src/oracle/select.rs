@@ -2,8 +2,8 @@
 // ABOUTME: else the first defined; a check that uses one when none is defined is skipped as unconfigured.
 use cupel_core::config::Config;
 use cupel_core::{
-    Check, CheckRegistry, CheckResult, CheckStatus, OracleState, Outcome, PlannedSkip, SkipReason,
-    Skipped, Writer,
+    Check, CheckRegistry, CheckResult, CheckStatus, OracleState, Outcome, PlannedSkip, RunOracle,
+    SkipReason, Skipped, Writer,
 };
 
 use super::{defined, report};
@@ -54,6 +54,15 @@ impl Selected {
             });
         }
         Ok(Self { name, unconfigured })
+    }
+
+    /// The chosen oracle with its definition, for the producers that run it (ADR-093 §2).
+    pub fn run_oracle(&self, config: &Config) -> Option<RunOracle> {
+        let name = self.name.as_ref()?;
+        Some(RunOracle {
+            name: name.clone(),
+            definition: config.file.oracles.get(name)?.clone(),
+        })
     }
 
     /// Names the oracle on each result, that ran, of a check that uses one, and reports the

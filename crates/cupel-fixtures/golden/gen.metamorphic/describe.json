@@ -1,0 +1,237 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "deep",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `metamorphic.violated`.",
+            "properties": {
+              "case": {
+                "description": "The index of the generated case that first violated the relation.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "followup_output": {
+                "additionalProperties": false,
+                "description": "The function on the follow-up input; null when the transform raised.",
+                "properties": {
+                  "raised": {
+                    "description": "What it raised: the exception's type and message.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "repr": {
+                    "description": "What it returned, printed by the language, when JSON cannot hold it.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "value": {
+                    "description": "What it returned, when JSON can hold it."
+                  }
+                },
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
+              "function": {
+                "description": "The function under test, as configured.",
+                "type": "string"
+              },
+              "input": {
+                "description": "The minimized input the relation does not hold for."
+              },
+              "input_type": {
+                "description": "The type of the generated inputs.",
+                "type": "string"
+              },
+              "original_input": {
+                "description": "The generated input before minimization."
+              },
+              "relation": {
+                "description": "The relation's name, as configured.",
+                "type": "string"
+              },
+              "relation_raised": {
+                "description": "What the relation raised on the two outputs; null when it returned false or was not\ncalled.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "seed": {
+                "description": "The run's seed, which regenerates the same inputs.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "shrinks": {
+                "description": "Minimization steps from `original_input` to `input`.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "source_output": {
+                "additionalProperties": false,
+                "description": "The function on `input`.",
+                "properties": {
+                  "raised": {
+                    "description": "What it raised: the exception's type and message.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "repr": {
+                    "description": "What it returned, printed by the language, when JSON cannot hold it.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "value": {
+                    "description": "What it returned, when JSON can hold it."
+                  }
+                },
+                "type": "object"
+              },
+              "transformed": {
+                "additionalProperties": false,
+                "description": "The follow-up input: the transform applied to `input`.",
+                "properties": {
+                  "raised": {
+                    "description": "What it raised: the exception's type and message.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "repr": {
+                    "description": "What it returned, printed by the language, when JSON cannot hold it.",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "value": {
+                    "description": "What it returned, when JSON can hold it."
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "required": [
+              "relation",
+              "function",
+              "input_type",
+              "input",
+              "transformed",
+              "source_output",
+              "original_input",
+              "case",
+              "shrinks",
+              "seed"
+            ],
+            "title": "Violated",
+            "type": "object"
+          },
+          "kind": "metamorphic.violated",
+          "summary": "A configured metamorphic relation does not hold: the function's outputs on a generated input and on its transform do not relate as declared."
+        }
+      ],
+      "id": "gen.metamorphic",
+      "metrics": [
+        {
+          "name": "violated",
+          "per": "scope",
+          "summary": "Relations some generated input violated."
+        },
+        {
+          "name": "relations",
+          "per": "scope",
+          "summary": "Relations evaluated."
+        }
+      ],
+      "needs": [
+        "relation-results"
+      ],
+      "stability": "experimental",
+      "summary": "Evaluates the metamorphic relations declared in configuration on generated inputs; reports each relation that does not hold, with a minimized input.",
+      "tier": 4,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

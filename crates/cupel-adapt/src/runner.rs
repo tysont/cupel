@@ -542,7 +542,7 @@ fn owned(paths: &[String], dir: &str, dirs: &[String], separator: &str) -> Vec<S
 }
 
 /// `word` as one shell word.
-fn quote(word: &str) -> String {
+pub(crate) fn quote(word: &str) -> String {
     let plain = word
         .chars()
         .all(|c| c.is_ascii_alphanumeric() || "-_./:=+,@%".contains(c));

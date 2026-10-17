@@ -104,6 +104,8 @@ fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
                         | FactKind::PerTestMap
                         | FactKind::TestReruns
                         | FactKind::MutationOutcomes
+                        | FactKind::DivergenceResults
+                        | FactKind::RelationResults
                         | FactKind::PropertyResults
                 ),
             "{kind}"

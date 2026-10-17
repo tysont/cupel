@@ -1,0 +1,191 @@
+{
+  "checks": [
+    {
+      "cost": "deep",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "gen.metamorphic",
+      "metrics": {
+        "relations": 2.0,
+        "violated": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "violated",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 4
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,1,1]; the evidence has the follow-up input and both outputs."
+      },
+      "check": "gen.metamorphic",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "case": 11,
+        "followup_output": {
+          "value": [
+            1,
+            0,
+            1
+          ]
+        },
+        "function": "sorting:sort_list",
+        "input": [
+          0,
+          1,
+          1
+        ],
+        "input_type": "list[int]",
+        "original_input": [
+          138,
+          38,
+          18
+        ],
+        "relation": "sort-reverse",
+        "relation_raised": null,
+        "seed": 3,
+        "shrinks": 10,
+        "source_output": {
+          "value": [
+            0,
+            1,
+            1
+          ]
+        },
+        "transformed": {
+          "value": [
+            1,
+            1,
+            0
+          ]
+        }
+      },
+      "id": "fnd_30a135",
+      "kind": "metamorphic.violated",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 7,
+        "file": "sorting.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only gen.metamorphic --seed 3",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_30a135 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 4,
+      "title": "`sorting:sort_list` breaks the relation `sort-reverse`"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_30a135",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,1,1]; the evidence has the follow-up input and both outputs."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "python": {
+            "relations": {
+              "add-commutes": {
+                "cases": 50,
+                "function": "arith:add",
+                "input": "tuple[int, int]",
+                "relation": "lambda a, b: a == b",
+                "transform": "lambda pair: (pair[1], pair[0])"
+              },
+              "sort-reverse": {
+                "function": "sorting:sort_list",
+                "input": "list[int]",
+                "transform": "lambda xs: list(reversed(xs))"
+              }
+            }
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 2
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

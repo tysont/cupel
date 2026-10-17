@@ -804,7 +804,7 @@ fn scope_which_flags() -> Vec<ArgDescription> {
             "--cases",
             ValueType::Integer,
             "N",
-            "The generated cases each property runs; default 1000 at standard depth, 10× per depth.",
+            "The case budget of generative checks: the inputs `gen.differential` and `gen.metamorphic` generate (default 100) and the cases each property runs (default 1000 at standard depth, 10× per depth).",
         ),
     ]
 }

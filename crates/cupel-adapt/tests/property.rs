@@ -39,7 +39,7 @@ fn project(lang: &str) -> Produced {
     })
 }
 
-fn produce_ctx(root: &Path, cases: Option<u32>, upstream: Vec<Produced>) -> ProduceCtx {
+fn produce_ctx(root: &Path, cases: Option<u64>, upstream: Vec<Produced>) -> ProduceCtx {
     let mut ctx = ProduceCtx::new(
         Ctx::new(root.to_path_buf()),
         Writer::new(root, false).unwrap().confined(),
@@ -191,7 +191,7 @@ fn files(root: &Path) -> Vec<String> {
 /// The baseline of `runner`, the language's `TestFrames`, and the engine's run on a copy of
 /// `gen.property/<lang>`, which must write nothing outside `.cupel/`; `None` (reported as
 /// skipped) when the runner's tool is not installed.
-fn budgeted(runner: &str, lang: &str, cases: Option<u32>) -> Option<PropertyResults> {
+fn budgeted(runner: &str, lang: &str, cases: Option<u64>) -> Option<PropertyResults> {
     let dir = tempfile::tempdir().unwrap();
     copy_repo(&format!("gen.property/{lang}"), dir.path());
     let sources = files(dir.path());

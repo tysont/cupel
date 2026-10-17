@@ -1,0 +1,13 @@
+# The metamorphic fixture (ADR-097): one relation the code breaks and one it keeps. `sort_list` makes a
+# single bubble pass, so sorting a list and sorting its reverse disagree once a list has three elements.
+[lang.python.relations.sort-reverse]
+function = "sorting:sort_list"
+input = "list[int]"
+transform = "lambda xs: list(reversed(xs))"
+
+[lang.python.relations.add-commutes]
+function = "arith:add"
+input = "tuple[int, int]"
+transform = "lambda pair: (pair[1], pair[0])"
+relation = "lambda a, b: a == b"
+cases = 50
