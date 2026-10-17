@@ -6,7 +6,7 @@ use cupel_core::syntax::{Span, TestFrames};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result, RunOrder,
-    Scope, Score, Severity, Stability, TestOutcome, TestRerun, TestReruns, Tier,
+    Scope, Score, Severity, Stability, TestOutcome, TestRerun, TestReruns, Tier, names_case,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -436,7 +436,7 @@ fn location(frames: &TestFrames, history: &History<'_>) -> Option<Location> {
         .flat_map(|file| {
             file.cases
                 .iter()
-                .filter(|case| names_match(history.name, &case.name))
+                .filter(|case| names_case(history.name, &case.name))
                 .map(|case| (file.file.as_str(), &case.span))
         })
         .collect();
@@ -457,13 +457,4 @@ fn location(frames: &TestFrames, history: &History<'_>) -> Option<Location> {
         }),
         _ => None,
     }
-}
-
-/// Whether the runner's name of a test names the case `case`: equal, or ending in it after a
-/// separator (`tests::case`, `Suite > case`, `test_case (module.Class.test_case)` excepted).
-fn names_match(runner: &str, case: &str) -> bool {
-    runner == case
-        || runner
-            .strip_suffix(case)
-            .is_some_and(|head| head.ends_with(|c: char| !(c.is_alphanumeric() || c == '_')))
 }

@@ -108,6 +108,6 @@ pub use select::Selection;
 pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};
 pub use test_results::{
     OUTPUT_TAIL_LINES, RunnerInvocation, TestOutcome, TestResult, TestResults, Unevaluable,
-    output_tail,
+    names_case, output_tail,
 };
 pub use writer::{WriteError, Writer};

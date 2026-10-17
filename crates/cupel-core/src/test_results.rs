@@ -151,6 +151,16 @@ pub struct Unevaluable {
     pub results: TestResults,
 }
 
+/// Whether `reported`, a runner's name of a test, names the `TestFrames` case `case`: equal, or
+/// ending in it after a separator (`tests::case`, `Suite > case`, `test_case (module.Class.test_case)`
+/// excepted).
+pub fn names_case(reported: &str, case: &str) -> bool {
+    reported == case
+        || reported
+            .strip_suffix(case)
+            .is_some_and(|head| head.ends_with(|c: char| !(c.is_alphanumeric() || c == '_')))
+}
+
 /// The last [`OUTPUT_TAIL_LINES`] lines of `text`, without surrounding blank lines; `None` when
 /// nothing is left.
 pub fn output_tail(text: &str) -> Option<String> {

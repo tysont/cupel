@@ -1,0 +1,5 @@
+# The everyday suite runs each property briefly with a pinned seed; a variable already set in the
+# environment (as Cupel's property run sets them) wins over these.
+[env]
+PROPTEST_CASES = "16"
+PROPTEST_RNG_SEED = "6"

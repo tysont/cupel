@@ -1,0 +1,9 @@
+{
+  "name": "units-ts",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "fast-check": "^4.0.0",
+    "vitest": "^4.0.0"
+  }
+}
