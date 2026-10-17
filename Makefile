@@ -37,11 +37,13 @@ readme:
 	UPDATE_README=1 $(CARGO) test --package cupel-cli --test readme
 
 # Daemon parity (ADR-085 §11): every golden-harness run also goes through a `cupel serve` on a
-# copy of its directory and must print the same after redaction. It runs the fixture suite twice
-# over, so it is its own target; CI runs it after `make check`.
+# copy of its directory and must print the same after redaction. MCP parity (ADR-121): each run
+# of a verb an MCP tool serves also goes through that tool's call to a `cupel serve --mcp` on
+# another copy and must return the same envelope and stderr. It runs the fixture suite twice or
+# three times over, so it is its own target; CI runs it after `make check`.
 parity:
 	$(CARGO) build --package cupel-cli
-	DAEMON_PARITY=1 $(CARGO) test --package cupel-fixtures
+	DAEMON_PARITY=1 MCP_PARITY=1 $(CARGO) test --package cupel-fixtures
 
 # The pre-commit bar. The tree is fingerprinted before the build so clean-check can
 # verify the build itself wrote nothing outside .gitignore (see ADR-010).

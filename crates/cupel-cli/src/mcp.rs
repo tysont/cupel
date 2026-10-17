@@ -43,18 +43,15 @@ const SPECS: [Spec; 5] = [
     },
 ];
 
-/// Flags no tool takes. The result is always the JSON envelope (`--format`, `--no-color`), events
-/// arrive as progress notifications (`--events`), the `describe` tool describes (`--describe`,
+/// Flags no tool takes. The result is always the JSON envelope (`--no-color`), events arrive
+/// as progress notifications (`--events`), the `describe` tool describes (`--describe`,
 /// `--help`), and a process sizes its thread pool once, so the server's first call would fix it
 /// for every later one (`--jobs`, ADR-086 §11).
-const WITHHELD: [&str; 6] = [
-    "--format",
-    "--no-color",
-    "--events",
-    "--describe",
-    "--help",
-    "--jobs",
-];
+const WITHHELD: [&str; 5] = ["--no-color", "--events", "--describe", "--help", "--jobs"];
+
+/// The format every call renders, which a call may also spell where it stands in its command
+/// line.
+const FORMAT: &str = "json";
 
 /// Every tool with its input schema.
 pub fn tools() -> Vec<Tool> {
@@ -101,7 +98,7 @@ fn described(spec: &Spec) -> cupel_core::CommandDescription {
 }
 
 /// The arguments `spec`'s tool takes: its command's and the global flags, less the withheld,
-/// the implied, and those not yet implemented.
+/// the implied, and those not yet implemented; `--format` takes only `json`.
 fn arguments(spec: &Spec) -> Vec<ArgDescription> {
     described(spec)
         .arguments
@@ -111,6 +108,14 @@ fn arguments(spec: &Spec) -> Vec<ArgDescription> {
             !WITHHELD.contains(&arg.name.as_str())
                 && !spec.implied.contains(&arg.name.as_str())
                 && arg.pending_step.is_none()
+        })
+        .map(|arg| match arg.name.as_str() {
+            "--format" => ArgDescription {
+                values: vec![FORMAT.to_owned()],
+                summary: "Always json: the result is the envelope.".to_owned(),
+                ..arg
+            },
+            _ => arg,
         })
         .collect()
 }
@@ -134,6 +139,10 @@ fn schema(arg: &ArgDescription) -> Value {
         value = json!({"type": "array", "items": value});
     }
     value["description"] = json!(arg.summary);
+    if arg.positional {
+        // The command line takes it without a flag, after the command words.
+        value["x-cupel-positional"] = json!(true);
+    }
     value
 }
 
@@ -151,8 +160,9 @@ pub fn is_error(code: u8) -> bool {
 }
 
 /// The command line, after the program name, the tool `name` runs for `arguments`: its words,
-/// its positional arguments, its flags in the order given, then `--format json`. Before the
-/// argument at fault, the command line it ran up to there and why it stopped.
+/// its positional arguments, its flags in the order given, then `--format json` unless they
+/// spelled it. Before the argument at fault, the command line it ran up to there and why it
+/// stopped.
 ///
 /// # Panics
 ///
@@ -183,13 +193,15 @@ pub fn command(
             }
         }
     }
+    if !flags.iter().any(|flag| flag == "--format") {
+        flags.extend(["--format".to_owned(), FORMAT.to_owned()]);
+    }
     let line: Vec<String> = spec
         .words
         .iter()
         .map(|word| (*word).to_owned())
         .chain(positionals)
         .chain(flags)
-        .chain(["--format".to_owned(), "json".to_owned()])
         .collect();
     match failure {
         None => Ok(line),
@@ -226,11 +238,12 @@ fn words(arg: &ArgDescription, value: &Value) -> Result<Vec<String>, CupelError>
 }
 
 /// `value` as one command-line word, if it has `arg`'s type: a non-negative integer for an
-/// integer, a string otherwise.
+/// integer, one of the values for an enum, a string otherwise.
 fn scalar(arg: &ArgDescription, value: &Value) -> Option<String> {
     match (arg.value, value) {
         (ValueType::Integer, Value::Number(number)) => number.as_u64().map(|n| n.to_string()),
         (ValueType::Integer, _) => None,
+        (ValueType::Enum, Value::String(text)) if !arg.values.contains(text) => None,
         (_, Value::String(text)) => Some(text.clone()),
         _ => None,
     }
@@ -238,9 +251,16 @@ fn scalar(arg: &ArgDescription, value: &Value) -> Option<String> {
 
 fn mistyped(arg: &ArgDescription, value: &Value) -> CupelError {
     let property = property(arg);
+    let quoted: Vec<String> = arg
+        .values
+        .iter()
+        .map(|value| format!("`{value}`"))
+        .collect();
+    let one_of = format!("one of {}", quoted.join(", "));
     let (one, many) = match arg.value {
         ValueType::Switch => ("a boolean", "booleans"),
         ValueType::Integer => ("a non-negative integer", "non-negative integers"),
+        ValueType::Enum => (one_of.as_str(), "strings"),
         _ => ("a string", "strings"),
     };
     let wanted = if arg.repeated {
@@ -255,7 +275,7 @@ fn mistyped(arg: &ArgDescription, value: &Value) -> CupelError {
         detail: None,
         argument: Some(property),
         value: Some(value.to_string()),
-        valid: Vec::new(),
+        valid: arg.values.clone(),
     }
     .into()
 }
@@ -328,7 +348,6 @@ mod tests {
             assert!(check.contains(&name.to_owned()), "{name} in {check:?}");
         }
         for name in [
-            "format",
             "events",
             "describe",
             "help",
@@ -354,11 +373,14 @@ mod tests {
             json!(["quick", "standard", "deep", "exhaustive"])
         );
         assert_eq!(properties["limit"]["type"], "integer");
+        assert_eq!(properties["format"]["enum"], json!(["json"]));
         assert_eq!(properties["timeout"]["type"], "string");
         assert_eq!(schema["additionalProperties"], false);
         assert!(schema.get("required").is_none());
         let explain = tool_named("explain").input_schema;
         assert_eq!(explain["required"], json!(["target"]));
+        assert_eq!(explain["properties"]["target"]["x-cupel-positional"], true);
+        assert!(properties["only"].get("x-cupel-positional").is_none());
         assert_eq!(
             tool_named("describe").input_schema["properties"]["subject"]["type"],
             "array"
@@ -413,6 +435,14 @@ mod tests {
             line("check", &[("only", json!([]))]),
             ["check", "--format", "json"]
         );
+        // A call may spell `--format json` where it stands.
+        assert_eq!(
+            line(
+                "check",
+                &[("format", json!("json")), ("changed", json!(true))]
+            ),
+            ["check", "--format", "json", "--changed"]
+        );
     }
 
     #[test]
@@ -424,17 +454,22 @@ mod tests {
             };
             (line, usage)
         };
-        let (line, usage) = failed(&[("changed", json!(true)), ("format", json!("text"))]);
+        let (line, usage) = failed(&[("changed", json!(true)), ("events", json!("stderr"))]);
         assert_eq!(line, ["check", "--changed", "--format", "json"]);
-        assert_eq!(usage.title, "The `check` tool takes no argument `format`");
-        assert_eq!(usage.argument.as_deref(), Some("format"));
+        assert_eq!(usage.title, "The `check` tool takes no argument `events`");
+        assert_eq!(usage.argument.as_deref(), Some("events"));
         assert!(usage.valid.contains(&"only".to_owned()));
         let cases = [
             ("changed", json!("yes"), "`changed` must be a boolean"),
             ("only", json!("a"), "`only` must be an array of strings"),
             ("only", json!([1]), "`only` must be an array of strings"),
             ("limit", json!(-1), "`limit` must be a non-negative integer"),
-            ("depth", json!(3), "`depth` must be a string"),
+            (
+                "depth",
+                json!(3),
+                "`depth` must be one of `quick`, `standard`, `deep`, `exhaustive`",
+            ),
+            ("format", json!("text"), "`format` must be one of `json`"),
         ];
         for (key, value, title) in cases {
             let (_, usage) = failed(&[(key, value.clone())]);

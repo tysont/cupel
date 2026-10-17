@@ -1251,6 +1251,10 @@ Added after P3.6's second measurement (P3 Notes "P3.6 — measurement with schem
 
 Each wrapped tool is a producer: parser tested on committed real output; integration test runs the real tool when installed, otherwise reports skipped visibly. The P7 facts (`Traces`, `Histories`, `ProofResults`, `ContractViolations`) are named in design §8.3.2 and so need no ADR to add, but each needs its conformance inventory and schema before its first producer.
 
+#### P7.7 `serve --mcp`
+
+**Status:** complete (2026-10-17, SHA_PLACEHOLDER; [ADR-121](adr/CUPEL_DECISION_121.md))
+
 #### P7 Definition of Done
 
 - Every check in the catalog (§5) is implemented or has an ADR explaining deferral.

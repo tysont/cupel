@@ -1,5 +1,5 @@
 // ABOUTME: Runs the built `cupel` binary in a chosen directory with a clean `CUPEL_*` environment and captures
-// ABOUTME: its exit code, stdout, stderr, and envelope or SARIF log; under DAEMON_PARITY=1 also proves the daemon prints the same.
+// ABOUTME: its exit code, stdout, stderr, and envelope or SARIF log; under DAEMON_PARITY or MCP_PARITY also proves parity.
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -76,14 +76,15 @@ impl Outcome {
 /// is closed and no `CUPEL_*` variable reaches it but `CUPEL_NO_DAEMON=1`, so the caller's shell
 /// cannot change the output and the run is cold. With `DAEMON_PARITY=1`, the same invocation
 /// also runs through a daemon on a copy of `cwd` made before this run, and a difference after
-/// redaction panics (ADR-085 §11).
+/// redaction panics (ADR-085 §11); with `MCP_PARITY=1`, an invocation of a verb `serve --mcp`
+/// serves also runs as its tool call on another copy, likewise (ADR-121).
 ///
 /// # Panics
 ///
 /// When the binary has not been built or cannot be started, and when it prints JSON that is
 /// neither an envelope nor a SARIF log, which breaks the output contract.
 pub fn run_cupel(args: &[&str], cwd: &Path) -> Outcome {
-    run(args, cwd, crate::parity::enabled())
+    run(args, cwd, true)
 }
 
 /// Runs `cupel <args>` in `cwd` as [`run_cupel`] does, but never through the parity daemon: for
@@ -99,7 +100,9 @@ pub fn run_cupel_measuring(args: &[&str], cwd: &Path) -> Outcome {
 }
 
 fn run(args: &[&str], cwd: &Path, parity: bool) -> Outcome {
-    let twin = parity.then(|| crate::parity::Twin::of(cwd));
+    let twin = (parity && crate::parity::enabled()).then(|| crate::parity::Twin::of(cwd));
+    let tool = crate::mcp_parity::tool(args).filter(|_| parity && crate::mcp_parity::enabled());
+    let mcp_twin = tool.map(|tool| (tool, crate::parity::Twin::of(cwd)));
     let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
     command.args(args).current_dir(cwd).stdin(Stdio::null());
     for (key, _) in std::env::vars_os() {
@@ -115,6 +118,9 @@ fn run(args: &[&str], cwd: &Path, parity: bool) -> Outcome {
     let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
     if let Some(twin) = twin {
         twin.assert_same(args, (output.status.code(), &stdout, &stderr));
+    }
+    if let Some((tool, twin)) = mcp_twin {
+        twin.assert_same_through_mcp(tool, args, (output.status.code(), &stdout, &stderr));
     }
     let is_envelope =
         stdout.trim_start().starts_with('{') && crate::sarif::sarif_log(&stdout).is_none();

@@ -324,18 +324,19 @@ fn a_bad_argument_is_a_usage_envelope_marked_as_an_error() {
     assert_eq!(envelope["status"], "error");
     assert_eq!(envelope["findings"][0]["kind"], "cli.usage");
     assert_eq!(envelope["findings"][0]["evidence"]["argument"], "only");
-    let withheld = mcp.call(3, "check", &json!({"format": "text"}));
-    assert_eq!(
-        structured(&withheld)["findings"][0]["evidence"]["argument"],
-        "format"
-    );
-    // A value of the right type that the verb rejects is the verb's own usage error.
-    let rejected = mcp.call(4, "check", &json!({"depth": "bottomless"}));
-    assert_eq!(rejected["isError"], true);
-    let envelope = structured(&rejected);
-    assert_eq!(envelope["findings"][0]["evidence"]["argument"], "--depth");
+    for (id, arguments, argument) in [
+        (3, json!({"format": "text"}), "format"),
+        (4, json!({"events": "stderr"}), "events"),
+        // A value of the right type that the verb rejects is the verb's own usage error.
+        (5, json!({"timeout": "soon"}), "--timeout"),
+    ] {
+        let refused = mcp.call(id, "check", &arguments);
+        assert_eq!(refused["isError"], true);
+        let envelope = structured(&refused);
+        assert_eq!(envelope["findings"][0]["evidence"]["argument"], argument);
+    }
     let unknown = mcp
-        .ask(5, "tools/call", &json!({"name": "serve"}))
+        .ask(6, "tools/call", &json!({"name": "serve"}))
         .pop()
         .unwrap();
     assert_eq!(unknown["error"]["code"], -32602);

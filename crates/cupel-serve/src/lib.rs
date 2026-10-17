@@ -10,6 +10,7 @@
 //! Protocol tools over stdio (`serve --mcp`, ADR-121).
 
 mod client;
+mod lines;
 pub mod mcp;
 pub mod protocol;
 mod server;

@@ -22,6 +22,7 @@ use serde::de::{Deserializer, MapAccess, Visitor};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
+use crate::lines::Lines;
 use crate::protocol::{MAX_MESSAGE, read_line_within, write_message};
 use crate::server::Served;
 
@@ -380,30 +381,40 @@ fn result(called: &Called) -> Value {
     result
 }
 
+/// What a call's writers hand on: lines of text, newlines included.
+type LineSink = dyn FnMut(&str) -> std::io::Result<()> + Send;
+
 /// Sends each event line as a progress notification under `token`; nothing without one.
-fn progress(output: &Output, token: Option<Value>) -> impl FnMut(&str) + Send + 'static {
+fn progress(output: &Output, token: Option<Value>) -> Box<LineSink> {
     let output = Arc::clone(output);
     let mut sent: u64 = 0;
-    move |line: &str| {
-        let Some(token) = &token else { return };
-        sent += 1;
-        let mut params = json!({"progressToken": token, "progress": sent, "message": line});
-        if let Ok(event) = serde_json::from_str::<Value>(line) {
-            params["_meta"] = json!({EVENT_KEY: event});
+    Box::new(move |lines: &str| {
+        let Some(token) = &token else { return Ok(()) };
+        for line in lines.lines() {
+            sent += 1;
+            let mut params = json!({"progressToken": token, "progress": sent, "message": line});
+            if let Ok(event) = serde_json::from_str::<Value>(line) {
+                params["_meta"] = json!({EVENT_KEY: event});
+            }
+            send(&output, &notification("notifications/progress", &params));
         }
-        send(&output, &notification("notifications/progress", &params));
-    }
+        Ok(())
+    })
 }
 
 /// Sends each standard error line as a log message, unless the level asked for is above it.
-fn log(output: &Output, level: &Arc<AtomicUsize>) -> impl FnMut(&str) + Send + 'static {
+fn log(output: &Output, level: &Arc<AtomicUsize>) -> Box<LineSink> {
     let (output, level) = (Arc::clone(output), Arc::clone(level));
-    move |line: &str| {
+    Box::new(move |lines: &str| {
         if level.load(Ordering::SeqCst) <= STDERR_LEVEL {
-            let params = json!({"level": LEVELS[STDERR_LEVEL], "logger": "cupel", "data": line});
-            send(&output, &notification("notifications/message", &params));
+            for line in lines.lines() {
+                let params =
+                    json!({"level": LEVELS[STDERR_LEVEL], "logger": "cupel", "data": line});
+                send(&output, &notification("notifications/message", &params));
+            }
         }
-    }
+        Ok(())
+    })
 }
 
 fn send(output: &Output, message: &Value) {
@@ -422,44 +433,4 @@ fn failure(id: &Value, code: i64, message: &str) -> Value {
 
 fn notification(method: &str, params: &Value) -> Value {
     json!({"jsonrpc": "2.0", "method": method, "params": params})
-}
-
-/// Text written in pieces, handed on one line at a time without its newline; a last line
-/// without a newline is handed on when the writer is dropped.
-struct Lines<F: FnMut(&str)> {
-    pending: Vec<u8>,
-    each: F,
-}
-
-impl<F: FnMut(&str)> Lines<F> {
-    fn new(each: F) -> Self {
-        Self {
-            pending: Vec::new(),
-            each,
-        }
-    }
-}
-
-impl<F: FnMut(&str)> Write for Lines<F> {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.pending.extend_from_slice(buf);
-        while let Some(end) = self.pending.iter().position(|&byte| byte == b'\n') {
-            let line: Vec<u8> = self.pending.drain(..=end).collect();
-            (self.each)(&String::from_utf8_lossy(&line[..end]));
-        }
-        Ok(buf.len())
-    }
-
-    fn flush(&mut self) -> std::io::Result<()> {
-        Ok(())
-    }
-}
-
-impl<F: FnMut(&str)> Drop for Lines<F> {
-    fn drop(&mut self) {
-        if !self.pending.is_empty() {
-            let rest = std::mem::take(&mut self.pending);
-            (self.each)(&String::from_utf8_lossy(&rest));
-        }
-    }
 }

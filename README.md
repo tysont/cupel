@@ -598,6 +598,38 @@ cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock run
 
 What a warm run still does: walk the tree and hash every file, run the checks over the facts, ask git for the commit, and record the run. When `cargo llvm-cov` (or another coverage tool) is installed and configured, `static.crap` wants a coverage report even at `quick`: a fresh cached report is reused, but after any change to the tree the next run measures coverage again with the whole test suite, cold or warm alike.
 
+### MCP
+
+`cupel serve --mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server on stdin and stdout (JSON-RPC 2.0, one message per line, protocol revision `2025-11-25` or `2025-06-18`), for clients that call tools rather than run commands. Configure it as a stdio server whose working directory, or `--cwd`, is the repository:
+
+```json
+{
+  "mcpServers": {
+    "cupel": {
+      "command": "cupel",
+      "args": ["serve", "--mcp", "--cwd", "/home/me/shop"]
+    }
+  }
+}
+```
+
+The tools, from the server's own `tools/list`:
+
+<!-- generated:mcp-tools -->
+| Tool | Runs | What it does |
+| --- | --- | --- |
+| `check` | `cupel check` | Run checks over a scope at a depth and evaluate the gate. Returns the envelope `cupel check --format json` prints; its exit_code and status say how the run ended. |
+| `survey` | `cupel survey` | Rank a whole tree without a baseline or gate: the worst targets per metric. Returns the envelope `cupel survey --format json` prints; its exit_code and status say how the run ended. |
+| `explain` | `cupel explain` | Give full context and remediation for one finding or check result. Returns the envelope `cupel explain --format json` prints; its exit_code and status say how the run ended. |
+| `tests_impacted` | `cupel tests --impacted` | List the tests a scope impacts, why, and the command that runs them. Returns the envelope `cupel tests --impacted --format json` prints; its exit_code and status say how the run ended. |
+| `describe` | `cupel describe` | Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema. Returns the envelope `cupel describe --format json` prints; its exit_code and status say how the run ended. |
+<!-- end:mcp-tools -->
+
+- **Arguments are the verb's flags.** Each tool's input schema is its verb's flags and the global flags as JSON properties: `--only a b` is `"only": ["a", "b"]`, `--no-gate` is `"no_gate": true`, `--limit 5` is `"limit": 5`, and a positional argument is a property too (`explain`'s `target`, `describe`'s `subject`). `format` takes only `json`, and no tool takes `--no-color`, `--events`, `--describe`, `--help`, or `--jobs`.
+- **The result is the envelope.** A call runs the command line its arguments spell, in the order given, with `--format json` last unless given, exactly as a cold `cupel` run in the repository would (the result's `_meta` names that command line under `cupel.dev/command`). The envelope is the result's `structuredContent` and, for clients that show only text, its text content. `isError` is true for exit 2, 3, 4, and 6; a failed gate (exit 1) or a partial run (exit 5) is a result. An argument the schema does not have, or one of the wrong type, is a usage envelope (exit 2) naming it.
+- **Events are progress.** A call with a `progressToken` receives each event of [the event stream](#global-flags) as a `notifications/progress` whose `message` is the event's JSON line and whose `_meta` holds it under `cupel.dev/event`. What the run writes to stderr arrives as `notifications/message` at level `info` (`logging/setLevel` above `info` silences it).
+- **Lifetime.** The server runs until its stdin closes, its `--timeout`, or Ctrl-C; a `notifications/cancelled` stops that call's run, which gets no response. It keeps its own warm syntax trees across calls, as the daemon does, and `--watch` reparses changed files; it is not the socket daemon and runs beside one. Stdout carries only protocol messages: the server's own envelope (`serve.mcp-stopped`) goes to stderr when it ends.
+
 ### Global flags
 
 | Flag | Meaning |
@@ -1239,8 +1271,8 @@ All automation goes through `make`.
 | `make lint`, `make fmt` | `cargo fmt --check` and clippy; `cargo fmt` |
 | `make build`, `make doc` | build the workspace; build its rustdoc |
 | `make matrix` | print the check × language support matrix |
-| `make readme` | regenerate this README's exit-code table, check table, check summaries, and support matrix from `cupel describe` |
-| `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)) |
+| `make readme` | regenerate this README's exit-code table, check table, check summaries, and support matrix from `cupel describe`, and its MCP tool table from `cupel serve --mcp` |
+| `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)), and each run of a verb an MCP tool serves again as that tool's call to `cupel serve --mcp` on another copy, which must return the same envelope and stderr ([ADR-121](docs/adr/CUPEL_DECISION_121.md)) |
 | `make dogfood` | Cupel grades itself: `cupel check --changed --gate` against `main`; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`. Both skip `tests.flaky` and `tests.mutation`, which would rerun Cupel's whole suite many times |
 | `make install` | `cargo install --path crates/cupel-cli` |
 
@@ -1248,7 +1280,7 @@ The generated README sections sit between `<!-- generated:NAME -->` and `<!-- en
 
 CI runs `make check` and `make parity` on Linux and macOS and `make dogfood` on every push: the tree gate on `main` and the changed gate on branches. Cupel's own `cupel.toml` is the example to copy.
 
-The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-mutate` is the mutation engine. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-serve` is the daemon's socket protocol, server, client, and file watcher, generic over what it runs. `cupel-cli` is the binary, and the daemon runs requests through the same code a cold invocation does. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
+The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-mutate` is the mutation engine. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-serve` is the daemon's socket protocol, server, client, and file watcher, and the MCP server, generic over what they run. `cupel-cli` is the binary, and the daemon runs requests through the same code a cold invocation does. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
 
 Checks and tool producers register themselves from their own modules ([ADR-074](docs/adr/CUPEL_DECISION_074.md)), so additions made in parallel never edit the same lines. Adding a check is one module in `crates/cupel-checks/src/` that submits itself with `inventory::submit!`, its `mod` line in that crate's `lib.rs`, its fixture code, and its goldens under `crates/cupel-fixtures/golden/<check-id>/` (the matrix golden per language, `describe.json`, and `survey-<lang>.json`); a check can keep its fixture code in its own `crates/cupel-fixtures/repos/<check-id>/<lang>/` so no other check's goldens change. Adding a tool producer is one module in `crates/cupel-adapt/src/` and its `mod` line. Tests derive what must be described, golden, and supported from the registries, so nothing else lists checks; `UPDATE_GOLDENS=1 make test` writes a new check's goldens and `make readme` adds its rows here.
 
