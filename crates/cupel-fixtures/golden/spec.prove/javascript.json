@@ -1,0 +1,225 @@
+{
+  "checks": [
+    {
+      "cost": "exhaustive",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "spec.prove",
+      "metrics": {
+        "failed": 1.0,
+        "open": 2.0,
+        "verified": 3.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 1,
+        "unit": "undischarged",
+        "value": 3.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 6
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix the code so the obligation holds, or strengthen the proof (an invariant, a lemma, an assertion that guides the verifier), then verify again."
+      },
+      "check": "spec.prove",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "message": "a postcondition could not be proved on this return path",
+        "related": [
+          {
+            "file": "proofs/tally.dfy",
+            "line": 23,
+            "message": "this is the postcondition that could not be proved"
+          }
+        ],
+        "tool": "tool.dafny"
+      },
+      "id": "fnd_993483",
+      "kind": "proof.failed",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 24,
+        "file": "proofs/tally.dfy",
+        "line": 24
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only spec.prove --paths proofs/tally.dfy",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_993483 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 6,
+      "title": "proof fails at proofs/tally.dfy:24: a postcondition could not be proved on this return path"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Prove what is assumed (replace the assumption with an assertion and its proof, give the lemma a body), or split the proof so the verifier decides it in its budget."
+      },
+      "check": "spec.prove",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "message": "assume statement has no {:axiom} annotation",
+        "related": [],
+        "tool": "tool.dafny"
+      },
+      "id": "fnd_6f1c03",
+      "kind": "proof.obligation-open",
+      "location": {
+        "col": 3,
+        "end_col": 9,
+        "end_line": 31,
+        "file": "proofs/tally.dfy",
+        "line": 31
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only spec.prove --paths proofs/tally.dfy",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_6f1c03 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 6,
+      "title": "proof obligation open at proofs/tally.dfy:31: assume statement has no {:axiom} annotation"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Prove what is assumed (replace the assumption with an assertion and its proof, give the lemma a body), or split the proof so the verifier decides it in its budget."
+      },
+      "check": "spec.prove",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "message": "This ensures clause is part of a bodyless method. Add the {:axiom} attribute to it or the enclosing method to suppress this warning",
+        "related": [],
+        "tool": "tool.dafny"
+      },
+      "id": "fnd_074eba",
+      "kind": "proof.obligation-open",
+      "location": {
+        "col": 17,
+        "end_col": 19,
+        "end_line": 35,
+        "file": "proofs/tally.dfy",
+        "line": 35
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only spec.prove --paths proofs/tally.dfy",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_074eba --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 6,
+      "title": "proof obligation open at proofs/tally.dfy:35: This ensures clause is part of a bodyless method. Add the {:axiom} attribute to it or the enclosing method to suppress this warning"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_993483",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Fix the code so the obligation holds, or strengthen the proof (an invariant, a lemma, an assertion that guides the verifier), then verify again."
+    },
+    {
+      "command": null,
+      "finding": "fnd_6f1c03",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Prove what is assumed (replace the assumption with an assertion and its proof, give the lemma a body), or split the proof so the verifier decides it in its budget."
+    },
+    {
+      "command": null,
+      "finding": "fnd_074eba",
+      "kind": "review",
+      "priority": 3,
+      "summary": "Prove what is assumed (replace the assumption with an assertion and its proof, give the lemma a body), or split the proof so the verifier decides it in its budget."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "javascript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 1
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 2
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}

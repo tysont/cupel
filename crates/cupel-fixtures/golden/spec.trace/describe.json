@@ -1,0 +1,162 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "exhaustive",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `trace.diverged`.",
+            "properties": {
+              "action": {
+                "description": "The spec action the implementation logged for the step, when it named one.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "oracle": {
+                "description": "The spec oracle the trace was validated against.",
+                "type": "string"
+              },
+              "previous": {
+                "description": "The last state the spec allows, before the step; null at the initial state."
+              },
+              "spec": {
+                "description": "Its specification file, relative to the repository root.",
+                "type": "string"
+              },
+              "state": {
+                "description": "The state the implementation logged at the step."
+              },
+              "step": {
+                "description": "The first step the spec does not allow, counting the initial state as 1.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "steps": {
+                "description": "The states the trace records.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tool": {
+                "description": "The validator that ran, such as `tool.tlc`.",
+                "type": "string"
+              },
+              "trace": {
+                "description": "The trace file's name in the directory the tests recorded into.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tool",
+              "oracle",
+              "spec",
+              "trace",
+              "steps",
+              "step",
+              "state"
+            ],
+            "title": "Diverged",
+            "type": "object"
+          },
+          "kind": "trace.diverged",
+          "summary": "A trace the tests recorded is not a behavior of the specification: at some step the implementation reached a state the spec does not allow from the state before."
+        }
+      ],
+      "id": "spec.trace",
+      "metrics": [
+        {
+          "name": "traces",
+          "per": "scope",
+          "summary": "Recorded traces validated against the spec."
+        },
+        {
+          "name": "diverged",
+          "per": "scope",
+          "summary": "Validated traces the spec does not allow."
+        },
+        {
+          "name": "unvalidated",
+          "per": "scope",
+          "summary": "Recorded traces that could not be validated."
+        }
+      ],
+      "needs": [
+        "traces"
+      ],
+      "stability": "experimental",
+      "summary": "Runs the tests with `CUPEL_TRACE_DIR` set, so the implementation logs its steps as JSON lines, and validates each recorded trace as a behavior of the run's spec oracle (TLA+ with TLC).",
+      "tier": 5,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

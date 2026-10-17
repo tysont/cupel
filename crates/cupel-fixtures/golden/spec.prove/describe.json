@@ -1,0 +1,206 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "exhaustive",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `proof.failed` and `proof.obligation-open`.",
+            "properties": {
+              "message": {
+                "description": "What the verifier says, in its words.",
+                "type": "string"
+              },
+              "related": {
+                "description": "The places it relates to the obligation, such as the postcondition a return path breaks.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One related place; inlined, as evidence schemas have no `$defs` (ADR-043).",
+                  "properties": {
+                    "file": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "file",
+                    "line"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "tool": {
+                "description": "The verifier, such as `tool.dafny`.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tool",
+              "message",
+              "related"
+            ],
+            "title": "Undischarged",
+            "type": "object"
+          },
+          "kind": "proof.failed",
+          "summary": "The verifier could not prove a proof obligation: a postcondition, an assertion, a loop invariant, a precondition at a call."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `proof.failed` and `proof.obligation-open`.",
+            "properties": {
+              "message": {
+                "description": "What the verifier says, in its words.",
+                "type": "string"
+              },
+              "related": {
+                "description": "The places it relates to the obligation, such as the postcondition a return path breaks.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One related place; inlined, as evidence schemas have no `$defs` (ADR-043).",
+                  "properties": {
+                    "file": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "file",
+                    "line"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "tool": {
+                "description": "The verifier, such as `tool.dafny`.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tool",
+              "message",
+              "related"
+            ],
+            "title": "Undischarged",
+            "type": "object"
+          },
+          "kind": "proof.obligation-open",
+          "summary": "A proof obligation is not discharged: the proof assumes it (an `assume`, a lemma or method without a body), or the verifier ran out of time or resources on it."
+        }
+      ],
+      "id": "spec.prove",
+      "metrics": [
+        {
+          "name": "verified",
+          "per": "scope",
+          "summary": "Declarations the verifier verified completely."
+        },
+        {
+          "name": "failed",
+          "per": "scope",
+          "summary": "Obligations the verifier could not prove."
+        },
+        {
+          "name": "open",
+          "per": "scope",
+          "summary": "Obligations assumed instead of proved, or left undecided in the verifier's time or resources."
+        }
+      ],
+      "needs": [
+        "proof-results"
+      ],
+      "stability": "experimental",
+      "summary": "Verifies the project's proofs with a deductive verifier (Dafny) and reports each obligation it could not prove and each the proofs assume or leave undecided.",
+      "tier": 6,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

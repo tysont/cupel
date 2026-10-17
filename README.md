@@ -623,6 +623,7 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
 | --- | --- | --- | --- | --- | --- | --- |
+| `conc.model-check` | 5 | exhaustive | `model.counterexample` | `harnesses`, `verified`, `failed`, `undetermined` | — | rust |
 | `conc.race` | 4 | standard | `race.detected`, `ub.detected` | `races`, `undefined_behavior` | — | go, rust |
 | `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — |  |
 | `gen.fuzz` | 4 | deep | `fuzz.crash`, `fuzz.timeout`, `fuzz.target-missing` | `targets`, `crashes`, `timeouts`, `missing` | — | go, javascript, python, rust |
@@ -630,6 +631,8 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
 | `perf.bench` | 0 | deep | `perf.regression`, `perf.improvement` | `benchmarks`, `compared`, `regression`, `regressed`, `improved` | — | go, python, rust |
 | `perf.footprint` | 0 | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
+| `spec.prove` | 6 | exhaustive | `proof.failed`, `proof.obligation-open` | `verified`, `failed`, `open` | — | clojure, go, java, javascript, python, rust, typescript |
+| `spec.trace` | 5 | exhaustive | `trace.diverged` | `traces`, `diverged`, `unvalidated` | — | clojure, go, java, javascript, python, rust, typescript |
 | `static.analyze` | 1 | standard | `analyze.<tool>.<rule>` | `errors`, `diagnostics` | — | go, javascript, python, rust, typescript |
 | `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | clojure, go, java, javascript, python, rust, typescript |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | clojure, go, java, javascript, python, rust, typescript |
@@ -682,6 +685,7 @@ The support matrix, from `cupel describe matrix`:
 <!-- generated:support-matrix -->
 | Check | clojure | go | java | javascript | python | rust | typescript |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| `conc.model-check` | unsupported | unsupported | unsupported | unsupported | unsupported | supported | unsupported |
 | `conc.race` | unsupported | supported | unsupported | unsupported | unsupported | supported | unsupported |
 | `gen.differential` | unsupported | unconfigured | unsupported | unconfigured | unconfigured | unconfigured | unconfigured |
 | `gen.fuzz` | unsupported | supported | unsupported | supported | supported | supported | unsupported |
@@ -689,6 +693,8 @@ The support matrix, from `cupel describe matrix`:
 | `gen.property` | unsupported | unsupported | unsupported | supported | supported | supported | supported |
 | `perf.bench` | unsupported | supported | unsupported | unconfigured | supported | supported | unconfigured |
 | `perf.footprint` | unsupported | supported | unsupported | supported | supported | supported | supported |
+| `spec.prove` | supported | supported | supported | supported | supported | supported | supported |
+| `spec.trace` | supported | supported | supported | supported | supported | supported | supported |
 | `static.analyze` | unsupported | supported | unsupported | supported | supported | supported | supported |
 | `static.api-surface` | supported | supported | supported | supported | supported | supported | supported |
 | `static.clones` | supported | supported | supported | supported | supported | supported | supported |
