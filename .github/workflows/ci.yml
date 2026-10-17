@@ -98,8 +98,13 @@ jobs:
           cargo install hyperfine --version 1.20.0 --locked
       - name: Install pytest-benchmark
         run: python -m pip install pytest-benchmark==5.1.0
+      # A global install nests Jazzer.js's own packages under core/node_modules, where core does not
+      # look for its bug detectors (`@jazzer.js/bug-detectors/dist/internal` beside it), and every run
+      # ends at start; a local install hoists them, so Jazzer.js gets a prefix of its own on PATH.
       - name: Install Jazzer.js
-        run: npm install --global @jazzer.js/core@4.0.0
+        run: |
+          npm install --prefix "$RUNNER_TEMP/jazzer" @jazzer.js/core@4.0.0
+          echo "$RUNNER_TEMP/jazzer/node_modules/.bin" >> "$GITHUB_PATH"
       # Java and Clojure (P6.4, ADR-108, ADR-109): the JDK, Maven, Gradle, and the Clojure CLI that the Java and
       # Clojure runner, coverage, and PIT plugin tests and goldens drive for real. Pinned: the coverage fixtures'
       # committed JaCoCo and Cloverage reports and the PIT capture come from these releases. Each tool downloads the
