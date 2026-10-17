@@ -59,6 +59,7 @@
 //! file; [`register`], which the CLI and the matrix harness already call, picks it up.
 
 mod analyze;
+mod bench;
 mod cargo_nextest;
 mod cargo_test;
 pub mod coverage;

@@ -1,0 +1,13 @@
+{"Time":"2026-10-17T03:01:52.311229-07:00","Action":"start","Package":"example.com/units"}
+{"Time":"2026-10-17T03:01:52.528885-07:00","Action":"output","Package":"example.com/units","Output":"goos: darwin\n"}
+{"Time":"2026-10-17T03:01:52.528999-07:00","Action":"output","Package":"example.com/units","Output":"goarch: arm64\n"}
+{"Time":"2026-10-17T03:01:52.529008-07:00","Action":"output","Package":"example.com/units","Output":"pkg: example.com/units\n"}
+{"Time":"2026-10-17T03:01:52.529012-07:00","Action":"output","Package":"example.com/units","Output":"cpu: Apple M2\n"}
+{"Time":"2026-10-17T03:01:52.529022-07:00","Action":"run","Package":"example.com/units","Test":"BenchmarkSum"}
+{"Time":"2026-10-17T03:01:52.529026-07:00","Action":"output","Package":"example.com/units","Test":"BenchmarkSum","Output":"=== RUN   BenchmarkSum\n"}
+{"Time":"2026-10-17T03:01:52.52904-07:00","Action":"output","Package":"example.com/units","Test":"BenchmarkSum","Output":"BenchmarkSum\n"}
+{"Time":"2026-10-17T03:01:52.701634-07:00","Action":"output","Package":"example.com/units","Test":"BenchmarkSum","Output":"BenchmarkSum-8   \t 3658516\t        37.21 ns/op\t       0 B/op\t       0 allocs/op\n"}
+{"Time":"2026-10-17T03:01:52.918306-07:00","Action":"output","Package":"example.com/units","Output":"BenchmarkSum-8   \t 3191704\t        39.49 ns/op\t       0 B/op\t       0 allocs/op\n"}
+{"Time":"2026-10-17T03:01:52.919161-07:00","Action":"output","Package":"example.com/units","Output":"PASS\n"}
+{"Time":"2026-10-17T03:01:52.919787-07:00","Action":"output","Package":"example.com/units","Output":"ok  \texample.com/units\t0.608s\n"}
+{"Time":"2026-10-17T03:01:52.919827-07:00","Action":"pass","Package":"example.com/units","Elapsed":0.609}

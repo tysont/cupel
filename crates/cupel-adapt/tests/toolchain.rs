@@ -379,6 +379,6 @@ fn a_row_describes_its_tools_rules_and_commands_in_default_order() {
             .iter()
             .map(ToString::to_string)
             .collect::<Vec<_>>(),
-        ["miri", "loom"]
+        ["miri", "tsan"]
     );
 }

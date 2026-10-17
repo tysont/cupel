@@ -1,0 +1,14 @@
+[package]
+name = "units"
+version = "0.1.0"
+edition = "2021"
+
+# A workspace of its own, so cargo never looks for one above the fixture.
+[workspace]
+
+[dev-dependencies]
+criterion = { version = "0.5", default-features = false }
+
+[[bench]]
+name = "sum"
+harness = false

@@ -1,0 +1,3 @@
+{"Time":"2026-10-17T03:01:53.162154-07:00","Action":"start","Package":"example.com/units"}
+{"Time":"2026-10-17T03:01:53.162282-07:00","Action":"output","Package":"example.com/units","Output":"FAIL\texample.com/units [build failed]\n"}
+{"Time":"2026-10-17T03:01:53.162304-07:00","Action":"fail","Package":"example.com/units","Elapsed":0}

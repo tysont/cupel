@@ -1,0 +1,6 @@
+# Captured from the real tool on the perf.bench Go fixture (P6.3); the other files here are its
+# unedited output. `dir` is where it ran.
+tool = "go1.23.2 darwin/arm64"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/bench-fork/go-green"
+command = "go test -run=^$ -bench=. -benchmem -count=2 -benchtime=100ms -json ./..."
+exit_code = 0
