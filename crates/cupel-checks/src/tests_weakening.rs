@@ -219,9 +219,9 @@ impl Check for TestsWeakening {
 }
 
 /// One test with where it is and how its file names repeats of its name.
-struct Test<'a> {
-    file: &'a str,
-    case: &'a TestCase,
+pub(crate) struct Test<'a> {
+    pub(crate) file: &'a str,
+    pub(crate) case: &'a TestCase,
     /// 0 for the first test of this name in its file, 1 for the second, and so on.
     repeat: usize,
 }
@@ -245,12 +245,12 @@ impl Test<'_> {
 }
 
 /// Every test of one side, in fact order.
-struct Tests<'a> {
-    tests: Vec<Test<'a>>,
+pub(crate) struct Tests<'a> {
+    pub(crate) tests: Vec<Test<'a>>,
 }
 
 impl<'a> Tests<'a> {
-    fn of(frames: &'a TestFrames) -> Self {
+    pub(crate) fn of(frames: &'a TestFrames) -> Self {
         let mut tests = Vec::new();
         for file in &frames.files {
             let mut seen: HashMap<&str, usize> = HashMap::new();
@@ -270,7 +270,7 @@ impl<'a> Tests<'a> {
 
 /// For each base test, the index of its head test: same file, name, and repeat first; then
 /// the first unmatched head test of the same name in another file (a move); else `None`.
-fn matches(base: &Tests<'_>, head: &Tests<'_>) -> Vec<Option<usize>> {
+pub(crate) fn matches(base: &Tests<'_>, head: &Tests<'_>) -> Vec<Option<usize>> {
     let mut taken = vec![false; head.tests.len()];
     let mut matched: Vec<Option<usize>> = base
         .tests
@@ -298,6 +298,15 @@ fn matches(base: &Tests<'_>, head: &Tests<'_>) -> Vec<Option<usize>> {
         }
     }
     matched
+}
+
+/// For each head test, whether no base test matches it ([`matches`]): the range added it.
+pub(crate) fn added(base: &Tests<'_>, head: &Tests<'_>) -> Vec<bool> {
+    let mut added = vec![true; head.tests.len()];
+    for index in matches(base, head).into_iter().flatten() {
+        added[index] = false;
+    }
+    added
 }
 
 /// Assertion counts of one test.
