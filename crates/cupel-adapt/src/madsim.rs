@@ -324,24 +324,26 @@ fn packages(metadata: &str) -> Vec<(String, Vec<Target>)> {
 /// `root`, with its file relative to the root.
 fn defined(root: &Path, package: &str) -> Vec<Defined> {
     let dir = root.join(package);
-    sources(&dir, |_, path| path.extension().is_some_and(|ext| ext == "rs"))
-        .into_iter()
-        .flat_map(|(relative, path)| {
-            let text = std::fs::read_to_string(path).unwrap_or_default();
-            harness_fns(&text)
-                .into_iter()
-                .map(|(name, line)| Defined {
-                    name,
-                    file: if package.is_empty() {
-                        relative.clone()
-                    } else {
-                        format!("{package}/{relative}")
-                    },
-                    line,
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect()
+    sources(&dir, |_, path| {
+        path.extension().is_some_and(|ext| ext == "rs")
+    })
+    .into_iter()
+    .flat_map(|(relative, path)| {
+        let text = std::fs::read_to_string(path).unwrap_or_default();
+        harness_fns(&text)
+            .into_iter()
+            .map(|(name, line)| Defined {
+                name,
+                file: if package.is_empty() {
+                    relative.clone()
+                } else {
+                    format!("{package}/{relative}")
+                },
+                line,
+            })
+            .collect::<Vec<_>>()
+    })
+    .collect()
 }
 
 /// The functions `text` marks `#[madsim::test]`, with the line of each `fn`.

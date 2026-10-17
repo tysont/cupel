@@ -1,0 +1,373 @@
+{
+  "checks": [
+    {
+      "cost": "deep",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 4,
+      "id": "conc.linearizability",
+      "metrics": {
+        "histories": 9.0,
+        "invalid": 2.0,
+        "operations": 21.0,
+        "unknown": 0.0,
+        "violations": 4.0
+      },
+      "notes": [
+        "histories/unknown-model.jsonl could not be checked: tool.porcupine checks register and kv histories, not `queue` (go)",
+        "histories/unmatched-completion.jsonl could not be checked: line 4: process 1 completes `read` with no open invocation (go)"
+      ],
+      "oracle": null,
+      "score": {
+        "n": 9,
+        "unit": "violations",
+        "value": 4.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 5
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Find why `read 1` by process 1 (line 6) cannot follow state `2` in `histories/compare-and-set.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories \"$CUPEL_HISTORY_DIR\"/` records the history again."
+      },
+      "check": "conc.linearizability",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "anomaly": "non-linearizable",
+        "command": "cp -R histories \"$CUPEL_HISTORY_DIR\"/",
+        "history": "histories/compare-and-set.jsonl",
+        "key": null,
+        "linearized": [
+          {
+            "f": "write",
+            "key": null,
+            "line": 2,
+            "outcome": "ok",
+            "process": 0,
+            "value": 1
+          },
+          {
+            "f": "cas",
+            "key": null,
+            "line": 4,
+            "outcome": "ok",
+            "process": 0,
+            "value": [
+              1,
+              2
+            ]
+          }
+        ],
+        "model": "register",
+        "seed": 3,
+        "states": [
+          2
+        ],
+        "stuck": [
+          {
+            "f": "read",
+            "key": null,
+            "line": 6,
+            "outcome": "ok",
+            "process": 1,
+            "value": 1
+          }
+        ],
+        "tool": "tool.porcupine"
+      },
+      "id": "fnd_920b28",
+      "kind": "consistency.violation",
+      "location": null,
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.linearizability --seed 3",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_920b28 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "history `histories/compare-and-set.jsonl` (register) is non-linearizable: `read 1` by process 1 (line 6) cannot follow state `2`"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Find why `read 2` by process 1 (line 6) cannot follow state `1` in `histories/failed-op.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories \"$CUPEL_HISTORY_DIR\"/` records the history again."
+      },
+      "check": "conc.linearizability",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "anomaly": "non-linearizable",
+        "command": "cp -R histories \"$CUPEL_HISTORY_DIR\"/",
+        "history": "histories/failed-op.jsonl",
+        "key": null,
+        "linearized": [
+          {
+            "f": "write",
+            "key": null,
+            "line": 2,
+            "outcome": "ok",
+            "process": 0,
+            "value": 1
+          }
+        ],
+        "model": "register",
+        "seed": 3,
+        "states": [
+          1
+        ],
+        "stuck": [
+          {
+            "f": "read",
+            "key": null,
+            "line": 6,
+            "outcome": "ok",
+            "process": 1,
+            "value": 2
+          }
+        ],
+        "tool": "tool.porcupine"
+      },
+      "id": "fnd_9920ad",
+      "kind": "consistency.violation",
+      "location": null,
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.linearizability --seed 3",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_9920ad --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "history `histories/failed-op.jsonl` (register) is non-linearizable: `read 2` by process 1 (line 6) cannot follow state `1`"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Find why `read 1` by process 1 (line 6) cannot follow state `2` in `histories/stale-read.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories \"$CUPEL_HISTORY_DIR\"/` records the history again."
+      },
+      "check": "conc.linearizability",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "anomaly": "non-linearizable",
+        "command": "cp -R histories \"$CUPEL_HISTORY_DIR\"/",
+        "history": "histories/stale-read.jsonl",
+        "key": null,
+        "linearized": [
+          {
+            "f": "write",
+            "key": null,
+            "line": 2,
+            "outcome": "ok",
+            "process": 0,
+            "value": 1
+          },
+          {
+            "f": "write",
+            "key": null,
+            "line": 4,
+            "outcome": "ok",
+            "process": 0,
+            "value": 2
+          }
+        ],
+        "model": "register",
+        "seed": 3,
+        "states": [
+          2
+        ],
+        "stuck": [
+          {
+            "f": "read",
+            "key": null,
+            "line": 6,
+            "outcome": "ok",
+            "process": 1,
+            "value": 1
+          }
+        ],
+        "tool": "tool.porcupine"
+      },
+      "id": "fnd_a1c5c8",
+      "kind": "consistency.violation",
+      "location": null,
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.linearizability --seed 3",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_a1c5c8 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "history `histories/stale-read.jsonl` (register) is non-linearizable: `read 1` by process 1 (line 6) cannot follow state `2`"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Find why `read null` by process 1 (line 8) cannot follow state `1` in `histories/per-key.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories \"$CUPEL_HISTORY_DIR\"/` records the history again."
+      },
+      "check": "conc.linearizability",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "anomaly": "non-linearizable",
+        "command": "cp -R histories \"$CUPEL_HISTORY_DIR\"/",
+        "history": "histories/per-key.jsonl",
+        "key": "y",
+        "linearized": [
+          {
+            "f": "write",
+            "key": "y",
+            "line": 6,
+            "outcome": "ok",
+            "process": 0,
+            "value": 1
+          }
+        ],
+        "model": "kv",
+        "seed": 3,
+        "states": [
+          1
+        ],
+        "stuck": [
+          {
+            "f": "read",
+            "key": "y",
+            "line": 8,
+            "outcome": "ok",
+            "process": 1,
+            "value": null
+          }
+        ],
+        "tool": "tool.porcupine"
+      },
+      "id": "fnd_eb30f5",
+      "kind": "consistency.violation",
+      "location": null,
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.linearizability --seed 3",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_eb30f5 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "history `histories/per-key.jsonl` (kv) key `\"y\"` is non-linearizable: `read null` by process 1 (line 8) cannot follow state `1`"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_920b28",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Find why `read 1` by process 1 (line 6) cannot follow state `2` in `histories/compare-and-set.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories \"$CUPEL_HISTORY_DIR\"/` records the history again."
+    },
+    {
+      "command": null,
+      "finding": "fnd_9920ad",
+      "kind": "fix_bug",
+      "priority": 2,
+      "summary": "Find why `read 2` by process 1 (line 6) cannot follow state `1` in `histories/failed-op.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories \"$CUPEL_HISTORY_DIR\"/` records the history again."
+    },
+    {
+      "command": null,
+      "finding": "fnd_a1c5c8",
+      "kind": "fix_bug",
+      "priority": 3,
+      "summary": "Find why `read 1` by process 1 (line 6) cannot follow state `2` in `histories/stale-read.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories \"$CUPEL_HISTORY_DIR\"/` records the history again."
+    },
+    {
+      "command": null,
+      "finding": "fnd_eb30f5",
+      "kind": "fix_bug",
+      "priority": 4,
+      "summary": "Find why `read null` by process 1 (line 8) cannot follow state `1` in `histories/per-key.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories \"$CUPEL_HISTORY_DIR\"/` records the history again."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "go": {
+            "history_command": "cp -R histories \"$CUPEL_HISTORY_DIR\"/"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 3
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 4,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 4,
+  "truncated": false
+}

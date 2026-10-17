@@ -1,0 +1,251 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "deep",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `consistency.violation`.",
+            "properties": {
+              "anomaly": {
+                "description": "The anomaly as the checker names it.",
+                "type": "string"
+              },
+              "command": {
+                "description": "The command that recorded the history.",
+                "type": "string"
+              },
+              "history": {
+                "description": "The history, as the history command named it.",
+                "type": "string"
+              },
+              "key": {
+                "description": "The key of a key-value history the violation is about; null for a single object."
+              },
+              "linearized": {
+                "description": "The last operations of that prefix, in order.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One operation of an excerpt; inlined, as evidence schemas have no `$defs` (ADR-043).",
+                  "properties": {
+                    "f": {
+                      "description": "Its function, such as `read`.",
+                      "type": "string"
+                    },
+                    "key": {
+                      "description": "Its key, in a key-value history."
+                    },
+                    "line": {
+                      "description": "The line of the history that invoked it.",
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "outcome": {
+                      "description": "`ok`, or `info` when its outcome is unknown.",
+                      "type": "string"
+                    },
+                    "process": {
+                      "description": "The process that invoked it."
+                    },
+                    "value": {
+                      "description": "What it wrote or compared, or what it read."
+                    }
+                  },
+                  "required": [
+                    "process",
+                    "f",
+                    "value",
+                    "outcome",
+                    "line"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "model": {
+                "description": "The model it declares.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "seed": {
+                "description": "The seed it was given.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "states": {
+                "description": "The states the model can be in after the longest linearizable prefix.",
+                "items": true,
+                "type": "array"
+              },
+              "stuck": {
+                "description": "The operations that could come next, none of which the model allows.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One operation of an excerpt; inlined, as evidence schemas have no `$defs` (ADR-043).",
+                  "properties": {
+                    "f": {
+                      "description": "Its function, such as `read`.",
+                      "type": "string"
+                    },
+                    "key": {
+                      "description": "Its key, in a key-value history."
+                    },
+                    "line": {
+                      "description": "The line of the history that invoked it.",
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "outcome": {
+                      "description": "`ok`, or `info` when its outcome is unknown.",
+                      "type": "string"
+                    },
+                    "process": {
+                      "description": "The process that invoked it."
+                    },
+                    "value": {
+                      "description": "What it wrote or compared, or what it read."
+                    }
+                  },
+                  "required": [
+                    "process",
+                    "f",
+                    "value",
+                    "outcome",
+                    "line"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "tool": {
+                "description": "The checker.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "history",
+              "anomaly",
+              "tool",
+              "states",
+              "linearized",
+              "stuck",
+              "command",
+              "seed"
+            ],
+            "title": "Violated",
+            "type": "object"
+          },
+          "kind": "consistency.violation",
+          "summary": "A recorded history of concurrent operations that no order consistent with real time explains under its model: the system is not linearizable."
+        }
+      ],
+      "id": "conc.linearizability",
+      "metrics": [
+        {
+          "name": "histories",
+          "per": "scope",
+          "summary": "Histories the history command wrote."
+        },
+        {
+          "name": "operations",
+          "per": "scope",
+          "summary": "Operations in those histories."
+        },
+        {
+          "name": "violations",
+          "per": "scope",
+          "summary": "Histories, or keys of key-value histories, no linearization explains."
+        },
+        {
+          "name": "unknown",
+          "per": "scope",
+          "summary": "Histories the checker ran out of time on."
+        },
+        {
+          "name": "invalid",
+          "per": "scope",
+          "summary": "Histories that could not be checked."
+        }
+      ],
+      "needs": [
+        "histories"
+      ],
+      "stability": "experimental",
+      "summary": "Checks the operation histories a project's history command records against the model each declares (register, key-value store) with a linearizability checker (Porcupine); reports the operations no order explains.",
+      "tier": 5,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

@@ -38,13 +38,48 @@ struct Violated {
     /// The states the model can be in after the longest linearizable prefix.
     states: Vec<Value>,
     /// The last operations of that prefix, in order.
-    linearized: Vec<HistoryOp>,
+    linearized: Vec<Op>,
     /// The operations that could come next, none of which the model allows.
-    stuck: Vec<HistoryOp>,
+    stuck: Vec<Op>,
     /// The command that recorded the history.
     command: String,
     /// The seed it was given.
     seed: u64,
+}
+
+/// One operation of an excerpt; inlined, as evidence schemas have no `$defs` (ADR-043).
+#[derive(Serialize, JsonSchema)]
+#[schemars(inline)]
+#[serde(deny_unknown_fields)]
+struct Op {
+    /// The process that invoked it.
+    process: Value,
+    /// Its function, such as `read`.
+    f: String,
+    /// Its key, in a key-value history.
+    key: Option<Value>,
+    /// What it wrote or compared, or what it read.
+    value: Value,
+    /// `ok`, or `info` when its outcome is unknown.
+    outcome: String,
+    /// The line of the history that invoked it.
+    line: u32,
+}
+
+impl From<&HistoryOp> for Op {
+    fn from(op: &HistoryOp) -> Self {
+        Self {
+            process: op.process.clone(),
+            f: op.f.clone(),
+            key: op.key.clone(),
+            value: op.value.clone(),
+            outcome: serde_json::to_value(op.outcome)
+                .ok()
+                .and_then(|outcome| outcome.as_str().map(str::to_owned))
+                .unwrap_or_default(),
+            line: op.line,
+        }
+    }
 }
 
 pub struct ConcLinearizability {
@@ -295,8 +330,8 @@ impl ConcLinearizability {
                 anomaly: violation.anomaly.clone(),
                 tool: fact.tool.to_string(),
                 states: violation.states.clone(),
-                linearized: violation.linearized.clone(),
-                stuck: violation.stuck.clone(),
+                linearized: violation.linearized.iter().map(Op::from).collect(),
+                stuck: violation.stuck.iter().map(Op::from).collect(),
                 command: fact.command.clone(),
                 seed: fact.seed,
             }),
