@@ -1,0 +1,20 @@
+Kani Rust Verifier 0.68.0 (cargo plugin)
+CBMC 6.11.0
+   Compiling tally v0.1.0 (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/p7.5/cap/broken)
+error[E0277]: cannot divide `u8` by `&str`
+ --> src/lib.rs:3:13
+  |
+3 |     (a + b) / "2"
+  |             ^ no implementation for `u8 / &str`
+  |
+  = help: the trait `std::ops::Div<&str>` is not implemented for `u8`
+  = help: the following other types implement trait `std::ops::Div<Rhs>`:
+            `&u8` implements `std::ops::Div<u8>`
+            `&u8` implements `std::ops::Div`
+            `u8` implements `std::ops::Div<&u8>`
+            `u8` implements `std::ops::Div<std::num::NonZero<u8>>`
+            `u8` implements `std::ops::Div`
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `tally` (lib) due to 1 previous error
+error: Failed to execute cargo (exit status: 101). Found 1 compilation errors.

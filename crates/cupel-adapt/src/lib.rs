@@ -75,6 +75,7 @@ mod java_tests;
 mod jest;
 mod maven;
 pub mod metamorphic;
+mod model_check;
 mod per_test;
 mod property;
 mod pytest;

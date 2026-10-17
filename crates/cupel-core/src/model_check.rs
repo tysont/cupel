@@ -37,8 +37,6 @@ pub struct ModelHarness {
     /// The properties the checker refuted: assertions, panics, overflows, out-of-bounds
     /// accesses, each where it fails.
     pub refuted: Vec<RefutedProperty>,
-    /// The inputs that refute them, when the checker gives them.
-    pub counterexample: Option<Counterexample>,
 }
 
 /// How checking a harness ended.
@@ -62,6 +60,8 @@ pub struct RefutedProperty {
     pub function: Option<String>,
     /// Where it fails in the repository; `None` outside it (the standard library).
     pub location: Option<Location>,
+    /// Inputs that refute it, when the checker gives them.
+    pub counterexample: Option<Counterexample>,
 }
 
 /// Concrete inputs that refute a harness's property.

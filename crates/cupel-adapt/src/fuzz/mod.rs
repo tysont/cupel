@@ -234,7 +234,7 @@ impl<F: Fuzzer> FuzzProducer<F> {
 
 /// Whether the project root `dir` holds a file of the scope with one of `extensions`; every
 /// root is, for an empty scope.
-fn in_scope(scope: &Scope, dir: &str, extensions: &[&str]) -> bool {
+pub(crate) fn in_scope(scope: &Scope, dir: &str, extensions: &[&str]) -> bool {
     scope.files.is_empty()
         || scope.files.iter().any(|file| {
             let path = Path::new(file);

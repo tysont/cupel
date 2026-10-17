@@ -1,0 +1,79 @@
+Kani Rust Verifier 0.68.0 (cargo plugin)
+CBMC 6.11.0
+   Compiling tally v0.1.0 (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/p7.5/cap/harnesses)
+warning: use of an unstable feature
+ --> <crate attribute>:1:12
+  |
+1 | #![feature(register_tool)]
+  |            ^^^^^^^^^^^^^
+  |
+  = note: requested on the command line with `--force-warn unstable-features`
+
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.43s
+Checking harness proofs::at_stays_in_bounds...
+
+VERIFICATION RESULT:
+ ** 1 of 9 failed
+Failed Checks: index out of bounds: the length is less than or equal to the given index
+ File: "src/lib.rs", line 13, in at
+
+VERIFICATION:- FAILED
+Verification Time: 0.020425832s
+
+Concrete playback unit test for `proofs::at_stays_in_bounds`:
+```
+/// Test generated for harness `proofs::at_stays_in_bounds` 
+///
+/// Check for `assertion`: "index out of bounds: the length is less than or equal to the given index"
+
+#[test]
+fn kani_concrete_playback_at_stays_in_bounds_10959774726121519048() {
+    let concrete_vals: Vec<Vec<u8>> = vec![
+        // 4ul
+        vec![4, 0, 0, 0, 0, 0, 0, 0],
+    ];
+    kani::concrete_playback_run(concrete_vals, at_stays_in_bounds);
+}
+```
+INFO: To automatically add the concrete playback unit test(s) to the src code, run Kani with `--concrete-playback=inplace`.
+Checking harness proofs::midpoint_lies_between...
+
+VERIFICATION RESULT:
+ ** 0 of 26 failed
+
+VERIFICATION:- SUCCESSFUL
+Verification Time: 0.058112s
+
+WARNING: Kani could not produce a concrete playback for `proofs::midpoint_lies_between` because there were no failing panic checks or satisfiable cover statements.
+Checking harness proofs::average_never_overflows...
+
+VERIFICATION RESULT:
+ ** 1 of 3 failed
+Failed Checks: attempt to add with overflow
+ File: "src/lib.rs", line 3, in average
+
+VERIFICATION:- FAILED
+Verification Time: 0.011188542s
+
+Concrete playback unit test for `proofs::average_never_overflows`:
+```
+/// Test generated for harness `proofs::average_never_overflows` 
+///
+/// Check for `assertion`: "attempt to add with overflow"
+
+#[test]
+fn kani_concrete_playback_average_never_overflows_2036582041107130434() {
+    let concrete_vals: Vec<Vec<u8>> = vec![
+        // 128
+        vec![128],
+        // 128
+        vec![128],
+    ];
+    kani::concrete_playback_run(concrete_vals, average_never_overflows);
+}
+```
+INFO: To automatically add the concrete playback unit test(s) to the src code, run Kani with `--concrete-playback=inplace`.
+Manual Harness Summary:
+Verification failed for - proofs::at_stays_in_bounds
+Verification failed for - proofs::average_never_overflows
+Complete - 1 successfully verified harnesses, 2 failures, 3 total.

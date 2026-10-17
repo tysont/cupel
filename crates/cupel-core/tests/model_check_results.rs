@@ -34,11 +34,11 @@ fn model_check_results_serializes_every_field() {
                 description: "attempt to add with overflow".to_owned(),
                 function: Some("average".to_owned()),
                 location: Some(at("src/lib.rs", 2)),
+                counterexample: Some(Counterexample {
+                    values: vec!["128".to_owned(), "128".to_owned()],
+                    replay: Some("#[test]\nfn replay() {}\n".to_owned()),
+                }),
             }],
-            counterexample: Some(Counterexample {
-                values: vec!["128".to_owned(), "128".to_owned()],
-                replay: Some("#[test]\nfn replay() {}\n".to_owned()),
-            }),
         }],
     };
     let value = serde_json::to_value(&results).unwrap();
@@ -57,11 +57,11 @@ fn model_check_results_serializes_every_field() {
                     "description": "attempt to add with overflow",
                     "function": "average",
                     "location": location(2),
+                    "counterexample": {
+                        "values": ["128", "128"],
+                        "replay": "#[test]\nfn replay() {}\n",
+                    },
                 }],
-                "counterexample": {
-                    "values": ["128", "128"],
-                    "replay": "#[test]\nfn replay() {}\n",
-                },
             }],
         })
     );

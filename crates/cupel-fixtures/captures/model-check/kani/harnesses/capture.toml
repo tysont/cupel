@@ -1,0 +1,6 @@
+# Captured from the real tool on the conc.model-check Rust fixture (P7.5), standard output and error merged; lib.rs
+# is the source it checked. `dir` is where it ran.
+tool = "Kani Rust Verifier 0.68.0 (cargo plugin)"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/p7.5/cap/harnesses"
+command = "cargo kani --output-format terse -Z concrete-playback --concrete-playback=print --target-dir <cache>"
+exit_code = 1
