@@ -1,0 +1,18 @@
+# ABOUTME: Conformance inventory for the `simulation-results` fact (ADR-120): the harness outcomes every simulator must
+# ABOUTME: report. `file` and `name` are where a harness is defined and its name; each producer's fixture maps them.
+fact = "simulation-results"
+
+[[constructs]]
+id = "passes-every-seed"
+summary = "A harness every seed of the range passes."
+expect = { status = "passed" }
+
+[[constructs]]
+id = "fails-at-a-seed"
+summary = "A harness some seeds fail: the first failing seed of the range is reported, with what the harness printed and the command that replays that seed alone."
+expect = { status = "failed" }
+
+[[constructs]]
+id = "fails-in-a-task"
+summary = "A harness whose failure is a panic in a task it spawned, not in its own body: the failing seed is still reported."
+expect = { status = "failed" }

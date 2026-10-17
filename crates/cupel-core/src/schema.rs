@@ -24,6 +24,7 @@ use crate::plugin::PluginMessage;
 use crate::property::PropertyResults;
 use crate::race::RaceReports;
 use crate::relation::RelationResults;
+use crate::simulation::SimulationResults;
 use crate::syntax::{
     ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, ProjectInfo, Roots, Symbols,
     TestConventions, TestFrames,
@@ -86,7 +87,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 24] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 25] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -114,6 +115,10 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 24] = [
     (FactKind::RelationResults, fact_schema::<RelationResults>),
     (FactKind::Footprint, fact_schema::<Footprint>),
     (FactKind::Histories, fact_schema::<Histories>),
+    (
+        FactKind::SimulationResults,
+        fact_schema::<SimulationResults>,
+    ),
 ];
 
 /// The payload version of a fact kind, or `None` for a kind without a payload type.

@@ -48,6 +48,7 @@
 //! | `test-conventions` | the pairing whose `source` is `file`, if its `tests` include `name` |
 //! | `project-info` | roots whose `path` is `file` |
 //! | `histories` | histories whose `name` is `file` |
+//! | `simulation-results` | harnesses defined in `file` whose `name` is `name` |
 //!
 //! An execution fact in [`EXECUTION`] has an inventory too (ADR-119): its producers' real-tool
 //! tests produce it over their own fixture repository (`repos/<check>/<lang>/`), whose
@@ -74,7 +75,7 @@ use crate::repos::repo_path;
 
 /// The execution facts with a conformance inventory, which their producers' tests check rather
 /// than the language harness (ADR-119).
-pub const EXECUTION: [FactKind; 1] = [FactKind::Histories];
+pub const EXECUTION: [FactKind; 2] = [FactKind::Histories, FactKind::SimulationResults];
 
 /// The constructs every producer of one fact must handle.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -429,6 +430,12 @@ fn locate(
         FactKind::Histories => list(value, "histories")
             .into_iter()
             .filter(|history| is(history, "name", file))
+            .collect(),
+        FactKind::SimulationResults => list(value, "harnesses")
+            .into_iter()
+            .filter(|harness| {
+                harness.pointer("/location/file") == Some(&file.into()) && name_is(harness, "name")
+            })
             .collect(),
         other => return Err(format!("`{other}` has no conformance inventory")),
     };

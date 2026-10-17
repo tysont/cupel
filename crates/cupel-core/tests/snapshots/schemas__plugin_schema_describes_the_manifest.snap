@@ -136,7 +136,8 @@ expression: pretty(&schema)
         "divergence-results",
         "relation-results",
         "footprint",
-        "histories"
+        "histories",
+        "simulation-results"
       ]
     },
     "Finding": {
@@ -829,6 +830,9 @@ expression: pretty(&schema)
             "roots": {
               "type": "string"
             },
+            "simulation-results": {
+              "type": "string"
+            },
             "symbols": {
               "type": "string"
             },
@@ -866,6 +870,7 @@ expression: pretty(&schema)
             "race-reports",
             "relation-results",
             "roots",
+            "simulation-results",
             "symbols",
             "test-conventions",
             "test-frames",

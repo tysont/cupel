@@ -54,6 +54,7 @@ mod schedule;
 pub mod schema;
 mod scope;
 mod select;
+mod simulation;
 mod status;
 mod suppression;
 pub mod syntax;
@@ -127,6 +128,7 @@ pub use root_run::{RootRun, RunStatus};
 pub use schedule::{Job, Outcome, Production, Scheduler};
 pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;
+pub use simulation::{SimulationFailure, SimulationHarness, SimulationResults, SimulationStatus};
 pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};
 pub use test_results::{
     OUTPUT_TAIL_LINES, RunnerInvocation, TestOutcome, TestResult, TestResults, Unevaluable,

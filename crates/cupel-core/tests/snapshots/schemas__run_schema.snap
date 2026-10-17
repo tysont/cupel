@@ -1108,7 +1108,8 @@ expression: pretty(&schema)
         "divergence-results",
         "relation-results",
         "footprint",
-        "histories"
+        "histories",
+        "simulation-results"
       ]
     },
     "FactProducers": {
