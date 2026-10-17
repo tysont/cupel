@@ -108,6 +108,8 @@ fn the_execution_facts_of_wrapped_tools_are_at_version_one_under_their_kind() {
         FactKind::FuzzResults,
         FactKind::RaceReports,
         FactKind::Traces,
+        FactKind::ModelCheckResults,
+        FactKind::ProofResults,
     ]
     .into_iter()
     .map(|kind| {
@@ -137,6 +139,16 @@ fn the_execution_facts_of_wrapped_tools_are_at_version_one_under_their_kind() {
                 FactKind::Traces,
                 Some(1),
                 json!("https://cupel.dev/schema/v1/fact/traces.json")
+            ),
+            (
+                FactKind::ModelCheckResults,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/model-check-results.json")
+            ),
+            (
+                FactKind::ProofResults,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/proof-results.json")
             ),
         ]
     );

@@ -445,7 +445,11 @@ fn symbol_key(symbol: &Value) -> Value {
 /// Execution facts whose inventories their tool producers' tests check with [`unexhibited`]
 /// (ADR-116): no language exhibits these constructs, the tool does, so each producer makes the
 /// fact from its own conformance input (a fixture its real tool runs on, or its captured output).
-pub const EXECUTION: [FactKind; 1] = [FactKind::Traces];
+pub const EXECUTION: [FactKind; 3] = [
+    FactKind::Traces,
+    FactKind::ModelCheckResults,
+    FactKind::ProofResults,
+];
 
 /// `conformance/<kind>.toml`.
 ///

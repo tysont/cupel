@@ -35,6 +35,7 @@ mod id;
 mod joint;
 mod lang;
 mod matrix;
+mod model_check;
 mod mutation;
 mod oracle;
 mod per_test;
@@ -42,6 +43,7 @@ mod per_test_impact;
 pub mod plugin;
 mod process;
 mod producer;
+mod proof;
 mod property;
 mod race;
 mod rank;
@@ -102,6 +104,9 @@ pub use hash::{FindingId, SiteHash, SymbolHash};
 pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
+pub use model_check::{
+    Counterexample, HarnessStatus, ModelCheckResults, ModelHarness, RefutedProperty,
+};
 pub use mutation::{Mutant, MutantOutcome, MutationOutcomes, MutationStrategy};
 pub use oracle::{OracleReport, OracleState, RunOracle, oracle_content_digest, oracle_identity};
 pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
@@ -112,6 +117,7 @@ pub use producer::{
     Producer, ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand,
     Runners, SharedFact, TestRun, TestSelection, ToolProbe, Upstream,
 };
+pub use proof::{Obligation, ObligationStatus, ProofResults, RelatedPlace};
 pub use property::{PropertyOutcome, PropertyResult, PropertyResults};
 pub use race::{RaceFrame, RaceKind, RaceReport, RaceReports, RaceStack};
 pub use rank::{

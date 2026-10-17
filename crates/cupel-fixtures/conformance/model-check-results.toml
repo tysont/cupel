@@ -1,0 +1,21 @@
+# ABOUTME: Conformance inventory for the `model-check-results` fact: the verdicts a bounded model checker's harnesses
+# ABOUTME: must be reported with. An execution fact: each producer's tests check its own fact against it (ADR-117).
+fact = "model-check-results"
+
+[[constructs]]
+id = "verified"
+summary = "A harness every property of which holds for every input within its bounds is verified, refuting nothing."
+within = "harnesses"
+expect = { status = "verified", refuted = [] }
+
+[[constructs]]
+id = "failed"
+summary = "A harness some input of which breaks a property (an assertion, an overflow, an out-of-bounds access) is failed, with the properties refuted and the inputs when the checker gives them."
+within = "harnesses"
+expect = { status = "failed" }
+
+[[constructs]]
+id = "undetermined"
+summary = "A harness the checker cannot decide (an unsupported construct, a bound it cannot prove sufficient) is undetermined."
+within = "harnesses"
+expect = { status = "undetermined" }

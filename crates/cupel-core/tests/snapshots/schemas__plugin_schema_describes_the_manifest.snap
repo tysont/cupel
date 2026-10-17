@@ -136,7 +136,9 @@ expression: pretty(&schema)
         "divergence-results",
         "relation-results",
         "footprint",
-        "traces"
+        "traces",
+        "model-check-results",
+        "proof-results"
       ]
     },
     "Finding": {
@@ -796,6 +798,9 @@ expression: pretty(&schema)
             "fuzz-results": {
               "type": "string"
             },
+            "model-check-results": {
+              "type": "string"
+            },
             "module-graph": {
               "type": "string"
             },
@@ -812,6 +817,9 @@ expression: pretty(&schema)
               "type": "string"
             },
             "project-info": {
+              "type": "string"
+            },
+            "proof-results": {
               "type": "string"
             },
             "property-results": {
@@ -855,12 +863,14 @@ expression: pretty(&schema)
             "divergence-results",
             "footprint",
             "fuzz-results",
+            "model-check-results",
             "module-graph",
             "mutation-outcomes",
             "mutation-sites",
             "norm-tree",
             "per-test-map",
             "project-info",
+            "proof-results",
             "property-results",
             "race-reports",
             "relation-results",

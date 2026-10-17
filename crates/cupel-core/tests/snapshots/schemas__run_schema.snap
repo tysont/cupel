@@ -1108,7 +1108,9 @@ expression: pretty(&schema)
         "divergence-results",
         "relation-results",
         "footprint",
-        "traces"
+        "traces",
+        "model-check-results",
+        "proof-results"
       ]
     },
     "FactProducers": {
