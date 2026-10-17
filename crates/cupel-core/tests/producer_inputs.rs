@@ -206,6 +206,7 @@ fn seen_in(depth: CostClass, cached: bool) -> Seen {
     let mut job = support::job(&writer, &config, &checks, &["rust"]);
     job.depth = depth;
     job.changed = Some(changed());
+    job.cases = Some(250);
     Scheduler {
         checks: &checks,
         producers: &producers,
@@ -240,6 +241,7 @@ fn a_producer_gets_the_runs_depth_and_changed_lines() {
             symbols: None,
             changed: Some(changed()),
             jobs: None,
+            cases: Some(250),
         })
     );
 }

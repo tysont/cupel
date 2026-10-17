@@ -398,7 +398,12 @@ fn lang_tables<'de, D: Deserializer<'de>>(
 ) -> Result<BTreeMap<LangId, Table>, D::Error> {
     BTreeMap::<String, Table>::deserialize(deserializer)?
         .into_iter()
-        .map(|(lang, table)| Ok((validate_lang_id(lang)?, table)))
+        .map(|(lang, table)| {
+            let lang = validate_lang_id(lang)?;
+            // A language's metamorphic relations are checked as the file loads (ADR-097 §1).
+            crate::relation::relations(&lang, &table)?;
+            Ok((lang, table))
+        })
         .collect::<Result<_, String>>()
         .map_err(de::Error::custom)
 }

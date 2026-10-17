@@ -39,6 +39,7 @@ mod process;
 mod producer;
 mod rank;
 mod ranking;
+mod relation;
 mod result;
 mod schedule;
 pub mod schema;
@@ -100,6 +101,10 @@ pub use rank::{
     Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,
 };
 pub use ranking::rankings;
+pub use relation::{
+    Evaluated, InputType, RELATIONS_KEY, Relation, RelationResult, RelationResults, Violation,
+    relations,
+};
 pub use schedule::{Job, Outcome, Production, Scheduler};
 pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;

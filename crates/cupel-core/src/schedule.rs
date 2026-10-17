@@ -63,6 +63,8 @@ pub struct Job<'a> {
     pub depth: CostClass,
     /// The lines a range scope changed, per file; `None` without a range (ADR-080).
     pub changed: Option<ChangedLines>,
+    /// The case budget of generative producers (`--cases`), handed to every producer (ADR-098).
+    pub cases: Option<u64>,
     /// The run's budget, concurrency cap, and the store's history of durations (ADR-086).
     pub resources: Resources,
 }
@@ -940,6 +942,8 @@ struct FactStore<'a> {
     joints_run: HashSet<(String, LangId)>,
     /// How many processes or threads producers may run at once (`--jobs`).
     jobs: Option<NonZeroUsize>,
+    /// The case budget of generative producers (`--cases`).
+    cases: Option<u64>,
     /// How long each production took, for the store's history (ADR-086 §2).
     durations: Vec<TaskDuration>,
 }
@@ -991,6 +995,7 @@ impl<'a> FactStore<'a> {
             reached: HashMap::new(),
             joints_run: HashSet::new(),
             jobs: job.resources.jobs,
+            cases: job.cases,
             durations: Vec::new(),
         }
     }
@@ -1170,6 +1175,7 @@ impl<'a> FactStore<'a> {
                 symbols: self.selected.get(&lang.id).cloned(),
                 changed: self.changed.clone(),
                 jobs: self.jobs,
+                cases: self.cases,
             },
         }
     }

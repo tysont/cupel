@@ -91,6 +91,9 @@ pub struct Focus {
     /// How many processes or threads a producer may run at once (`--jobs`, ADR-086 §11);
     /// `None` for its own default.
     pub jobs: Option<NonZeroUsize>,
+    /// How many inputs a generative producer generates (`--cases`, ADR-098); `None` for its
+    /// own default.
+    pub cases: Option<u64>,
 }
 
 /// Per file, the 1-based inclusive line ranges a change touched.
@@ -104,6 +107,7 @@ impl Default for Focus {
             symbols: None,
             changed: None,
             jobs: None,
+            cases: None,
         }
     }
 }

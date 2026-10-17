@@ -129,6 +129,7 @@ pub fn run(
         seed: run.seed,
         depth: config.effective.depth,
         changed: changed_lines(writer.root(), &request, &resolved)?,
+        cases: args.cases,
         resources: resources::of(invocation, config, args, git.as_ref())?,
     };
     let scheduler = Scheduler {

@@ -15,6 +15,7 @@ use crate::flake::TestReruns;
 use crate::mutation::MutationOutcomes;
 use crate::per_test::PerTestMap;
 use crate::plugin::PluginMessage;
+use crate::relation::RelationResults;
 use crate::syntax::{
     ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, ProjectInfo, Roots, Symbols,
     TestConventions, TestFrames,
@@ -77,7 +78,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 15] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 16] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -93,6 +94,7 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 15] = [
     (FactKind::CoverageMap, fact_schema::<CoverageMap>),
     (FactKind::PerTestMap, fact_schema::<PerTestMap>),
     (FactKind::MutationOutcomes, fact_schema::<MutationOutcomes>),
+    (FactKind::RelationResults, fact_schema::<RelationResults>),
 ];
 
 /// The payload version of a fact kind, or `None` for kinds whose payload type does not exist yet.

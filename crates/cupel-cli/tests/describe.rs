@@ -105,7 +105,8 @@ fn describe_verb_describes_its_arguments_sub_verbs_and_pending_flags() {
         .iter()
         .find(|argument| argument["name"] == json!("--cases"))
         .unwrap();
-    assert_eq!(cases["pending_step"], json!("P5.4"));
+    // `gen.metamorphic` reads the case budget (ADR-098).
+    assert_eq!(cases["pending_step"], json!(null));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
 }
 
