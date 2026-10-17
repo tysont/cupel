@@ -92,11 +92,13 @@ fn evaluate_rule(rule: &GateRuleSpec, envelope: &Envelope) -> (Option<f64>, Rule
             };
             (Some(actual), outcome(compare(op, actual, bound)))
         }
-        GateCondition::None => {
+        GateCondition::None | GateCondition::NoBreaking => {
+            let breaking_only = rule.condition == GateCondition::NoBreaking;
             let present = envelope
                 .findings
                 .iter()
                 .filter(|finding| finding.check == entry.id && finding.severity != Severity::Info)
+                .filter(|finding| !breaking_only || is_breaking(&finding.kind))
                 .count();
             #[allow(
                 clippy::cast_precision_loss,
@@ -105,8 +107,13 @@ fn evaluate_rule(rule: &GateRuleSpec, envelope: &Envelope) -> (Option<f64>, Rule
             let actual = present as f64;
             (Some(actual), outcome(present == 0))
         }
-        GateCondition::NoBreaking => (None, RuleOutcome::Unsupported),
     }
+}
+
+/// Whether a finding of `kind` reports a breaking change: the kind's last segment is
+/// `breaking`, such as `api.breaking` (ADR-101 §6).
+pub fn is_breaking(kind: &str) -> bool {
+    kind.rsplit('.').next() == Some("breaking") && kind.contains('.')
 }
 
 /// The rule's check entry when the check ran to completion for some language: not skipped

@@ -180,3 +180,46 @@ fn language_validation_rejects_unregistered_languages_wherever_they_appear() {
         );
     }
 }
+
+/// A check that reports breaking findings (`api.breaking`) and one that does not.
+fn breaking_registry() -> CheckRegistry {
+    let mut checks = CheckRegistry::default();
+    let mut api = support::manifest("static.api-surface", &[], &[]);
+    api.findings = vec![cupel_core::FindingKindSpec {
+        kind: "api.breaking".to_owned(),
+        action: cupel_core::ActionKind::Review,
+        summary: String::new(),
+        evidence: serde_json::Map::new(),
+    }];
+    checks.register(Box::new(Declared(api))).unwrap();
+    checks.register(declared("tests.weakening", &[])).unwrap();
+    checks
+}
+
+fn validate_breaking(text: &str) -> Result<()> {
+    let file = ConfigFile::parse(text, Path::new("/repo/cupel.toml")).unwrap();
+    let config = Config::resolve(
+        Some(PathBuf::from("/repo/cupel.toml")),
+        file,
+        &ConfigRequest::default(),
+    )
+    .unwrap();
+    config.validate_registered(&breaking_registry(), &langs())
+}
+
+#[test]
+fn no_breaking_needs_a_check_that_reports_breaking_findings() {
+    let ok = validate_breaking("[gate.changed]\n\"static.api-surface\" = \"no-breaking\"\n");
+    assert_eq!(ok.map_err(|err| err.to_string()), Ok(()));
+    let err = validate_breaking("[gate.changed]\n\"tests.weakening\" = \"no-breaking\"\n")
+        .expect_err("tests.weakening reports nothing breaking");
+    assert!(
+        matches!(&err, Error::Config(ConfigError::NoBreakingKind { check }) if check == "tests.weakening"),
+        "{err:?}"
+    );
+    assert_eq!(
+        err.to_string(),
+        "the `no-breaking` rule on `tests.weakening` can never fail: `tests.weakening` declares \
+         no breaking finding kind (`<group>.breaking`)"
+    );
+}

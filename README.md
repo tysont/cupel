@@ -624,6 +624,7 @@ Every check below exists. Each is supported in all five languages except `gen.pr
 | `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — |  |
 | `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — |  |
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
+| `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | go, javascript, python, rust, typescript |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | go, javascript, python, rust, typescript |
 | `static.complexity` | 0 | quick | `complexity.high`, `nesting.deep`, `params.many`, `function.long` | `cyclomatic_max`, `cognitive_max`, `nesting_max`, `params_max`, `length_max` | `cyclomatic`, `cognitive` | go, javascript, python, rust, typescript |
 | `static.crap` | 0 | quick | `crap.high`, `crap.watch` | `max`, `mean` | `crap` | go, javascript, python, rust, typescript |
@@ -666,6 +667,7 @@ The support matrix, from `cupel describe matrix`:
 | `gen.differential` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
 | `gen.metamorphic` | unsupported | unsupported | unconfigured | unsupported | unsupported |
 | `gen.property` | unsupported | supported | supported | supported | supported |
+| `static.api-surface` | supported | supported | supported | supported | supported |
 | `static.clones` | supported | supported | supported | supported | supported |
 | `static.complexity` | supported | supported | supported | supported | supported |
 | `static.crap` | supported | supported | supported | supported | supported |

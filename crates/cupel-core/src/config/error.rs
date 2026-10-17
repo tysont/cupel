@@ -74,6 +74,13 @@ pub enum ConfigError {
          and head, and a tree scope has no range"
     )]
     TreeGateNeedsRange { check: String },
+    /// A `no-breaking` rule names a check that declares no breaking finding kind, so the rule
+    /// could never fail (ADR-101 §6).
+    #[error(
+        "the `no-breaking` rule on `{check}` can never fail: `{check}` declares no breaking \
+         finding kind (`<group>.breaking`)"
+    )]
+    NoBreakingKind { check: String },
     /// A plugin cannot describe itself, or describes something Cupel cannot register (ADR-088 §5).
     #[error("plugin `{name}` (`{program}`) cannot be used: {problem}")]
     Plugin {

@@ -4,6 +4,8 @@ use crate::check::{Check, CheckRegistry, Manifest};
 use crate::config::Config;
 use crate::config::error::ConfigError;
 use crate::config::file::GateSection;
+use crate::config::GateCondition;
+use crate::gate::is_breaking;
 use crate::error::Result;
 use crate::id::{CheckId, LangId};
 use crate::rank::MetricPer;
@@ -28,6 +30,14 @@ impl Config {
                     let manifest = registry.check(&rule.key.check, section)?;
                     if section == "[gate.tree]" && needs_range(checks, &rule.key.check) {
                         return Err(ConfigError::TreeGateNeedsRange {
+                            check: rule.key.check.to_string(),
+                        }
+                        .into());
+                    }
+                    if rule.condition == GateCondition::NoBreaking
+                        && !manifest.findings.iter().any(|spec| is_breaking(&spec.kind))
+                    {
+                        return Err(ConfigError::NoBreakingKind {
                             check: rule.key.check.to_string(),
                         }
                         .into());

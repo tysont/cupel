@@ -360,6 +360,17 @@ impl Usage {
                     ),
                 )
             },
+            ConfigError::NoBreakingKind { check } => Self {
+                value: Some(check.clone()),
+                ..usage(
+                    "[gate.changed]",
+                    format!(
+                        "Gate `{check}` with \"none\" or a metric instead; \"no-breaking\" \
+                         applies to checks that report breaking changes, such as \
+                         static.api-surface."
+                    ),
+                )
+            },
             ConfigError::Plugin {
                 name,
                 program,

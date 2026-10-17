@@ -189,21 +189,53 @@ fn none_counts_warn_and_fail_findings_after_suppression() {
     );
 }
 
+/// `finding` of `kind`.
+fn of_kind(kind: &str, id: &str, check: &str, severity: &str) -> Value {
+    let mut finding = finding(id, check, severity, false);
+    finding["kind"] = json!(kind);
+    finding
+}
+
 #[test]
-fn no_breaking_is_unsupported_and_fails_the_gate() {
+fn no_breaking_counts_the_check_s_breaking_findings_above_info() {
+    let checks = [check("static.api-surface", "fail", &json!({}))];
+    let broke = envelope(
+        "pass",
+        &checks,
+        &[
+            of_kind("api.breaking", "fnd_000001", "static.api-surface", "warn"),
+            of_kind("api.breaking", "fnd_000002", "static.api-surface", "warn"),
+            of_kind("api.widened", "fnd_000003", "static.api-surface", "warn"),
+            of_kind("api.breaking", "fnd_000004", "static.api-surface", "info"),
+            of_kind("api.breaking", "fnd_000005", "static.crap", "warn"),
+        ],
+    );
+    assert_eq!(
+        one("static.api-surface", "no-breaking", &broke),
+        (Some(2.0), RuleOutcome::Fail)
+    );
+    let widened = envelope(
+        "pass",
+        &checks,
+        &[of_kind("api.widened", "fnd_000003", "static.api-surface", "info")],
+    );
+    assert_eq!(
+        one("static.api-surface", "no-breaking", &widened),
+        (Some(0.0), RuleOutcome::Pass)
+    );
+}
+
+#[test]
+fn no_breaking_is_skipped_when_its_check_did_not_run() {
     let envelope = envelope(
         "pass",
-        &[check("static.crap", "pass", &json!({"max": 1.0}))],
+        &[check("static.api-surface", "skipped", &json!({}))],
         &[],
     );
-    let gate = evaluate_gate(
-        "gate.changed",
-        &[rule("static.crap", "no-breaking")],
-        &envelope,
+    assert_eq!(
+        one("static.api-surface", "no-breaking", &envelope),
+        (None, RuleOutcome::Skipped)
     );
-    assert_eq!(gate.rules[0].result, RuleOutcome::Unsupported);
-    assert_eq!(gate.rules[0].actual, None);
-    assert_eq!(gate.result, GateOutcome::Fail);
 }
 
 #[test]

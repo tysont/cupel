@@ -1,0 +1,241 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `api.breaking` and `api.widened`.",
+            "properties": {
+              "base": {
+                "description": "The items at this path at the base commit, in fact order.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One public item as a side of the diff shows it; inlined, as evidence schemas have no\n`$defs` (ADR-043).",
+                  "properties": {
+                    "kind": {
+                      "description": "`function`, `method`, `type`, `interface`, `constant`, `variable`, or `module`.",
+                      "type": "string"
+                    },
+                    "signature": {
+                      "description": "The normalized signature: parameter names are `_`, layout is gone.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "signature"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "change": {
+                "description": "`removed` or `changed` (breaking); `added` or `extended` (widened).",
+                "type": "string"
+              },
+              "head": {
+                "description": "The items at this path at head, in fact order.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One public item as a side of the diff shows it; inlined, as evidence schemas have no\n`$defs` (ADR-043).",
+                  "properties": {
+                    "kind": {
+                      "description": "`function`, `method`, `type`, `interface`, `constant`, `variable`, or `module`.",
+                      "type": "string"
+                    },
+                    "signature": {
+                      "description": "The normalized signature: parameter names are `_`, layout is gone.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "signature"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "path": {
+                "description": "The item's fully qualified path.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "change",
+              "base",
+              "head"
+            ],
+            "title": "ApiChange",
+            "type": "object"
+          },
+          "kind": "api.breaking",
+          "summary": "A public item of the base commit was removed (deleted, renamed, or made private) or lost a signature or kind callers may use."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `api.breaking` and `api.widened`.",
+            "properties": {
+              "base": {
+                "description": "The items at this path at the base commit, in fact order.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One public item as a side of the diff shows it; inlined, as evidence schemas have no\n`$defs` (ADR-043).",
+                  "properties": {
+                    "kind": {
+                      "description": "`function`, `method`, `type`, `interface`, `constant`, `variable`, or `module`.",
+                      "type": "string"
+                    },
+                    "signature": {
+                      "description": "The normalized signature: parameter names are `_`, layout is gone.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "signature"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "change": {
+                "description": "`removed` or `changed` (breaking); `added` or `extended` (widened).",
+                "type": "string"
+              },
+              "head": {
+                "description": "The items at this path at head, in fact order.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "One public item as a side of the diff shows it; inlined, as evidence schemas have no\n`$defs` (ADR-043).",
+                  "properties": {
+                    "kind": {
+                      "description": "`function`, `method`, `type`, `interface`, `constant`, `variable`, or `module`.",
+                      "type": "string"
+                    },
+                    "signature": {
+                      "description": "The normalized signature: parameter names are `_`, layout is gone.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "signature"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "path": {
+                "description": "The item's fully qualified path.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "change",
+              "base",
+              "head"
+            ],
+            "title": "ApiChange",
+            "type": "object"
+          },
+          "kind": "api.widened",
+          "summary": "The public API gained an item (added, renamed into, or made public) or a signature beside the ones it had."
+        }
+      ],
+      "id": "static.api-surface",
+      "metrics": [
+        {
+          "name": "breaking",
+          "per": "scope",
+          "summary": "Public paths the range removed or changed; the gate rule `static.api-surface = \"no-breaking\"` requires none reported."
+        },
+        {
+          "name": "widened",
+          "per": "scope",
+          "summary": "Public paths the range added or extended."
+        }
+      ],
+      "needs": [
+        "api-surface"
+      ],
+      "stability": "experimental",
+      "summary": "Diff of the public API against the range's base: removed and changed items are breaking, added ones widen it. Runs only with --changed or --base.",
+      "tier": 0,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

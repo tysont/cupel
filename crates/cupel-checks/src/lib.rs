@@ -49,6 +49,7 @@ mod manifest;
 mod metrics;
 mod outcome;
 mod settings;
+mod static_api_surface;
 mod static_clones;
 mod static_complexity;
 mod static_crap;
