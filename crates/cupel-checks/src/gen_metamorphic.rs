@@ -24,6 +24,47 @@ const KIND: &str = "metamorphic.violated";
 /// (`[lang.<id>.relations]`).
 const LIMITS: Limits = Limits::new(&[]);
 
+/// How one evaluation ended: exactly one of its keys. Inlined in the evidence schema, which has
+/// no `$defs` (ADR-043).
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+#[schemars(inline)]
+struct Outcome {
+    /// What it returned, when JSON can hold it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    value: Option<Value>,
+    /// What it raised: the exception's type and message.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    raised: Option<String>,
+    /// What it returned, printed by the language, when JSON cannot hold it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    repr: Option<String>,
+}
+
+impl From<&Evaluated> for Outcome {
+    fn from(evaluated: &Evaluated) -> Self {
+        let none = Self {
+            value: None,
+            raised: None,
+            repr: None,
+        };
+        match evaluated {
+            Evaluated::Value(value) => Self {
+                value: Some(value.clone()),
+                ..none
+            },
+            Evaluated::Raised(raised) => Self {
+                raised: Some(raised.clone()),
+                ..none
+            },
+            Evaluated::Repr(repr) => Self {
+                repr: Some(repr.clone()),
+                ..none
+            },
+        }
+    }
+}
+
 /// Evidence of `metamorphic.violated`.
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
@@ -37,11 +78,11 @@ struct Violated {
     /// The minimized input the relation does not hold for.
     input: Value,
     /// The follow-up input: the transform applied to `input`.
-    transformed: Evaluated,
+    transformed: Outcome,
     /// The function on `input`.
-    source_output: Evaluated,
+    source_output: Outcome,
     /// The function on the follow-up input; null when the transform raised.
-    followup_output: Option<Evaluated>,
+    followup_output: Option<Outcome>,
     /// What the relation raised on the two outputs; null when it returned false or was not
     /// called.
     relation_raised: Option<String>,
@@ -189,9 +230,9 @@ impl GenMetamorphic {
             function: result.function.clone(),
             input_type: result.input.clone(),
             input: violation.input.clone(),
-            transformed: violation.transformed.clone(),
-            source_output: violation.source.clone(),
-            followup_output: violation.followup.clone(),
+            transformed: Outcome::from(&violation.transformed),
+            source_output: Outcome::from(&violation.source),
+            followup_output: violation.followup.as_ref().map(Outcome::from),
             relation_raised: violation.relation_raised.clone(),
             original_input: violation.original.clone(),
             case: violation.case,

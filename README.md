@@ -613,11 +613,12 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 ## Checks
 
-Every check below exists and is supported in all five languages. All run at `--depth quick` except `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite and so run from `--depth standard`, the default. The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists and is supported in all five languages. All run at `--depth quick` except `tests.coverage`, `tests.flaky`, and `tests.mutation`, which run the project's test suite and so run from `--depth standard`, the default. The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks. `gen.metamorphic` is the exception to both first sentences: it runs from `--depth deep`, for Python, and only where relations are declared (see [Metamorphic relations](#metamorphic-relations)).
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
 | --- | --- | --- | --- | --- | --- | --- |
+| `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — |  |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | go, javascript, python, rust, typescript |
 | `static.complexity` | 0 | quick | `complexity.high`, `nesting.deep`, `params.many`, `function.long` | `cyclomatic_max`, `cognitive_max`, `nesting_max`, `params_max`, `length_max` | `cyclomatic`, `cognitive` | go, javascript, python, rust, typescript |
 | `static.crap` | 0 | quick | `crap.high`, `crap.watch` | `max`, `mean` | `crap` | go, javascript, python, rust, typescript |
@@ -642,6 +643,8 @@ What each check looks for:
 - **`tests.flaky`** reruns the test suite several times in different orders and with different seeds, and reports tests whose outcome changes: `test.flaky` when two reruns in the same order disagree, `test.order-dependent` when the outcome follows the order. See [Flakiness](#flakiness).
 - **`tests.mutation`** changes the code in small ways (`<` to `<=`, `+` to `-`, `&&` to `||`, `true` to `false`, `0` to `1`) and runs the tests that cover each change. A mutant every test passes against survived: the tests do not notice that line changing. The score is killed / (killed + survived). See [Mutation testing](#mutation-testing).
 
+- **`gen.metamorphic`** evaluates the metamorphic relations you declare (sorting a list and sorting its reverse give the same result; `add(a, b) == add(b, a)`) on generated inputs, and reports each relation that does not hold, with the smallest failing input it could find and both outputs. See [Metamorphic relations](#metamorphic-relations).
+
 `cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
 
 ## Languages
@@ -653,6 +656,7 @@ The support matrix, from `cupel describe matrix`:
 <!-- generated:support-matrix -->
 | Check | go | javascript | python | rust | typescript |
 | --- | --- | --- | --- | --- | --- |
+| `gen.metamorphic` | unsupported | unsupported | unconfigured | unsupported | unsupported |
 | `static.clones` | supported | supported | supported | supported | supported |
 | `static.complexity` | supported | supported | supported | supported | supported |
 | `static.crap` | supported | supported | supported | supported | supported |
@@ -786,6 +790,45 @@ Mutation testing is expensive, so the engine stacks every saving it can. Before 
 A Rust file's mutants cost one build per worker plus one test run each; outside Rust, each mutant costs an incremental build of what it changes plus the tests. The run's `--seed` reaches every mutant run.
 
 On the Cupel repository itself (1377 tests, release build, 8-core Apple silicon, a quiet machine), a one-function change checked at `standard` with a warm cache takes about 10.5 minutes: one instrumented run of the suite (5.3 min) and the mutants (5.2 min, two mutants with sixteen covering tests each); an unchanged rerun takes 2 seconds.
+
+## Metamorphic relations
+
+A metamorphic relation says how a function's output changes when its input does, without saying what the output is: sorting a list and sorting its reverse give the same list. `gen.metamorphic` checks relations you declare in `cupel.toml`, per language, under `[lang.<id>.relations.<name>]`. Python is the language with a harness today.
+
+```toml
+[lang.python.relations.sort-reverse]
+function = "sorting:sort_list"          # module:name, imported from the repository root
+input = "list[int]"                     # bool, int, str, list[T], tuple[T, ...]
+transform = "lambda xs: list(reversed(xs))"   # the follow-up input, from the input
+
+[lang.python.relations.add-commutes]
+function = "arith:add"                  # a tuple input is spread into the arguments: add(a, b)
+input = "tuple[int, int]"
+transform = "lambda pair: (pair[1], pair[0])"
+relation = "lambda a, b: a == b"        # how the two outputs relate; default ==
+cases = 50                              # inputs to generate; default 100
+```
+
+`transform` and `relation` are Python expressions evaluated in the function's module. For every input the harness calls the function on it, the transform on it, and the function on the transform's result, each on its own copy; the relation is violated when it returns false or when any of those calls raises. A relation whose function cannot be imported, or whose expressions do not evaluate to callables, makes the check `error` with the reason in its `notes`; a key that is not one of these five, a missing one, or an input type outside the list is a usage error (exit 2) when `cupel.toml` loads.
+
+Inputs are generated from `--seed`, the relation's name, and the case number alone, starting small (lists of at most one element, integers within ±16) and growing to lists and strings of up to eight elements and integers within ±1024. `--cases N` sets how many inputs every relation gets, over its `cases`. The first input that breaks a relation is minimized: integers move toward zero, lists and strings shrink and their elements get simpler, as long as the relation still breaks. The finding's evidence has the minimized input, the transformed input, both outputs (each `{"value": …}`, `{"raised": "Type: message"}`, or `{"repr": …}` for a value JSON cannot hold), the generated input it started from, and the seed; its `repro` reruns the same inputs. A relation is one finding however many inputs break it, located at the function's definition. In the fixture, `sort_list` makes a single bubble pass:
+
+```text
+$ cupel check --only gen.metamorphic --seed 3 --format text
+checks
+  gen.metamorphic  fail     tier 4 · deep · score 1 violated (n 2) · metrics relations 2, violated 1 · 1 finding · 537 ms
+
+fail (1)
+  gen.metamorphic
+    `sorting:sort_list` breaks the relation `sort-reverse`
+      fnd_30a135 · metamorphic.violated · tier 4 · confidence 1
+      at sorting.py:1-7
+      evidence: case 15 · followup_output {1} · function "sorting:sort_list" · input [3] · input_type "list[int]" · original_input [3] · relation "sort-reverse" · seed 3 · shrinks 9 · source_output {1} · transformed {1} (full: cupel explain fnd_30a135)
+      action fix_bug (priority 1): Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,0,-1]; the evidence has the follow-up input and both outputs.
+      repro: cupel check --only gen.metamorphic --seed 3
+```
+
+The minimized input `[0, 0, -1]` sorts to `[0, -1, 0]`, its reverse to `[-1, 0, 0]`. A failing check does not fail the run by itself; a gate rule such as `"gen.metamorphic.violated" = "== 0"` does. Without any relation declared for a language, the check is skipped there as `unconfigured` (`lang.python.relations`); the support matrix above, which knows no repository's configuration, shows Python that way. The other four languages have no harness yet, so the check is `unsupported` for them. Every relation is evaluated whatever the scope, and only those whose function is defined in a file in scope are reported.
 
 ## Plugins
 

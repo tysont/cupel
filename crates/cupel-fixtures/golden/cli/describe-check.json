@@ -260,7 +260,7 @@
         "default": null,
         "env": null,
         "name": "--cases",
-        "pending_step": "P5.4",
+        "pending_step": null,
         "positional": false,
         "repeated": false,
         "required": false,

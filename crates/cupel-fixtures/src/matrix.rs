@@ -195,7 +195,7 @@ impl Registries {
 
     /// The support matrix in the fixture repository `fixture`, with its plugins.
     fn matrix_in(&self, fixture: &str) -> SupportMatrix {
-        let ctx = Ctx::new(repo_path(fixture));
+        let ctx = fixture_ctx(fixture);
         let langs = self.languages.langs();
         match Self::of_fixture(fixture) {
             Some(own) => SupportMatrix::compute(&own.checks, &own.producers, &langs, &ctx),
@@ -237,6 +237,25 @@ impl Registries {
             .get(id)
             .expect("pairs come from the check registry")
     }
+}
+
+/// What a producer of the fixture repository `fixture` sees when reporting whether it can run:
+/// the repository and its `cupel.toml`'s `[lang.<id>]` tables, as in a run there (a producer
+/// configured by them, such as the metamorphic engine, ADR-097, is available only with them).
+///
+/// # Panics
+///
+/// When the fixture's `cupel.toml` does not parse.
+fn fixture_ctx(fixture: &str) -> Ctx {
+    let root = repo_path(fixture);
+    let config = root.join("cupel.toml");
+    let mut ctx = Ctx::new(root);
+    if let Ok(text) = fs::read_to_string(&config) {
+        let file = ConfigFile::parse(&text, &config)
+            .unwrap_or_else(|error| panic!("fixture {fixture}: {error}"));
+        ctx.lang = file.lang;
+    }
+    ctx
 }
 
 /// Whether every bare program `file`'s plugins run (such as `python3`) is on `PATH`; says which is
@@ -454,13 +473,19 @@ pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
     let root = repo_path(&pair.fixture());
     let scratch = tempfile::tempdir().map_err(|error| error.to_string())?;
     let files = walk(&root, &registries.languages, &ProjectInfo::default());
-    let produce_ctx = ProduceCtx::new(
-        Ctx::new(root.clone()),
+    let mut produce_ctx = ProduceCtx::new(
+        fixture_ctx(&pair.fixture()),
         Writer::new(scratch.path(), false)
             .map_err(|error| error.to_string())?
             .confined(),
         Cancellation::new(),
     );
+    produce_ctx.config = produce_ctx
+        .ctx
+        .lang
+        .get(&pair.lang)
+        .cloned()
+        .unwrap_or_default();
     let scope = Scope::of_files(files.clone());
     // The producer the scheduler would choose: the first ready candidate; a want with none is
     // not served, as in a run.
