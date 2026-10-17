@@ -157,14 +157,15 @@ impl Warning {
     }
 }
 
-/// A frame line, `#0 tally::publish::{{closure}} /repo/src/lib.rs:9:49 (race-1a2b+0x1234)`; a
-/// frame without a place (`<null>`) is not kept.
+/// A frame line, `#0 tally::publish::{{closure}} /repo/src/lib.rs:9:49 (race-1a2b+0x1234)`, on
+/// Linux followed by `(BuildId: …)`; a frame without a place (`<null>`) is not kept.
 fn frame(line: &str) -> Option<RawFrame> {
-    let (_, rest) = line.split_once(' ')?;
-    let rest = match rest.rfind(" (") {
-        Some(at) if rest.ends_with(')') => &rest[..at],
-        _ => rest,
-    };
+    let (_, mut rest) = line.split_once(' ')?;
+    while let Some(at) = rest.rfind(" (")
+        && rest.ends_with(')')
+    {
+        rest = &rest[..at];
+    }
     let (function, location) = rest.rsplit_once(' ')?;
     let (file, line) = place(location)?;
     Some(RawFrame {
@@ -239,5 +240,25 @@ mod tests {
             }
         );
         assert_eq!(report.stacks[1].access.as_deref(), Some("write"));
+    }
+
+    #[test]
+    fn a_linux_frame_keeps_its_place_before_the_module_offset_and_the_build_id() {
+        let line = "#0 tally::publish::h0123456789abcdef /repo/src/lib.rs:9:49 (race-1a2b+0xf1bf8) \
+            (BuildId: 066ac18022ff88ecd8b4eee0a402950043686a4d)";
+        assert_eq!(
+            frame(line),
+            Some(RawFrame {
+                function: Some("tally::publish::h0123456789abcdef".to_owned()),
+                file: "/repo/src/lib.rs".to_owned(),
+                line: 9,
+            })
+        );
+        assert_eq!(
+            frame(
+                "#0 pthread_create <null> (r+0x68d38) (BuildId: 066ac18022ff88ecd8b4eee0a402950043686a4d)"
+            ),
+            None
+        );
     }
 }
