@@ -618,7 +618,7 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 ## Checks
 
-Every check below exists. Each is supported in all seven languages except `gen.property`, which Go, Java, and Clojure lack (Cupel runs no property framework for them); `gen.metamorphic`, which has a Python harness only; `conc.race`, which has race detectors for Go and Rust only; `gen.fuzz`, which has no TypeScript, Java, or Clojure fuzzer; `perf.bench`, which has no Java or Clojure bench tool; and `gen.differential`, `static.analyze`, and `perf.footprint`, which have no Java or Clojure harness, analyzer, or lockfile reader yet; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, `tests.mutation`, and `conc.race`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default; and `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`, which run from `--depth deep` (or by name with `--only`), the first two once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists. Each is supported in all seven languages except `gen.property`, which Go, Java, and Clojure lack (Cupel runs no property framework for them); `gen.metamorphic`, which has a Python harness only; `conc.race`, which has race detectors for Go and Rust only; `gen.fuzz`, which has no TypeScript, Java, or Clojure fuzzer; `perf.bench`, which has no Java or Clojure bench tool; `spec.contracts`, which reads Rust's `contracts` crate and Python's icontract only; and `gen.differential`, `static.analyze`, and `perf.footprint`, which have no Java or Clojure harness, analyzer, or lockfile reader yet; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, `tests.mutation`, `conc.race`, and `spec.contracts`, which run the project's test suite, `meta.traceability`, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default; and `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`, which run from `--depth deep` (or by name with `--only`), the first two once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
@@ -667,6 +667,9 @@ What each check looks for:
 - **`gen.fuzz`** runs every fuzz target the project has (cargo-fuzz targets, Go `FuzzXxx` functions, Jazzer.js and atheris modules) with the run's seed and an execution budget, and reports each input that crashes a target (`fuzz.crash`) or runs past the per-input limit (`fuzz.timeout`), with the saved input and the command that reruns it; a project root with no fuzz target is `fuzz.target-missing` (`info`). See [Fuzzing](#fuzzing).
 - **`conc.race`** runs the tests under a race detector (Go's `-race`; Miri or ThreadSanitizer for Rust) and reports each data race (`race.detected`) and each operation with undefined behavior (`ub.detected`), with the stacks of the accesses inside the repository. See [Race detectors](#race-detectors).
 - **`perf.bench`** runs the project's benchmarks (Go's, criterion, pytest-benchmark, or commands timed by hyperfine) at the range's base commit and in the working tree, and compares each benchmark's samples with a Mann-Whitney U test: a significant slowdown of at least 5% is `perf.regression` (`warn`), a speedup `perf.improvement` (`info`). Without a range there is nothing to compare, and it says so. See [Benchmarks](#benchmarks).
+- **`spec.contracts`** runs the tests again with every contract the project's contract library checks turned on, the debug-only and slow ones too, and its property tests at the case budget, and reports each precondition, postcondition, and invariant a test violated (`contract.violated`), at the contract. See [Contracts](#contracts).
+- **`meta.traceability`** maps each requirement ID you list to the tests the range added whose names carry it (`test_req_12_parses`, `parses week dates #REQ-12`), and reports each requirement no such test names (`spec.untested-requirement`). It needs `--changed` or `--base`. See [Requirements and test provenance](#requirements-and-test-provenance).
+- **`meta.oracle-independence`** labels each changed function the tests exercise by whether a test that existed before the change runs it, and reports one only the change's own tests run (`evidence.self-authored-only`, `warn`): the only evidence it works was written with it. It needs `--changed` or `--base` and a per-test coverage map. See [Requirements and test provenance](#requirements-and-test-provenance).
 
 `cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
 
@@ -1080,6 +1083,49 @@ fail (1)
 
 The evidence holds the `target`, the `tool`, the `message`, the `input` (as text, or `hex:` and its bytes), the `reproducer` file and the `reproduce` command (for Go, the commands that make the input a regression case under `testdata/fuzz/`), the `seed`, and the `cases`. An input that runs past the per-input limit is `fuzz.timeout` (`warn`, confidence 0.7: a slow path under load can cross it). A target that does not build is a note. The gate keys are `gen.fuzz.crashes`, `timeouts`, `targets`, and `missing`.
 
+## Contracts
+
+`spec.contracts` reruns the suite once more through the baseline's runner, after the baseline passes, with the contract library's switches on and every property test given the run's seed and case budget (as `gen.property` gives them), and reads each failed test's output for the library's report. A project root whose manifests do not declare the library is not run again, and a note says nothing was checked.
+
+| Language | Library | Contracts | Turned on for the run |
+|---|---|---|---|
+| Rust | the `contracts` crate | `#[requires]`, `#[ensures]`, `#[invariant]`, and their `debug_` and `test_` forms | debug assertions in every profile a test builds with (`CARGO_PROFILE_DEV_DEBUG_ASSERTIONS`, `CARGO_PROFILE_TEST_DEBUG_ASSERTIONS`), which `debug_*` contracts need |
+| Python | icontract | `@require`, `@ensure`, `@invariant` | `ICONTRACT_SLOW=1`, which enables contracts declared `enabled=icontract.SLOW` |
+
+A violation is placed at the contract (the attribute or decorator), names the function or class it is declared on, and keeps the library's message: the description and condition, and for icontract the values it saw, with addresses masked. Under `--changed` a violation is kept when its contract or its test is in a changed file. On the Rust fixture, whose `debug_*` contracts its own `[profile.dev]` leaves unchecked:
+
+```text
+$ cupel check --only spec.contracts --format text
+fail (3)
+  spec.contracts
+    precondition of `share` violated in `ledger/src/lib.rs::tests::shares_nothing_among_no_parts`: a share needs at least one part: parts > 0
+      fnd_1d32c0 · contract.violated · tier 5 · confidence 1
+      at src/lib.rs:4
+      action fix_bug (priority 1): A caller passed what the precondition rejects: fix the call the test makes, or the precondition if it is wrong, then rerun.
+      repro: cupel check --only spec.contracts --paths src/lib.rs
+    postcondition of `half` violated in `ledger/src/lib.rs::tests::halves_one`: half of a positive amount is positive: ret > 0
+      fnd_4aa38d · contract.violated · tier 5 · confidence 1
+      at src/lib.rs:10
+    invariant of `post` violated in `ledger/src/lib.rs::tests::posts_three_entries`: an account holds two entries: self.entries.len() <= 2
+      fnd_bedc57 · contract.violated · tier 5 · confidence 1
+      at src/lib.rs:25
+```
+
+The evidence holds the `tool`, the contract's `kind` (`precondition`, `postcondition`, `invariant`), the `function`, the `message`, and the `test`. A run that did not complete in a root is a note. The gate key is `spec.contracts.violations`. Go, JavaScript, TypeScript, Java, and Clojure have no producer: their tests' failures do not say a contract failed (an `assert`, a Guava precondition, and a Clojure `:pre` all read as plain assertions), so the pair is `unsupported`.
+
+## Requirements and test provenance
+
+`meta.traceability` checks a change against the task's requirements. List their IDs in `cupel.toml`, under a per-language override when a repository's languages trace different ones:
+
+```toml
+[checks."meta.traceability"]
+requirements = ["REQ-12", "REQ-13"]
+```
+
+A test traces a requirement when the range added it (no test of that name in that file at the base commit) and its name carries the ID as whole words, in any case and with any separator: `test_req_12_parses`, `it("parses week dates #REQ-12")`, but not `test_req_120` or `testReq12`. A test that existed before the change passed without it, so it cannot show the change meets the requirement; the finding lists such tests with `added: false`. With no requirements configured the check passes with a note. The gate keys are `meta.traceability` (none untested) and `meta.traceability.untested`.
+
+`meta.oracle-independence` asks who wrote the evidence. Under a range, with a per-test coverage map (made at `--depth standard` for Rust, Go, and Python; see [Coverage](#coverage)), it finds the tests that run each changed function. A function a test from before the change runs is `independent`; one only tests the range added run is `evidence.self-authored-only`: worth checking those tests' expectations against the task rather than the code. Without a map, it labels nothing and says why. A registered oracle's independence is its verification: a result against an unverified oracle is already capped at tier 3 with an `oracle.unverified` finding (see [`cupel oracle`](#cupel-oracle)). The gate keys are `meta.oracle-independence.independent` and `self_authored_only`.
+
 ## Plugins
 
 A plugin is a check or a fact producer in its own executable, in any language, that speaks JSON over standard input and output. Cupel registers it beside the built-in checks and producers, so `describe`, `--only`, `--dry-run`, gates, `[checks."<id>"]` settings, and the support matrix treat it like one of them.
@@ -1172,6 +1218,9 @@ cyclomatic_max = 15
 order = ["domain", "app", "infra"]
 map = { domain = "src/domain/**", app = "src/app/**", infra = "src/infra/**" }
 
+[checks."meta.traceability"]       # the task's requirement IDs, traced by the names of added tests
+requirements = ["REQ-12", "REQ-13"]
+
 [oracles.release]                  # what checks compare against; see cupel oracle
 kind = "ref"
 ref = "v1.2.0"
@@ -1218,7 +1267,7 @@ depth = "quick"
 | `tests.quality` | `setup_statements_min` | `3` | The fewest leading statements tests in one file must share to be test.duplicate-setup. |
 <!-- end:check-settings -->
 
-**Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the check table under Checks. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening` or `static.api-surface`, which need a range, is rejected when the config loads.
+**Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the check table under Checks. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening`, `static.api-surface`, `meta.traceability`, or `meta.oracle-independence`, which need a range, is rejected when the config loads.
 
 Cupel writes only under `.cupel/` (run records, the SQLite fact store, `cache/` with coverage reports and per-test maps, scratch space) unless `--write` is given. An install you allow (`--install`, or yes to the question) runs your package manager, which for the JavaScript launchers, uv, and poetry adds a dev dependency to `package.json` or `pyproject.toml` and its lockfile. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
 
