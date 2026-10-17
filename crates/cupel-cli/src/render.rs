@@ -1,20 +1,30 @@
-// ABOUTME: Renders an envelope for stdout in each built format: pretty JSON, JSON lines, and text.
-// ABOUTME: Every renderer takes the already-paged envelope; SARIF (P6.1) is added beside them here.
+// ABOUTME: Renders an envelope for stdout in each format: pretty JSON, JSON lines, text, and SARIF.
+// ABOUTME: Every renderer takes the already-paged envelope; only SARIF also reads the repository root.
+mod sarif;
 mod text;
 
 #[cfg(test)]
 pub(crate) mod fixture;
 
+use std::path::Path;
+
 use cupel_core::Envelope;
 
 use crate::format::Rendering;
 
-/// The stdout text of `envelope` in `rendering`. `color` applies to text only.
-pub fn render(envelope: &Envelope, rendering: Rendering, color: bool) -> String {
+/// The stdout text of `envelope` in `rendering`. `color` applies to text only; `root`, the
+/// repository root when one was resolved, to SARIF only.
+pub fn render(
+    envelope: &Envelope,
+    rendering: Rendering,
+    color: bool,
+    root: Option<&Path>,
+) -> String {
     match rendering {
         Rendering::Json => json(envelope),
         Rendering::Jsonl => jsonl(envelope),
         Rendering::Text => text::render(envelope, color),
+        Rendering::Sarif => sarif::render(envelope, root),
     }
 }
 

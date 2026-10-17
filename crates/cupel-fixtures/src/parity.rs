@@ -91,12 +91,16 @@ impl Twin {
     }
 }
 
-/// `text` with every root spelling replaced and, when it is an envelope, redacted (ADR-003); each
-/// event line of a stream has its run ID and timings masked, and in a text rendering the `run`
-/// line (ID, start, duration, seed) is masked whole and each check's `N ms` too.
+/// `text` with every root spelling replaced and, when it is an envelope or a SARIF log, redacted
+/// (ADR-003); each event line of a stream has its run ID and timings masked, and in a text
+/// rendering the `run` line (ID, start, duration, seed) is masked whole and each check's `N ms`
+/// too.
 fn redacted(text: &str, root: &Path) -> String {
     if let Ok(envelope) = serde_json::from_str::<Envelope>(text) {
         return canonical_json(&crate::redact(&envelope, root));
+    }
+    if let Some(log) = crate::sarif::sarif_log(text) {
+        return canonical_json(&crate::redact_sarif(&log, root));
     }
     let spellings = [root.canonicalize().ok(), Some(root.to_path_buf())];
     let mut lines = String::new();

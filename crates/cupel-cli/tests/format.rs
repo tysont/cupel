@@ -1,5 +1,5 @@
 // ABOUTME: Integration tests for output-format selection: piped stdout gets JSON, `--format` and
-// ABOUTME: `CUPEL_FORMAT` override it, and invalid or unbuilt formats produce exit-2 envelopes.
+// ABOUTME: `CUPEL_FORMAT` override it, `sarif` prints a SARIF log, and an invalid format exits 2.
 mod support;
 
 use serde_json::{Value, json};
@@ -143,16 +143,12 @@ fn usage_errors_render_in_the_requested_format_when_it_is_valid() {
 }
 
 #[test]
-fn sarif_is_not_implemented_and_renders_as_json() {
+fn sarif_renders_a_sarif_log_instead_of_the_envelope() {
     let outcome = run(["describe", "--format", "sarif"]);
-    assert_eq!(outcome.code, 2);
-    let finding = outcome.finding();
-    assert_eq!(finding["kind"], json!("cli.not-implemented"));
-    assert_eq!(
-        finding["id"],
-        json!(cli_finding_id("cli.not-implemented", "--format sarif"))
-    );
-    assert!(finding["detail"].as_str().unwrap().contains("P6.1"));
+    assert_eq!(outcome.code, 0, "{}", outcome.stderr);
+    let log: Value = serde_json::from_str(&outcome.stdout).expect("SARIF is JSON");
+    assert_eq!(log["version"], json!("2.1.0"));
+    assert_eq!(log["runs"][0]["tool"]["driver"]["name"], json!("cupel"));
 }
 
 #[test]

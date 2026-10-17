@@ -148,8 +148,8 @@ fn examples(command: &Value) -> Vec<(String, i64)> {
 
 #[test]
 fn every_verb_is_implemented() {
-    // `oracle` (P5.2) was the last verb with a plan step; pending flags and formats still name
-    // theirs (`describe --agent`, `--format sarif`).
+    // `oracle` (P5.2) was the last verb with a plan step; pending flags still name theirs
+    // (`describe --agent`).
     assert_eq!(pending_examples(), Vec::<(String, String, String)>::new());
 }
 

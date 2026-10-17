@@ -1,7 +1,25 @@
 // ABOUTME: End-to-end golden tests against the real `cupel` binary: `describe`, `describe check`,
-// ABOUTME: and a usage-error envelope, plus how `run_cupel` captures output that is not JSON.
+// ABOUTME: a usage-error envelope, a SARIF check of a fixture, and how `run_cupel` captures output that is not JSON.
 use cupel_core::{ExitCode, Status};
-use cupel_fixtures::run_cupel;
+use cupel_fixtures::{copy_repo, run_cupel, sarif_problems};
+
+#[test]
+fn a_sarif_check_of_the_rust_fixture_matches_its_golden() {
+    let dir = tempfile::tempdir().unwrap();
+    copy_repo("rust", dir.path());
+    let check = ["check", "--only", "static.complexity"];
+    let first = run_cupel(&[&check[..], &["--format", "json"]].concat(), dir.path());
+    let suppressed = first.envelope().findings[0].id.to_string();
+    let suppress = ["suppress", &suppressed, "--reason", "measured later"];
+    assert_eq!(run_cupel(&suppress, dir.path()).code, Some(0));
+
+    let outcome = run_cupel(&[&check[..], &["--format", "sarif"]].concat(), dir.path());
+
+    assert_eq!(outcome.code, Some(0), "{}", outcome.stderr);
+    assert!(outcome.envelope.is_none(), "a SARIF log is not an envelope");
+    assert_eq!(sarif_problems(&outcome.sarif()), Vec::<String>::new());
+    outcome.assert_sarif_golden("cli/sarif-check");
+}
 
 #[test]
 fn describe_matches_its_golden() {

@@ -88,7 +88,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "repeated": false,
         "required": false,
         "stability": "experimental",
-        "summary": "Output format; json when stdout is not a terminal, text when it is.",
+        "summary": "Output format: json (the envelope), jsonl, text, or sarif (SARIF 2.1.0); json when stdout is not a terminal, text when it is.",
         "value": "enum",
         "value_name": "FORMAT",
         "values": [

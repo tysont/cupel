@@ -204,7 +204,7 @@ Without `--budget`, checks run in the order `cupel describe --all` lists them; w
 | `--gate`, `--no-gate` | Evaluate `[gate.changed]` for range scopes or `[gate.tree]` otherwise. On by default when the table exists; `--gate` without the table is exit 2 |
 | `--against baseline\|REF\|run:ID` | What `new_since_baseline` and each check's `delta` are computed against |
 | `--dry-run` | Return the plan (checks, targets, facts, estimates, files it would write) and run nothing |
-| `--format json\|jsonl\|text` | JSON when stdout is not a terminal, text when it is |
+| `--format json\|jsonl\|text\|sarif` | JSON when stdout is not a terminal, text when it is |
 
 Here is a small Python repository. An agent's branch added a shipping calculator, loosened one test's assertion, and skipped another test. The gate fails:
 
@@ -342,6 +342,8 @@ The same run as JSON, trimmed to two checks, one finding, and one action:
 ```
 
 Every object has a fixed key set; an absent value is `null`, never a missing key (a check result's `notes`, omitted when empty, is the one exception). `status` is one of `pass`, `fail`, `partial`, `error`, or `plan`. A check result in `error` says why in its `notes`, such as a tool that could not run. `--format jsonl` writes the envelope header and then one finding per line. `cupel describe schema run` and `cupel describe schema finding` are the full schemas.
+
+`--format sarif` writes the envelope as a [SARIF 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/) log for code-scanning tools and editors, from every verb. Each finding is a result: its kind is the `ruleId`, its severity the `level` (`fail` is `error`, `warn` is `warning`, `info` is `note`), its location a region relative to the `SRCROOT` base (the repository root), and its ID `partialFingerprints["cupel/findingId"]`; a suppressed finding carries an `accepted` suppression, and `fixes` is always empty. The rules are the finding kinds of the checks that ran, described as `cupel describe finding` describes them. The commit is in `versionControlProvenance` and the exit code in the invocation. What SARIF has no place for is kept in `properties`: a result's holds the finding's check, tier, confidence, evidence, action, and repro; the invocation's holds the envelope's `run`; the run's holds the rest of the envelope (checks, summary and gate, `next_actions`, and each verb's own payload).
 
 ### `cupel survey`
 
@@ -600,7 +602,7 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 | Flag | Meaning |
 |---|---|
-| `--format json\|jsonl\|text` | JSON when stdout is not a terminal, text when it is; `CUPEL_FORMAT` also sets it |
+| `--format json\|jsonl\|text\|sarif` | JSON when stdout is not a terminal, text when it is; `CUPEL_FORMAT` also sets it |
 | `--dry-run` | Preview what would run or be written; change nothing |
 | `--describe` | Describe the verb instead of running it |
 | `--config PATH`, `--profile NAME` | Use this `cupel.toml`, or apply `[profile.NAME]` from it |

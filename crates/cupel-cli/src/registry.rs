@@ -591,7 +591,8 @@ fn invocation_flags() -> Vec<ArgDescription> {
             "--format",
             "FORMAT",
             &["json", "jsonl", "text", "sarif"],
-            "Output format; json when stdout is not a terminal, text when it is.",
+            "Output format: json (the envelope), jsonl, text, or sarif (SARIF 2.1.0); json when \
+             stdout is not a terminal, text when it is.",
         )
         .env(Setting::Format.env_var()),
         switch(

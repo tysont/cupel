@@ -45,10 +45,12 @@ pub mod parity;
 mod redact;
 mod repos;
 mod run;
+mod sarif;
 
 pub use captures::Capture;
 pub use cupel_plugin::evidence;
 pub use golden::{GoldenError, GoldenMode, Goldens, assert_golden, canonical_json};
-pub use redact::redact;
+pub use redact::{redact, redact_sarif};
 pub use repos::{copy_repo, repo_path};
 pub use run::{Outcome, run_cupel};
+pub use sarif::sarif_problems;
