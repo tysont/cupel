@@ -1,0 +1,128 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "standard",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `analyze.<tool>.<rule>`.",
+            "properties": {
+              "level": {
+                "description": "`error`, `warning`, or `note`.",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "rule": {
+                "description": "The analyzer's rule or error code, as it reported it.",
+                "type": "string"
+              },
+              "tool": {
+                "description": "The analyzer that reported it, such as `mypy`.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tool",
+              "rule",
+              "level",
+              "message"
+            ],
+            "title": "Diagnostic",
+            "type": "object"
+          },
+          "kind": "analyze.<tool>.<rule>",
+          "summary": "A type checker or linter reported a problem: `<tool>` is the analyzer and `<rule>` its rule or error code. Errors fail, warnings warn, notes inform."
+        }
+      ],
+      "id": "static.analyze",
+      "metrics": [
+        {
+          "name": "errors",
+          "per": "scope",
+          "summary": "Results the analyzers reported as errors (type errors, error-level lints)."
+        },
+        {
+          "name": "diagnostics",
+          "per": "scope",
+          "summary": "Every result the analyzers reported."
+        }
+      ],
+      "needs": [
+        "analyzer-report"
+      ],
+      "stability": "experimental",
+      "summary": "Runs each language's type checker at its strictest and its linters with the project's configuration, and reports what they find.",
+      "tier": 1,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

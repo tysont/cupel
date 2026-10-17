@@ -200,12 +200,25 @@ fn base_reports_the_removed_changed_and_added_items_in_every_language() {
         assert_eq!(findings(&envelope), expected(), "{}", library.lang);
         let result = &envelope.checks[0];
         assert_eq!(result.status, CheckStatus::Fail, "{}", library.lang);
-        assert_eq!(result.metrics["breaking"], 2.0, "{}", library.lang);
-        assert_eq!(result.metrics["widened"], 1.0, "{}", library.lang);
+        assert_eq!(
+            result.metrics.get("breaking"),
+            Some(&2.0),
+            "{}",
+            library.lang
+        );
+        assert_eq!(
+            result.metrics.get("widened"),
+            Some(&1.0),
+            "{}",
+            library.lang
+        );
         let removed = with_change(&envelope, "removed");
         assert_eq!(removed.severity, Severity::Warn);
         assert_eq!(
-            removed.location.as_ref().map(|at| (at.file.as_str(), at.line)),
+            removed
+                .location
+                .as_ref()
+                .map(|at| (at.file.as_str(), at.line)),
             Some((library.file, line_of(&library.base.to_lowercase(), "gone("))),
             "{}: the removed item is located where it was at the base",
             library.lang
@@ -243,7 +256,10 @@ fn an_unchanged_surface_passes_and_a_tree_scope_is_skipped_because_it_needs_a_ra
     repo.write(library.file, library.base);
     let base = repo.commit("the library");
     repo.write("notes.py", "def helper() -> int:\n    return 0\n");
-    repo.write(library.file, &library.base.replace("return x", "return x * 1"));
+    repo.write(
+        library.file,
+        &library.base.replace("return x", "return x * 1"),
+    );
     repo.commit("a body changes");
     let ranged = repo.check(&["--base", &base], 0);
     assert_eq!(
@@ -268,7 +284,9 @@ fn the_no_breaking_gate_fails_on_a_break_and_passes_once_it_is_suppressed() {
         "[gate.changed]\n\"static.api-surface\" = \"no-breaking\"\n",
     );
     let gated = run_cupel(
-        &["check", "--only", CHECK, "--base", &base, "--format", "json"],
+        &[
+            "check", "--only", CHECK, "--base", &base, "--format", "json",
+        ],
         repo.path(),
     );
     assert_eq!(gated.code, Some(1), "{}", gated.stderr);
@@ -291,7 +309,9 @@ fn the_no_breaking_gate_fails_on_a_break_and_passes_once_it_is_suppressed() {
         }
     }
     let passed = run_cupel(
-        &["check", "--only", CHECK, "--base", &base, "--format", "json"],
+        &[
+            "check", "--only", CHECK, "--base", &base, "--format", "json",
+        ],
         repo.path(),
     );
     assert_eq!(passed.code, Some(0), "{}", passed.stdout);

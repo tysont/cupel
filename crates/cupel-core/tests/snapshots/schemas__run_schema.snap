@@ -3044,6 +3044,13 @@ expression: pretty(&schema)
       "description": "A toolchain-table row: the tools Cupel knows for a language, each list in default order.",
       "type": "object",
       "properties": {
+        "analyzers": {
+          "description": "Type checkers and linters, run in this order for `AnalyzerReport` (ADR-102).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ToolDescription"
+          }
+        },
         "bench": {
           "description": "Benchmark producers (`BenchSamples`).",
           "type": "array",
@@ -3095,6 +3102,7 @@ expression: pretty(&schema)
         }
       },
       "required": [
+        "analyzers",
         "bench",
         "coverage",
         "fuzz",

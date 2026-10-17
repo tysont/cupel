@@ -118,6 +118,39 @@
     "stability": "experimental",
     "subject": "language",
     "toolchain": {
+      "analyzers": [
+        {
+          "commands": [
+            {
+              "command": "<x> tsc --noEmit --strict --pretty false",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "install": "<add> typescript",
+          "producer": "tool.tsc"
+        },
+        {
+          "commands": [
+            {
+              "command": "<x> eslint --format json",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "file `eslint.config.js` exists",
+            "file `eslint.config.mjs` exists",
+            "file `eslint.config.cjs` exists",
+            "file `eslint.config.ts` exists",
+            "file `eslint.config.mts` exists",
+            "file `eslint.config.cts` exists"
+          ],
+          "format": null,
+          "install": "<add> eslint",
+          "producer": "tool.eslint"
+        }
+      ],
       "bench": [
         {
           "commands": [

@@ -1,5 +1,5 @@
 # ABOUTME: The toolchain table (design §8.7, ADR-036): per language, launchers, runners, coverage and
-# ABOUTME: bench producers in default order with detection rules and default commands; see the crate docs.
+# ABOUTME: bench producers, and analyzers in default order with detection rules and default commands; see the crate docs.
 
 # Presence probes for programs whose `--version` does not work; every other program is probed
 # with `<program> --version`.
@@ -95,6 +95,26 @@ id = "tool.bench-script"
 detect = [{ json = "package.json", path = ["scripts", "bench"] }]
 command = "<run> bench"
 
+# Analyzers (ADR-102): the type checker runs for TypeScript only; ESLint runs where the root has
+# a flat config, and is `unconfigured` elsewhere.
+[[rows.analyzers]]
+id = "tool.tsc"
+command = "<x> tsc --noEmit --strict --pretty false"
+install = "<add> typescript"
+
+[[rows.analyzers]]
+id = "tool.eslint"
+detect = [
+  { file = "eslint.config.js" },
+  { file = "eslint.config.mjs" },
+  { file = "eslint.config.cjs" },
+  { file = "eslint.config.ts" },
+  { file = "eslint.config.mts" },
+  { file = "eslint.config.cts" },
+]
+command = "<x> eslint --format json"
+install = "<add> eslint"
+
 # --- Python -------------------------------------------------------------------------------------
 
 [[rows]]
@@ -150,6 +170,16 @@ detect = [
 ]
 commands = { "tool.pytest" = "<m> pytest --benchmark-only --benchmark-json={out}" }
 
+[[rows.analyzers]]
+id = "tool.mypy"
+command = "<m> mypy --strict --output json"
+install = "<add> mypy"
+
+[[rows.analyzers]]
+id = "tool.ruff"
+command = "<m> ruff check --output-format json"
+install = "<add> ruff"
+
 # --- Rust ---------------------------------------------------------------------------------------
 
 [[rows]]
@@ -179,6 +209,11 @@ id = "tool.criterion"
 detect = [{ mentions = "criterion", in = ["Cargo.toml"] }]
 command = "cargo bench --bench {name} -- --save-baseline {id}"
 
+[[rows.analyzers]]
+id = "tool.clippy"
+command = "cargo clippy --all-targets --message-format=json"
+install = "rustup component add clippy"
+
 # --- Go -----------------------------------------------------------------------------------------
 
 [[rows]]
@@ -199,3 +234,12 @@ command = "go test -coverprofile={out} <packages>"
 [[rows.bench]]
 id = "tool.go-bench"
 command = "go test -run=^$ -bench=. <packages>"
+
+[[rows.analyzers]]
+id = "tool.go-vet"
+command = "go vet -json <packages>"
+
+[[rows.analyzers]]
+id = "tool.staticcheck"
+command = "staticcheck -f json <packages>"
+install = "go install honnef.co/go/tools/cmd/staticcheck@2024.1.1"

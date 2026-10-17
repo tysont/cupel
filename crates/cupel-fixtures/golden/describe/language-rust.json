@@ -115,6 +115,20 @@
     "stability": "experimental",
     "subject": "language",
     "toolchain": {
+      "analyzers": [
+        {
+          "commands": [
+            {
+              "command": "cargo clippy --all-targets --message-format=json",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "install": "rustup component add clippy",
+          "producer": "tool.clippy"
+        }
+      ],
       "bench": [
         {
           "commands": [

@@ -110,7 +110,7 @@ fn a_removed_item_is_breaking_and_located_where_it_was_at_the_base() {
         "cupel check --only static.api-surface --base c0ffee"
     );
     assert_eq!(result.status, CheckStatus::Fail);
-    assert_eq!(result.metrics["breaking"], 1.0);
+    assert_eq!(result.metrics.get("breaking"), Some(&1.0));
     assert_eq!(result.score, Some(score(1.0, "breaking", 2)));
 }
 
@@ -234,7 +234,10 @@ fn the_manifest_needs_api_surface_on_both_sides() {
                 ("api.breaking", ActionKind::Review),
                 ("api.widened", ActionKind::Review),
             ],
-            metrics: vec![("breaking", MetricPer::Scope), ("widened", MetricPer::Scope)],
+            metrics: vec![
+                ("breaking", MetricPer::Scope),
+                ("widened", MetricPer::Scope)
+            ],
             evidence: vec!["object", "object"],
         }
     );

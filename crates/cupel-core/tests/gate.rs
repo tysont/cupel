@@ -217,7 +217,12 @@ fn no_breaking_counts_the_check_s_breaking_findings_above_info() {
     let widened = envelope(
         "pass",
         &checks,
-        &[of_kind("api.widened", "fnd_000003", "static.api-surface", "info")],
+        &[of_kind(
+            "api.widened",
+            "fnd_000003",
+            "static.api-surface",
+            "info",
+        )],
     );
     assert_eq!(
         one("static.api-surface", "no-breaking", &widened),

@@ -48,6 +48,36 @@ pub struct FindingKindSpec {
     pub evidence: Map<String, Value>,
 }
 
+impl FindingKindSpec {
+    /// Whether a finding of `kind` is of this spec: the same kind, or, for a *template* such as
+    /// `analyze.<tool>.<rule>`, each `<…>` segment standing for one non-empty segment of `kind`
+    /// and a final one for one or more (ADR-102 §3).
+    pub fn matches(&self, kind: &str) -> bool {
+        if self.kind == kind {
+            return true;
+        }
+        let pattern: Vec<&str> = self.kind.split('.').collect();
+        let segments: Vec<&str> = kind.split('.').collect();
+        if segments.iter().any(|segment| segment.is_empty()) {
+            return false;
+        }
+        let placeholder = |segment: &str| segment.starts_with('<') && segment.ends_with('>');
+        let Some((last, fixed)) = pattern.split_last() else {
+            return false;
+        };
+        let rest_ok = if placeholder(last) {
+            segments.len() > fixed.len()
+        } else {
+            segments.len() == pattern.len() && segments.last() == Some(last)
+        };
+        rest_ok
+            && fixed
+                .iter()
+                .zip(&segments)
+                .all(|(expected, actual)| placeholder(expected) || expected == actual)
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct MetricSpec {
     pub name: String,

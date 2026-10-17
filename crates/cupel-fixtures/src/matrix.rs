@@ -378,7 +378,7 @@ fn verify_supported(goldens: &Goldens, check: &dyn Check, pair: &Pair) -> Result
             .manifest()
             .findings
             .iter()
-            .find(|spec| spec.kind == finding.kind)
+            .find(|spec| spec.matches(&finding.kind))
             .ok_or_else(|| format!("finding kind `{}` is not in the manifest", finding.kind))?;
         evidence::validate(&spec.evidence, &Value::Object(finding.evidence.0.clone()))
             .map_err(|problem| format!("{} {}: {problem}", finding.kind, finding.id))?;

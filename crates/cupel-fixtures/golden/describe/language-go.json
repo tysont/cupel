@@ -115,6 +115,32 @@
     "stability": "experimental",
     "subject": "language",
     "toolchain": {
+      "analyzers": [
+        {
+          "commands": [
+            {
+              "command": "go vet -json <packages>",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "install": null,
+          "producer": "tool.go-vet"
+        },
+        {
+          "commands": [
+            {
+              "command": "staticcheck -f json <packages>",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "install": "go install honnef.co/go/tools/cmd/staticcheck@2024.1.1",
+          "producer": "tool.staticcheck"
+        }
+      ],
       "bench": [
         {
           "commands": [

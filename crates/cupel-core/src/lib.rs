@@ -4,6 +4,7 @@
 //! structural hashes, and the extension model of facts, producers, and checks (design §8.3).
 
 mod actions;
+mod analyzer;
 mod base;
 pub mod budget;
 mod cancel;
@@ -54,6 +55,7 @@ mod test_results;
 mod writer;
 
 pub use actions::{NEXT_ACTIONS, next_actions};
+pub use analyzer::{AnalyzerLevel, AnalyzerReport, AnalyzerResult, AnalyzerRun, AnalyzerStatus};
 pub use base::{BaseTree, Range};
 pub use cancel::Cancellation;
 pub use check::{

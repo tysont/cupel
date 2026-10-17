@@ -115,6 +115,32 @@
     "stability": "experimental",
     "subject": "language",
     "toolchain": {
+      "analyzers": [
+        {
+          "commands": [
+            {
+              "command": "<m> mypy --strict --output json",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "install": "<add> mypy",
+          "producer": "tool.mypy"
+        },
+        {
+          "commands": [
+            {
+              "command": "<m> ruff check --output-format json",
+              "runner": null
+            }
+          ],
+          "detect": [],
+          "format": null,
+          "install": "<add> ruff",
+          "producer": "tool.ruff"
+        }
+      ],
       "bench": [
         {
           "commands": [

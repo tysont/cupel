@@ -338,6 +338,23 @@ fn describe_finding_shows_its_check_action_and_evidence_schema() {
 }
 
 #[test]
+fn describe_finding_resolves_a_reported_kind_through_its_template() {
+    let description = assert_described(&["describe", "finding", "analyze.ruff.F401"], "finding");
+    assert_eq!(
+        (
+            &description["kind"],
+            &description["check"],
+            &description["action"]
+        ),
+        (
+            &json!("analyze.<tool>.<rule>"),
+            &json!("static.analyze"),
+            &json!("fix_bug")
+        )
+    );
+}
+
+#[test]
 fn unknown_checks_and_finding_kinds_are_usage_errors_listing_the_known_ones() {
     for (args, valid) in [
         (vec!["describe", "static.complexty"], "static.complexity"),

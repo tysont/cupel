@@ -2,11 +2,11 @@
 // ABOUTME: Parsing checks ID syntax only; this is where unknown checks, metrics, and languages are caught.
 use crate::check::{Check, CheckRegistry, Manifest};
 use crate::config::Config;
+use crate::config::GateCondition;
 use crate::config::error::ConfigError;
 use crate::config::file::GateSection;
-use crate::config::GateCondition;
-use crate::gate::is_breaking;
 use crate::error::Result;
+use crate::gate::is_breaking;
 use crate::id::{CheckId, LangId};
 use crate::rank::MetricPer;
 

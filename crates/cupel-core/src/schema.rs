@@ -5,6 +5,7 @@ use schemars::transform::transform_subschemas;
 use schemars::{JsonSchema, Schema};
 use serde_json::{Value, json};
 
+use crate::analyzer::AnalyzerReport;
 use crate::config::ConfigFile;
 use crate::coverage::CoverageMap;
 use crate::divergence::DivergenceResults;
@@ -80,7 +81,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 18] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 19] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -97,6 +98,7 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 18] = [
     (FactKind::PerTestMap, fact_schema::<PerTestMap>),
     (FactKind::MutationOutcomes, fact_schema::<MutationOutcomes>),
     (FactKind::PropertyResults, fact_schema::<PropertyResults>),
+    (FactKind::AnalyzerReport, fact_schema::<AnalyzerReport>),
     (
         FactKind::DivergenceResults,
         fact_schema::<DivergenceResults>,

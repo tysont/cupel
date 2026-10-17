@@ -195,6 +195,8 @@ pub struct ToolchainDescription {
     pub coverage: Vec<ToolDescription>,
     /// Benchmark producers (`BenchSamples`).
     pub bench: Vec<ToolDescription>,
+    /// Type checkers and linters, run in this order for `AnalyzerReport` (ADR-102).
+    pub analyzers: Vec<ToolDescription>,
     /// Property-testing tools.
     pub property: Vec<ToolId>,
     /// Fuzzers.

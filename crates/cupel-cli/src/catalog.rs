@@ -86,17 +86,22 @@ impl Catalog {
         })
     }
 
-    /// The finding kind `kind`, from the manifest of the check that emits it, else from the
-    /// kinds Cupel attaches to a run outside any check (ADR-091 §5).
+    /// The finding kind `kind`, from the manifest of the check that emits it (a kind it
+    /// declares, else a template that matches it, ADR-102 §3), else from the kinds Cupel
+    /// attaches to a run outside any check (ADR-091 §5).
     pub fn finding(&self, kind: &str) -> Option<FindingDescription> {
-        let emitted = self.checks.iter().find_map(|check| {
-            let manifest = check.manifest();
-            manifest
-                .findings
-                .iter()
-                .find(|spec| spec.kind == kind)
-                .map(|spec| FindingDescription::of(manifest, spec))
-        });
+        let declared = |matches: &dyn Fn(&cupel_core::FindingKindSpec) -> bool| {
+            self.checks.iter().find_map(|check| {
+                let manifest = check.manifest();
+                manifest
+                    .findings
+                    .iter()
+                    .find(|spec| matches(spec))
+                    .map(|spec| FindingDescription::of(manifest, spec))
+            })
+        };
+        let emitted =
+            declared(&|spec| spec.kind == kind).or_else(|| declared(&|spec| spec.matches(kind)));
         emitted.or_else(|| {
             oracle::cap::finding_kinds()
                 .into_iter()

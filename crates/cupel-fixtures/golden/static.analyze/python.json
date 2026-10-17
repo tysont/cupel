@@ -1,0 +1,180 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "static.analyze",
+      "metrics": {
+        "diagnostics": 2.0,
+        "errors": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "diagnostics",
+        "value": 2.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 1
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 2,
+        "summary": "Fix what ruff reports at ledger.py:1 (F401), or configure ruff if the rule does not apply to this project."
+      },
+      "check": "static.analyze",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "level": "warning",
+        "message": "`os` imported but unused",
+        "rule": "F401",
+        "tool": "ruff"
+      },
+      "id": "fnd_c7ffdd",
+      "kind": "analyze.ruff.F401",
+      "location": {
+        "col": 8,
+        "end_col": 10,
+        "end_line": 1,
+        "file": "ledger.py",
+        "line": 1
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.analyze --paths ledger.py",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c7ffdd --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 1,
+      "title": "ruff F401: `os` imported but unused"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix what mypy reports at ledger.py:9 (arg-type), or configure mypy if the rule does not apply to this project."
+      },
+      "check": "static.analyze",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "level": "error",
+        "message": "Argument 2 to \"add\" has incompatible type \"str\"; expected \"int\"",
+        "rule": "arg-type",
+        "tool": "mypy"
+      },
+      "id": "fnd_109c78",
+      "kind": "analyze.mypy.arg-type",
+      "location": {
+        "col": 19,
+        "end_col": 22,
+        "end_line": 9,
+        "file": "ledger.py",
+        "line": 9
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.analyze --paths ledger.py",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_109c78 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 1,
+      "title": "mypy arg-type: Argument 2 to \"add\" has incompatible type \"str\"; expected \"int\""
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_109c78",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Fix what mypy reports at ledger.py:9 (arg-type), or configure mypy if the rule does not apply to this project."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c7ffdd",
+      "kind": "fix_bug",
+      "priority": 2,
+      "summary": "Fix what ruff reports at ledger.py:1 (F401), or configure ruff if the rule does not apply to this project."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 2
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

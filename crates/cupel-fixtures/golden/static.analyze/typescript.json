@@ -1,0 +1,142 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "static.analyze",
+      "metrics": {
+        "diagnostics": 1.0,
+        "errors": 1.0
+      },
+      "notes": [
+        "eslint unconfigured: Add an ESLint flat config (eslint.config.js or .mjs) to the project root; ESLint does not run without one. (typescript)"
+      ],
+      "oracle": null,
+      "score": {
+        "n": 1,
+        "unit": "diagnostics",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 1
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix what tsc reports at ledger.ts:5 (TS2345), or configure tsc if the rule does not apply to this project."
+      },
+      "check": "static.analyze",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "level": "error",
+        "message": "Argument of type 'string' is not assignable to parameter of type 'number'.",
+        "rule": "TS2345",
+        "tool": "tsc"
+      },
+      "id": "fnd_7fa2aa",
+      "kind": "analyze.tsc.TS2345",
+      "location": {
+        "col": 37,
+        "end_col": null,
+        "end_line": 5,
+        "file": "ledger.ts",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.analyze --paths ledger.ts",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_7fa2aa --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 1,
+      "title": "tsc TS2345: Argument of type 'string' is not assignable to parameter of type 'number'."
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_7fa2aa",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Fix what tsc reports at ledger.ts:5 (TS2345), or configure tsc if the rule does not apply to this project."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "typescript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 1
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

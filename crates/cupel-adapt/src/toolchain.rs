@@ -43,6 +43,9 @@ pub struct Row {
     pub coverage: Vec<Tool>,
     #[serde(default)]
     pub bench: Vec<Tool>,
+    /// Type checkers and linters, run in this order (ADR-102).
+    #[serde(default)]
+    pub analyzers: Vec<Tool>,
     #[serde(default)]
     pub property: Vec<ToolId>,
     #[serde(default)]
@@ -64,7 +67,7 @@ pub struct Launcher {
     pub values: BTreeMap<String, String>,
 }
 
-/// A tool producer: a runner, coverage, or bench producer.
+/// A tool producer: a runner, coverage, or bench producer, or an analyzer.
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Tool {
@@ -218,9 +221,13 @@ fn detected(rules: &[Rule], dirs: &Dirs<'_>) -> bool {
 }
 
 impl Row {
-    /// Every tool producer of the row: runners, then coverage, then bench producers.
+    /// Every tool of the row: runners, then coverage and bench producers, then analyzers.
     fn tools(&self) -> impl Iterator<Item = &Tool> {
-        self.runners.iter().chain(&self.coverage).chain(&self.bench)
+        self.runners
+            .iter()
+            .chain(&self.coverage)
+            .chain(&self.bench)
+            .chain(&self.analyzers)
     }
 
     /// The first launcher whose rules hold in `dirs`.
@@ -269,6 +276,7 @@ impl Row {
             runners: self.runners.iter().map(Tool::describe).collect(),
             coverage: self.coverage.iter().map(Tool::describe).collect(),
             bench: self.bench.iter().map(Tool::describe).collect(),
+            analyzers: self.analyzers.iter().map(Tool::describe).collect(),
             property: self.property.clone(),
             fuzz: self.fuzz.clone(),
             race: self.race.clone(),
