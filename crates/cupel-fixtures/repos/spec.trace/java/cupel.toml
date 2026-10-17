@@ -1,0 +1,6 @@
+# spec.trace's fixture (ADR-116): the counter's tests record traces into CUPEL_TRACE_DIR, validated against
+# spec/Counter.tla. `Bump` adds two but logs an `Inc`.
+[oracles.counter]
+kind = "spec"
+spec = "spec/Counter.tla"
+lang = "tla+"

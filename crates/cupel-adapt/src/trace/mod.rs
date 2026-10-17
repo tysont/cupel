@@ -76,8 +76,10 @@ pub fn record(ctx: &ProduceCtx, baseline: &TestResults) -> Result<Recorded> {
             .join("trace")
             .join(baseline.runner.as_str()),
     )?;
+    // A seed, in the declared order, makes a runner that caches results (`go test`) run again.
     let options = RunOptions {
         env: vec![(TRACE_DIR.to_owned(), dir.to_string_lossy().into_owned())],
+        seed: Some(ctx.seed),
         ..RunOptions::default()
     };
     let ran = runner.run(ctx, &TestSelection::All, &options)?;
