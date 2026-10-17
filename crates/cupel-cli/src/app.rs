@@ -128,13 +128,20 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     if keeps_run_record(run, cli) {
         record(&writer, &envelope, &run.take_executions(), &mut stderr);
     }
-    let mut output = output(
-        envelope,
-        &presentation(rendering).rooted(writer.root()),
-        stderr,
-    );
+    routed(
+        cli,
+        output(
+            envelope,
+            &presentation(rendering).rooted(writer.root()),
+            stderr,
+        ),
+    )
+}
+
+/// `output` as the process writes it: under `serve --mcp` stdout carries the protocol, so the
+/// server's own envelope follows its diagnostics on stderr (ADR-121).
+fn routed(cli: &Cli, mut output: Output) -> Output {
     if matches!(&cli.verb, Some(VerbArgs::Serve(args)) if args.mcp) {
-        // Stdout carries the protocol; the server's own envelope follows its diagnostics (ADR-121).
         let envelope = std::mem::take(&mut output.stdout);
         output.stderr.push_str(&envelope);
     }

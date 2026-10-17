@@ -2,14 +2,13 @@
 // ABOUTME: tools, envelopes equal to cold runs, events as progress, usage errors, a clean stdout, and the daemon.
 mod support;
 
-use std::io::{BufRead, BufReader, Write};
-use std::path::Path;
-use std::process::{Child, ChildStdin, Command, Stdio};
-use std::sync::mpsc::{self, Receiver};
+use std::path::{Path, PathBuf};
+use std::process::{Child, Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
 
 use cupel_core::Envelope;
+use cupel_serve::mcp::Client;
 use serde_json::{Value, json};
 use support::{Outcome, Repo};
 
@@ -43,10 +42,7 @@ fn binary(root: &Path) -> Command {
 /// A `cupel serve --mcp` process in a repository, spoken to over its stdin and stdout.
 struct Mcp {
     child: Child,
-    input: Option<ChildStdin>,
-    lines: Receiver<String>,
-    /// Every line it wrote to stdout so far.
-    written: Vec<String>,
+    client: Client,
 }
 
 impl Mcp {
@@ -59,52 +55,18 @@ impl Mcp {
             .stderr(Stdio::piped())
             .spawn()
             .expect("cupel serve --mcp starts");
-        let input = child.stdin.take();
-        let stdout = BufReader::new(child.stdout.take().unwrap());
-        let (sender, lines) = mpsc::channel();
-        thread::spawn(move || {
-            for line in stdout.lines() {
-                let Ok(line) = line else { return };
-                if sender.send(line).is_err() {
-                    return;
-                }
-            }
-        });
-        Self {
-            child,
-            input,
-            lines,
-            written: Vec::new(),
-        }
+        let input = child.stdin.take().unwrap();
+        let output = child.stdout.take().unwrap();
+        let client = Client::new(input, output, PATIENCE);
+        Self { child, client }
     }
 
     fn send(&mut self, message: &Value) {
-        let input = self.input.as_mut().expect("stdin is open");
-        writeln!(input, "{message}").unwrap();
-        input.flush().unwrap();
+        self.client.send(&message.to_string());
     }
 
-    fn next(&mut self) -> Value {
-        let line = self
-            .lines
-            .recv_timeout(PATIENCE)
-            .expect("the server answers in time");
-        self.written.push(line.clone());
-        serde_json::from_str(&line).unwrap_or_else(|_| panic!("a JSON line: {line}"))
-    }
-
-    /// Sends request `id` and returns every message up to and including its response.
     fn ask(&mut self, id: u64, method: &str, params: &Value) -> Vec<Value> {
-        self.send(&json!({"jsonrpc": "2.0", "id": id, "method": method, "params": params}));
-        let mut messages = Vec::new();
-        loop {
-            let message = self.next();
-            let done = message["id"] == json!(id);
-            messages.push(message);
-            if done {
-                return messages;
-            }
-        }
+        self.client.ask(&json!(id), method, &params.to_string())
     }
 
     fn initialize(&mut self) -> Value {
@@ -123,7 +85,7 @@ impl Mcp {
 
     /// Closes stdin and returns the exit code, what stdout still held, and stderr.
     fn close(mut self) -> (i32, Vec<String>, String) {
-        drop(self.input.take());
+        self.client.close();
         let deadline = Instant::now() + Duration::from_secs(60);
         let status = loop {
             if let Some(status) = self.child.try_wait().unwrap() {
@@ -132,7 +94,7 @@ impl Mcp {
             assert!(Instant::now() < deadline, "the server never exited");
             thread::sleep(Duration::from_millis(20));
         };
-        let rest: Vec<String> = self.lines.try_iter().collect();
+        let rest = self.client.unread();
         let mut stderr = String::new();
         let mut pipe = self.child.stderr.take().unwrap();
         std::io::Read::read_to_string(&mut pipe, &mut stderr).unwrap();
@@ -176,10 +138,17 @@ fn structured(result: &Value) -> Value {
     document
 }
 
+/// A repository with a server on it.
+fn served(extra: &[&str]) -> (Repo, PathBuf, Mcp) {
+    let repo = repo();
+    let root = repo.root();
+    let mcp = Mcp::start(&root, extra);
+    (repo, root, mcp)
+}
+
 #[test]
 fn serve_mcp_initializes_and_lists_the_tools() {
-    let repo = repo();
-    let mut mcp = Mcp::start(&repo.root(), &[]);
+    let (_repo, _root, mut mcp) = served(&[]);
     let initialized = mcp.initialize();
     assert_eq!(initialized["result"]["protocolVersion"], "2025-11-25");
     assert_eq!(
@@ -193,16 +162,16 @@ fn serve_mcp_initializes_and_lists_the_tools() {
         names,
         ["check", "survey", "explain", "tests_impacted", "describe"]
     );
-    for tool in tools {
-        assert_eq!(tool["inputSchema"]["additionalProperties"], false, "{tool}");
-    }
+    let closed: Vec<&Value> = tools
+        .iter()
+        .map(|tool| &tool["inputSchema"]["additionalProperties"])
+        .collect();
+    assert_eq!(closed, [&json!(false); 5]);
 }
 
 #[test]
 fn a_check_call_returns_the_envelope_cupel_check_prints_for_the_same_arguments() {
-    let repo = repo();
-    let root = repo.root();
-    let mut mcp = Mcp::start(&root, &[]);
+    let (repo, root, mut mcp) = served(&[]);
     mcp.initialize();
     let result = mcp.call(2, "check", &json!({"only": ["static.complexity"]}));
     let command = ["check", "--only", "static.complexity", "--format", "json"];
@@ -226,44 +195,48 @@ fn a_check_call_returns_the_envelope_cupel_check_prints_for_the_same_arguments()
     assert_eq!(gated["isError"], false);
 }
 
+/// Calls `tool` as request `id` and checks it ran `command` and returned what a cold run of it
+/// prints, marked as an error exactly when that run's exit code is one.
+fn assert_answers_as_cold(mcp: &mut Mcp, root: &Path, call: (u64, &str, &Value), command: &[&str]) {
+    let (id, tool, arguments) = call;
+    let result = mcp.call(id, tool, arguments);
+    assert_eq!(result["_meta"]["cupel.dev/command"], json!(command));
+    let local = cold(root, command);
+    assert_eq!(
+        redacted(&structured(&result), root),
+        redacted(&local.envelope(), root),
+        "{tool}"
+    );
+    assert_eq!(result["isError"], json!(matches!(local.code, 2..=4 | 6)));
+}
+
 #[test]
 fn the_other_tools_answer_as_their_verbs_do() {
-    let repo = repo();
-    let root = repo.root();
-    let mut mcp = Mcp::start(&root, &[]);
-    let cases: [(&str, Value, &[&str]); 4] = [
-        (
-            "describe",
-            json!({"subject": ["check"]}),
-            &["describe", "check", "--format", "json"],
-        ),
-        (
-            "tests_impacted",
-            json!({}),
-            &["tests", "--impacted", "--format", "json"],
-        ),
-        (
-            "survey",
-            json!({"only": ["static.complexity"]}),
-            &["survey", "--only", "static.complexity", "--format", "json"],
-        ),
-        (
-            "explain",
-            json!({"target": "static.complexity"}),
-            &["explain", "static.complexity", "--format", "json"],
-        ),
-    ];
-    for (id, (tool, arguments, command)) in (2..).zip(cases) {
-        let result = mcp.call(id, tool, &arguments);
-        assert_eq!(result["_meta"]["cupel.dev/command"], json!(command));
-        let local = cold(&root, command);
-        assert_eq!(
-            redacted(&structured(&result), &root),
-            redacted(&local.envelope(), &root),
-            "{tool}"
-        );
-        assert_eq!(result["isError"], json!(local.code >= 2 && local.code != 5));
-    }
+    let (_repo, root, mut mcp) = served(&[]);
+    assert_answers_as_cold(
+        &mut mcp,
+        &root,
+        (2, "describe", &json!({"subject": ["check"]})),
+        &["describe", "check", "--format", "json"],
+    );
+    assert_answers_as_cold(
+        &mut mcp,
+        &root,
+        (3, "tests_impacted", &json!({})),
+        &["tests", "--impacted", "--format", "json"],
+    );
+    assert_answers_as_cold(
+        &mut mcp,
+        &root,
+        (4, "survey", &json!({"only": ["static.complexity"]})),
+        &["survey", "--only", "static.complexity", "--format", "json"],
+    );
+    assert_answers_as_cold(
+        &mut mcp,
+        &root,
+        (5, "explain", &json!({"target": "static.complexity"})),
+        &["explain", "static.complexity", "--format", "json"],
+    );
 }
 
 /// `event` with its volatile values masked.
@@ -278,9 +251,7 @@ fn masked(mut event: Value) -> Value {
 
 #[test]
 fn events_arrive_as_progress_notifications_in_the_order_a_cold_run_writes_them() {
-    let repo = repo();
-    let root = repo.root();
-    let mut mcp = Mcp::start(&root, &[]);
+    let (_repo, root, mut mcp) = served(&[]);
     let params = json!({
         "name": "check",
         "arguments": {"only": ["static.complexity"]},
@@ -313,28 +284,38 @@ fn events_arrive_as_progress_notifications_in_the_order_a_cold_run_writes_them()
     assert_eq!(served.last().unwrap()["ev"], "run.end");
 }
 
+/// The argument the usage envelope of a `check` call with `arguments` names, after checking the
+/// call is marked as an error with exit 2.
+fn refused_argument(mcp: &mut Mcp, id: u64, arguments: &Value) -> Value {
+    let refused = mcp.call(id, "check", arguments);
+    assert_eq!(refused["isError"], true);
+    let envelope = structured(&refused);
+    assert_eq!(
+        (&envelope["exit_code"], &envelope["status"]),
+        (&json!(2), &json!("error"))
+    );
+    assert_eq!(envelope["findings"][0]["kind"], "cli.usage");
+    envelope["findings"][0]["evidence"]["argument"].clone()
+}
+
 #[test]
 fn a_bad_argument_is_a_usage_envelope_marked_as_an_error() {
-    let repo = repo();
-    let mut mcp = Mcp::start(&repo.root(), &[]);
-    let mistyped = mcp.call(2, "check", &json!({"only": "static.complexity"}));
-    assert_eq!(mistyped["isError"], true);
-    let envelope = structured(&mistyped);
-    assert_eq!(envelope["exit_code"], 2);
-    assert_eq!(envelope["status"], "error");
-    assert_eq!(envelope["findings"][0]["kind"], "cli.usage");
-    assert_eq!(envelope["findings"][0]["evidence"]["argument"], "only");
-    for (id, arguments, argument) in [
-        (3, json!({"format": "text"}), "format"),
-        (4, json!({"events": "stderr"}), "events"),
-        // A value of the right type that the verb rejects is the verb's own usage error.
-        (5, json!({"timeout": "soon"}), "--timeout"),
-    ] {
-        let refused = mcp.call(id, "check", &arguments);
-        assert_eq!(refused["isError"], true);
-        let envelope = structured(&refused);
-        assert_eq!(envelope["findings"][0]["evidence"]["argument"], argument);
-    }
+    let (_repo, _root, mut mcp) = served(&[]);
+    let mistyped = refused_argument(&mut mcp, 2, &json!({"only": "static.complexity"}));
+    assert_eq!(mistyped, "only");
+    assert_eq!(
+        refused_argument(&mut mcp, 3, &json!({"format": "text"})),
+        "format"
+    );
+    assert_eq!(
+        refused_argument(&mut mcp, 4, &json!({"events": "stderr"})),
+        "events"
+    );
+    // A value of the right type that the verb rejects is the verb's own usage error.
+    assert_eq!(
+        refused_argument(&mut mcp, 5, &json!({"timeout": "soon"})),
+        "--timeout"
+    );
     let unknown = mcp
         .ask(6, "tools/call", &json!({"name": "serve"}))
         .pop()
@@ -344,27 +325,37 @@ fn a_bad_argument_is_a_usage_envelope_marked_as_an_error() {
 
 #[test]
 fn stdout_carries_only_protocol_messages_and_the_serve_envelope_goes_to_stderr() {
-    let repo = repo();
-    let mut mcp = Mcp::start(&repo.root(), &["--quiet"]);
+    let (_repo, _root, mut mcp) = served(&["--quiet"]);
     mcp.initialize();
     mcp.call(2, "check", &json!({"only": ["static.complexity"]}));
-    let written = mcp.written.clone();
+    let received = mcp.client.received();
+    let written: Vec<Value> = received
+        .iter()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap()["jsonrpc"].clone())
+        .collect();
+    assert_eq!(written, vec![json!("2.0"); received.len()]);
     let (code, rest, stderr) = mcp.close();
     assert_eq!(code, 0, "{stderr}");
     assert!(rest.is_empty(), "{rest:?}");
-    for line in written {
-        let message: Value = serde_json::from_str(&line).unwrap();
-        assert_eq!(message["jsonrpc"], "2.0", "{line}");
-    }
     let envelope: Value = serde_json::from_str(&stderr).expect("stderr is the serve envelope");
     assert_eq!(envelope["findings"][0]["kind"], "serve.mcp-stopped");
     assert_eq!(envelope["findings"][0]["evidence"]["requests"], 1);
 }
 
+/// Waits up to thirty seconds for `path` to exist.
+fn appears(path: &Path) -> bool {
+    let deadline = Instant::now() + Duration::from_secs(30);
+    std::iter::from_fn(|| {
+        thread::sleep(Duration::from_millis(20));
+        Some(path.exists())
+    })
+    .find(|exists| *exists || Instant::now() >= deadline)
+    .unwrap_or(false)
+}
+
 #[test]
 fn serve_mcp_runs_beside_a_socket_daemon_and_takes_no_socket_flags() {
-    let repo = repo();
-    let root = repo.root();
+    let (_repo, root, mut mcp) = served(&["--watch"]);
     let mut daemon = binary(&root)
         .args(["serve", "--quiet", "--timeout", "300s"])
         .stdin(Stdio::null())
@@ -372,27 +363,27 @@ fn serve_mcp_runs_beside_a_socket_daemon_and_takes_no_socket_flags() {
         .stderr(Stdio::null())
         .spawn()
         .unwrap();
-    let socket = root.join(".cupel/serve.sock");
-    let deadline = Instant::now() + Duration::from_secs(30);
-    while !socket.exists() {
-        assert!(Instant::now() < deadline, "the daemon never listened");
-        thread::sleep(Duration::from_millis(20));
-    }
-    let mut mcp = Mcp::start(&root, &["--watch"]);
+    assert!(
+        appears(&root.join(".cupel/serve.sock")),
+        "the daemon listens"
+    );
     let result = mcp.call(2, "check", &json!({"only": ["static.complexity"]}));
     assert_eq!(structured(&result)["exit_code"], 0);
     drop(mcp);
     let stopped = cold(&root, &["serve", "--stop", "--format", "json"]);
     assert_eq!(stopped.finding()["evidence"]["requests"], json!(null));
     let _ = daemon.wait();
-    for flag in ["--socket", "--stop"] {
-        let mut args = vec!["serve", "--mcp", flag];
-        if flag == "--socket" {
-            args.push("x.sock");
-        }
-        args.extend(["--format", "json"]);
-        let refused = cold(&root, &args);
-        assert_eq!(refused.code, 2, "{flag}: {}", refused.stdout);
-        assert_eq!(refused.finding()["kind"], "cli.usage");
-    }
+    let socket = cold(
+        &root,
+        &["serve", "--mcp", "--socket", "x.sock", "--format", "json"],
+    );
+    let stop = cold(&root, &["serve", "--mcp", "--stop", "--format", "json"]);
+    let kinds = [
+        socket.finding()["kind"].clone(),
+        stop.finding()["kind"].clone(),
+    ];
+    assert_eq!(
+        (socket.code, stop.code, kinds),
+        (2, 2, [json!("cli.usage"), json!("cli.usage")])
+    );
 }

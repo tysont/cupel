@@ -12,6 +12,7 @@
 mod client;
 mod lines;
 pub mod mcp;
+mod mcp_client;
 pub mod protocol;
 mod server;
 mod watch;

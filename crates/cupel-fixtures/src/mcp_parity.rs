@@ -1,12 +1,10 @@
 // ABOUTME: MCP parity (ADR-121): with MCP_PARITY=1, every `run_cupel` of a verb `serve --mcp` serves also runs as a
 // ABOUTME: `tools/call` to a fresh server on an identical copy, and fails unless envelope and stderr match the cold run's.
-use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
-use std::process::{Child, ChildStdin, Command, Stdio};
-use std::sync::mpsc::{self, Receiver};
-use std::thread;
+use std::process::{Child, Command, Stdio};
 use std::time::Duration;
 
+use cupel_serve::mcp::Client;
 use serde_json::{Value, json};
 use similar::TextDiff;
 
@@ -149,8 +147,7 @@ fn arguments(tool: &str, args: &[String], schema: &Value) -> Option<Arguments> {
 /// A `cupel serve --mcp` started for one comparison and killed after it.
 struct Server {
     child: Child,
-    input: ChildStdin,
-    lines: Receiver<String>,
+    client: Client,
     next_id: u64,
 }
 
@@ -172,19 +169,10 @@ impl Server {
         command.env("CUPEL_NO_DAEMON", "1");
         let mut child = command.spawn().expect("cupel serve --mcp starts");
         let input = child.stdin.take().expect("stdin is piped");
-        let output = BufReader::new(child.stdout.take().expect("stdout is piped"));
-        let (sender, lines) = mpsc::channel();
-        thread::spawn(move || {
-            for line in output.lines().map_while(Result::ok) {
-                if sender.send(line).is_err() {
-                    return;
-                }
-            }
-        });
+        let output = child.stdout.take().expect("stdout is piped");
         Self {
             child,
-            input,
-            lines,
+            client: Client::new(input, output, PATIENCE),
             next_id: 0,
         }
     }
@@ -193,26 +181,7 @@ impl Server {
     /// its response.
     fn ask(&mut self, method: &str, params: &str) -> Vec<Value> {
         self.next_id += 1;
-        let id = self.next_id;
-        let request = format!(
-            r#"{{"jsonrpc":"2.0","id":{id},"method":{},"params":{params}}}"#,
-            json!(method)
-        );
-        writeln!(self.input, "{request}").expect("the server reads its input");
-        let mut messages = Vec::new();
-        loop {
-            let line = self
-                .lines
-                .recv_timeout(PATIENCE)
-                .expect("the parity server answers");
-            let message: Value = serde_json::from_str(&line)
-                .unwrap_or_else(|_| panic!("serve --mcp wrote a line that is not JSON: {line}"));
-            let done = message["id"] == json!(id);
-            messages.push(message);
-            if done {
-                return messages;
-            }
-        }
+        self.client.ask(&json!(self.next_id), method, params)
     }
 
     /// The input schema of `tool`.

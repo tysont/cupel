@@ -1,13 +1,13 @@
 // ABOUTME: Tests for the MCP server over in-memory pipes with scripted tools: the handshake, listing and calling
 // ABOUTME: tools, progress and log notifications, protocol errors, cancellation, end of input, and the stop token.
-use std::io::{BufRead, BufReader, PipeReader, PipeWriter, Write};
+use std::io::Write;
 use std::sync::{Arc, Mutex};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
 use cupel_core::Cancellation;
 use cupel_serve::Served;
-use cupel_serve::mcp::{self, Call, Called, Server, Tool, Tools};
+use cupel_serve::mcp::{self, Call, Called, Client, Server, Tool, Tools};
 use serde_json::{Value, json};
 
 /// Tools scripted by name: `echo` returns its arguments, in order, as its document; `events`
@@ -71,8 +71,7 @@ impl Tools for Script {
 
 /// A server on a thread, fed through one pipe and read through another.
 struct Session {
-    input: Option<PipeWriter>,
-    output: BufReader<PipeReader>,
+    client: Client,
     stop: Cancellation,
     server: Option<JoinHandle<Served>>,
     tools: Arc<Script>,
@@ -99,8 +98,7 @@ impl Session {
             )
         });
         Self {
-            input: Some(input),
-            output: BufReader::new(output),
+            client: Client::new(input, output, Duration::from_secs(30)),
             stop,
             server: Some(server),
             tools,
@@ -108,35 +106,19 @@ impl Session {
     }
 
     fn send(&mut self, message: &Value) {
-        self.send_line(&message.to_string());
+        self.client.send(&message.to_string());
     }
 
     fn send_line(&mut self, line: &str) {
-        let input = self.input.as_mut().expect("input is open");
-        writeln!(input, "{line}").unwrap();
-        input.flush().unwrap();
+        self.client.send(line);
     }
 
-    /// The next message the server wrote.
     fn next(&mut self) -> Value {
-        let mut line = String::new();
-        self.output.read_line(&mut line).unwrap();
-        assert!(line.ends_with('\n'), "a whole line: {line:?}");
-        serde_json::from_str(&line).unwrap_or_else(|_| panic!("a JSON line: {line:?}"))
+        self.client.receive()
     }
 
-    /// Sends request `id` and returns every message up to and including its response.
     fn ask(&mut self, id: u64, method: &str, params: &Value) -> Vec<Value> {
-        self.send(&json!({"jsonrpc": "2.0", "id": id, "method": method, "params": params}));
-        let mut messages = Vec::new();
-        loop {
-            let message = self.next();
-            let done = message["id"] == json!(id);
-            messages.push(message);
-            if done {
-                return messages;
-            }
-        }
+        self.client.ask(&json!(id), method, &params.to_string())
     }
 
     /// The response to request `id`.
@@ -146,7 +128,7 @@ impl Session {
 
     /// Closes the input and returns what the server reported.
     fn close(mut self) -> Served {
-        drop(self.input.take());
+        self.client.close();
         self.server.take().unwrap().join().unwrap()
     }
 }
@@ -306,11 +288,22 @@ fn protocol_errors_carry_json_rpc_codes() {
     assert_eq!(session.response(5, "ping", &json!({}))["result"], json!({}));
 }
 
+/// A server running a `wait` call as request `id`, which it has read once a later ping is
+/// answered.
+fn waiting(id: &Value) -> Session {
+    let mut session = Session::start();
+    let params = call("wait", &json!({}));
+    session.send(&json!({"jsonrpc": "2.0", "id": id, "method": "tools/call", "params": params}));
+    assert_eq!(
+        session.response(100, "ping", &json!({}))["result"],
+        json!({})
+    );
+    session
+}
+
 #[test]
 fn a_cancelled_call_stops_and_gets_no_response_while_others_are_answered() {
-    let mut session = Session::start();
-    session.send(&json!({"jsonrpc": "2.0", "id": "w", "method": "tools/call", "params": call("wait", &json!({}))}));
-    assert_eq!(session.response(1, "ping", &json!({}))["result"], json!({}));
+    let mut session = waiting(&json!("w"));
     session.send(&json!({"jsonrpc": "2.0", "method": "notifications/cancelled", "params": {"requestId": "w", "reason": "user"}}));
     // The next message is the ping's answer, not the cancelled call's.
     assert_eq!(session.response(2, "ping", &json!({}))["id"], 2);
@@ -322,10 +315,7 @@ fn a_cancelled_call_stops_and_gets_no_response_while_others_are_answered() {
 
 #[test]
 fn closing_the_input_cancels_calls_in_flight_and_returns() {
-    let mut session = Session::start();
-    session.send(&json!({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": call("wait", &json!({}))}));
-    // Answered requests are in order, so the call has started once the ping is answered.
-    session.response(2, "ping", &json!({}));
+    let session = waiting(&json!(1));
     let tools = Arc::clone(&session.tools);
     let served = session.close();
     assert_eq!(*tools.waited.lock().unwrap(), ["cancelled"]);
@@ -334,9 +324,7 @@ fn closing_the_input_cancels_calls_in_flight_and_returns() {
 
 #[test]
 fn the_stop_token_cancels_calls_answers_them_and_returns() {
-    let mut session = Session::start();
-    session.send(&json!({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": call("wait", &json!({}))}));
-    session.response(2, "ping", &json!({}));
+    let mut session = waiting(&json!(1));
     session.stop.cancel();
     let answered = session.next();
     assert_eq!(answered["id"], 1);

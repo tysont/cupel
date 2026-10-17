@@ -341,24 +341,32 @@ mod tests {
 
     #[test]
     fn a_schema_takes_the_verbs_flags_and_the_global_ones_but_not_the_withheld_or_pending() {
-        let check = properties("check");
-        for name in [
-            "changed", "only", "depth", "no_gate", "scaffold", "cwd", "dry_run",
-        ] {
-            assert!(check.contains(&name.to_owned()), "{name} in {check:?}");
-        }
-        for name in [
+        let taken = |tool: &str, names: &[&'static str]| -> Vec<&'static str> {
+            let properties = properties(tool);
+            names
+                .iter()
+                .copied()
+                .filter(|name| properties.contains(&(*name).to_owned()))
+                .collect()
+        };
+        let flags = [
+            "changed", "only", "depth", "no_gate", "scaffold", "cwd", "dry_run", "format",
+        ];
+        assert_eq!(taken("check", &flags), flags);
+        let withheld = [
             "events",
             "describe",
             "help",
             "no_color",
             "jobs",
             "since_baseline",
-        ] {
-            assert!(!check.contains(&name.to_owned()), "{name} in {check:?}");
-        }
-        assert!(!properties("tests_impacted").contains(&"impacted".to_owned()));
-        assert!(!properties("describe").contains(&"agent".to_owned()));
+        ];
+        assert_eq!(taken("check", &withheld), Vec::<&str>::new());
+        assert_eq!(
+            taken("tests_impacted", &["impacted", "changed"]),
+            ["changed"]
+        );
+        assert_eq!(taken("describe", &["agent", "all"]), ["all"]);
     }
 
     #[test]

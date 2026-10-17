@@ -23,6 +23,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 use crate::lines::Lines;
+pub use crate::mcp_client::Client;
 use crate::protocol::{MAX_MESSAGE, read_line_within, write_message};
 use crate::server::Served;
 
