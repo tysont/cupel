@@ -123,7 +123,10 @@ fn a_violation_is_a_failing_finding_with_its_excerpt_and_how_to_record_it_again(
         .as_object()
         .unwrap()
     );
-    assert_eq!(stale.repro, "cupel check --only conc.linearizability --seed 3");
+    assert_eq!(
+        stale.repro,
+        "cupel check --only conc.linearizability --seed 3"
+    );
     assert!(
         stale
             .action
@@ -227,7 +230,13 @@ fn settings_are_refused() {
 fn every_metric_adds_up_across_languages() {
     support::assert_counts_add_up(
         ID,
-        &["histories", "operations", "violations", "unknown", "invalid"],
+        &[
+            "histories",
+            "operations",
+            "violations",
+            "unknown",
+            "invalid",
+        ],
         "violations",
     );
 }
@@ -242,9 +251,15 @@ fn the_manifest_reads_the_histories() {
             tier: 5,
             cost: CostClass::Deep,
             kinds: vec![("consistency.violation", ActionKind::FixBug)],
-            metrics: ["histories", "operations", "violations", "unknown", "invalid"]
-                .map(|metric| (metric, MetricPer::Scope))
-                .to_vec(),
+            metrics: [
+                "histories",
+                "operations",
+                "violations",
+                "unknown",
+                "invalid"
+            ]
+            .map(|metric| (metric, MetricPer::Scope))
+            .to_vec(),
             evidence: vec!["object"],
         }
     );

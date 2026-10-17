@@ -1,0 +1,4 @@
+# conc.linearizability checks the histories this command writes (ADR-119); the committed ones
+# exhibit each construct of the `histories` conformance inventory.
+[lang.go]
+history_command = "cp -R histories \"$CUPEL_HISTORY_DIR\"/"

@@ -131,7 +131,11 @@ impl Check for ConcLinearizability {
                 .filter(|history| history.status == status)
                 .count()
         };
-        let operations: u64 = fact.histories.iter().map(|history| history.operations).sum();
+        let operations: u64 = fact
+            .histories
+            .iter()
+            .map(|history| history.operations)
+            .sum();
         let counts = [
             ("histories", fact.histories.len()),
             (
@@ -268,11 +272,7 @@ impl ConcLinearizability {
             ),
             None => (String::new(), name.clone()),
         };
-        let what = format!(
-            "{} {}",
-            stuck(&violation.stuck),
-            after(&violation.states)
-        );
+        let what = format!("{} {}", stuck(&violation.stuck), after(&violation.states));
         SubjectFinding {
             kind: "consistency.violation",
             subject,

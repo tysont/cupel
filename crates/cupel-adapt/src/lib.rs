@@ -73,6 +73,7 @@ mod go_test;
 mod gradle;
 mod java_tests;
 mod jest;
+mod linearizability;
 mod maven;
 pub mod metamorphic;
 mod per_test;

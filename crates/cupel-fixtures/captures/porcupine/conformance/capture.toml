@@ -1,0 +1,9 @@
+# Captured from Cupel's Porcupine runner (cupel-adapt/src/linearizability/porcupine.go, Porcupine v1.3.1)
+# checking the conc.linearizability Go fixture's histories (P7.3): request.json is the input Cupel wrote for
+# it and output.json its unedited standard output, one entry per checkable history in name order
+# (compare-and-set, failed-op, indeterminate, linearizable, per-key, stale-read, unfinished). `dir` is
+# where it ran.
+tool = "go1.23.2 darwin/arm64, github.com/anishathalye/porcupine v1.3.1"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/lin/cap/.cupel/cache/linearizability/porcupine"
+command = "go run . < request.json"
+exit_code = 0
