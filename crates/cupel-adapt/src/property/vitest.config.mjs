@@ -1,5 +1,5 @@
-// ABOUTME: Written by Cupel's property engine (ADR-095) and passed to vitest as `--config`: the configuration of the
-// ABOUTME: project vitest runs in, with the setup file that sets Cupel's fast-check budget appended to its setup files.
+// ABOUTME: Written by Cupel's property engine (ADR-095) and passed to vitest as `--config`: the project's own vitest
+// ABOUTME: configuration with Cupel's fast-check budget setup file appended and vitest's caches off, so nothing lands in the tree.
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -14,5 +14,15 @@ export default async (env) => {
   const exported = found ? ((await import(pathToFileURL(found).href)).default ?? {}) : {};
   const config = typeof exported === "function" ? await exported(env) : await exported;
   const test = config.test ?? {};
-  return { ...config, test: { ...test, setupFiles: [test.setupFiles ?? []].flat().concat(setup) } };
+  // `cache` is the results cache under Vite's cacheDir; `fsModuleCache` (vitest 5, on by default) writes
+  // transformed modules under node_modules. Both off: a Cupel run leaves the tree as it found it.
+  return {
+    ...config,
+    test: {
+      ...test,
+      setupFiles: [test.setupFiles ?? []].flat().concat(setup),
+      cache: false,
+      fsModuleCache: false,
+    },
+  };
 };
