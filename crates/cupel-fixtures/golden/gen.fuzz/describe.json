@@ -1,0 +1,261 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "deep",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `fuzz.crash` and `fuzz.timeout`.",
+            "properties": {
+              "cases": {
+                "description": "The executions the target was given.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "input": {
+                "description": "The failing input, as text when printable, else `hex:` and its bytes.",
+                "type": "string"
+              },
+              "message": {
+                "description": "What the target reported when it failed.",
+                "type": "string"
+              },
+              "reproduce": {
+                "description": "The command that runs the target on it, from its project root.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reproducer": {
+                "description": "The file holding the whole input, relative to the repository root.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "seed": {
+                "description": "The seed the fuzzer was given; null for a fuzzer that takes none.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "target": {
+                "description": "The fuzz target, as the fuzzer names it.",
+                "type": "string"
+              },
+              "tool": {
+                "description": "The fuzzer that ran it.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "target",
+              "tool",
+              "message",
+              "input",
+              "cases"
+            ],
+            "title": "Failing",
+            "type": "object"
+          },
+          "kind": "fuzz.crash",
+          "summary": "An input the fuzzer generated crashed a fuzz target: a panic, an uncaught exception, a sanitizer error, or running out of memory."
+        },
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `fuzz.crash` and `fuzz.timeout`.",
+            "properties": {
+              "cases": {
+                "description": "The executions the target was given.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "input": {
+                "description": "The failing input, as text when printable, else `hex:` and its bytes.",
+                "type": "string"
+              },
+              "message": {
+                "description": "What the target reported when it failed.",
+                "type": "string"
+              },
+              "reproduce": {
+                "description": "The command that runs the target on it, from its project root.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "reproducer": {
+                "description": "The file holding the whole input, relative to the repository root.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "seed": {
+                "description": "The seed the fuzzer was given; null for a fuzzer that takes none.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "target": {
+                "description": "The fuzz target, as the fuzzer names it.",
+                "type": "string"
+              },
+              "tool": {
+                "description": "The fuzzer that ran it.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "target",
+              "tool",
+              "message",
+              "input",
+              "cases"
+            ],
+            "title": "Failing",
+            "type": "object"
+          },
+          "kind": "fuzz.timeout",
+          "summary": "An input ran a fuzz target past the fuzzer's per-input time limit: a hang, or a path slow enough to be one."
+        },
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `fuzz.target-missing`.",
+            "properties": {
+              "root": {
+                "description": "The project root, relative to the repository root.",
+                "type": "string"
+              },
+              "tool": {
+                "description": "The fuzzer that searched it.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "root",
+              "tool"
+            ],
+            "title": "Missing",
+            "type": "object"
+          },
+          "kind": "fuzz.target-missing",
+          "summary": "A project root the fuzzer searched holds no fuzz target."
+        }
+      ],
+      "id": "gen.fuzz",
+      "metrics": [
+        {
+          "name": "targets",
+          "per": "scope",
+          "summary": "Fuzz targets found."
+        },
+        {
+          "name": "crashes",
+          "per": "scope",
+          "summary": "Fuzz targets an input crashed."
+        },
+        {
+          "name": "timeouts",
+          "per": "scope",
+          "summary": "Fuzz targets an input ran past the time limit."
+        },
+        {
+          "name": "missing",
+          "per": "scope",
+          "summary": "Project roots with no fuzz target."
+        }
+      ],
+      "needs": [
+        "fuzz-results"
+      ],
+      "stability": "experimental",
+      "summary": "Runs the existing fuzz targets (cargo-fuzz, Go native fuzzing, atheris, Jazzer.js) with the run's seed and an execution budget; reports crashes and hangs with the input that reproduces them, and project roots without a fuzz target.",
+      "tier": 4,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}
