@@ -74,6 +74,7 @@ pub fn job<'a>(
         selectors_must_match: true,
         base: None,
         seed: 0,
+        cases: None,
         depth: cupel_core::CostClass::Standard,
         changed: None,
         resources: cupel_core::budget::Resources::default(),

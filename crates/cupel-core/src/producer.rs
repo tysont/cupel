@@ -78,7 +78,7 @@ pub struct ProduceCtx {
 }
 
 /// What a run asked to look at beyond its files: its depth, the symbols `--symbols` selected,
-/// the lines a range changed, and how much it may run at once. Producers that narrow their work
+/// the lines a range changed, how much it may run at once, and its case budget. Producers that narrow their work
 /// by it (the mutation engine, ADR-080) read it; the rest produce over their scope's files.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Focus {
@@ -91,6 +91,9 @@ pub struct Focus {
     /// How many processes or threads a producer may run at once (`--jobs`, ADR-086 §11);
     /// `None` for its own default.
     pub jobs: Option<NonZeroUsize>,
+    /// `--cases`: the generated cases a generative producer runs per property or relation;
+    /// `None` for [`case_budget`](Self::case_budget)'s default for the depth.
+    pub cases: Option<u32>,
 }
 
 /// Per file, the 1-based inclusive line ranges a change touched.
@@ -104,6 +107,7 @@ impl Default for Focus {
             symbols: None,
             changed: None,
             jobs: None,
+            cases: None,
         }
     }
 }
@@ -115,6 +119,17 @@ impl Focus {
         self.jobs
             .or_else(|| std::thread::available_parallelism().ok())
             .map_or(1, NonZeroUsize::get)
+    }
+
+    /// The generated cases a generative producer runs per property: `--cases`, else ten times
+    /// as many at each depth above `quick`'s 100 (ADR-095 §3).
+    pub fn case_budget(&self) -> u32 {
+        self.cases.unwrap_or(match self.depth {
+            CostClass::Quick => 100,
+            CostClass::Standard => 1_000,
+            CostClass::Deep => 10_000,
+            CostClass::Exhaustive => 100_000,
+        })
     }
 }
 
@@ -284,6 +299,9 @@ pub struct RunnerCommand {
 pub struct RunOptions {
     /// Variables added to the runner's environment.
     pub env: Vec<(String, String)>,
+    /// Arguments appended to the runner's command, after those that narrow and vary it, such as
+    /// the configuration file a property run points the runner at (ADR-095 §3).
+    pub args: Vec<String>,
     /// Ends only this run, which then reports an incomplete invocation.
     pub timeout: Option<Duration>,
     /// `Shuffled` asks the runner for its seeded shuffle; `Declared` and `Reversed` run a
@@ -300,6 +318,7 @@ impl Default for RunOptions {
     fn default() -> Self {
         Self {
             env: Vec::new(),
+            args: Vec::new(),
             timeout: None,
             order: RunOrder::Declared,
             seed: None,

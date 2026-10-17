@@ -162,6 +162,7 @@ impl Case {
                 reason: None,
                 span: at,
             }),
+            property: None,
         }
     }
 

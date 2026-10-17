@@ -19,7 +19,7 @@ expression: pretty(&schema)
   "required": [
     "files"
   ],
-  "x-cupel-fact-version": 1,
+  "x-cupel-fact-version": 2,
   "$defs": {
     "Assertion": {
       "type": "object",
@@ -142,6 +142,13 @@ expression: pretty(&schema)
         "name": {
           "type": "string"
         },
+        "property": {
+          "description": "The property-based framework that generates the case's inputs, such as `proptest` or\n`hypothesis`; `None` for a case with fixed inputs (ADR-095).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "skip": {
           "anyOf": [
             {
@@ -160,6 +167,7 @@ expression: pretty(&schema)
         "assertions",
         "mocks",
         "name",
+        "property",
         "skip",
         "span"
       ]

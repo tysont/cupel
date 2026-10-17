@@ -160,8 +160,8 @@ pub struct ScopeArgs {
     pub against: Option<String>,
     #[arg(long, value_name = "NAME")]
     pub oracle: Option<String>,
-    #[arg(long, value_name = "N")]
-    pub cases: Option<u64>,
+    #[arg(long, value_name = "N", value_parser = clap::value_parser!(u32).range(1..))]
+    pub cases: Option<u32>,
 }
 
 /// The verbs of design §6.2. The analysis verbs carry `ScopeArgs` for parsing even though their

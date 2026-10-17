@@ -56,6 +56,7 @@ pub mod capture {
     pub const SKIP_REASON: &str = "skip.reason";
     pub const TEST_SETUP: &str = "test.setup";
     pub const FRAMEWORK_PREFIX: &str = "framework.";
+    pub const PROPERTY_PREFIX: &str = "property.";
     // imports.scm
     pub const IMPORT: &str = "import";
     pub const IMPORT_SPECIFIER: &str = "import.specifier";
@@ -199,7 +200,11 @@ const TESTS: Contract = Contract {
         c::SKIP_REASON,
         c::TEST_SETUP,
     ],
-    open: &[c::ASSERTION_IDIOM_PREFIX, c::FRAMEWORK_PREFIX],
+    open: &[
+        c::ASSERTION_IDIOM_PREFIX,
+        c::FRAMEWORK_PREFIX,
+        c::PROPERTY_PREFIX,
+    ],
 };
 
 const IMPORTS: Contract = Contract {

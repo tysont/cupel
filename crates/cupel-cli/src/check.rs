@@ -127,6 +127,7 @@ pub fn run(
         selectors: request.selectors()?,
         selectors_must_match: !request.has_range(),
         seed: run.seed,
+        cases: args.cases,
         depth: config.effective.depth,
         changed: changed_lines(writer.root(), &request, &resolved)?,
         resources: resources::of(invocation, config, args, git.as_ref())?,

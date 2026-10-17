@@ -37,6 +37,7 @@ mod per_test_impact;
 pub mod plugin;
 mod process;
 mod producer;
+mod property;
 mod rank;
 mod ranking;
 mod result;
@@ -96,6 +97,7 @@ pub use producer::{
     Producer, ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand,
     Runners, SharedFact, TestRun, TestSelection, ToolProbe, Upstream,
 };
+pub use property::{PropertyOutcome, PropertyResult, PropertyResults};
 pub use rank::{
     Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,
 };

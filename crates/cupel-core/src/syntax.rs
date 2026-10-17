@@ -228,7 +228,7 @@ pub enum OperatorSet {
 pub struct TestFrames {
     pub files: Vec<TestFile>,
 }
-fact!(TestFrames, TestFrames);
+fact!(TestFrames, TestFrames, 2);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct TestFile {
@@ -247,6 +247,9 @@ pub struct TestCase {
     pub assertions: Vec<Assertion>,
     pub mocks: Vec<Mock>,
     pub skip: Option<SkipMarker>,
+    /// The property-based framework that generates the case's inputs, such as `proptest` or
+    /// `hypothesis`; `None` for a case with fixed inputs (ADR-095).
+    pub property: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

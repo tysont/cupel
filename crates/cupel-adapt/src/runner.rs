@@ -417,6 +417,7 @@ impl Runner {
             .into_iter()
             .chain(run.narrowing.iter().cloned())
             .chain((vary.args)(run.options))
+            .chain(run.options.args.iter().cloned())
             .collect();
         let env: Vec<(String, String)> = run
             .options

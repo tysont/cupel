@@ -17,8 +17,10 @@
 //! - `@test.setup` on a setup or fixture block; reported per file.
 //! - `@framework.<name>` on any node: the file's framework is the name from the earliest
 //!   pattern that matched, else `[tests].framework`.
+//! - `@property.<framework>` on any node: the case is a property test whose inputs `<framework>`
+//!   generates (ADR-095); the earliest pattern wins per case.
 //!
-//! An assertion, mock, or skip captured in the same match as a `@test.case` belongs to that
+//! An assertion, mock, skip, or property captured in the same match as a `@test.case` belongs to that
 //! case (attributes and decorators sit outside the function they mark); otherwise it belongs
 //! to the innermost case containing it. A mock outside every case (a module-level mock)
 //! belongs to every case in the file. Only files with at least one case are reported.
@@ -42,6 +44,8 @@ struct Case<'t> {
     assertions: Vec<Assertion>,
     mocks: Vec<Mock>,
     skip: Option<SkipMarker>,
+    /// The property framework, with the pattern that named it.
+    property: Option<(usize, String)>,
 }
 
 /// Cases by node ID.
@@ -75,6 +79,7 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
     attach_assertions(&mut cases, parsed, &found, rules);
     attach_mocks(&mut cases, parsed, &found);
     attach_skips(&mut cases, parsed, &found);
+    attach_properties(&mut cases, &found);
 
     let mut setup: Vec<(usize, Span)> = found
         .iter()
@@ -99,6 +104,7 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
                     assertions: case.assertions,
                     mocks: case.mocks,
                     skip: case.skip,
+                    property: case.property.map(|(_, framework)| framework),
                 })
                 .collect(),
         }],
@@ -118,6 +124,7 @@ fn collect_cases<'t>(parsed: &'t Parsed, found: &[Match<'_, 't>]) -> Cases<'t> {
             assertions: Vec::new(),
             mocks: Vec::new(),
             skip: None,
+            property: None,
         });
         if let Some(name) = m.node(capture::TEST_NAME)
             && case
@@ -240,6 +247,25 @@ fn attach_skips(cases: &mut Cases<'_>, parsed: &Parsed, found: &[Match<'_, '_>])
     for (owner, skip) in skips {
         if let Some(case) = owner.and_then(|id| cases.get_mut(&id)) {
             case.skip.get_or_insert(skip);
+        }
+    }
+}
+
+/// Names each property case's framework: the earliest pattern's `@property.<framework>`.
+fn attach_properties(cases: &mut Cases<'_>, found: &[Match<'_, '_>]) {
+    for m in found {
+        let Some((framework, node)) = m.prefixed(capture::PROPERTY_PREFIX) else {
+            continue;
+        };
+        let Some(case) = owner(cases, m, node).and_then(|id| cases.get_mut(&id)) else {
+            continue;
+        };
+        if case
+            .property
+            .as_ref()
+            .is_none_or(|(pattern, _)| m.pattern < *pattern)
+        {
+            case.property = Some((m.pattern, framework.to_owned()));
         }
     }
 }

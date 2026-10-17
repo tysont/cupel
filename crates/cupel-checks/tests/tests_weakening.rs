@@ -51,6 +51,7 @@ fn case(name: &str, line: u32, assertions: Vec<Assertion>) -> TestCase {
         assertions,
         mocks: Vec::new(),
         skip: None,
+        property: None,
     }
 }
 

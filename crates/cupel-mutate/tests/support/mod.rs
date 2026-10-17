@@ -64,6 +64,7 @@ pub fn produce(root: &Path, lang: &str, run: &Run) -> Result<MutationOutcomes, E
         selectors_must_match: false,
         base: None,
         seed: 0,
+        cases: None,
         depth: run.depth.unwrap_or(CostClass::Standard),
         changed: run.changed.clone(),
         resources: cupel_core::budget::Resources::default(),

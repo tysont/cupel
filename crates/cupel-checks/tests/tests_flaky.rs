@@ -72,6 +72,7 @@ fn frames(names: &[&str]) -> TestFrames {
                     assertions: Vec::new(),
                     mocks: Vec::new(),
                     skip: None,
+                    property: None,
                 })
                 .collect(),
         }],

@@ -59,6 +59,8 @@ pub struct Job<'a> {
     pub base: Option<BaseTree>,
     /// The run's seed, handed to every producer (ADR-078).
     pub seed: u64,
+    /// `--cases`, the generative case budget handed to every producer (ADR-095 §3).
+    pub cases: Option<u32>,
     /// The run's depth, handed to every producer (ADR-080).
     pub depth: CostClass,
     /// The lines a range scope changed, per file; `None` without a range (ADR-080).
@@ -917,6 +919,7 @@ struct FactStore<'a> {
     cancel: Cancellation,
     config: &'a Config,
     seed: u64,
+    cases: Option<u32>,
     depth: CostClass,
     changed: Option<ChangedLines>,
     /// Per language, the symbols `--symbols` selected; empty without selectors.
@@ -977,6 +980,7 @@ impl<'a> FactStore<'a> {
             cancel: job.cancel.clone(),
             config: job.config,
             seed: job.seed,
+            cases: job.cases,
             depth: job.depth,
             changed: job.changed.clone(),
             selected: HashMap::new(),
@@ -1170,6 +1174,7 @@ impl<'a> FactStore<'a> {
                 symbols: self.selected.get(&lang.id).cloned(),
                 changed: self.changed.clone(),
                 jobs: self.jobs,
+                cases: self.cases,
             },
         }
     }

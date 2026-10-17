@@ -240,6 +240,7 @@ fn a_producer_gets_the_runs_depth_and_changed_lines() {
             symbols: None,
             changed: Some(changed()),
             jobs: None,
+            cases: None,
         })
     );
 }
