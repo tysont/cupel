@@ -7,16 +7,16 @@ cupel describe: pass (exit 0)
 language typescript · family ecma · .ts .mts .cts .tsx · experimental
 
 facts
-  symbols            lang.typescript (quick)
-  decisions          lang.typescript (quick)
-  norm-tree          lang.typescript (quick)
-  mutation-sites     lang.typescript (quick)
-  test-frames        lang.typescript (quick)
-  module-graph       lang.typescript (quick)
-  api-surface        lang.typescript (quick)
-  roots              lang.typescript (quick)
-  test-conventions   lang.typescript (quick)
-  project-info       lang.typescript (quick)
+  symbols             lang.typescript (quick)
+  decisions           lang.typescript (quick)
+  norm-tree           lang.typescript (quick)
+  mutation-sites      lang.typescript (quick)
+  test-frames         lang.typescript (quick)
+  module-graph        lang.typescript (quick)
+  api-surface         lang.typescript (quick)
+  roots               lang.typescript (quick)
+  test-conventions    lang.typescript (quick)
+  project-info        lang.typescript (quick)
 
 checks
 
