@@ -272,8 +272,8 @@ pub struct Violation {
     pub transformed: Evaluated,
     /// The function on `input`.
     pub source: Evaluated,
-    /// The function on the follow-up input.
-    pub followup: Evaluated,
+    /// The function on the follow-up input; `None` when the transform raised.
+    pub followup: Option<Evaluated>,
     /// What the relation raised when it was called on the two outputs; `None` when it returned
     /// false, or when an output could not be computed.
     pub relation_raised: Option<String>,

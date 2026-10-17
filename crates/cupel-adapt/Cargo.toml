@@ -24,6 +24,7 @@ similar.workspace = true
 [dev-dependencies]
 cupel-fixtures.workspace = true
 tempfile.workspace = true
+proptest.workspace = true
 
 [lints]
 workspace = true

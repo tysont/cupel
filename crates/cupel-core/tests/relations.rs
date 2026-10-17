@@ -188,7 +188,7 @@ fn a_violation_serializes_each_evaluation_by_how_it_ended() {
                 shrinks: 4,
                 transformed: Evaluated::Value(json!([0, 1])),
                 source: Evaluated::Value(json!([1, 0])),
-                followup: Evaluated::Raised("ValueError: unsorted".to_owned()),
+                followup: Some(Evaluated::Raised("ValueError: unsorted".to_owned())),
                 relation_raised: None,
             }),
         }],

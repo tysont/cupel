@@ -65,6 +65,7 @@ pub mod flake;
 mod fresh;
 mod go_test;
 mod jest;
+pub mod metamorphic;
 mod per_test;
 mod pytest;
 pub mod report;
