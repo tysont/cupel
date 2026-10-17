@@ -73,12 +73,23 @@ pub fn parse(json: &str, dir: &Path) -> Option<Vec<TestResult>> {
                 duration_ms: assertion.duration.and_then(milliseconds),
                 output: outcome
                     .is_failure()
-                    .then(|| output_tail(&assertion.failure_messages.join("\n")))
+                    .then(|| output_tail(&without_frames(&assertion.failure_messages)))
                     .flatten(),
             });
         }
     }
     Some(tests)
+}
+
+/// Failure `messages` joined, without their stack frames (`    at f (file:1:2)`): a message's own
+/// lines, such as a property's counterexample, are what its output tail must keep.
+fn without_frames(messages: &[String]) -> String {
+    messages
+        .iter()
+        .flat_map(|message| message.lines())
+        .filter(|line| !line.trim_start().starts_with("at "))
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 fn outcome(status: &str) -> TestOutcome {

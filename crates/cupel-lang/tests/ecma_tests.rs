@@ -5,7 +5,8 @@ mod support;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
 use support::{
-    Expected, assert_framework, assert_test_file, case, expected, fixture, produce, rows, tree, properties, property,
+    Expected, assert_framework, assert_test_file, case, expected, fixture, produce, properties,
+    property, rows, tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -400,7 +401,10 @@ test("example", () => {
   expect(digits(7)).toBe(1);
 });
 "#;
-    for (lang, path) in [("javascript", "props.test.js"), ("typescript", "props.test.ts")] {
+    for (lang, path) in [
+        ("javascript", "props.test.js"),
+        ("typescript", "props.test.ts"),
+    ] {
         let dir = tree(&[(path, source)]);
         assert_eq!(
             properties(lang, dir.path(), path),

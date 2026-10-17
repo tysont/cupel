@@ -294,6 +294,34 @@ fn jest_json_names_each_test_by_file_and_titles_relative_to_the_run() {
 }
 
 #[test]
+fn jest_failure_messages_keep_their_lines_and_drop_stack_frames() {
+    let capture = Capture::of("property/jest", "falsified");
+    let tests = jest_json::parse(&capture.file("report.json"), &capture.ran_in).unwrap();
+    let output = tests
+        .iter()
+        .find(|test| test.outcome == Failed)
+        .and_then(|test| test.output.as_deref())
+        .unwrap();
+    let lines: Vec<&str> = output.lines().collect();
+    assert_eq!(
+        lines[..4],
+        [
+            "Error: Property failed after 8 tests",
+            "{ seed: 3, path: \"7:4:1:0:0:1:4:0:0\", endOnFailure: true }",
+            "Counterexample: [100000]",
+            "Shrunk 8 time(s)",
+        ]
+    );
+    assert!(
+        lines
+            .iter()
+            .all(|line| !line.trim_start().starts_with("at ")),
+        "{output}"
+    );
+    assert!(output.contains("[cause]: Error: expect(received).toBe(expected)"));
+}
+
+#[test]
 fn vitest_json_is_read_like_jest_with_describe_blocks_in_the_id() {
     let capture = Capture::of("vitest", "red");
     let tests = jest_json::parse(&capture.file("report.json"), &capture.ran_in).unwrap();

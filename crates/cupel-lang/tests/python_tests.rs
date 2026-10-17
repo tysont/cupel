@@ -6,7 +6,7 @@ use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, Test
 use support::Skip::{Because, Runs};
 use support::{
     Expected, assert_framework, assert_source_file, assert_test_file, case, expected, fixture,
-    produce, rows, tree, properties, property,
+    produce, properties, property, rows, tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -310,7 +310,7 @@ fn conventions_find_sibling_nested_and_per_project_test_files() {
 fn hypothesis_tests_are_property_cases() {
     let dir = tree(&[(
         "tests/test_props.py",
-        r#"import hypothesis
+        r"import hypothesis
 from hypothesis import given, strategies as st
 
 
@@ -332,7 +332,7 @@ class TestThing:
 
 def test_example():
     assert 1 == 1
-"#,
+",
     )]);
     assert_eq!(
         properties("python", dir.path(), "tests/test_props.py"),

@@ -199,7 +199,7 @@ fn each_assertion_form_has_its_kind_and_strength() {
 fn property_tests_name_their_framework_and_proptest_blocks_hold_cases() {
     let dir = tree(&[(
         "tests/props.rs",
-        r#"use proptest::prelude::*;
+        r"use proptest::prelude::*;
 
 proptest! {
     #![proptest_config(ProptestConfig::with_cases(8))]
@@ -239,7 +239,7 @@ fn runner_form() {
 fn example() {
     assert_eq!(1, 1);
 }
-"#,
+",
     )]);
     assert_eq!(
         properties("rust", dir.path(), "tests/props.rs"),

@@ -1,0 +1,6 @@
+# Captured from the real tool on the gen.property JavaScript fixture with the property engine's
+# configuration (P5.4, ADR-095); report.json is its unedited output. `dir` is where it ran.
+tool = "jest 30.5.2, fast-check 4.10.2"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p54/fx-javascript"
+command = "jest --ci --json --outputFile=<report> --config .cupel/jest.config.cjs"
+exit_code = 1

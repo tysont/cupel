@@ -66,6 +66,7 @@ mod fresh;
 mod go_test;
 mod jest;
 mod per_test;
+mod property;
 mod pytest;
 pub mod report;
 mod rules;
