@@ -239,10 +239,11 @@ impl GenFuzz {
             .location
             .as_ref()
             .map_or(target.root.as_str(), |at| at.file.as_str());
-        let seed = run
-            .seeded
-            .then(|| format!(" --seed {}", run.seed))
-            .unwrap_or_default();
+        let seed = if run.seeded {
+            format!(" --seed {}", run.seed)
+        } else {
+            String::new()
+        };
         Some(
             SubjectFinding {
                 kind,
