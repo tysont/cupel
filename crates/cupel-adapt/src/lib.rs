@@ -77,6 +77,7 @@ mod maven;
 pub mod metamorphic;
 mod model_check;
 mod per_test;
+mod proof;
 mod property;
 mod pytest;
 mod race;
