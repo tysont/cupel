@@ -8,18 +8,31 @@
 //! expressions, booleans, and `nil` become `$lit`. Comments (ordinary nodes in this grammar,
 //! not extras) and `#_` discarded forms are dropped, and so is the symbol's own name and the metadata on any symbol, so renaming a
 //! function, marking it `^:private`, or reformatting it keeps its hash.
+use std::sync::Arc;
+
+use cupel_core::ProducerRegistry;
 use cupel_core::syntax::{NormNode, NormTree, NormalizedSymbol};
 use tree_sitter::Node;
 
+use crate::language::Language;
 use crate::normalize::structural_hash;
-use crate::parse::Parsed;
-use crate::producer::Source;
+use crate::parse::{ParseCache, Parsed};
+use crate::producer::{QueryProducer, Source};
 use crate::symbols::definitions;
 
 /// What a name that is not a call's function becomes.
 const NAME: &str = "$id";
 /// What a literal becomes.
 const LITERAL: &str = "$lit";
+
+/// Registers Clojure's `NormTree` producer, which no `[normalize]` table drives.
+pub fn register(language: &Arc<dyn Language>, cache: &Arc<ParseCache>, reg: &mut ProducerRegistry) {
+    reg.register::<NormTree, _>(QueryProducer::new(
+        Arc::clone(language),
+        Arc::clone(cache),
+        extract,
+    ));
+}
 
 /// The `NormTree` extractor for Clojure.
 pub fn extract(source: &Source<'_>) -> NormTree {

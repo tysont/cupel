@@ -7,14 +7,10 @@ mod resolve;
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::{ModuleGraph, NormTree, ProjectInfo};
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
-use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
-use crate::producer::QueryProducer;
-use crate::project::ProjectRoots;
 use crate::spec::{LanguageSpec, QueryFile};
 
 static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
@@ -69,30 +65,12 @@ impl Language for Clojure {
         Stability::Experimental
     }
 
-    /// The generic producers, except that `NormTree` is Clojure's own: what a list calls is its
-    /// first element, which the `[normalize]` table cannot name (see `normalize`).
+    /// The generic producers, Clojure's own `NormTree` (what a list calls is its first element,
+    /// which no `[normalize]` table can name), and the producers that read the file system.
     fn register(&self, reg: &mut ProducerRegistry) {
         let language: Arc<dyn Language> = Arc::new(self.clone());
-        let cache = &self.cache;
-        // No `[normalize]` table drives the generic NormTree, so every generic producer applies.
-        crate::generic::register(&language, cache, reg);
-        reg.register::<NormTree, _>(QueryProducer::new(
-            Arc::clone(&language),
-            Arc::clone(cache),
-            normalize::extract,
-        ));
-        // Project roots come from `deps.edn` files on disk, which queries cannot see.
-        reg.register::<ProjectInfo, _>(ProjectRoots::new(
-            Arc::clone(&language),
-            &project::ECOSYSTEM,
-            &super::ecosystems::KNOWN,
-        ));
-        // Which file defines a namespace depends on the classpath's roots, which queries
-        // cannot see.
-        reg.register::<ModuleGraph, _>(ImportGraph::new(
-            language,
-            Arc::clone(cache),
-            resolve::graph,
-        ));
+        crate::generic::register(&language, &self.cache, reg);
+        normalize::register(&language, &self.cache, reg);
+        resolve::register(language, &self.cache, reg);
     }
 }

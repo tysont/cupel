@@ -19,10 +19,15 @@
 //! - Edges are grouped by project directory: the nearest directory above the file with a
 //!   `deps.edn` (`.` outside every project). Clojure requires by namespace, never by path.
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::Arc;
 
-use cupel_core::syntax::{ImportEdge, ImportTarget, ModuleGraph, RootImports};
+use cupel_core::ProducerRegistry;
+use cupel_core::syntax::{ImportEdge, ImportTarget, ModuleGraph, ProjectInfo, RootImports};
 
-use crate::imports::{Imports, join};
+use crate::imports::{ImportGraph, Imports, join};
+use crate::language::Language;
+use crate::parse::ParseCache;
+use crate::project::ProjectRoots;
 
 /// The extensions of Clojure files a namespace may live in, in the order the loader tries them.
 const EXTENSIONS: [&str; 2] = [".clj", ".cljc"];
@@ -35,6 +40,17 @@ const GENERATED: [&str; 3] = ["target", ".cpcache", "node_modules"];
 
 /// How deep below the repository root `deps.edn` files are searched for.
 const SEARCH_DEPTH: usize = 6;
+
+/// Registers the producers that read the file system: project roots from `deps.edn` files, and
+/// the module graph, since which file defines a namespace depends on the classpath's roots.
+pub fn register(language: Arc<dyn Language>, cache: &Arc<ParseCache>, reg: &mut ProducerRegistry) {
+    reg.register::<ProjectInfo, _>(ProjectRoots::new(
+        Arc::clone(&language),
+        &super::project::ECOSYSTEM,
+        &crate::langs::ecosystems::KNOWN,
+    ));
+    reg.register::<ModuleGraph, _>(ImportGraph::new(language, Arc::clone(cache), graph));
+}
 
 /// Resolves every import in scope.
 pub fn graph(imports: &Imports<'_>) -> ModuleGraph {
@@ -254,9 +270,16 @@ mod tests {
 
     #[test]
     fn deps_edn_paths_and_extra_paths_are_read_in_order() {
-        let deps =
-            "{:paths [\"src\" \"resources\"]\n :aliases {:test {:extra-paths [\"test\"]}}}\n";
-        assert_eq!(paths_of(deps), ["src", "resources", "test"]);
-        assert!(paths_of("{:deps {}}").is_empty());
+        let cases: [(&str, &[&str]); 3] = [
+            (
+                "{:paths [\"src\" \"resources\"]\n :aliases {:test {:extra-paths [\"test\"]}}}\n",
+                &["src", "resources", "test"],
+            ),
+            ("{:aliases {:dev {:extra-paths [\"dev\"]}}}", &["dev"]),
+            ("{:deps {}}", &[]),
+        ];
+        for (deps, paths) in cases {
+            assert_eq!(paths_of(deps), paths, "{deps}");
+        }
     }
 }
