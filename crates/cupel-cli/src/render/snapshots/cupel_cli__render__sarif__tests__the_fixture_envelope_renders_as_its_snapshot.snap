@@ -625,7 +625,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
             "tier": 3
           },
           "ruleId": "crap.high",
-          "ruleIndex": 4,
+          "ruleIndex": 6,
           "suppressions": []
         },
         {
@@ -788,6 +788,44 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
               },
               "shortDescription": {
                 "text": "The mutant survived and may behave exactly as the original (ADR-004)."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Runs each language's benchmarks at head and at the range's base commit and compares their samples with a Mann-Whitney U test."
+              },
+              "help": {
+                "text": "A benchmark is significantly slower, or allocates significantly more, than at the range's base commit, by at least the threshold.\n\nAction: review. `cupel describe finding perf.regression` describes the kind and its evidence, `cupel describe perf.bench` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "perf.regression",
+              "properties": {
+                "action": "review",
+                "check": "perf.bench",
+                "cost": "deep",
+                "stability": "experimental",
+                "tier": 0
+              },
+              "shortDescription": {
+                "text": "A benchmark is significantly slower, or allocates significantly more, than at the range's base commit, by at least the threshold."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Runs each language's benchmarks at head and at the range's base commit and compares their samples with a Mann-Whitney U test."
+              },
+              "help": {
+                "text": "A benchmark is significantly faster, or allocates significantly less, than at the range's base commit, by at least the threshold.\n\nAction: review. `cupel describe finding perf.improvement` describes the kind and its evidence, `cupel describe perf.bench` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "perf.improvement",
+              "properties": {
+                "action": "review",
+                "check": "perf.bench",
+                "cost": "deep",
+                "stability": "experimental",
+                "tier": 0
+              },
+              "shortDescription": {
+                "text": "A benchmark is significantly faster, or allocates significantly less, than at the range's base commit, by at least the threshold."
               }
             },
             {
