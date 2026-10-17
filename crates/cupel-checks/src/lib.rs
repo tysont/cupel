@@ -42,6 +42,7 @@
 //! [`Facts`]: cupel_core::Facts
 
 mod finding;
+mod gen_property;
 mod manifest;
 mod metrics;
 mod outcome;
