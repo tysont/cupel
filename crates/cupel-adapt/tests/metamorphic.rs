@@ -37,18 +37,17 @@ fn conforms(ty: &InputType, value: &Value) -> bool {
     }
 }
 
+/// Input types as written in `cupel.toml`, nested up to three deep, parsed.
 fn types() -> impl Strategy<Value = InputType> {
-    let leaf = prop_oneof![
-        Just(InputType::Bool),
-        Just(InputType::Int),
-        Just(InputType::Str)
-    ];
-    leaf.prop_recursive(3, 12, 3, |inner| {
+    let leaf = prop::sample::select(vec!["bool", "int", "str"]).prop_map(str::to_owned);
+    let written = leaf.prop_recursive(3, 12, 3, |inner| {
         prop_oneof![
-            inner.clone().prop_map(|t| InputType::List(Box::new(t))),
-            prop::collection::vec(inner, 1..4).prop_map(InputType::Tuple),
+            inner.clone().prop_map(|element| format!("list[{element}]")),
+            prop::collection::vec(inner, 1..4)
+                .prop_map(|elements| format!("tuple[{}]", elements.join(", "))),
         ]
-    })
+    });
+    written.prop_map(|text| input_type(&text))
 }
 
 proptest! {
@@ -86,10 +85,17 @@ fn early_cases_are_small_and_later_ones_grow() {
             .max()
             .unwrap()
     };
-    assert!(longest(0..4) <= 1, "{}", longest(0..4));
-    assert!(longest(60..100) > 3, "{}", longest(60..100));
-    let seeds: Vec<Value> = (0..8).map(|seed| generate(&ty, seed, 50)).collect();
-    assert!(seeds.windows(2).any(|pair| pair[0] != pair[1]));
+    assert_eq!(
+        longest(0..4).max(1),
+        1,
+        "the first four cases are of size one"
+    );
+    assert_eq!(longest(0..400), 8, "cases grow to size eight");
+    let triples = input_type("tuple[int, int, int]");
+    let seeds: std::collections::BTreeSet<String> = (0..8)
+        .map(|seed| generate(&triples, seed, 50).to_string())
+        .collect();
+    assert_eq!(seeds.len(), 8, "each seed draws its own lists: {seeds:?}");
 }
 
 #[test]
@@ -204,12 +210,13 @@ fn sort_reverse() -> Value {
     })
 }
 
+/// The result of relation `name`; relations are evaluated in name order.
 fn named<'a>(results: &'a RelationResults, name: &str) -> &'a RelationResult {
-    results
-        .relations
-        .iter()
-        .find(|result| result.name == name)
-        .unwrap_or_else(|| panic!("{name} was evaluated"))
+    let names: Vec<&str> = results.relations.iter().map(|r| r.name.as_str()).collect();
+    let index = names
+        .binary_search(&name)
+        .expect("the relation was evaluated");
+    &results.relations[index]
 }
 
 #[test]

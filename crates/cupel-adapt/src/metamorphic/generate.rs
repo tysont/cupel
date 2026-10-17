@@ -3,6 +3,8 @@
 use cupel_core::InputType;
 use serde_json::Value;
 
+use crate::flake::rerun_seed;
+
 /// The largest size a case grows to: list and string lengths up to it, integers up to
 /// `16 * size²` in magnitude.
 const MAX_SIZE: u64 = 8;
@@ -12,7 +14,10 @@ const ALPHABET: &[u8] = b"abcxyz019 _-";
 
 /// Case `case` of the inputs drawn with `seed`: the same value for the same three arguments.
 pub fn generate(ty: &InputType, seed: u64, case: u64) -> Value {
-    let mut rng = Rng(splitmix(seed ^ splitmix(case)));
+    let mut rng = Rng {
+        seed: rerun_seed(seed ^ case.rotate_left(32), 0),
+        drawn: 0,
+    };
     value(ty, &mut rng, size(case))
 }
 
@@ -23,7 +28,7 @@ pub fn relation_seed(seed: u64, name: &str) -> u64 {
     let hash = name.bytes().fold(0xcbf2_9ce4_8422_2325_u64, |hash, byte| {
         (hash ^ u64::from(byte)).wrapping_mul(0x0100_0000_01b3)
     });
-    splitmix(seed ^ hash)
+    rerun_seed(seed ^ hash, 0)
 }
 
 /// Case `case`'s size: one for the first four cases, one more every four, then [`MAX_SIZE`].
@@ -63,24 +68,21 @@ fn index(drawn: u64) -> usize {
     usize::try_from(drawn).unwrap_or(0)
 }
 
-/// A splitmix64 sequence.
-struct Rng(u64);
+/// A splitmix64 sequence: the `drawn`th value from `seed`, as the flake engine derives its
+/// reruns' seeds.
+struct Rng {
+    seed: u64,
+    drawn: u32,
+}
 
 impl Rng {
     fn next(&mut self) -> u64 {
-        self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
-        splitmix(self.0)
+        self.drawn = self.drawn.wrapping_add(1);
+        rerun_seed(self.seed, self.drawn)
     }
 
     /// A draw in `0..bound`; `bound` is at least 1.
     fn below(&mut self, bound: u64) -> u64 {
         self.next() % bound.max(1)
     }
-}
-
-/// splitmix64's output function.
-fn splitmix(mut z: u64) -> u64 {
-    z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-    z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-    z ^ (z >> 31)
 }

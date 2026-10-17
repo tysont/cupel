@@ -143,11 +143,7 @@ impl Check for GenMetamorphic {
 
     /// One target per file in scope; how many relations there are is the engine's to know.
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        LIMITS.plan(
-            &self.manifest,
-            ctx,
-            outcome::plan_files(&self.manifest, scope),
-        )
+        LIMITS.plan_files(&self.manifest, ctx, scope)
     }
 
     fn run(

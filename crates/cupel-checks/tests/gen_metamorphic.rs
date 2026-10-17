@@ -187,6 +187,17 @@ fn no_relations_is_a_pass_over_none() {
 
 #[test]
 fn the_check_takes_no_settings() {
-    let (key, valid) = setting_error(check(ID), json!({"cases": 5}));
-    assert_eq!((key.as_str(), valid), ("cases", Vec::<String>::new()));
+    // Relations and their case budgets are configured for the engine, never the check.
+    let refused: Vec<(String, Vec<String>)> = ["cases", "relations"]
+        .into_iter()
+        .map(|key| setting_error(check(ID), json!({ key: 1 })))
+        .collect();
+    let none = Vec::<String>::new();
+    assert_eq!(
+        refused,
+        [
+            ("cases".to_owned(), none.clone()),
+            ("relations".to_owned(), none)
+        ]
+    );
 }

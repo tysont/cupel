@@ -145,10 +145,9 @@ fn input_types_parse_with_any_spacing_and_print_canonically() {
 
 #[test]
 fn only_a_tuple_spreads_into_arguments() {
-    let spreads = |text: &str| text.parse::<InputType>().unwrap().spreads();
-    assert!(spreads("tuple[int, int]"));
-    assert!(!spreads("list[int]"));
-    assert!(!spreads("int"));
+    let spreads = ["tuple[int, int]", "list[int]", "int"]
+        .map(|text| text.parse::<InputType>().unwrap().spreads());
+    assert_eq!(spreads, [true, false, false]);
 }
 
 fn input_type() -> impl Strategy<Value = InputType> {
@@ -174,10 +173,14 @@ proptest! {
 
 #[test]
 fn relation_results_is_a_fact_kind_with_a_versioned_schema() {
-    assert_eq!(FactKind::RelationResults.as_str(), "relation-results");
-    assert!(FactKind::ALL.contains(&FactKind::RelationResults));
-    assert!(!FactKind::SYNTACTIC.contains(&FactKind::RelationResults));
-    assert_eq!(schema::fact_version(FactKind::RelationResults), Some(1));
+    let kind = FactKind::RelationResults;
+    let described = (
+        kind.as_str(),
+        FactKind::ALL.contains(&kind),
+        FactKind::SYNTACTIC.contains(&kind),
+        schema::fact_version(kind),
+    );
+    assert_eq!(described, ("relation-results", true, false, Some(1)));
 }
 
 #[test]

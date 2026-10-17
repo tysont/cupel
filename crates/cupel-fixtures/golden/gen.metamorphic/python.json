@@ -34,47 +34,47 @@
         "hints": {},
         "kind": "fix_bug",
         "priority": 1,
-        "summary": "Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,0,-1]; the evidence has the follow-up input and both outputs."
+        "summary": "Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,1,1]; the evidence has the follow-up input and both outputs."
       },
       "check": "gen.metamorphic",
       "confidence": 1.0,
       "detail": null,
       "evidence": {
-        "case": 15,
+        "case": 11,
         "followup_output": {
           "value": [
-            -1,
+            1,
             0,
-            0
+            1
           ]
         },
         "function": "sorting:sort_list",
         "input": [
           0,
-          0,
-          -1
+          1,
+          1
         ],
         "input_type": "list[int]",
         "original_input": [
-          -134,
-          7,
-          -234
+          138,
+          38,
+          18
         ],
         "relation": "sort-reverse",
         "relation_raised": null,
         "seed": 3,
-        "shrinks": 9,
+        "shrinks": 10,
         "source_output": {
           "value": [
             0,
-            -1,
-            0
+            1,
+            1
           ]
         },
         "transformed": {
           "value": [
-            -1,
-            0,
+            1,
+            1,
             0
           ]
         }
@@ -104,7 +104,7 @@
       "finding": "fnd_30a135",
       "kind": "fix_bug",
       "priority": 1,
-      "summary": "Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,0,-1]; the evidence has the follow-up input and both outputs."
+      "summary": "Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,1,1]; the evidence has the follow-up input and both outputs."
     }
   ],
   "oracles": null,

@@ -16,14 +16,11 @@ fn fixture() -> Option<Repo> {
     Some(repo)
 }
 
-/// The check's result in `envelope`.
+/// The check's result in `envelope`, the only one an `--only gen.metamorphic` run has.
 fn result(envelope: &Value) -> &Value {
-    envelope["checks"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .find(|check| check["id"] == json!("gen.metamorphic"))
-        .expect("gen.metamorphic has a result")
+    let only = &envelope["checks"][0];
+    assert_eq!(only["id"], json!("gen.metamorphic"), "{envelope}");
+    only
 }
 
 #[test]
@@ -46,7 +43,7 @@ fn the_violated_relation_fails_the_check_with_its_minimized_input() {
         (
             &json!("metamorphic.violated"),
             &json!("sort-reverse"),
-            &json!([0, 0, -1])
+            &json!([0, 1, 1])
         )
     );
     assert_eq!(

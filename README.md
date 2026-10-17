@@ -816,19 +816,19 @@ Inputs are generated from `--seed`, the relation's name, and the case number alo
 ```text
 $ cupel check --only gen.metamorphic --seed 3 --format text
 checks
-  gen.metamorphic  fail     tier 4 · deep · score 1 violated (n 2) · metrics relations 2, violated 1 · 1 finding · 537 ms
+  gen.metamorphic  fail     tier 4 · deep · score 1 violated (n 2) · metrics relations 2, violated 1 · 1 finding · 1042 ms
 
 fail (1)
   gen.metamorphic
     `sorting:sort_list` breaks the relation `sort-reverse`
       fnd_30a135 · metamorphic.violated · tier 4 · confidence 1
       at sorting.py:1-7
-      evidence: case 15 · followup_output {1} · function "sorting:sort_list" · input [3] · input_type "list[int]" · original_input [3] · relation "sort-reverse" · seed 3 · shrinks 9 · source_output {1} · transformed {1} (full: cupel explain fnd_30a135)
-      action fix_bug (priority 1): Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,0,-1]; the evidence has the follow-up input and both outputs.
+      evidence: case 11 · followup_output {1} · function "sorting:sort_list" · input [3] · input_type "list[int]" · original_input [3] · relation "sort-reverse" · seed 3 · shrinks 10 · source_output {1} · transformed {1} (full: cupel explain fnd_30a135)
+      action fix_bug (priority 1): Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,1,1]; the evidence has the follow-up input and both outputs.
       repro: cupel check --only gen.metamorphic --seed 3
 ```
 
-The minimized input `[0, 0, -1]` sorts to `[0, -1, 0]`, its reverse to `[-1, 0, 0]`. A failing check does not fail the run by itself; a gate rule such as `"gen.metamorphic.violated" = "== 0"` does. Without any relation declared for a language, the check is skipped there as `unconfigured` (`lang.python.relations`); the support matrix above, which knows no repository's configuration, shows Python that way. The other four languages have no harness yet, so the check is `unsupported` for them. Every relation is evaluated whatever the scope, and only those whose function is defined in a file in scope are reported.
+The minimized input `[0, 1, 1]` sorts to `[0, 1, 1]`, its reverse `[1, 1, 0]` to `[1, 0, 1]`. A failing check does not fail the run by itself; a gate rule such as `"gen.metamorphic.violated" = "== 0"` does. Without any relation declared for a language, the check is skipped there as `unconfigured` (`lang.python.relations`); the support matrix above, which knows no repository's configuration, shows Python that way. The other four languages have no harness yet, so the check is `unsupported` for them. Every relation is evaluated whatever the scope, and only those whose function is defined in a file in scope are reported.
 
 ## Plugins
 
