@@ -129,7 +129,16 @@ fn input_types_parse_with_any_spacing_and_print_canonically() {
             "{text}"
         );
     }
-    for bad in ["", "list", "list[]", "list[int", "tuple[]", "int]", "list[int]x", "dict"] {
+    for bad in [
+        "",
+        "list",
+        "list[]",
+        "list[int",
+        "tuple[]",
+        "int]",
+        "list[int]x",
+        "dict",
+    ] {
         assert!(bad.parse::<InputType>().is_err(), "{bad} should not parse");
     }
 }

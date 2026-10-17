@@ -10,7 +10,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     Availability, CostClass, Ctx, EventSink, Fact, FactKind, Langs, MutationOutcomes, PerTestMap,
-    ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, Scope, TestReruns, TestResults,
+    ProduceCtx, Producer, ProducerId, ProducerRegistry, RelationResults, Result, Scope, TestReruns,
+    TestResults,
 };
 
 use crate::command::PluginCommand;
@@ -21,7 +22,7 @@ use crate::request::{self, Inputs};
 type Register = fn(&mut ProducerRegistry, ProducerManifest, PluginCommand);
 
 /// Every kind a plugin may provide (those with a payload type, ADR-088 §8), with its registration.
-const KINDS: [(FactKind, Register); 15] = [
+const KINDS: [(FactKind, Register); 16] = [
     (FactKind::Symbols, register_as::<Symbols>),
     (FactKind::Decisions, register_as::<Decisions>),
     (FactKind::NormTree, register_as::<NormTree>),
@@ -37,6 +38,7 @@ const KINDS: [(FactKind, Register); 15] = [
     (FactKind::CoverageMap, register_as::<CoverageMap>),
     (FactKind::PerTestMap, register_as::<PerTestMap>),
     (FactKind::MutationOutcomes, register_as::<MutationOutcomes>),
+    (FactKind::RelationResults, register_as::<RelationResults>),
 ];
 
 /// The kinds a producer plugin may provide, in catalog order.

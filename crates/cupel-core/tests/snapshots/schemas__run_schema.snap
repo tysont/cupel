@@ -1105,7 +1105,8 @@ expression: pretty(&schema)
         "fuzz-results",
         "race-reports",
         "analyzer-report",
-        "divergence-results"
+        "divergence-results",
+        "relation-results"
       ]
     },
     "FactProducers": {

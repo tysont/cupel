@@ -29,7 +29,10 @@ fn conforms(ty: &InputType, value: &Value) -> bool {
         }
         (InputType::Tuple(elements), Value::Array(items)) => {
             elements.len() == items.len()
-                && elements.iter().zip(items).all(|(ty, item)| conforms(ty, item))
+                && elements
+                    .iter()
+                    .zip(items)
+                    .all(|(ty, item)| conforms(ty, item))
         }
         _ => false,
     }
@@ -102,7 +105,10 @@ fn candidates_shrink_toward_the_simplest_value_of_the_type() {
     assert_eq!(shrunk("bool", json!(true)), [json!(false)]);
     assert_eq!(shrunk("bool", json!(false)), Vec::<Value>::new());
     assert_eq!(shrunk("str", json!("")), Vec::<Value>::new());
-    assert_eq!(shrunk("str", json!("ba")), [json!(""), json!("a"), json!("b"), json!("aa")]);
+    assert_eq!(
+        shrunk("str", json!("ba")),
+        [json!(""), json!("a"), json!("b"), json!("aa")]
+    );
     assert_eq!(shrunk("list[int]", json!([])), Vec::<Value>::new());
     assert_eq!(
         shrunk("list[int]", json!([3, 0])),
@@ -131,8 +137,7 @@ fn each_relation_draws_its_own_inputs_from_the_runs_seed() {
 // ---------------------------------------------------------------- the engine
 
 fn engine() -> &'static dyn RegisteredProducer {
-    static REGISTRY: std::sync::OnceLock<cupel_core::ProducerRegistry> =
-        std::sync::OnceLock::new();
+    static REGISTRY: std::sync::OnceLock<cupel_core::ProducerRegistry> = std::sync::OnceLock::new();
     let registry = REGISTRY.get_or_init(support::registry);
     support::producer(registry, FactKind::RelationResults, ID, "python")
 }
@@ -256,7 +261,10 @@ fn a_violated_relation_is_minimized_and_a_held_one_runs_every_case() {
     assert_eq!((held.cases, held.violation.is_none()), (40, true));
     assert_eq!(held.input, "tuple[int, int]");
     let sort = named(&results, "sort-reverse");
-    let violation = sort.violation.as_ref().expect("one bubble pass does not sort");
+    let violation = sort
+        .violation
+        .as_ref()
+        .expect("one bubble pass does not sort");
     assert!(sort.cases <= DEFAULT_CASES && sort.cases == violation.case + 1);
     let input = violation.input.as_array().unwrap();
     assert_eq!(input.len(), 3, "a minimal unsortable list: {input:?}");
@@ -307,7 +315,10 @@ fn an_exception_is_a_violation_with_what_it_raised() {
         },
     });
     let results = produce(&produce_ctx(dir.path(), 2, relations)).unwrap();
-    let violation = named(&results, "inverse-negates").violation.clone().unwrap();
+    let violation = named(&results, "inverse-negates")
+        .violation
+        .clone()
+        .unwrap();
     assert_eq!(
         (violation.input.clone(), violation.source.clone()),
         (
@@ -325,9 +336,21 @@ fn a_relation_the_harness_cannot_set_up_is_an_error_naming_it() {
     }
     let dir = repository();
     let cases = [
-        (json!("nowhere:sort_list"), "lambda xs: xs", "cannot import `nowhere`"),
-        (json!("sorting:missing"), "lambda xs: xs", "`sorting` has no `missing`"),
-        (json!("sorting:sort_list"), "lambda xs:", "`transform` does not evaluate"),
+        (
+            json!("nowhere:sort_list"),
+            "lambda xs: xs",
+            "cannot import `nowhere`",
+        ),
+        (
+            json!("sorting:missing"),
+            "lambda xs: xs",
+            "`sorting` has no `missing`",
+        ),
+        (
+            json!("sorting:sort_list"),
+            "lambda xs:",
+            "`transform` does not evaluate",
+        ),
     ];
     for (function, transform, expected) in cases {
         let relations = json!({

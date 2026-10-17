@@ -15,7 +15,7 @@ mod generate;
 mod shrink;
 
 use cupel_core::{
-    Availability, CostClass, Ctx, Error, EventSink, Evaluated, FactKind, LangId, Langs, Location,
+    Availability, CostClass, Ctx, Error, Evaluated, EventSink, FactKind, LangId, Langs, Location,
     ProduceCtx, Producer, ProducerId, RELATIONS_KEY, Relation, RelationResult, RelationResults,
     Result, Scope, ToolId, ToolProbe, Violation, find_program, relations,
 };
@@ -113,7 +113,14 @@ impl Producer<RelationResults> for MetamorphicEngine {
         let mut evaluated = Vec::with_capacity(configured.len());
         for (name, relation) in &configured {
             ctx.cancel.checkpoint()?;
-            evaluated.push(Harness { ctx, name, relation }.evaluate()?);
+            evaluated.push(
+                Harness {
+                    ctx,
+                    name,
+                    relation,
+                }
+                .evaluate()?,
+            );
         }
         Ok(RelationResults {
             seed: ctx.seed,
