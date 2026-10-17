@@ -18,7 +18,7 @@ use serde_json::{Map, Value};
 use crate::finding::SymbolFinding;
 use crate::manifest::{evidence, kind, metric, ranked};
 use crate::metrics::{
-    decisions_by_symbol, scored, sum, symbol_target, trees_by_symbol, weighted_mean,
+    case_key, decisions_by_symbol, scored, sum, symbol_target, trees_by_symbol, weighted_mean,
 };
 use crate::outcome;
 use crate::settings::Limits;
@@ -333,15 +333,6 @@ impl Counts {
     }
 }
 
-/// The key of the symbol a test case is: the case's node is the symbol's node (ADR-030, ADR-054).
-fn key_of(file: &TestFile, case: &TestCase) -> SymbolKey {
-    SymbolKey {
-        file: file.file.clone(),
-        line: case.span.line,
-        col: case.span.col,
-    }
-}
-
 /// The configured thresholds (ADR-054).
 struct Settings {
     mock_density_max: u32,
@@ -426,7 +417,7 @@ impl TestsQuality {
         let mut reported = Vec::new();
         let mut candidates = Vec::new();
         for case in &file.cases {
-            let key = key_of(file, case);
+            let key = case_key(file, case);
             if !ctx.scope.includes(&key) {
                 continue;
             }

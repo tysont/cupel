@@ -5,7 +5,7 @@ mod support;
 use std::collections::BTreeSet;
 
 use cupel_core::syntax::{
-    Assertion, AssertionKind, AssertionStrength, Span, SymbolDef, SymbolKind, Symbols, TestCase,
+    Assertion, AssertionKind, AssertionStrength, SymbolDef, SymbolKind, Symbols, TestCase,
     TestConventions, TestFile, TestFrames, TestPairing, Visibility,
 };
 use cupel_core::{
@@ -13,18 +13,9 @@ use cupel_core::{
     Location, MetricPer, Plan, Scope, Score, Severity,
 };
 use serde_json::{Value, json};
+use support::span;
 
 const ID: &str = "tests.assertion-density";
-
-/// `lines` lines from `line`.
-fn span(line: u32, lines: u32) -> Span {
-    Span {
-        line,
-        col: 1,
-        end_line: line + lines - 1,
-        end_col: 2,
-    }
-}
 
 /// A test case `lines` long at `line` making `assertions` assertions.
 fn case(name: &str, line: u32, lines: u32, assertions: usize) -> TestCase {
@@ -91,14 +82,16 @@ impl World {
         }
     }
 
-    fn with_symbols(mut self, symbols: Vec<SymbolDef>) -> Self {
-        self.symbols = symbols;
-        self
-    }
-
-    fn pairing(mut self, source: &'static str, tests: &[&'static str]) -> Self {
-        self.pairs.push((source, tests.to_vec()));
-        self
+    /// This world with source `symbols`, each source file in `pairs` tested by its test files.
+    fn testing(self, symbols: Vec<SymbolDef>, pairs: &[(&'static str, &[&'static str])]) -> Self {
+        Self {
+            symbols,
+            pairs: pairs
+                .iter()
+                .map(|(source, tests)| (*source, tests.to_vec()))
+                .collect(),
+            ..self
+        }
     }
 
     fn facts(&self) -> Facts {
@@ -192,9 +185,9 @@ fn the_manifest_needs_test_frames_symbols_and_conventions_at_tier_two_and_quick_
     );
 }
 
-#[test]
-fn a_long_test_with_few_assertions_is_sparse_and_its_finding_says_why() {
-    let world = World::of(vec![TestFile {
+/// One test file: a 30-line test making one assertion, then three that are not sparse.
+fn long_tests() -> World {
+    World::of(vec![TestFile {
         file: "t/a.x".to_owned(),
         framework: "x-test".to_owned(),
         setup: Vec::new(),
@@ -205,16 +198,19 @@ fn a_long_test_with_few_assertions_is_sparse_and_its_finding_says_why() {
             // A test that asserts nothing is tests.quality's `test.no-assertion`.
             case("none_in_thirty", 120, 30, 0),
         ],
-    }]);
-    let (result, findings) = world.run();
+    }])
+}
+
+#[test]
+fn a_long_test_with_few_assertions_is_sparse_and_its_evidence_says_why() {
+    let (result, findings) = long_tests().run();
     assert_eq!(
         reported(&findings),
         [("density.sparse-test", "t/a.x", 10)],
         "{findings:#?}"
     );
-    let finding = &findings[0];
     assert_eq!(
-        finding.evidence.0,
+        findings[0].evidence.0,
         *json!({
             "test": "one_in_thirty",
             "assertions": 1,
@@ -225,6 +221,19 @@ fn a_long_test_with_few_assertions_is_sparse_and_its_finding_says_why() {
         .as_object()
         .unwrap()
     );
+    assert_eq!(
+        findings[0].title,
+        "`one_in_thirty` makes 1 assertion(s) in 30 lines (max 20 lines per assertion)"
+    );
+    assert_eq!(result.status, CheckStatus::Fail);
+    assert_eq!(result.findings, 1);
+    assert_eq!(result.metrics.get("sparse_tests"), Some(&1.0));
+}
+
+#[test]
+fn a_sparse_test_is_identified_by_its_file_and_name_and_located_at_its_span() {
+    let (_, findings) = long_tests().run();
+    let finding = &findings[0];
     assert_eq!(
         finding.id,
         FindingId::for_subject(
@@ -243,13 +252,14 @@ fn a_long_test_with_few_assertions_is_sparse_and_its_finding_says_why() {
             end_col: Some(2),
         })
     );
-    assert_eq!(finding.severity, Severity::Warn);
-    assert_eq!(finding.symbol, None);
     assert_eq!(
-        finding.title,
-        "`one_in_thirty` makes 1 assertion(s) in 30 lines (max 20 lines per assertion)"
+        (
+            finding.severity,
+            finding.symbol.as_ref(),
+            finding.action.kind
+        ),
+        (Severity::Warn, None, ActionKind::StrengthenAssertion)
     );
-    assert_eq!(finding.action.kind, ActionKind::StrengthenAssertion);
     assert_eq!(
         finding.repro,
         "cupel check --only tests.assertion-density --paths t/a.x"
@@ -258,9 +268,6 @@ fn a_long_test_with_few_assertions_is_sparse_and_its_finding_says_why() {
         finding.suppress,
         format!("cupel suppress {} --reason '…'", finding.id)
     );
-    assert_eq!(result.status, CheckStatus::Fail);
-    assert_eq!(result.findings, 1);
-    assert_eq!(result.metrics.get("sparse_tests"), Some(&1.0));
 }
 
 #[test]
@@ -350,18 +357,19 @@ fn assertions_per_tested_public_function_count_public_functions_whose_tests_ran(
         file("t/b.x", 5, &[3]),
         file("t/c.x", 5, &[1]),
     ])
-    .with_symbols(vec![
-        function("src/a.x", "parse", 1, Visibility::Public),
-        function("src/a.x", "render", 10, Visibility::Public),
-        function("src/a.x", "helper", 20, Visibility::Private),
-        function("src/b.x", "load", 1, Visibility::Public),
-        // No test file pairs with src/untested.x.
-        function("src/untested.x", "lonely", 1, Visibility::Public),
-        // A function in a test file is not code under test.
-        function("t/c.x", "fixture", 1, Visibility::Public),
-    ])
-    .pairing("src/a.x", &["t/a.x", "t/c.x"])
-    .pairing("src/b.x", &["t/b.x"]);
+    .testing(
+        vec![
+            function("src/a.x", "parse", 1, Visibility::Public),
+            function("src/a.x", "render", 10, Visibility::Public),
+            function("src/a.x", "helper", 20, Visibility::Private),
+            function("src/b.x", "load", 1, Visibility::Public),
+            // No test file pairs with src/untested.x.
+            function("src/untested.x", "lonely", 1, Visibility::Public),
+            // A function in a test file is not code under test.
+            function("t/c.x", "fixture", 1, Visibility::Public),
+        ],
+        &[("src/a.x", &["t/a.x", "t/c.x"]), ("src/b.x", &["t/b.x"])],
+    );
     let (result, findings) = world.run();
     assert_eq!(reported(&findings), []);
     // src/a.x: (2 + 4 + 1) assertions over 2 public functions; src/b.x: 3 over 1.
@@ -391,12 +399,13 @@ fn findings_and_metrics_cover_the_scope_and_the_repository_is_every_test_seen() 
         file("t/dense.x", 30, &[4, 4, 4]),
         file("t/sparse.x", 30, &[1, 1, 1]),
     ])
-    .with_symbols(vec![
-        function("src/a.x", "parse", 1, Visibility::Public),
-        function("src/b.x", "load", 1, Visibility::Public),
-    ])
-    .pairing("src/a.x", &["t/dense.x"])
-    .pairing("src/b.x", &["t/sparse.x"]);
+    .testing(
+        vec![
+            function("src/a.x", "parse", 1, Visibility::Public),
+            function("src/b.x", "load", 1, Visibility::Public),
+        ],
+        &[("src/a.x", &["t/dense.x"]), ("src/b.x", &["t/sparse.x"])],
+    );
     let scope = Scope::of_files(vec!["t/sparse.x".to_owned(), "src/b.x".to_owned()]);
     let (result, findings) = world.run_in(scope, json!({}));
     assert_eq!(

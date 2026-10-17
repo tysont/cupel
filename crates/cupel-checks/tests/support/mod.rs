@@ -10,7 +10,7 @@ use std::sync::OnceLock;
 
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
-    Decision, Decisions, ImportTarget, NormNode, NormTree, NormalizedSymbol, SymbolDecisions,
+    Decision, Decisions, ImportTarget, NormNode, NormTree, NormalizedSymbol, Span, SymbolDecisions,
     SymbolDef, Symbols,
 };
 use cupel_core::{
@@ -170,6 +170,16 @@ pub fn score(value: f64, unit: &str, n: u64) -> Score {
         value,
         unit: unit.to_owned(),
         n,
+    }
+}
+
+/// A span of `lines` lines from `line`, from column 1 to column 2.
+pub fn span(line: u32, lines: u32) -> Span {
+    Span {
+        line,
+        col: 1,
+        end_line: line + lines - 1,
+        end_col: 2,
     }
 }
 

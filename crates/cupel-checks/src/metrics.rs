@@ -1,9 +1,11 @@
 // ABOUTME: Measurements more than one check makes the same way, so their numbers agree: per-symbol fact indexes,
-// ABOUTME: cyclomatic complexity (ADR-024, ADR-042), ranking targets, and combining `scope` metrics (ADR-063).
+// ABOUTME: test-case keys, cyclomatic complexity (ADR-024, ADR-042), ranking targets, and combining `scope` metrics (ADR-063).
 use std::collections::HashMap;
 
 use cupel_core::coverage::{CoverageMap, LineHits};
-use cupel_core::syntax::{Decision, Decisions, NormNode, NormTree, SymbolDef, SymbolKey};
+use cupel_core::syntax::{
+    Decision, Decisions, NormNode, NormTree, SymbolDef, SymbolKey, TestCase, TestFile,
+};
 use cupel_core::{CheckResult, Location, SymbolHash, Target};
 
 /// Each symbol's decisions, by symbol.
@@ -33,6 +35,16 @@ pub fn trees_by_symbol<'a>(
         .flat_map(|fact| &fact.symbols)
         .map(|entry| (&entry.symbol, (&entry.hash, &entry.root)))
         .collect()
+}
+
+/// The key of the symbol a test case is: the case's node is the symbol's node (ADR-030, ADR-054),
+/// so scope, `Symbols`, and `NormTree` join a case by it.
+pub fn case_key(file: &TestFile, case: &TestCase) -> SymbolKey {
+    SymbolKey {
+        file: file.file.clone(),
+        line: case.span.line,
+        col: case.span.col,
+    }
 }
 
 /// The instrumented lines that say whether tests ran `symbol`: those after its first line, or

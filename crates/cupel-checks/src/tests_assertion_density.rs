@@ -3,8 +3,7 @@
 use std::collections::BTreeMap;
 
 use cupel_core::syntax::{
-    Span, SymbolKey, SymbolKind, Symbols, TestCase, TestConventions, TestFile, TestFrames,
-    Visibility,
+    Span, SymbolKind, Symbols, TestCase, TestConventions, TestFile, TestFrames, Visibility,
 };
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
@@ -16,7 +15,7 @@ use serde::Serialize;
 use serde_json::{Map, Value};
 
 use crate::manifest::{evidence, kind, metric};
-use crate::metrics::{scored, sum, weighted_mean};
+use crate::metrics::{case_key, scored, sum, weighted_mean};
 use crate::outcome;
 use crate::settings::Limits;
 
@@ -146,7 +145,7 @@ impl Check for TestsAssertionDensity {
         _: &Plan,
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
-        let limits = Settings::read(&self.manifest.id, &ctx.config)?;
+        let limits = LIMITS.read(&self.manifest.id, &ctx.config)?;
         let frames = facts.get::<TestFrames>()?;
         let repository = Tally::of(frames.files.iter().flat_map(|file| &file.cases));
         let mut tests = Tally::default();
@@ -154,7 +153,7 @@ impl Check for TestsAssertionDensity {
         for file in &frames.files {
             ctx.cancel.checkpoint()?;
             for case in &file.cases {
-                if ctx.scope.includes(&key_of(file, case)) {
+                if ctx.scope.includes(&case_key(file, case)) {
                     tests.add(case);
                     reported.extend(self.sparse_test(file, case, &limits));
                 }
@@ -216,24 +215,8 @@ impl Check for TestsAssertionDensity {
     }
 }
 
-/// The configured limits (ADR-104).
-struct Settings {
-    lines_per_assertion_max: u32,
-    file_density_percent_min: u32,
-    file_tests_min: u32,
-}
-
-impl Settings {
-    fn read(check: &CheckId, config: &Map<String, Value>) -> Result<Self> {
-        let values = LIMITS.read(check, config)?;
-        let value = |name: &str| values.get(name).copied().unwrap_or(u32::MAX);
-        Ok(Self {
-            lines_per_assertion_max: value("lines_per_assertion_max"),
-            file_density_percent_min: value("file_density_percent_min"),
-            file_tests_min: value("file_tests_min"),
-        })
-    }
-}
+/// Every setting's value, configured or default, by name: [`LIMITS`] reads them all (ADR-104).
+type Settings = BTreeMap<&'static str, u32>;
 
 /// Assertions over what they are counted per: tests, or tested public functions.
 #[derive(Default)]
@@ -309,7 +292,7 @@ impl TestsAssertionDensity {
         let assertions = u32::try_from(case.assertions.len()).unwrap_or(u32::MAX);
         let lines = case.span.end_line.saturating_sub(case.span.line) + 1;
         let per = lines.checked_div(assertions)?;
-        let max = limits.lines_per_assertion_max;
+        let max = limits["lines_per_assertion_max"];
         (lines > max.saturating_mul(assertions)).then(|| {
             let name = &case.name;
             self.finding(Said {
@@ -349,8 +332,8 @@ impl TestsAssertionDensity {
         // The file's density over the repository's, as a percentage: own.a / own.t ÷ repo.a / repo.t.
         let percent = (100 * own.assertions * repository.tests)
             .checked_div(own.tests * repository.assertions)?;
-        let min = limits.file_density_percent_min;
-        (own.tests >= u64::from(limits.file_tests_min) && percent < u64::from(min)).then(|| {
+        let min = limits["file_density_percent_min"];
+        (own.tests >= u64::from(limits["file_tests_min"]) && percent < u64::from(min)).then(|| {
             let path = &file.file;
             self.finding(Said {
                 kind: SPARSE_FILE,
@@ -378,7 +361,7 @@ impl TestsAssertionDensity {
                     repository_assertions: repository.assertions,
                     percent,
                     file_density_percent_min: min,
-                    file_tests_min: limits.file_tests_min,
+                    file_tests_min: limits["file_tests_min"],
                 }),
             })
         })
@@ -433,15 +416,6 @@ struct Said<'a> {
     title: String,
     summary: String,
     evidence: Value,
-}
-
-/// The key of the symbol a test case is (ADR-030, ADR-054).
-fn key_of(file: &TestFile, case: &TestCase) -> SymbolKey {
-    SymbolKey {
-        file: file.file.clone(),
-        line: case.span.line,
-        col: case.span.col,
-    }
 }
 
 /// `value` to two decimal places, for a title.
