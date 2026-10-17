@@ -11,14 +11,14 @@ use support::{Recorded, check, recorded, score, setting_error};
 
 const ID: &str = "gen.metamorphic";
 
-fn located(file: &str, line: u32) -> Option<Location> {
-    Some(Location {
+fn located(file: &str, line: u32) -> Location {
+    Location {
         file: file.to_owned(),
         line,
         col: None,
         end_line: line + 5,
         end_col: None,
-    })
+    }
 }
 
 fn held(name: &str, file: &str) -> RelationResult {
@@ -27,7 +27,7 @@ fn held(name: &str, file: &str) -> RelationResult {
         function: format!("{name}:f"),
         input: "int".to_owned(),
         cases: 100,
-        location: located(file, 1),
+        location: Some(located(file, 1)),
         violation: None,
     }
 }
@@ -38,7 +38,7 @@ fn violated() -> RelationResult {
         function: "sorting:sort_list".to_owned(),
         input: "list[int]".to_owned(),
         cases: 31,
-        location: located("sorting.py", 4),
+        location: Some(located("sorting.py", 4)),
         violation: Some(Violation {
             case: 30,
             input: json!([1, 0, 0]),
@@ -108,7 +108,7 @@ fn a_violated_relation_is_one_failing_finding_with_the_minimized_input_and_both_
     );
     assert_eq!(
         finding.location,
-        located("sorting.py", 4),
+        Some(located("sorting.py", 4)),
         "the function's definition"
     );
     assert_eq!(
@@ -172,7 +172,10 @@ fn only_relations_whose_function_is_in_scope_or_unlocated_are_reported() {
         .map(|f| f.evidence.0["relation"].as_str().unwrap())
         .collect();
     assert_eq!(reported, ["elsewhere"]);
-    assert_eq!(result.metrics["relations"], 2.0);
+    assert_eq!(
+        result.metrics,
+        [("relations".to_owned(), 2.0), ("violated".to_owned(), 1.0)].into()
+    );
 }
 
 #[test]

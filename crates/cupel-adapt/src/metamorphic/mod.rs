@@ -240,8 +240,8 @@ impl Harness<'_> {
             .and_then(|line| serde_json::from_str::<Response>(line).ok());
         match (captured.exit_code, response) {
             (Some(0), Some(Response::Evaluated(batch))) => Ok(batch),
-            (_, Some(Response::Failed { error })) => Err(self.failed(error)),
-            (code, _) => Err(self.failed(format!(
+            (_, Some(Response::Failed { error })) => Err(self.failed(&error)),
+            (code, _) => Err(self.failed(&format!(
                 "the harness exited with {} without an outcome: {}",
                 code.map_or_else(|| "a signal".to_owned(), |code| format!("code {code}")),
                 output_tail(&captured.stderr).unwrap_or_default()
@@ -249,7 +249,7 @@ impl Harness<'_> {
         }
     }
 
-    fn failed(&self, problem: String) -> Error {
+    fn failed(&self, problem: &str) -> Error {
         Error::Process {
             program: PROGRAM.to_owned(),
             message: format!("relation `{}`: {problem}", self.name),

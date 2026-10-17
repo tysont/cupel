@@ -21,9 +21,8 @@ fn input_type(text: &str) -> InputType {
 /// Whether `value` is a value of `ty`.
 fn conforms(ty: &InputType, value: &Value) -> bool {
     match (ty, value) {
-        (InputType::Bool, Value::Bool(_)) => true,
+        (InputType::Bool, Value::Bool(_)) | (InputType::Str, Value::String(_)) => true,
         (InputType::Int, Value::Number(number)) => number.is_i64(),
-        (InputType::Str, Value::String(_)) => true,
         (InputType::List(element), Value::Array(items)) => {
             items.iter().all(|item| conforms(element, item))
         }
@@ -150,17 +149,9 @@ fn python_installed() -> bool {
     installed
 }
 
-/// `[lang.python]` holding `relations`.
-fn python_table(relations: Value) -> serde_json::Map<String, Value> {
-    let Value::Object(table) = json!({ "relations": relations }) else {
-        unreachable!()
-    };
-    table
-}
-
 /// The context of producing in `root` with `seed` and `relations` configured for Python.
 fn produce_ctx(root: &Path, seed: u64, relations: Value) -> ProduceCtx {
-    let table = python_table(relations);
+    let table = serde_json::Map::from_iter([("relations".to_owned(), relations)]);
     let mut ctx = ProduceCtx::new(
         Ctx {
             lang: [(LangId::from("python"), table.clone())].into(),
