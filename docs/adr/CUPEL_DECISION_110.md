@@ -40,3 +40,4 @@ Design §8.4.4 promises that a language is added with no change to `cupel-core`,
 - PIT's mutators and Cupel's operator tables are different vocabularies, so a PIT run reports what PIT mutates (bytecode-level returns of primitives, negated conditions) and the placement is a best effort by line; `tests.mutation` scores them like any mutant.
 - The PIT plugin needs `python3` beside the JDK; the matrix test and the plugin tests report `SKIPPED` without it.
 - A future language follows the same path; until the ecosystem fix lands it edits `ecosystems.rs` too.
+- The ecosystem defect is fixed by [ADR-112](CUPEL_DECISION_112.md): `Language::ecosystem`, collected by the registry; `KNOWN` is gone.
