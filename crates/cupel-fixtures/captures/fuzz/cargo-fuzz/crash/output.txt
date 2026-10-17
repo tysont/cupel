@@ -1,0 +1,52 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3
+INFO: Loaded 1 modules   (305 inline 8-bit counters): 305 [0x1020cd650, 0x1020cd781), 
+INFO: Loaded 1 PC tables (305 PCs): 305 [0x1020cd788,0x1020cea98), 
+INFO:        0 files found in /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/rust/.c/first/corpus
+INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
+
+thread '<unnamed>' (72901288) panicked at /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/rust/src/lib.rs:5:5:
+index out of bounds: the len is 0 but the index is 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+==82951== ERROR: libFuzzer: deadly signal
+    #0 0x0001028032f4 in __sanitizer_print_stack_trace+0x28 (librustc-nightly_rt.asan.dylib:arm64+0x872f4)
+    #1 0x000102055258 in fuzzer::PrintStackTrace()+0x30 (first:arm64+0x100011258)
+    #2 0x000102049294 in fuzzer::Fuzzer::CrashCallback()+0x54 (first:arm64+0x100005294)
+    #3 0x000183c0f740 in _sigtramp+0x34 (libsystem_platform.dylib:arm64e+0x3740)
+    #4 0x000183c058d4 in pthread_kill+0x124 (libsystem_pthread.dylib:arm64e+0x68d4)
+    #5 0x000183b0c640 in abort+0x90 (libsystem_c.dylib:arm64e+0x78640)
+    #6 0x0001020ae7f0 in _RNvNtNtNtCscWiedGj65Mj_3std3sys3pal4unix14abort_internal+0x8 (first:arm64+0x10006a7f0)
+    #7 0x0001020ae67c in _RNvNtCscWiedGj65Mj_3std7process5abort+0x8 (first:arm64+0x10006a67c)
+    #8 0x0001020a9e0c in _RNCNvCs2TRtMb0re8V_13libfuzzer_sys10initialize0B3_+0xb8 (first:arm64+0x100065e0c)
+    #9 0x000102095804 in _RNvNtCscWiedGj65Mj_3std9panicking15panic_with_hook+0x264 (first:arm64+0x100051804)
+    #10 0x000102089a6c in _RNCNvNtCscWiedGj65Mj_3std9panicking13panic_handler0B5_+0x40 (first:arm64+0x100045a6c)
+    #11 0x00010207f7f8 in _RINvNtNtCscWiedGj65Mj_3std3sys9backtrace26___rust_end_short_backtraceNCNvNtB6_9panicking13panic_handler0zEB6_+0x8 (first:arm64+0x10003b7f8)
+    #12 0x00010208a04c in _RNvCsck7zkdlYSbk_7___rustc17rust_begin_unwind+0x1c (first:arm64+0x10004604c)
+    #13 0x0001020aedd0 in _RNvNtCs9slFQPZOruX_4core9panicking9panic_fmt+0x24 (first:arm64+0x10006add0)
+    #14 0x0001020aec70 in _RNvNtCs9slFQPZOruX_4core9panicking18panic_bounds_check+0x34 (first:arm64+0x10006ac70)
+    #15 0x000102045298 in first lib.rs:5
+    #16 0x000102045298 in _RNvNvCs530I51jnxTG_5first1__19___libfuzzer_sys_run first.rs:6
+    #17 0x000102046930 in rust_fuzzer_test_input lib.rs:276
+    #18 0x0001020478c0 in _RINvNvNtCscWiedGj65Mj_3std9panicking12catch_unwind7do_callNCNvCs2TRtMb0re8V_13libfuzzer_sys15test_input_wrap0lEBY_+0xc4 (first:arm64+0x1000038c0)
+    #19 0x0001020484f8 in __rust_try+0x18 (first:arm64+0x1000044f8)
+    #20 0x000102047180 in LLVMFuzzerTestOneInput+0x16c (first:arm64+0x100003180)
+    #21 0x00010204ab14 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long)+0x158 (first:arm64+0x100006b14)
+    #22 0x00010204bd9c in fuzzer::Fuzzer::ReadAndExecuteSeedCorpora(std::__1::vector<fuzzer::SizedFile, std::__1::allocator<fuzzer::SizedFile>>&)+0x240 (first:arm64+0x100007d9c)
+    #23 0x00010204c50c in fuzzer::Fuzzer::Loop(std::__1::vector<fuzzer::SizedFile, std::__1::allocator<fuzzer::SizedFile>>&)+0x88 (first:arm64+0x10000850c)
+    #24 0x00010206b73c in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long))+0x1aa8 (first:arm64+0x10002773c)
+    #25 0x000102078e60 in main+0x24 (first:arm64+0x100034e60)
+    #26 0x000183847dfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+NOTE: libFuzzer has rudimentary signal handlers.
+      Combine libFuzzer with AddressSanitizer or similar for better crash reports.
+SUMMARY: libFuzzer: deadly signal
+MS: 0 ; base unit: 0000000000000000000000000000000000000000
+
+
+artifact_prefix='/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/rust/.c/first/inputs/'; Test unit written to /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/rust/.c/first/inputs/crash-da39a3ee5e6b4b0d3255bfef95601890afd80709
+Base64: 
+stat::number_of_executed_units: 1
+stat::average_exec_per_sec:     0
+stat::new_units_added:          0
+stat::slowest_unit_time_sec:    0
+stat::peak_rss_mb:              48

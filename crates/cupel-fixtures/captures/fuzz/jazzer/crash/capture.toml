@@ -1,0 +1,6 @@
+# Captured from the real fuzzer (P6.3, ADR-107); output.txt is its unedited output, standard error
+# merged into standard output. `dir` is where it ran.
+tool = "@jazzer.js/core 4.0.0, node 25.2.1"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/x/jz"
+command = "jazzer first.fuzz corpus -- -runs=1000 -seed=3 -artifact_prefix=art/"
+exit_code = 77

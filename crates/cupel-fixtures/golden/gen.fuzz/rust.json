@@ -1,0 +1,145 @@
+{
+  "checks": [
+    {
+      "cost": "deep",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "gen.fuzz",
+      "metrics": {
+        "crashes": 1.0,
+        "missing": 0.0,
+        "targets": 2.0,
+        "timeouts": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "failing",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 4
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix `first`'s failure on the saved input (`cargo +nightly fuzz run first .cupel/cache/fuzz/rust/root/first/inputs/crash-da39a3ee5e6b4b0d3255bfef95601890afd80709` reruns it), then keep the input in the target's corpus as a regression case."
+      },
+      "check": "gen.fuzz",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cases": 1000,
+        "input": "",
+        "message": "index out of bounds: the len is 0 but the index is 0",
+        "reproduce": "cargo +nightly fuzz run first .cupel/cache/fuzz/rust/root/first/inputs/crash-da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "reproducer": ".cupel/cache/fuzz/rust/root/first/inputs/crash-da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "seed": 3,
+        "target": "first",
+        "tool": "tool.cargo-fuzz"
+      },
+      "id": "fnd_d59cd3",
+      "kind": "fuzz.crash",
+      "location": {
+        "col": 5,
+        "end_col": null,
+        "end_line": 5,
+        "file": "src/lib.rs",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only gen.fuzz --paths fuzz/fuzz_targets/first.rs --seed 3 --cases 1000",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_d59cd3 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 4,
+      "title": "fuzz target `first` crashes on the empty input: index out of bounds: the len is 0 but the index is 0"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_d59cd3",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Fix `first`'s failure on the saved input (`cargo +nightly fuzz run first .cupel/cache/fuzz/rust/root/first/inputs/crash-da39a3ee5e6b4b0d3255bfef95601890afd80709` reruns it), then keep the input in the target's corpus as a regression case."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 2
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

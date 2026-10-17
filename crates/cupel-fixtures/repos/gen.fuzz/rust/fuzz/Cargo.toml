@@ -1,0 +1,31 @@
+[package]
+name = "units-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.units]
+path = ".."
+
+[[bin]]
+name = "first"
+path = "fuzz_targets/first.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "checked_first"
+path = "fuzz_targets/checked_first.rs"
+test = false
+doc = false
+bench = false
+
+# The fuzz crate is its own workspace, as `cargo fuzz init` makes it.
+[workspace]

@@ -1,0 +1,36 @@
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3
+INFO: Loaded 1 modules   (306 inline 8-bit counters): 306 [0x1001f1650, 0x1001f1782), 
+INFO: Loaded 1 PC tables (306 PCs): 306 [0x1001f1788,0x1001f2aa8), 
+INFO:        0 files found in /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/rust/.c/spin/corpus
+INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
+ALARM: working on the last Unit for 1 seconds
+       and the timeout value is 1 (use -timeout=N to change)
+MS: 0 ; base unit: 0000000000000000000000000000000000000000
+
+
+artifact_prefix='/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/rust/.c/spin/inputs/'; Test unit written to /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/fuzz-fork/rust/.c/spin/inputs/timeout-da39a3ee5e6b4b0d3255bfef95601890afd80709
+Base64: 
+==82983== ERROR: libFuzzer: timeout after 1 seconds
+    #0 0x000100a5b2f4 in __sanitizer_print_stack_trace+0x28 (librustc-nightly_rt.asan.dylib:arm64+0x872f4)
+    #1 0x0001001792fc in fuzzer::PrintStackTrace()+0x30 (spin:arm64+0x1000112fc)
+    #2 0x00010016d2a8 in fuzzer::Fuzzer::AlarmCallback()+0x128 (spin:arm64+0x1000052a8)
+    #3 0x000183c0f740 in _sigtramp+0x34 (libsystem_platform.dylib:arm64e+0x3740)
+    #4 0x0001001692a0 in _RNvNvCs5fttxXLcvBH_4spin1__19___libfuzzer_sys_run lib.rs
+    #5 0x00010016a9d4 in rust_fuzzer_test_input lib.rs:276
+    #6 0x00010016b964 in _RINvNvNtCscWiedGj65Mj_3std9panicking12catch_unwind7do_callNCNvCs2TRtMb0re8V_13libfuzzer_sys15test_input_wrap0lEBY_+0xc4 (spin:arm64+0x100003964)
+    #7 0x00010016c59c in __rust_try+0x18 (spin:arm64+0x10000459c)
+    #8 0x00010016b224 in LLVMFuzzerTestOneInput+0x16c (spin:arm64+0x100003224)
+    #9 0x00010016ebb8 in fuzzer::Fuzzer::ExecuteCallback(unsigned char const*, unsigned long)+0x158 (spin:arm64+0x100006bb8)
+    #10 0x00010016fe40 in fuzzer::Fuzzer::ReadAndExecuteSeedCorpora(std::__1::vector<fuzzer::SizedFile, std::__1::allocator<fuzzer::SizedFile>>&)+0x240 (spin:arm64+0x100007e40)
+    #11 0x0001001705b0 in fuzzer::Fuzzer::Loop(std::__1::vector<fuzzer::SizedFile, std::__1::allocator<fuzzer::SizedFile>>&)+0x88 (spin:arm64+0x1000085b0)
+    #12 0x00010018f7e0 in fuzzer::FuzzerDriver(int*, char***, int (*)(unsigned char const*, unsigned long))+0x1aa8 (spin:arm64+0x1000277e0)
+    #13 0x00010019cf04 in main+0x24 (spin:arm64+0x100034f04)
+    #14 0x000183847dfc in start+0x1b4c (dyld:arm64e+0x1fdfc)
+
+SUMMARY: libFuzzer: timeout
+stat::number_of_executed_units: 1
+stat::average_exec_per_sec:     1
+stat::new_units_added:          0
+stat::slowest_unit_time_sec:    0
+stat::peak_rss_mb:              48

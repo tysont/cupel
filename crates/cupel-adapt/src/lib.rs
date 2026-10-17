@@ -67,6 +67,7 @@ pub mod differential;
 pub mod flake;
 mod footprint;
 mod fresh;
+mod fuzz;
 mod go_test;
 mod jest;
 pub mod metamorphic;

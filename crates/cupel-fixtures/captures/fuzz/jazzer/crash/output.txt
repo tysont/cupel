@@ -1,0 +1,19 @@
+INFO: using inputs from: corpus
+(node:44242) Warning: Accessing non-existent property 'default' of module exports inside circular dependency
+(Use `node --trace-warnings ...` to show where the warning was created)
+Dictionary: 4 entries
+INFO: Running with entropic power schedule (0xFF, 100).
+INFO: Seed: 3
+INFO: Loaded 1 modules   (512 inline 8-bit counters): 512 [0x734020000, 0x734020200), 
+INFO: Loaded 1 PC tables (512 PCs): 512 [0x734ca0000,0x734ca2000), 
+INFO:        0 files found in corpus
+INFO: -max_len is not provided; libFuzzer will not generate inputs larger than 4096 bytes
+==44242== Uncaught Exception: Error: empty input
+    at firstByte (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/x/jz/first.js:3:11)
+    at module.exports.fuzz (/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p63/x/jz/first.fuzz.js:3:3)
+MS: 0 ; base unit: 0000000000000000000000000000000000000000
+
+
+artifact_prefix='art/'; Test unit written to art/crash-da39a3ee5e6b4b0d3255bfef95601890afd80709
+Base64: 
+Done 1 runs in 0 second(s)

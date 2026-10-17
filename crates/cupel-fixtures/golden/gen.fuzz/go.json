@@ -1,0 +1,145 @@
+{
+  "checks": [
+    {
+      "cost": "deep",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "gen.fuzz",
+      "metrics": {
+        "crashes": 1.0,
+        "missing": 0.0,
+        "targets": 2.0,
+        "timeouts": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "failing",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 4
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix `example.com/units/text.FuzzSecondByte`'s failure on the saved input (`mkdir -p text/testdata/fuzz/FuzzSecondByte && cp .cupel/cache/fuzz/go/root/example.com_units_text.FuzzSecondByte/inputs/771e938e4458e983 text/testdata/fuzz/FuzzSecondByte/ && go test -run=FuzzSecondByte/771e938e4458e983 ./text` reruns it), then keep the input in the target's corpus as a regression case."
+      },
+      "check": "gen.fuzz",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cases": 1000,
+        "input": "0",
+        "message": "panic: runtime error: index out of range [1] with length 1",
+        "reproduce": "mkdir -p text/testdata/fuzz/FuzzSecondByte && cp .cupel/cache/fuzz/go/root/example.com_units_text.FuzzSecondByte/inputs/771e938e4458e983 text/testdata/fuzz/FuzzSecondByte/ && go test -run=FuzzSecondByte/771e938e4458e983 ./text",
+        "reproducer": ".cupel/cache/fuzz/go/root/example.com_units_text.FuzzSecondByte/inputs/771e938e4458e983",
+        "seed": null,
+        "target": "example.com/units/text.FuzzSecondByte",
+        "tool": "tool.go-fuzz"
+      },
+      "id": "fnd_f6f05f",
+      "kind": "fuzz.crash",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 7,
+        "file": "text/first.go",
+        "line": 7
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only gen.fuzz --paths text/first_test.go --cases 1000",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_f6f05f --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 4,
+      "title": "fuzz target `example.com/units/text.FuzzSecondByte` crashes on `0`: panic: runtime error: index out of range [1] with length 1"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_f6f05f",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Fix `example.com/units/text.FuzzSecondByte`'s failure on the saved input (`mkdir -p text/testdata/fuzz/FuzzSecondByte && cp .cupel/cache/fuzz/go/root/example.com_units_text.FuzzSecondByte/inputs/771e938e4458e983 text/testdata/fuzz/FuzzSecondByte/ && go test -run=FuzzSecondByte/771e938e4458e983 ./text` reruns it), then keep the input in the target's corpus as a regression case."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "go"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}
