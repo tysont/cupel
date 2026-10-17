@@ -94,6 +94,7 @@ cupel/
 ├── LICENSE
 ├── .gitignore
 ├── .github/workflows/ci.yml
+├── plugins/                   # external-process plugins Cupel ships: pit/ (Java mutation through PIT, ADR-110)
 ├── crates/
 │   ├── cupel-cli/             # binary `cupel`: clap, renderers, exit codes, daemon auto-connect
 │   ├── cupel-core/            # fact types + Fact/Producer/Check traits + registries + support matrix;
