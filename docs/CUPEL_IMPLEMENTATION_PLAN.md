@@ -1099,7 +1099,7 @@ Added after P3.6's second measurement (P3 Notes "P3.6 — measurement with schem
 
 #### P5.3 `gen.differential`
 
-**Status:** not started
+**Status:** in progress (2026-10-16) · [ADR-093](adr/CUPEL_DECISION_093.md) · [ADR-094](adr/CUPEL_DECISION_094.md)
 
 - Old-vs-new (ref oracle) or impl-vs-command on generated inputs; input generators per language; minimized divergence with both outputs in evidence.
 
