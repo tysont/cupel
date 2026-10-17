@@ -19,7 +19,11 @@ fn dependency(name: &str, version: Option<&str>) -> Dependency {
 #[test]
 fn footprint_is_an_execution_fact_appended_to_the_catalog_with_a_versioned_schema() {
     let kind = FactKind::Footprint;
-    assert_eq!(FactKind::ALL.last(), Some(&kind));
+    let at = FactKind::ALL.iter().position(|each| *each == kind);
+    assert_eq!(
+        at.map(|at| FactKind::ALL[at - 1]),
+        Some(FactKind::RelationResults)
+    );
     assert_eq!(
         support::fact_entry(kind),
         (

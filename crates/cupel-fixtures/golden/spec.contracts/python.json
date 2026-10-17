@@ -1,0 +1,223 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "spec.contracts",
+      "metrics": {
+        "violations": 3.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 4,
+        "unit": "violations",
+        "value": 3.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 5
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "A caller passed what the precondition rejects: fix the call the test makes, or the precondition if it is wrong, then rerun."
+      },
+      "check": "spec.contracts",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "function": "share",
+        "kind": "precondition",
+        "message": "parts > 0; parts was 0; total was 10",
+        "test": "tests/test_ledger.py::test_shares_nothing_among_no_parts",
+        "tool": "tool.icontract"
+      },
+      "id": "fnd_e4c662",
+      "kind": "contract.violated",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 6,
+        "file": "src/ledger.py",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only spec.contracts --paths src/ledger.py",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_e4c662 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "precondition of `share` violated in `tests/test_ledger.py::test_shares_nothing_among_no_parts`: parts > 0; parts was 0; total was 10"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "The function returned what its postcondition rejects: fix the function, or the postcondition if it is wrong, then rerun."
+      },
+      "check": "spec.contracts",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "function": "half",
+        "kind": "postcondition",
+        "message": "result > 0; amount was 1; result was 0",
+        "test": "tests/test_ledger.py::test_halves_one",
+        "tool": "tool.icontract"
+      },
+      "id": "fnd_ff06af",
+      "kind": "contract.violated",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 11,
+        "file": "src/ledger.py",
+        "line": 11
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only spec.contracts --paths src/ledger.py",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_ff06af --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "postcondition of `half` violated in `tests/test_ledger.py::test_halves_one`: result > 0; amount was 1; result was 0"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "A method left the value in a state its invariant rejects: fix the method, or the invariant if it is wrong, then rerun."
+      },
+      "check": "spec.contracts",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "function": "Account",
+        "kind": "invariant",
+        "message": "len(self.entries) <= 2; len(self.entries) was 3; self was <ledger.Account object at 0x…>; self.entries was [1, 2, 3]",
+        "test": "tests/test_ledger.py::test_posts_three_entries",
+        "tool": "tool.icontract"
+      },
+      "id": "fnd_c0c9ab",
+      "kind": "contract.violated",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 21,
+        "file": "src/ledger.py",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only spec.contracts --paths src/ledger.py",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_c0c9ab --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "invariant of `Account` violated in `tests/test_ledger.py::test_posts_three_entries`: len(self.entries) <= 2; len(self.entries) was 3; self was <ledger.Account object at 0x…>; self.entries was [1, 2, 3]"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_e4c662",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "A caller passed what the precondition rejects: fix the call the test makes, or the precondition if it is wrong, then rerun."
+    },
+    {
+      "command": null,
+      "finding": "fnd_ff06af",
+      "kind": "fix_bug",
+      "priority": 2,
+      "summary": "The function returned what its postcondition rejects: fix the function, or the postcondition if it is wrong, then rerun."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c0c9ab",
+      "kind": "fix_bug",
+      "priority": 3,
+      "summary": "A method left the value in a state its invariant rejects: fix the method, or the invariant if it is wrong, then rerun."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 9
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 3,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}

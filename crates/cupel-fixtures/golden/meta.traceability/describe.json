@@ -1,0 +1,154 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "standard",
+      "findings": [
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `spec.untested-requirement`.",
+            "properties": {
+              "base": {
+                "description": "The commit the range starts from.",
+                "type": "string"
+              },
+              "requirement": {
+                "description": "The requirement ID, as configured.",
+                "type": "string"
+              },
+              "tests": {
+                "description": "The tests in scope whose names carry the ID, none of them added by the range.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "A test whose name carries a requirement ID; inlined, as evidence schemas have no `$defs`.",
+                  "properties": {
+                    "added": {
+                      "description": "Whether the range added it (always false here: one it added would trace the\nrequirement).",
+                      "type": "boolean"
+                    },
+                    "file": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "file",
+                    "name",
+                    "line",
+                    "added"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "requirement",
+              "base",
+              "tests"
+            ],
+            "title": "Untested",
+            "type": "object"
+          },
+          "kind": "spec.untested-requirement",
+          "summary": "A requirement of the task has no test the change added whose name carries its ID, so nothing shows the change meets it."
+        }
+      ],
+      "id": "meta.traceability",
+      "metrics": [
+        {
+          "name": "untested",
+          "per": "scope",
+          "summary": "Requirements no test added by the range names."
+        }
+      ],
+      "needs": [
+        "test-frames"
+      ],
+      "settings": [
+        {
+          "default": [],
+          "name": "requirements",
+          "summary": "The task's requirement IDs, such as `REQ-12`; a per-language override assigns them to the language whose tests trace them."
+        }
+      ],
+      "stability": "experimental",
+      "summary": "Maps each requirement ID the task lists (`requirements`) to the tests the range added whose names carry it (`test_req_12_…`, `… #REQ-12`) and reports each requirement without one. Runs only with --changed or --base.",
+      "tier": 2,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

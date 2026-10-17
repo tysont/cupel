@@ -1,0 +1,26 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "meta.oracle-independence",
+      "metrics": {},
+      "oracle": null,
+      "score": null,
+      "skipped": {
+        "est_ms": null,
+        "fact": null,
+        "lang": "rust",
+        "reason": "needs-range",
+        "see": "cupel check --changed --only meta.oracle-independence",
+        "tool": null
+      },
+      "status": "skipped",
+      "tier": 2
+    }
+  ],
+  "findings": [],
+  "rankings": []
+}

@@ -19,22 +19,19 @@ fn sources(root: &Path) -> Vec<String> {
 }
 
 /// The contract run of `tool` on a copy of the spec.contracts fixture for `lang`, after the
-/// baseline of `runner`, which must be green; `None` (reported as skipped) when the runner or
-/// the library is not installed here.
+/// baseline of `runner`, which must be green; `None` (reported as skipped) when the runner is
+/// not installed here.
 fn contract_run(tool: &str, runner: &str, lang: &str) -> Option<ContractViolations> {
     let fixture = support::own_fixture("spec.contracts", lang);
     let root = fixture.path();
     let registry = support::shared_registry();
     let producer = support::producer(registry, FactKind::ContractViolations, tool, lang);
     let runner_producer = support::runner(registry, runner, lang);
-    for availability in [
-        runner_producer.availability(&Ctx::new(root.to_path_buf())),
-        producer.availability(&Ctx::new(root.to_path_buf())),
-    ] {
-        if let Availability::MissingTool { name, .. } = availability {
-            eprintln!("SKIPPED: {name} not installed; {tool} did not run");
-            return None;
-        }
+    if let Availability::MissingTool { name, .. } =
+        runner_producer.availability(&Ctx::new(root.to_path_buf()))
+    {
+        eprintln!("SKIPPED: {name} not installed; {tool} did not run");
+        return None;
     }
     let before = sources(root);
     let mut ctx = support::produce_ctx(root, lang, Cancellation::new());
@@ -114,6 +111,14 @@ fn the_rust_contract_run_turns_on_debug_contracts_and_reads_each_violation() {
 
 #[test]
 fn the_icontract_run_turns_on_slow_contracts_and_reads_each_violation() {
+    let imports = std::process::Command::new("python3")
+        .args(["-c", "import icontract"])
+        .status()
+        .is_ok_and(|status| status.success());
+    if !imports {
+        eprintln!("SKIPPED: python3 does not import icontract; tool.icontract did not run");
+        return;
+    }
     let Some(fact) = contract_run("tool.icontract", "tool.pytest", "python") else {
         return;
     };

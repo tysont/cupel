@@ -23,7 +23,6 @@ use cupel_core::{
     Availability, ContractKind, ContractPlace, ContractViolation, ContractViolations, CostClass,
     Ctx, Error, EventSink, FactKind, LangId, Langs, ProduceCtx, Producer, ProducerId,
     ProducerRegistry, Result, RootRun, RunStatus, Scope, TestOutcome, TestResults, TestSelection,
-    ToolProbe,
 };
 
 use crate::rules::{Dirs, Rule};
@@ -39,10 +38,6 @@ pub struct Library {
     pub manifests: &'static [&'static str],
     /// The environment that turns on every contract it checks.
     pub switches: &'static [(&'static str, &'static str)],
-    pub availability: fn() -> Availability,
-    /// The import or program `doctor` reports; `None` when the language's toolchain is all
-    /// it needs.
-    pub probe: Option<fn() -> ToolProbe>,
     /// The violations in one failed test's output, each file as the library printed it; the
     /// function reads a file as printed, for a library whose report leaves the kind to its
     /// source.
@@ -92,12 +87,10 @@ impl Producer<ContractViolations> for Contracts {
         CostClass::Standard
     }
 
+    /// Ready wherever the runner is: a project that declares the library cannot run its own
+    /// tests without it, so a missing library is the baseline's failure, not this producer's.
     fn availability(&self, _: &Ctx) -> Availability {
-        (self.0.availability)()
-    }
-
-    fn tool(&self, _: &Ctx) -> Option<ToolProbe> {
-        self.0.probe.map(|probe| probe())
+        Availability::Ready
     }
 
     fn produce(

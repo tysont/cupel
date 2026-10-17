@@ -92,7 +92,7 @@ fn unknown_paths_symbols_checks_and_tiers_are_usage_errors_naming_the_flag() {
         (vec!["check", "--paths", "scr"], "--paths"),
         (vec!["check", "--symbols", "nothing::here"], "--symbols"),
         (vec!["check", "--only", "static.complexty"], "--only"),
-        (vec!["check", "--skip", "spec"], "--skip"),
+        (vec!["check", "--skip", "proofs"], "--skip"),
         (vec!["check", "--tier", "9+"], "--tier"),
         (vec!["check", "--changed"], "--changed"),
         (vec!["check", "--base", "main"], "--base"),

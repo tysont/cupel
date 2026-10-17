@@ -628,8 +628,11 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 | `gen.fuzz` | 4 | deep | `fuzz.crash`, `fuzz.timeout`, `fuzz.target-missing` | `targets`, `crashes`, `timeouts`, `missing` | — | go, javascript, python, rust |
 | `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — |  |
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
+| `meta.oracle-independence` | 2 | quick | `evidence.self-authored-only` | `independent`, `self_authored_only` | — | clojure, go, java, javascript, python, rust, typescript |
+| `meta.traceability` | 2 | standard | `spec.untested-requirement` | `untested` | — | clojure, go, java, javascript, python, rust, typescript |
 | `perf.bench` | 0 | deep | `perf.regression`, `perf.improvement` | `benchmarks`, `compared`, `regression`, `regressed`, `improved` | — | go, python, rust |
 | `perf.footprint` | 0 | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
+| `spec.contracts` | 5 | standard | `contract.violated` | `violations` | — | python, rust |
 | `static.analyze` | 1 | standard | `analyze.<tool>.<rule>` | `errors`, `diagnostics` | — | go, javascript, python, rust, typescript |
 | `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | clojure, go, java, javascript, python, rust, typescript |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | clojure, go, java, javascript, python, rust, typescript |
@@ -687,8 +690,11 @@ The support matrix, from `cupel describe matrix`:
 | `gen.fuzz` | unsupported | supported | unsupported | supported | supported | supported | unsupported |
 | `gen.metamorphic` | unsupported | unsupported | unsupported | unsupported | unconfigured | unsupported | unsupported |
 | `gen.property` | unsupported | unsupported | unsupported | supported | supported | supported | supported |
+| `meta.oracle-independence` | supported | supported | supported | supported | supported | supported | supported |
+| `meta.traceability` | supported | supported | supported | supported | supported | supported | supported |
 | `perf.bench` | unsupported | supported | unsupported | unconfigured | supported | supported | unconfigured |
 | `perf.footprint` | unsupported | supported | unsupported | supported | supported | supported | supported |
+| `spec.contracts` | unsupported | unsupported | unsupported | unsupported | supported | supported | unsupported |
 | `static.analyze` | unsupported | supported | unsupported | supported | supported | supported | supported |
 | `static.api-surface` | supported | supported | supported | supported | supported | supported | supported |
 | `static.clones` | supported | supported | supported | supported | supported | supported | supported |
@@ -1244,6 +1250,7 @@ depth = "quick"
 <!-- generated:check-settings -->
 | Check | Setting | Default | What it sets |
 | --- | --- | --- | --- |
+| `meta.traceability` | `requirements` | `[]` | The task's requirement IDs, such as `REQ-12`; a per-language override assigns them to the language whose tests trace them. |
 | `perf.bench` | `threshold_percent` | `5` | The smallest change of a benchmark's median, in percent of the base's, that is reported. |
 | `perf.bench` | `significance_percent` | `5` | The Mann-Whitney U test's level, in percent: a change with a lower p is significant. |
 | `static.clones` | `threshold` | `0.82` | The least Jaccard similarity of two symbols' fingerprint sets that makes a clone, greater than 0 and at most 1. |

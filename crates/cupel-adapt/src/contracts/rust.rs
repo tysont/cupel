@@ -1,6 +1,6 @@
 // ABOUTME: `tool.rust-contracts` (ADR-113): the `contracts` crate's violations in a Rust test's panic, read from the
 // ABOUTME: libtest output the baseline's runner keeps; the run turns on `debug_*` contracts through debug assertions.
-use cupel_core::{Availability, ContractKind};
+use cupel_core::ContractKind;
 
 use super::{Found, Library, Source};
 
@@ -17,8 +17,6 @@ pub static RUST_CONTRACTS: Library = Library {
         ("CARGO_PROFILE_DEV_DEBUG_ASSERTIONS", "true"),
         ("CARGO_PROFILE_TEST_DEBUG_ASSERTIONS", "true"),
     ],
-    availability: || Availability::Ready,
-    probe: None,
     read,
 };
 

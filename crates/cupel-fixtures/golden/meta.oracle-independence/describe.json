@@ -1,0 +1,127 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "quick",
+      "findings": [
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `evidence.self-authored-only`.",
+            "properties": {
+              "base": {
+                "description": "The commit the range starts from: no test that exercises the function existed there.",
+                "type": "string"
+              },
+              "tests": {
+                "description": "The runner's IDs of the tests that exercise it, all added by the range.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "base",
+              "tests"
+            ],
+            "title": "SelfAuthored",
+            "type": "object"
+          },
+          "kind": "evidence.self-authored-only",
+          "summary": "A changed function is exercised only by tests the change added: the only evidence it works was written with it."
+        }
+      ],
+      "id": "meta.oracle-independence",
+      "metrics": [
+        {
+          "name": "independent",
+          "per": "scope",
+          "summary": "Changed functions a test that existed before the change exercises."
+        },
+        {
+          "name": "self_authored_only",
+          "per": "scope",
+          "summary": "Changed functions exercised only by tests the change added."
+        }
+      ],
+      "needs": [
+        "symbols",
+        "norm-tree",
+        "test-frames"
+      ],
+      "stability": "experimental",
+      "summary": "Labels each changed function the tests exercise by whether a test that existed before the change runs it (independent) or only tests the change added do (self-authored). Runs only with --changed or --base; needs a per-test coverage map.",
+      "tier": 2,
+      "version": 1,
+      "wants": [
+        "per-test-map",
+        "test-conventions"
+      ]
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

@@ -1,0 +1,131 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "standard",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `contract.violated`: the violation as the fact holds it.",
+            "properties": {
+              "function": {
+                "description": "The function, method, or type the contract is declared on, when the library says.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "kind": {
+                "description": "`precondition`, `postcondition`, or `invariant`.",
+                "type": "string"
+              },
+              "message": {
+                "description": "The library's message: the contract's description and condition, with the values it\nsaw when it prints them.",
+                "type": "string"
+              },
+              "test": {
+                "description": "The runner's ID of the test that violated it.",
+                "type": "string"
+              },
+              "tool": {
+                "description": "The producer that read the library's report, such as `tool.icontract`.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "tool",
+              "kind",
+              "message",
+              "test"
+            ],
+            "title": "Violated",
+            "type": "object"
+          },
+          "kind": "contract.violated",
+          "summary": "A test violated a precondition, postcondition, or invariant while the tests ran with every contract checked and generated inputs at the case budget."
+        }
+      ],
+      "id": "spec.contracts",
+      "metrics": [
+        {
+          "name": "violations",
+          "per": "scope",
+          "summary": "Contracts violated, counted once per test that violated each."
+        }
+      ],
+      "needs": [
+        "contract-violations"
+      ],
+      "stability": "experimental",
+      "summary": "Runs the tests again with every contract the project's contract library checks turned on (debug-only and slow ones too) and properties at the case budget, and reports each precondition, postcondition, and invariant a test violated.",
+      "tier": 5,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

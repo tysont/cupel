@@ -1,8 +1,6 @@
 // ABOUTME: `tool.icontract` (ADR-113): icontract's `ViolationError`s in a pytest failure, each placed at its decorator,
 // ABOUTME: whose source says the kind and the function; the run turns on contracts declared `enabled=icontract.SLOW`.
-use std::sync::OnceLock;
-
-use cupel_core::{Availability, Cancellation, ContractKind, Install, Process, ToolId, ToolProbe};
+use cupel_core::ContractKind;
 
 use super::{Found, Library, Source};
 use crate::race::report::masked;
@@ -21,8 +19,6 @@ pub static ICONTRACT: Library = Library {
     ],
     // `icontract.SLOW` is true when this is set as icontract is imported.
     switches: &[("ICONTRACT_SLOW", "1")],
-    availability,
-    probe: Some(probe),
     read,
 };
 
@@ -33,43 +29,6 @@ inventory::submit!(crate::ToolProducer {
 
 /// What pytest prints before an icontract violation's header, after its `E` margin.
 const HEADER: &str = "icontract.errors.ViolationError: File ";
-
-/// Ready when `python3` imports `icontract`.
-fn availability() -> Availability {
-    if importable() {
-        return Availability::Ready;
-    }
-    Availability::MissingTool {
-        name: ToolId::from("icontract"),
-        install: Some(Install::Command(
-            "python3 -m pip install icontract".to_owned(),
-        )),
-    }
-}
-
-fn probe() -> ToolProbe {
-    ToolProbe {
-        name: ToolId::from("icontract"),
-        version: [
-            "python3",
-            "-c",
-            "import icontract; print(icontract.__version__)",
-        ]
-        .map(str::to_owned)
-        .to_vec(),
-    }
-}
-
-/// Whether `python3` imports `icontract`, asked once.
-fn importable() -> bool {
-    static IMPORTABLE: OnceLock<bool> = OnceLock::new();
-    *IMPORTABLE.get_or_init(|| {
-        Process::new("python3", ".")
-            .args(["-c", "import icontract"])
-            .run(&Cancellation::new())
-            .is_ok_and(|ran| ran.exit_code == Some(0))
-    })
-}
 
 /// Every violation in one failed test's `output`: the header with the decorator's file and
 /// line, then the `E` lines that follow it (the condition, then the values it saw), joined with

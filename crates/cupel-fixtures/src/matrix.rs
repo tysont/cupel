@@ -479,7 +479,7 @@ fn stale_goldens(goldens: &Goldens, registries: &Registries, pairs: &[Pair]) -> 
 }
 
 /// Runs `pair`'s check on its language's fixture with a `Facts` built from the manifest alone:
-/// exactly its `needs`, plus each `want` the language produces. A check that reads anything
+/// exactly its `needs`, plus each `want` the language produces here. A check that reads anything
 /// else gets `UndeclaredFact` and fails here. A check with `base_needs` gets the fixture as
 /// both sides of an empty range (ADR-056).
 pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
@@ -491,11 +491,16 @@ pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
         .get(&pair.lang)
         .ok_or_else(|| format!("no language `{}`", pair.lang))?;
     let lang = cupel_lang::lang(language.as_ref());
-    let root = repo_path(&pair.fixture());
+    // A copy, since a want may run the fixture's tests, which write beside them (`go.work.sum`).
+    let copy = tempfile::tempdir().map_err(|error| error.to_string())?;
+    copy_repo(&pair.fixture(), copy.path());
+    let root = copy.path().to_path_buf();
     let scratch = tempfile::tempdir().map_err(|error| error.to_string())?;
     let files = walk(&root, &registries.languages, &ProjectInfo::default());
+    let mut ctx = fixture_ctx(&pair.fixture());
+    ctx.root.clone_from(&root);
     let mut produce_ctx = ProduceCtx::new(
-        fixture_ctx(&pair.fixture()),
+        ctx,
         Writer::new(scratch.path(), false)
             .map_err(|error| error.to_string())?
             .confined(),
@@ -532,10 +537,12 @@ pub fn run_with_declared_facts(pair: &Pair) -> Result<CheckResult, String> {
             .insert_shared(&fact)
             .map_err(|error| error.to_string())?;
     }
+    // A want that cannot be made here (a per-test map of a fixture that does not build) is not
+    // served, as in a run.
     for kind in &manifest.wants {
-        if let Some(fact) = produce(*kind) {
+        if let Some(Ok(fact)) = produce(*kind) {
             facts
-                .insert_shared(&fact?)
+                .insert_shared(&fact)
                 .map_err(|error| error.to_string())?;
         }
     }
