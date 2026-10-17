@@ -1,0 +1,16 @@
+{
+  "dir": ".",
+  "ran_in": "/Users/tysont/Workspace/cupel/.claude/worktrees/agent-afcc5fc0c4c6b4423/crates/cupel-fixtures/repos/tests.mutation/clojure",
+  "skip_dirs": [
+    "target",
+    ".cpcache"
+  ],
+  "report": "20863efc55677059aba7c5a1be9b33b835f5895079045723fec50080c7789a1c",
+  "files": {
+    "cupel.toml": "62dd04639f8a7cf4773aff97f35124cbd07ddfe72387f7ca55802915f514ce2c",
+    "deps.edn": "02599b250cbf4b4fe937da2e2618bb9a18a31e9ff8d941df0c027e1b55582b52",
+    "src/discount/core.clj": "11f94fe199cf809eccbf85f8c6dc0800cc9a8fc962acfa0afe6c1ecbe791689a",
+    "test/discount/large_test.clj": "8085108943621c033574b0efb18c079754d0d393701a3454d71f4f323a1c02e7",
+    "test/discount/small_test.clj": "7834a110afdc2a72746fc0469050f718ea78de64dc9e935d86464acfd7e747f6"
+  }
+}

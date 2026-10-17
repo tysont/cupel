@@ -26,7 +26,8 @@ static GRADLE: RunnerSpec = RunnerSpec {
         ordering: RunOrdering::Seeded,
         args: vary,
         env: |_| Vec::new(),
-        executed: Executed::Report,
+        // One report per class, read in name order: the reports do not say the order classes ran in.
+        executed: Executed::Unknown,
     },
     outputs: &["build", ".gradle"],
 };

@@ -27,7 +27,8 @@ static MAVEN: RunnerSpec = RunnerSpec {
         ordering: RunOrdering::Seeded,
         args: vary,
         env: |_| Vec::new(),
-        executed: Executed::Report,
+        // One report per class, read in name order: the reports do not say the order classes ran in.
+        executed: Executed::Unknown,
     },
     outputs: &["target"],
 };
@@ -71,18 +72,17 @@ fn command(root: &Root) -> Vec<String> {
     ]
 }
 
-/// A shuffled run's seed as Surefire's random class order and JUnit Jupiter's random method
-/// order (ADR-078).
+/// Surefire's order of test classes (ADR-078): alphabetical, so every machine runs a suite the
+/// same way whatever its file system lists first, or random from a shuffled run's seed (halved:
+/// Surefire reads a signed 64-bit seed). Methods
+/// keep JUnit's order within a class, and a `pom.xml` that sets `runOrder` keeps its own.
 fn vary(options: &RunOptions) -> Vec<String> {
     match (options.order, options.seed) {
         (RunOrder::Shuffled, Some(seed)) => vec![
             "-Dsurefire.runOrder=random".to_owned(),
-            format!("-Dsurefire.runOrder.random.seed={seed}"),
-            "-Djunit.jupiter.testmethod.order.default=org.junit.jupiter.api.MethodOrderer$Random"
-                .to_owned(),
-            format!("-Djunit.jupiter.execution.order.random.seed={seed}"),
+            format!("-Dsurefire.runOrder.random.seed={}", seed >> 1),
         ],
-        _ => Vec::new(),
+        _ => vec!["-Dsurefire.runOrder=alphabetical".to_owned()],
     }
 }
 

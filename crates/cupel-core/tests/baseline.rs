@@ -455,3 +455,23 @@ fn pins_are_keyed_by_fact_kind() {
         [Some("unittest"), None, None]
     );
 }
+
+#[test]
+fn mutation_outcomes_are_pinned_by_mutator() {
+    let ctx = Ctx {
+        lang: [(
+            LangId::from("java"),
+            serde_json::json!({"mutator": "plugin.pit", "mutation": {"set": "extended"}})
+                .as_object()
+                .unwrap()
+                .clone(),
+        )]
+        .into(),
+        ..Ctx::new(std::env::temp_dir())
+    };
+    assert_eq!(FactKind::MutationOutcomes.pin_key(), Some("mutator"));
+    assert_eq!(
+        ctx.pin(FactKind::MutationOutcomes, &LangId::from("java")),
+        Some("plugin.pit")
+    );
+}
