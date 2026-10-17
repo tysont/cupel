@@ -1,0 +1,45 @@
+TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802)
+Running breadth-first search Model-Checking with fp 69 and seed -1731606312369121745 with 1 worker on 8 cores with 5461MB heap and 64MB offheap memory [pid: 96323] (Mac OS X 26.5.1 aarch64, Homebrew 21.0.12.1 x86_64, MSBDiskFPSet, DiskStateQueue).
+Parsing file /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/p7.2/cap/conforms/CupelTrace.tla
+Parsing file /private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/p7.2/cap/conforms/Counter.tla
+Parsing file /private/var/folders/bt/j8pp1pyj5kl1lcrsb92knd0c0000gn/T/Integers.tla
+Parsing file /private/var/folders/bt/j8pp1pyj5kl1lcrsb92knd0c0000gn/T/Sequences.tla
+Parsing file /private/var/folders/bt/j8pp1pyj5kl1lcrsb92knd0c0000gn/T/TLC.tla
+Parsing file /private/var/folders/bt/j8pp1pyj5kl1lcrsb92knd0c0000gn/T/Naturals.tla
+Parsing file /private/var/folders/bt/j8pp1pyj5kl1lcrsb92knd0c0000gn/T/FiniteSets.tla
+Semantic processing of module Naturals
+Semantic processing of module Counter
+Semantic processing of module Integers
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module CupelTrace
+Starting... (2026-10-17 15:16:50)
+Computing initial states...
+Finished computing initial states: 1 distinct state generated at 2026-10-17 15:16:50.
+Error: Invariant CupelTraceUnmatched is violated.
+Error: The behavior up to this point is:
+State 1: <Initial predicate>
+/\ cupel_step = 1
+/\ done = FALSE
+/\ count = 0
+
+State 2: <CupelTraceNext line 22, col 5 to line 28, col 99 of module CupelTrace>
+/\ cupel_step = 2
+/\ done = FALSE
+/\ count = 1
+
+State 3: <CupelTraceNext line 22, col 5 to line 28, col 99 of module CupelTrace>
+/\ cupel_step = 3
+/\ done = FALSE
+/\ count = 2
+
+State 4: <CupelTraceNext line 22, col 5 to line 28, col 99 of module CupelTrace>
+/\ cupel_step = 4
+/\ done = TRUE
+/\ count = 2
+
+4 states generated, 4 distinct states found, 0 states left on queue.
+The depth of the complete state graph search is 4.
+The average outdegree of the complete state graph is 1 (minimum is 1, the maximum 1 and the 95th percentile is 1).
+Finished in 00s at (2026-10-17 15:16:50)

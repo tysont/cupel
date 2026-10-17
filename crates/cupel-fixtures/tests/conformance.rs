@@ -91,7 +91,11 @@ fn an_execution_fact_exhibits_each_construct_or_gives_a_reason() {
         matches!(failures.as_slice(), [Failure::NotDetected { construct, .. }] if construct == "diverged"),
         "{failures:?}"
     );
-    let failures = unexhibited(&facts, &fact, &[("failed", " "), ("misspelled", "A reason.")]);
+    let failures = unexhibited(
+        &facts,
+        &fact,
+        &[("failed", " "), ("misspelled", "A reason.")],
+    );
     let constructs: Vec<&str> = failures
         .iter()
         .filter_map(|failure| match failure {
