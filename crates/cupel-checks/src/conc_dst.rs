@@ -38,6 +38,8 @@ struct Failed {
     message: String,
     /// What it printed for the failing seed.
     trace: Vec<String>,
+    /// Whether replaying the seed alone failed again.
+    reproduced: bool,
     /// The command that reruns the failing seed alone, from the project root.
     reproduce: String,
 }
@@ -189,7 +191,7 @@ impl ConcDst {
             kind: "dst.failure",
             subject: format!("{}|{name}", harness.root),
             severity: Severity::Fail,
-            confidence: 1.0,
+            confidence: if failure.reproduced { 1.0 } else { 0.5 },
             title: format!("simulation `{name}` fails{at_seed}: {}", failure.message),
             summary: format!(
                 "Fix the failure `{name}` shows{at_seed} (`{}` replays it from `{}`), then keep \
@@ -204,6 +206,7 @@ impl ConcDst {
                 seeds: results.seeds,
                 message: failure.message.clone(),
                 trace: failure.trace.clone(),
+                reproduced: failure.reproduced,
                 reproduce: failure.reproduce.clone(),
             }),
             location: failure

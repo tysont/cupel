@@ -1,0 +1,14 @@
+[package]
+name = "ledger"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# A workspace of its own, so cargo never looks for one above the fixture.
+[workspace]
+
+[dependencies]
+madsim = { version = "=0.2.34", default-features = false, features = ["macros"] }
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(madsim)"] }

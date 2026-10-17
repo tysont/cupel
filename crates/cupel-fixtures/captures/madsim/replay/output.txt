@@ -1,0 +1,31 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running tests/sim.rs (../cap-target/debug/deps/sim-ad300df12b395f85)
+
+running 1 test
+test concurrent_deposits_are_all_kept ... FAILED
+
+failures:
+
+---- concurrent_deposits_are_all_kept stdout ----
+deposit 10 reads 0
+deposit 20 reads 0
+deposit 10 writes 10
+deposit 20 writes 20
+
+thread '<unnamed>' (93230339) panicked at tests/sim.rs:23:5:
+assertion `left == right` failed: a deposit was lost
+  left: 20
+ right: 30
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+context: node=0 "madsim-main", task=0 (spawned at /Users/tysont/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/madsim-0.2.34/src/sim/runtime/mod.rs:129:19)
+note: run with `MADSIM_TEST_SEED=4` environment variable to reproduce this error
+
+
+failures:
+    concurrent_deposits_are_all_kept
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p ledger --test sim`
+error: 1 target failed:
+    `-p ledger --test sim`

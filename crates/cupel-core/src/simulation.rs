@@ -63,9 +63,12 @@ pub struct SimulationFailure {
     pub message: String,
     /// Where it failed in the repository, when the failure names a place there.
     pub location: Option<Location>,
-    /// What the harness printed for that seed, with thread numbers and paths outside the
-    /// repository masked; at most 50 lines, the last ones.
+    /// What the harness printed for that seed, replayed alone, with thread numbers and paths
+    /// outside the repository masked; at most 50 lines, the last ones.
     pub trace: Vec<String>,
+    /// Whether replaying the seed alone failed again; a failure that does not repeat is a
+    /// harness that is not deterministic.
+    pub reproduced: bool,
     /// The command that runs that seed alone, from the project root.
     pub reproduce: String,
 }

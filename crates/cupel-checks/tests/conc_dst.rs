@@ -41,6 +41,7 @@ fn lost_deposit() -> SimulationFailure {
             "deposit 10 reads 0 at 3ms".to_owned(),
             "deposit 20 reads 0 at 5ms".to_owned(),
         ],
+        reproduced: true,
         reproduce: "RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=4 cargo test --test sim \
                     concurrent_deposits_are_all_kept -- --exact"
             .to_owned(),
@@ -59,6 +60,7 @@ fn campaign() -> SimulationResults {
         location: None,
         message: "could not bind the simulated address".to_owned(),
         trace: Vec::new(),
+        reproduced: false,
         reproduce: "RUSTFLAGS='--cfg madsim' cargo test --test sim sim_setup -- --exact".to_owned(),
     });
     SimulationResults {
@@ -119,6 +121,7 @@ fn a_failing_seed_is_a_failing_finding_whose_repro_reruns_that_seed_alone() {
             "seeds": 1000,
             "message": "assertion `left == right` failed: a deposit was lost",
             "trace": ["deposit 10 reads 0 at 3ms", "deposit 20 reads 0 at 5ms"],
+            "reproduced": true,
             "reproduce": lost_deposit().reproduce,
         })
         .as_object()
@@ -140,6 +143,9 @@ fn a_failure_without_a_seed_reruns_the_whole_range_from_the_root() {
     let (_, findings) = support::run_over(ID, campaign());
     let unseeded = &findings[1];
     assert_eq!(unseeded.location, None);
+    // A failure that did not fail again when replayed is less certain.
+    assert!((unseeded.confidence - 0.5).abs() < f64::EPSILON);
+    assert_eq!(unseeded.evidence.0["reproduced"], json!(false));
     assert_eq!(
         unseeded.title,
         "simulation `sim_setup` fails: could not bind the simulated address"

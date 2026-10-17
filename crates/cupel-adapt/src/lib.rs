@@ -74,6 +74,7 @@ mod gradle;
 mod java_tests;
 mod jest;
 mod linearizability;
+mod madsim;
 mod maven;
 pub mod metamorphic;
 mod per_test;
