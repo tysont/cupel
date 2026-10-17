@@ -1107,7 +1107,8 @@ expression: pretty(&schema)
         "analyzer-report",
         "divergence-results",
         "relation-results",
-        "footprint"
+        "footprint",
+        "histories"
       ]
     },
     "FactProducers": {

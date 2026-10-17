@@ -10,9 +10,9 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     AnalyzerReport, Availability, BenchSamples, CostClass, Ctx, DivergenceResults, EventSink, Fact,
-    FactKind, Footprint, FuzzResults, Langs, MutationOutcomes, PerTestMap, ProduceCtx, Producer,
-    ProducerId, ProducerRegistry, PropertyResults, RaceReports, RelationResults, Result, Scope,
-    TestReruns, TestResults,
+    FactKind, Footprint, FuzzResults, Histories, Langs, MutationOutcomes, PerTestMap, ProduceCtx,
+    Producer, ProducerId, ProducerRegistry, PropertyResults, RaceReports, RelationResults, Result,
+    Scope, TestReruns, TestResults,
 };
 
 use crate::command::PluginCommand;
@@ -23,7 +23,7 @@ use crate::request::{self, Inputs};
 type Register = fn(&mut ProducerRegistry, ProducerManifest, PluginCommand);
 
 /// Every kind a plugin may provide (those with a payload type, ADR-088 §8), with its registration.
-const KINDS: [(FactKind, Register); 23] = [
+const KINDS: [(FactKind, Register); 24] = [
     (FactKind::Symbols, register_as::<Symbols>),
     (FactKind::Decisions, register_as::<Decisions>),
     (FactKind::NormTree, register_as::<NormTree>),
@@ -50,6 +50,7 @@ const KINDS: [(FactKind, Register); 23] = [
     ),
     (FactKind::RelationResults, register_as::<RelationResults>),
     (FactKind::Footprint, register_as::<Footprint>),
+    (FactKind::Histories, register_as::<Histories>),
 ];
 
 /// The kinds a producer plugin may provide, in catalog order.

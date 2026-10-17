@@ -2,7 +2,8 @@
 // ABOUTME: every construct of that fact's inventory, and its producer detects each mapped construct.
 use cupel_core::{FactKind, LangId};
 use cupel_fixtures::conformance::{
-    FactInventory, Failure, LanguageInventory, check_language, fact_inventories, run_language,
+    EXECUTION, FactInventory, Failure, LanguageInventory, check_language, fact_inventories,
+    run_language,
 };
 use cupel_lang::LanguageRegistry;
 use serde_json::json;
@@ -37,10 +38,10 @@ fn every_registered_language_has_a_fixture_repository_and_inventory() {
 }
 
 #[test]
-fn every_fact_inventory_loads_and_names_a_syntactic_fact() {
+fn every_fact_inventory_loads_and_names_a_syntactic_or_an_execution_fact() {
     for inventory in fact_inventories() {
         assert!(
-            FactKind::SYNTACTIC.contains(&inventory.fact),
+            FactKind::SYNTACTIC.contains(&inventory.fact) || EXECUTION.contains(&inventory.fact),
             "{}",
             inventory.fact
         );
@@ -180,4 +181,35 @@ fn facts_without_a_producer_are_not_checked() {
     let facts = [inventory("decisions", TWO_CONSTRUCTS)];
     let lang = LanguageInventory::parse(&LangId::from("rust"), "").unwrap();
     assert!(check_language(&facts, &lang, &[FactKind::Symbols], |_| unreachable!()).is_empty());
+}
+
+#[test]
+fn an_execution_fact_s_entry_is_located_by_the_file_its_producer_read() {
+    let facts = [inventory(
+        "histories",
+        r#"
+        [[constructs]]
+        id = "stale-read"
+        summary = "A stale read."
+        within = "violations"
+        expect = { anomaly = "non-linearizable" }
+        "#,
+    )];
+    let lang = LanguageInventory::parse(
+        &LangId::from("go"),
+        "[histories.stale-read]\nfile = \"histories/stale-read.jsonl\"\n",
+    )
+    .unwrap();
+    let checked = |violations: serde_json::Value| {
+        let fact = json!({ "histories": [
+            { "name": "histories/other.jsonl", "violations": [{ "anomaly": "non-linearizable" }] },
+            { "name": "histories/stale-read.jsonl", "violations": violations },
+        ] });
+        check_language(&facts, &lang, &[FactKind::Histories], |_| Ok(fact.clone()))
+    };
+
+    assert_eq!(checked(json!([{ "anomaly": "non-linearizable" }])), []);
+    assert!(
+        matches!(checked(json!([])).as_slice(), [Failure::NotDetected { construct, .. }] if construct == "stale-read")
+    );
 }

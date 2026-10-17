@@ -35,6 +35,7 @@ pub enum FactKind {
     DivergenceResults,
     RelationResults,
     Footprint,
+    Histories,
 }
 
 impl fmt::Display for FactKind {
@@ -62,7 +63,7 @@ impl FactKind {
     }
 
     /// Every kind, in catalog order.
-    pub const ALL: [FactKind; 23] = [
+    pub const ALL: [FactKind; 24] = [
         Self::Symbols,
         Self::Decisions,
         Self::NormTree,
@@ -86,6 +87,7 @@ impl FactKind {
         Self::DivergenceResults,
         Self::RelationResults,
         Self::Footprint,
+        Self::Histories,
     ];
 
     /// Kinds produced by language producers from the syntax tree.
@@ -104,7 +106,7 @@ impl FactKind {
 }
 
 /// Each kind's name, in declaration order (so `NAMES[kind as usize]` names `kind`).
-const NAMES: [&str; 23] = [
+const NAMES: [&str; 24] = [
     "symbols",
     "decisions",
     "norm-tree",
@@ -128,6 +130,7 @@ const NAMES: [&str; 23] = [
     "divergence-results",
     "relation-results",
     "footprint",
+    "histories",
 ];
 
 /// A typed, versioned, language-neutral intermediate between producers and checks.

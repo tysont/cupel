@@ -41,6 +41,7 @@
 //! [`Scope`]: cupel_core::Scope
 //! [`Facts`]: cupel_core::Facts
 
+mod conc_linearizability;
 mod conc_race;
 mod finding;
 mod gen_differential;

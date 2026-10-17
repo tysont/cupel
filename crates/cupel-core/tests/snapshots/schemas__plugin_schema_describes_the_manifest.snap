@@ -135,7 +135,8 @@ expression: pretty(&schema)
         "analyzer-report",
         "divergence-results",
         "relation-results",
-        "footprint"
+        "footprint",
+        "histories"
       ]
     },
     "Finding": {
@@ -795,6 +796,9 @@ expression: pretty(&schema)
             "fuzz-results": {
               "type": "string"
             },
+            "histories": {
+              "type": "string"
+            },
             "module-graph": {
               "type": "string"
             },
@@ -851,6 +855,7 @@ expression: pretty(&schema)
             "divergence-results",
             "footprint",
             "fuzz-results",
+            "histories",
             "module-graph",
             "mutation-outcomes",
             "mutation-sites",

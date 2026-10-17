@@ -17,6 +17,7 @@ use crate::finding::Finding;
 use crate::flake::TestReruns;
 use crate::footprint::Footprint;
 use crate::fuzz::FuzzResults;
+use crate::histories::Histories;
 use crate::mutation::MutationOutcomes;
 use crate::per_test::PerTestMap;
 use crate::plugin::PluginMessage;
@@ -85,7 +86,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 23] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 24] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -112,6 +113,7 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 23] = [
     ),
     (FactKind::RelationResults, fact_schema::<RelationResults>),
     (FactKind::Footprint, fact_schema::<Footprint>),
+    (FactKind::Histories, fact_schema::<Histories>),
 ];
 
 /// The payload version of a fact kind, or `None` for a kind without a payload type.
