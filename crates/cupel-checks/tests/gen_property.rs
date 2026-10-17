@@ -15,20 +15,26 @@ use support::{Recorded, check, recorded, score};
 
 const ID: &str = "gen.property";
 
-fn span(line: u32) -> Span {
-    Span {
-        line,
-        col: 5,
-        end_line: line + 2,
-        end_col: 6,
-    }
-}
+/// Where the property case sits in its test file.
+const CASE: Span = Span {
+    line: 10,
+    col: 5,
+    end_line: 12,
+    end_col: 6,
+};
+
+/// Where a function sits in its source file.
+const FUNCTION: Span = Span {
+    line: 1,
+    end_line: 3,
+    ..CASE
+};
 
 fn property(name: &str, outcome: PropertyOutcome, counterexample: Option<&str>) -> PropertyResult {
     PropertyResult {
         file: "tests/test_units.py".to_owned(),
         name: name.to_owned(),
-        span: span(10),
+        span: CASE,
         framework: "hypothesis".to_owned(),
         test: Some(format!("tests/test_units.py::{name}")),
         outcome,
@@ -56,7 +62,7 @@ fn function(file: &str, name: &str, visibility: Visibility, parameters: u32) -> 
         visibility,
         lang: LangId::from("python"),
         file: file.to_owned(),
-        span: span(1),
+        span: FUNCTION,
         body: None,
         parameters,
     }
@@ -282,7 +288,7 @@ fn a_public_function_whose_tests_hold_no_property_is_missing_one() {
             kind: ApiItemKind::Function,
             signature: "(_)".to_owned(),
             file: "src/units/percent.py".to_owned(),
-            span: span(1),
+            span: FUNCTION,
         }],
     };
     let (result, recorded) = run_over(

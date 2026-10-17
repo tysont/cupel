@@ -24,16 +24,7 @@ pub fn apply(
 ) -> Result<(), CupelError> {
     let root = writer.root().to_path_buf();
     let read = |path: &str| std::fs::read_to_string(root.join(path)).ok();
-    let mut by_file: BTreeMap<String, Vec<Stub>> = BTreeMap::new();
-    for finding in envelope
-        .findings
-        .iter()
-        .filter(|finding| finding.kind == MISSING && !finding.suppressed)
-    {
-        if let Some(stub) = stub(finding, languages, &read) {
-            by_file.entry(stub.target.clone()).or_default().push(stub);
-        }
-    }
+    let by_file = stubs_by_file(&envelope.findings, languages, &read);
     let preview = Writer::new(writer.root(), true)?.recording();
     let target = if write { writer } else { &preview };
     let mut files = Vec::new();
@@ -75,6 +66,25 @@ pub fn apply(
         });
     }
     Ok(())
+}
+
+/// The stubs of the unsuppressed `property.missing` findings among `findings`, by the file each
+/// goes in.
+fn stubs_by_file(
+    findings: &[Finding],
+    languages: &LanguageRegistry,
+    read: &dyn Fn(&str) -> Option<String>,
+) -> BTreeMap<String, Vec<Stub>> {
+    let mut by_file: BTreeMap<String, Vec<Stub>> = BTreeMap::new();
+    for finding in findings
+        .iter()
+        .filter(|finding| finding.kind == MISSING && !finding.suppressed)
+    {
+        if let Some(stub) = stub(finding, languages, read) {
+            by_file.entry(stub.target.clone()).or_default().push(stub);
+        }
+    }
+    by_file
 }
 
 /// The stub of the function `finding` is about, by the language of its file.

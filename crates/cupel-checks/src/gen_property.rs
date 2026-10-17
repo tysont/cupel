@@ -118,11 +118,7 @@ impl Check for GenProperty {
 
     /// One target per file in scope; the property run's size is the engine's to know.
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        LIMITS.plan(
-            &self.manifest,
-            ctx,
-            outcome::plan_files(&self.manifest, scope),
-        )
+        LIMITS.plan_files(&self.manifest, ctx, scope)
     }
 
     fn run(

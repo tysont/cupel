@@ -26,10 +26,24 @@ fn falsified() -> PropertyResult {
 }
 
 #[test]
-fn property_results_is_a_fact_kind_with_a_versioned_schema() {
-    assert_eq!(FactKind::PropertyResults.as_str(), "property-results");
-    assert!(!FactKind::SYNTACTIC.contains(&FactKind::PropertyResults));
-    assert_eq!(schema::fact_version(FactKind::PropertyResults), Some(1));
+fn property_results_is_an_execution_fact_with_a_versioned_schema() {
+    let kind = FactKind::PropertyResults;
+    assert_eq!(
+        (
+            kind.as_str(),
+            FactKind::SYNTACTIC.contains(&kind),
+            schema::fact_version(kind),
+            schema::fact(kind).map(|schema| schema.as_value()["$id"].clone()),
+        ),
+        (
+            "property-results",
+            false,
+            Some(1),
+            Some(json!(
+                "https://cupel.dev/schema/v1/fact/property-results.json"
+            )),
+        )
+    );
 }
 
 #[test]

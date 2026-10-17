@@ -135,22 +135,11 @@ pub fn property_stub(
 /// each header line those stubs need that it lacks before them; `None` when nothing is new.
 pub fn merged_stubs(existing: Option<&str>, stubs: &[&Stub]) -> Option<String> {
     let mut text = existing.unwrap_or_default().to_owned();
-    let mut fresh: Vec<&Stub> = Vec::new();
-    for stub in stubs {
-        if !text.contains(&stub.marker) && !fresh.iter().any(|seen| seen.marker == stub.marker) {
-            fresh.push(stub);
-        }
-    }
+    let fresh = fresh(&text, stubs);
     if fresh.is_empty() {
         return None;
     }
-    let mut header: Vec<&str> = Vec::new();
-    for line in fresh.iter().flat_map(|stub| &stub.header) {
-        let present = text.lines().any(|have| have.trim() == line.trim());
-        if !present && !header.contains(&line.as_str()) {
-            header.push(line);
-        }
-    }
+    let header = missing_header(&text, &fresh);
     if !text.is_empty() && !text.ends_with('\n') {
         text.push('\n');
     }
@@ -165,6 +154,29 @@ pub fn merged_stubs(existing: Option<&str>, stubs: &[&Stub]) -> Option<String> {
         text.push_str(&stub.text);
     }
     Some(text)
+}
+
+/// The stubs of `stubs` that `text` does not hold yet, each once.
+fn fresh<'s>(text: &str, stubs: &[&'s Stub]) -> Vec<&'s Stub> {
+    let mut fresh: Vec<&Stub> = Vec::new();
+    for stub in stubs {
+        if !text.contains(&stub.marker) && !fresh.iter().any(|seen| seen.marker == stub.marker) {
+            fresh.push(stub);
+        }
+    }
+    fresh
+}
+
+/// The header lines `stubs` need that `text` lacks, each once, in order.
+fn missing_header<'s>(text: &str, stubs: &[&'s Stub]) -> Vec<&'s str> {
+    let mut header: Vec<&str> = Vec::new();
+    for line in stubs.iter().flat_map(|stub| &stub.header) {
+        let present = text.lines().any(|have| have.trim() == line.trim());
+        if !present && !header.contains(&line.as_str()) {
+            header.push(line);
+        }
+    }
+    header
 }
 
 /// A parameter: the generator that makes it and how the function takes it.

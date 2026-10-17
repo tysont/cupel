@@ -92,24 +92,26 @@ fn a_case_budget_of_zero_is_a_usage_error() {
     assert_eq!(outcome.code, 2, "{}", outcome.stdout);
 }
 
+/// A short property run of the fixture with `--scaffold`.
+const SCAFFOLD: [&str; 8] = [
+    "check",
+    "--only",
+    "gen.property",
+    "--seed",
+    "3",
+    "--cases",
+    "5",
+    "--scaffold",
+];
+
 #[test]
-fn scaffold_previews_stubs_without_write_and_writes_them_with_it() {
+fn scaffold_without_write_previews_each_files_diff_and_writes_nothing() {
     let Some(repo) = fixture() else { return };
-    let args = [
-        "check",
-        "--only",
-        "gen.property",
-        "--seed",
-        "3",
-        "--cases",
-        "5",
-        "--scaffold",
-    ];
     // The suite's own runs leave what its tools keep (Hypothesis's `.hypothesis/`) before the
     // preview is compared.
-    assert_eq!(repo.run(&args[..7]).code, 0);
+    assert_eq!(repo.run(&SCAFFOLD[..7]).code, 0);
     let before = repo.tree_outside_cupel();
-    let preview = repo.run(&args);
+    let preview = repo.run(&SCAFFOLD);
     assert_eq!(preview.code, 0, "{}", preview.stdout);
     assert_eq!(
         repo.tree_outside_cupel(),
@@ -121,14 +123,12 @@ fn scaffold_previews_stubs_without_write_and_writes_them_with_it() {
     assert_eq!(writes.len(), 1, "{writes:?}");
     assert_eq!(writes[0]["path"], json!("tests/test_percent.py"));
     let diff = writes[0]["diff"].as_str().unwrap();
-    assert!(
-        diff.contains("+def test_clamp_percent_property(a0):"),
-        "{diff}"
-    );
-    assert!(
-        diff.contains("+from hypothesis import given, strategies as st"),
-        "{diff}"
-    );
+    for line in [
+        "+def test_clamp_percent_property(a0):",
+        "+from hypothesis import given, strategies as st",
+    ] {
+        assert!(diff.contains(line), "{line} in {diff}");
+    }
     let commands: Vec<&str> = envelope["next_actions"]
         .as_array()
         .unwrap()
@@ -141,8 +141,12 @@ fn scaffold_previews_stubs_without_write_and_writes_them_with_it() {
             .any(|command| command.contains(" --scaffold ") && command.ends_with(" --write")),
         "{commands:?}"
     );
+}
 
-    let mut written = args.to_vec();
+#[test]
+fn scaffold_with_write_appends_stubs_the_next_run_counts_as_properties() {
+    let Some(repo) = fixture() else { return };
+    let mut written = SCAFFOLD.to_vec();
     written.push("--write");
     let write = repo.run(&written);
     assert_eq!(write.code, 0, "{}", write.stdout);
@@ -154,15 +158,7 @@ fn scaffold_previews_stubs_without_write_and_writes_them_with_it() {
     );
     assert!(text.contains("@given(st.from_type(object))\ndef test_clamp_percent_property(a0):"));
 
-    let after = repo.run(&[
-        "check",
-        "--only",
-        "gen.property",
-        "--seed",
-        "3",
-        "--cases",
-        "5",
-    ]);
+    let after = repo.run(&SCAFFOLD[..7]);
     assert_eq!(after.code, 0, "{}", after.stdout);
     assert_eq!(found(&after.envelope()), Vec::<(String, String)>::new());
     assert_eq!(

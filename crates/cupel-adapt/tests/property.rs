@@ -60,13 +60,14 @@ fn engine(ctx: &ProduceCtx, lang: &str, scope: &Scope) -> cupel_core::Result<Pro
         .map(|fact| fact.downcast::<PropertyResults>().unwrap())
 }
 
-fn baseline_of(runner: &str) -> Produced {
-    Produced::new(TestResults::new(
-        ProducerId::from(runner),
-        Vec::new(),
-        Vec::new(),
-        Path::new("."),
-    ))
+/// A green baseline of `runner` that ran no test.
+fn green(runner: &str) -> Produced {
+    Produced::new(TestResults {
+        runner: ProducerId::from(runner),
+        invocations: Vec::new(),
+        tests: Vec::new(),
+        suite_hash: String::new(),
+    })
 }
 
 fn frames(file: &str, property: Option<&str>) -> Produced {
@@ -122,7 +123,7 @@ fn without_a_property_in_scope_the_engine_runs_nothing() {
         dir.path(),
         None,
         vec![
-            baseline_of("tool.pytest"),
+            green("tool.pytest"),
             frames("tests/test_a.py", None),
             project("python"),
         ],
@@ -143,7 +144,7 @@ fn a_framework_the_runner_cannot_budget_is_an_error_naming_the_runners_that_can(
         dir.path(),
         None,
         vec![
-            baseline_of("tool.unittest"),
+            green("tool.unittest"),
             frames("tests/test_a.py", Some("hypothesis")),
             project("python"),
         ],

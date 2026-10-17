@@ -130,7 +130,7 @@ fn a_rust_function_with_a_parameter_type_the_table_does_not_map_gets_no_stub() {
 }
 
 #[test]
-fn ecma_stubs_import_the_way_their_file_does_and_type_their_arbitraries() {
+fn an_ecma_stub_imports_as_an_es_module_and_types_its_arbitraries() {
     let esm = stub(
         "typescript",
         &subject(
@@ -160,6 +160,10 @@ fn ecma_stubs_import_the_way_their_file_does_and_type_their_arbitraries() {
         "\ntest.skip(\"clampPercent keeps its property\", () => {\n  fc.assert(\n    \
          fc.property(fc.double(), (a0) => {\n      percentSubject.clampPercent(a0);\n    }),\n  );\n});\n"
     );
+}
+
+#[test]
+fn an_ecma_stub_requires_in_a_commonjs_file_and_starts_a_test_file_where_none_is() {
     let commonjs = stub(
         "javascript",
         &subject("percent.js", "clampPercent", "percent", Some("(_)"), 1),
