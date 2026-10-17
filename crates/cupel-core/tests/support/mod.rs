@@ -19,6 +19,17 @@ use cupel_core::{
     Stability, Tier, Writer,
 };
 
+/// What the catalog says about the fact `kind`: its name, whether it is syntactic, its
+/// payload's version, and its schema's `$id`.
+pub fn fact_entry(kind: FactKind) -> (&'static str, bool, Option<u32>, Option<serde_json::Value>) {
+    (
+        kind.as_str(),
+        FactKind::SYNTACTIC.contains(&kind),
+        cupel_core::schema::fact_version(kind),
+        cupel_core::schema::fact(kind).map(|schema| schema.as_value()["$id"].clone()),
+    )
+}
+
 /// The language `id` as a member of `family`.
 pub fn lang(id: &str, family: &str) -> Lang {
     Lang {

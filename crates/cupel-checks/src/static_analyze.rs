@@ -3,15 +3,15 @@
 use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::{
-    Action, ActionKind, AnalyzerLevel, AnalyzerReport, AnalyzerResult, AnalyzerStatus, Check,
-    CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, Evidence, FactKind, Facts,
+    Action, ActionKind, AnalyzerLevel, AnalyzerReport, AnalyzerResult, AnalyzerRun, AnalyzerStatus,
+    Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, Evidence, FactKind, Facts,
     Finding, FindingId, Manifest, Plan, Result, Scope, Score, Severity, Stability, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
 
-use crate::manifest::{evidence, kind, metric};
+use crate::manifest::{evidence, kind, metric, spelling};
 use crate::metrics::sum;
 use crate::outcome;
 use crate::settings::Limits;
@@ -90,65 +90,26 @@ impl Check for StaticAnalyze {
     ) -> Result<CheckResult> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
         let report = facts.get::<AnalyzerReport>()?;
-        let mut notes = Vec::new();
-        let mut ran = 0u64;
-        let (mut errors, mut diagnostics, mut informational) = (0u64, 0u64, 0u64);
-        let mut repeats: HashMap<(String, String, String), usize> = HashMap::new();
+        let mut tally = Tally::default();
         for analyzer in &report.analyzers {
             ctx.cancel.checkpoint()?;
-            if analyzer.status != AnalyzerStatus::Ran {
-                notes.push(format!(
+            if analyzer.status == AnalyzerStatus::Ran {
+                tally.ran += 1;
+                for found in &analyzer.results {
+                    sink.emit(Event::Finding(Box::new(
+                        tally.finding(self, analyzer, found),
+                    )));
+                }
+            } else {
+                tally.notes.push(format!(
                     "{} {}: {}",
                     analyzer.tool,
-                    status_word(analyzer.status),
+                    spelling(&analyzer.status),
                     analyzer.detail.as_deref().unwrap_or("no detail")
                 ));
-                continue;
-            }
-            ran += 1;
-            for found in &analyzer.results {
-                let kind = format!("analyze.{}.{}", analyzer.tool, segment(&found.rule));
-                let repeat = repeats
-                    .entry((
-                        kind.clone(),
-                        found.location.file.clone(),
-                        found.message.clone(),
-                    ))
-                    .or_default();
-                let finding = self.finding(analyzer.tool.as_str(), &kind, found, *repeat);
-                *repeat += 1;
-                diagnostics += 1;
-                errors += u64::from(found.level == AnalyzerLevel::Error);
-                informational += u64::from(found.level == AnalyzerLevel::Note);
-                sink.emit(Event::Finding(Box::new(finding)));
             }
         }
-        #[allow(
-            clippy::cast_precision_loss,
-            reason = "result counts stay far below 2^52, where f64 is exact"
-        )]
-        let (errors_value, diagnostics_value) = (errors as f64, diagnostics as f64);
-        let measured = ran > 0;
-        let mut result = outcome::result(
-            &self.manifest,
-            outcome::status(diagnostics > informational),
-            measured.then(|| Score {
-                value: diagnostics_value,
-                unit: "diagnostics".to_owned(),
-                n: ran,
-            }),
-            if measured {
-                BTreeMap::from([
-                    ("errors".to_owned(), errors_value),
-                    ("diagnostics".to_owned(), diagnostics_value),
-                ])
-            } else {
-                BTreeMap::new()
-            },
-            diagnostics,
-        );
-        result.notes = notes;
-        Ok(result)
+        Ok(tally.result(&self.manifest))
     }
 
     /// Results add up across languages.
@@ -161,17 +122,88 @@ impl Check for StaticAnalyze {
     }
 }
 
+/// What the analyzers reported so far.
+#[derive(Default)]
+struct Tally {
+    /// Analyzers that ran.
+    ran: u64,
+    errors: u64,
+    diagnostics: u64,
+    /// Results that are notes.
+    informational: u64,
+    /// How many findings of each kind, file, and message were reported, which tells repeats
+    /// apart.
+    repeats: HashMap<(String, String, String), usize>,
+    notes: Vec<String>,
+}
+
+impl Tally {
+    /// The finding for `found`, counted.
+    fn finding(
+        &mut self,
+        check: &StaticAnalyze,
+        analyzer: &AnalyzerRun,
+        found: &AnalyzerResult,
+    ) -> Finding {
+        let kind = format!("analyze.{}.{}", analyzer.tool, segment(&found.rule));
+        let repeat = self
+            .repeats
+            .entry((
+                kind.clone(),
+                found.location.file.clone(),
+                found.message.clone(),
+            ))
+            .or_default();
+        let finding = check.finding(analyzer.tool.as_str(), &kind, found, *repeat);
+        *repeat += 1;
+        self.diagnostics += 1;
+        self.errors += u64::from(found.level == AnalyzerLevel::Error);
+        self.informational += u64::from(found.level == AnalyzerLevel::Note);
+        finding
+    }
+
+    /// The language's result: a score and metrics only when some analyzer ran.
+    fn result(self, manifest: &Manifest) -> CheckResult {
+        #[allow(
+            clippy::cast_precision_loss,
+            reason = "result counts stay far below 2^52, where f64 is exact"
+        )]
+        let (errors, diagnostics) = (self.errors as f64, self.diagnostics as f64);
+        let measured = self.ran > 0;
+        let mut result = outcome::result(
+            manifest,
+            outcome::status(self.diagnostics > self.informational),
+            measured.then(|| Score {
+                value: diagnostics,
+                unit: "diagnostics".to_owned(),
+                n: self.ran,
+            }),
+            if measured {
+                BTreeMap::from([
+                    ("errors".to_owned(), errors),
+                    ("diagnostics".to_owned(), diagnostics),
+                ])
+            } else {
+                BTreeMap::new()
+            },
+            self.diagnostics,
+        );
+        result.notes = self.notes;
+        result
+    }
+}
+
 impl StaticAnalyze {
     /// The finding for one result: the `repeat`th of its kind, file, and message.
     fn finding(&self, tool: &str, kind: &str, found: &AnalyzerResult, repeat: usize) -> Finding {
         let file = &found.location.file;
         let subject = format!("{file}|{}|{repeat}", found.message);
         let id = FindingId::for_subject(&self.manifest.id, kind, &subject);
-        let level = level_word(found.level);
+        let level = spelling(&found.level);
         let fields = match evidence(&Diagnostic {
             tool: tool.to_owned(),
             rule: found.rule.clone(),
-            level: level.to_owned(),
+            level,
             message: found.message.clone(),
         }) {
             Value::Object(fields) => fields,
@@ -234,22 +266,5 @@ fn segment(rule: &str) -> String {
         "unnamed".to_owned()
     } else {
         joined.join(".")
-    }
-}
-
-fn status_word(status: AnalyzerStatus) -> &'static str {
-    match status {
-        AnalyzerStatus::Ran => "ran",
-        AnalyzerStatus::Missing => "missing",
-        AnalyzerStatus::Unconfigured => "unconfigured",
-        AnalyzerStatus::Failed => "failed",
-    }
-}
-
-fn level_word(level: AnalyzerLevel) -> &'static str {
-    match level {
-        AnalyzerLevel::Error => "error",
-        AnalyzerLevel::Warning => "warning",
-        AnalyzerLevel::Note => "note",
     }
 }

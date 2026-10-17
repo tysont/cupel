@@ -44,6 +44,11 @@ fn langs() -> Vec<LangId> {
 }
 
 fn validate(text: &str) -> Result<()> {
+    validate_against(text, &registry())
+}
+
+/// `text` as a cupel.toml, validated against `checks`.
+fn validate_against(text: &str, checks: &CheckRegistry) -> Result<()> {
     let file = ConfigFile::parse(text, Path::new("/repo/cupel.toml")).unwrap();
     let config = Config::resolve(
         Some(PathBuf::from("/repo/cupel.toml")),
@@ -51,7 +56,7 @@ fn validate(text: &str) -> Result<()> {
         &ConfigRequest::default(),
     )
     .unwrap();
-    config.validate_registered(&registry(), &langs())
+    config.validate_registered(checks, &langs())
 }
 
 #[test]
@@ -197,14 +202,7 @@ fn breaking_registry() -> CheckRegistry {
 }
 
 fn validate_breaking(text: &str) -> Result<()> {
-    let file = ConfigFile::parse(text, Path::new("/repo/cupel.toml")).unwrap();
-    let config = Config::resolve(
-        Some(PathBuf::from("/repo/cupel.toml")),
-        file,
-        &ConfigRequest::default(),
-    )
-    .unwrap();
-    config.validate_registered(&breaking_registry(), &langs())
+    validate_against(text, &breaking_registry())
 }
 
 #[test]

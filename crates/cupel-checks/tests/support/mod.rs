@@ -164,6 +164,33 @@ pub fn setting_error(check: &dyn Check, config: Value) -> (String, Vec<String>) 
     (key, valid)
 }
 
+/// Asserts the check `id` has no settings: any key is a configuration error that lists none.
+pub fn assert_refuses_settings(id: &str) {
+    let (key, valid) = setting_error(check(id), serde_json::json!({"anything": 1}));
+    assert_eq!((key.as_str(), valid), ("anything", Vec::<String>::new()));
+}
+
+/// Asserts that each of `metrics` of the check `id` adds up across two languages, and so do
+/// its scores in `unit`.
+pub fn assert_counts_add_up(id: &str, metrics: &[&str], unit: &str) {
+    let check = check(id);
+    let values =
+        |base: f64| -> Vec<(&str, f64)> { metrics.iter().map(|metric| (*metric, base)).collect() };
+    let results = [
+        language(check, &values(2.0), 4),
+        language(check, &values(1.0), 3),
+    ];
+    let summed: Vec<Option<f64>> = metrics
+        .iter()
+        .map(|metric| combined(check, metric, &results))
+        .collect();
+    assert_eq!(summed, vec![Some(3.0); metrics.len()]);
+    assert_eq!(
+        check.combine(&[score(2.0, unit, 4), score(1.0, unit, 3)]),
+        Some(score(3.0, unit, 7))
+    );
+}
+
 /// A score of `value` in `unit` over `n` targets.
 pub fn score(value: f64, unit: &str, n: u64) -> Score {
     Score {

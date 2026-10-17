@@ -72,9 +72,15 @@ mod tests {
 
     #[test]
     fn a_pattern_is_walked_from_its_literal_directories() {
-        assert_eq!(literal_prefix("target/release/app"), "target/release");
-        assert_eq!(literal_prefix("dist/**/*.js"), "dist");
-        assert_eq!(literal_prefix("*.wasm"), ".");
-        assert_eq!(literal_prefix("build/{a,b}/out.bin"), "build");
+        let prefixes: Vec<String> = [
+            "target/release/app",
+            "dist/**/*.js",
+            "*.wasm",
+            "build/{a,b}/out.bin",
+        ]
+        .into_iter()
+        .map(literal_prefix)
+        .collect();
+        assert_eq!(prefixes, ["target/release", "dist", ".", "build"]);
     }
 }

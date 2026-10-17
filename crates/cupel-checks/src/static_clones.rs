@@ -544,13 +544,7 @@ fn member(compared: &Compared<'_>) -> Member {
 }
 
 fn location(symbol: &SymbolDef) -> Location {
-    Location {
-        file: symbol.file.clone(),
-        line: symbol.span.line,
-        col: Some(symbol.span.col),
-        end_line: symbol.span.end_line,
-        end_col: Some(symbol.span.end_col),
-    }
+    crate::finding::located(&symbol.file, &symbol.span)
 }
 
 /// The 64 bits a structural hash's hex digits spell.

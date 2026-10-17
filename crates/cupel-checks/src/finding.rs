@@ -119,6 +119,17 @@ impl<'a, E: Serialize> SymbolFinding<'a, E> {
     }
 }
 
+/// The location of `span` in `file`.
+pub fn located(file: &str, span: &Span) -> Location {
+    Location {
+        file: file.to_owned(),
+        line: span.line,
+        col: Some(span.col),
+        end_line: span.end_line,
+        end_col: Some(span.end_col),
+    }
+}
+
 /// `finding` about `symbol` with the action hint `nearest_test_file`: the first test file
 /// `conventions` pairs with the symbol's file, when there is one.
 pub fn with_nearest_test(

@@ -19,6 +19,20 @@ pub fn registry() -> ProducerRegistry {
     registry
 }
 
+/// The registry, built once for every test of a test binary.
+pub fn shared_registry() -> &'static ProducerRegistry {
+    static REGISTRY: std::sync::OnceLock<ProducerRegistry> = std::sync::OnceLock::new();
+    REGISTRY.get_or_init(registry)
+}
+
+/// A copy of the fixture repository of `check` for `lang` (`repos/<check>/<lang>`) in a
+/// temporary directory.
+pub fn own_fixture(check: &str, lang: &str) -> tempfile::TempDir {
+    let copy = tempfile::tempdir().unwrap();
+    cupel_fixtures::copy_repo(&format!("{check}/{lang}"), copy.path());
+    copy
+}
+
 pub fn lang(id: &str) -> Lang {
     let family = if matches!(id, "javascript" | "typescript") {
         "ecma"

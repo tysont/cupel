@@ -7,7 +7,7 @@ use cupel_core::{
     Facts, Finding, FindingId, Footprint, FootprintBase, MetricPer, Scope, Severity, Vulnerability,
 };
 use serde_json::json;
-use support::{Shape, combined, language, score};
+use support::{Shape, score};
 
 const ID: &str = "perf.footprint";
 
@@ -228,23 +228,15 @@ fn no_manifest_is_a_note_and_scores_zero() {
 
 #[test]
 fn settings_are_refused() {
-    let (key, valid) = support::setting_error(support::check(ID), json!({"max": 1}));
-    assert_eq!(key, "max");
-    assert!(valid.is_empty());
+    support::assert_refuses_settings(ID);
 }
 
 #[test]
 fn every_metric_adds_up_across_languages() {
-    let check = support::check(ID);
-    let results = [
-        language(check, &[("dependencies", 3.0), ("artifact_bytes", 10.0)], 3),
-        language(check, &[("dependencies", 2.0), ("artifact_bytes", 5.0)], 2),
-    ];
-    assert_eq!(combined(check, "dependencies", &results), Some(5.0));
-    assert_eq!(combined(check, "artifact_bytes", &results), Some(15.0));
-    assert_eq!(
-        check.combine(&[score(3.0, "dependencies", 3), score(2.0, "dependencies", 2)]),
-        Some(score(5.0, "dependencies", 5))
+    support::assert_counts_add_up(
+        ID,
+        &["dependencies", "vulnerable", "copyleft", "artifact_bytes"],
+        "dependencies",
     );
 }
 

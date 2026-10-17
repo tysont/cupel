@@ -33,6 +33,15 @@ pub fn ranked(name: &str, per: MetricPer, summary: &str) -> MetricSpec {
     }
 }
 
+/// How `value`, a unit enum variant, is spelled in JSON (`api-surface`, `missing`); empty for
+/// anything else.
+pub fn spelling<T: Serialize>(value: &T) -> String {
+    match serde_json::to_value(value) {
+        Ok(Value::String(text)) => text,
+        _ => String::new(),
+    }
+}
+
 /// `value` as JSON evidence; a value that cannot be serialized is null.
 pub fn evidence<T: Serialize>(value: &T) -> Value {
     serde_json::to_value(value).unwrap_or(Value::Null)

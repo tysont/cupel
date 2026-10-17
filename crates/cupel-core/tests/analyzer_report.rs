@@ -1,21 +1,17 @@
 // ABOUTME: Tests for the `AnalyzerReport` payload (ADR-102): its fact kind and versioned schema, its shape as
 // ABOUTME: JSON, the status and level spellings, and the kind templates that match `analyze.<tool>.<rule>`.
+mod support;
+
 use cupel_core::{
     ActionKind, AnalyzerLevel, AnalyzerReport, AnalyzerResult, AnalyzerRun, AnalyzerStatus,
-    FactKind, FindingKindSpec, Location, ToolId, schema,
+    FactKind, FindingKindSpec, Location, ToolId,
 };
 use serde_json::{Map, json};
 
 #[test]
 fn analyzer_report_is_an_execution_fact_with_a_versioned_schema() {
-    let kind = FactKind::AnalyzerReport;
     assert_eq!(
-        (
-            kind.as_str(),
-            FactKind::SYNTACTIC.contains(&kind),
-            schema::fact_version(kind),
-            schema::fact(kind).map(|schema| schema.as_value()["$id"].clone()),
-        ),
+        support::fact_entry(FactKind::AnalyzerReport),
         (
             "analyzer-report",
             false,
@@ -72,36 +68,29 @@ fn analyzer_report_serializes_every_field() {
         serde_json::from_value::<AnalyzerReport>(value).unwrap(),
         report
     );
-    let spelled: Vec<_> = [
+}
+
+#[test]
+fn statuses_and_levels_are_spelled_in_kebab_case() {
+    let statuses = [
         AnalyzerStatus::Ran,
         AnalyzerStatus::Missing,
         AnalyzerStatus::Unconfigured,
         AnalyzerStatus::Failed,
     ]
-    .iter()
-    .map(|status| serde_json::to_value(status).unwrap())
-    .chain(
-        [
-            AnalyzerLevel::Error,
-            AnalyzerLevel::Warning,
-            AnalyzerLevel::Note,
-        ]
-        .iter()
-        .map(|level| serde_json::to_value(level).unwrap()),
-    )
-    .collect();
+    .map(|status| serde_json::to_value(status).unwrap());
+    let levels = [
+        AnalyzerLevel::Error,
+        AnalyzerLevel::Warning,
+        AnalyzerLevel::Note,
+    ]
+    .map(|level| serde_json::to_value(level).unwrap());
     assert_eq!(
-        spelled,
-        [
-            "ran",
-            "missing",
-            "unconfigured",
-            "failed",
-            "error",
-            "warning",
-            "note"
-        ]
-        .map(|s| json!(s))
+        (statuses, levels),
+        (
+            ["ran", "missing", "unconfigured", "failed"].map(|s| json!(s)),
+            ["error", "warning", "note"].map(|s| json!(s))
+        )
     );
 }
 
@@ -116,22 +105,29 @@ fn spec(kind: &str) -> FindingKindSpec {
 
 #[test]
 fn a_kind_template_matches_one_segment_per_placeholder_and_the_rest_for_the_last() {
-    let template = spec("analyze.<tool>.<rule>");
-    for kind in [
-        "analyze.ruff.F401",
-        "analyze.go-vet.printf",
-        "analyze.eslint.react.no-danger",
-        "analyze.<tool>.<rule>",
-    ] {
-        assert!(template.matches(kind), "{kind}");
-    }
-    for kind in ["analyze.ruff", "analyze", "lint.ruff.F401", "analyze..F401"] {
-        assert!(!template.matches(kind), "{kind}");
-    }
-    let middle = spec("a.<b>.c");
-    assert!(middle.matches("a.x.c"));
-    assert!(!middle.matches("a.x.y.c"));
-    let exact = spec("api.breaking");
-    assert!(exact.matches("api.breaking"));
-    assert!(!exact.matches("api.breaking.more"));
+    let matched = |spec_kind: &str, kinds: &[&str]| -> Vec<bool> {
+        let spec = spec(spec_kind);
+        kinds.iter().map(|kind| spec.matches(kind)).collect()
+    };
+    assert_eq!(
+        matched(
+            "analyze.<tool>.<rule>",
+            &[
+                "analyze.ruff.F401",
+                "analyze.go-vet.printf",
+                "analyze.eslint.react.no-danger",
+                "analyze.<tool>.<rule>",
+                "analyze.ruff",
+                "analyze",
+                "lint.ruff.F401",
+                "analyze..F401",
+            ]
+        ),
+        [true, true, true, true, false, false, false, false]
+    );
+    assert_eq!(matched("a.<b>.c", &["a.x.c", "a.x.y.c"]), [true, false]);
+    assert_eq!(
+        matched("api.breaking", &["api.breaking", "api.breaking.more"]),
+        [true, false]
+    );
 }

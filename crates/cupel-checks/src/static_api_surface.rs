@@ -2,7 +2,7 @@
 // ABOUTME: changed public items as `api.breaking` and added ones as `api.widened` (ADR-101).
 use std::collections::BTreeMap;
 
-use cupel_core::syntax::{ApiItem, ApiItemKind, ApiSurface};
+use cupel_core::syntax::{ApiItem, ApiSurface};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result, Scope, Score,
@@ -12,7 +12,8 @@ use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
 
-use crate::manifest::{evidence, kind, metric};
+use crate::finding::located;
+use crate::manifest::{evidence, kind, metric, spelling};
 use crate::metrics::sum;
 use crate::outcome;
 use crate::settings::Limits;
@@ -56,45 +57,55 @@ inventory::submit!(crate::NativeCheck(|| Box::new(StaticApiSurface::new())));
 
 impl StaticApiSurface {
     pub fn new() -> Self {
-        Self {
-            manifest: Manifest {
-                id: CheckId::from(ID),
-                version: 1,
-                tier: Tier::try_from(0).expect("tier 0 exists"),
-                cost: CostClass::Quick,
-                needs: vec![FactKind::ApiSurface],
-                wants: vec![],
-                findings: vec![
-                    kind::<ApiChange>(
-                        "api.breaking",
-                        ActionKind::Review,
-                        "A public item of the base commit was removed (deleted, renamed, or made \
-                         private) or lost a signature or kind callers may use.",
-                    ),
-                    kind::<ApiChange>(
-                        "api.widened",
-                        ActionKind::Review,
-                        "The public API gained an item (added, renamed into, or made public) or \
-                         a signature beside the ones it had.",
-                    ),
-                ],
-                metrics: vec![
-                    metric(
-                        "breaking",
-                        "Public paths the range removed or changed; the gate rule \
-                         `static.api-surface = \"no-breaking\"` requires none reported.",
-                    ),
-                    metric("widened", "Public paths the range added or extended."),
-                ],
-                stability: Stability::Experimental,
-                summary: "Diff of the public API against the range's base: removed and changed \
-                          items are breaking, added ones widen it. Runs only with --changed or \
-                          --base."
-                    .to_owned(),
-            },
+        let mut manifest = Manifest {
+            id: CheckId::from(ID),
+            version: 1,
+            tier: Tier::try_from(0).expect("tier 0 exists"),
+            cost: CostClass::Quick,
+            needs: vec![FactKind::ApiSurface],
+            wants: vec![],
+            findings: Vec::new(),
+            metrics: Vec::new(),
+            stability: Stability::Experimental,
+            summary: "Diff of the public API against the range's base: removed and changed items \
+                      are breaking, added ones widen it. Runs only with --changed or --base."
+                .to_owned(),
+        };
+        for (name, summary) in KINDS {
+            manifest
+                .findings
+                .push(kind::<ApiChange>(name, ActionKind::Review, summary));
         }
+        for (name, summary) in METRICS {
+            manifest.metrics.push(metric(name, summary));
+        }
+        Self { manifest }
     }
 }
+
+/// `api.breaking` and `api.widened`, whose evidence is the same, with what each means.
+const KINDS: [(&str, &str); 2] = [
+    (
+        "api.breaking",
+        "A public item of the base commit was removed (deleted, renamed, or made private) or lost \
+         a signature or kind callers may use.",
+    ),
+    (
+        "api.widened",
+        "The public API gained an item (added, renamed into, or made public) or a signature beside \
+         the ones it had.",
+    ),
+];
+
+/// The gate metrics, with what each counts.
+const METRICS: [(&str, &str); 2] = [
+    (
+        "breaking",
+        "Public paths the range removed or changed; the gate rule `static.api-surface = \
+         \"no-breaking\"` requires none reported.",
+    ),
+    ("widened", "Public paths the range added or extended."),
+];
 
 impl Check for StaticApiSurface {
     fn manifest(&self) -> &Manifest {
@@ -205,7 +216,8 @@ impl<'a> Side<'a> {
 }
 
 /// How a path's items changed across the range.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Serialize)]
+#[serde(rename_all = "kebab-case")]
 enum Change {
     Removed,
     Changed,
@@ -218,15 +230,6 @@ impl Change {
         match self {
             Self::Removed | Self::Changed => "api.breaking",
             Self::Added | Self::Extended => "api.widened",
-        }
-    }
-
-    fn word(self) -> &'static str {
-        match self {
-            Self::Removed => "removed",
-            Self::Changed => "changed",
-            Self::Added => "added",
-            Self::Extended => "extended",
         }
     }
 }
@@ -253,7 +256,7 @@ fn shown(items: &[&ApiItem]) -> Vec<Shown> {
     items
         .iter()
         .map(|item| Shown {
-            kind: kind_name(item.kind),
+            kind: spelling(&item.kind),
             signature: item.signature.clone(),
         })
         .collect()
@@ -275,44 +278,14 @@ impl StaticApiSurface {
         let id = FindingId::for_subject(&self.manifest.id, kind, path);
         let fields = match evidence(&ApiChange {
             path: path.to_owned(),
-            change: change.word().to_owned(),
+            change: spelling(&change),
             base: shown(before),
             head: shown(after),
         }) {
             Value::Object(fields) => fields,
             _ => Map::new(),
         };
-        let (severity, title, summary) = match change {
-            Change::Removed => (
-                Severity::Warn,
-                format!("public `{path}` was removed"),
-                format!(
-                    "Restore `{path}` (see it at {commit}), or keep the old name delegating to \
-                     the new one; if the break is intended, say so in review and suppress this."
-                ),
-            ),
-            Change::Changed => (
-                Severity::Warn,
-                format!("public `{path}` changed its signature"),
-                format!(
-                    "Keep the signature `{path}` had at {commit} beside the new one, or confirm \
-                     every caller is updated and suppress this."
-                ),
-            ),
-            Change::Added => (
-                Severity::Info,
-                format!("public `{path}` was added"),
-                format!("Confirm `{path}` is meant to be public API before callers depend on it."),
-            ),
-            Change::Extended => (
-                Severity::Info,
-                format!("public `{path}` gained a signature"),
-                format!(
-                    "Confirm the new signature of `{path}` is meant to be public API before \
-                     callers depend on it."
-                ),
-            ),
-        };
+        let (severity, title, summary) = said(change, path, commit);
         Finding {
             suppress: format!("cupel suppress {id} --reason '…'"),
             repro: format!("cupel check --only {} --base {commit}", self.manifest.id),
@@ -339,20 +312,41 @@ impl StaticApiSurface {
     }
 }
 
-/// `kind` as the fact spells it.
-fn kind_name(kind: ApiItemKind) -> String {
-    match serde_json::to_value(kind) {
-        Ok(Value::String(name)) => name,
-        _ => String::new(),
+/// A finding's severity, title, and action summary for how `path` changed.
+fn said(change: Change, path: &str, commit: &str) -> (Severity, String, String) {
+    match change {
+        Change::Removed => (
+            Severity::Warn,
+            format!("public `{path}` was removed"),
+            format!(
+                "Restore `{path}` (see it at {commit}), or keep the old name delegating to the \
+                 new one; if the break is intended, say so in review and suppress this."
+            ),
+        ),
+        Change::Changed => (
+            Severity::Warn,
+            format!("public `{path}` changed its signature"),
+            format!(
+                "Keep the signature `{path}` had at {commit} beside the new one, or confirm \
+                 every caller is updated and suppress this."
+            ),
+        ),
+        Change::Added => (
+            Severity::Info,
+            format!("public `{path}` was added"),
+            format!("Confirm `{path}` is meant to be public API before callers depend on it."),
+        ),
+        Change::Extended => (
+            Severity::Info,
+            format!("public `{path}` gained a signature"),
+            format!(
+                "Confirm the new signature of `{path}` is meant to be public API before \
+                 callers depend on it."
+            ),
+        ),
     }
 }
 
 fn location(item: &ApiItem) -> Location {
-    Location {
-        file: item.file.clone(),
-        line: item.span.line,
-        col: Some(item.span.col),
-        end_line: item.span.end_line,
-        end_col: Some(item.span.end_col),
-    }
+    located(&item.file, &item.span)
 }

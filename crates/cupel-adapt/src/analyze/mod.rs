@@ -49,6 +49,19 @@ fn languages() -> Vec<LangId> {
         .collect()
 }
 
+/// The file extensions of `lang`'s sources, which its analyzers are handed: a scope holds every
+/// language's files.
+fn extensions(lang: &LangId) -> &'static [&'static str] {
+    match lang.as_str() {
+        "rust" => &["rs"],
+        "python" => &["py", "pyi"],
+        "javascript" => &["js", "mjs", "cjs", "jsx"],
+        "typescript" => &["ts", "tsx", "mts", "cts"],
+        "go" => &["go"],
+        _ => &[],
+    }
+}
+
 /// The analyzers `lang`'s row lists that apply to it, in the row's order.
 fn specs(lang: &LangId) -> Vec<&'static Spec> {
     toolchain::for_lang(lang)
@@ -111,7 +124,17 @@ impl Producer<AnalyzerReport> for Analyzers {
         _: &mut dyn EventSink,
     ) -> Result<AnalyzerReport> {
         let root = canonical(&ctx.ctx.root);
-        let in_scope: BTreeSet<&str> = scope.files.iter().map(String::as_str).collect();
+        let extensions = extensions(&self.0);
+        let in_scope: BTreeSet<&str> = scope
+            .files
+            .iter()
+            .map(String::as_str)
+            .filter(|file| {
+                Path::new(file)
+                    .extension()
+                    .is_some_and(|ext| extensions.iter().any(|known| ext == *known))
+            })
+            .collect();
         let mut analyzers = Vec::new();
         for spec in specs(&self.0) {
             ctx.cancel.checkpoint()?;

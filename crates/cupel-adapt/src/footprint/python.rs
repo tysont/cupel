@@ -249,9 +249,11 @@ mod tests {
 
     #[test]
     fn names_normalize_as_pep_503_says() {
-        assert_eq!(normalize("Typing_Extensions"), "typing-extensions");
-        assert_eq!(normalize("zope.interface"), "zope-interface");
-        assert_eq!(normalize("a__b"), "a-b");
+        let normalized: Vec<String> = ["Typing_Extensions", "zope.interface", "a__b"]
+            .into_iter()
+            .map(normalize)
+            .collect();
+        assert_eq!(normalized, ["typing-extensions", "zope-interface", "a-b"]);
     }
 
     #[test]

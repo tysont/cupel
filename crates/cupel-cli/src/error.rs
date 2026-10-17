@@ -350,27 +350,13 @@ impl Usage {
                         .to_owned(),
                 )
             },
-            ConfigError::TreeGateNeedsRange { check } => Self {
-                value: Some(check.clone()),
-                ..usage(
-                    "[gate.tree]",
-                    format!(
-                        "Move the `{check}` rule from [gate.tree] to [gate.changed], which \
-                         applies to --changed and --base scopes."
-                    ),
-                )
-            },
-            ConfigError::NoBreakingKind { check } => Self {
-                value: Some(check.clone()),
-                ..usage(
-                    "[gate.changed]",
-                    format!(
-                        "Gate `{check}` with \"none\" or a metric instead; \"no-breaking\" \
-                         applies to checks that report breaking changes, such as \
-                         static.api-surface."
-                    ),
-                )
-            },
+            ConfigError::TreeGateNeedsRange { check } | ConfigError::NoBreakingKind { check } => {
+                let (section, fix) = misplaced_rule(error, check);
+                Self {
+                    value: Some(check.clone()),
+                    ..usage(section, fix)
+                }
+            }
             ConfigError::Plugin {
                 name,
                 program,
@@ -519,6 +505,29 @@ fn plugin_fix(name: &str, program: &str, on_path: bool) -> String {
         format!(
             "Fix or remove `[plugins] {name}` in cupel.toml; it runs `{program}`, which must \
              answer `describe` with a valid manifest."
+        )
+    }
+}
+
+/// The section and the fix for a gate rule that can never be evaluated where it is: a
+/// `[gate.tree]` rule on a check that needs a range, or `no-breaking` on a check that reports
+/// nothing breaking (ADR-101 §6).
+fn misplaced_rule(error: &ConfigError, check: &str) -> (&'static str, String) {
+    if matches!(error, ConfigError::NoBreakingKind { .. }) {
+        (
+            "[gate.changed]",
+            format!(
+                "Gate `{check}` with \"none\" or a metric instead; \"no-breaking\" applies to \
+                 checks that report breaking changes, such as static.api-surface."
+            ),
+        )
+    } else {
+        (
+            "[gate.tree]",
+            format!(
+                "Move the `{check}` rule from [gate.tree] to [gate.changed], which applies to \
+                 --changed and --base scopes."
+            ),
         )
     }
 }

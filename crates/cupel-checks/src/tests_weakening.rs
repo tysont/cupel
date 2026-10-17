@@ -560,11 +560,5 @@ fn owners(snapshot: &str, head: &Tests<'_>) -> Vec<usize> {
 }
 
 fn location(file: &str, span: &Span) -> Location {
-    Location {
-        file: file.to_owned(),
-        line: span.line,
-        col: Some(span.col),
-        end_line: span.end_line,
-        end_col: Some(span.end_col),
-    }
+    crate::finding::located(file, span)
 }

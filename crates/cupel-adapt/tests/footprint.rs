@@ -7,18 +7,79 @@ use std::path::Path;
 use std::process::Command;
 
 use cupel_core::{
-    Availability, Cancellation, FactKind, Footprint, ProduceCtx, ProducerRegistry, Scope,
-    Vulnerability, find_program,
+    Availability, Cancellation, Dependency, FactKind, Footprint, ProduceCtx, Scope, Vulnerability,
+    find_program,
 };
-use cupel_fixtures::copy_repo;
 use serde_json::{Value, json};
 
 const ID: &str = "tool.footprint";
 
-fn registry() -> &'static ProducerRegistry {
-    static REGISTRY: std::sync::OnceLock<ProducerRegistry> = std::sync::OnceLock::new();
-    REGISTRY.get_or_init(support::registry)
+/// One language's fixture as the producer should read it.
+struct Expected {
+    lang: &'static str,
+    manifest: &'static str,
+    /// (name, version, direct, license, line) of each dependency, all listed in `manifest`.
+    dependencies: [(&'static str, &'static str, bool, Option<&'static str>, u32); 2],
+    licenses: bool,
+    /// The vulnerable dependency's name and version, and the version that fixes it.
+    vulnerable: (&'static str, &'static str, &'static str),
 }
+
+const GPL: Option<&str> = Some("GPL-3.0-only");
+const MIT: Option<&str> = Some("MIT");
+
+const FIXTURES: [Expected; 5] = [
+    Expected {
+        lang: "rust",
+        manifest: "Cargo.lock",
+        dependencies: [
+            ("gplthing", "0.1.0", true, GPL, 6),
+            ("oldsmall", "0.6.3", true, MIT, 18),
+        ],
+        licenses: true,
+        vulnerable: ("oldsmall", "0.6.3", "0.6.10"),
+    },
+    Expected {
+        lang: "python",
+        manifest: "requirements.txt",
+        dependencies: [
+            ("gplthing", "1.0.0", true, GPL, 1),
+            ("oldlib", "2.0.0", true, MIT, 2),
+        ],
+        licenses: true,
+        vulnerable: ("oldlib", "2.0.0", "2.0.1"),
+    },
+    Expected {
+        lang: "javascript",
+        manifest: "package-lock.json",
+        dependencies: [
+            ("gplthing", "1.0.0", true, GPL, 15),
+            ("oldlib", "2.0.0", true, MIT, 19),
+        ],
+        licenses: true,
+        vulnerable: ("oldlib", "2.0.0", "2.0.1"),
+    },
+    Expected {
+        lang: "typescript",
+        manifest: "package-lock.json",
+        dependencies: [
+            ("gplthing", "1.0.0", true, GPL, 15),
+            ("oldlib", "2.0.0", true, MIT, 19),
+        ],
+        licenses: true,
+        vulnerable: ("oldlib", "2.0.0", "2.0.1"),
+    },
+    Expected {
+        lang: "go",
+        manifest: "go.mod",
+        dependencies: [
+            ("example.com/gplthing", "v1.0.0", true, None, 6),
+            ("example.com/oldlib", "v2.0.0", false, None, 7),
+        ],
+        licenses: false,
+        vulnerable: ("example.com/oldlib", "v2.0.0", "2.0.1"),
+    },
+];
 
 /// What a producer of `lang` sees in the repository at `root`, with `config` as its
 /// `[lang.<id>]` table.
@@ -31,62 +92,51 @@ fn ctx(root: &Path, lang: &str, config: Value) -> ProduceCtx {
     ctx
 }
 
-fn produce(ctx: &ProduceCtx, lang: &str) -> Footprint {
-    let producer = support::producer(registry(), FactKind::Footprint, ID, lang);
+fn produced(ctx: &ProduceCtx, lang: &str) -> cupel_core::Result<Footprint> {
+    let producer = support::producer(support::shared_registry(), FactKind::Footprint, ID, lang);
     assert_eq!(producer.availability(&ctx.ctx), Availability::Ready);
     producer
         .produce(ctx, &Scope::default(), &mut Vec::new())
-        .unwrap()
-        .downcast::<Footprint>()
-        .unwrap()
+        .map(|made| made.downcast::<Footprint>().unwrap())
+}
+
+fn produce(ctx: &ProduceCtx, lang: &str) -> Footprint {
+    produced(ctx, lang).unwrap()
 }
 
 fn configured() -> Value {
     json!({"advisories": "advisories", "artifacts": ["dist/*"]})
 }
 
-/// A copy of the perf.footprint fixture for `lang`.
 fn fixture(lang: &str) -> tempfile::TempDir {
-    let dir = tempfile::tempdir().unwrap();
-    copy_repo(&format!("perf.footprint/{lang}"), dir.path());
-    dir
+    support::own_fixture("perf.footprint", lang)
 }
 
-type Listed = Vec<(String, Option<String>, bool, Option<String>, String, u32)>;
+impl Expected {
+    fn dependencies(&self) -> Vec<Dependency> {
+        self.dependencies
+            .iter()
+            .map(|(name, version, direct, license, line)| Dependency {
+                name: (*name).to_owned(),
+                version: Some((*version).to_owned()),
+                direct: *direct,
+                license: license.map(str::to_owned),
+                file: self.manifest.to_owned(),
+                line: *line,
+            })
+            .collect()
+    }
 
-fn listed(footprint: &Footprint) -> Listed {
-    footprint
-        .dependencies
-        .iter()
-        .map(|d| {
-            (
-                d.name.clone(),
-                d.version.clone(),
-                d.direct,
-                d.license.clone(),
-                d.file.clone(),
-                d.line,
-            )
-        })
-        .collect()
-}
-
-fn dep(
-    name: &str,
-    version: &str,
-    direct: bool,
-    license: Option<&str>,
-    file: &str,
-    line: u32,
-) -> (String, Option<String>, bool, Option<String>, String, u32) {
-    (
-        name.to_owned(),
-        Some(version.to_owned()),
-        direct,
-        license.map(str::to_owned),
-        file.to_owned(),
-        line,
-    )
+    fn vulnerabilities(&self) -> Vec<Vulnerability> {
+        let (package, version, fixed) = self.vulnerable;
+        vec![Vulnerability {
+            id: "OSV-2099-0001".to_owned(),
+            package: package.to_owned(),
+            version: version.to_owned(),
+            summary: format!("Out-of-bounds write in {package}"),
+            fixed: Some(fixed.to_owned()),
+        }]
+    }
 }
 
 #[test]
@@ -95,92 +145,35 @@ fn each_language_lists_its_dependencies_licenses_and_vulnerabilities() {
         eprintln!("SKIPPED: cargo not installed; Rust licenses were not read");
         return;
     }
-    let gpl = Some("GPL-3.0-only");
-    let mit = Some("MIT");
-    let cases: [(&str, &str, Listed, bool, &str, &str); 5] = [
-        (
-            "rust",
-            "Cargo.lock",
-            vec![
-                dep("gplthing", "0.1.0", true, gpl, "Cargo.lock", 6),
-                dep("oldsmall", "0.6.3", true, mit, "Cargo.lock", 18),
-            ],
-            true,
-            "oldsmall",
-            "0.6.3",
-        ),
-        (
-            "python",
-            "requirements.txt",
-            vec![
-                dep("gplthing", "1.0.0", true, gpl, "requirements.txt", 1),
-                dep("oldlib", "2.0.0", true, mit, "requirements.txt", 2),
-            ],
-            true,
-            "oldlib",
-            "2.0.0",
-        ),
-        (
-            "javascript",
-            "package-lock.json",
-            vec![
-                dep("gplthing", "1.0.0", true, gpl, "package-lock.json", 15),
-                dep("oldlib", "2.0.0", true, mit, "package-lock.json", 19),
-            ],
-            true,
-            "oldlib",
-            "2.0.0",
-        ),
-        (
-            "typescript",
-            "package-lock.json",
-            vec![
-                dep("gplthing", "1.0.0", true, gpl, "package-lock.json", 15),
-                dep("oldlib", "2.0.0", true, mit, "package-lock.json", 19),
-            ],
-            true,
-            "oldlib",
-            "2.0.0",
-        ),
-        (
-            "go",
-            "go.mod",
-            vec![
-                dep("example.com/gplthing", "v1.0.0", true, None, "go.mod", 6),
-                dep("example.com/oldlib", "v2.0.0", false, None, "go.mod", 7),
-            ],
-            false,
-            "example.com/oldlib",
-            "v2.0.0",
-        ),
-    ];
-    for (lang, manifest, expected, licenses, package, version) in cases {
+    for expected in &FIXTURES {
+        let lang = expected.lang;
         let dir = fixture(lang);
         let footprint = produce(&ctx(dir.path(), lang, configured()), lang);
-        assert_eq!(footprint.manifests, [manifest], "{lang}");
-        assert_eq!(listed(&footprint), expected, "{lang}");
-        assert_eq!(footprint.licenses, licenses, "{lang}");
+        let artifacts: Vec<(String, u64)> = footprint
+            .artifacts
+            .iter()
+            .flatten()
+            .map(|artifact| (artifact.path.clone(), artifact.bytes))
+            .collect();
         assert_eq!(
-            footprint.vulnerabilities,
-            Some(vec![Vulnerability {
-                id: "OSV-2099-0001".to_owned(),
-                package: package.to_owned(),
-                version: version.to_owned(),
-                summary: format!("Out-of-bounds write in {package}"),
-                fixed: Some(if lang == "rust" { "0.6.10" } else { "2.0.1" }.to_owned()),
-            }]),
+            (
+                footprint.manifests,
+                footprint.dependencies,
+                footprint.licenses,
+                footprint.vulnerabilities,
+                artifacts,
+                footprint.base,
+            ),
+            (
+                vec![expected.manifest.to_owned()],
+                expected.dependencies(),
+                expected.licenses,
+                Some(expected.vulnerabilities()),
+                vec![("dist/bundle.txt".to_owned(), 68)],
+                None,
+            ),
             "{lang}"
         );
-        let artifacts = footprint.artifacts.expect("configured");
-        assert_eq!(
-            artifacts
-                .iter()
-                .map(|a| (a.path.as_str(), a.bytes))
-                .collect::<Vec<_>>(),
-            [("dist/bundle.txt", 68)],
-            "{lang}"
-        );
-        assert_eq!(footprint.base, None, "{lang}");
     }
 }
 
@@ -200,16 +193,17 @@ fn unconfigured_measurements_are_absent_and_a_root_without_manifests_lists_nothi
 #[test]
 fn an_advisory_that_does_not_parse_is_an_error_naming_it() {
     let dir = fixture("go");
-    fs::write(dir.path().join("advisories/broken.json"), "{").unwrap();
-    let producer = support::producer(registry(), FactKind::Footprint, ID, "go");
-    let error = producer
-        .produce(
-            &ctx(dir.path(), "go", configured()),
-            &Scope::default(),
-            &mut Vec::new(),
+    let broken = dir.path().join("advisories/broken.json");
+    fs::write(&broken, "{").unwrap();
+    let error = produced(&ctx(dir.path(), "go", configured()), "go").unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        format!(
+            "cannot run `tool.footprint`: cannot read {}: EOF while parsing an object at line 1 \
+             column 1",
+            broken.display()
         )
-        .unwrap_err();
-    assert!(error.to_string().contains("broken.json"), "{error}");
+    );
 }
 
 fn git(dir: &Path, args: &[&str]) -> String {
@@ -254,7 +248,7 @@ fn under_a_range_the_same_manifests_are_read_at_the_base_commit() {
         before
             .dependencies
             .iter()
-            .map(cupel_core::Dependency::spelled)
+            .map(Dependency::spelled)
             .collect::<Vec<_>>(),
         ["example.com/gplthing@v1.0.0"]
     );

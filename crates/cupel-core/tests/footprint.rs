@@ -1,6 +1,8 @@
 // ABOUTME: Tests for the `Footprint` payload (ADR-103): its fact kind and versioned schema, its shape as JSON with
 // ABOUTME: every optional measurement absent and present, and how a dependency is spelled.
-use cupel_core::{Artifact, Dependency, FactKind, Footprint, FootprintBase, Vulnerability, schema};
+mod support;
+
+use cupel_core::{Artifact, Dependency, FactKind, Footprint, FootprintBase, Vulnerability};
 use serde_json::json;
 
 fn dependency(name: &str, version: Option<&str>) -> Dependency {
@@ -19,12 +21,7 @@ fn footprint_is_an_execution_fact_appended_to_the_catalog_with_a_versioned_schem
     let kind = FactKind::Footprint;
     assert_eq!(FactKind::ALL.last(), Some(&kind));
     assert_eq!(
-        (
-            kind.as_str(),
-            FactKind::SYNTACTIC.contains(&kind),
-            schema::fact_version(kind),
-            schema::fact(kind).map(|schema| schema.as_value()["$id"].clone()),
-        ),
+        support::fact_entry(kind),
         (
             "footprint",
             false,

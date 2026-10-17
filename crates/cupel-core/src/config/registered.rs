@@ -2,9 +2,9 @@
 // ABOUTME: Parsing checks ID syntax only; this is where unknown checks, metrics, and languages are caught.
 use crate::check::{Check, CheckRegistry, Manifest};
 use crate::config::Config;
-use crate::config::GateCondition;
 use crate::config::error::ConfigError;
 use crate::config::file::GateSection;
+use crate::config::{GateCondition, GateRuleSpec};
 use crate::error::Result;
 use crate::gate::is_breaking;
 use crate::id::{CheckId, LangId};
@@ -26,27 +26,7 @@ impl Config {
         for (section, gate) in gates {
             gate.iter()
                 .flat_map(GateSection::rules)
-                .try_for_each(|rule| {
-                    let manifest = registry.check(&rule.key.check, section)?;
-                    if section == "[gate.tree]" && needs_range(checks, &rule.key.check) {
-                        return Err(ConfigError::TreeGateNeedsRange {
-                            check: rule.key.check.to_string(),
-                        }
-                        .into());
-                    }
-                    if rule.condition == GateCondition::NoBreaking
-                        && !manifest.findings.iter().any(|spec| is_breaking(&spec.kind))
-                    {
-                        return Err(ConfigError::NoBreakingKind {
-                            check: rule.key.check.to_string(),
-                        }
-                        .into());
-                    }
-                    match &rule.key.metric {
-                        Some(metric) => declared_metric(manifest, metric, section),
-                        None => Ok(()),
-                    }
-                })?;
+                .try_for_each(|rule| registry.rule(rule, section))?;
         }
         Ok(())
     }
@@ -91,6 +71,26 @@ impl<'a> Registries<'a> {
                     .map(|check| check.manifest().id.to_string()),
             )
         })
+    }
+
+    /// Rejects a gate rule on an unknown check, a `[gate.tree]` rule on a check that needs a
+    /// range, `no-breaking` on a check that reports nothing breaking (ADR-101 §6), and a metric
+    /// the check does not declare.
+    fn rule(&self, rule: &GateRuleSpec, section: &str) -> Result<()> {
+        let manifest = self.check(&rule.key.check, section)?;
+        let check = || rule.key.check.to_string();
+        if section == "[gate.tree]" && needs_range(self.checks, &rule.key.check) {
+            return Err(ConfigError::TreeGateNeedsRange { check: check() }.into());
+        }
+        if rule.condition == GateCondition::NoBreaking
+            && !manifest.findings.iter().any(|spec| is_breaking(&spec.kind))
+        {
+            return Err(ConfigError::NoBreakingKind { check: check() }.into());
+        }
+        match &rule.key.metric {
+            Some(metric) => declared_metric(manifest, metric, section),
+            None => Ok(()),
+        }
     }
 
     fn lang(&self, lang: &LangId, section: &str) -> Result<()> {

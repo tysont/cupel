@@ -8,7 +8,7 @@ use cupel_core::{
     MetricPer, Scope, Severity, ToolId,
 };
 use serde_json::json;
-use support::{Shape, combined, language, score};
+use support::{Shape, score};
 
 const ID: &str = "static.analyze";
 
@@ -219,24 +219,12 @@ fn a_failed_analyzer_is_a_note_beside_the_results_of_the_others() {
 
 #[test]
 fn settings_are_refused() {
-    let (key, valid) = support::setting_error(support::check(ID), json!({"strict": 1}));
-    assert_eq!(key, "strict");
-    assert!(valid.is_empty());
+    support::assert_refuses_settings(ID);
 }
 
 #[test]
 fn counts_add_up_across_languages() {
-    let check = support::check(ID);
-    let results = [
-        language(check, &[("errors", 2.0), ("diagnostics", 5.0)], 2),
-        language(check, &[("errors", 1.0), ("diagnostics", 1.0)], 1),
-    ];
-    assert_eq!(combined(check, "errors", &results), Some(3.0));
-    assert_eq!(combined(check, "diagnostics", &results), Some(6.0));
-    assert_eq!(
-        check.combine(&[score(5.0, "diagnostics", 2), score(1.0, "diagnostics", 1)]),
-        Some(score(6.0, "diagnostics", 3))
-    );
+    support::assert_counts_add_up(ID, &["errors", "diagnostics"], "diagnostics");
 }
 
 #[test]

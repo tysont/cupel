@@ -6,10 +6,9 @@ use std::fs;
 use std::path::Path;
 
 use cupel_core::{
-    AnalyzerLevel, AnalyzerReport, AnalyzerStatus, Availability, Cancellation, FactKind,
-    ProducerRegistry, Scope, find_program,
+    AnalyzerLevel, AnalyzerReport, AnalyzerStatus, Availability, Cancellation, FactKind, Scope,
+    find_program,
 };
-use cupel_fixtures::copy_repo;
 
 const ID: &str = "tool.analyzers";
 
@@ -37,14 +36,14 @@ fn installed() -> bool {
     }
 }
 
-fn registry() -> &'static ProducerRegistry {
-    static REGISTRY: std::sync::OnceLock<ProducerRegistry> = std::sync::OnceLock::new();
-    REGISTRY.get_or_init(support::registry)
-}
-
 /// The analyzers' report on `files` of the repository at `root` for `lang`.
 fn analyze(root: &Path, lang: &str, files: &[&str]) -> AnalyzerReport {
-    let producer = support::producer(registry(), FactKind::AnalyzerReport, ID, lang);
+    let producer = support::producer(
+        support::shared_registry(),
+        FactKind::AnalyzerReport,
+        ID,
+        lang,
+    );
     let ctx = support::produce_ctx(root, lang, Cancellation::new());
     assert_eq!(producer.availability(&ctx.ctx), Availability::Ready);
     let scope = Scope::of_files(files.iter().map(|file| (*file).to_owned()).collect());
@@ -55,11 +54,10 @@ fn analyze(root: &Path, lang: &str, files: &[&str]) -> AnalyzerReport {
         .unwrap()
 }
 
-/// A copy of the static.analyze fixture for `lang`.
-fn fixture(lang: &str) -> tempfile::TempDir {
-    let dir = tempfile::tempdir().unwrap();
-    copy_repo(&format!("static.analyze/{lang}"), dir.path());
-    dir
+/// A copy of the static.analyze fixture for `lang`; `None` (reported as skipped) when an
+/// analyzer the fixtures run is not installed.
+fn fixture(lang: &str) -> Option<tempfile::TempDir> {
+    installed().then(|| support::own_fixture("static.analyze", lang))
 }
 
 /// One result as (rule, level, file, line).
@@ -111,9 +109,6 @@ fn ran(tool: &str, results: &[(&str, AnalyzerLevel, &str, u32)]) -> Analyzed {
 #[test]
 fn each_language_reports_exactly_its_fixture_s_planted_results() {
     use AnalyzerLevel::{Error, Warning};
-    if !installed() {
-        return;
-    }
     let cases: [(&str, &[&str], Summary); 5] = [
         (
             "rust",
@@ -164,7 +159,9 @@ fn each_language_reports_exactly_its_fixture_s_planted_results() {
         ),
     ];
     for (lang, files, expected) in cases {
-        let dir = fixture(lang);
+        let Some(dir) = fixture(lang) else {
+            return;
+        };
         let report = analyze(dir.path(), lang, files);
         assert_eq!(summary(&report), expected, "{lang}");
     }
@@ -172,28 +169,28 @@ fn each_language_reports_exactly_its_fixture_s_planted_results() {
 
 #[test]
 fn an_unconfigured_analyzer_says_what_to_add() {
-    if !installed() {
+    let Some(dir) = fixture("typescript") else {
         return;
-    }
-    let dir = fixture("typescript");
+    };
     let report = analyze(dir.path(), "typescript", &["ledger.ts"]);
     let eslint = &report.analyzers[1];
-    assert_eq!(eslint.status, AnalyzerStatus::Unconfigured);
-    assert!(
-        eslint
-            .detail
-            .as_deref()
-            .is_some_and(|detail| detail.contains("eslint.config.js")),
-        "{eslint:?}"
+    assert_eq!(
+        (eslint.status, eslint.detail.as_deref()),
+        (
+            AnalyzerStatus::Unconfigured,
+            Some(
+                "Add an ESLint flat config (eslint.config.js or .mjs) to the project root; \
+                 ESLint does not run without one."
+            )
+        )
     );
 }
 
 #[test]
 fn results_outside_the_scope_are_dropped_though_the_project_is_analyzed() {
-    if !installed() {
+    let Some(dir) = fixture("typescript") else {
         return;
-    }
-    let dir = fixture("typescript");
+    };
     fs::write(
         dir.path().join("other.ts"),
         "export const late: string = 1;\n",
@@ -220,10 +217,9 @@ fn results_outside_the_scope_are_dropped_though_the_project_is_analyzed() {
 
 #[test]
 fn an_analyzer_that_fails_is_recorded_with_its_output_and_the_others_still_run() {
-    if !installed() {
+    let Some(dir) = fixture("python") else {
         return;
-    }
-    let dir = fixture("python");
+    };
     fs::write(dir.path().join("ruff.toml"), "line-length = [\n").unwrap();
     let report = analyze(dir.path(), "python", &["ledger.py"]);
     assert_eq!(report.analyzers[0].status, AnalyzerStatus::Ran);
@@ -241,16 +237,15 @@ fn an_analyzer_that_fails_is_recorded_with_its_output_and_the_others_still_run()
 
 #[test]
 fn analyzing_writes_nothing_in_the_tree_but_cargo_s_target() {
-    if !installed() {
-        return;
-    }
     for (lang, file) in [
         ("python", "ledger.py"),
         ("typescript", "ledger.ts"),
         ("javascript", "ledger.js"),
         ("go", "ledger.go"),
     ] {
-        let dir = fixture(lang);
+        let Some(dir) = fixture(lang) else {
+            return;
+        };
         let before = listing(dir.path());
         analyze(dir.path(), lang, &[file]);
         let after: Vec<String> = listing(dir.path())

@@ -113,36 +113,41 @@ fn first_fixed(affected: &Value) -> Option<String> {
 }
 
 /// A hit when `version` is in the range: after an `introduced` and before the next `fixed` (or
-/// at most the next `last_affected`).
+/// at most the next `last_affected`), or after the last `introduced` with nothing after it.
 fn in_range(range: &Value, version: &str) -> Option<Hit> {
-    let events = range["events"].as_array()?;
     let mut introduced: Option<&str> = None;
-    for event in events {
+    for event in range["events"].as_array()? {
         if let Some(start) = event["introduced"].as_str() {
             introduced = Some(start);
-            continue;
-        }
-        let Some(start) = introduced else {
-            continue;
-        };
-        let after_start = start == "0" || compare_versions(version, start) != Ordering::Less;
-        if let Some(fixed) = event["fixed"].as_str() {
-            if after_start && compare_versions(version, fixed) == Ordering::Less {
-                return Some(Hit {
-                    fixed: Some(fixed.to_owned()),
-                });
-            }
-            introduced = None;
-        } else if let Some(last) = event["last_affected"].as_str() {
-            if after_start && compare_versions(version, last) != Ordering::Greater {
-                return Some(Hit { fixed: None });
-            }
-            introduced = None;
+        } else if let Some(start) = introduced.take()
+            && let Some(hit) = ended(event, version, start)
+        {
+            return Some(hit);
         }
     }
     introduced
-        .filter(|start| *start == "0" || compare_versions(version, start) != Ordering::Less)
+        .filter(|start| at_or_after(version, start))
         .map(|_| Hit { fixed: None })
+}
+
+/// A hit when the interval from `start` that `event` ends (a `fixed` or `last_affected`
+/// event) holds `version`.
+fn ended(event: &Value, version: &str, start: &str) -> Option<Hit> {
+    if !at_or_after(version, start) {
+        return None;
+    }
+    if let Some(fixed) = event["fixed"].as_str() {
+        return (compare_versions(version, fixed) == Ordering::Less).then(|| Hit {
+            fixed: Some(fixed.to_owned()),
+        });
+    }
+    let last = event["last_affected"].as_str()?;
+    (compare_versions(version, last) != Ordering::Greater).then_some(Hit { fixed: None })
+}
+
+/// Whether `version` is at or after `start`; `0` starts every range.
+fn at_or_after(version: &str, start: &str) -> bool {
+    start == "0" || compare_versions(version, start) != Ordering::Less
 }
 
 /// Compares two versions part by part, splitting on `.`, `-`, and `+` after a leading `v`:

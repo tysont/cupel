@@ -392,41 +392,33 @@ fn tsc(captured: &Captured) -> Result<Vec<Raw>, String> {
         if line.starts_with("error TS") {
             return Err(format!("tsc could not check the project: {line}"));
         }
-        let Some((place, rest)) = line.split_once("): ") else {
-            continue;
-        };
-        let Some((file, position)) = place.rsplit_once('(') else {
-            continue;
-        };
-        let Some((line_number, col)) = position.split_once(',') else {
-            continue;
-        };
-        let Some((severity, rest)) = rest.split_once(' ') else {
-            continue;
-        };
-        let Some((code, message)) = rest.split_once(": ") else {
-            continue;
-        };
-        let (Ok(line_number), Ok(col)) = (line_number.parse(), col.parse()) else {
-            continue;
-        };
-        let level = match severity {
-            "error" => AnalyzerLevel::Error,
-            "warning" => AnalyzerLevel::Warning,
-            _ => AnalyzerLevel::Note,
-        };
-        raws.push(Raw {
-            rule: code.to_owned(),
-            level,
-            message: message.to_owned(),
-            file: file.to_owned(),
-            line: line_number,
-            col: Some(col),
-            end_line: None,
-            end_col: None,
-        });
+        raws.extend(tsc_line(line));
     }
     Ok(raws)
+}
+
+/// One `file(line,col): severity code: message` line; `None` for any other line.
+fn tsc_line(line: &str) -> Option<Raw> {
+    let (place, rest) = line.split_once("): ")?;
+    let (file, position) = place.rsplit_once('(')?;
+    let (line_number, col) = position.split_once(',')?;
+    let (severity, rest) = rest.split_once(' ')?;
+    let (code, message) = rest.split_once(": ")?;
+    let level = match severity {
+        "error" => AnalyzerLevel::Error,
+        "warning" => AnalyzerLevel::Warning,
+        _ => AnalyzerLevel::Note,
+    };
+    Some(Raw {
+        rule: code.to_owned(),
+        level,
+        message: message.to_owned(),
+        file: file.to_owned(),
+        line: line_number.parse().ok()?,
+        col: Some(col.parse().ok()?),
+        end_line: None,
+        end_col: None,
+    })
 }
 
 #[derive(Deserialize)]

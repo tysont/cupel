@@ -8,7 +8,7 @@ use cupel_core::{
     MetricPer, Produced, Range, Scope, Severity,
 };
 use serde_json::json;
-use support::{Shape, combined, language, score};
+use support::{Shape, score};
 
 const ID: &str = "static.api-surface";
 
@@ -199,24 +199,12 @@ fn findings_follow_base_order_then_head_order_for_additions() {
 
 #[test]
 fn settings_are_refused() {
-    let (key, valid) = support::setting_error(support::check(ID), json!({"strict": 1}));
-    assert_eq!(key, "strict");
-    assert!(valid.is_empty());
+    support::assert_refuses_settings(ID);
 }
 
 #[test]
 fn breaking_and_widened_add_up_across_languages() {
-    let check = support::check(ID);
-    let results = [
-        language(check, &[("breaking", 2.0), ("widened", 1.0)], 4),
-        language(check, &[("breaking", 1.0), ("widened", 0.0)], 3),
-    ];
-    assert_eq!(combined(check, "breaking", &results), Some(3.0));
-    assert_eq!(combined(check, "widened", &results), Some(1.0));
-    assert_eq!(
-        check.combine(&[score(2.0, "breaking", 4), score(1.0, "breaking", 3)]),
-        Some(score(3.0, "breaking", 7))
-    );
+    support::assert_counts_add_up(ID, &["breaking", "widened"], "breaking");
 }
 
 #[test]
