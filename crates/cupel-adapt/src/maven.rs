@@ -73,19 +73,40 @@ fn command(root: &Root) -> Vec<String> {
 }
 
 /// Surefire's order of test classes (ADR-078): alphabetical, so every machine runs a suite the
-/// same way whatever its file system lists first, or random from a shuffled run's seed (halved:
-/// Surefire reads a signed 64-bit seed). Methods
-/// keep `JUnit`'s order within a class, and a `pom.xml` that sets `runOrder` keeps its own.
+/// same way whatever its file system lists first, or reverse alphabetical for a shuffled run.
+/// Surefire's `random` order shuffles the classes as the file system listed them, so one seed is
+/// a different permutation on each platform; the reverse order puts every class after the ones it
+/// followed, on every machine alike, and the seed is left to the methods. Methods keep `JUnit`'s
+/// order within a class, and a `pom.xml` that sets `runOrder` keeps its own.
 fn vary(options: &RunOptions) -> Vec<String> {
-    match (options.order, options.seed) {
-        (RunOrder::Shuffled, Some(seed)) => vec![
-            "-Dsurefire.runOrder=random".to_owned(),
-            format!("-Dsurefire.runOrder.random.seed={}", seed >> 1),
-        ],
-        _ => vec!["-Dsurefire.runOrder=alphabetical".to_owned()],
-    }
+    let order = match options.order {
+        RunOrder::Shuffled => "reversealphabetical",
+        _ => "alphabetical",
+    };
+    vec![format!("-Dsurefire.runOrder={order}")]
 }
 
 fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
     read_reports(ran, &reports(&ran.root.dir))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_shuffled_run_reverses_the_alphabetical_class_order_whatever_the_seed() {
+        let shuffled = RunOptions {
+            order: RunOrder::Shuffled,
+            seed: Some(7),
+            ..RunOptions::default()
+        };
+        assert_eq!(vary(&shuffled), ["-Dsurefire.runOrder=reversealphabetical"]);
+        let declared = RunOptions {
+            order: RunOrder::Declared,
+            seed: Some(7),
+            ..RunOptions::default()
+        };
+        assert_eq!(vary(&declared), ["-Dsurefire.runOrder=alphabetical"]);
+    }
 }
