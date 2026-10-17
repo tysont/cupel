@@ -1,0 +1,364 @@
+{
+  "roots": [
+    {
+      "edges": [
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/core.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "cheshire.core",
+          "target": {
+            "kind": "external",
+            "package": "cheshire.core"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/core.clj",
+          "line": 4,
+          "relative": false,
+          "specifier": "clojure.string",
+          "target": {
+            "kind": "external",
+            "package": "clojure"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/core.clj",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.gen",
+          "target": {
+            "kind": "unresolved"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/core.clj",
+          "line": 6,
+          "relative": false,
+          "specifier": "ledger.report",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/report.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/core.clj",
+          "line": 7,
+          "relative": false,
+          "specifier": "shapes.geometry",
+          "target": {
+            "kind": "file",
+            "path": "shapes/src/shapes/geometry.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/core.clj",
+          "line": 8,
+          "relative": false,
+          "specifier": "java.util",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/deps_cycle/alpha.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.deps-cycle.beta",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/deps_cycle/beta.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/deps_cycle/beta.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.deps-cycle.alpha",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/deps_cycle/alpha.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/deps_layers/domain/order.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.deps-layers.infra.store",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/deps_layers/infra/store.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/deps_layers/port/port.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.deps-layers.domain.order",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/deps_layers/domain/order.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/main.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.clones-settlement",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/clones_settlement.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/main.clj",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.complexity",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/complexity.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/main.clj",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.core",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/core.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/main.clj",
+          "line": 6,
+          "relative": false,
+          "specifier": "ledger.decide",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/main.clj",
+          "line": 7,
+          "relative": false,
+          "specifier": "ledger.pricing",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/main.clj",
+          "line": 8,
+          "relative": false,
+          "specifier": "ledger.twins",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/twins.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/core_test.clj",
+          "line": 2,
+          "relative": false,
+          "specifier": "clojure.test",
+          "target": {
+            "kind": "external",
+            "package": "clojure"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/core_test.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.core",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/core.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/core_test.clj",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.decide",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/core_test.clj",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.pricing",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/pricing_test.clj",
+          "line": 2,
+          "relative": false,
+          "specifier": "clojure.test",
+          "target": {
+            "kind": "external",
+            "package": "clojure"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/pricing_test.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.core",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/core.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/pricing_test.clj",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.decide",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/pricing_test.clj",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.pricing",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/property_test.clj",
+          "line": 2,
+          "relative": false,
+          "specifier": "clojure.test.check.clojure-test",
+          "target": {
+            "kind": "external",
+            "package": "clojure"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/property_test.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "clojure.test.check.generators",
+          "target": {
+            "kind": "external",
+            "package": "clojure"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/property_test.clj",
+          "line": 4,
+          "relative": false,
+          "specifier": "clojure.test.check.properties",
+          "target": {
+            "kind": "external",
+            "package": "clojure"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/property_test.clj",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.core",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/core.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/quality_test.clj",
+          "line": 2,
+          "relative": false,
+          "specifier": "clojure.test",
+          "target": {
+            "kind": "external",
+            "package": "clojure"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/quality_test.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.core",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/core.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/quality_test.clj",
+          "line": 4,
+          "relative": false,
+          "specifier": "ledger.decide",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/decide.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "test/ledger/quality_test.clj",
+          "line": 5,
+          "relative": false,
+          "specifier": "ledger.pricing",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/pricing.clj"
+          }
+        }
+      ],
+      "root": "."
+    },
+    {
+      "edges": [],
+      "root": "shapes"
+    }
+  ]
+}

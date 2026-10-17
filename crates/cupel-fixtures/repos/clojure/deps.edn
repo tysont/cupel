@@ -1,0 +1,6 @@
+{:paths ["src"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.3"}
+        cheshire/cheshire {:mvn/version "6.1.0"}
+        ledger/shapes {:local/root "shapes"}}
+ :aliases {:test {:extra-paths ["test"]
+                  :extra-deps {org.clojure/test.check {:mvn/version "1.1.3"}}}}}

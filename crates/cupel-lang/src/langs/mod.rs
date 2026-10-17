@@ -1,5 +1,6 @@
 // ABOUTME: The compiled-in languages, one module per language directory (design §8.4.2), and the
 // ABOUTME: registry that holds them; `javascript` and `typescript` share the `ecma` module.
+pub mod clojure;
 pub mod ecma;
 pub mod ecosystems;
 pub mod go;
@@ -28,6 +29,7 @@ impl LanguageRegistry {
             Arc::new(go::Go::new(Arc::clone(&cache))),
             Arc::new(python::Python::new(Arc::clone(&cache))),
             Arc::new(java::Java::new(Arc::clone(&cache))),
+            Arc::new(clojure::Clojure::new(Arc::clone(&cache))),
         ];
         Self::of(languages, cache)
     }

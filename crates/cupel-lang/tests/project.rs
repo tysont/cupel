@@ -1,5 +1,5 @@
 // ABOUTME: Tests for the `ProjectInfo` producers: every detect fixture yields its roots through the
-// ABOUTME: registered languages, with members, packages, and skip dirs; Clojure roots are unregistered.
+// ABOUTME: registered languages, with members, packages, and skip dirs; no recognized root is unregistered.
 mod support;
 
 use std::path::{Path, PathBuf};
@@ -145,13 +145,28 @@ fn maven_and_gradle_roots_are_java_roots_with_their_subprojects_as_members() {
             )
         }]
     );
-    let tools = tree(&[("tools/deps.edn", "{}\n")]);
-    let roots = cupel_lang::unregistered_roots(tools.path(), &Exclude::default());
-    let shape: Vec<(&str, &str)> = roots
-        .iter()
-        .map(|root| (root.path.as_str(), root.lang.as_str()))
-        .collect();
-    assert_eq!(shape, [("tools", "clojure")]);
+}
+
+#[test]
+fn deps_edn_roots_are_clojure_roots_and_no_recognized_root_is_unregistered() {
+    let dir = tree(&[
+        ("tools/deps.edn", "{:deps {lib/x {:local/root \"lib\"}}}\n"),
+        ("tools/lib/deps.edn", "{}\n"),
+        ("svc/pom.xml", "<project/>\n"),
+    ]);
+    assert_eq!(
+        produce::<ProjectInfo>("clojure", dir.path()).roots,
+        [ProjectRoot {
+            members: strings(&["lib"]),
+            ..plain(
+                "tools",
+                "clojure",
+                &["deps.edn", "lib/deps.edn"],
+                &["target", ".cpcache"]
+            )
+        }]
+    );
+    assert!(cupel_lang::unregistered_roots(dir.path(), &Exclude::default()).is_empty());
 }
 
 #[test]

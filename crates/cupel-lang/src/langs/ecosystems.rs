@@ -1,5 +1,5 @@
-// ABOUTME: Every build ecosystem Cupel recognizes: the registered languages' and Clojure's, which is
-// ABOUTME: detected but not registered (ADR-038); project-root walks skip them all.
+// ABOUTME: Every build ecosystem Cupel recognizes, whose generated directories project-root walks skip,
+// ABOUTME: and those whose language is detected but not registered, which `init` reports (ADR-038).
 use std::path::Path;
 
 use cupel_core::Exclude;
@@ -7,12 +7,10 @@ use cupel_core::syntax::ProjectRoot;
 
 use crate::project::{Ecosystem, roots};
 
-/// `deps.edn` roots. Clojure is not registered until P6; `init` reports these (ADR-038).
-const CLOJURE: Ecosystem = Ecosystem {
-    manifests: &["deps.edn"],
-    skip_dirs: &["target", ".cpcache"],
-    describe: |candidate| candidate.root("clojure", Vec::new()),
-};
+/// Ecosystems that are recognized but whose language is not registered; `init` reports their
+/// roots rather than configuring them (ADR-038). Every recognized ecosystem's language is
+/// registered, so there are none.
+const UNREGISTERED: [&Ecosystem; 0] = [];
 
 /// Every known ecosystem, whose generated directories every project-root walk skips.
 pub const KNOWN: [&Ecosystem; 6] = [
@@ -21,13 +19,13 @@ pub const KNOWN: [&Ecosystem; 6] = [
     &super::ecma::project::ECOSYSTEM,
     &super::python::project::ECOSYSTEM,
     &super::java::project::ECOSYSTEM,
-    &CLOJURE,
+    &super::clojure::project::ECOSYSTEM,
 ];
 
-/// Roots of languages that are recognized but not registered (Clojure) outside
-/// `exclude`, ordered by path, then language.
+/// Roots of languages that are recognized but not registered outside `exclude`, ordered by
+/// path, then language.
 pub fn unregistered_roots(root: &Path, exclude: &Exclude) -> Vec<ProjectRoot> {
-    let mut roots: Vec<ProjectRoot> = [&CLOJURE]
+    let mut roots: Vec<ProjectRoot> = UNREGISTERED
         .into_iter()
         .flat_map(|ecosystem| roots(root, ecosystem, &KNOWN, exclude))
         .collect();

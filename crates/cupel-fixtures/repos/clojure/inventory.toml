@@ -1,0 +1,325 @@
+# Maps every construct of every conformance inventory (conformance/<fact>.toml) to code in this
+# repository that exhibits it, or marks it not-applicable with a reason.
+
+[symbols.function]
+file = "src/ledger/core.clj"
+name = "ledger.core/balance"
+
+[symbols.method]
+file = "src/ledger/core.clj"
+name = "ledger.core/Account/audit-trail"
+
+[symbols.static-method]
+not-applicable = "Clojure functions belong to namespaces, not types; a record or type has only the protocol and interface methods it implements, which take the instance."
+
+[symbols.nested-function]
+file = "src/ledger/core.clj"
+name = "ledger.core/statement/header"
+
+[symbols.closure]
+file = "src/ledger/core.clj"
+name = "ledger.core/as-json/title"
+
+[symbols.public]
+file = "src/ledger/core.clj"
+name = "ledger.core/balance"
+
+[symbols.internal]
+not-applicable = "A Clojure var is public or private to its namespace (`defn-`, `^:private`); there is no package-level visibility."
+
+[symbols.private]
+file = "src/ledger/core.clj"
+name = "ledger.core/scale"
+
+[symbols.file-namespace]
+file = "src/ledger/report.clj"
+name = "ledger.report/render"
+expect = { namespace = "ledger.report" }
+
+[symbols.parameters]
+file = "src/ledger/complexity.clj"
+name = "ledger.complexity/open-account"
+expect = { parameters = 6 }
+
+[symbols.receiver]
+file = "src/ledger/complexity.clj"
+name = "ledger.complexity/Statement/line"
+expect = { parameters = 1 }
+
+[decisions.if]
+file = "src/ledger/decide.clj"
+name = "ledger.decide/sign"
+
+[decisions.else-if]
+file = "src/ledger/decide.clj"
+name = "ledger.decide/classify"
+expect = { nesting = 0, cognitive = 1 }
+
+[decisions.nested]
+file = "src/ledger/decide.clj"
+name = "ledger.decide/first-overdraft"
+expect = { kind = "branch", nesting = 1 }
+
+[decisions.loop]
+file = "src/ledger/decide.clj"
+name = "ledger.decide/first-overdraft"
+
+[decisions.boolean-op]
+file = "src/ledger/decide.clj"
+name = "ledger.decide/classify"
+
+[decisions.early-return]
+not-applicable = "Clojure has no return statement: a function's value is its last form, and `recur` loops rather than returns."
+
+[decisions.case]
+file = "src/ledger/decide.clj"
+name = "ledger.decide/describe"
+
+[decisions.ternary]
+not-applicable = "Clojure has no conditional operator; `if` is itself an expression and is a branch."
+
+[decisions.catch]
+file = "src/ledger/decide.clj"
+name = "ledger.decide/parse-cents"
+
+[norm-tree.rename]
+file = "src/ledger/twins.clj"
+name = "ledger.twins/net-total"
+twin = "ledger.twins/sum-after-charge"
+
+[norm-tree.literal]
+file = "src/ledger/twins.clj"
+name = "ledger.twins/net-total"
+twin = "ledger.twins/net-total-floor"
+
+[norm-tree.layout]
+file = "src/ledger/twins.clj"
+name = "ledger.twins/net-total"
+twin = "ledger.twins/net-total-laid-out"
+
+[norm-tree.operator]
+file = "src/ledger/twins.clj"
+name = "ledger.twins/net-total"
+twin = "ledger.twins/net-total-plus"
+
+[norm-tree.branch]
+file = "src/ledger/twins.clj"
+name = "ledger.twins/net-total"
+twin = "ledger.twins/net-total-capped"
+
+[norm-tree.call]
+file = "src/ledger/twins.clj"
+name = "ledger.twins/net-total"
+twin = "ledger.twins/net-total-product"
+
+[mutation-sites.relational]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/tally"
+expect = { from = "<", to = ["<="] }
+
+[mutation-sites.equality]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/discounted"
+expect = { from = "not=", to = ["="] }
+
+[mutation-sites.arith-add-sub]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/discounted"
+expect = { from = "-", to = ["+"] }
+
+[mutation-sites.arith-mul-div]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/discounted"
+expect = { from = "/", to = ["*"] }
+
+[mutation-sites.boolean-op]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/discounted"
+expect = { from = "and", to = ["or"] }
+
+[mutation-sites.boolean-literal]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/tally"
+expect = { from = "false", to = ["true"] }
+
+[mutation-sites.zero-one]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/tally"
+expect = { from = "0", to = ["1"] }
+
+[mutation-sites.statement-deletion]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/tally"
+expect = { from = "(log-total total)", to = [""] }
+
+[mutation-sites.return-value]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/mail"
+expect = { from = "(notifier (:owner account) (str (:cents account)))", to = ["nil"] }
+
+[mutation-sites.constant]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/discounted"
+expect = { from = "100", to = ["0"] }
+
+[mutation-sites.boundary]
+file = "src/ledger/decide.clj"
+name = "ledger.decide/classify"
+expect = { from = "0", to = ["(inc 0)", "(dec 0)"] }
+
+[mutation-sites.negation]
+file = "src/ledger/pricing.clj"
+name = "ledger.pricing/discounted"
+expect = { from = "(and member (not= cut 0))", to = ["(not (and member (not= cut 0)))"] }
+
+[test-frames.case]
+file = "test/ledger/core_test.clj"
+name = "deposit-adds-to-the-balance"
+
+[test-frames.assertion-equality]
+file = "test/ledger/core_test.clj"
+name = "deposit-adds-to-the-balance"
+
+[test-frames.assertion-truthiness]
+file = "test/ledger/core_test.clj"
+name = "members-get-a-discount"
+
+[test-frames.assertion-not-null]
+file = "test/ledger/core_test.clj"
+name = "new-accounts-are-registered"
+
+[test-frames.assertion-throws]
+file = "test/ledger/pricing_test.clj"
+name = "parse-cents-rejects-blanks"
+
+[test-frames.assertion-snapshot]
+not-applicable = "clojure.test has no snapshot assertion, and no snapshot library is in common use with it."
+
+[test-frames.weak-assertion]
+file = "test/ledger/core_test.clj"
+name = "new-accounts-have-distinct-ids"
+expect = { kind = "equality" }
+
+[test-frames.no-assertion]
+file = "test/ledger/core_test.clj"
+name = "opening-an-account-does-not-throw"
+
+[test-frames.skip]
+not-applicable = "clojure.test has no skip marker: a test is left out by not loading its namespace or by a test runner's own selectors."
+
+[test-frames.mock]
+file = "test/ledger/pricing_test.clj"
+name = "mail-notifies-the-owner"
+expect = { target = "pricing/log-total" }
+
+[test-frames.setup]
+file = "test/ledger/core_test.clj"
+
+[test-frames.framework]
+file = "test/ledger/core_test.clj"
+expect = { framework = "clojure-test" }
+
+[test-frames.property]
+file = "test/ledger/property_test.clj"
+name = "balance-of-one-entry-is-the-entry"
+expect = { property = "test-check" }
+
+[test-conventions.separate-test-file]
+file = "src/ledger/core.clj"
+name = "test/ledger/core_test.clj"
+
+[test-conventions.inline-tests]
+not-applicable = "Clojure's test runners load test namespaces from the test paths; `with-test` metadata is rare and runs only where those namespaces load."
+
+[module-graph.relative]
+not-applicable = "Clojure requires namespaces by name; `load` of a relative path is not a dependency declaration."
+
+[module-graph.absolute]
+file = "src/ledger/core.clj"
+name = "ledger.report"
+expect = { relative = false, target = { path = "src/ledger/report.clj" } }
+
+[module-graph.workspace-member]
+file = "src/ledger/core.clj"
+name = "shapes.geometry"
+expect = { target = { path = "shapes/src/shapes/geometry.clj" } }
+
+[module-graph.external]
+file = "src/ledger/core.clj"
+name = "cheshire.core"
+expect = { target = { package = "cheshire.core" } }
+
+[module-graph.standard-library]
+file = "src/ledger/core.clj"
+name = "clojure.string"
+expect = { target = { package = "clojure" } }
+
+[module-graph.unresolved]
+file = "src/ledger/core.clj"
+name = "ledger.gen"
+
+[module-graph.declaration]
+not-applicable = "Clojure declares no child namespaces in source: a namespace is a file, and every file names its namespace in its `ns` form."
+
+[module-graph.re-export]
+not-applicable = "A required namespace's vars are reachable only through that namespace; Clojure has no re-export."
+
+[api-surface.function]
+file = "src/ledger/core.clj"
+name = "ledger.core/balance"
+expect = { signature = "[_]" }
+
+[api-surface.method]
+file = "src/ledger/core.clj"
+name = "ledger.core/Audited/audit-trail"
+expect = { signature = "[_]" }
+
+[api-surface.type]
+file = "src/ledger/core.clj"
+name = "ledger.core/Account"
+
+[api-surface.interface]
+file = "src/ledger/core.clj"
+name = "ledger.core/Audited"
+
+[api-surface.constant]
+file = "src/ledger/core.clj"
+name = "ledger.core/max-entries"
+
+[api-surface.variable]
+file = "src/ledger/core.clj"
+name = "ledger.core/currency"
+
+[api-surface.module]
+not-applicable = "The `ns` form names the namespace of the vars defined after it, as Go's package clause does, rather than declaring an item; a namespace's API is its public vars."
+
+[roots.entry-point]
+file = "src/ledger/main.clj"
+name = "ledger.main/-main"
+
+[roots.export]
+file = "src/ledger/core.clj"
+name = "ledger.core/balance"
+
+[roots.test]
+file = "test/ledger/core_test.clj"
+name = "ledger.core-test/deposit-adds-to-the-balance"
+
+[roots.hook]
+file = "src/ledger/core.clj"
+name = "ledger.core/Account/audit-trail"
+
+[project-info.manifest-root]
+file = "."
+expect = { lang = "clojure", build_files = ["deps.edn", "shapes/deps.edn"] }
+
+[project-info.workspace-member]
+file = "."
+expect = { members = ["shapes"] }
+
+[project-info.generated-dirs]
+file = "."
+expect = { skip_dirs = ["target", ".cpcache"] }
+
+[project-info.packages]
+not-applicable = "The Clojure CLI runs by alias and namespace, not by path patterns."

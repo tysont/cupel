@@ -33,6 +33,7 @@ fn the_compiled_in_languages_are_registered_with_their_families() {
     assert_eq!(
         languages,
         [
+            ("clojure", "clojure"),
             ("go", "go"),
             ("java", "java"),
             ("javascript", "ecma"),
@@ -70,7 +71,12 @@ fn every_extension_maps_to_exactly_one_language() {
         ("cmd/main.go", "go"),
         ("pkg/mod.py", "python"),
         ("src/main/java/a/A.java", "java"),
+        ("src/a/core.clj", "clojure"),
+        ("src/a/shared.cljc", "clojure"),
     ];
+    for path in ["src/a/core.cljs", "deps.edn"] {
+        assert!(registry.for_path(path).is_none(), "{path}");
+    }
     for (path, id) in cases {
         let language = registry.for_path(path).unwrap_or_else(|| panic!("{path}"));
         assert_eq!(language.id().as_str(), id, "{path}");
@@ -86,8 +92,8 @@ fn every_extension_maps_to_exactly_one_language() {
     assert_eq!(
         extensions,
         [
-            ".cjs", ".cts", ".go", ".java", ".js", ".jsx", ".mjs", ".mts", ".py", ".rs", ".ts",
-            ".tsx"
+            ".cjs", ".clj", ".cljc", ".cts", ".go", ".java", ".js", ".jsx", ".mjs", ".mts", ".py",
+            ".rs", ".ts", ".tsx"
         ],
         "each extension is claimed once"
     );

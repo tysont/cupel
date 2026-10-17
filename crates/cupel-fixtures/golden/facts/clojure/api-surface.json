@@ -1,0 +1,712 @@
+{
+  "items": [
+    {
+      "file": "shapes/src/shapes/geometry.clj",
+      "kind": "function",
+      "path": "shapes.geometry/square",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 7,
+        "line": 4
+      }
+    },
+    {
+      "file": "shapes/src/shapes/geometry.clj",
+      "kind": "interface",
+      "path": "shapes.geometry/Figure",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 10,
+        "line": 9
+      }
+    },
+    {
+      "file": "shapes/src/shapes/geometry.clj",
+      "kind": "method",
+      "path": "shapes.geometry/Figure/area",
+      "signature": "[_]",
+      "span": {
+        "col": 3,
+        "end_col": 18,
+        "end_line": 10,
+        "line": 10
+      }
+    },
+    {
+      "file": "shapes/src/shapes/geometry.clj",
+      "kind": "type",
+      "path": "shapes.geometry/Circle",
+      "signature": "[radius]",
+      "span": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 15,
+        "line": 12
+      }
+    },
+    {
+      "file": "src/ledger/clones_settlement.clj",
+      "kind": "function",
+      "path": "ledger.clones-settlement/settle-invoices",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 11,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/clones_settlement.clj",
+      "kind": "function",
+      "path": "ledger.clones-settlement/reconcile-payments",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 20,
+        "line": 13
+      }
+    },
+    {
+      "file": "src/ledger/clones_settlement.clj",
+      "kind": "function",
+      "path": "ledger.clones-settlement/order-lines",
+      "signature": "[_ _ _]",
+      "span": {
+        "col": 1,
+        "end_col": 39,
+        "end_line": 29,
+        "line": 22
+      }
+    },
+    {
+      "file": "src/ledger/clones_settlement.clj",
+      "kind": "function",
+      "path": "ledger.clones-settlement/refund-lines",
+      "signature": "[_ _ _]",
+      "span": {
+        "col": 1,
+        "end_col": 45,
+        "end_line": 39,
+        "line": 31
+      }
+    },
+    {
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "path": "ledger.complexity/label",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 18,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "path": "ledger.complexity/settle",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 30,
+        "line": 20
+      }
+    },
+    {
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "path": "ledger.complexity/open-account",
+      "signature": "[_ _ _ _ _ _]",
+      "span": {
+        "col": 1,
+        "end_col": 77,
+        "end_line": 35,
+        "line": 32
+      }
+    },
+    {
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "path": "ledger.complexity/statement-template",
+      "signature": "[]",
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 100,
+        "line": 37
+      }
+    },
+    {
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "path": "ledger.complexity/net",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 22,
+        "end_line": 105,
+        "line": 102
+      }
+    },
+    {
+      "file": "src/ledger/complexity.clj",
+      "kind": "type",
+      "path": "ledger.complexity/Statement",
+      "signature": "[owner]",
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 107,
+        "line": 107
+      }
+    },
+    {
+      "file": "src/ledger/complexity.clj",
+      "kind": "interface",
+      "path": "ledger.complexity/Printed",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 110,
+        "line": 109
+      }
+    },
+    {
+      "file": "src/ledger/complexity.clj",
+      "kind": "method",
+      "path": "ledger.complexity/Printed/line",
+      "signature": "[_ _]",
+      "span": {
+        "col": 3,
+        "end_col": 28,
+        "end_line": 110,
+        "line": 110
+      }
+    },
+    {
+      "file": "src/ledger/complexity.clj",
+      "kind": "function",
+      "path": "ledger.complexity/month",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 133,
+        "line": 117
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "constant",
+      "path": "ledger.core/max-entries",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 7,
+        "end_line": 12,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "variable",
+      "path": "ledger.core/currency",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 9,
+        "end_line": 16,
+        "line": 14
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "variable",
+      "path": "ledger.core/registry",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 25,
+        "end_line": 18,
+        "line": 18
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "interface",
+      "path": "ledger.core/Audited",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 27,
+        "end_line": 21,
+        "line": 20
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "method",
+      "path": "ledger.core/Audited/audit-trail",
+      "signature": "[_]",
+      "span": {
+        "col": 3,
+        "end_col": 26,
+        "end_line": 21,
+        "line": 21
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "type",
+      "path": "ledger.core/Account",
+      "signature": "[id owner cents]",
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 26,
+        "line": 23
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "path": "ledger.core/open-account",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 14,
+        "end_line": 33,
+        "line": 28
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "path": "ledger.core/deposit",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 35,
+        "end_line": 38,
+        "line": 35
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "path": "ledger.core/balance",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 46,
+        "line": 43
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "path": "ledger.core/floor-area",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 51,
+        "line": 48
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "path": "ledger.core/statement",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 76,
+        "end_line": 58,
+        "line": 53
+      }
+    },
+    {
+      "file": "src/ledger/core.clj",
+      "kind": "function",
+      "path": "ledger.core/as-json",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 77,
+        "end_line": 64,
+        "line": 60
+      }
+    },
+    {
+      "file": "src/ledger/dead_export.clj",
+      "kind": "function",
+      "path": "ledger.dead-export/unused-total",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 7,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "path": "ledger.decide/classify",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 20,
+        "end_line": 8,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "path": "ledger.decide/first-overdraft",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 15,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "path": "ledger.decide/parse-cents",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 24,
+        "line": 17
+      }
+    },
+    {
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "path": "ledger.decide/describe",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 30,
+        "line": 26
+      }
+    },
+    {
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "path": "ledger.decide/sign",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 33,
+        "line": 32
+      }
+    },
+    {
+      "file": "src/ledger/decide.clj",
+      "kind": "function",
+      "path": "ledger.decide/drain",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 39,
+        "line": 35
+      }
+    },
+    {
+      "file": "src/ledger/deps_cycle/alpha.clj",
+      "kind": "function",
+      "path": "ledger.deps-cycle.alpha/alpha",
+      "signature": "[]",
+      "span": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 8,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/ledger/deps_cycle/beta.clj",
+      "kind": "function",
+      "path": "ledger.deps-cycle.beta/beta",
+      "signature": "[]",
+      "span": {
+        "col": 1,
+        "end_col": 5,
+        "end_line": 8,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/ledger/deps_cycle/beta.clj",
+      "kind": "function",
+      "path": "ledger.deps-cycle.beta/both",
+      "signature": "[]",
+      "span": {
+        "col": 1,
+        "end_col": 26,
+        "end_line": 13,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/ledger/deps_layers/domain/order.clj",
+      "kind": "function",
+      "path": "ledger.deps-layers.domain.order/rows",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 31,
+        "end_line": 8,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/ledger/deps_layers/infra/store.clj",
+      "kind": "function",
+      "path": "ledger.deps-layers.infra.store/rows",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 7,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/deps_layers/port/port.clj",
+      "kind": "interface",
+      "path": "ledger.deps-layers.port.port/Port",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 24,
+        "end_line": 6,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/ledger/deps_layers/port/port.clj",
+      "kind": "method",
+      "path": "ledger.deps-layers.port.port/Port/place",
+      "signature": "[_ _]",
+      "span": {
+        "col": 3,
+        "end_col": 23,
+        "end_line": 6,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/ledger/deps_layers/port/port.clj",
+      "kind": "variable",
+      "path": "ledger.deps-layers.port.port/placed-rows",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 29,
+        "end_line": 8,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/ledger/main.clj",
+      "kind": "function",
+      "path": "ledger.main/-main",
+      "signature": "[&_]",
+      "span": {
+        "col": 1,
+        "end_col": 41,
+        "end_line": 13,
+        "line": 11
+      }
+    },
+    {
+      "file": "src/ledger/pricing.clj",
+      "kind": "function",
+      "path": "ledger.pricing/discounted",
+      "signature": "[_ _ _]",
+      "span": {
+        "col": 1,
+        "end_col": 15,
+        "end_line": 8,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/pricing.clj",
+      "kind": "function",
+      "path": "ledger.pricing/log-total",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 27,
+        "end_line": 11,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/ledger/pricing.clj",
+      "kind": "function",
+      "path": "ledger.pricing/tally",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 42,
+        "end_line": 17,
+        "line": 13
+      }
+    },
+    {
+      "file": "src/ledger/pricing.clj",
+      "kind": "function",
+      "path": "ledger.pricing/mail",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 54,
+        "end_line": 22,
+        "line": 19
+      }
+    },
+    {
+      "file": "src/ledger/report.clj",
+      "kind": "function",
+      "path": "ledger.report/render",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 55,
+        "end_line": 7,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "path": "ledger.twins/sum",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 22,
+        "end_line": 5,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "path": "ledger.twins/product",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 22,
+        "end_line": 8,
+        "line": 7
+      }
+    },
+    {
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "path": "ledger.twins/net-total",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 14,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "path": "ledger.twins/sum-after-charge",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 20,
+        "line": 16
+      }
+    },
+    {
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "path": "ledger.twins/net-total-floor",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 13,
+        "end_line": 26,
+        "line": 22
+      }
+    },
+    {
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "path": "ledger.twins/net-total-laid-out",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 35,
+        "line": 28
+      }
+    },
+    {
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "path": "ledger.twins/net-total-plus",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 41,
+        "line": 37
+      }
+    },
+    {
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "path": "ledger.twins/net-total-capped",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 35,
+        "end_line": 47,
+        "line": 43
+      }
+    },
+    {
+      "file": "src/ledger/twins.clj",
+      "kind": "function",
+      "path": "ledger.twins/net-total-product",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 53,
+        "line": 49
+      }
+    }
+  ]
+}
