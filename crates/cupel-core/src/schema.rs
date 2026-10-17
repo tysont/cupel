@@ -28,6 +28,7 @@ use crate::syntax::{
     TestConventions, TestFrames,
 };
 use crate::test_results::TestResults;
+use crate::trace::Traces;
 
 /// Every published schema's `$id` starts with this.
 pub const BASE_URL: &str = "https://cupel.dev/schema/v1/";
@@ -85,7 +86,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 23] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 24] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -112,6 +113,7 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 23] = [
     ),
     (FactKind::RelationResults, fact_schema::<RelationResults>),
     (FactKind::Footprint, fact_schema::<Footprint>),
+    (FactKind::Traces, fact_schema::<Traces>),
 ];
 
 /// The payload version of a fact kind, or `None` for a kind without a payload type.

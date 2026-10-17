@@ -2,7 +2,8 @@
 // ABOUTME: every construct of that fact's inventory, and its producer detects each mapped construct.
 use cupel_core::{FactKind, LangId};
 use cupel_fixtures::conformance::{
-    FactInventory, Failure, LanguageInventory, check_language, fact_inventories, run_language,
+    EXECUTION, FactInventory, Failure, LanguageInventory, check_language, fact_inventories,
+    fact_inventory, run_language, unexhibited,
 };
 use cupel_lang::LanguageRegistry;
 use serde_json::json;
@@ -37,15 +38,72 @@ fn every_registered_language_has_a_fixture_repository_and_inventory() {
 }
 
 #[test]
-fn every_fact_inventory_loads_and_names_a_syntactic_fact() {
+fn every_fact_inventory_loads_and_names_a_syntactic_fact_or_an_execution_fact() {
     for inventory in fact_inventories() {
         assert!(
-            FactKind::SYNTACTIC.contains(&inventory.fact),
+            FactKind::SYNTACTIC.contains(&inventory.fact) || EXECUTION.contains(&inventory.fact),
             "{}",
             inventory.fact
         );
         assert!(!inventory.constructs.is_empty(), "{}", inventory.fact);
     }
+}
+
+#[test]
+fn every_execution_fact_with_conformance_has_its_inventory() {
+    for kind in EXECUTION {
+        assert_eq!(fact_inventory(kind).fact, kind);
+    }
+}
+
+#[test]
+fn an_execution_fact_exhibits_each_construct_or_gives_a_reason() {
+    let facts = inventory(
+        "traces",
+        r#"
+        [[constructs]]
+        id = "conforms"
+        summary = "A trace the spec allows."
+        within = "traces"
+        expect = { status = "conforms" }
+
+        [[constructs]]
+        id = "diverged"
+        summary = "A trace the spec does not allow."
+        within = "traces"
+        expect = { status = "diverged", divergence = { step = 1 } }
+
+        [[constructs]]
+        id = "failed"
+        summary = "A trace that cannot be validated."
+        within = "traces"
+        expect = { status = "failed" }
+        "#,
+    );
+    let fact = json!({ "traces": [
+        { "name": "a.jsonl", "status": "conforms" },
+        { "name": "b.jsonl", "status": "diverged", "divergence": { "step": 2 } },
+    ] });
+
+    let failures = unexhibited(&facts, &fact, &[("failed", "The tool reads every trace.")]);
+
+    assert!(
+        matches!(failures.as_slice(), [Failure::NotDetected { construct, .. }] if construct == "diverged"),
+        "{failures:?}"
+    );
+    let failures = unexhibited(&facts, &fact, &[("failed", " "), ("misspelled", "A reason.")]);
+    let constructs: Vec<&str> = failures
+        .iter()
+        .filter_map(|failure| match failure {
+            Failure::NotDetected { construct, .. } => Some(construct.as_str()),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(constructs, ["diverged", "failed"], "{failures:?}");
+    assert!(
+        matches!(&failures[0], Failure::Unknown { what } if what == "construct `traces.misspelled`"),
+        "{failures:?}"
+    );
 }
 
 fn inventory(fact: &str, constructs: &str) -> FactInventory {

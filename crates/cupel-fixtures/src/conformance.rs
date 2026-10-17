@@ -51,6 +51,11 @@
 //! A construct a language cannot exhibit is mapped to `not-applicable = "<reason>"`. Facts a
 //! language has no producer for are not checked, so their mappings may be absent. An unmapped
 //! construct, a mapping to an unknown fact or construct, and an undetected construct all fail.
+//!
+//! An inventory may also name an **execution fact** ([`EXECUTION`]), which tools make rather
+//! than languages. Nothing maps it per language: each tool producer's tests make the fact from
+//! the producer's conformance input and check it with [`unexhibited`], naming the constructs the
+//! tool cannot exhibit with their reasons.
 use std::collections::BTreeMap;
 use std::fmt;
 use std::fs;
@@ -435,6 +440,70 @@ fn symbol_key(symbol: &Value) -> Value {
         "line": symbol.pointer("/span/line"),
         "col": symbol.pointer("/span/col"),
     })
+}
+
+/// Execution facts whose inventories their tool producers' tests check with [`unexhibited`]
+/// (ADR-116): no language exhibits these constructs, the tool does, so each producer makes the
+/// fact from its own conformance input (a fixture its real tool runs on, or its captured output).
+pub const EXECUTION: [FactKind; 1] = [FactKind::Traces];
+
+/// `conformance/<kind>.toml`.
+///
+/// # Panics
+///
+/// When the kind has no inventory.
+pub fn fact_inventory(kind: FactKind) -> FactInventory {
+    fact_inventories()
+        .into_iter()
+        .find(|inventory| inventory.fact == kind)
+        .unwrap_or_else(|| panic!("conformance/{kind}.toml is missing"))
+}
+
+/// The constructs of an execution fact's `inventory` that `value`, a fact a producer made, does
+/// not exhibit: no item of the construct's `within` list (or the fact itself) contains its
+/// `expect`. A construct the producer cannot exhibit is listed in `not_applicable` with its
+/// reason; one listed with an empty reason must be exhibited, and one the inventory does not
+/// have is a failure.
+pub fn unexhibited(
+    inventory: &FactInventory,
+    value: &Value,
+    not_applicable: &[(&str, &str)],
+) -> Vec<Failure> {
+    let fact = inventory.fact;
+    let mut failures: Vec<Failure> = not_applicable
+        .iter()
+        .filter(|(construct, _)| inventory.construct(construct).is_none())
+        .map(|(construct, _)| Failure::Unknown {
+            what: format!("construct `{fact}.{construct}`"),
+        })
+        .collect();
+    let excused = |id: &str| {
+        not_applicable
+            .iter()
+            .any(|(construct, reason)| *construct == id && !reason.trim().is_empty())
+    };
+    for construct in inventory.constructs.iter().filter(|c| !excused(&c.id)) {
+        let expect = Value::Object(construct.expect.clone().unwrap_or_default());
+        let items: Vec<&Value> = match &construct.within {
+            Some(field) => value
+                .get(field)
+                .and_then(Value::as_array)
+                .map(|items| items.iter().collect())
+                .unwrap_or_default(),
+            None => vec![value],
+        };
+        if !items.iter().any(|item| contains(item, &expect)) {
+            failures.push(Failure::NotDetected {
+                fact,
+                construct: construct.id.clone(),
+                reason: format!(
+                    "no {} matches {expect}",
+                    construct.within.as_deref().unwrap_or("fact")
+                ),
+            });
+        }
+    }
+    failures
 }
 
 /// Whether `actual` contains `expected`: objects key by key, recursively; anything else exactly.

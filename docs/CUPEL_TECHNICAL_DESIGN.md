@@ -603,6 +603,7 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `AnalyzerReport` | per analyzer: ran, missing, unconfigured, or failed; its results normalized to SARIF's rule, level, message, location (ADR-102) | linter/type-checker tool | `static.analyze` |
 | `DivergenceResults` | per generated input: both outputs, minimized | differential engine | `gen.differential`, `gen.metamorphic` |
 | `Footprint` | dependencies from lockfiles and manifests (name, version, direct, license, where listed), whether licenses were read, OSV vulnerabilities and artifact sizes when configured, the range's base dependencies; read offline (ADR-103) | lockfile readers | `perf.footprint` |
+| `Traces` | the traces a test run recorded through the logging convention (JSON lines in `CUPEL_TRACE_DIR`), each validated against the run's spec oracle: conforms, diverged (the step, the action and state logged there, the last state the spec allows, where it was logged), or failed with the reason; the spec validated against (ADR-116) | trace validator tool | `spec.trace` |
 
 P7 adds `Traces`, `Histories`, `ProofResults`, `ContractViolations` under the same rules. Facts carry completeness flags rather than languages carrying capability flags: a `CoverageMap` with `branches: None` makes `tests.coverage` skip branch findings with that reason; whether a language has a per-test map is simply whether a `PerTestMap` producer is registered for it.
 

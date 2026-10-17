@@ -57,6 +57,7 @@ mod status;
 mod suppression;
 pub mod syntax;
 mod test_results;
+mod trace;
 mod writer;
 
 pub use actions::{NEXT_ACTIONS, next_actions};
@@ -130,4 +131,5 @@ pub use test_results::{
     OUTPUT_TAIL_LINES, RunnerInvocation, TestOutcome, TestResult, TestResults, Unevaluable,
     names_case, output_tail,
 };
+pub use trace::{Trace, TraceDivergence, TraceSpec, TraceStatus, Traces};
 pub use writer::{WriteError, Writer};

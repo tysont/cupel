@@ -1,0 +1,27 @@
+# ABOUTME: Conformance inventory for the `traces` fact: how a validator's verdicts on recorded traces must read.
+# ABOUTME: An execution fact: each Traces producer's tests check its own fact against it (ADR-116).
+fact = "traces"
+
+[[constructs]]
+id = "conforms"
+summary = "A trace every step of which the spec allows conforms, with no divergence."
+within = "traces"
+expect = { status = "conforms" }
+
+[[constructs]]
+id = "diverged"
+summary = "A trace a later step of which the spec does not allow is diverged, with that step's state and the last allowed one."
+within = "traces"
+expect = { status = "diverged" }
+
+[[constructs]]
+id = "diverged-at-start"
+summary = "A trace whose first state is not an initial state of the spec diverges at step 1, with no previous state."
+within = "traces"
+expect = { status = "diverged", divergence = { step = 1 } }
+
+[[constructs]]
+id = "unreadable"
+summary = "A trace that is not JSON lines of logged states fails, with the reason, and no divergence."
+within = "traces"
+expect = { status = "failed" }
