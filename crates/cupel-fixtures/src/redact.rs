@@ -1,4 +1,4 @@
-// ABOUTME: Redaction of the envelope fields that vary between identical runs (ADR-003 §2),
+// ABOUTME: Redaction of the envelope fields that vary between identical runs (ADR-003 §2, and an oracle's verification),
 // ABOUTME: replacing each present value with a placeholder string and leaving nulls alone.
 use std::path::Path;
 
@@ -52,6 +52,12 @@ pub fn redact(envelope: &Envelope, root: &Path) -> Value {
     if let Some(Value::Object(tools)) = value.pointer_mut("/run/toolchain") {
         for version in tools.values_mut() {
             *version = VERSION.into();
+        }
+    }
+    if let Some(Value::Array(oracles)) = value.get_mut("oracles") {
+        for oracle in oracles {
+            mask(oracle, "/verified_at", TIMESTAMP);
+            mask(oracle, "/verified_run", RUN_ID);
         }
     }
     mask_durations(&mut value);

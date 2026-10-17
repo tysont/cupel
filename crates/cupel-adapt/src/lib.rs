@@ -61,6 +61,7 @@
 mod cargo_nextest;
 mod cargo_test;
 pub mod coverage;
+pub mod differential;
 pub mod flake;
 mod fresh;
 mod go_test;

@@ -94,10 +94,7 @@ impl Registries {
     /// When the fixture's `cupel.toml` does not parse, or a plugin it names cannot be used.
     pub fn of_fixture(fixture: &str) -> Option<Self> {
         let root = repo_path(fixture);
-        let config = root.join("cupel.toml");
-        let text = fs::read_to_string(&config).ok()?;
-        let file = ConfigFile::parse(&text, &config)
-            .unwrap_or_else(|error| panic!("fixture {fixture}: {error}"));
+        let file = fixture_config(fixture)?;
         if file.plugins.is_empty() || !programs_installed(&file, fixture) {
             return None;
         }
@@ -193,7 +190,8 @@ impl Registries {
         pairs
     }
 
-    /// The support matrix in the fixture repository `fixture`, with its plugins.
+    /// The support matrix in the fixture repository `fixture`, with its plugins and its
+    /// `[lang.*]` tables (ADR-094 §7).
     fn matrix_in(&self, fixture: &str) -> SupportMatrix {
         let ctx = fixture_ctx(fixture);
         let langs = self.languages.langs();
@@ -239,20 +237,25 @@ impl Registries {
     }
 }
 
-/// What a producer of the fixture repository `fixture` sees when reporting whether it can run:
-/// the repository and its `cupel.toml`'s `[lang.<id>]` tables, as in a run there (a producer
-/// configured by them, such as the metamorphic engine, ADR-097, is available only with them).
+/// The fixture `fixture`'s configuration, when it has a `cupel.toml`.
 ///
 /// # Panics
 ///
 /// When the fixture's `cupel.toml` does not parse.
+fn fixture_config(fixture: &str) -> Option<ConfigFile> {
+    let config = repo_path(fixture).join("cupel.toml");
+    let text = fs::read_to_string(&config).ok()?;
+    Some(
+        ConfigFile::parse(&text, &config)
+            .unwrap_or_else(|error| panic!("fixture {fixture}: {error}")),
+    )
+}
+
+/// What a producer sees in the fixture `fixture`: its root and its `[lang.*]` tables, as a run
+/// there would (support is per repository, ADR-079, ADR-094 §7).
 fn fixture_ctx(fixture: &str) -> Ctx {
-    let root = repo_path(fixture);
-    let config = root.join("cupel.toml");
-    let mut ctx = Ctx::new(root);
-    if let Ok(text) = fs::read_to_string(&config) {
-        let file = ConfigFile::parse(&text, &config)
-            .unwrap_or_else(|error| panic!("fixture {fixture}: {error}"));
+    let mut ctx = Ctx::new(repo_path(fixture));
+    if let Some(file) = fixture_config(fixture) {
         ctx.lang = file.lang;
     }
     ctx
@@ -298,6 +301,7 @@ fn run_on_fixture(
 ) -> Result<(Envelope, std::path::PathBuf, tempfile::TempDir), String> {
     let dir = tempfile::tempdir().map_err(|error| error.to_string())?;
     copy_repo(&pair.fixture(), dir.path());
+    verify_oracles(&pair.fixture(), dir.path())?;
     let outcome = run_cupel(
         &[
             "check",
@@ -322,6 +326,23 @@ fn run_on_fixture(
         ));
     }
     Ok((envelope, outcome.cwd, dir))
+}
+
+/// Verifies the oracles of a fixture that defines any, in its copy at `dir`, so its golden is
+/// the result against a verified oracle (ADR-094 §7).
+fn verify_oracles(fixture: &str, dir: &Path) -> Result<(), String> {
+    if fixture_config(fixture).is_none_or(|file| file.oracles.is_empty()) {
+        return Ok(());
+    }
+    let outcome = run_cupel(&["oracle", "verify", "--all", "--format", "json"], dir);
+    if outcome.code == Some(0) {
+        Ok(())
+    } else {
+        Err(format!(
+            "oracle verify --all exited {:?}: {}",
+            outcome.code, outcome.stdout
+        ))
+    }
 }
 
 /// A supported pair runs and matches its golden. A check that reads a range's base side

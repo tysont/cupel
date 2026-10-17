@@ -207,3 +207,29 @@ fn a_filesystem_root_is_never_treated_as_the_repository_root() {
         &json!("/nowhere/src/lib.rs")
     );
 }
+
+#[test]
+fn an_oracles_verification_time_and_run_are_redacted_and_an_unverified_ones_stay_null() {
+    let mut value = serde_json::to_value(volatile_envelope("/nowhere", "/nowhere")).unwrap();
+    let definition =
+        json!({"kind": "ref", "ref": "v1", "cmd": null, "spec": null, "lang": null, "inputs": []});
+    value["oracles"] = json!([
+        {"name": "release", "definition": definition, "state": "verified", "hash": "ab12",
+         "verified_at": "1999-12-31T23:59:59Z", "verified_run": "run_01ARZ3NDEKTSV4RRFFQ69G5FAV"},
+        {"name": "next", "definition": definition, "state": "unverified", "hash": "cd34",
+         "verified_at": null, "verified_run": null},
+    ]);
+    let envelope: Envelope = serde_json::from_value(value).unwrap();
+
+    let redacted = redact(&envelope, Path::new("/nowhere"));
+
+    assert_eq!(
+        (
+            pointer(&redacted, "/oracles/0/verified_at"),
+            pointer(&redacted, "/oracles/0/verified_run"),
+            pointer(&redacted, "/oracles/0/hash"),
+        ),
+        (&json!("<timestamp>"), &json!("<run-id>"), &json!("ab12"))
+    );
+    assert_eq!(pointer(&redacted, "/oracles/1/verified_run"), &Value::Null);
+}

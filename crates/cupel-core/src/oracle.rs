@@ -26,6 +26,13 @@ pub fn oracle_content_digest(bytes: &[u8]) -> String {
     blake3::hash(bytes).to_hex().to_string()
 }
 
+/// The oracle a run compares against (ADR-091 §2), handed to producers (ADR-093 §2).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RunOracle {
+    pub name: String,
+    pub definition: OracleConfig,
+}
+
 /// Whether an oracle's recorded verification holds now.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "kebab-case")]

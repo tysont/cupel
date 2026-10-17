@@ -129,8 +129,9 @@ fn job<'a>(
         seed: invocation.run.seed,
         depth: config.effective.depth,
         changed: None,
-        cases: None,
         resources: cupel_core::budget::Resources::default(),
+        oracle: None,
+        cases: None,
     }
 }
 

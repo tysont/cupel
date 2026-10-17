@@ -21,6 +21,7 @@ use crate::joint::Deciding;
 use crate::lang::Lang;
 use crate::matrix::{Support, SupportMatrix};
 use crate::mutation::MutationOutcomes;
+use crate::oracle::RunOracle;
 use crate::producer::{
     Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, SharedFact, Upstream,
 };
@@ -63,10 +64,12 @@ pub struct Job<'a> {
     pub depth: CostClass,
     /// The lines a range scope changed, per file; `None` without a range (ADR-080).
     pub changed: Option<ChangedLines>,
-    /// The case budget of generative producers (`--cases`), handed to every producer (ADR-098).
-    pub cases: Option<u64>,
     /// The run's budget, concurrency cap, and the store's history of durations (ADR-086).
     pub resources: Resources,
+    /// The oracle the run's checks compare against, handed to every producer (ADR-093 §2).
+    pub oracle: Option<RunOracle>,
+    /// `--cases`, handed to every producer (ADR-094 §5, ADR-098).
+    pub cases: Option<u64>,
 }
 
 /// What a run (or a dry run's planning) produced.
@@ -942,10 +945,10 @@ struct FactStore<'a> {
     joints_run: HashSet<(String, LangId)>,
     /// How many processes or threads producers may run at once (`--jobs`).
     jobs: Option<NonZeroUsize>,
-    /// The case budget of generative producers (`--cases`).
-    cases: Option<u64>,
     /// How long each production took, for the store's history (ADR-086 §2).
     durations: Vec<TaskDuration>,
+    oracle: Option<RunOracle>,
+    cases: Option<u64>,
 }
 
 impl<'a> FactStore<'a> {
@@ -995,8 +998,9 @@ impl<'a> FactStore<'a> {
             reached: HashMap::new(),
             joints_run: HashSet::new(),
             jobs: job.resources.jobs,
-            cases: job.cases,
             durations: Vec::new(),
+            oracle: job.oracle.clone(),
+            cases: job.cases,
         }
     }
 
@@ -1177,6 +1181,7 @@ impl<'a> FactStore<'a> {
                 jobs: self.jobs,
                 cases: self.cases,
             },
+            oracle: self.oracle.clone(),
         }
     }
 
