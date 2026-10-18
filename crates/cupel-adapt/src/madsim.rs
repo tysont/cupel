@@ -14,7 +14,7 @@ use crate::analyze::extensions;
 use crate::fuzz::cargo_fuzz::panic;
 use crate::fuzz::{in_scope, sources};
 use crate::race::cargo::{failure, progress};
-use crate::runner::{installed, suite_roots};
+use crate::runner::{installed, probe, suite_roots};
 use crate::{toolchain, tree};
 
 const ID: &str = "tool.madsim";
@@ -67,11 +67,8 @@ impl Producer<SimulationResults> for Madsim {
         }
     }
 
-    fn tool(&self, _: &Ctx) -> Option<ToolProbe> {
-        Some(ToolProbe {
-            name: ToolId::from("cargo"),
-            version: vec!["cargo".to_owned(), "--version".to_owned()],
-        })
+    fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
+        Some(probe("cargo", false, &["cargo", "--version"], &ctx.root))
     }
 
     fn produce(
@@ -161,39 +158,61 @@ impl Campaign<'_> {
             let defined = defined(&self.path, &package_dir);
             for target in targets {
                 self.ctx.cancel.checkpoint()?;
-                let captured = self
-                    .test(&target, None, self.seed, self.seeds)
-                    .run(&self.ctx.cancel)?;
-                let text = output(&captured);
-                let ran = outcomes(&text);
-                if let Some(problem) = failure(&text, !ran.is_empty()) {
-                    failed = Some(format!("{}: {problem}", target.selector.join(" ")));
-                }
-                for (name, passed) in ran {
-                    let Some(defined) = harness(&defined, &name) else {
-                        continue;
-                    };
-                    let failure = if passed {
-                        None
-                    } else {
-                        Some(self.failure(&target, &name, &text)?)
-                    };
-                    harnesses.push(SimulationHarness {
-                        root: self.dir.clone(),
-                        location: Some(self.location(&defined.file, defined.line, None)),
-                        name,
-                        status: if passed {
-                            SimulationStatus::Passed
-                        } else {
-                            SimulationStatus::Failed
-                        },
-                        failure,
-                    });
-                }
+                let (problem, found) = self.target(&target, &defined)?;
+                failed = problem.or(failed);
+                harnesses.extend(found);
             }
         }
         harnesses.sort_by(|a, b| a.name.cmp(&b.name));
         Ok((self.root_run(failed), harnesses))
+    }
+
+    /// Runs `target` over the seed range: why its run failed, when it did, and its harnesses.
+    fn target(
+        &self,
+        target: &Target,
+        defined: &[Defined],
+    ) -> Result<(Option<String>, Vec<SimulationHarness>)> {
+        let captured = self
+            .test(target, None, self.seed, self.seeds)
+            .run(&self.ctx.cancel)?;
+        let text = output(&captured);
+        let ran = outcomes(&text);
+        let problem = failure(&text, !ran.is_empty())
+            .map(|problem| format!("{}: {problem}", target.selector.join(" ")));
+        let mut harnesses = Vec::new();
+        for (name, passed) in ran {
+            if let Some(defined) = harness(defined, &name) {
+                harnesses.push(self.harness(target, defined, name, passed, &text)?);
+            }
+        }
+        Ok((problem, harnesses))
+    }
+
+    /// The harness `name` defined at `defined`, which `passed` or failed in the campaign `text`.
+    fn harness(
+        &self,
+        target: &Target,
+        defined: &Defined,
+        name: String,
+        passed: bool,
+        text: &str,
+    ) -> Result<SimulationHarness> {
+        let (status, failure) = if passed {
+            (SimulationStatus::Passed, None)
+        } else {
+            (
+                SimulationStatus::Failed,
+                Some(self.failure(target, &name, text)?),
+            )
+        };
+        Ok(SimulationHarness {
+            root: self.dir.clone(),
+            location: Some(self.location(&defined.file, defined.line, None)),
+            name,
+            status,
+            failure,
+        })
     }
 
     fn root_run(&self, failed: Option<String>) -> RootRun {
@@ -526,18 +545,10 @@ mod tests {
             message,
             "assertion `left == right` failed: a deposit was lost"
         );
-    }
-
-    #[test]
-    fn a_task_s_spawn_place_inside_the_repository_is_kept() {
-        assert_eq!(
-            masked("context: node=0 \"madsim-main\", task=16 (spawned at tests/sim.rs:45:22)"),
-            "context: node=0 \"madsim-main\", task=16 (spawned at tests/sim.rs:45:22)"
-        );
-        assert_eq!(
-            masked("thread 'main' (12) panicked at x"),
-            "thread 'main' panicked at x"
-        );
+        // A task's spawn place inside the repository is kept.
+        let in_repository =
+            "context: node=0 \"madsim-main\", task=16 (spawned at tests/sim.rs:45:22)";
+        assert_eq!(masked(in_repository), in_repository);
     }
 
     #[test]

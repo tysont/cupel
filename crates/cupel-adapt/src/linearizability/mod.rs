@@ -21,7 +21,7 @@ use cupel_core::{
 };
 use serde_json::{Map, Value};
 
-use crate::runner::installed;
+use crate::runner::{installed, probe};
 use crate::toolchain;
 
 /// The `[lang.<id>]` key naming the command that records histories.
@@ -91,11 +91,8 @@ impl Producer<Histories> for Porcupine {
         }
     }
 
-    fn tool(&self, _: &Ctx) -> Option<ToolProbe> {
-        Some(ToolProbe {
-            name: ToolId::from("go"),
-            version: vec!["go".to_owned(), "version".to_owned()],
-        })
+    fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
+        Some(probe("go", false, &["go", "version"], &ctx.root))
     }
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<Histories> {

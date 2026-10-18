@@ -160,12 +160,14 @@ impl Check for ConcLinearizability {
                     .map(move |violation| self.violated(fact, history, violation))
             })
             .collect();
-        let count = |status: HistoryStatus| {
+        let (unknown, invalid) =
             fact.histories
                 .iter()
-                .filter(|history| history.status == status)
-                .count()
-        };
+                .fold((0, 0), |(unknown, invalid), history| match history.status {
+                    HistoryStatus::Unknown => (unknown + 1, invalid),
+                    HistoryStatus::Invalid => (unknown, invalid + 1),
+                    HistoryStatus::Linearizable | HistoryStatus::Violated => (unknown, invalid),
+                });
         let operations: u64 = fact
             .histories
             .iter()
@@ -178,8 +180,8 @@ impl Check for ConcLinearizability {
                 usize::try_from(operations).unwrap_or(usize::MAX),
             ),
             ("violations", findings.len()),
-            ("unknown", count(HistoryStatus::Unknown)),
-            ("invalid", count(HistoryStatus::Invalid)),
+            ("unknown", unknown),
+            ("invalid", invalid),
         ];
         let reported = findings.len() as u64;
         for finding in findings {

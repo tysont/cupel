@@ -8,12 +8,9 @@ use serde_json::json;
 
 /// A campaign of one root whose harness failed at seed 4.
 fn campaign() -> SimulationResults {
-    let at = |line| Location {
-        file: "tests/sim.rs".to_owned(),
-        line,
-        col: Some(5),
-        end_line: line,
-        end_col: None,
+    let at = |line: u32| -> Location {
+        serde_json::from_value(json!({"file": "tests/sim.rs", "line": line, "col": 5, "end_line": line, "end_col": null}))
+            .unwrap()
     };
     SimulationResults {
         tool: ProducerId::from("tool.madsim"),

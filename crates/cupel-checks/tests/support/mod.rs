@@ -15,8 +15,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    CostClass, Error, Event, EventSink, Fact, FactKind, Facts, Finding, Manifest, Measurement,
-    MetricPer, RunId, Scope, Score, SymbolHash, Tier, Writer,
+    CostClass, Error, Event, EventSink, Fact, FactKind, Facts, Finding, Location, Manifest,
+    Measurement, MetricPer, RunId, Scope, Score, SymbolHash, Tier, Writer,
 };
 use serde_json::Value;
 
@@ -209,6 +209,17 @@ pub fn assert_counts_add_up(id: &str, metrics: &[&str], unit: &str) {
         check.combine(&[score(2.0, unit, 4), score(1.0, unit, 3)]),
         Some(score(3.0, unit, 7))
     );
+}
+
+/// A one-line location at `line` of `file`, from column 5.
+pub fn at(file: &str, line: u32) -> Location {
+    Location {
+        file: file.to_owned(),
+        line,
+        col: Some(5),
+        end_line: line,
+        end_col: None,
+    }
 }
 
 /// A score of `value` in `unit` over `n` targets.

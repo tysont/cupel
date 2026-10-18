@@ -3,24 +3,14 @@
 mod support;
 
 use cupel_core::{
-    ActionKind, CheckId, CheckStatus, CostClass, FactKind, FindingId, Location, MetricPer,
-    ProducerId, RootRun, RunStatus, Severity, SimulationFailure, SimulationHarness,
-    SimulationResults, SimulationStatus,
+    ActionKind, CheckId, CheckStatus, CostClass, FactKind, FindingId, MetricPer, ProducerId,
+    RootRun, RunStatus, Severity, SimulationFailure, SimulationHarness, SimulationResults,
+    SimulationStatus,
 };
 use serde_json::json;
-use support::{Shape, score};
+use support::{Shape, at, score};
 
 const ID: &str = "conc.dst";
-
-fn at(file: &str, line: u32) -> Location {
-    Location {
-        file: file.to_owned(),
-        line,
-        col: Some(5),
-        end_line: line,
-        end_col: None,
-    }
-}
 
 fn harness(name: &str, status: SimulationStatus) -> SimulationHarness {
     SimulationHarness {

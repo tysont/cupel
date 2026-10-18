@@ -50,6 +50,11 @@ pub struct ConcDst {
 
 inventory::submit!(crate::NativeCheck(|| Box::new(ConcDst::new())));
 
+const METRICS: [(&str, &str); 2] = [
+    ("harnesses", "Simulation harnesses found."),
+    ("failures", "Harnesses a seed of the range failed."),
+];
+
 impl ConcDst {
     pub fn new() -> Self {
         Self {
@@ -67,12 +72,8 @@ impl ConcDst {
                      seed replays the same schedule, faults, and timings, so it reproduces the \
                      failure exactly.",
                 )],
-                metrics: ["harnesses", "failures"]
+                metrics: METRICS
                     .into_iter()
-                    .zip([
-                        "Simulation harnesses found.",
-                        "Harnesses a seed of the range failed.",
-                    ])
                     .map(|(name, summary)| metric(name, summary))
                     .collect(),
                 settings: LIMITS.specs(),

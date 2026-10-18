@@ -64,7 +64,7 @@ struct Response {
 }
 
 /// One partition's result as the runner prints it.
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
 pub struct Checked {
     pub result: String,
     pub longest: Vec<usize>,
@@ -269,13 +269,14 @@ fn judged(
     for (part, result) in parts.iter().zip(&results) {
         match result.result.as_str() {
             "Illegal" => entry.violations.push(violation(part, result)),
-            "Unknown" => {
+            "Ok" => {}
+            // `Unknown`, or no result: the runner ran out of time on the part.
+            _ => {
                 entry.detail = Some(format!(
                     "the checker ran out of its {} s",
                     timeout.as_secs()
                 ));
             }
-            _ => {}
         }
     }
     if !entry.violations.is_empty() {
@@ -314,16 +315,6 @@ fn violation(part: &Partition, checked: &Checked) -> HistoryViolation {
             .filter_map(|&index| part.shown.get(index).cloned())
             .collect(),
         stuck,
-    }
-}
-
-impl Default for Checked {
-    fn default() -> Self {
-        Self {
-            result: "Unknown".to_owned(),
-            longest: Vec::new(),
-            states: Vec::new(),
-        }
     }
 }
 
