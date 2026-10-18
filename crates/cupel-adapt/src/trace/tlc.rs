@@ -174,14 +174,23 @@ fn validate(ctx: &ProduceCtx, spec: &TraceSpec, name: &str, steps: &[Logged]) ->
         &work.join(format!("{MODULE}.cfg")),
         names.config().as_bytes(),
     )?;
+    ctx.writer.create_dir(&work.join("tmp"))?;
     let ran = tlc(&work).run(&ctx.cancel)?;
     Ok(verdict(&ran.stdout).trace(&ctx.ctx.root, name, steps))
 }
 
 /// TLC on the generated module in `work`, deadlock unchecked, its states under `work/states`.
+/// The JVM's temporary directory is `work/tmp`, where SANY writes the standard modules it
+/// parses: in the shared one, TLC runs at the same time overwrite each other's copies.
 fn tlc(work: &Path) -> Process {
     let states = work.join("states").to_string_lossy().into_owned();
+    let options = format!(
+        "{} -Djava.io.tmpdir={}",
+        std::env::var("JAVA_TOOL_OPTIONS").unwrap_or_default(),
+        work.join("tmp").display()
+    );
     Process::new(PROGRAM, work)
+        .env("JAVA_TOOL_OPTIONS", options.trim_start())
         .args([
             "-deadlock",
             "-workers",
