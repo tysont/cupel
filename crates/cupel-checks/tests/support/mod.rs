@@ -163,6 +163,20 @@ pub fn run_over<F: Fact>(id: &str, fact: F) -> (CheckResult, Vec<Finding>) {
     (result, recorded.findings)
 }
 
+/// The finding IDs of the check `id` run over `fact` alone ([`run_over`]).
+pub fn ids_over<F: Fact>(id: &str, fact: F) -> Vec<cupel_core::FindingId> {
+    run_over(id, fact).1.into_iter().map(|f| f.id).collect()
+}
+
+/// A project root whose tool run completed.
+pub fn ran(dir: &str) -> cupel_core::RootRun {
+    cupel_core::RootRun {
+        dir: dir.to_owned(),
+        status: cupel_core::RunStatus::Ran,
+        detail: None,
+    }
+}
+
 /// The setting `check` names, and the settings it lists as valid, when planning with `config`
 /// fails as a configuration error.
 pub fn setting_error(check: &dyn Check, config: Value) -> (String, Vec<String>) {

@@ -8,7 +8,7 @@ use cupel_core::{
     Severity,
 };
 use serde_json::json;
-use support::{Shape, score};
+use support::{Shape, ran, score};
 
 const ID: &str = "spec.contracts";
 
@@ -22,14 +22,6 @@ fn violation(kind: ContractKind, line: Option<u32>, test: &str) -> ContractViola
             line,
         }),
         test: test.to_owned(),
-    }
-}
-
-fn ran(dir: &str) -> RootRun {
-    RootRun {
-        dir: dir.to_owned(),
-        status: RunStatus::Ran,
-        detail: None,
     }
 }
 
@@ -135,8 +127,7 @@ fn each_kind_says_whose_obligation_the_contract_was() {
 #[test]
 fn a_violation_keeps_its_id_when_its_lines_move_and_tests_are_told_apart() {
     let id_of = |violations: Vec<ContractViolation>| {
-        let (_, findings) = support::run_over(ID, fact(vec![ran(".")], violations));
-        findings.into_iter().map(|f| f.id).collect::<Vec<_>>()
+        support::ids_over(ID, fact(vec![ran(".")], violations))
     };
     let at = |line, test| vec![violation(ContractKind::Precondition, Some(line), test)];
     assert_eq!(

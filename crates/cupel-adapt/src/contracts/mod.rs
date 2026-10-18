@@ -22,7 +22,8 @@ use cupel_core::syntax::{ProjectInfo, TestFrames};
 use cupel_core::{
     Availability, ContractKind, ContractPlace, ContractViolation, ContractViolations, CostClass,
     Ctx, Error, EventSink, FactKind, LangId, Langs, ProduceCtx, Producer, ProducerId,
-    ProducerRegistry, Result, RootRun, RunStatus, Scope, TestOutcome, TestResults, TestSelection,
+    ProducerRegistry, Result, RootRun, RunOptions, RunStatus, RunnerInvocation, Scope, TestOutcome,
+    TestResults, TestSelection,
 };
 
 use crate::rules::{Dirs, Rule};
@@ -115,6 +116,26 @@ impl Producer<ContractViolations> for Contracts {
                 value: baseline.runner.to_string(),
                 expected: "a registered runner",
             })?;
+        let ran = runner.run(
+            ctx,
+            &TestSelection::All,
+            &self.options(ctx, baseline, scope),
+        )?;
+        fact.runs = ran.results.invocations.iter().map(root_run).collect();
+        fact.tests = ran
+            .results
+            .tests
+            .iter()
+            .filter(|test| test.outcome != TestOutcome::Skipped)
+            .count() as u64;
+        fact.violations = self.violations(ctx, &ran.results, scope);
+        Ok(fact)
+    }
+}
+
+impl Contracts {
+    /// The contract run's options: every property case's budget, then the library's switches.
+    fn options(&self, ctx: &ProduceCtx, baseline: &TestResults, scope: &Scope) -> RunOptions {
         let mut options = crate::property::budgeted(
             ctx,
             &baseline.runner,
@@ -127,61 +148,51 @@ impl Producer<ContractViolations> for Contracts {
                 .iter()
                 .map(|(name, value)| ((*name).to_owned(), (*value).to_owned())),
         );
-        let ran = runner.run(ctx, &TestSelection::All, &options)?;
-        fact.runs = ran
-            .results
-            .invocations
-            .iter()
-            .map(|invocation| RootRun {
-                dir: invocation.dir.clone(),
-                status: if invocation.completed {
-                    RunStatus::Ran
-                } else {
-                    RunStatus::Failed
-                },
-                detail: invocation.output.clone(),
-            })
-            .collect();
-        fact.tests = ran
-            .results
-            .tests
-            .iter()
-            .filter(|test| test.outcome != TestOutcome::Skipped)
-            .count() as u64;
+        options
+    }
+
+    /// Every violation the library reported in the run's failed tests that concerns the scope,
+    /// without duplicates.
+    fn violations(
+        &self,
+        ctx: &ProduceCtx,
+        results: &TestResults,
+        scope: &Scope,
+    ) -> Vec<ContractViolation> {
         let root = canonical(&ctx.ctx.root);
-        let dirs: Vec<PathBuf> = ran
-            .results
+        let dirs: Vec<PathBuf> = results
             .invocations
             .iter()
             .map(|invocation| canonical(&root.join(&invocation.dir)))
             .collect();
         let source = |file: &str| fs::read_to_string(located(&dirs, file)?).ok();
-        for test in ran.results.failures() {
+        let mut violations: Vec<ContractViolation> = Vec::new();
+        for test in results.failures() {
             for found in (self.0.read)(test.output.as_deref().unwrap_or_default(), &source) {
+                let place = found
+                    .file
+                    .and_then(|file| placed(&root, &dirs, &file))
+                    .map(|file| ContractPlace {
+                        file,
+                        line: found.line,
+                    });
                 let violation = ContractViolation {
                     kind: found.kind,
                     function: found.function,
                     message: found.message,
-                    place: found
-                        .file
-                        .and_then(|file| placed(&root, &dirs, &file))
-                        .map(|file| ContractPlace {
-                            file,
-                            line: found.line,
-                        }),
+                    place,
                     test: test.id.clone(),
                 };
-                let test_file = test.file.as_deref();
-                if in_scope(&violation, test_file, scope) && !fact.violations.contains(&violation) {
-                    fact.violations.push(violation);
+                if in_scope(&violation, test.file.as_deref(), scope)
+                    && !violations.contains(&violation)
+                {
+                    violations.push(violation);
                 }
             }
         }
-        Ok(fact)
+        violations
     }
-}
 
-impl Contracts {
     /// The fact of a run of `runner` that checked nothing yet.
     fn nothing(&self, runner: ProducerId) -> ContractViolations {
         ContractViolations {
@@ -192,6 +203,19 @@ impl Contracts {
             tests: 0,
             violations: Vec::new(),
         }
+    }
+}
+
+/// How the runner's invocation in a root ended.
+fn root_run(invocation: &RunnerInvocation) -> RootRun {
+    RootRun {
+        dir: invocation.dir.clone(),
+        status: if invocation.completed {
+            RunStatus::Ran
+        } else {
+            RunStatus::Failed
+        },
+        detail: invocation.output.clone(),
     }
 }
 
@@ -307,19 +331,15 @@ pub(crate) mod tests {
     #[test]
     fn a_violation_is_in_scope_by_its_contract_or_its_test_or_when_outside_the_repository() {
         let scope = Scope::of_files(vec!["src/lib.rs".to_owned()]);
-        assert!(in_scope(&violation(Some("src/lib.rs")), None, &scope));
-        assert!(!in_scope(&violation(Some("src/other.rs")), None, &scope));
-        assert!(in_scope(
-            &violation(Some("src/other.rs")),
-            Some("src/lib.rs"),
-            &scope
-        ));
-        assert!(in_scope(&violation(None), None, &scope));
-        assert!(in_scope(
-            &violation(Some("src/other.rs")),
-            None,
-            &Scope::of_files(vec![])
-        ));
+        let everything = Scope::of_files(vec![]);
+        let kept = [
+            in_scope(&violation(Some("src/lib.rs")), None, &scope),
+            in_scope(&violation(Some("src/other.rs")), None, &scope),
+            in_scope(&violation(Some("src/other.rs")), Some("src/lib.rs"), &scope),
+            in_scope(&violation(None), None, &scope),
+            in_scope(&violation(Some("src/other.rs")), None, &everything),
+        ];
+        assert_eq!(kept, [true, false, true, true, true]);
     }
 
     #[test]
@@ -357,7 +377,7 @@ pub(crate) mod tests {
             cupel_core::Writer::new(root, false).unwrap().confined(),
             cupel_core::Cancellation::new(),
         );
-        assert!(!declared(&ctx, &rust::RUST_CONTRACTS));
+        let mut seen = vec![declared(&ctx, &rust::RUST_CONTRACTS)];
         fs::write(
             root.join("crates/books/Cargo.toml"),
             "[dependencies]\ncontracts = \"0.6\"\n",
@@ -374,12 +394,13 @@ pub(crate) mod tests {
             }],
         };
         ctx.upstream.insert(cupel_core::Produced::new(info).share());
-        assert!(declared(&ctx, &rust::RUST_CONTRACTS));
+        seen.push(declared(&ctx, &rust::RUST_CONTRACTS));
         fs::write(
             root.join("crates/books/Cargo.toml"),
             "[dependencies]\ncontracts-extra = \"1\"\n",
         )
         .unwrap();
-        assert!(!declared(&ctx, &rust::RUST_CONTRACTS));
+        seen.push(declared(&ctx, &rust::RUST_CONTRACTS));
+        assert_eq!(seen, [false, true, false]);
     }
 }

@@ -8,7 +8,7 @@ use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
     Facts, Plan, Result, Scope, Score, Severity, Stability, Tier,
 };
-use cupel_core::{Manifest, SettingSpec};
+use cupel_core::{FindingKindSpec, Manifest, SettingSpec};
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::Value;
@@ -67,12 +67,7 @@ impl MetaTraceability {
                 cost: CostClass::Standard,
                 needs: vec![FactKind::TestFrames],
                 wants: vec![],
-                findings: vec![kind::<Untested>(
-                    KIND,
-                    ActionKind::WriteTest,
-                    "A requirement of the task has no test the change added whose name carries \
-                     its ID, so nothing shows the change meets it.",
-                )],
+                findings: vec![untested_kind()],
                 metrics: vec![metric(
                     "untested",
                     "Requirements no test added by the range names.",
@@ -87,6 +82,16 @@ impl MetaTraceability {
             },
         }
     }
+}
+
+/// `spec.untested-requirement`, as the manifest declares it.
+fn untested_kind() -> FindingKindSpec {
+    kind::<Untested>(
+        KIND,
+        ActionKind::WriteTest,
+        "A requirement of the task has no test the change added whose name carries its ID, so \
+         nothing shows the change meets it.",
+    )
 }
 
 /// The settings the manifest declares (ADR-111).
@@ -125,22 +130,18 @@ impl Check for MetaTraceability {
     ) -> Result<CheckResult> {
         let requirements = requirements(&self.manifest.id, &ctx.config)?;
         if requirements.is_empty() {
-            let mut result = outcome::result(
+            return Ok(outcome::unmeasured(
                 &self.manifest,
-                outcome::status(false),
-                None,
-                BTreeMap::new(),
-                0,
-            );
-            result.notes = vec![format!(
-                "no requirements are configured: list their IDs as `{REQUIREMENTS}` under \
-                 [checks.\"{ID}\"]"
-            )];
-            return Ok(result);
+                format!(
+                    "no requirements are configured: list their IDs as `{REQUIREMENTS}` under \
+                     [checks.\"{ID}\"]"
+                ),
+            ));
         }
-        let head_frames = facts.get::<TestFrames>()?;
-        let base_frames = facts.base::<TestFrames>()?;
-        let (head, base) = (Tests::of(head_frames), Tests::of(base_frames));
+        let (head, base) = (
+            Tests::of(facts.get::<TestFrames>()?),
+            Tests::of(facts.base::<TestFrames>()?),
+        );
         let added = added(&base, &head);
         let commit = facts
             .range()
@@ -148,44 +149,15 @@ impl Check for MetaTraceability {
         let mut untested = 0u64;
         for requirement in &requirements {
             ctx.cancel.checkpoint()?;
-            let naming: Vec<Naming> = head
-                .tests
-                .iter()
-                .zip(&added)
-                .filter(|(test, _)| names(&test.case.name, requirement))
-                .map(|(test, added)| Naming {
-                    file: test.file.to_owned(),
-                    name: test.case.name.clone(),
-                    line: test.case.span.line,
-                    added: *added,
-                })
-                .collect();
+            let naming = naming(&head, &added, requirement);
             if naming.iter().any(|test| test.added) {
                 continue;
             }
             untested += 1;
-            sink.emit(Event::Finding(Box::new(self.finding(
-                requirement,
-                &commit,
-                naming,
-            ))));
+            let finding = self.finding(requirement, &commit, naming);
+            sink.emit(Event::Finding(Box::new(finding)));
         }
-        #[allow(
-            clippy::cast_precision_loss,
-            reason = "requirement counts stay far below 2^52, where f64 is exact"
-        )]
-        let value = untested as f64;
-        Ok(outcome::result(
-            &self.manifest,
-            outcome::status(untested > 0),
-            Some(Score {
-                value,
-                unit: "untested requirements".to_owned(),
-                n: requirements.len() as u64,
-            }),
-            BTreeMap::from([("untested".to_owned(), value)]),
-            untested,
-        ))
+        Ok(self.result(untested, requirements.len() as u64))
     }
 
     /// Untested requirements add up across languages.
@@ -199,6 +171,26 @@ impl Check for MetaTraceability {
 }
 
 impl MetaTraceability {
+    /// The result of `untested` of `requirements`.
+    fn result(&self, untested: u64, requirements: u64) -> CheckResult {
+        #[allow(
+            clippy::cast_precision_loss,
+            reason = "requirement counts stay far below 2^52, where f64 is exact"
+        )]
+        let value = untested as f64;
+        outcome::result(
+            &self.manifest,
+            outcome::status(untested > 0),
+            Some(Score {
+                value,
+                unit: "untested requirements".to_owned(),
+                n: requirements,
+            }),
+            BTreeMap::from([("untested".to_owned(), value)]),
+            untested,
+        )
+    }
+
     fn finding(&self, requirement: &str, commit: &str, naming: Vec<Naming>) -> cupel_core::Finding {
         let title = match naming.len() {
             0 => format!("requirement {requirement} has no test that names it"),
@@ -232,6 +224,21 @@ impl MetaTraceability {
         }
         .finding(&self.manifest)
     }
+}
+
+/// The head tests whose names carry `requirement`, each with whether the range added it.
+fn naming(head: &Tests<'_>, added: &[bool], requirement: &str) -> Vec<Naming> {
+    head.tests
+        .iter()
+        .zip(added)
+        .filter(|(test, _)| names(&test.case.name, requirement))
+        .map(|(test, added)| Naming {
+            file: test.file.to_owned(),
+            name: test.case.name.clone(),
+            line: test.case.span.line,
+            added: *added,
+        })
+        .collect()
 }
 
 /// The configured requirement IDs: a list of non-empty strings, and no other key.

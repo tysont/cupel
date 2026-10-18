@@ -7,7 +7,7 @@ use cupel_core::{
     RaceFrame, RaceKind, RaceReport, RaceReports, RaceStack, RootRun, RunStatus, Severity,
 };
 use serde_json::json;
-use support::{Shape, score};
+use support::{Shape, ran, score};
 
 const ID: &str = "conc.race";
 
@@ -57,14 +57,6 @@ fn undefined(message: &str) -> RaceReport {
                 frame(Some("reads_last"), "tests/ub.rs", 3),
             ],
         )],
-    }
-}
-
-fn ran(dir: &str) -> RootRun {
-    RootRun {
-        dir: dir.to_owned(),
-        status: RunStatus::Ran,
-        detail: None,
     }
 }
 
@@ -151,10 +143,7 @@ fn undefined_behavior_is_a_failing_finding_titled_by_its_message() {
 
 #[test]
 fn a_report_keeps_its_id_when_its_lines_move_and_repeats_are_told_apart() {
-    let id_of = |report: Vec<RaceReport>| {
-        let (_, findings) = support::run_over(ID, reports(vec![ran(".")], report));
-        findings.into_iter().map(|f| f.id).collect::<Vec<_>>()
-    };
+    let id_of = |report: Vec<RaceReport>| support::ids_over(ID, reports(vec![ran(".")], report));
     assert_eq!(id_of(vec![race(12)]), id_of(vec![race(40)]));
     let check = CheckId::from(ID);
     assert_eq!(

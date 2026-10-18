@@ -39,6 +39,12 @@ impl Limits {
         self.plan(manifest, ctx, outcome::plan_files(manifest, scope))
     }
 
+    /// A plan over every symbol in `scope` ([`outcome::plan_symbols`]), once the settings in
+    /// `ctx` are valid.
+    pub fn plan_symbols(&self, manifest: &Manifest, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
+        self.plan(manifest, ctx, outcome::plan_symbols(manifest, scope))
+    }
+
     /// The value of every setting, configured or default, by name. Any key that is not a
     /// setting, and any setting that is not a non-negative integer, is a configuration error.
     pub fn read(&self, check: &CheckId, config: &Table) -> Result<BTreeMap<&'static str, u32>> {

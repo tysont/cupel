@@ -25,6 +25,18 @@ const KIND: &str = "evidence.self-authored-only";
 /// The check has no settings.
 const SETTINGS: Limits = Limits::new(&[]);
 
+/// The metrics, each with what it counts.
+const METRICS: [(&str, &str); 2] = [
+    (
+        "independent",
+        "Changed functions a test that existed before the change exercises.",
+    ),
+    (
+        "self_authored_only",
+        "Changed functions exercised only by tests the change added.",
+    ),
+];
+
 /// The note when no per-test map was made.
 const NO_MAP: &str = "no per-test coverage map: which tests exercise the changed functions is \
                       unknown, so none is labeled; one is made at --depth standard where the \
@@ -64,16 +76,10 @@ impl MetaOracleIndependence {
                     "A changed function is exercised only by tests the change added: the only \
                      evidence it works was written with it.",
                 )],
-                metrics: vec![
-                    metric(
-                        "independent",
-                        "Changed functions a test that existed before the change exercises.",
-                    ),
-                    metric(
-                        "self_authored_only",
-                        "Changed functions exercised only by tests the change added.",
-                    ),
-                ],
+                metrics: METRICS
+                    .iter()
+                    .map(|(name, counts)| metric(name, counts))
+                    .collect(),
                 settings: SETTINGS.specs(),
                 stability: Stability::Experimental,
                 summary: "Labels each changed function the tests exercise by whether a test that \
@@ -96,11 +102,7 @@ impl Check for MetaOracleIndependence {
     }
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        SETTINGS.plan(
-            &self.manifest,
-            ctx,
-            outcome::plan_symbols(&self.manifest, scope),
-        )
+        SETTINGS.plan_symbols(&self.manifest, ctx, scope)
     }
 
     fn run(
@@ -112,19 +114,10 @@ impl Check for MetaOracleIndependence {
     ) -> Result<CheckResult> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
         let Ok(map) = facts.get::<PerTestMap>() else {
-            let mut result = outcome::result(
-                &self.manifest,
-                outcome::status(false),
-                None,
-                BTreeMap::new(),
-                0,
-            );
-            result.notes = vec![NO_MAP.to_owned()];
-            return Ok(result);
+            return Ok(outcome::unmeasured(&self.manifest, NO_MAP.to_owned()));
         };
-        let head_frames = facts.get::<TestFrames>()?;
         let (head, base) = (
-            Tests::of(head_frames),
+            Tests::of(facts.get::<TestFrames>()?),
             Tests::of(facts.base::<TestFrames>()?),
         );
         let added = added(&base, &head);
@@ -133,20 +126,12 @@ impl Check for MetaOracleIndependence {
             added: &added,
         };
         let hashes = hashes_by_symbol(facts.get::<NormTree>()?);
-        let conventions = facts.get::<TestConventions>().ok();
         let commit = facts
             .range()
             .map_or_else(String::new, |range| range.commit.clone());
         let index = map.index();
         let (mut independent, mut only_self) = (0u64, 0u64);
-        for symbol in facts
-            .get::<Symbols>()?
-            .symbols
-            .iter()
-            .filter(|symbol| ctx.scope.includes(&symbol.key()))
-            .filter(|symbol| !conventions.is_some_and(|c| c.is_test(&symbol.file)))
-            .filter(|symbol| !is_test_case(symbol, &head))
-        {
+        for symbol in changed_functions(ctx, facts, &head)? {
             ctx.cancel.checkpoint()?;
             let covering: Vec<&TestCoverage> = index
                 .covering(&symbol.file, symbol.span.line, symbol.span.end_line)
@@ -275,6 +260,23 @@ impl Authored<'_> {
 fn names(case: &Test<'_>, test: &TestCoverage) -> bool {
     test.file.as_deref().is_none_or(|file| file == case.file)
         && names_case(&test.id, &case.case.name)
+}
+
+/// The functions in scope that are not test code: outside test files and no test case's own.
+fn changed_functions<'a>(
+    ctx: &CheckCtx,
+    facts: &'a Facts,
+    head: &Tests<'_>,
+) -> Result<Vec<&'a SymbolDef>> {
+    let conventions = facts.get::<TestConventions>().ok();
+    Ok(facts
+        .get::<Symbols>()?
+        .symbols
+        .iter()
+        .filter(|symbol| ctx.scope.includes(&symbol.key()))
+        .filter(|symbol| !conventions.is_some_and(|c| c.is_test(&symbol.file)))
+        .filter(|symbol| !is_test_case(symbol, head))
+        .collect())
 }
 
 /// Whether `symbol` is a test case's own function: it overlaps a case of its file.

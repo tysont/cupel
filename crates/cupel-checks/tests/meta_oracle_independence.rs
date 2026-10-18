@@ -15,13 +15,9 @@ use support::{Shape, hash_of_line, score};
 
 const ID: &str = "meta.oracle-independence";
 
-fn span(line: u32, end_line: u32) -> Span {
-    Span {
-        line,
-        col: 1,
-        end_line,
-        end_col: 2,
-    }
+/// The lines from `line` to `end_line`.
+fn lines(line: u32, end_line: u32) -> Span {
+    support::span(line, end_line - line + 1)
 }
 
 fn symbol(name: &str, line: u32, end_line: u32) -> SymbolDef {
@@ -37,7 +33,7 @@ fn symbol(name: &str, line: u32, end_line: u32) -> SymbolDef {
         } else {
             "src/dates.py".to_owned()
         },
-        span: span(line, end_line),
+        span: lines(line, end_line),
         body: None,
         parameters: 1,
     }
@@ -46,7 +42,7 @@ fn symbol(name: &str, line: u32, end_line: u32) -> SymbolDef {
 fn case(name: &str, line: u32) -> TestCase {
     TestCase {
         name: name.to_owned(),
-        span: span(line, line + 2),
+        span: lines(line, line + 2),
         assertions: Vec::new(),
         mocks: Vec::new(),
         skip: None,

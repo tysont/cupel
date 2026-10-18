@@ -28,6 +28,13 @@ pub fn result(
     }
 }
 
+/// A `pass` of the check `manifest` describes that measured nothing, with `note` saying why.
+pub fn unmeasured(manifest: &Manifest, note: String) -> CheckResult {
+    let mut result = result(manifest, CheckStatus::Pass, None, BTreeMap::new(), 0);
+    result.notes = vec![note];
+    result
+}
+
 /// `fail` when the check reported something that fails it, else `pass`.
 pub fn status(failed: bool) -> CheckStatus {
     if failed {
