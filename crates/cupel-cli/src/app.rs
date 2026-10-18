@@ -103,16 +103,19 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     };
     let mut stderr = String::new();
     let destination = cli.global.events.as_deref();
-    let (envelope, rendering, events) =
-        match Events::open(destination, &writer, &environment.stderr) {
-            Ok(mut events) => {
-                let (envelope, rendering, said) =
-                    configured(environment, run, cli, &writer, &mut events);
-                stderr.push_str(&said);
-                (envelope, rendering, Some(events))
-            }
-            Err(error) => (run.failed(&error), recovered_rendering(environment), None),
-        };
+    let (envelope, rendering, events) = match Events::open(
+        destination,
+        &writer,
+        (&environment.stderr, environment.events.as_ref()),
+    ) {
+        Ok(mut events) => {
+            let (envelope, rendering, said) =
+                configured(environment, run, cli, &writer, &mut events);
+            stderr.push_str(&said);
+            (envelope, rendering, Some(events))
+        }
+        Err(error) => (run.failed(&error), recovered_rendering(environment), None),
+    };
     if let Some(mut events) = events {
         events.emit(Event::RunEnd {
             status: envelope.status,
@@ -125,11 +128,24 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     if keeps_run_record(run, cli) {
         record(&writer, &envelope, &run.take_executions(), &mut stderr);
     }
-    output(
-        envelope,
-        &presentation(rendering).rooted(writer.root()),
-        stderr,
+    routed(
+        cli,
+        output(
+            envelope,
+            &presentation(rendering).rooted(writer.root()),
+            stderr,
+        ),
     )
+}
+
+/// `output` as the process writes it: under `serve --mcp` stdout carries the protocol, so the
+/// server's own envelope follows its diagnostics on stderr (ADR-121).
+fn routed(cli: &Cli, mut output: Output) -> Output {
+    if matches!(&cli.verb, Some(VerbArgs::Serve(args)) if args.mcp) {
+        let envelope = std::mem::take(&mut output.stdout);
+        output.stderr.push_str(&envelope);
+    }
+    output
 }
 
 /// The writer for the repository the invocation names: recording, for a run that only plans.
@@ -391,9 +407,12 @@ fn run_verb(
             Ok(invocation.nothing_planned(events))
         }
         VerbArgs::Doctor { fix } => Ok(doctor::run(invocation, *fix)),
-        VerbArgs::Serve(args) => {
-            serve::verb(invocation, args, (cli.global.quiet, self::run), environment)
-        }
+        VerbArgs::Serve(args) => Ok(serve::verb(
+            invocation,
+            args,
+            (cli.global.quiet, self::run),
+            environment,
+        )),
         VerbArgs::Init { force } => init_verb(invocation, cli, *force, events),
         VerbArgs::Check { scope, .. } => check::verb(invocation, scope, events),
         VerbArgs::Survey { scope } => survey::verb(invocation, scope, events),

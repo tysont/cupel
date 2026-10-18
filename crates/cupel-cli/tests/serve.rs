@@ -360,14 +360,6 @@ fn serve_announces_itself_and_refuses_to_start_beside_a_running_daemon() {
 }
 
 #[test]
-fn serve_mcp_is_pending() {
-    let repo = repo();
-    let outcome = repo.run(&["serve", "--mcp"]);
-    assert_eq!(outcome.code, 2);
-    assert_eq!(outcome.finding()["kind"], json!("cli.not-implemented"));
-}
-
-#[test]
 fn a_file_changed_under_watch_is_reparsed_and_the_next_run_matches_a_cold_one() {
     let repo = repo();
     let daemon = Daemon::start(&repo, &["--watch"]);

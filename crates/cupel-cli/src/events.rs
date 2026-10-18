@@ -1,5 +1,5 @@
-// ABOUTME: The `--events` destination: standard error or a file opened through the `Writer`, each
-// ABOUTME: receiving one JSON line per event (design §7.4, ADR-020 §4). Without `--events`, events are dropped.
+// ABOUTME: The `--events` destination: standard error or a file opened through the `Writer`, each receiving one
+// ABOUTME: JSON line per event (design §7.4, ADR-020 §4). Without `--events`, the invocation's own stream, if any.
 use std::io::Write;
 use std::path::Path;
 
@@ -18,16 +18,18 @@ pub struct Events {
 
 impl Events {
     /// Opens `--events`: `stderr` (the invocation's standard error stream), or a path resolved
-    /// against the root and checked by `writer`.
+    /// against the root and checked by `writer`; without it, `otherwise` (a tool call's progress
+    /// stream under `serve --mcp`) or nowhere.
     pub fn open(
         destination: Option<&str>,
         writer: &Writer,
-        stderr: &Stream,
+        (stderr, otherwise): (&Stream, Option<&Stream>),
     ) -> Result<Self, CupelError> {
-        let out: Box<dyn Write> = match destination {
-            None => return Ok(Self { sink: None }),
-            Some(STDERR) => Box::new(stderr.clone()),
-            Some(path) => Box::new(
+        let out: Box<dyn Write> = match (destination, otherwise) {
+            (None, None) => return Ok(Self { sink: None }),
+            (None, Some(stream)) => Box::new(stream.clone()),
+            (Some(STDERR), _) => Box::new(stderr.clone()),
+            (Some(path), _) => Box::new(
                 writer
                     .stream(Path::new(path))
                     .map_err(|error| refused(path, &error))?,

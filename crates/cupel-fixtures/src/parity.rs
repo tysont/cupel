@@ -23,8 +23,8 @@ pub fn enabled() -> bool {
 /// same state.
 pub struct Twin {
     dir: TempDir,
-    root: PathBuf,
-    original: PathBuf,
+    pub(crate) root: PathBuf,
+    pub(crate) original: PathBuf,
 }
 
 impl Twin {
@@ -79,7 +79,7 @@ impl Twin {
     }
 
     /// `arg` with every spelling of the original directory replaced by the copy's.
-    fn moved(&self, arg: &str) -> String {
+    pub(crate) fn moved(&self, arg: &str) -> String {
         let canonical = self.original.canonicalize().unwrap_or_default();
         let mut moved = arg.to_owned();
         for spelling in [&self.original, &canonical] {
@@ -95,7 +95,7 @@ impl Twin {
 /// (ADR-003); each event line of a stream has its run ID and timings masked, and in a text
 /// rendering the `run` line (ID, start, duration, seed) is masked whole and each check's `N ms`
 /// too.
-fn redacted(text: &str, root: &Path) -> String {
+pub(crate) fn redacted(text: &str, root: &Path) -> String {
     if let Ok(envelope) = serde_json::from_str::<Envelope>(text) {
         return canonical_json(&crate::redact(&envelope, root));
     }

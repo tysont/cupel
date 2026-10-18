@@ -841,7 +841,7 @@ Baseline test run happens once, in the real tree, before any mutant; red ⇒ exi
 
 ### 8.10 Daemon (`serve`)
 
-Holds parsed trees (content-hash keyed), store connection, coverage map, and the last plan. File watcher (`notify`) triggers incremental tree-sitter reparse and symbol re-hash. CLI connects over `.cupel/serve.sock` and proxies the request; output is byte-identical to a cold run. MCP mode exposes `check`, `survey`, `explain`, `tests_impacted`, `describe` as tools with the envelope as the result and events as progress notifications.
+Holds parsed trees (content-hash keyed), store connection, coverage map, and the last plan. File watcher (`notify`) triggers incremental tree-sitter reparse and symbol re-hash. CLI connects over `.cupel/serve.sock` and proxies the request; output is byte-identical to a cold run. MCP mode exposes `check`, `survey`, `explain`, `tests_impacted`, `describe` as tools with the envelope as the result and events as progress notifications: MCP 2025-11-25 over stdio, in a process of its own beside the socket daemon, each tool's input schema derived from its verb's flags (ADR-121).
 
 ## 9. Performance design
 

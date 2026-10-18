@@ -226,7 +226,7 @@ pub enum VerbArgs {
 pub struct ServeArgs {
     #[arg(long, value_name = "PATH")]
     pub socket: Option<PathBuf>,
-    #[arg(long)]
+    #[arg(long, conflicts_with_all = ["socket", "stop"])]
     pub mcp: bool,
     #[arg(long)]
     pub watch: bool,

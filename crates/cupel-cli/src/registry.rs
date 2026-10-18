@@ -568,7 +568,11 @@ fn serve_verb() -> CommandDescription {
                 "Reparse the files the daemon has parsed as they change.",
             ),
             switch("--stop", "Stop the daemon serving this repository."),
-            switch("--mcp", "Expose the verbs as MCP tools.").pending("P7.7"),
+            switch(
+                "--mcp",
+                "Serve the analysis verbs and describe as MCP tools on stdin and stdout instead.",
+            )
+            .conflicts(&["--socket", "--stop"]),
         ],
         examples(&[(
             "cupel serve --stop",
