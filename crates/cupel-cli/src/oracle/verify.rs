@@ -1,6 +1,7 @@
 // ABOUTME: `oracle verify` (ADR-090 §3): each oracle's smoke comparison — a ref resolves, a command answers each
 // ABOUTME: known input the same way twice, a spec parses — recorded on success and revoked on failure.
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use cupel_core::config::{Config, OracleConfig, OracleKind};
 use cupel_core::{
@@ -17,13 +18,18 @@ use crate::persist;
 use crate::problem::Problem;
 use crate::run::{Invocation, shell_quote};
 
-/// How a spec language's own parser is run on a file: the program and the arguments before the
-/// file (ADR-090 §3).
-const PARSERS: [(&str, &str, &[&str]); 3] = [
-    ("quint", "quint", &["parse"]),
-    ("tla+", "sany", &[]),
-    ("p", "p", &["compile", "--pfiles"]),
+/// How a spec language's own parser is run on a file: the program, the arguments before the
+/// file (ADR-090 §3), and whether it is a JVM that needs a temporary directory of its own
+/// (SANY deletes the standard modules it extracted there on exit, so parsers running at once
+/// in the shared one delete each other's).
+const PARSERS: [(&str, &str, &[&str], bool); 3] = [
+    ("quint", "quint", &["parse"], false),
+    ("tla+", "sany", &[], true),
+    ("p", "p", &["compile", "--pfiles"], false),
 ];
+
+/// Tells one parser run's temporary directory from another's in this process.
+static PARSER_RUNS: AtomicU64 = AtomicU64::new(0);
 
 /// The exit code `sh` reports when the command's program is not found.
 const NOT_FOUND: i32 = 127;
@@ -183,9 +189,9 @@ fn shown(input: &str) -> String {
 
 /// Runs the parser of `lang` on the spec file `spec`, which must accept it.
 fn parses(root: &Path, cancel: &Cancellation, spec: &str, lang: &str) -> Result<(), Failure> {
-    let (_, program, args) = PARSERS
+    let (_, program, args, jvm) = PARSERS
         .iter()
-        .find(|(name, _, _)| *name == lang)
+        .find(|(name, _, _, _)| *name == lang)
         .expect("a spec oracle's language is validated when configuration loads");
     if find_program(program).is_none() {
         return Err(Failure::Unreachable(Unreachable {
@@ -194,9 +200,8 @@ fn parses(root: &Path, cancel: &Cancellation, spec: &str, lang: &str) -> Result<
             fix: format!("Install `{program}` and put it on PATH."),
         }));
     }
-    let ran = Process::new(program, root)
-        .args(args.iter().copied().chain([spec]))
-        .merged()
+    let tmp = jvm.then(parser_tmpdir).flatten();
+    let ran = parser(root, program, args, spec, tmp.as_deref())
         .run(cancel)
         .map_err(|error| {
             Failure::Unreachable(Unreachable {
@@ -204,7 +209,11 @@ fn parses(root: &Path, cancel: &Cancellation, spec: &str, lang: &str) -> Result<
                 action: ActionKind::InstallTool,
                 fix: format!("Reinstall `{program}`."),
             })
-        })?;
+        });
+    if let Some(tmp) = &tmp {
+        let _ = std::fs::remove_dir_all(tmp);
+    }
+    let ran = ran?;
     if ran.exit_code == Some(0) {
         return Ok(());
     }
@@ -212,6 +221,29 @@ fn parses(root: &Path, cancel: &Cancellation, spec: &str, lang: &str) -> Result<
         title: format!("`{program}` does not accept the spec file `{spec}`"),
         evidence: json!({"spec": spec, "exit_code": ran.exit_code, "output": ran.stdout}),
     })
+}
+
+/// `program` on `spec` in `root` with `args` before it, output merged; a JVM parser's
+/// temporary directory is `tmp`.
+fn parser(root: &Path, program: &str, args: &[&str], spec: &str, tmp: Option<&Path>) -> Process {
+    let process = Process::new(program, root)
+        .args(args.iter().copied().chain([spec]))
+        .merged();
+    match tmp {
+        Some(tmp) => process.java_tmpdir(tmp),
+        None => process,
+    }
+}
+
+/// A temporary directory of this parser run's own, created; `None` when it cannot be, in
+/// which case the parser runs in the shared one.
+fn parser_tmpdir() -> Option<PathBuf> {
+    let tmp = std::env::temp_dir().join(format!(
+        "cupel-parser-{}-{}",
+        std::process::id(),
+        PARSER_RUNS.fetch_add(1, Ordering::SeqCst)
+    ));
+    std::fs::create_dir_all(&tmp).ok().map(|()| tmp)
 }
 
 /// The finding for the oracle `name`'s failure (ADR-016: its subject is the oracle's name).
@@ -250,5 +282,37 @@ fn problem(name: &str, failure: Failure) -> Problem {
         evidence,
         action,
         fix,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_jvm_parser_gets_a_temporary_directory_of_its_own_and_the_others_do_not() {
+        let root = Path::new("/repo");
+        let tmp = Path::new("/tmp/cupel-parser-1-0");
+        assert_eq!(
+            parser(root, "sany", &[], "spec/Counter.tla", Some(tmp)),
+            Process::new("sany", root)
+                .args(["spec/Counter.tla"])
+                .merged()
+                .java_tmpdir(tmp)
+        );
+        assert_eq!(
+            parser(root, "quint", &["parse"], "spec/counter.qnt", None),
+            Process::new("quint", root)
+                .args(["parse", "spec/counter.qnt"])
+                .merged()
+        );
+        let made = parser_tmpdir().unwrap();
+        assert!(
+            made.is_dir()
+                && made
+                    .file_name()
+                    .is_some_and(|name| name.to_string_lossy().starts_with("cupel-parser-"))
+        );
+        std::fs::remove_dir_all(made).unwrap();
     }
 }
