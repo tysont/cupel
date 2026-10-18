@@ -1,16 +1,19 @@
 // ABOUTME: `Process`, the one way producers run an external program (ADR-076 §3): input given, output captured,
 // ABOUTME: the child polled against the run's `Cancellation`, and stopped with its process group when it fires.
-use std::io::{Read, Write};
+use std::io::{ErrorKind, Read, Write};
 use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::thread::JoinHandle;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crate::cancel::Cancellation;
 use crate::error::{Error, Result};
 
 /// How often a running child is checked for exit and cancellation.
 const POLL: Duration = Duration::from_millis(10);
+
+/// How long a spawn waits for another process to close a program it still holds open for writing.
+const BUSY_WAIT: Duration = Duration::from_secs(2);
 
 /// A program to run: its arguments, directory, extra environment, and whether its standard error
 /// is merged into its standard output.
@@ -130,7 +133,7 @@ impl Process {
             command.stdout(Stdio::piped()).stderr(Stdio::piped());
             None
         };
-        let mut child = command.spawn().map_err(|error| self.failed(&error))?;
+        let mut child = spawn(&mut command).map_err(|error| self.failed(&error))?;
         // The command holds the parent's copies of a merged pipe's write end; the reader sees
         // the end of the output only once they are closed.
         drop(command);
@@ -165,6 +168,23 @@ impl Process {
 
 /// Waits for `child` to exit, stopping it when `cancel` fires first: at once, or after SIGTERM
 /// and `grace`.
+/// Spawns `command`. Linux refuses to execute a program some process has open for writing
+/// (`ETXTBSY`); a child another thread forked holds a just-written script's descriptor until it
+/// execs, so the spawn is retried until the program closes, within `BUSY_WAIT`.
+fn spawn(command: &mut Command) -> std::io::Result<Child> {
+    let deadline = Instant::now() + BUSY_WAIT;
+    loop {
+        match command.spawn() {
+            Err(error)
+                if error.kind() == ErrorKind::ExecutableFileBusy && Instant::now() < deadline =>
+            {
+                std::thread::sleep(POLL);
+            }
+            spawned => return spawned,
+        }
+    }
+}
+
 fn wait(child: &mut Child, cancel: &Cancellation, grace: Option<Duration>) -> Result<Option<i32>> {
     loop {
         if let Ok(Some(status)) = child.try_wait() {

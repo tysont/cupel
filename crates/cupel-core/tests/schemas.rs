@@ -103,73 +103,36 @@ fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
 
 #[test]
 fn the_execution_facts_of_wrapped_tools_are_at_version_one_under_their_kind() {
-    let described: Vec<(FactKind, Option<u32>, Value)> = [
-        FactKind::BenchSamples,
-        FactKind::FuzzResults,
-        FactKind::RaceReports,
-        FactKind::Histories,
-        FactKind::SimulationResults,
-        FactKind::Traces,
-        FactKind::ModelCheckResults,
-        FactKind::ProofResults,
-        FactKind::ContractViolations,
-    ]
-    .into_iter()
-    .map(|kind| {
-        let id = schema::fact(kind).map(|schema| schema.as_value()["$id"].clone());
-        (kind, schema::fact_version(kind), id.unwrap_or(Value::Null))
-    })
-    .collect();
-    assert_eq!(
-        described,
-        [
+    const WRAPPED: [(FactKind, &str); 9] = [
+        (FactKind::BenchSamples, "bench-samples"),
+        (FactKind::FuzzResults, "fuzz-results"),
+        (FactKind::RaceReports, "race-reports"),
+        (FactKind::Histories, "histories"),
+        (FactKind::SimulationResults, "simulation-results"),
+        (FactKind::Traces, "traces"),
+        (FactKind::ModelCheckResults, "model-check-results"),
+        (FactKind::ProofResults, "proof-results"),
+        (FactKind::ContractViolations, "contract-violations"),
+    ];
+    let described: Vec<(FactKind, Option<u32>, Value)> = WRAPPED
+        .iter()
+        .map(|(kind, _)| {
+            let id = schema::fact(*kind).map(|schema| schema.as_value()["$id"].clone());
             (
-                FactKind::BenchSamples,
-                Some(1),
-                json!("https://cupel.dev/schema/v1/fact/bench-samples.json")
-            ),
-            (
-                FactKind::FuzzResults,
-                Some(1),
-                json!("https://cupel.dev/schema/v1/fact/fuzz-results.json")
-            ),
-            (
-                FactKind::RaceReports,
-                Some(1),
-                json!("https://cupel.dev/schema/v1/fact/race-reports.json")
-            ),
-            (
-                FactKind::Histories,
-                Some(1),
-                json!("https://cupel.dev/schema/v1/fact/histories.json")
-            ),
-            (
-                FactKind::SimulationResults,
-                Some(1),
-                json!("https://cupel.dev/schema/v1/fact/simulation-results.json")
-            ),
-            (
-                FactKind::Traces,
-                Some(1),
-                json!("https://cupel.dev/schema/v1/fact/traces.json")
-            ),
-            (
-                FactKind::ModelCheckResults,
-                Some(1),
-                json!("https://cupel.dev/schema/v1/fact/model-check-results.json")
-            ),
-            (
-                FactKind::ProofResults,
-                Some(1),
-                json!("https://cupel.dev/schema/v1/fact/proof-results.json")
-            ),
-            (
-                FactKind::ContractViolations,
-                Some(1),
-                json!("https://cupel.dev/schema/v1/fact/contract-violations.json")
-            ),
-        ]
-    );
+                *kind,
+                schema::fact_version(*kind),
+                id.unwrap_or(Value::Null),
+            )
+        })
+        .collect();
+    let expected: Vec<(FactKind, Option<u32>, Value)> = WRAPPED
+        .iter()
+        .map(|(kind, name)| {
+            let id = format!("https://cupel.dev/schema/v1/fact/{name}.json");
+            (*kind, Some(1), json!(id))
+        })
+        .collect();
+    assert_eq!(described, expected);
 }
 
 #[test]

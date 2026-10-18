@@ -232,3 +232,34 @@ fn a_rustc_wrapper_of_the_users_own_is_inherited() {
         String::from_utf8_lossy(&output.stdout)
     );
 }
+
+#[test]
+fn a_program_another_process_still_holds_open_for_writing_is_run_once_it_is_closed() {
+    // Linux refuses to execute a file some process has open for writing (ETXTBSY), and a child
+    // forked by another thread holds a just-written script's descriptor until it execs; the
+    // spawn waits the writer out instead of failing.
+    let dir = tempfile::tempdir().unwrap();
+    let program = dir.path().join("say.sh");
+    std::fs::write(&program, "#!/bin/sh\necho spoken\n").unwrap();
+    std::fs::set_permissions(
+        &program,
+        std::os::unix::fs::PermissionsExt::from_mode(0o755),
+    )
+    .unwrap();
+    let held = std::fs::OpenOptions::new()
+        .append(true)
+        .open(&program)
+        .unwrap();
+    let writer = std::thread::spawn(move || {
+        std::thread::sleep(Duration::from_millis(150));
+        drop(held);
+    });
+    let captured = Process::new(&program.to_string_lossy(), dir.path())
+        .run(&Cancellation::new())
+        .unwrap();
+    writer.join().unwrap();
+    assert_eq!(
+        (captured.exit_code, captured.stdout.as_str()),
+        (Some(0), "spoken\n")
+    );
+}
