@@ -337,6 +337,12 @@ pub fn relative(base: &Path, path: &Path) -> String {
         .replace('\\', "/")
 }
 
+/// Whether `path` has the extension `extension`, in any case.
+pub fn extension_is(path: &Path, extension: &str) -> bool {
+    path.extension()
+        .is_some_and(|ext| ext.eq_ignore_ascii_case(extension))
+}
+
 /// The longest input shown, in characters, or bytes for one shown as hex.
 const SHOWN: usize = 256;
 

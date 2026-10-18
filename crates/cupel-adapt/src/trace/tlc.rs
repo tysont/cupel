@@ -12,6 +12,7 @@
 //! the trace diverged ([`verdict`]).
 
 use std::collections::BTreeSet;
+use std::fmt::Write as _;
 use std::fs;
 use std::path::Path;
 
@@ -320,8 +321,8 @@ impl SpecConfig {
                 Some(first)
             };
             match (section, rest) {
-                ("INIT", Some(name)) => config.init = name.to_owned(),
-                ("NEXT", Some(name)) => config.next = name.to_owned(),
+                ("INIT", Some(name)) => name.clone_into(&mut config.init),
+                ("NEXT", Some(name)) => name.clone_into(&mut config.next),
                 ("CONSTANT" | "CONSTANTS", _) => config.constants.push(
                     line.strip_prefix(section)
                         .filter(|_| first == section)
@@ -414,15 +415,14 @@ fn logged_names(steps: &[Logged]) -> std::result::Result<(BTreeSet<&str>, BTreeS
 /// One conjunct per variable: when the logged state at `index` has it, the variable (primed by
 /// `prime`) equals it.
 fn constrained(variables: &BTreeSet<&str>, index: &str, prime: &str) -> String {
-    variables
-        .iter()
-        .map(|variable| {
-            format!(
-                "    /\\ (\"{variable}\" \\in DOMAIN {MODULE}[{index}] => \
-                 {variable}{prime} = {MODULE}[{index}][\"{variable}\"])\n"
-            )
-        })
-        .collect()
+    variables.iter().fold(String::new(), |mut text, variable| {
+        let _ = writeln!(
+            text,
+            "    /\\ (\"{variable}\" \\in DOMAIN {MODULE}[{index}] => \
+             {variable}{prime} = {MODULE}[{index}][\"{variable}\"])"
+        );
+        text
+    })
 }
 
 /// The step each logged state takes: the action it names, else the spec's `next`.
@@ -432,11 +432,12 @@ fn relation(actions: &BTreeSet<&str>, next: &str) -> String {
     }
     let mut case = String::from("    /\\ CASE ");
     for action in actions {
-        case.push_str(&format!(
+        let _ = write!(
+            case,
             "{MODULE}Action[cupel_step + 1] = \"{action}\" -> {action}\n         [] "
-        ));
+        );
     }
-    case.push_str(&format!("OTHER -> {next}\n"));
+    let _ = writeln!(case, "OTHER -> {next}");
     case
 }
 

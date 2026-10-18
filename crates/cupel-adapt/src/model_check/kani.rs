@@ -8,7 +8,7 @@ use cupel_core::{
     ProducerId, RefutedProperty, Result, Scope, ToolProbe, output_tail,
 };
 
-use crate::fuzz::{in_scope, sources};
+use crate::fuzz::{extension_is, in_scope, sources};
 use crate::runner::{on_path, probe, root_run, suite_roots};
 use crate::tree::{canonical, relative, under};
 
@@ -171,7 +171,7 @@ fn located(root: &Path, dir: &Path, file: &str, line: u32) -> Option<Location> {
 fn defined(dir: &Path, name: &str) -> Option<(String, u32)> {
     let function = name.rsplit("::").next()?;
     let signature = format!("fn {function}(");
-    sources(dir, |relative, _| relative.ends_with(".rs"))
+    sources(dir, |_, path| extension_is(path, "rs"))
         .into_iter()
         .find_map(|(relative, path)| {
             let text = std::fs::read_to_string(path).ok()?;

@@ -1,6 +1,7 @@
 // ABOUTME: `conc.model-check` (ADR-117): properties a bounded model checker refuted in the project's proof harnesses,
 // ABOUTME: from the ModelCheckResults fact, one failing finding per refuted property with its counterexample.
 use std::collections::BTreeMap;
+use std::fmt::Write as _;
 
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckResult, CostClass, Event, EventSink, FactKind, Facts,
@@ -194,10 +195,10 @@ impl ConcModelCheck {
             harness.name, property.description
         );
         if let Some(function) = &property.function {
-            title.push_str(&format!(" in `{function}`"));
+            let _ = write!(title, " in `{function}`");
         }
         if !values.is_empty() {
-            title.push_str(&format!(" with {}", values.join(", ")));
+            let _ = write!(title, " with {}", values.join(", "));
         }
         let location = property
             .location

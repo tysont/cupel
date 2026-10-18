@@ -9,7 +9,7 @@ use cupel_core::{
 };
 use serde_json::Value;
 
-use crate::fuzz::sources;
+use crate::fuzz::{extension_is, sources};
 use crate::runner::{on_path, probe, root_run, suite_roots};
 use crate::tree::{canonical, relative, under};
 
@@ -76,7 +76,7 @@ impl Producer<ProofResults> for Dafny {
                 continue;
             }
             let path = canonical(&root.join(&dir));
-            let files: Vec<String> = sources(&path, |relative, _| relative.ends_with(".dfy"))
+            let files: Vec<String> = sources(&path, |_, path| extension_is(path, "dfy"))
                 .into_iter()
                 .map(|(relative, _)| relative)
                 .filter(|file| !ctx.ctx.exclude.excludes(&under(&dir, file)))

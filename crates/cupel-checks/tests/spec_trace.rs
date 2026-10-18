@@ -171,7 +171,12 @@ fn traces_that_all_conform_pass_and_no_validated_trace_scores_nothing() {
 
 #[test]
 fn the_check_compares_against_the_runs_oracle() {
-    assert_eq!(support::check(ID).uses_oracle(), true);
+    let check = support::check(ID);
+    let manifest = check.manifest();
+    assert_eq!(
+        (u8::from(manifest.tier), manifest.cost, check.uses_oracle()),
+        (5, CostClass::Exhaustive, true)
+    );
 }
 
 #[test]
