@@ -263,3 +263,19 @@ fn a_program_another_process_still_holds_open_for_writing_is_run_once_it_is_clos
         (Some(0), "spoken\n")
     );
 }
+
+#[test]
+fn a_java_temporary_directory_is_appended_to_the_jvms_tool_options() {
+    let dir = tempfile::tempdir().unwrap();
+    let captured = shell("printf %s \"$JAVA_TOOL_OPTIONS\"")
+        .java_tmpdir(dir.path())
+        .run(&Cancellation::new())
+        .unwrap();
+    assert!(
+        captured
+            .stdout
+            .ends_with(&format!("-Djava.io.tmpdir={}", dir.path().display())),
+        "{:?}",
+        captured.stdout
+    );
+}

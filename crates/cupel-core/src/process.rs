@@ -1,7 +1,7 @@
 // ABOUTME: `Process`, the one way producers run an external program (ADR-076 §3): input given, output captured,
 // ABOUTME: the child polled against the run's `Cancellation`, and stopped with its process group when it fires.
 use std::io::{ErrorKind, Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
@@ -92,6 +92,20 @@ impl Process {
     pub fn terminate(mut self, grace: Duration) -> Self {
         self.grace = Some(grace);
         self
+    }
+
+    /// A JVM program's temporary directory: `-Djava.io.tmpdir=<dir>` appended to the
+    /// `JAVA_TOOL_OPTIONS` the environment has. The TLA+ tools (SANY, TLC) write the standard
+    /// modules they parse into it and delete them on exit, so two running at once in the shared
+    /// directory delete each other's.
+    #[must_use]
+    pub fn java_tmpdir(self, dir: &Path) -> Self {
+        let options = format!(
+            "{} -Djava.io.tmpdir={}",
+            std::env::var("JAVA_TOOL_OPTIONS").unwrap_or_default(),
+            dir.display()
+        );
+        self.env("JAVA_TOOL_OPTIONS", options.trim_start())
     }
 
     /// The program and its arguments.
