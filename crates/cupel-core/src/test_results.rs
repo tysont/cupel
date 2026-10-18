@@ -7,7 +7,7 @@ use std::path::Path;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::id::{LangId, ProducerId};
 
 /// The most lines an output tail keeps.
@@ -31,6 +31,8 @@ impl Fact for TestResults {
     const KIND: FactKind = FactKind::TestResults;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<TestResults>("test-results").pinned_by("runner"));
 
 /// One run of a runner in one project root.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

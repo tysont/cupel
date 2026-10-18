@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::id::ProducerId;
 use crate::root_run::RootRun;
 
@@ -30,6 +30,10 @@ impl Fact for ContractViolations {
     const KIND: FactKind = FactKind::ContractViolations;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(
+    FactEntry::execution::<ContractViolations>("contract-violations").with_conformance()
+);
 
 /// One contract a test violated.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

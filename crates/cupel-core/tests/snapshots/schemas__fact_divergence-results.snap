@@ -1,0 +1,254 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/divergence-results.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DivergenceResults",
+  "description": "Entry points compared with an oracle on generated inputs (ADR-093 §1).",
+  "type": "object",
+  "properties": {
+    "cases": {
+      "description": "Generated inputs per entry, besides an oracle's known inputs.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "engine": {
+      "description": "The producer that compared them, such as `engine.differential`.",
+      "$ref": "#/$defs/ProducerId"
+    },
+    "entries": {
+      "description": "One per configured entry point in scope, in configuration order.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EntryComparison"
+      }
+    },
+    "oracle": {
+      "description": "The oracle compared against; `None` when the run has none.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ComparedOracle"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seed": {
+      "description": "The run's seed, from which every entry's inputs derive.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "cases",
+    "engine",
+    "entries",
+    "oracle",
+    "seed"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "Answer": {
+      "description": "How one call ended, with its text: a value's rendering, an error, or why there was no answer.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "returned": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "returned"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "raised": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "raised"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "crashed": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "crashed"
+          ]
+        }
+      ]
+    },
+    "ComparedOracle": {
+      "description": "The oracle a comparison ran against.",
+      "type": "object",
+      "properties": {
+        "commit": {
+          "description": "The commit a `ref` oracle resolved to.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/OracleKind"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "commit",
+        "kind",
+        "name"
+      ]
+    },
+    "Divergence": {
+      "description": "An input on which the implementation and the oracle answered differently.",
+      "type": "object",
+      "properties": {
+        "case": {
+          "description": "The index of `found` among the entry's inputs.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "found": {
+          "description": "The arguments as first generated.",
+          "type": "array",
+          "items": true
+        },
+        "implementation": {
+          "description": "What the working tree answered on `input`.",
+          "$ref": "#/$defs/Answer"
+        },
+        "input": {
+          "description": "The minimized arguments.",
+          "type": "array",
+          "items": true
+        },
+        "oracle": {
+          "description": "What the oracle answered on `input`.",
+          "$ref": "#/$defs/Answer"
+        },
+        "shrinks": {
+          "description": "Minimization steps taken from `found` to `input`.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "case",
+        "found",
+        "implementation",
+        "input",
+        "oracle",
+        "shrinks"
+      ]
+    },
+    "EntryComparison": {
+      "description": "One entry point's comparison.",
+      "type": "object",
+      "properties": {
+        "compared": {
+          "description": "Inputs both sides answered.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "divergence": {
+          "description": "The first divergence, minimized; `None` when every input agreed.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Divergence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "entry": {
+          "description": "The entry as configured: `<file>:<function>`.",
+          "type": "string"
+        },
+        "skipped": {
+          "description": "Why the entry was not compared; `None` when it was.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "symbol": {
+          "description": "The function the entry names, when it resolved.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolKey"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "compared",
+        "divergence",
+        "entry",
+        "skipped",
+        "symbol"
+      ]
+    },
+    "OracleKind": {
+      "type": "string",
+      "enum": [
+        "ref",
+        "command",
+        "spec"
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "SymbolKey": {
+      "description": "Identifies a symbol within one run by where it starts. Not stable across edits; anything\npersisted across runs uses `SymbolHash` (ADR-014).",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "file",
+        "line"
+      ]
+    }
+  }
+}

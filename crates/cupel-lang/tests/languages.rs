@@ -139,8 +139,9 @@ fn registering_producers_never_registers_a_language_twice_for_a_fact() {
     let twice: Vec<String> = langs
         .iter()
         .flat_map(|lang| {
-            cupel_core::FactKind::ALL
-                .into_iter()
+            cupel_core::FactKind::all()
+                .iter()
+                .copied()
                 .map(move |kind| (lang, kind))
         })
         .filter(|(lang, kind)| producers.producers_for(*kind, lang).count() > 1)

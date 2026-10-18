@@ -112,7 +112,7 @@ fn python_has_one_producer_for_every_syntactic_fact() {
     let mut producers = cupel_core::ProducerRegistry::default();
     languages.register_producers(&mut producers);
     let python = cupel_lang::lang(languages.get(&"python".into()).unwrap().as_ref());
-    for kind in cupel_core::FactKind::SYNTACTIC {
+    for &kind in cupel_core::FactKind::syntactic() {
         let count = producers.producers_for(kind, &python).count();
         assert_eq!(count, 1, "{kind}");
     }

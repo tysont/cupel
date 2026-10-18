@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::id::ProducerId;
 use crate::root_run::RootRun;
 
@@ -27,6 +27,8 @@ impl Fact for BenchSamples {
     const KIND: FactKind = FactKind::BenchSamples;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<BenchSamples>("bench-samples"));
 
 /// One benchmark's samples of one measurement.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]

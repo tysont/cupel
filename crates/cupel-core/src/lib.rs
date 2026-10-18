@@ -96,7 +96,7 @@ pub use error::{ArgumentError, Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
 pub use exclude::{ALWAYS_EXCLUDED, Exclude};
 pub use explanation::{Excerpt, ExcerptLine, ExplainSubject, Explanation, Metric};
-pub use fact::{Fact, FactKind};
+pub use fact::{Fact, FactEntry, FactKind};
 pub use facts::Facts;
 pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Symbol};
 pub use flake::{RunOrder, TestRerun, TestReruns};

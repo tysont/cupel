@@ -1,8 +1,8 @@
 // ABOUTME: Per-fact conformance (design §8.3.7): every registered language that produces a fact maps
 // ABOUTME: every construct of that fact's inventory, and its producer detects each mapped construct.
-use cupel_core::{FactKind, LangId};
+use cupel_core::{FactEntry, FactKind, LangId, ProducerRegistry};
 use cupel_fixtures::conformance::{
-    EXECUTION, FactInventory, Failure, LanguageInventory, check_language, fact_inventories,
+    FactInventory, Failure, LanguageInventory, check_language, execution, fact_inventories,
     fact_inventory, run_language, unexhibited,
 };
 use cupel_lang::LanguageRegistry;
@@ -38,22 +38,47 @@ fn every_registered_language_has_a_fixture_repository_and_inventory() {
 }
 
 #[test]
-fn every_fact_inventory_loads_and_names_a_syntactic_fact_or_an_execution_fact() {
+fn every_fact_inventory_loads_and_names_a_kind_whose_entry_has_conformance() {
     for inventory in fact_inventories() {
-        assert!(
-            FactKind::SYNTACTIC.contains(&inventory.fact) || EXECUTION.contains(&inventory.fact),
-            "{}",
-            inventory.fact
-        );
+        assert!(inventory.fact.entry().conformance, "{}", inventory.fact);
         assert!(!inventory.constructs.is_empty(), "{}", inventory.fact);
     }
 }
 
 #[test]
-fn every_execution_fact_with_conformance_has_its_inventory() {
-    for kind in EXECUTION {
+fn every_kind_with_conformance_has_exactly_its_inventory() {
+    let with_conformance: Vec<FactKind> = FactEntry::catalog()
+        .iter()
+        .filter(|entry| entry.conformance)
+        .map(|entry| entry.kind)
+        .collect();
+    let mut inventories: Vec<FactKind> = fact_inventories()
+        .iter()
+        .map(|inventory| inventory.fact)
+        .collect();
+    inventories.sort();
+    assert_eq!(inventories, with_conformance);
+    for kind in execution() {
         assert_eq!(fact_inventory(kind).fact, kind);
     }
+}
+
+#[test]
+fn every_syntactic_fact_is_produced_by_some_language() {
+    let languages = LanguageRegistry::builtin();
+    let mut producers = ProducerRegistry::default();
+    languages.register_producers(&mut producers);
+    let unproduced: Vec<FactKind> = FactKind::syntactic()
+        .iter()
+        .copied()
+        .filter(|kind| {
+            languages
+                .langs()
+                .iter()
+                .all(|lang| producers.producers_for(*kind, lang).next().is_none())
+        })
+        .collect();
+    assert_eq!(unproduced, Vec::<FactKind>::new());
 }
 
 #[test]

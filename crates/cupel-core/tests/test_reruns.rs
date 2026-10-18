@@ -16,8 +16,8 @@ fn rerun(order: RunOrder, seed: u64, executed: Option<&[&str]>) -> TestRerun {
 #[test]
 fn test_reruns_is_a_fact_kind_with_a_versioned_schema() {
     assert_eq!(FactKind::TestReruns.as_str(), "test-reruns");
-    assert!(FactKind::ALL.contains(&FactKind::TestReruns));
-    assert!(!FactKind::SYNTACTIC.contains(&FactKind::TestReruns));
+    assert!(FactKind::all().contains(&FactKind::TestReruns));
+    assert!(!FactKind::syntactic().contains(&FactKind::TestReruns));
     assert_eq!(schema::fact_version(FactKind::TestReruns), Some(1));
 }
 

@@ -8,7 +8,7 @@ use std::path::Path;
 
 use cupel_core::{
     Cancellation, CostClass, Ctx, Error, FactKind, PerTestMap, ProduceCtx, Produced, ProducerId,
-    ProducerRegistry, Scope, TestResults, Writer, schema,
+    ProducerRegistry, Scope, TestResults, Writer,
 };
 use serde_json::{Value, json};
 use support::{
@@ -25,8 +25,9 @@ fn produce_with(dir: &Path, manifest: &Value, run: &str) -> cupel_core::Result<P
     let mut producers = ProducerRegistry::default();
     plugins.register_producers(&mut producers);
     let kind = manifest["provides"]["kind"].as_str().unwrap();
-    let kind = FactKind::ALL
-        .into_iter()
+    let kind = FactKind::all()
+        .iter()
+        .copied()
         .find(|candidate| candidate.as_str() == kind)
         .unwrap();
     let producer = producers.producers_for(kind, &typescript()).next().unwrap();
@@ -171,10 +172,6 @@ fn a_non_zero_exit_without_a_fact_is_an_error() {
 }
 
 #[test]
-fn every_kind_with_a_payload_type_can_be_provided_by_a_plugin() {
-    let providable: Vec<FactKind> = FactKind::ALL
-        .into_iter()
-        .filter(|kind| schema::fact_version(*kind).is_some())
-        .collect();
-    assert_eq!(cupel_plugin::providable_kinds(), providable);
+fn every_catalog_kind_can_be_provided_by_a_plugin() {
+    assert_eq!(cupel_plugin::providable_kinds(), FactKind::all());
 }

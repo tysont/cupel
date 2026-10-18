@@ -1,0 +1,168 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/property-results.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PropertyResults",
+  "description": "The property tests in scope, run once with a seed and a case budget (ADR-095).",
+  "type": "object",
+  "properties": {
+    "cases": {
+      "description": "The generated cases each property was asked to pass.",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    },
+    "frameworks": {
+      "description": "The language's property frameworks, in the toolchain table's order.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "properties": {
+      "description": "Every property test case in scope, by file, then line.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PropertyResult"
+      }
+    },
+    "runner": {
+      "description": "The baseline's runner, which ran the properties, such as `tool.pytest`.",
+      "$ref": "#/$defs/ProducerId"
+    },
+    "seed": {
+      "description": "The run's seed, handed to every framework that takes one.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "cases",
+    "frameworks",
+    "properties",
+    "runner",
+    "seed"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "PropertyOutcome": {
+      "description": "How a property test ended.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "passed",
+            "skipped"
+          ]
+        },
+        {
+          "description": "Failed, and the framework reported the input that falsifies it.",
+          "type": "string",
+          "const": "falsified"
+        },
+        {
+          "description": "Failed without a counterexample: an error before any case ran, or a crash.",
+          "type": "string",
+          "const": "failed"
+        },
+        {
+          "description": "No test the runner reported is this case.",
+          "type": "string",
+          "const": "not-run"
+        }
+      ]
+    },
+    "PropertyResult": {
+      "description": "One property test and what the run said about it.",
+      "type": "object",
+      "properties": {
+        "counterexample": {
+          "description": "The framework's shrunk failing input, as it printed it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "file": {
+          "description": "The test file, relative to the repository root.",
+          "type": "string"
+        },
+        "framework": {
+          "description": "The framework that generates its inputs, such as `proptest` or `hypothesis`.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The case's name, as `TestFrames` gives it.",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/PropertyOutcome"
+        },
+        "seeded": {
+          "description": "Whether the framework took the run's seed (quickcheck takes none).",
+          "type": "boolean"
+        },
+        "span": {
+          "$ref": "#/$defs/Span"
+        },
+        "test": {
+          "description": "The runner's ID of the test; `None` when no test the runner reported is this case.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "counterexample",
+        "file",
+        "framework",
+        "name",
+        "outcome",
+        "seeded",
+        "span",
+        "test"
+      ]
+    },
+    "Span": {
+      "description": "A 1-based range within one file.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "line"
+      ]
+    }
+  }
+}

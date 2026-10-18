@@ -4,7 +4,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::finding::Location;
 use crate::id::ProducerId;
 
@@ -27,6 +27,8 @@ impl Fact for Traces {
     const KIND: FactKind = FactKind::Traces;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<Traces>("traces").with_conformance());
 
 /// The spec oracle traces are validated against.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

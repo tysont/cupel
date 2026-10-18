@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::id::ProducerId;
 
 /// Which lines each test executes when it runs alone (ADR-077).
@@ -27,6 +27,8 @@ impl Fact for PerTestMap {
     const KIND: FactKind = FactKind::PerTestMap;
     const VERSION: u32 = 2;
 }
+
+inventory::submit!(FactEntry::execution::<PerTestMap>("per-test-map"));
 
 /// The lines one test executed.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

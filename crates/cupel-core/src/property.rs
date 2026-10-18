@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::id::ProducerId;
 use crate::syntax::Span;
 
@@ -26,6 +26,8 @@ impl Fact for PropertyResults {
     const KIND: FactKind = FactKind::PropertyResults;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<PropertyResults>("property-results"));
 
 /// One property test and what the run said about it.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

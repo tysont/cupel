@@ -671,11 +671,12 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
 }
 
 #[test]
-fn describe_fact_of_a_wrapped_tool_fact_has_its_payload_version_and_schema() {
-    let described: Vec<Value> = ["bench-samples", "fuzz-results", "race-reports"]
-        .into_iter()
-        .map(|kind| {
-            let description = &run(["describe", "fact", kind]).envelope()["description"];
+fn describe_fact_of_every_catalog_kind_has_its_entry_version_and_schema() {
+    let entries = cupel_core::FactEntry::catalog();
+    let described: Vec<Value> = entries
+        .iter()
+        .map(|entry| {
+            let description = &run(["describe", "fact", entry.name]).envelope()["description"];
             json!([
                 description["syntactic"],
                 description["version"],
@@ -683,15 +684,14 @@ fn describe_fact_of_a_wrapped_tool_fact_has_its_payload_version_and_schema() {
             ])
         })
         .collect();
-    let url = |kind: &str| format!("https://cupel.dev/schema/v1/fact/{kind}.json");
-    assert_eq!(
-        described,
-        [
-            json!([false, 1, url("bench-samples")]),
-            json!([false, 1, url("fuzz-results")]),
-            json!([false, 1, url("race-reports")]),
-        ]
-    );
+    let expected: Vec<Value> = entries
+        .iter()
+        .map(|entry| {
+            let id = format!("https://cupel.dev/schema/v1/fact/{}.json", entry.name);
+            json!([entry.syntactic, entry.version, id])
+        })
+        .collect();
+    assert_eq!(described, expected);
 }
 
 #[test]
@@ -710,7 +710,7 @@ fn the_coverage_map_has_a_payload_type_before_any_producer_makes_one() {
 fn describe_fact_with_an_unknown_kind_is_a_usage_error_listing_kinds() {
     let finding = assert_rejected(&["describe", "fact", "vibes"], "cli.usage");
     let valid = finding["evidence"]["valid"].as_array().unwrap();
-    assert_eq!(valid.len(), cupel_core::FactKind::ALL.len());
+    assert_eq!(valid.len(), cupel_core::FactKind::all().len());
     assert_eq!(valid[0], json!("symbols"));
 }
 

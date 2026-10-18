@@ -24,7 +24,7 @@ use cupel_core::{
 pub fn fact_entry(kind: FactKind) -> (&'static str, bool, Option<u32>, Option<serde_json::Value>) {
     (
         kind.as_str(),
-        FactKind::SYNTACTIC.contains(&kind),
+        FactKind::syntactic().contains(&kind),
         cupel_core::schema::fact_version(kind),
         cupel_core::schema::fact(kind).map(|schema| schema.as_value()["$id"].clone()),
     )

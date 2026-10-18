@@ -602,6 +602,15 @@ impl ProducerRegistry {
             }));
     }
 
+    /// Registers a producer whose fact type is known only at run time, such as a producer plugin,
+    /// whose fact its kind's catalog entry decodes (ADR-123).
+    pub fn register_dyn(&mut self, producer: Box<dyn RegisteredProducer>) {
+        self.by_kind
+            .entry(producer.provides())
+            .or_default()
+            .push(producer);
+    }
+
     /// Registers `runner` as a `TestResults` producer and keeps it for [`runner`](Self::runner).
     pub fn register_runner<R: Runner + Clone + 'static>(&mut self, runner: R) {
         self.runners.insert(runner.id(), Arc::new(runner.clone()));

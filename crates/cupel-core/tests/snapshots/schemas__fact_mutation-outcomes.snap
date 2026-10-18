@@ -1,0 +1,316 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/mutation-outcomes.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MutationOutcomes",
+  "description": "What mutation testing found in scope (ADR-080; version 2 adds how each mutant was built,\nADR-082).",
+  "type": "object",
+  "properties": {
+    "depth": {
+      "description": "The depth the engine planned for.",
+      "$ref": "#/$defs/CostClass"
+    },
+    "engine": {
+      "description": "The producer, such as `engine.mutation`.",
+      "$ref": "#/$defs/ProducerId"
+    },
+    "mutants": {
+      "description": "One per (site, replacement), sorted by file, position, then replacement.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Mutant"
+      }
+    },
+    "per_test": {
+      "description": "Whether the tests run against each mutant were selected by a `PerTestMap`.",
+      "type": "boolean"
+    },
+    "runner": {
+      "description": "The runner that ran the mutants; `None` when none ran.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ProducerId"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "depth",
+    "engine",
+    "mutants",
+    "per_test",
+    "runner"
+  ],
+  "x-cupel-fact-version": 2,
+  "$defs": {
+    "CostClass": {
+      "description": "How expensive a check or producer is to run. The same names select a run's depth (design §5.8).",
+      "type": "string",
+      "enum": [
+        "quick",
+        "standard",
+        "deep",
+        "exhaustive"
+      ]
+    },
+    "Mutant": {
+      "description": "One mutant: a site with one replacement, and what became of it.",
+      "type": "object",
+      "properties": {
+        "cache_key": {
+          "description": "The key its outcome is stored and reused under (ADR-080 §10); `None` from a producer\nthat does not reuse outcomes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "duration_ms": {
+          "description": "The wall time of the mutant's run; `None` when it was not run.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "equivalent": {
+          "description": "Why the mutant may be equivalent to the original (ADR-004); `None` when nothing says so.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fallback": {
+          "description": "Why a mutant of a language with schemata was built as a file copy instead; `None`\notherwise.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "from": {
+          "description": "The source text replaced.",
+          "type": "string"
+        },
+        "killing_tests": {
+          "description": "Of `tests`, those that failed or errored.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "operator": {
+          "$ref": "#/$defs/MutationOperator"
+        },
+        "outcome": {
+          "$ref": "#/$defs/MutantOutcome"
+        },
+        "reused": {
+          "description": "Whether the outcome was reused from an earlier run (ADR-080 §10).",
+          "type": "boolean"
+        },
+        "site_hash": {
+          "$ref": "#/$defs/SiteHash"
+        },
+        "span": {
+          "description": "Where `from` is, in the symbol's file.",
+          "$ref": "#/$defs/Span"
+        },
+        "strategy": {
+          "description": "How the mutant was built (ADR-082); `None` when it was not run, or its outcome was\nstored before strategies were recorded.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MutationStrategy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "symbol": {
+          "description": "The symbol the site belongs to.",
+          "$ref": "#/$defs/SymbolKey"
+        },
+        "symbol_hash": {
+          "description": "The symbol's structural hash (ADR-025), when the engine had one.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolHash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tests": {
+          "description": "The tests run against the mutant, by their runner's IDs; empty when it was not run.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "to": {
+          "description": "What replaced it.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "cache_key",
+        "duration_ms",
+        "equivalent",
+        "fallback",
+        "from",
+        "killing_tests",
+        "operator",
+        "outcome",
+        "reused",
+        "site_hash",
+        "span",
+        "strategy",
+        "symbol",
+        "symbol_hash",
+        "tests",
+        "to"
+      ]
+    },
+    "MutantOutcome": {
+      "description": "What became of a mutant.",
+      "oneOf": [
+        {
+          "description": "A test failed against it.",
+          "type": "string",
+          "const": "killed"
+        },
+        {
+          "description": "Every test run against it passed.",
+          "type": "string",
+          "const": "survived"
+        },
+        {
+          "description": "Its run took longer than its timeout.",
+          "type": "string",
+          "const": "timeout"
+        },
+        {
+          "description": "No test runs its site, so it was not run (coverage gating).",
+          "type": "string",
+          "const": "uncovered"
+        },
+        {
+          "description": "Its run did not complete and no test failed: it did not build or load.",
+          "type": "string",
+          "const": "unviable"
+        }
+      ]
+    },
+    "MutationOperator": {
+      "type": "string",
+      "enum": [
+        "relational",
+        "equality",
+        "arith-add-sub",
+        "arith-mul-div",
+        "boolean-op",
+        "boolean-literal",
+        "zero-one",
+        "statement-deletion",
+        "return-value",
+        "constant",
+        "boundary",
+        "negation"
+      ]
+    },
+    "MutationStrategy": {
+      "description": "How a mutant was built (ADR-082).",
+      "oneOf": [
+        {
+          "description": "One build of the file with every mutant behind a run-time switch, selected by\n`CUPEL_MUTANT`.",
+          "type": "string",
+          "const": "schemata"
+        },
+        {
+          "description": "The file rewritten with only this mutant, and rebuilt.",
+          "type": "string",
+          "const": "file-copy"
+        }
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "SiteHash": {
+      "description": "sixteen lowercase hex digits",
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$"
+    },
+    "Span": {
+      "description": "A 1-based range within one file.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "line"
+      ]
+    },
+    "SymbolHash": {
+      "description": "`sh_` followed by sixteen lowercase hex digits",
+      "type": "string",
+      "pattern": "^sh_[0-9a-f]{16}$"
+    },
+    "SymbolKey": {
+      "description": "Identifies a symbol within one run by where it starts. Not stable across edits; anything\npersisted across runs uses `SymbolHash` (ADR-014).",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "file",
+        "line"
+      ]
+    }
+  }
+}

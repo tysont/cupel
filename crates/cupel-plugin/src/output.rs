@@ -1,7 +1,9 @@
 // ABOUTME: Reads what `<plugin> run` printed (ADR-089 §4–6): every line an event, findings and metrics the manifest
 // ABOUTME: declares, exactly one result or fact of the declared kind and version, and the exit status weighed last.
 use cupel_core::plugin::{PluginEvent, PluginResult, ProducerManifest};
-use cupel_core::{Captured, CheckStatus, Event, Fact, Finding, Manifest, MetricPer, Result};
+use cupel_core::{
+    Captured, CheckStatus, Event, FactEntry, Finding, Manifest, MetricPer, Produced, Result,
+};
 use serde_json::Value;
 
 use crate::command::{PluginCommand, ended};
@@ -147,11 +149,12 @@ fn check_result(manifest: &Manifest, result: &PluginResult) -> std::result::Resu
 }
 
 /// A producer plugin's output: exactly one fact of the provided kind and version, whose payload
-/// is a valid `F`.
-pub(crate) fn fact_output<F: Fact>(
+/// is a valid payload of that kind, decoded by its catalog entry.
+pub(crate) fn fact_output(
     manifest: &ProducerManifest,
+    entry: &FactEntry,
     stdout: &str,
-) -> std::result::Result<F, String> {
+) -> std::result::Result<Produced, String> {
     let mut fact = None;
     for event in events(stdout)? {
         let PluginEvent::Fact(reported) = event else {
@@ -175,7 +178,7 @@ pub(crate) fn fact_output<F: Fact>(
             fact.kind, fact.version, provides.version
         ));
     }
-    serde_json::from_value(fact.payload).map_err(|error| {
+    (entry.decode)(fact.payload).map_err(|error| {
         format!(
             "the fact does not match the `{}` schema: {error}",
             fact.kind

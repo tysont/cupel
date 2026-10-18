@@ -159,58 +159,6 @@ fn support(m: &SupportMatrix, check: &str, lang: &Lang) -> Support {
         .expect("every (check, lang) pair has a cell")
 }
 
-// ---------------------------------------------------------------- fact kinds
-
-#[test]
-fn fact_kinds_are_the_catalog_rows_in_kebab_case() {
-    let names = [
-        "symbols",
-        "decisions",
-        "norm-tree",
-        "mutation-sites",
-        "test-frames",
-        "module-graph",
-        "api-surface",
-        "roots",
-        "test-conventions",
-        "project-info",
-        "test-results",
-        "test-reruns",
-        "coverage-map",
-        "per-test-map",
-        "mutation-outcomes",
-        "bench-samples",
-        "property-results",
-        "fuzz-results",
-        "race-reports",
-        "analyzer-report",
-        "divergence-results",
-        "relation-results",
-        "footprint",
-        "histories",
-        "simulation-results",
-        "traces",
-        "model-check-results",
-        "proof-results",
-        "contract-violations",
-    ];
-    let spelled: Vec<(serde_json::Value, String, &str)> = FactKind::ALL
-        .into_iter()
-        .map(|kind| {
-            (
-                serde_json::to_value(kind).unwrap(),
-                kind.to_string(),
-                kind.as_str(),
-            )
-        })
-        .collect();
-    let expected: Vec<(serde_json::Value, String, &str)> = names
-        .into_iter()
-        .map(|name| (json!(name), name.to_owned(), name))
-        .collect();
-    assert_eq!(spelled, expected);
-}
-
 // ---------------------------------------------------------------- Facts accessor
 
 #[test]

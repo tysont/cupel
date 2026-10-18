@@ -1,5 +1,7 @@
-# ABOUTME: Git attributes for Cupel. The crate roots below hold the `mod` lines new checks and producers
-# ABOUTME: add in parallel; `union` keeps both sides' lines when two branches add one each (ADR-074).
+# ABOUTME: Git attributes for Cupel. The files below hold the lines new checks, producers, and fact kinds add in
+# ABOUTME: parallel (`mod` lines, `FactKind` variants); `union` keeps both sides' lines (ADR-074, ADR-123).
 crates/cupel-adapt/src/lib.rs merge=union
 crates/cupel-checks/src/lib.rs merge=union
+crates/cupel-core/src/fact/kind.rs merge=union
+crates/cupel-core/src/lib.rs merge=union
 crates/cupel-lang/src/lib.rs merge=union

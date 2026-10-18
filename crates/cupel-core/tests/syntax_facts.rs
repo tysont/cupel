@@ -12,7 +12,6 @@ use cupel_core::{Fact, FactKind, LangId};
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use serde_json::{Value, json};
-use std::collections::BTreeSet;
 use std::fmt::Debug;
 
 fn span(line: u32) -> Span {
@@ -375,8 +374,6 @@ fn each_payload_declares_its_own_kind_and_version() {
         (TestConventions::KIND, TestConventions::VERSION),
         (ProjectInfo::KIND, ProjectInfo::VERSION),
     ];
-    let kinds: BTreeSet<FactKind> = declared.iter().map(|(kind, _)| *kind).collect();
-    assert_eq!(kinds, FactKind::SYNTACTIC.into_iter().collect());
     assert_eq!(
         declared,
         [

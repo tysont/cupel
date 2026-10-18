@@ -1,0 +1,181 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/contract-violations.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ContractViolations",
+  "description": "What one contract library reported while a language's tests ran with every contract it\nchecks turned on and generated inputs at the run's case budget (ADR-113).",
+  "type": "object",
+  "properties": {
+    "declared": {
+      "description": "Whether a project root declares the library as a dependency; when none does, the tests\nwere not run again and nothing was checked.",
+      "type": "boolean"
+    },
+    "runner": {
+      "description": "The baseline's runner, which ran the tests, such as `tool.cargo-test`.",
+      "$ref": "#/$defs/ProducerId"
+    },
+    "runs": {
+      "description": "Each project root the runner ran in, in root order.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RootRun"
+      }
+    },
+    "tests": {
+      "description": "The tests the contract run reported, skipped ones aside.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "tool": {
+      "description": "The producer that reads the library's reports, such as `tool.rust-contracts`.",
+      "$ref": "#/$defs/ProducerId"
+    },
+    "violations": {
+      "description": "Every violation whose contract is in scope or outside the repository, in test order.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ContractViolation"
+      }
+    }
+  },
+  "required": [
+    "declared",
+    "runner",
+    "runs",
+    "tests",
+    "tool",
+    "violations"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "ContractKind": {
+      "description": "What a contract constrains.",
+      "oneOf": [
+        {
+          "description": "What must hold when a function is called: the caller's obligation.",
+          "type": "string",
+          "const": "precondition"
+        },
+        {
+          "description": "What must hold when a function returns: the function's obligation.",
+          "type": "string",
+          "const": "postcondition"
+        },
+        {
+          "description": "What must hold of a value before and after every method call on it.",
+          "type": "string",
+          "const": "invariant"
+        }
+      ]
+    },
+    "ContractPlace": {
+      "description": "Where a contract is declared.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Relative to the repository root.",
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "file",
+        "line"
+      ]
+    },
+    "ContractViolation": {
+      "description": "One contract a test violated.",
+      "type": "object",
+      "properties": {
+        "function": {
+          "description": "The function, method, or type the contract is declared on, as the library names it;\n`None` when it does not say.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/ContractKind"
+        },
+        "message": {
+          "description": "The library's message: the contract's description and condition, with the values it saw\nwhen the library prints them.",
+          "type": "string"
+        },
+        "place": {
+          "description": "Where the contract is declared, relative to the repository root; `None` for a contract\noutside the repository, such as a dependency's.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContractPlace"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "test": {
+          "description": "The runner's ID of the test that violated it.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "function",
+        "kind",
+        "message",
+        "place",
+        "test"
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "RootRun": {
+      "description": "A project root a tool ran in, and how its run ended.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Why a failed run failed: the tail of its output.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dir": {
+          "description": "The project root, relative to the repository root; `.` for the root itself.",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/RunStatus"
+        }
+      },
+      "required": [
+        "detail",
+        "dir",
+        "status"
+      ]
+    },
+    "RunStatus": {
+      "description": "Whether a tool's run in a root completed.",
+      "oneOf": [
+        {
+          "description": "It ran to the end, whatever it found.",
+          "type": "string",
+          "const": "ran"
+        },
+        {
+          "description": "It could not run to the end: a build failure, a crash of the tool, output it cannot read.",
+          "type": "string",
+          "const": "failed"
+        }
+      ]
+    }
+  }
+}

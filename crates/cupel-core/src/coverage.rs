@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 
 /// Which lines (and, when the producer measures them, branches) the test suite ran.
 ///
@@ -20,6 +20,8 @@ impl Fact for CoverageMap {
     const KIND: FactKind = FactKind::CoverageMap;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<CoverageMap>("coverage-map"));
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct FileCoverage {

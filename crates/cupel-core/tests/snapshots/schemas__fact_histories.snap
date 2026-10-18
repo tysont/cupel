@@ -1,0 +1,255 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/histories.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Histories",
+  "description": "The histories one run of a language's history command wrote, each checked by one checker\n(ADR-119).",
+  "type": "object",
+  "properties": {
+    "command": {
+      "description": "The command that recorded the histories (`[lang.<id>] history_command`).",
+      "type": "string"
+    },
+    "histories": {
+      "description": "Every history the command wrote, by name.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/History"
+      }
+    },
+    "run": {
+      "description": "The command's run from the repository root.",
+      "$ref": "#/$defs/RootRun"
+    },
+    "seed": {
+      "description": "The seed the command was given (`CUPEL_SEED`), so a randomized harness repeats.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "tool": {
+      "description": "The checker, such as `tool.porcupine`.",
+      "$ref": "#/$defs/ProducerId"
+    }
+  },
+  "required": [
+    "command",
+    "histories",
+    "run",
+    "seed",
+    "tool"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "History": {
+      "description": "One recorded history and what checking it against its model found.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Why a history is invalid or its check unknown.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "model": {
+          "description": "The model the history declares, such as `register` or `kv`; `None` when it declares none.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "description": "The history file, relative to the directory the command wrote it in.",
+          "type": "string"
+        },
+        "operations": {
+          "description": "The operations it holds: invocations that completed or whose outcome is unknown.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "status": {
+          "$ref": "#/$defs/HistoryStatus"
+        },
+        "violations": {
+          "description": "What a violated history's checker found, one entry per independent part (a key of a\nkey-value store) that no linearization explains.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HistoryViolation"
+          }
+        }
+      },
+      "required": [
+        "detail",
+        "model",
+        "name",
+        "operations",
+        "status",
+        "violations"
+      ]
+    },
+    "HistoryOp": {
+      "description": "One operation of a history, as the excerpt of a violation shows it.",
+      "type": "object",
+      "properties": {
+        "f": {
+          "description": "The function, such as `read`, `write`, or `cas`.",
+          "type": "string"
+        },
+        "key": {
+          "description": "The key of a key-value operation."
+        },
+        "line": {
+          "description": "The line of the history file that invoked it.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "outcome": {
+          "$ref": "#/$defs/OpOutcome"
+        },
+        "process": {
+          "description": "The process (client) that invoked it."
+        },
+        "value": {
+          "description": "What it wrote or compared (`write`, `cas`), or what it read when it completed."
+        }
+      },
+      "required": [
+        "f",
+        "key",
+        "line",
+        "outcome",
+        "process",
+        "value"
+      ]
+    },
+    "HistoryStatus": {
+      "description": "How checking a history ended.",
+      "oneOf": [
+        {
+          "description": "Some order of its operations, consistent with real time, is a legal run of the model.",
+          "type": "string",
+          "const": "linearizable"
+        },
+        {
+          "description": "No such order exists.",
+          "type": "string",
+          "const": "violated"
+        },
+        {
+          "description": "The checker ran out of time before deciding.",
+          "type": "string",
+          "const": "unknown"
+        },
+        {
+          "description": "The history cannot be checked: it does not parse, declares no model or one the checker\ndoes not know, or pairs a completion with no invocation.",
+          "type": "string",
+          "const": "invalid"
+        }
+      ]
+    },
+    "HistoryViolation": {
+      "description": "One independent part of a history that no linearization explains.",
+      "type": "object",
+      "properties": {
+        "anomaly": {
+          "description": "The anomaly as the checker names it: `non-linearizable` for a linearizability checker.",
+          "type": "string"
+        },
+        "key": {
+          "description": "The key of a key-value history; `None` for a single object."
+        },
+        "linearized": {
+          "description": "The last operations of that prefix, in their linearized order (at most three).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HistoryOp"
+          }
+        },
+        "states": {
+          "description": "The states the model can be in after the longest linearizable prefix the checker found;\nempty when it reports none.",
+          "type": "array",
+          "items": true
+        },
+        "stuck": {
+          "description": "The operations that could come next in real time, none of which the model allows from\nthose states.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HistoryOp"
+          }
+        }
+      },
+      "required": [
+        "anomaly",
+        "key",
+        "linearized",
+        "states",
+        "stuck"
+      ]
+    },
+    "OpOutcome": {
+      "description": "Whether an operation's completion is known.",
+      "oneOf": [
+        {
+          "description": "It completed and took effect.",
+          "type": "string",
+          "const": "ok"
+        },
+        {
+          "description": "It may or may not have taken effect: it timed out, its process crashed, or the history\nends before it completes.",
+          "type": "string",
+          "const": "info"
+        }
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "RootRun": {
+      "description": "A project root a tool ran in, and how its run ended.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Why a failed run failed: the tail of its output.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dir": {
+          "description": "The project root, relative to the repository root; `.` for the root itself.",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/RunStatus"
+        }
+      },
+      "required": [
+        "detail",
+        "dir",
+        "status"
+      ]
+    },
+    "RunStatus": {
+      "description": "Whether a tool's run in a root completed.",
+      "oneOf": [
+        {
+          "description": "It ran to the end, whatever it found.",
+          "type": "string",
+          "const": "ran"
+        },
+        {
+          "description": "It could not run to the end: a build failure, a crash of the tool, output it cannot read.",
+          "type": "string",
+          "const": "failed"
+        }
+      ]
+    }
+  }
+}

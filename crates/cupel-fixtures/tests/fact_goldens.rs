@@ -14,7 +14,7 @@ use cupel_lang::{LanguageRegistry, ParseCache, Reparse, walk};
 fn produced_pairs(languages: &LanguageRegistry, producers: &ProducerRegistry) -> Vec<String> {
     let mut names = Vec::new();
     for lang in languages.langs() {
-        for kind in FactKind::SYNTACTIC {
+        for &kind in FactKind::syntactic() {
             if producers.producers_for(kind, &lang).next().is_some() {
                 names.push(format!("facts/{}/{kind}", lang.id));
             }
@@ -31,7 +31,7 @@ fn every_produced_fact_matches_its_golden() {
     let goldens = Goldens::from_env();
     let mut failures = Vec::new();
     for lang in languages.langs() {
-        for kind in FactKind::SYNTACTIC {
+        for &kind in FactKind::syntactic() {
             if producers.producers_for(kind, &lang).next().is_none() {
                 continue;
             }
@@ -102,7 +102,7 @@ fn every_fact_golden_holds_for_trees_reparsed_from_edited_ones() {
             parsed
         );
         let misses = languages.cache().stats().misses;
-        for kind in FactKind::SYNTACTIC {
+        for &kind in FactKind::syntactic() {
             if producers.producers_for(kind, &lang).next().is_none() {
                 continue;
             }

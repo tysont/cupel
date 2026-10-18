@@ -3,20 +3,22 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::hash::{SiteHash, SymbolHash};
 use crate::id::LangId;
 
-/// Implements `Fact` for a payload, at version 1 unless a version is given.
+/// Implements `Fact` for a payload, at version 1 unless a version is given, and submits its
+/// syntactic catalog entry under `name` (ADR-123).
 macro_rules! fact {
-    ($payload:ident, $kind:ident) => {
-        fact!($payload, $kind, 1);
+    ($payload:ident, $kind:ident, $name:literal) => {
+        fact!($payload, $kind, $name, 1);
     };
-    ($payload:ident, $kind:ident, $version:literal) => {
+    ($payload:ident, $kind:ident, $name:literal, $version:literal) => {
         impl Fact for $payload {
             const KIND: FactKind = FactKind::$kind;
             const VERSION: u32 = $version;
         }
+        inventory::submit!(FactEntry::syntactic::<$payload>($name));
     };
 }
 
@@ -45,7 +47,7 @@ pub struct SymbolKey {
 pub struct Symbols {
     pub symbols: Vec<SymbolDef>,
 }
-fact!(Symbols, Symbols, 2);
+fact!(Symbols, Symbols, "symbols", 2);
 
 /// One function, method, or named closure.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -98,7 +100,7 @@ pub enum Visibility {
 pub struct Decisions {
     pub symbols: Vec<SymbolDecisions>,
 }
-fact!(Decisions, Decisions, 2);
+fact!(Decisions, Decisions, "decisions", 2);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct SymbolDecisions {
@@ -141,7 +143,7 @@ pub enum DecisionKind {
 pub struct NormTree {
     pub symbols: Vec<NormalizedSymbol>,
 }
-fact!(NormTree, NormTree);
+fact!(NormTree, NormTree, "norm-tree");
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct NormalizedSymbol {
@@ -177,7 +179,7 @@ impl NormNode {
 pub struct MutationSites {
     pub symbols: Vec<SymbolSites>,
 }
-fact!(MutationSites, MutationSites);
+fact!(MutationSites, MutationSites, "mutation-sites");
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct SymbolSites {
@@ -228,7 +230,7 @@ pub enum OperatorSet {
 pub struct TestFrames {
     pub files: Vec<TestFile>,
 }
-fact!(TestFrames, TestFrames, 2);
+fact!(TestFrames, TestFrames, "test-frames", 2);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct TestFile {
@@ -295,7 +297,7 @@ pub struct SkipMarker {
 pub struct ModuleGraph {
     pub roots: Vec<RootImports>,
 }
-fact!(ModuleGraph, ModuleGraph, 2);
+fact!(ModuleGraph, ModuleGraph, "module-graph", 2);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct RootImports {
@@ -343,7 +345,7 @@ pub enum ImportTarget {
 pub struct ApiSurface {
     pub items: Vec<ApiItem>,
 }
-fact!(ApiSurface, ApiSurface);
+fact!(ApiSurface, ApiSurface, "api-surface");
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ApiItem {
@@ -374,7 +376,7 @@ pub enum ApiItemKind {
 pub struct Roots {
     pub roots: Vec<LiveRoot>,
 }
-fact!(Roots, Roots);
+fact!(Roots, Roots, "roots");
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct LiveRoot {
@@ -398,7 +400,7 @@ pub struct TestConventions {
     pub test_globs: Vec<String>,
     pub pairs: Vec<TestPairing>,
 }
-fact!(TestConventions, TestConventions);
+fact!(TestConventions, TestConventions, "test-conventions");
 
 impl TestConventions {
     /// Whether `path` is a test file: some glob in `test_globs` matches it. A glob that does not
@@ -434,7 +436,7 @@ pub struct TestPairing {
 pub struct ProjectInfo {
     pub roots: Vec<ProjectRoot>,
 }
-fact!(ProjectInfo, ProjectInfo, 2);
+fact!(ProjectInfo, ProjectInfo, "project-info", 2);
 
 /// A directory with a build manifest of one language's ecosystem.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

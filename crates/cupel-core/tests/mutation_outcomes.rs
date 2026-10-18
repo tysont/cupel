@@ -39,7 +39,7 @@ fn mutant(file: &str, line: u32, to: &str, outcome: MutantOutcome) -> Mutant {
 #[test]
 fn mutation_outcomes_is_a_fact_kind_with_a_versioned_schema() {
     assert_eq!(FactKind::MutationOutcomes.as_str(), "mutation-outcomes");
-    assert!(!FactKind::SYNTACTIC.contains(&FactKind::MutationOutcomes));
+    assert!(!FactKind::syntactic().contains(&FactKind::MutationOutcomes));
     assert_eq!(schema::fact_version(FactKind::MutationOutcomes), Some(2));
 }
 

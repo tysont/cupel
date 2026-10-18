@@ -1,0 +1,172 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/bench-samples.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BenchSamples",
+  "description": "The benchmarks one bench tool measured at head and, under a range, at its base commit\n(ADR-106). Every sample is a cost: lower is better.",
+  "type": "object",
+  "properties": {
+    "base": {
+      "description": "The same roots measured at the range's base commit; `None` outside a range.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BenchBase"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "benchmarks": {
+      "description": "Every benchmark measured at head, in the order the tool reported them.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Benchmark"
+      }
+    },
+    "runs": {
+      "description": "Each project root it ran in at head, in `ProjectInfo` order.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RootRun"
+      }
+    },
+    "samples": {
+      "description": "The samples asked of every benchmark on each side.",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    },
+    "tool": {
+      "description": "The bench tool, such as `tool.criterion` or `tool.go-bench`.",
+      "$ref": "#/$defs/ProducerId"
+    }
+  },
+  "required": [
+    "base",
+    "benchmarks",
+    "runs",
+    "samples",
+    "tool"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "BenchBase": {
+      "description": "The benchmarks measured at the base commit of a range.",
+      "type": "object",
+      "properties": {
+        "benchmarks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Benchmark"
+          }
+        },
+        "commit": {
+          "type": "string"
+        },
+        "runs": {
+          "description": "Each project root it ran in there.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RootRun"
+          }
+        }
+      },
+      "required": [
+        "benchmarks",
+        "commit",
+        "runs"
+      ]
+    },
+    "Benchmark": {
+      "description": "One benchmark's samples of one measurement.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Where the benchmark is defined, relative to the repository root, when the tool says.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "line": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "name": {
+          "description": "The benchmark, unique within its side with its unit: a Go benchmark with its package\n(`example.com/units.BenchmarkSum`), a criterion ID, a pytest node ID, a hyperfine command.",
+          "type": "string"
+        },
+        "samples": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "unit": {
+          "description": "What one sample measures, per iteration of the benchmark: `ns` of wall time, `bytes`\nor `allocs` allocated.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "line",
+        "name",
+        "samples",
+        "unit"
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "RootRun": {
+      "description": "A project root a tool ran in, and how its run ended.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Why a failed run failed: the tail of its output.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dir": {
+          "description": "The project root, relative to the repository root; `.` for the root itself.",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/RunStatus"
+        }
+      },
+      "required": [
+        "detail",
+        "dir",
+        "status"
+      ]
+    },
+    "RunStatus": {
+      "description": "Whether a tool's run in a root completed.",
+      "oneOf": [
+        {
+          "description": "It ran to the end, whatever it found.",
+          "type": "string",
+          "const": "ran"
+        },
+        {
+          "description": "It could not run to the end: a build failure, a crash of the tool, output it cannot read.",
+          "type": "string",
+          "const": "failed"
+        }
+      ]
+    }
+  }
+}

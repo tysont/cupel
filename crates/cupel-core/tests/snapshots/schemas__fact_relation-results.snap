@@ -1,0 +1,230 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/relation-results.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RelationResults",
+  "description": "The metamorphic engine's evaluation of every relation of one language (ADR-097).",
+  "type": "object",
+  "properties": {
+    "relations": {
+      "description": "Every configured relation, by name.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RelationResult"
+      }
+    },
+    "seed": {
+      "description": "The run's seed; each relation's inputs derive from it and the relation's name.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "relations",
+    "seed"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "Evaluated": {
+      "description": "How one evaluation in the harness ended.",
+      "oneOf": [
+        {
+          "description": "It returned a value JSON can hold.",
+          "type": "object",
+          "properties": {
+            "value": true
+          },
+          "additionalProperties": false,
+          "required": [
+            "value"
+          ]
+        },
+        {
+          "description": "It raised: the exception's type and message.",
+          "type": "object",
+          "properties": {
+            "raised": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "raised"
+          ]
+        },
+        {
+          "description": "It returned a value JSON cannot hold: the language's printed form of it.",
+          "type": "object",
+          "properties": {
+            "repr": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "repr"
+          ]
+        }
+      ]
+    },
+    "Location": {
+      "description": "A span in a file. Paths are relative to the repository root; lines and columns are 1-based.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "file",
+        "line"
+      ]
+    },
+    "RelationResult": {
+      "description": "One relation evaluated on its generated inputs.",
+      "type": "object",
+      "properties": {
+        "cases": {
+          "description": "How many generated inputs were evaluated: all of them, or up to the first violation.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "function": {
+          "description": "The function under test, as configured.",
+          "type": "string"
+        },
+        "input": {
+          "description": "The input type, printed canonically.",
+          "type": "string"
+        },
+        "location": {
+          "description": "Where the function is defined, when the harness can tell.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Location"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "violation": {
+          "description": "The first generated input the relation did not hold for, minimized; `None` when it held\nfor every one.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Violation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "cases",
+        "function",
+        "input",
+        "location",
+        "name",
+        "violation"
+      ]
+    },
+    "Violation": {
+      "description": "A generated input the relation does not hold for, after minimization.",
+      "type": "object",
+      "properties": {
+        "case": {
+          "description": "The index of the generated case that first violated the relation.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "followup": {
+          "description": "The function on the follow-up input; `None` when the transform raised.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Evaluated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "input": {
+          "description": "The minimized input."
+        },
+        "original": {
+          "description": "The input as generated, before minimization."
+        },
+        "relation_raised": {
+          "description": "What the relation raised when it was called on the two outputs; `None` when it returned\nfalse, or when an output could not be computed.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "shrinks": {
+          "description": "How many minimization steps led from `original` to `input`.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "source": {
+          "description": "The function on `input`.",
+          "$ref": "#/$defs/Evaluated"
+        },
+        "transformed": {
+          "description": "The transform applied to `input`: the follow-up input.",
+          "$ref": "#/$defs/Evaluated"
+        }
+      },
+      "required": [
+        "case",
+        "followup",
+        "input",
+        "original",
+        "relation_raised",
+        "shrinks",
+        "source",
+        "transformed"
+      ]
+    }
+  }
+}

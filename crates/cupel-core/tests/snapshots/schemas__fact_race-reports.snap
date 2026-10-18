@@ -1,0 +1,182 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/race-reports.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RaceReports",
+  "description": "Data races and undefined behavior one detector found running a language's tests (ADR-105).",
+  "type": "object",
+  "properties": {
+    "reports": {
+      "description": "Every report touching the scope, in the order the detector printed them, without\nduplicates.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RaceReport"
+      }
+    },
+    "runs": {
+      "description": "Each project root it ran in, in `ProjectInfo` order.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RootRun"
+      }
+    },
+    "tool": {
+      "description": "The detector that ran, such as `tool.go-race` or `tool.miri`.",
+      "$ref": "#/$defs/ProducerId"
+    }
+  },
+  "required": [
+    "reports",
+    "runs",
+    "tool"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "RaceFrame": {
+      "description": "One frame of a stack, in a file of the repository.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Relative to the repository root.",
+          "type": "string"
+        },
+        "function": {
+          "description": "The function, as the detector names it, without a compiler's hash suffix; `None` when the\ndetector gives only a place (Miri's earlier access of a race).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "file",
+        "function",
+        "line"
+      ]
+    },
+    "RaceKind": {
+      "description": "What a report is about.",
+      "oneOf": [
+        {
+          "description": "Two threads accessed the same memory without synchronization, one of them writing.",
+          "type": "string",
+          "const": "data-race"
+        },
+        {
+          "description": "An operation the language leaves undefined: an out-of-bounds or dangling access, an\ninvalid value, a violated aliasing rule.",
+          "type": "string",
+          "const": "undefined-behavior"
+        }
+      ]
+    },
+    "RaceReport": {
+      "description": "One report: a data race between two accesses, or one operation with undefined behavior.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/RaceKind"
+        },
+        "message": {
+          "description": "What the detector says happened, with addresses, thread and goroutine numbers, and\nallocation IDs masked, so the same defect reads the same on every run.",
+          "type": "string"
+        },
+        "stacks": {
+          "description": "The stacks the detector printed: each conflicting access of a data race, ordered by their\nfirst frame so the order the accesses happened in does not matter; where undefined\nbehavior happened.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RaceStack"
+          }
+        },
+        "test": {
+          "description": "The test that was running, as the test runner names it; `None` when the detector does not\nsay.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "kind",
+        "message",
+        "stacks",
+        "test"
+      ]
+    },
+    "RaceStack": {
+      "description": "One stack of a report.",
+      "type": "object",
+      "properties": {
+        "access": {
+          "description": "The access the stack made, such as `read` or `write`; `None` for the stack of undefined\nbehavior.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "frames": {
+          "description": "Its frames in files of the repository, innermost first; frames in the language's runtime\nand dependencies, whose paths differ between machines, are left out.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RaceFrame"
+          }
+        }
+      },
+      "required": [
+        "access",
+        "frames"
+      ]
+    },
+    "RootRun": {
+      "description": "A project root a tool ran in, and how its run ended.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Why a failed run failed: the tail of its output.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dir": {
+          "description": "The project root, relative to the repository root; `.` for the root itself.",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/RunStatus"
+        }
+      },
+      "required": [
+        "detail",
+        "dir",
+        "status"
+      ]
+    },
+    "RunStatus": {
+      "description": "Whether a tool's run in a root completed.",
+      "oneOf": [
+        {
+          "description": "It ran to the end, whatever it found.",
+          "type": "string",
+          "const": "ran"
+        },
+        {
+          "description": "It could not run to the end: a build failure, a crash of the tool, output it cannot read.",
+          "type": "string",
+          "const": "failed"
+        }
+      ]
+    }
+  }
+}

@@ -1,76 +1,21 @@
-// ABOUTME: A producer plugin as a `Producer` of the kind it provides (ADR-089): upstream facts written as files, the
-// ABOUTME: plugin run, its one fact checked against the kind's type and version. One table maps each kind to its type.
-use std::marker::PhantomData;
-
-use cupel_core::coverage::CoverageMap;
+// ABOUTME: A producer plugin as a producer of the kind it provides (ADR-089): upstream facts written as files, the
+// ABOUTME: plugin run, its one fact checked against the kind's version and decoded by the kind's catalog entry (ADR-123).
 use cupel_core::plugin::ProducerManifest;
-use cupel_core::syntax::{
-    ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, ProjectInfo, Roots, Symbols,
-    TestConventions, TestFrames,
-};
 use cupel_core::{
-    AnalyzerReport, Availability, BenchSamples, ContractViolations, CostClass, Ctx,
-    DivergenceResults, EventSink, Fact, FactKind, Footprint, FuzzResults, Histories, Langs,
-    ModelCheckResults, MutationOutcomes, PerTestMap, ProduceCtx, Producer, ProducerId,
-    ProducerRegistry, ProofResults, PropertyResults, RaceReports, RelationResults, Result, Scope,
-    SimulationResults, TestReruns, TestResults, Traces,
+    Availability, CostClass, Ctx, Estimate, EventSink, FactEntry, FactKind, Langs, ProduceCtx,
+    Produced, ProducerId, ProducerRegistry, RegisteredProducer, Result, Scope, ToolProbe, Upstream,
 };
 
 use crate::command::PluginCommand;
 use crate::output;
 use crate::request::{self, Inputs};
 
-/// Registers one producer plugin as a producer of `F`.
-type Register = fn(&mut ProducerRegistry, ProducerManifest, PluginCommand);
-
-/// Every kind a plugin may provide (those with a payload type, ADR-088 §8), with its registration.
-const KINDS: [(FactKind, Register); 29] = [
-    (FactKind::Symbols, register_as::<Symbols>),
-    (FactKind::Decisions, register_as::<Decisions>),
-    (FactKind::NormTree, register_as::<NormTree>),
-    (FactKind::MutationSites, register_as::<MutationSites>),
-    (FactKind::TestFrames, register_as::<TestFrames>),
-    (FactKind::ModuleGraph, register_as::<ModuleGraph>),
-    (FactKind::ApiSurface, register_as::<ApiSurface>),
-    (FactKind::Roots, register_as::<Roots>),
-    (FactKind::TestConventions, register_as::<TestConventions>),
-    (FactKind::ProjectInfo, register_as::<ProjectInfo>),
-    (FactKind::TestResults, register_as::<TestResults>),
-    (FactKind::TestReruns, register_as::<TestReruns>),
-    (FactKind::CoverageMap, register_as::<CoverageMap>),
-    (FactKind::PerTestMap, register_as::<PerTestMap>),
-    (FactKind::MutationOutcomes, register_as::<MutationOutcomes>),
-    (FactKind::BenchSamples, register_as::<BenchSamples>),
-    (FactKind::PropertyResults, register_as::<PropertyResults>),
-    (FactKind::FuzzResults, register_as::<FuzzResults>),
-    (FactKind::RaceReports, register_as::<RaceReports>),
-    (FactKind::AnalyzerReport, register_as::<AnalyzerReport>),
-    (
-        FactKind::DivergenceResults,
-        register_as::<DivergenceResults>,
-    ),
-    (FactKind::RelationResults, register_as::<RelationResults>),
-    (FactKind::Footprint, register_as::<Footprint>),
-    (FactKind::Histories, register_as::<Histories>),
-    (
-        FactKind::SimulationResults,
-        register_as::<SimulationResults>,
-    ),
-    (FactKind::Traces, register_as::<Traces>),
-    (
-        FactKind::ModelCheckResults,
-        register_as::<ModelCheckResults>,
-    ),
-    (FactKind::ProofResults, register_as::<ProofResults>),
-    (
-        FactKind::ContractViolations,
-        register_as::<ContractViolations>,
-    ),
-];
-
-/// The kinds a producer plugin may provide, in catalog order.
+/// The kinds a producer plugin may provide (every catalog kind, ADR-088 §8), in catalog order.
 pub fn providable_kinds() -> Vec<FactKind> {
-    KINDS.iter().map(|(kind, _)| *kind).collect()
+    FactEntry::catalog()
+        .iter()
+        .map(|entry| entry.kind)
+        .collect()
 }
 
 /// Registers the producer plugin `manifest` describes; discovery admits only providable kinds.
@@ -79,34 +24,27 @@ pub(crate) fn register(
     manifest: ProducerManifest,
     command: PluginCommand,
 ) {
-    if let Some((_, register)) = KINDS
-        .iter()
-        .find(|(kind, _)| *kind == manifest.provides.kind)
-    {
-        register(registry, manifest, command);
-    }
-}
-
-fn register_as<F: Fact>(
-    registry: &mut ProducerRegistry,
-    manifest: ProducerManifest,
-    command: PluginCommand,
-) {
-    registry.register::<F, _>(PluginProducer::<F> {
+    let entry = manifest.provides.kind.entry();
+    registry.register_dyn(Box::new(PluginProducer {
         manifest,
         command,
-        fact: PhantomData,
-    });
+        entry,
+    }));
 }
 
 /// A producer implemented by a plugin, registered after the native producers (ADR-088 §7).
-struct PluginProducer<F> {
+struct PluginProducer {
     manifest: ProducerManifest,
     command: PluginCommand,
-    fact: PhantomData<fn() -> F>,
+    /// The catalog entry of the kind it provides, which decodes its fact.
+    entry: &'static FactEntry,
 }
 
-impl<F: Fact> Producer<F> for PluginProducer<F> {
+impl RegisteredProducer for PluginProducer {
+    fn provides(&self) -> FactKind {
+        self.entry.kind
+    }
+
     fn id(&self) -> ProducerId {
         self.manifest.id.clone()
     }
@@ -127,12 +65,29 @@ impl<F: Fact> Producer<F> for PluginProducer<F> {
         self.manifest.cost
     }
 
+    fn estimate(&self, _ctx: &Ctx, _upstream: &Upstream) -> Estimate {
+        Estimate::of(self.manifest.cost)
+    }
+
     /// Ready: the plugin answered `describe` (ADR-088 §7).
     fn availability(&self, _ctx: &Ctx) -> Availability {
         Availability::Ready
     }
 
-    fn produce(&self, ctx: &ProduceCtx, scope: &Scope, _sink: &mut dyn EventSink) -> Result<F> {
+    fn detected(&self, _ctx: &Ctx) -> bool {
+        true
+    }
+
+    fn tool(&self, _ctx: &Ctx) -> Option<ToolProbe> {
+        None
+    }
+
+    fn produce(
+        &self,
+        ctx: &ProduceCtx,
+        scope: &Scope,
+        _sink: &mut dyn EventSink,
+    ) -> Result<Produced> {
         let scratch = ctx
             .writer
             .cupel_dir()
@@ -158,8 +113,63 @@ impl<F: Fact> Producer<F> for PluginProducer<F> {
         );
         let captured = self.command.call("run", Some(&request), &ctx.cancel)?;
         output::accepted(&self.command, &captured, "fact", |stdout| {
-            output::fact_output::<F>(&self.manifest, stdout)
+            output::fact_output(&self.manifest, self.entry, stdout)
         })
         .map(|(fact, _)| fact)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::Path;
+
+    use cupel_core::plugin::Provides;
+    use cupel_core::{Lang, LangFamily, LangId, Stability};
+
+    use super::*;
+
+    fn manifest(kind: FactKind) -> ProducerManifest {
+        ProducerManifest {
+            id: ProducerId::from("plugin.sample"),
+            version: 1,
+            provides: Provides {
+                kind,
+                version: kind.entry().version,
+            },
+            languages: vec![LangId::from("typescript")],
+            needs: Vec::new(),
+            wants: Vec::new(),
+            cost: CostClass::Quick,
+            stability: Stability::Experimental,
+            summary: String::new(),
+        }
+    }
+
+    #[test]
+    fn every_providable_kind_registers_a_producer_of_that_kind() {
+        let typescript = Lang {
+            id: LangId::from("typescript"),
+            family: LangFamily::from("ecmascript"),
+        };
+        let command = PluginCommand::new("sample", "sample", &[], Path::new("."));
+        let unregistered: Vec<FactKind> = providable_kinds()
+            .into_iter()
+            .filter(|kind| {
+                let mut registry = ProducerRegistry::default();
+                register(&mut registry, manifest(*kind), command.clone());
+                let provided: Vec<FactKind> = registry
+                    .producers_for(*kind, &typescript)
+                    .map(RegisteredProducer::provides)
+                    .collect();
+                provided != [*kind]
+            })
+            .collect();
+        assert_eq!(unregistered, Vec::<FactKind>::new());
+    }
+
+    /// Registration goes through the catalog, so this module holds no per-kind table (ADR-123).
+    #[test]
+    fn this_module_names_no_fact_kind() {
+        assert!(!include_str!("producer.rs").contains(concat!("FactKind", "::")));
     }
 }

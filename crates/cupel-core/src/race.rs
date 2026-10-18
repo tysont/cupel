@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::id::ProducerId;
 use crate::root_run::RootRun;
 
@@ -23,6 +23,8 @@ impl Fact for RaceReports {
     const KIND: FactKind = FactKind::RaceReports;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<RaceReports>("race-reports").pinned_by("race"));
 
 /// One report: a data race between two accesses, or one operation with undefined behavior.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

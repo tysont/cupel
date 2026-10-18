@@ -4,7 +4,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::id::ProducerId;
 use crate::root_run::RootRun;
 
@@ -28,6 +28,8 @@ impl Fact for Histories {
     const KIND: FactKind = FactKind::Histories;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<Histories>("histories").with_conformance());
 
 /// One recorded history and what checking it against its model found.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::finding::Location;
 use crate::id::ProducerId;
 use crate::root_run::RootRun;
@@ -29,6 +29,10 @@ impl Fact for SimulationResults {
     const KIND: FactKind = FactKind::SimulationResults;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(
+    FactEntry::execution::<SimulationResults>("simulation-results").with_conformance()
+);
 
 /// One simulation harness and how its seeds ended.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

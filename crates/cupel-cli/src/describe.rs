@@ -135,7 +135,10 @@ fn unknown_schema(name: Option<&str>) -> CupelError {
 }
 
 fn fact_kind(name: &str) -> Option<FactKind> {
-    FactKind::ALL.into_iter().find(|kind| kind.as_str() == name)
+    FactKind::all()
+        .iter()
+        .copied()
+        .find(|kind| kind.as_str() == name)
 }
 
 fn unknown_language(catalog: &Catalog, id: Option<&str>) -> CupelError {
@@ -162,7 +165,7 @@ fn unknown_finding(catalog: &Catalog, kind: Option<&str>) -> CupelError {
 }
 
 fn unknown_fact(kind: Option<&str>) -> CupelError {
-    let valid: Vec<String> = FactKind::ALL.iter().map(ToString::to_string).collect();
+    let valid: Vec<String> = FactKind::all().iter().map(ToString::to_string).collect();
     unknown_named("describe fact", "fact kind", kind, valid)
 }
 

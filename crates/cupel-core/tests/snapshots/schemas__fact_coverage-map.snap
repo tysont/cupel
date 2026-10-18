@@ -1,0 +1,103 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/coverage-map.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CoverageMap",
+  "description": "Which lines (and, when the producer measures them, branches) the test suite ran.\n\nFiles are sorted by path, lines by number, and branches by line and index, each once; build\none with [`CoverageMap::new`] to get that shape from records in any order (ADR-079).",
+  "type": "object",
+  "properties": {
+    "files": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FileCoverage"
+      }
+    }
+  },
+  "required": [
+    "files"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "BranchHits": {
+      "type": "object",
+      "properties": {
+        "branch": {
+          "description": "The branch's index among the branches on its line.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "hits": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "line": {
+          "description": "The 1-based line holding the branch.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "branch",
+        "hits",
+        "line"
+      ]
+    },
+    "FileCoverage": {
+      "type": "object",
+      "properties": {
+        "branches": {
+          "description": "Branch hits; `None` when the producer does not measure branches.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/BranchHits"
+          }
+        },
+        "file": {
+          "description": "Relative to the repository root, `/`-separated.",
+          "type": "string"
+        },
+        "lines": {
+          "description": "Every instrumented line; a line absent here is not executable code.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LineHits"
+          }
+        }
+      },
+      "required": [
+        "branches",
+        "file",
+        "lines"
+      ]
+    },
+    "LineHits": {
+      "type": "object",
+      "properties": {
+        "hits": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "line": {
+          "description": "1-based.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "hits",
+        "line"
+      ]
+    }
+  }
+}

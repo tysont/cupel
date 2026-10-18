@@ -13,8 +13,8 @@ use serde_json::json;
 #[test]
 fn divergence_results_is_a_fact_kind_with_a_versioned_schema() {
     assert_eq!(FactKind::DivergenceResults.as_str(), "divergence-results");
-    assert!(FactKind::ALL.contains(&FactKind::DivergenceResults));
-    assert!(!FactKind::SYNTACTIC.contains(&FactKind::DivergenceResults));
+    assert!(FactKind::all().contains(&FactKind::DivergenceResults));
+    assert!(!FactKind::syntactic().contains(&FactKind::DivergenceResults));
     assert_eq!(schema::fact_version(FactKind::DivergenceResults), Some(1));
 }
 

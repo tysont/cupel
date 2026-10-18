@@ -1,0 +1,164 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/analyzer-report.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AnalyzerReport",
+  "description": "What a language's analyzers reported, one entry per analyzer in the toolchain table's order\n(ADR-102).",
+  "type": "object",
+  "properties": {
+    "analyzers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AnalyzerRun"
+      }
+    }
+  },
+  "required": [
+    "analyzers"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "AnalyzerLevel": {
+      "description": "SARIF's result levels (`none` is not reported).",
+      "type": "string",
+      "enum": [
+        "error",
+        "warning",
+        "note"
+      ]
+    },
+    "AnalyzerResult": {
+      "description": "One result, as SARIF's `result`: a rule, a level, a message, and one physical location.",
+      "type": "object",
+      "properties": {
+        "level": {
+          "$ref": "#/$defs/AnalyzerLevel"
+        },
+        "location": {
+          "$ref": "#/$defs/Location"
+        },
+        "message": {
+          "type": "string"
+        },
+        "rule": {
+          "description": "The tool's rule or error code, such as `F401`, `TS2322`, or `needless_return`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "level",
+        "location",
+        "message",
+        "rule"
+      ]
+    },
+    "AnalyzerRun": {
+      "description": "One analyzer: whether it ran, and what it reported in the files in scope.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Missing: how to install it; unconfigured: what to add; failed: the tail of its output.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "results": {
+          "description": "Its results in files in scope, relative to the repository root, in the order it reported\nthem, without exact duplicates.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AnalyzerResult"
+          }
+        },
+        "status": {
+          "$ref": "#/$defs/AnalyzerStatus"
+        },
+        "tool": {
+          "description": "The analyzer, such as `mypy` or `go-vet`.",
+          "$ref": "#/$defs/ToolId"
+        }
+      },
+      "required": [
+        "detail",
+        "results",
+        "status",
+        "tool"
+      ]
+    },
+    "AnalyzerStatus": {
+      "description": "Whether an analyzer ran.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "ran"
+          ]
+        },
+        {
+          "description": "Its program is not installed.",
+          "type": "string",
+          "const": "missing"
+        },
+        {
+          "description": "It needs configuration the project does not have, such as an `ESLint` flat config.",
+          "type": "string",
+          "const": "unconfigured"
+        },
+        {
+          "description": "It ran but its output could not be read, or it crashed.",
+          "type": "string",
+          "const": "failed"
+        }
+      ]
+    },
+    "Location": {
+      "description": "A span in a file. Paths are relative to the repository root; lines and columns are 1-based.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "file",
+        "line"
+      ]
+    },
+    "ToolId": {
+      "description": "An external tool a producer drives, such as `cargo-llvm-cov`.",
+      "type": "string"
+    }
+  }
+}

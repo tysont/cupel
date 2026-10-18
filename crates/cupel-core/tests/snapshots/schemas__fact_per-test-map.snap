@@ -1,0 +1,101 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/per-test-map.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PerTestMap",
+  "description": "Which lines each test executes when it runs alone (ADR-077).",
+  "type": "object",
+  "properties": {
+    "measured": {
+      "description": "How many of `tests` the production that made this map measured (ADR-083); 0 when every\ntest came from the producer's cache.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "reused": {
+      "description": "How many of `tests` came from the producer's cache without being measured again.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "runner": {
+      "description": "The `TestResults` producer whose test IDs `tests` uses, such as `tool.cargo-nextest`; it is\nthe runner a selection of these tests is handed to.",
+      "$ref": "#/$defs/ProducerId"
+    },
+    "tests": {
+      "description": "Every measured test, sorted by ID; a test that executed nothing has no `covered` entries.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TestCoverage"
+      }
+    }
+  },
+  "required": [
+    "measured",
+    "reused",
+    "runner",
+    "tests"
+  ],
+  "x-cupel-fact-version": 2,
+  "$defs": {
+    "CoveredLines": {
+      "description": "The lines of one file a test executed.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "Relative to the repository root, `/`-separated.",
+          "type": "string"
+        },
+        "lines": {
+          "description": "1-based, ascending, unique.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          }
+        }
+      },
+      "required": [
+        "file",
+        "lines"
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "TestCoverage": {
+      "description": "The lines one test executed.",
+      "type": "object",
+      "properties": {
+        "covered": {
+          "description": "Sorted by file, one entry per file.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CoveredLines"
+          }
+        },
+        "file": {
+          "description": "The test's own file, relative to the repository root, when the coverage tool names it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "The runner's ID of the test (ADR-075).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "covered",
+        "file",
+        "id"
+      ]
+    }
+  }
+}

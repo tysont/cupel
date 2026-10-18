@@ -31,7 +31,7 @@ fn property_results_is_an_execution_fact_with_a_versioned_schema() {
     assert_eq!(
         (
             kind.as_str(),
-            FactKind::SYNTACTIC.contains(&kind),
+            FactKind::syntactic().contains(&kind),
             schema::fact_version(kind),
             schema::fact(kind).map(|schema| schema.as_value()["$id"].clone()),
         ),

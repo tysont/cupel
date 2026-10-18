@@ -1,0 +1,256 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/model-check-results.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ModelCheckResults",
+  "description": "The proof harnesses of a language's projects, each model-checked once (ADR-117).",
+  "type": "object",
+  "properties": {
+    "harnesses": {
+      "description": "Every harness it checked, by root, then name.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ModelHarness"
+      }
+    },
+    "runs": {
+      "description": "Each project root it ran in, in `ProjectInfo` order.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RootRun"
+      }
+    },
+    "tool": {
+      "description": "The model checker, such as `tool.kani`.",
+      "$ref": "#/$defs/ProducerId"
+    }
+  },
+  "required": [
+    "harnesses",
+    "runs",
+    "tool"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "Counterexample": {
+      "description": "Concrete inputs that refute a harness's property.",
+      "type": "object",
+      "properties": {
+        "replay": {
+          "description": "A unit test the checker wrote that replays them, when it writes one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "values": {
+          "description": "Each nondeterministic value the harness drew, in the order it drew them, as the\nchecker renders them.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "replay",
+        "values"
+      ]
+    },
+    "HarnessStatus": {
+      "description": "How checking a harness ended.",
+      "oneOf": [
+        {
+          "description": "Every property holds for every input within the harness's bounds.",
+          "type": "string",
+          "const": "verified"
+        },
+        {
+          "description": "Some input refutes a property.",
+          "type": "string",
+          "const": "failed"
+        },
+        {
+          "description": "The checker could not decide: an unsupported construct, a bound too small to be sound.",
+          "type": "string",
+          "const": "undetermined"
+        }
+      ]
+    },
+    "Location": {
+      "description": "A span in a file. Paths are relative to the repository root; lines and columns are 1-based.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "file",
+        "line"
+      ]
+    },
+    "ModelHarness": {
+      "description": "One proof harness and what checking it found.",
+      "type": "object",
+      "properties": {
+        "location": {
+          "description": "Where the harness is defined, when found.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Location"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "description": "The harness as the checker names it, such as `proofs::average_never_overflows`.",
+          "type": "string"
+        },
+        "refuted": {
+          "description": "The properties the checker refuted: assertions, panics, overflows, out-of-bounds\naccesses, each where it fails.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RefutedProperty"
+          }
+        },
+        "root": {
+          "description": "The project root it belongs to, relative to the repository root.",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/HarnessStatus"
+        }
+      },
+      "required": [
+        "location",
+        "name",
+        "refuted",
+        "root",
+        "status"
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "RefutedProperty": {
+      "description": "A property a model checker refuted.",
+      "type": "object",
+      "properties": {
+        "counterexample": {
+          "description": "Inputs that refute it, when the checker gives them.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Counterexample"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": {
+          "description": "What the property is, in the checker's words (`attempt to add with overflow`).",
+          "type": "string"
+        },
+        "function": {
+          "description": "The function it fails in, as the checker names it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "location": {
+          "description": "Where it fails in the repository; `None` outside it (the standard library).",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Location"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "counterexample",
+        "description",
+        "function",
+        "location"
+      ]
+    },
+    "RootRun": {
+      "description": "A project root a tool ran in, and how its run ended.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Why a failed run failed: the tail of its output.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dir": {
+          "description": "The project root, relative to the repository root; `.` for the root itself.",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/RunStatus"
+        }
+      },
+      "required": [
+        "detail",
+        "dir",
+        "status"
+      ]
+    },
+    "RunStatus": {
+      "description": "Whether a tool's run in a root completed.",
+      "oneOf": [
+        {
+          "description": "It ran to the end, whatever it found.",
+          "type": "string",
+          "const": "ran"
+        },
+        {
+          "description": "It could not run to the end: a build failure, a crash of the tool, output it cannot read.",
+          "type": "string",
+          "const": "failed"
+        }
+      ]
+    }
+  }
+}

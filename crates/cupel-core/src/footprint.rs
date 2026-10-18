@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 
 /// What a language's projects depend on and how big their artifacts are, measured without
 /// network access (ADR-103).
@@ -29,6 +29,8 @@ impl Fact for Footprint {
     const KIND: FactKind = FactKind::Footprint;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<Footprint>("footprint"));
 
 /// One dependency as a lockfile or manifest lists it.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

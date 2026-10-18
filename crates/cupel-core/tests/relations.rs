@@ -176,8 +176,8 @@ fn relation_results_is_a_fact_kind_with_a_versioned_schema() {
     let kind = FactKind::RelationResults;
     let described = (
         kind.as_str(),
-        FactKind::ALL.contains(&kind),
-        FactKind::SYNTACTIC.contains(&kind),
+        FactKind::all().contains(&kind),
+        FactKind::syntactic().contains(&kind),
         schema::fact_version(kind),
     );
     assert_eq!(described, ("relation-results", true, false, Some(1)));

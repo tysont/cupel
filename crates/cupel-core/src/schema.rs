@@ -5,35 +5,12 @@ use schemars::transform::transform_subschemas;
 use schemars::{JsonSchema, Schema};
 use serde_json::{Value, json};
 
-use crate::analyzer::AnalyzerReport;
-use crate::bench::BenchSamples;
 use crate::config::ConfigFile;
-use crate::contract::ContractViolations;
-use crate::coverage::CoverageMap;
-use crate::divergence::DivergenceResults;
 use crate::envelope::Envelope;
 use crate::event::Event;
 use crate::fact::{Fact, FactKind};
 use crate::finding::Finding;
-use crate::flake::TestReruns;
-use crate::footprint::Footprint;
-use crate::fuzz::FuzzResults;
-use crate::histories::Histories;
-use crate::model_check::ModelCheckResults;
-use crate::mutation::MutationOutcomes;
-use crate::per_test::PerTestMap;
 use crate::plugin::PluginMessage;
-use crate::proof::ProofResults;
-use crate::property::PropertyResults;
-use crate::race::RaceReports;
-use crate::relation::RelationResults;
-use crate::simulation::SimulationResults;
-use crate::syntax::{
-    ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, ProjectInfo, Roots, Symbols,
-    TestConventions, TestFrames,
-};
-use crate::test_results::TestResults;
-use crate::trace::Traces;
 
 /// Every published schema's `$id` starts with this.
 pub const BASE_URL: &str = "https://cupel.dev/schema/v1/";
@@ -81,70 +58,19 @@ pub fn plugin() -> Schema {
     root::<PluginMessage>(&url("plugin"))
 }
 
-/// Schema of a fact kind's payload, or `None` for a kind without a payload type (none, now that
-/// every execution fact has one; a kind added to the catalog gets its payload with its producer).
+/// Schema of a fact kind's payload, from the kind's catalog entry (ADR-123); `None` for a kind
+/// whose payload module submits no entry, which the catalog tests rule out.
 pub fn fact(kind: FactKind) -> Option<Schema> {
-    FACT_SCHEMAS
-        .iter()
-        .find(|(with_payload, _)| *with_payload == kind)
-        .map(|(_, schema)| schema())
+    kind.find_entry().map(|entry| (entry.schema)())
 }
 
-/// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 29] = [
-    (FactKind::Symbols, fact_schema::<Symbols>),
-    (FactKind::Decisions, fact_schema::<Decisions>),
-    (FactKind::NormTree, fact_schema::<NormTree>),
-    (FactKind::MutationSites, fact_schema::<MutationSites>),
-    (FactKind::TestFrames, fact_schema::<TestFrames>),
-    (FactKind::ModuleGraph, fact_schema::<ModuleGraph>),
-    (FactKind::ApiSurface, fact_schema::<ApiSurface>),
-    (FactKind::Roots, fact_schema::<Roots>),
-    (FactKind::TestConventions, fact_schema::<TestConventions>),
-    (FactKind::ProjectInfo, fact_schema::<ProjectInfo>),
-    (FactKind::TestResults, fact_schema::<TestResults>),
-    (FactKind::TestReruns, fact_schema::<TestReruns>),
-    (FactKind::CoverageMap, fact_schema::<CoverageMap>),
-    (FactKind::PerTestMap, fact_schema::<PerTestMap>),
-    (FactKind::MutationOutcomes, fact_schema::<MutationOutcomes>),
-    (FactKind::BenchSamples, fact_schema::<BenchSamples>),
-    (FactKind::PropertyResults, fact_schema::<PropertyResults>),
-    (FactKind::FuzzResults, fact_schema::<FuzzResults>),
-    (FactKind::RaceReports, fact_schema::<RaceReports>),
-    (FactKind::AnalyzerReport, fact_schema::<AnalyzerReport>),
-    (
-        FactKind::DivergenceResults,
-        fact_schema::<DivergenceResults>,
-    ),
-    (FactKind::RelationResults, fact_schema::<RelationResults>),
-    (FactKind::Footprint, fact_schema::<Footprint>),
-    (FactKind::Histories, fact_schema::<Histories>),
-    (
-        FactKind::SimulationResults,
-        fact_schema::<SimulationResults>,
-    ),
-    (FactKind::Traces, fact_schema::<Traces>),
-    (
-        FactKind::ModelCheckResults,
-        fact_schema::<ModelCheckResults>,
-    ),
-    (FactKind::ProofResults, fact_schema::<ProofResults>),
-    (
-        FactKind::ContractViolations,
-        fact_schema::<ContractViolations>,
-    ),
-];
-
-/// The payload version of a fact kind, or `None` for a kind without a payload type.
+/// The payload version of a fact kind, or `None` for a kind without a catalog entry.
 pub fn fact_version(kind: FactKind) -> Option<u32> {
-    fact(kind)?
-        .get("x-cupel-fact-version")
-        .and_then(Value::as_u64)
-        .and_then(|version| u32::try_from(version).ok())
+    kind.find_entry().map(|entry| entry.version)
 }
 
 /// A fact payload's schema, carrying the fact version it describes.
-fn fact_schema<F: Fact>() -> Schema {
+pub(crate) fn fact_schema<F: Fact>() -> Schema {
     let mut schema = root::<F>(&format!("{BASE_URL}fact/{}.json", F::KIND));
     schema.insert("x-cupel-fact-version".to_owned(), json!(F::VERSION));
     schema

@@ -1,0 +1,165 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/test-results.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TestResults",
+  "description": "What one run of a test suite reported, normalized across runners (ADR-075).",
+  "type": "object",
+  "properties": {
+    "invocations": {
+      "description": "One per project root the runner ran in, in root order.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RunnerInvocation"
+      }
+    },
+    "runner": {
+      "description": "The producer that ran the suite, such as `tool.pytest`.",
+      "$ref": "#/$defs/ProducerId"
+    },
+    "suite_hash": {
+      "description": "Identifies the suite that ran: a blake3 hex digest of the sorted test IDs and the content\nof every file they name.",
+      "type": "string"
+    },
+    "tests": {
+      "description": "Every test the runner reported, sorted by ID.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TestResult"
+      }
+    }
+  },
+  "required": [
+    "invocations",
+    "runner",
+    "suite_hash",
+    "tests"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "RunnerInvocation": {
+      "description": "One run of a runner in one project root.",
+      "type": "object",
+      "properties": {
+        "command": {
+          "description": "The program and its arguments, as run.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "completed": {
+          "description": "Whether the runner reached the end of the suite and reported it: false for a build that\nfailed, a crash, or a report that could not be read.",
+          "type": "boolean"
+        },
+        "dir": {
+          "description": "The directory it ran in, relative to the repository root, `/`-separated; `.` for the root.",
+          "type": "string"
+        },
+        "exit_code": {
+          "description": "`None` when the process was ended by a signal.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int32"
+        },
+        "output": {
+          "description": "The tail of the runner's output, when it did not complete.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "command",
+        "completed",
+        "dir",
+        "exit_code",
+        "output"
+      ]
+    },
+    "TestOutcome": {
+      "description": "How a test ended.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "passed"
+          ]
+        },
+        {
+          "description": "An assertion or panic in the test.",
+          "type": "string",
+          "const": "failed"
+        },
+        {
+          "description": "Ignored, pending, todo, or skipped.",
+          "type": "string",
+          "const": "skipped"
+        },
+        {
+          "description": "The test or its suite could not run, such as a file that does not load or build.",
+          "type": "string",
+          "const": "errored"
+        }
+      ]
+    },
+    "TestResult": {
+      "description": "One test as its runner reported it.",
+      "type": "object",
+      "properties": {
+        "duration_ms": {
+          "description": "`None` when the runner does not measure it.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "file": {
+          "description": "The file the runner attributes the test to, relative to the repository root.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "The runner's identity of the test, unique within the fact and stable across runs.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The runner's display name of the test.",
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/$defs/TestOutcome"
+        },
+        "output": {
+          "description": "For `failed` and `errored` tests, the tail of the failure message and captured output.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "duration_ms",
+        "file",
+        "id",
+        "name",
+        "outcome",
+        "output"
+      ]
+    }
+  }
+}

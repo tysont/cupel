@@ -1,0 +1,190 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/footprint.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Footprint",
+  "description": "What a language's projects depend on and how big their artifacts are, measured without\nnetwork access (ADR-103).",
+  "type": "object",
+  "properties": {
+    "artifacts": {
+      "description": "The configured artifacts and their sizes; `None` when none are configured.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/$defs/Artifact"
+      }
+    },
+    "base": {
+      "description": "The dependencies at the range's base commit; `None` outside a range.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FootprintBase"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "dependencies": {
+      "description": "Every dependency they list, in the order read.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Dependency"
+      }
+    },
+    "licenses": {
+      "description": "Whether licenses were read for these dependencies; a `None` license then means the\ndependency declares none.",
+      "type": "boolean"
+    },
+    "manifests": {
+      "description": "The lockfiles and manifests read, relative to the repository root.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "vulnerabilities": {
+      "description": "Known vulnerabilities of the dependencies, from the configured advisories; `None` when\nno advisories are configured.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "#/$defs/Vulnerability"
+      }
+    }
+  },
+  "required": [
+    "artifacts",
+    "base",
+    "dependencies",
+    "licenses",
+    "manifests",
+    "vulnerabilities"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "Artifact": {
+      "description": "A configured artifact and its size.",
+      "type": "object",
+      "properties": {
+        "bytes": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "path": {
+          "description": "Relative to the repository root.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "bytes",
+        "path"
+      ]
+    },
+    "Dependency": {
+      "description": "One dependency as a lockfile or manifest lists it.",
+      "type": "object",
+      "properties": {
+        "direct": {
+          "description": "Whether the project declares it itself, rather than another dependency pulling it in.",
+          "type": "boolean"
+        },
+        "file": {
+          "description": "The lockfile or manifest that lists it, relative to the repository root.",
+          "type": "string"
+        },
+        "license": {
+          "description": "Its SPDX license expression or declared license, when the ecosystem records one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "line": {
+          "description": "The line there that names it.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "description": "The locked version; `None` when only a version range is declared.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "direct",
+        "file",
+        "license",
+        "line",
+        "name",
+        "version"
+      ]
+    },
+    "FootprintBase": {
+      "description": "The dependencies the same lockfiles and manifests listed at the range's base commit.",
+      "type": "object",
+      "properties": {
+        "commit": {
+          "type": "string"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Dependency"
+          }
+        }
+      },
+      "required": [
+        "commit",
+        "dependencies"
+      ]
+    },
+    "Vulnerability": {
+      "description": "A known vulnerability of one dependency.",
+      "type": "object",
+      "properties": {
+        "fixed": {
+          "description": "The first version that fixes it, when the advisory names one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "The advisory's ID, such as `RUSTSEC-2024-0001` or `GHSA-…`.",
+          "type": "string"
+        },
+        "package": {
+          "description": "The affected dependency's name and version.",
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "fixed",
+        "id",
+        "package",
+        "summary",
+        "version"
+      ]
+    }
+  }
+}

@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::finding::Location;
 use crate::id::ToolId;
 
@@ -18,6 +18,8 @@ impl Fact for AnalyzerReport {
     const KIND: FactKind = FactKind::AnalyzerReport;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<AnalyzerReport>("analyzer-report"));
 
 /// One analyzer: whether it ran, and what it reported in the files in scope.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

@@ -1,0 +1,201 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/proof-results.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProofResults",
+  "description": "A deductive verifier's run over the proofs of a language's projects (ADR-118).",
+  "type": "object",
+  "properties": {
+    "files": {
+      "description": "The proof files it verified, relative to the repository root, sorted.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "obligations": {
+      "description": "Every obligation not discharged, in the order the verifier reported them.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Obligation"
+      }
+    },
+    "runs": {
+      "description": "Each project root it ran in, in `ProjectInfo` order.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/RootRun"
+      }
+    },
+    "tool": {
+      "description": "The verifier, such as `tool.dafny`.",
+      "$ref": "#/$defs/ProducerId"
+    },
+    "verified": {
+      "description": "The declarations it verified completely.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "files",
+    "obligations",
+    "runs",
+    "tool",
+    "verified"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "Location": {
+      "description": "A span in a file. Paths are relative to the repository root; lines and columns are 1-based.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "file",
+        "line"
+      ]
+    },
+    "Obligation": {
+      "description": "A proof obligation that is not discharged.",
+      "type": "object",
+      "properties": {
+        "location": {
+          "description": "Where the obligation is, in the repository.",
+          "$ref": "#/$defs/Location"
+        },
+        "message": {
+          "description": "What the verifier says, in its words.",
+          "type": "string"
+        },
+        "related": {
+          "description": "The places the verifier relates to it, such as the postcondition a return path breaks.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RelatedPlace"
+          }
+        },
+        "status": {
+          "$ref": "#/$defs/ObligationStatus"
+        }
+      },
+      "required": [
+        "location",
+        "message",
+        "related",
+        "status"
+      ]
+    },
+    "ObligationStatus": {
+      "description": "Why an obligation is not discharged.",
+      "oneOf": [
+        {
+          "description": "The verifier could not prove it: the code or the proof is wrong.",
+          "type": "string",
+          "const": "failed"
+        },
+        {
+          "description": "It is not decided: assumed rather than proved (an `assume`, a lemma without a body), or\nthe verifier ran out of time or resources on it.",
+          "type": "string",
+          "const": "open"
+        }
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "RelatedPlace": {
+      "description": "A place a verifier relates to an obligation.",
+      "type": "object",
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/Location"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "location",
+        "message"
+      ]
+    },
+    "RootRun": {
+      "description": "A project root a tool ran in, and how its run ended.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Why a failed run failed: the tail of its output.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dir": {
+          "description": "The project root, relative to the repository root; `.` for the root itself.",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/RunStatus"
+        }
+      },
+      "required": [
+        "detail",
+        "dir",
+        "status"
+      ]
+    },
+    "RunStatus": {
+      "description": "Whether a tool's run in a root completed.",
+      "oneOf": [
+        {
+          "description": "It ran to the end, whatever it found.",
+          "type": "string",
+          "const": "ran"
+        },
+        {
+          "description": "It could not run to the end: a build failure, a crash of the tool, output it cannot read.",
+          "type": "string",
+          "const": "failed"
+        }
+      ]
+    }
+  }
+}

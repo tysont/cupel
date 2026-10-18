@@ -5,7 +5,7 @@ use std::fmt;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::grade::CostClass;
 use crate::hash::{SiteHash, SymbolHash};
 use crate::id::ProducerId;
@@ -31,6 +31,10 @@ impl Fact for MutationOutcomes {
     const KIND: FactKind = FactKind::MutationOutcomes;
     const VERSION: u32 = 2;
 }
+
+inventory::submit!(
+    FactEntry::execution::<MutationOutcomes>("mutation-outcomes").pinned_by("mutator")
+);
 
 impl MutationOutcomes {
     /// The outcomes of `mutants`, sorted.

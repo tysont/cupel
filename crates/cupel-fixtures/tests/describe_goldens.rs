@@ -45,8 +45,9 @@ fn language_layer(registries: &Registries) -> ProducerRegistry {
 fn facts_of(producers: &ProducerRegistry, registries: &Registries, lang: &LangId) -> Value {
     let language = registries.languages.get(lang).unwrap();
     let lang = cupel_lang::lang(language.as_ref());
-    let facts: Vec<Value> = FactKind::ALL
-        .into_iter()
+    let facts: Vec<Value> = FactKind::all()
+        .iter()
+        .copied()
         .filter_map(|kind| {
             let ids: Vec<String> = producers
                 .producers_for(kind, &lang)

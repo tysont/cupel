@@ -10,7 +10,7 @@ use serde_json::Value;
 
 use crate::config::Table;
 use crate::config::gate::is_segment;
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::finding::Location;
 use crate::id::LangId;
 
@@ -239,6 +239,8 @@ impl Fact for RelationResults {
     const KIND: FactKind = FactKind::RelationResults;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<RelationResults>("relation-results"));
 
 /// One relation evaluated on its generated inputs.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

@@ -1,0 +1,227 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://cupel.dev/schema/v1/fact/traces.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Traces",
+  "description": "The traces a language's tests recorded, validated against the run's spec oracle (ADR-116).",
+  "type": "object",
+  "properties": {
+    "problem": {
+      "description": "Why no trace was validated: no spec oracle, a spec in a language the validator does not\nread, a test run that did not complete; `None` when the recorded traces were validated.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "spec": {
+      "description": "The specification the traces were validated against; `None` when the run has no spec\noracle the validator reads.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TraceSpec"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tool": {
+      "description": "The validator that ran, such as `tool.tlc`.",
+      "$ref": "#/$defs/ProducerId"
+    },
+    "traces": {
+      "description": "Every trace the tests recorded, by name.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Trace"
+      }
+    }
+  },
+  "required": [
+    "problem",
+    "spec",
+    "tool",
+    "traces"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "Location": {
+      "description": "A span in a file. Paths are relative to the repository root; lines and columns are 1-based.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "file",
+        "line"
+      ]
+    },
+    "ProducerId": {
+      "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
+      "type": "string"
+    },
+    "Trace": {
+      "description": "One recorded trace and how its validation ended.",
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Why a failed validation failed: an unreadable trace, a spec the validator rejected.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "divergence": {
+          "description": "The first step the spec does not allow, for a diverged trace.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TraceDivergence"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "description": "The trace file's name in the directory the tests recorded into.",
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/TraceStatus"
+        },
+        "steps": {
+          "description": "The states it records, the initial one included.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "detail",
+        "divergence",
+        "name",
+        "status",
+        "steps"
+      ]
+    },
+    "TraceDivergence": {
+      "description": "The first step of a trace the spec does not allow.",
+      "type": "object",
+      "properties": {
+        "action": {
+          "description": "The spec action the implementation logged for the step, when it named one.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "location": {
+          "description": "Where in the repository the implementation logged the step, when it said.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Location"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "previous": {
+          "description": "The state at the step before, the last the spec allows; `None` at the initial state."
+        },
+        "state": {
+          "description": "The state the implementation logged at the step, as recorded."
+        },
+        "step": {
+          "description": "The step, counting the initial state as 1.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "action",
+        "location",
+        "previous",
+        "state",
+        "step"
+      ]
+    },
+    "TraceSpec": {
+      "description": "The spec oracle traces are validated against.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "The specification file, relative to the repository root.",
+          "type": "string"
+        },
+        "lang": {
+          "description": "Its language: `tla+`, `quint`, or `p`.",
+          "type": "string"
+        },
+        "oracle": {
+          "description": "The oracle's name in `cupel.toml`.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "lang",
+        "oracle"
+      ]
+    },
+    "TraceStatus": {
+      "description": "How a trace's validation ended.",
+      "oneOf": [
+        {
+          "description": "Every step is one the spec allows: the trace is a behavior of the spec.",
+          "type": "string",
+          "const": "conforms"
+        },
+        {
+          "description": "Some step is not: the trace leaves the spec's behaviors there.",
+          "type": "string",
+          "const": "diverged"
+        },
+        {
+          "description": "It could not be validated.",
+          "type": "string",
+          "const": "failed"
+        }
+      ]
+    }
+  }
+}

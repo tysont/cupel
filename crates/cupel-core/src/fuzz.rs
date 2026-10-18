@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::finding::Location;
 use crate::id::ProducerId;
 
@@ -29,6 +29,8 @@ impl Fact for FuzzResults {
     const KIND: FactKind = FactKind::FuzzResults;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<FuzzResults>("fuzz-results"));
 
 /// One fuzz target and how its run ended.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

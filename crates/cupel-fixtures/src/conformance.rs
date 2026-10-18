@@ -50,7 +50,7 @@
 //! | `histories` | histories whose `name` is `file` |
 //! | `simulation-results` | harnesses defined in `file` whose `name` is `name` |
 //!
-//! An execution fact in [`EXECUTION`] has an inventory too (ADR-119): its producers' real-tool
+//! An execution fact in [`execution`] has an inventory too (ADR-119): its producers' real-tool
 //! tests produce it over their own fixture repository (`repos/<check>/<lang>/`), whose
 //! `inventory.toml` maps each construct to what the producer read there, and check it with
 //! [`check_language`].
@@ -59,7 +59,7 @@
 //! language has no producer for are not checked, so their mappings may be absent. An unmapped
 //! construct, a mapping to an unknown fact or construct, and an undetected construct all fail.
 //!
-//! An inventory may also name an **execution fact** ([`EXECUTION`]), which tools make rather
+//! An inventory may also name an **execution fact** ([`execution`]), which tools make rather
 //! than languages. Nothing maps it per language: each tool producer's tests make the fact from
 //! the producer's conformance input and check it with [`unexhibited`], naming the constructs the
 //! tool cannot exhibit with their reasons.
@@ -70,7 +70,8 @@ use std::path::{Path, PathBuf};
 
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    Cancellation, Ctx, Event, FactKind, LangId, ProduceCtx, ProducerRegistry, Scope, Writer,
+    Cancellation, Ctx, Event, FactEntry, FactKind, LangId, ProduceCtx, ProducerRegistry, Scope,
+    Writer,
 };
 use cupel_lang::{LanguageRegistry, walk};
 use serde::Deserialize;
@@ -462,14 +463,14 @@ fn symbol_key(symbol: &Value) -> Value {
 /// Execution facts whose inventories their tool producers' tests check with [`unexhibited`]
 /// (ADR-116): no language exhibits these constructs, the tool does, so each producer makes the
 /// fact from its own conformance input (a fixture its real tool runs on, or its captured output).
-pub const EXECUTION: [FactKind; 6] = [
-    FactKind::Histories,
-    FactKind::SimulationResults,
-    FactKind::Traces,
-    FactKind::ModelCheckResults,
-    FactKind::ProofResults,
-    FactKind::ContractViolations,
-];
+/// They are the catalog entries with conformance that are not syntactic (ADR-123), in catalog order.
+pub fn execution() -> Vec<FactKind> {
+    FactEntry::catalog()
+        .iter()
+        .filter(|entry| entry.conformance && !entry.syntactic)
+        .map(|entry| entry.kind)
+        .collect()
+}
 
 /// `conformance/<kind>.toml`.
 ///
@@ -554,8 +555,9 @@ pub fn run_language(lang: &LangId) -> Vec<Failure> {
     let mut producers = ProducerRegistry::default();
     languages.register_producers(&mut producers);
     let registered = cupel_lang::lang(language.as_ref());
-    let produced: Vec<FactKind> = FactKind::SYNTACTIC
-        .into_iter()
+    let produced: Vec<FactKind> = FactKind::syntactic()
+        .iter()
+        .copied()
         .filter(|kind| producers.producers_for(*kind, &registered).next().is_some())
         .collect();
     let inventory = match LanguageInventory::load(lang) {

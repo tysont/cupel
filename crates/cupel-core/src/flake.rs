@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::id::ProducerId;
 use crate::test_results::{RunnerInvocation, TestResult};
 
@@ -22,6 +22,8 @@ impl Fact for TestReruns {
     const KIND: FactKind = FactKind::TestReruns;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<TestReruns>("test-reruns"));
 
 /// One rerun of the suite: what it varied and what every test did.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

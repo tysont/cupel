@@ -94,50 +94,18 @@ fn config_schema_keys_are_optional_and_closed() {
 #[test]
 fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
     // Every kind of the catalog has a payload type, so producer plugins can provide each one.
-    let without: Vec<FactKind> = FactKind::ALL
-        .into_iter()
+    let without: Vec<FactKind> = FactKind::all()
+        .iter()
+        .copied()
         .filter(|kind| schema::fact(*kind).is_none())
         .collect();
     assert_eq!(without, []);
 }
 
-#[test]
-fn the_execution_facts_of_wrapped_tools_are_at_version_one_under_their_kind() {
-    const WRAPPED: [(FactKind, &str); 9] = [
-        (FactKind::BenchSamples, "bench-samples"),
-        (FactKind::FuzzResults, "fuzz-results"),
-        (FactKind::RaceReports, "race-reports"),
-        (FactKind::Histories, "histories"),
-        (FactKind::SimulationResults, "simulation-results"),
-        (FactKind::Traces, "traces"),
-        (FactKind::ModelCheckResults, "model-check-results"),
-        (FactKind::ProofResults, "proof-results"),
-        (FactKind::ContractViolations, "contract-violations"),
-    ];
-    let described: Vec<(FactKind, Option<u32>, Value)> = WRAPPED
-        .iter()
-        .map(|(kind, _)| {
-            let id = schema::fact(*kind).map(|schema| schema.as_value()["$id"].clone());
-            (
-                *kind,
-                schema::fact_version(*kind),
-                id.unwrap_or(Value::Null),
-            )
-        })
-        .collect();
-    let expected: Vec<(FactKind, Option<u32>, Value)> = WRAPPED
-        .iter()
-        .map(|(kind, name)| {
-            let id = format!("https://cupel.dev/schema/v1/fact/{name}.json");
-            (*kind, Some(1), json!(id))
-        })
-        .collect();
-    assert_eq!(described, expected);
-}
-
+/// One snapshot per kind, `schemas__fact_<kind>.snap`, so a new kind adds a file (ADR-123).
 #[test]
 fn fact_schemas() {
-    for kind in FactKind::SYNTACTIC {
+    for &kind in FactKind::all() {
         let schema = schema::fact(kind).unwrap();
         let value = schema.as_value();
         assert_eq!(value["$schema"], json!(DRAFT_2020_12));

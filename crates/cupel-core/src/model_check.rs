@@ -3,7 +3,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::finding::Location;
 use crate::id::ProducerId;
 use crate::root_run::RootRun;
@@ -23,6 +23,10 @@ impl Fact for ModelCheckResults {
     const KIND: FactKind = FactKind::ModelCheckResults;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(
+    FactEntry::execution::<ModelCheckResults>("model-check-results").with_conformance()
+);
 
 /// One proof harness and what checking it found.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

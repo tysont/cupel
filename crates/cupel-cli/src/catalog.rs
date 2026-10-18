@@ -186,7 +186,7 @@ impl Catalog {
         FactDescription {
             kind,
             version: schema::fact_version(kind),
-            syntactic: FactKind::SYNTACTIC.contains(&kind),
+            syntactic: FactKind::syntactic().contains(&kind),
             schema: schema::fact(kind).and_then(|schema| match schema.to_value() {
                 Value::Object(body) => Some(body),
                 _ => None,
@@ -269,8 +269,9 @@ impl Catalog {
     /// The fact kinds `language` has producers for, in catalog order, with those producers.
     fn facts_of(&self, language: &dyn Language) -> Vec<FactProducers> {
         let lang = cupel_lang::lang(language);
-        FactKind::ALL
-            .into_iter()
+        FactKind::all()
+            .iter()
+            .copied()
             .filter_map(|kind| {
                 let producers: Vec<ProducerDescription> = self
                     .producers

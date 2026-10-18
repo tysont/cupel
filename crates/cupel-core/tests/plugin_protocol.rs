@@ -212,7 +212,7 @@ const STATUSES: [CheckStatus; 4] = [
 ];
 
 fn fact_kind() -> impl Strategy<Value = FactKind> {
-    proptest::sample::select(FactKind::ALL.to_vec())
+    proptest::sample::select(FactKind::all().to_vec())
 }
 
 fn cost() -> impl Strategy<Value = CostClass> {

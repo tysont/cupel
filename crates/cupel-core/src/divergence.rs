@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::config::OracleKind;
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactEntry, FactKind};
 use crate::id::ProducerId;
 use crate::syntax::SymbolKey;
 
@@ -28,6 +28,10 @@ impl Fact for DivergenceResults {
     const KIND: FactKind = FactKind::DivergenceResults;
     const VERSION: u32 = 1;
 }
+
+inventory::submit!(FactEntry::execution::<DivergenceResults>(
+    "divergence-results"
+));
 
 /// The oracle a comparison ran against.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

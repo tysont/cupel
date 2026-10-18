@@ -369,6 +369,7 @@ dependencies = [
  "blake3",
  "globset",
  "insta",
+ "inventory",
  "nix",
  "proptest",
  "schemars",
