@@ -140,7 +140,8 @@ expression: pretty(&schema)
         "simulation-results",
         "traces",
         "model-check-results",
-        "proof-results"
+        "proof-results",
+        "contract-violations"
       ]
     },
     "Finding": {
@@ -785,6 +786,9 @@ expression: pretty(&schema)
             "bench-samples": {
               "type": "string"
             },
+            "contract-violations": {
+              "type": "string"
+            },
             "coverage-map": {
               "type": "string"
             },
@@ -866,6 +870,7 @@ expression: pretty(&schema)
             "analyzer-report",
             "api-surface",
             "bench-samples",
+            "contract-violations",
             "coverage-map",
             "decisions",
             "divergence-results",

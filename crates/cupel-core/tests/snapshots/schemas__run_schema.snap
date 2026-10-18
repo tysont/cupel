@@ -1112,7 +1112,8 @@ expression: pretty(&schema)
         "simulation-results",
         "traces",
         "model-check-results",
-        "proof-results"
+        "proof-results",
+        "contract-violations"
       ]
     },
     "FactProducers": {

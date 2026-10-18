@@ -667,9 +667,9 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 | `meta.traceability` | 2 | standard | `spec.untested-requirement` | `untested` | — | clojure, go, java, javascript, python, rust, typescript |
 | `perf.bench` | 0 | deep | `perf.regression`, `perf.improvement` | `benchmarks`, `compared`, `regression`, `regressed`, `improved` | — | go, python, rust |
 | `perf.footprint` | 0 | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
+| `spec.contracts` | 5 | standard | `contract.violated` | `violations` | — | python, rust |
 | `spec.prove` | 6 | exhaustive | `proof.failed`, `proof.obligation-open` | `verified`, `failed`, `open` | — | clojure, go, java, javascript, python, rust, typescript |
 | `spec.trace` | 5 | exhaustive | `trace.diverged` | `traces`, `diverged`, `unvalidated` | — | clojure, go, java, javascript, python, rust, typescript |
-| `spec.contracts` | 5 | standard | `contract.violated` | `violations` | — | python, rust |
 | `static.analyze` | 1 | standard | `analyze.<tool>.<rule>` | `errors`, `diagnostics` | — | go, javascript, python, rust, typescript |
 | `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | clojure, go, java, javascript, python, rust, typescript |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | clojure, go, java, javascript, python, rust, typescript |
@@ -739,9 +739,9 @@ The support matrix, from `cupel describe matrix`:
 | `meta.traceability` | supported | supported | supported | supported | supported | supported | supported |
 | `perf.bench` | unsupported | supported | unsupported | unconfigured | supported | supported | unconfigured |
 | `perf.footprint` | unsupported | supported | unsupported | supported | supported | supported | supported |
+| `spec.contracts` | unsupported | unsupported | unsupported | unsupported | supported | supported | unsupported |
 | `spec.prove` | supported | supported | supported | supported | supported | supported | supported |
 | `spec.trace` | supported | supported | supported | supported | supported | supported | supported |
-| `spec.contracts` | unsupported | unsupported | unsupported | unsupported | supported | supported | unsupported |
 | `static.analyze` | unsupported | supported | unsupported | supported | supported | supported | supported |
 | `static.api-surface` | supported | supported | supported | supported | supported | supported | supported |
 | `static.clones` | supported | supported | supported | supported | supported | supported | supported |
