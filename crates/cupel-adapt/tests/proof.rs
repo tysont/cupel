@@ -6,16 +6,33 @@ use cupel_core::{Availability, Cancellation, FactKind, ProofResults, RunStatus, 
 use cupel_fixtures::conformance::{fact_inventory, unexhibited};
 use serde_json::json;
 
+/// Each obligation as [status, line, message, [related lines]].
+fn summary(fact: &ProofResults) -> Vec<serde_json::Value> {
+    fact.obligations
+        .iter()
+        .map(|obligation| {
+            json!([
+                obligation.status,
+                obligation.location.line,
+                obligation.message,
+                obligation
+                    .related
+                    .iter()
+                    .map(|related| related.location.line)
+                    .collect::<Vec<_>>(),
+            ])
+        })
+        .collect()
+}
+
 #[test]
 fn dafny_reports_the_unproved_postcondition_and_both_assumptions() {
-    let fixture = support::own_fixture("spec.prove", "go");
-    let root = fixture.path();
-    let producer = support::producer(
-        support::shared_registry(),
+    let (fixture, kind) = (
+        support::own_fixture("spec.prove", "go"),
         FactKind::ProofResults,
-        "tool.dafny",
-        "go",
     );
+    let root = fixture.path();
+    let producer = support::producer(support::shared_registry(), kind, "tool.dafny", "go");
     let ctx = support::produce_ctx(root, "go", Cancellation::new());
     if let Availability::MissingTool { name, .. } = producer.availability(&ctx.ctx) {
         eprintln!("SKIPPED: {name} not installed; tool.dafny was not run");
@@ -34,22 +51,7 @@ fn dafny_reports_the_unproved_postcondition_and_both_assumptions() {
     assert_eq!(fact.runs[0].status, RunStatus::Ran, "{:?}", fact.runs);
     assert_eq!(fact.files, ["proofs/tally.dfy"]);
     assert_eq!(fact.verified, 3);
-    let summary: Vec<serde_json::Value> = fact
-        .obligations
-        .iter()
-        .map(|obligation| {
-            json!([
-                obligation.status,
-                obligation.location.line,
-                obligation.message,
-                obligation
-                    .related
-                    .iter()
-                    .map(|related| related.location.line)
-                    .collect::<Vec<_>>(),
-            ])
-        })
-        .collect();
+    let summary = summary(&fact);
     assert_eq!(
         summary,
         [

@@ -13,13 +13,7 @@ use support::{Shape, score};
 const ID: &str = "conc.model-check";
 
 fn at(line: u32) -> Location {
-    Location {
-        file: "src/lib.rs".to_owned(),
-        line,
-        col: None,
-        end_line: line,
-        end_col: None,
-    }
+    support::line_at("src/lib.rs", line)
 }
 
 fn harness(name: &str, status: HarnessStatus, refuted: Vec<RefutedProperty>) -> ModelHarness {

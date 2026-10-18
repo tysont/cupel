@@ -5,12 +5,11 @@ use std::path::Path;
 use cupel_core::{
     Availability, CostClass, Counterexample, Ctx, EventSink, FactKind, HarnessStatus, Install,
     LangId, Langs, Location, ModelCheckResults, ModelHarness, Process, ProduceCtx, Producer,
-    ProducerId, RefutedProperty, Result, RootRun, RunStatus, Scope, ToolId, ToolProbe,
-    find_program, output_tail,
+    ProducerId, RefutedProperty, Result, Scope, ToolProbe, output_tail,
 };
 
 use crate::fuzz::{in_scope, sources};
-use crate::runner::suite_roots;
+use crate::runner::{on_path, probe, root_run, suite_roots};
 use crate::tree::{canonical, relative, under};
 
 const ID: &str = "tool.kani";
@@ -42,23 +41,19 @@ impl Producer<ModelCheckResults> for Kani {
 
     /// Ready with `cargo-kani` on `PATH`; its first run downloads the rest (`cargo kani setup`).
     fn availability(&self, _: &Ctx) -> Availability {
-        if find_program("cargo-kani").is_some() {
-            Availability::Ready
-        } else {
-            Availability::MissingTool {
-                name: ToolId::from("cargo-kani"),
-                install: Some(Install::Command(
-                    "cargo install --locked kani-verifier && cargo kani setup".to_owned(),
-                )),
-            }
-        }
+        on_path(
+            "cargo-kani",
+            Install::Command("cargo install --locked kani-verifier && cargo kani setup".to_owned()),
+        )
     }
 
-    fn tool(&self, _: &Ctx) -> Option<ToolProbe> {
-        Some(ToolProbe {
-            name: ToolId::from("cargo-kani"),
-            version: ["cargo", "kani", "--version"].map(str::to_owned).to_vec(),
-        })
+    fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
+        Some(probe(
+            "cargo-kani",
+            false,
+            &["cargo", "kani", "--version"],
+            &ctx.root,
+        ))
     }
 
     fn produce(
@@ -79,54 +74,17 @@ impl Producer<ModelCheckResults> for Kani {
                 continue;
             }
             ctx.cancel.checkpoint()?;
-            let path = canonical(&root.join(&dir));
-            let ran = Process::new("cargo", &path)
-                .args([
-                    "kani",
-                    "--output-format",
-                    "terse",
-                    "-Z",
-                    "concrete-playback",
-                    "--concrete-playback=print",
-                    "--target-dir",
-                    &target.to_string_lossy(),
-                ])
-                .merged()
-                .run(&ctx.cancel)?;
-            let read = read(&ran.stdout);
-            fact.runs.push(RootRun {
-                dir: dir.clone(),
-                status: if read.failed.is_some() {
-                    RunStatus::Failed
-                } else {
-                    RunStatus::Ran
-                },
-                detail: read.failed,
-            });
-            let place = |file: &str, line: u32| located(&root, &path, file, line);
+            let checked = Checked {
+                root: &root,
+                path: canonical(&root.join(&dir)),
+                dir,
+            };
+            let read = read(&command(&checked.path, &target).run(&ctx.cancel)?.stdout);
+            fact.runs.push(root_run(checked.dir.clone(), read.failed));
             let mut harnesses: Vec<ModelHarness> = read
                 .harnesses
                 .into_iter()
-                .map(|raw| ModelHarness {
-                    root: dir.clone(),
-                    location: defined(&path, &raw.name)
-                        .map(|(file, line)| at(under(&dir, &file), line)),
-                    status: raw.status,
-                    refuted: raw
-                        .refuted
-                        .into_iter()
-                        .map(|property| RefutedProperty {
-                            location: property
-                                .file
-                                .as_deref()
-                                .and_then(|file| place(file, property.line)),
-                            description: property.description,
-                            function: property.function,
-                            counterexample: property.counterexample,
-                        })
-                        .collect(),
-                    name: raw.name,
-                })
+                .map(|raw| checked.harness(raw))
                 .filter(|harness| {
                     harness
                         .location
@@ -138,6 +96,56 @@ impl Producer<ModelCheckResults> for Kani {
             fact.harnesses.extend(harnesses);
         }
         Ok(fact)
+    }
+}
+
+/// `cargo kani` in the project root `path`, terse, printing concrete playback, building into
+/// `target`.
+fn command(path: &Path, target: &Path) -> Process {
+    Process::new("cargo", path)
+        .args([
+            "kani",
+            "--output-format",
+            "terse",
+            "-Z",
+            "concrete-playback",
+            "--concrete-playback=print",
+            "--target-dir",
+            &target.to_string_lossy(),
+        ])
+        .merged()
+}
+
+/// A project root Kani checked: the repository root, the project root on disk, and relative.
+struct Checked<'a> {
+    root: &'a Path,
+    path: std::path::PathBuf,
+    dir: String,
+}
+
+impl Checked<'_> {
+    /// The harness Kani reported, placed in the repository.
+    fn harness(&self, raw: RawHarness) -> ModelHarness {
+        ModelHarness {
+            root: self.dir.clone(),
+            location: defined(&self.path, &raw.name)
+                .map(|(file, line)| at(under(&self.dir, &file), line)),
+            status: raw.status,
+            refuted: raw
+                .refuted
+                .into_iter()
+                .map(|property| RefutedProperty {
+                    location: property
+                        .file
+                        .as_deref()
+                        .and_then(|file| located(self.root, &self.path, file, property.line)),
+                    description: property.description,
+                    function: property.function,
+                    counterexample: property.counterexample,
+                })
+                .collect(),
+            name: raw.name,
+        }
     }
 }
 
@@ -220,19 +228,25 @@ fn read(output: &str) -> Read {
                 status: HarnessStatus::Undetermined,
                 refuted: Vec::new(),
             });
-            continue;
+        } else if let Some(harness) = harnesses.last_mut() {
+            harness.read(line, &mut lines);
         }
-        let Some(harness) = harnesses.last_mut() else {
-            continue;
-        };
+    }
+    let failed = failure(output, !harnesses.is_empty());
+    Read { harnesses, failed }
+}
+
+impl RawHarness {
+    /// Reads a line of this harness's report, and a playback test's lines after it from `rest`.
+    fn read<'a>(&mut self, line: &str, rest: &mut impl Iterator<Item = &'a str>) {
         if let Some(verdict) = line.strip_prefix("VERIFICATION:- ") {
-            harness.status = match verdict.trim() {
+            self.status = match verdict.trim() {
                 "SUCCESSFUL" => HarnessStatus::Verified,
                 "FAILED" => HarnessStatus::Failed,
                 _ => HarnessStatus::Undetermined,
             };
         } else if let Some(description) = line.strip_prefix("Failed Checks: ") {
-            harness.refuted.push(RawProperty {
+            self.refuted.push(RawProperty {
                 description: description.to_owned(),
                 file: None,
                 line: 0,
@@ -240,16 +254,14 @@ fn read(output: &str) -> Read {
                 counterexample: None,
             });
         } else if let Some(place) = line.trim_start().strip_prefix("File: ") {
-            if let Some(property) = harness.refuted.last_mut() {
+            if let Some(property) = self.refuted.last_mut() {
                 (property.file, property.line, property.function) = file_line(place);
             }
         } else if line.starts_with("Concrete playback unit test for ") {
-            let (check, counterexample) = playback(&mut lines);
-            attach(harness, check.as_deref(), counterexample);
+            let (check, counterexample) = playback(rest);
+            attach(self, check.as_deref(), counterexample);
         }
     }
-    let failed = failure(output, !harnesses.is_empty());
-    Read { harnesses, failed }
 }
 
 /// `"src/lib.rs", line 3, in average` as its file, line, and function.
@@ -424,14 +436,22 @@ mod tests {
             .as_ref()
             .and_then(|counterexample| counterexample.replay.clone())
             .unwrap();
-        assert!(
-            replay
-                .starts_with("/// Test generated for harness `proofs::average_never_overflows`\n"),
-            "{replay}"
-        );
-        assert!(
-            replay.contains("kani::concrete_playback_run(concrete_vals, average_never_overflows);"),
-            "{replay}"
+        assert_eq!(
+            replay,
+            "/// Test generated for harness `proofs::average_never_overflows`\n\
+             ///\n\
+             /// Check for `assertion`: \"attempt to add with overflow\"\n\
+             \n\
+             #[test]\n\
+             fn kani_concrete_playback_average_never_overflows_2036582041107130434() {\n    \
+             let concrete_vals: Vec<Vec<u8>> = vec![\n        \
+             // 128\n        \
+             vec![128],\n        \
+             // 128\n        \
+             vec![128],\n    \
+             ];\n    \
+             kani::concrete_playback_run(concrete_vals, average_never_overflows);\n\
+             }\n"
         );
     }
 

@@ -15,8 +15,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus,
-    CostClass, Error, Event, EventSink, Fact, FactKind, Facts, Finding, Manifest, Measurement,
-    MetricPer, RunId, Scope, Score, SymbolHash, Tier, Writer,
+    CostClass, Error, Event, EventSink, Fact, FactKind, Facts, Finding, Location, Manifest,
+    Measurement, MetricPer, RunId, Scope, Score, SymbolHash, Tier, Writer,
 };
 use serde_json::Value;
 
@@ -326,4 +326,15 @@ pub fn pairs(expected: &[(&str, &str)]) -> Vec<(String, String)> {
         .iter()
         .map(|(display, kind)| ((*display).to_owned(), (*kind).to_owned()))
         .collect()
+}
+
+/// The one-line location of `line` in `file`, without columns.
+pub fn line_at(file: &str, line: u32) -> Location {
+    Location {
+        file: file.to_owned(),
+        line,
+        col: None,
+        end_line: line,
+        end_col: None,
+    }
 }

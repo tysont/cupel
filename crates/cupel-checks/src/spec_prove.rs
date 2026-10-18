@@ -3,15 +3,15 @@
 use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::{
-    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
-    Facts, Finding, Manifest, Obligation, ObligationStatus, Plan, ProofResults, Result, RunStatus,
-    Scope, Score, Severity, Stability, Tier,
+    ActionKind, Check, CheckCtx, CheckResult, CostClass, Event, EventSink, FactKind, Facts,
+    Finding, Manifest, Obligation, ObligationStatus, Plan, ProofResults, Result, RunStatus, Scope,
+    Score, Severity,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::finding::SubjectFinding;
-use crate::manifest::{evidence, kind, metric};
+use crate::manifest::{Declared, evidence, kind};
 use crate::metrics::sum;
 use crate::outcome;
 use crate::settings::Limits;
@@ -87,6 +87,22 @@ const OPEN: Said = Said {
     title: "proof obligation open",
 };
 
+const DECLARED: Declared = Declared {
+    id: ID,
+    tier: 6,
+    cost: CostClass::Exhaustive,
+    needs: FactKind::ProofResults,
+    findings: || {
+        [FAILED, OPEN]
+            .iter()
+            .map(|said| kind::<Undischarged>(said.kind, said.action, said.means))
+            .collect()
+    },
+    metrics: &METRICS,
+    summary: "Verifies the project's proofs with a deductive verifier (Dafny) and reports each \
+              obligation it could not prove and each the proofs assume or leave undecided.",
+};
+
 pub struct SpecProve {
     manifest: Manifest,
 }
@@ -96,28 +112,7 @@ inventory::submit!(crate::NativeCheck(|| Box::new(SpecProve::new())));
 impl SpecProve {
     pub fn new() -> Self {
         Self {
-            manifest: Manifest {
-                id: CheckId::from(ID),
-                version: 1,
-                tier: Tier::try_from(6).expect("tier 6 exists"),
-                cost: CostClass::Exhaustive,
-                needs: vec![FactKind::ProofResults],
-                wants: vec![],
-                findings: [FAILED, OPEN]
-                    .iter()
-                    .map(|said| kind::<Undischarged>(said.kind, said.action, said.means))
-                    .collect(),
-                metrics: METRICS
-                    .iter()
-                    .map(|(name, counts)| metric(name, counts))
-                    .collect(),
-                settings: LIMITS.specs(),
-                stability: Stability::Experimental,
-                summary: "Verifies the project's proofs with a deductive verifier (Dafny) and \
-                          reports each obligation it could not prove and each the proofs assume \
-                          or leave undecided."
-                    .to_owned(),
-            },
+            manifest: DECLARED.manifest(),
         }
     }
 }
@@ -149,10 +144,7 @@ impl Check for SpecProve {
             sink.emit(Event::Finding(Box::new(finding)));
         }
         let count = |status: ObligationStatus| {
-            fact.obligations
-                .iter()
-                .filter(|obligation| obligation.status == status)
-                .count()
+            outcome::tally(&fact.obligations, |obligation| obligation.status, &status)
         };
         let (failed, open) = (
             count(ObligationStatus::Failed),

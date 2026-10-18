@@ -16,13 +16,14 @@ use std::fs;
 use std::path::Path;
 
 use cupel_core::{
-    Availability, CostClass, Ctx, Error, EventSink, FactKind, Install, Langs, Location, ProduceCtx,
-    Producer, ProducerId, Result, Scope, TestResults, ToolId, ToolProbe, Trace, TraceDivergence,
-    TraceSpec, TraceStatus, Traces, find_program, output_tail,
+    Availability, CostClass, Ctx, Error, EventSink, FactKind, Install, Langs, Location, Process,
+    ProduceCtx, Producer, ProducerId, Result, Scope, TestResults, ToolProbe, Trace,
+    TraceDivergence, TraceSpec, TraceStatus, Traces, output_tail,
 };
 use serde_json::{Map, Value};
 
 use super::log::{self, Logged};
+use crate::runner::{on_path, probe};
 use crate::tree::{canonical, relative};
 
 const ID: &str = "tool.tlc";
@@ -63,26 +64,19 @@ impl Producer<Traces> for Tlc {
     }
 
     fn availability(&self, _: &Ctx) -> Availability {
-        if find_program(PROGRAM).is_some() {
-            Availability::Ready
-        } else {
-            Availability::MissingTool {
-                name: ToolId::from(PROGRAM),
-                install: Some(Install::Hint(
-                    "TLC is in the TLA+ tools (https://github.com/tlaplus/tlaplus/releases): put \
-                     a `tlc` script on PATH that runs `java -cp tla2tools.jar tlc2.TLC \"$@\"`, \
-                     as tla-bin installs it."
-                        .to_owned(),
-                )),
-            }
-        }
+        on_path(
+            PROGRAM,
+            Install::Hint(
+                "TLC is in the TLA+ tools (https://github.com/tlaplus/tlaplus/releases): put a \
+                 `tlc` script on PATH that runs `java -cp tla2tools.jar tlc2.TLC \"$@\"`, as \
+                 tla-bin installs it."
+                    .to_owned(),
+            ),
+        )
     }
 
-    fn tool(&self, _: &Ctx) -> Option<ToolProbe> {
-        Some(ToolProbe {
-            name: ToolId::from(PROGRAM),
-            version: vec![PROGRAM.to_owned(), "-h".to_owned()],
-        })
+    fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
+        Some(probe(PROGRAM, false, &[PROGRAM, "-h"], &ctx.root))
     }
 
     fn produce(&self, ctx: &ProduceCtx, scope: &Scope, _: &mut dyn EventSink) -> Result<Traces> {
@@ -179,8 +173,14 @@ fn validate(ctx: &ProduceCtx, spec: &TraceSpec, name: &str, steps: &[Logged]) ->
         &work.join(format!("{MODULE}.cfg")),
         names.config().as_bytes(),
     )?;
+    let ran = tlc(&work).run(&ctx.cancel)?;
+    Ok(verdict(&ran.stdout).trace(&ctx.ctx.root, name, steps))
+}
+
+/// TLC on the generated module in `work`, deadlock unchecked, its states under `work/states`.
+fn tlc(work: &Path) -> Process {
     let states = work.join("states").to_string_lossy().into_owned();
-    let ran = cupel_core::Process::new(PROGRAM, &work)
+    Process::new(PROGRAM, work)
         .args([
             "-deadlock",
             "-workers",
@@ -192,24 +192,28 @@ fn validate(ctx: &ProduceCtx, spec: &TraceSpec, name: &str, steps: &[Logged]) ->
             &format!("{MODULE}.tla"),
         ])
         .merged()
-        .run(&ctx.cancel)?;
-    Ok(match verdict(&ran.stdout) {
-        Verdict::Conforms => Trace {
+}
+
+impl Verdict {
+    /// The trace `name` of `steps` as this verdict says it ended; a divergence is placed where
+    /// it was logged in the repository at `root`.
+    fn trace(self, root: &Path, name: &str, steps: &[Logged]) -> Trace {
+        let (status, divergence) = match self {
+            Self::Conforms => (TraceStatus::Conforms, None),
+            Self::Diverged { matched } => (
+                TraceStatus::Diverged,
+                Some(divergence(root, steps, matched)),
+            ),
+            Self::Failed(detail) => return failed(name, steps.len(), detail),
+        };
+        Trace {
             name: name.to_owned(),
             steps: steps.len() as u64,
-            status: TraceStatus::Conforms,
+            status,
             detail: None,
-            divergence: None,
-        },
-        Verdict::Diverged { matched } => Trace {
-            name: name.to_owned(),
-            steps: steps.len() as u64,
-            status: TraceStatus::Diverged,
-            detail: None,
-            divergence: Some(divergence(&ctx.ctx.root, steps, matched)),
-        },
-        Verdict::Failed(detail) => failed(name, steps.len(), detail),
-    })
+            divergence,
+        }
+    }
 }
 
 /// The `.tla` files in the spec's directory, which the spec may extend or instantiate.
@@ -351,22 +355,7 @@ impl SpecConfig {
 /// The module that checks `steps` against the spec module `spec`; why it cannot be written when
 /// a logged name is not a TLA+ identifier or a value has no TLA+ counterpart.
 fn module(spec: &str, names: &SpecConfig, steps: &[Logged]) -> std::result::Result<String, String> {
-    let variables: BTreeSet<&str> = steps
-        .iter()
-        .flat_map(|step| step.state.keys())
-        .map(String::as_str)
-        .collect();
-    for variable in &variables {
-        identifier(variable, "a logged variable")?;
-    }
-    let actions: BTreeSet<&str> = steps
-        .iter()
-        .skip(1)
-        .filter_map(|step| step.action.as_deref())
-        .collect();
-    for action in &actions {
-        identifier(action, "a logged action")?;
-    }
+    let (variables, actions) = logged_names(steps)?;
     let states = steps
         .iter()
         .map(|step| record(&step.state))
@@ -375,29 +364,6 @@ fn module(spec: &str, names: &SpecConfig, steps: &[Logged]) -> std::result::Resu
         .iter()
         .map(|step| string(step.action.as_deref().unwrap_or_default()))
         .collect();
-    let constrained = |index: &str, prime: &str| -> String {
-        variables
-            .iter()
-            .map(|variable| {
-                format!(
-                    "    /\\ (\"{variable}\" \\in DOMAIN {MODULE}[{index}] => \
-                     {variable}{prime} = {MODULE}[{index}][\"{variable}\"])\n"
-                )
-            })
-            .collect()
-    };
-    let step = if actions.is_empty() {
-        format!("    /\\ {}\n", names.next)
-    } else {
-        let mut case = String::from("    /\\ CASE ");
-        for action in &actions {
-            case.push_str(&format!(
-                "{MODULE}Action[cupel_step + 1] = \"{action}\" -> {action}\n         [] "
-            ));
-        }
-        case.push_str(&format!("OTHER -> {}\n", names.next));
-        case
-    };
     Ok(format!(
         "---- MODULE {MODULE} ----\n\
          EXTENDS {spec}, Integers, Sequences, TLC\n\
@@ -410,16 +376,68 @@ fn module(spec: &str, names: &SpecConfig, steps: &[Logged]) -> std::result::Resu
          \n\
          {MODULE}Init ==\n    /\\ cupel_step = 1\n    /\\ {}\n{}\
          \n\
-         {MODULE}Next ==\n    /\\ cupel_step < Len({MODULE})\n    /\\ cupel_step' = cupel_step + 1\n{step}{}\
+         {MODULE}Next ==\n    /\\ cupel_step < Len({MODULE})\n    /\\ cupel_step' = cupel_step + 1\n{}{}\
          \n\
          {MODULE}Unmatched == cupel_step < Len({MODULE})\n\
          ====\n",
         states.join(",\n    "),
         logged.join(", "),
         names.init,
-        constrained("1", ""),
-        constrained("cupel_step + 1", "'"),
+        constrained(&variables, "1", ""),
+        relation(&actions, &names.next),
+        constrained(&variables, "cupel_step + 1", "'"),
     ))
+}
+
+/// The variables the steps log and the actions they name after the first, each checked to be
+/// a TLA+ identifier.
+fn logged_names(steps: &[Logged]) -> std::result::Result<(BTreeSet<&str>, BTreeSet<&str>), String> {
+    let variables: BTreeSet<&str> = steps
+        .iter()
+        .flat_map(|step| step.state.keys())
+        .map(String::as_str)
+        .collect();
+    let actions: BTreeSet<&str> = steps
+        .iter()
+        .skip(1)
+        .filter_map(|step| step.action.as_deref())
+        .collect();
+    for variable in &variables {
+        identifier(variable, "a logged variable")?;
+    }
+    for action in &actions {
+        identifier(action, "a logged action")?;
+    }
+    Ok((variables, actions))
+}
+
+/// One conjunct per variable: when the logged state at `index` has it, the variable (primed by
+/// `prime`) equals it.
+fn constrained(variables: &BTreeSet<&str>, index: &str, prime: &str) -> String {
+    variables
+        .iter()
+        .map(|variable| {
+            format!(
+                "    /\\ (\"{variable}\" \\in DOMAIN {MODULE}[{index}] => \
+                 {variable}{prime} = {MODULE}[{index}][\"{variable}\"])\n"
+            )
+        })
+        .collect()
+}
+
+/// The step each logged state takes: the action it names, else the spec's `next`.
+fn relation(actions: &BTreeSet<&str>, next: &str) -> String {
+    if actions.is_empty() {
+        return format!("    /\\ {next}\n");
+    }
+    let mut case = String::from("    /\\ CASE ");
+    for action in actions {
+        case.push_str(&format!(
+            "{MODULE}Action[cupel_step + 1] = \"{action}\" -> {action}\n         [] "
+        ));
+    }
+    case.push_str(&format!("OTHER -> {next}\n"));
+    case
 }
 
 /// `name` when it is a TLA+ identifier (letters, digits, `_`, not only digits).
@@ -631,9 +649,11 @@ mod tests {
         let logged = steps(&[json!({"state": {"x": 0}}), json!({"state": {"x": 1}})]);
         let names = SpecConfig::read(Some("INIT Start\nNEXT\n  Step\n"));
         let text = module("Spec", &names, &logged).unwrap();
-        assert!(text.contains("    /\\ Start\n"), "{text}");
-        assert!(text.contains("    /\\ Step\n"), "{text}");
-        assert!(!text.contains("CASE"), "{text}");
+        let relations: Vec<&str> = text
+            .lines()
+            .filter(|line| line.starts_with("    /\\ S") || line.contains("CASE"))
+            .collect();
+        assert_eq!(relations, ["    /\\ Start", "    /\\ Step"]);
     }
 
     #[test]

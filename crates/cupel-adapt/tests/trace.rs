@@ -4,7 +4,8 @@ mod support;
 
 use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::{
-    Availability, Cancellation, FactKind, ProduceCtx, RunOracle, Scope, TestResults, Traces,
+    Availability, Cancellation, FactKind, ProduceCtx, RunOracle, Scope, TestResults, TraceStatus,
+    Traces,
 };
 use cupel_fixtures::conformance::{fact_inventory, unexhibited};
 use serde_json::json;
@@ -53,8 +54,9 @@ fn context(root: &std::path::Path, oracle: Option<RunOracle>, baseline: bool) ->
     ctx
 }
 
-#[test]
-fn tlc_validates_each_recorded_trace_and_exhibits_every_construct() {
+/// TLC's traces of a copy of the spec.trace Rust fixture over `scope`, having checked it wrote
+/// nothing in the copy; `None` (reported as skipped) when TLC is not installed.
+fn validated(scope: &Scope) -> Option<Traces> {
     let fixture = support::own_fixture("spec.trace", "rust");
     let root = fixture.path();
     let ctx = context(root, Some(oracle(OracleKind::Spec, "tla+")), true);
@@ -66,60 +68,104 @@ fn tlc_validates_each_recorded_trace_and_exhibits_every_construct() {
     );
     if let Availability::MissingTool { name, .. } = producer.availability(&ctx.ctx) {
         eprintln!("SKIPPED: {name} not installed; tool.tlc was not run");
-        return;
+        return None;
     }
     let before = support::tree(root);
-
-    let fact = traces(&ctx, &Scope::default());
-
+    let fact = traces(&ctx, scope);
     assert_eq!(support::tree(root), before, "tool.tlc wrote in the tree");
+    Some(fact)
+}
+
+/// A divergence of the fixture's `src/lib.rs` at `line`, as the fact serializes it.
+fn diverged(
+    step: u64,
+    action: Option<&str>,
+    count: u32,
+    previous: Option<u32>,
+    line: u32,
+) -> serde_json::Value {
+    json!({
+        "step": step,
+        "action": action,
+        "state": {"count": count, "done": false},
+        "previous": previous.map(|count| json!({"count": count, "done": false})),
+        "location": {"file": "src/lib.rs", "line": line, "col": null, "end_line": line,
+                     "end_col": null},
+    })
+}
+
+#[test]
+fn tlc_finds_where_each_diverged_trace_leaves_the_spec() {
+    let Some(fact) = validated(&Scope::default()) else {
+        return;
+    };
     assert_eq!(fact.problem, None);
+    let divergences: Vec<(String, serde_json::Value)> = fact
+        .traces
+        .iter()
+        .filter(|trace| trace.status == TraceStatus::Diverged)
+        .map(|trace| (trace.name.clone(), json!(trace.divergence)))
+        .collect();
+    assert_eq!(
+        divergences,
+        [
+            (
+                "bumps.jsonl".to_owned(),
+                diverged(3, Some("Inc"), 3, Some(1), 33)
+            ),
+            ("restarts.jsonl".to_owned(), diverged(1, None, 5, None, 22)),
+        ]
+    );
+}
+
+#[test]
+fn tlc_validates_every_recorded_trace_and_exhibits_every_construct() {
+    let Some(fact) = validated(&Scope::default()) else {
+        return;
+    };
     let value = serde_json::to_value(&fact).unwrap();
     assert_eq!(
         value["spec"],
         json!({"oracle": "counter", "file": "spec/Counter.tla", "lang": "tla+"})
     );
+    let verdicts: Vec<(&str, u64, TraceStatus, Option<&str>)> = fact
+        .traces
+        .iter()
+        .map(|trace| {
+            (
+                trace.name.as_str(),
+                trace.steps,
+                trace.status,
+                trace.detail.as_deref(),
+            )
+        })
+        .collect();
     assert_eq!(
-        value["traces"],
-        json!([
-            {
-                "name": "bumps.jsonl", "steps": 3, "status": "diverged", "detail": null,
-                "divergence": {
-                    "step": 3,
-                    "action": "Inc",
-                    "state": {"count": 3, "done": false},
-                    "previous": {"count": 1, "done": false},
-                    "location": {"file": "src/lib.rs", "line": 33, "col": null,
-                                 "end_line": 33, "end_col": null},
-                },
-            },
-            {"name": "counts.jsonl", "steps": 4, "status": "conforms", "detail": null,
-             "divergence": null},
-            {
-                "name": "restarts.jsonl", "steps": 2, "status": "diverged", "detail": null,
-                "divergence": {
-                    "step": 1,
-                    "action": null,
-                    "state": {"count": 5, "done": false},
-                    "previous": null,
-                    "location": {"file": "src/lib.rs", "line": 22, "col": null,
-                                 "end_line": 22, "end_col": null},
-                },
-            },
-            {
-                "name": "torn.jsonl", "steps": 0, "status": "failed",
-                "detail": "line 1: not JSON: EOF while parsing a value at line 1 column 10",
-                "divergence": null,
-            },
-        ])
+        verdicts,
+        [
+            ("bumps.jsonl", 3, TraceStatus::Diverged, None),
+            ("counts.jsonl", 4, TraceStatus::Conforms, None),
+            ("restarts.jsonl", 2, TraceStatus::Diverged, None),
+            (
+                "torn.jsonl",
+                0,
+                TraceStatus::Failed,
+                Some("line 1: not JSON: EOF while parsing a value at line 1 column 10")
+            ),
+        ]
     );
     assert_eq!(
         unexhibited(&fact_inventory(FactKind::Traces), &value, &[]),
         []
     );
+}
 
-    let elsewhere = traces(&ctx, &Scope::of_files(vec!["tests/trace.rs".to_owned()]));
-    let names: Vec<&str> = elsewhere
+#[test]
+fn a_trace_logged_outside_the_scope_is_dropped() {
+    let Some(fact) = validated(&Scope::of_files(vec!["tests/trace.rs".to_owned()])) else {
+        return;
+    };
+    let names: Vec<&str> = fact
         .traces
         .iter()
         .map(|trace| trace.name.as_str())
@@ -140,25 +186,29 @@ fn without_a_tla_spec_oracle_nothing_is_recorded_and_the_problem_says_why() {
         Some(oracle(OracleKind::Spec, "quint")),
     ]
     .map(|oracle| traces(&context(dir.path(), oracle, false), &Scope::default()));
-    for fact in &problems {
-        assert!(fact.traces.is_empty());
-    }
     assert_eq!(
-        problems.map(|fact| (fact.spec.is_some(), fact.problem.unwrap_or_default())),
+        problems.map(|fact| (
+            fact.traces.len(),
+            fact.spec.is_some(),
+            fact.problem.unwrap_or_default()
+        )),
         [
             (
+                0,
                 false,
                 "the run has no oracle: define a spec oracle with `cupel oracle add NAME --kind \
                  spec --spec FILE --lang tla+`"
                     .to_owned()
             ),
             (
+                0,
                 false,
                 "the run's oracle `counter` is not a specification: name a spec oracle with \
                  `--oracle`"
                     .to_owned()
             ),
             (
+                0,
                 false,
                 "the run's oracle `counter` is a quint specification, which tool.tlc does not \
                  read"

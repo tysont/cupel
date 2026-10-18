@@ -138,13 +138,8 @@ impl Check for GenFuzz {
             .iter()
             .filter(|root| !results.targets.iter().any(|target| target.root == **root))
             .collect();
-        let count = |status: FuzzStatus| {
-            results
-                .targets
-                .iter()
-                .filter(|target| target.status == status)
-                .count()
-        };
+        let count =
+            |status: FuzzStatus| outcome::tally(&results.targets, |target| target.status, &status);
         let counts = [
             ("targets", results.targets.len()),
             ("crashes", count(FuzzStatus::Crashed)),

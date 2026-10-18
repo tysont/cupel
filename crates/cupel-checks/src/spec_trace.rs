@@ -1,16 +1,16 @@
 // ABOUTME: `spec.trace` (ADR-116): traces the tests recorded that are not behaviors of the run's spec oracle, from
 // ABOUTME: the Traces fact, one failing finding per diverged trace at the step it left the spec.
 use cupel_core::{
-    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
-    Facts, Finding, Manifest, Plan, Result, Scope, Score, Severity, Stability, Tier, Trace,
-    TraceDivergence, TraceStatus, Traces,
+    ActionKind, Check, CheckCtx, CheckResult, CostClass, Event, EventSink, FactKind, Facts,
+    Finding, Manifest, Plan, Result, Scope, Score, Severity, Trace, TraceDivergence, TraceStatus,
+    Traces,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::Value;
 
 use crate::finding::SubjectFinding;
-use crate::manifest::{evidence, kind, metric};
+use crate::manifest::{Declared, evidence, kind};
 use crate::metrics::sum;
 use crate::outcome;
 use crate::settings::Limits;
@@ -54,6 +54,25 @@ struct Diverged {
     previous: Option<Value>,
 }
 
+const DECLARED: Declared = Declared {
+    id: ID,
+    tier: 5,
+    cost: CostClass::Exhaustive,
+    needs: FactKind::Traces,
+    findings: || {
+        vec![kind::<Diverged>(
+            "trace.diverged",
+            ActionKind::FixBug,
+            "A trace the tests recorded is not a behavior of the specification: at some step the \
+             implementation reached a state the spec does not allow from the state before.",
+        )]
+    },
+    metrics: &METRICS,
+    summary: "Runs the tests with `CUPEL_TRACE_DIR` set, so the implementation logs its steps as \
+              JSON lines, and validates each recorded trace as a behavior of the run's spec oracle \
+              (TLA+ with TLC).",
+};
+
 pub struct SpecTrace {
     manifest: Manifest,
 }
@@ -63,31 +82,7 @@ inventory::submit!(crate::NativeCheck(|| Box::new(SpecTrace::new())));
 impl SpecTrace {
     pub fn new() -> Self {
         Self {
-            manifest: Manifest {
-                id: CheckId::from(ID),
-                version: 1,
-                tier: Tier::try_from(5).expect("tier 5 exists"),
-                cost: CostClass::Exhaustive,
-                needs: vec![FactKind::Traces],
-                wants: vec![],
-                findings: vec![kind::<Diverged>(
-                    "trace.diverged",
-                    ActionKind::FixBug,
-                    "A trace the tests recorded is not a behavior of the specification: at \
-                     some step the implementation reached a state the spec does not allow \
-                     from the state before.",
-                )],
-                metrics: METRICS
-                    .iter()
-                    .map(|(name, counts)| metric(name, counts))
-                    .collect(),
-                settings: LIMITS.specs(),
-                stability: Stability::Experimental,
-                summary: "Runs the tests with `CUPEL_TRACE_DIR` set, so the implementation logs \
-                          its steps as JSON lines, and validates each recorded trace as a \
-                          behavior of the run's spec oracle (TLA+ with TLC)."
-                    .to_owned(),
-            },
+            manifest: DECLARED.manifest(),
         }
     }
 }
@@ -110,12 +105,8 @@ impl Check for SpecTrace {
     ) -> Result<CheckResult> {
         LIMITS.read(&self.manifest.id, &ctx.config)?;
         let fact = facts.get::<Traces>()?;
-        let count = |status: TraceStatus| {
-            fact.traces
-                .iter()
-                .filter(|trace| trace.status == status)
-                .count()
-        };
+        let count =
+            |status: TraceStatus| outcome::tally(&fact.traces, |trace| trace.status, &status);
         let diverged = count(TraceStatus::Diverged);
         let validated = diverged + count(TraceStatus::Conforms);
         for trace in &fact.traces {

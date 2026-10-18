@@ -3,15 +3,15 @@
 use std::collections::BTreeMap;
 
 use cupel_core::{
-    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
-    Facts, Finding, HarnessStatus, Manifest, ModelCheckResults, ModelHarness, Plan,
-    RefutedProperty, Result, RunStatus, Scope, Score, Severity, Stability, Tier,
+    ActionKind, Check, CheckCtx, CheckResult, CostClass, Event, EventSink, FactKind, Facts,
+    Finding, HarnessStatus, Manifest, ModelCheckResults, ModelHarness, Plan, RefutedProperty,
+    Result, RunStatus, Scope, Score, Severity,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::finding::SubjectFinding;
-use crate::manifest::{evidence, kind, metric};
+use crate::manifest::{Declared, evidence, kind};
 use crate::metrics::sum;
 use crate::outcome;
 use crate::settings::Limits;
@@ -56,6 +56,25 @@ struct Refuted {
     replay: Option<String>,
 }
 
+const DECLARED: Declared = Declared {
+    id: ID,
+    tier: 5,
+    cost: CostClass::Exhaustive,
+    needs: FactKind::ModelCheckResults,
+    findings: || {
+        vec![kind::<Refuted>(
+            "model.counterexample",
+            ActionKind::FixBug,
+            "A bounded model checker found inputs to a proof harness that break a property: an \
+             assertion, an arithmetic overflow, an out-of-bounds access, a panic.",
+        )]
+    },
+    metrics: &METRICS,
+    summary: "Model-checks the project's proof harnesses (Kani's `#[kani::proof]`) over every \
+              input within their bounds and reports each property refuted, with the inputs that \
+              refute it.",
+};
+
 pub struct ConcModelCheck {
     manifest: Manifest,
 }
@@ -65,31 +84,7 @@ inventory::submit!(crate::NativeCheck(|| Box::new(ConcModelCheck::new())));
 impl ConcModelCheck {
     pub fn new() -> Self {
         Self {
-            manifest: Manifest {
-                id: CheckId::from(ID),
-                version: 1,
-                tier: Tier::try_from(5).expect("tier 5 exists"),
-                cost: CostClass::Exhaustive,
-                needs: vec![FactKind::ModelCheckResults],
-                wants: vec![],
-                findings: vec![kind::<Refuted>(
-                    "model.counterexample",
-                    ActionKind::FixBug,
-                    "A bounded model checker found inputs to a proof harness that break a \
-                     property: an assertion, an arithmetic overflow, an out-of-bounds access, \
-                     a panic.",
-                )],
-                metrics: METRICS
-                    .iter()
-                    .map(|(name, counts)| metric(name, counts))
-                    .collect(),
-                settings: LIMITS.specs(),
-                stability: Stability::Experimental,
-                summary: "Model-checks the project's proof harnesses (Kani's `#[kani::proof]`) \
-                          over every input within their bounds and reports each property \
-                          refuted, with the inputs that refute it."
-                    .to_owned(),
-            },
+            manifest: DECLARED.manifest(),
         }
     }
 }
@@ -121,10 +116,7 @@ impl Check for ConcModelCheck {
             }
         }
         let count = |status: HarnessStatus| {
-            fact.harnesses
-                .iter()
-                .filter(|harness| harness.status == status)
-                .count()
+            outcome::tally(&fact.harnesses, |harness| harness.status, &status)
         };
         let failed = count(HarnessStatus::Failed);
         let measured = fact.runs.iter().any(|run| run.status == RunStatus::Ran);

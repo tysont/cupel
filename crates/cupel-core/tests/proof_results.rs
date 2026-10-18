@@ -1,5 +1,7 @@
 // ABOUTME: Tests for the `ProofResults` payload (ADR-118): its shape as JSON and the spellings of its obligation
 // ABOUTME: statuses; schemas.rs pins its kind and version.
+mod support;
+
 use cupel_core::{
     Location, Obligation, ObligationStatus, ProducerId, ProofResults, RelatedPlace, RootRun,
     RunStatus,
@@ -64,13 +66,5 @@ fn proof_results_serializes_every_field() {
         serde_json::from_value::<ProofResults>(value).unwrap(),
         results
     );
-}
-
-#[test]
-fn obligation_statuses_are_spelled_in_kebab_case() {
-    let spelled = |value: serde_json::Value| value.as_str().unwrap().to_owned();
-    assert_eq!(
-        [ObligationStatus::Failed, ObligationStatus::Open].map(|status| spelled(json!(status))),
-        ["failed", "open"]
-    );
+    assert_eq!(support::spelled(&[ObligationStatus::Open]), ["open"]);
 }

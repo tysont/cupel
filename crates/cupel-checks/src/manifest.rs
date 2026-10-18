@@ -1,6 +1,9 @@
 // ABOUTME: Builders every native check's manifest and evidence share: finding kinds whose evidence is a
 // ABOUTME: JSON Schema, `scope` and per-target metric specs, settings, and evidence (ADR-012, ADR-062, ADR-111).
-use cupel_core::{ActionKind, FindingKindSpec, MetricPer, MetricSpec, SettingSpec};
+use cupel_core::{
+    ActionKind, CheckId, CostClass, FactKind, FindingKindSpec, Manifest, MetricPer, MetricSpec,
+    SettingSpec, Stability, Tier,
+};
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -54,4 +57,45 @@ pub fn spelling<T: Serialize>(value: &T) -> String {
 /// `value` as JSON evidence; a value that cannot be serialized is null.
 pub fn evidence<T: Serialize>(value: &T) -> Value {
     serde_json::to_value(value).unwrap_or(Value::Null)
+}
+
+/// What a check over one execution fact, with no settings, declares (ADR-116, ADR-117,
+/// ADR-118): all its manifest holds but what every such check shares (version 1, no wants, no
+/// settings, experimental).
+pub struct Declared {
+    pub id: &'static str,
+    pub tier: u8,
+    pub cost: CostClass,
+    pub needs: FactKind,
+    pub findings: fn() -> Vec<FindingKindSpec>,
+    /// Each metric, with what it counts.
+    pub metrics: &'static [(&'static str, &'static str)],
+    pub summary: &'static str,
+}
+
+impl Declared {
+    /// The manifest.
+    ///
+    /// # Panics
+    ///
+    /// When `tier` is not a tier.
+    pub fn manifest(&self) -> Manifest {
+        Manifest {
+            id: CheckId::from(self.id),
+            version: 1,
+            tier: Tier::try_from(self.tier).expect("a check declares a tier that exists"),
+            cost: self.cost,
+            needs: vec![self.needs],
+            wants: vec![],
+            findings: (self.findings)(),
+            metrics: self
+                .metrics
+                .iter()
+                .map(|(name, counts)| metric(name, counts))
+                .collect(),
+            settings: Vec::new(),
+            stability: Stability::Experimental,
+            summary: self.summary.to_owned(),
+        }
+    }
 }

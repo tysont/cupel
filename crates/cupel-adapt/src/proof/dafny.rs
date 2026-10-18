@@ -5,12 +5,12 @@ use std::path::Path;
 use cupel_core::{
     Availability, CostClass, Ctx, EventSink, FactKind, Install, Langs, Location, Obligation,
     ObligationStatus, Process, ProduceCtx, Producer, ProducerId, ProofResults, RelatedPlace,
-    Result, RootRun, RunStatus, Scope, ToolId, ToolProbe, find_program, output_tail,
+    Result, Scope, ToolProbe, output_tail,
 };
 use serde_json::Value;
 
 use crate::fuzz::sources;
-use crate::runner::suite_roots;
+use crate::runner::{on_path, probe, root_run, suite_roots};
 use crate::tree::{canonical, relative, under};
 
 const ID: &str = "tool.dafny";
@@ -43,26 +43,18 @@ impl Producer<ProofResults> for Dafny {
     }
 
     fn availability(&self, _: &Ctx) -> Availability {
-        if find_program("dafny").is_some() {
-            Availability::Ready
-        } else {
-            Availability::MissingTool {
-                name: ToolId::from("dafny"),
-                install: Some(Install::Hint(
-                    "Download a Dafny release (https://github.com/dafny-lang/dafny/releases), \
-                     which bundles Z3, and put `dafny` on PATH; or `dotnet tool install --global \
-                     dafny`."
-                        .to_owned(),
-                )),
-            }
-        }
+        on_path(
+            "dafny",
+            Install::Hint(
+                "Download a Dafny release (https://github.com/dafny-lang/dafny/releases), which \
+                 bundles Z3, and put `dafny` on PATH; or `dotnet tool install --global dafny`."
+                    .to_owned(),
+            ),
+        )
     }
 
-    fn tool(&self, _: &Ctx) -> Option<ToolProbe> {
-        Some(ToolProbe {
-            name: ToolId::from("dafny"),
-            version: vec!["dafny".to_owned(), "--version".to_owned()],
-        })
+    fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
+        Some(probe("dafny", false, &["dafny", "--version"], &ctx.root))
     }
 
     fn produce(
@@ -99,15 +91,7 @@ impl Producer<ProofResults> for Dafny {
                 .merged()
                 .run(&ctx.cancel)?;
             let read = read(&ran.stdout, &|file| relative(&root, &path, file));
-            fact.runs.push(RootRun {
-                dir: dir.clone(),
-                status: if read.failed.is_some() {
-                    RunStatus::Failed
-                } else {
-                    RunStatus::Ran
-                },
-                detail: read.failed,
-            });
+            fact.runs.push(root_run(dir.clone(), read.failed));
             fact.files
                 .extend(files.iter().map(|file| under(&dir, file)));
             fact.verified += read.verified;

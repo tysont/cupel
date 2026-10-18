@@ -35,13 +35,7 @@ fn diverged(name: &str, step: u64, location: Option<Location>) -> Trace {
 }
 
 fn at(line: u32) -> Location {
-    Location {
-        file: "src/lib.rs".to_owned(),
-        line,
-        col: None,
-        end_line: line,
-        end_col: None,
-    }
+    support::line_at("src/lib.rs", line)
 }
 
 fn validated(traces: Vec<Trace>) -> Traces {
@@ -177,7 +171,7 @@ fn traces_that_all_conform_pass_and_no_validated_trace_scores_nothing() {
 
 #[test]
 fn the_check_compares_against_the_runs_oracle() {
-    assert!(support::check(ID).uses_oracle());
+    assert_eq!(support::check(ID).uses_oracle(), true);
 }
 
 #[test]

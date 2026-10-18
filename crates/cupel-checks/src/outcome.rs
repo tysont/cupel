@@ -116,3 +116,8 @@ pub fn counted(value: usize, unit: &str, n: usize) -> Score {
         n: n as u64,
     }
 }
+
+/// How many of `items` have the status `wanted`, as `status` reads it.
+pub fn tally<T, S: PartialEq>(items: &[T], status: impl Fn(&T) -> S, wanted: &S) -> usize {
+    items.iter().filter(|item| status(item) == *wanted).count()
+}

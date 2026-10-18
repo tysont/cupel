@@ -5,10 +5,10 @@ use std::time::Duration;
 
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    Availability, Cancellation, Captured, CostClass, Ctx, Error, EventSink, FactKind, Langs,
-    Process, ProduceCtx, Producer, ProducerId, Result, RunOptions, RunOrder, RunOrdering,
-    RunnerCommand, RunnerInvocation, Scope, TestResult, TestResults, TestRun, TestSelection,
-    ToolId, ToolProbe, find_program, output_tail,
+    Availability, Cancellation, Captured, CostClass, Ctx, Error, EventSink, FactKind, Install,
+    Langs, Process, ProduceCtx, Producer, ProducerId, Result, RootRun, RunOptions, RunOrder,
+    RunOrdering, RunStatus, RunnerCommand, RunnerInvocation, Scope, TestResult, TestResults,
+    TestRun, TestSelection, ToolId, ToolProbe, find_program, output_tail,
 };
 
 use crate::toolchain;
@@ -585,6 +585,31 @@ pub(crate) fn installed(tool: &str, node_bin: bool, dir: &Path) -> Option<String
         return Some(local.to_string_lossy().into_owned());
     }
     find_program(tool).map(|_| tool.to_owned())
+}
+
+/// Ready when `program` is on `PATH`, else missing, installed as `install` says.
+pub(crate) fn on_path(program: &str, install: Install) -> Availability {
+    if find_program(program).is_some() {
+        Availability::Ready
+    } else {
+        Availability::MissingTool {
+            name: ToolId::from(program),
+            install: Some(install),
+        }
+    }
+}
+
+/// A tool's run in the project root `dir`: failed, saying why, when `failed` says so.
+pub(crate) fn root_run(dir: String, failed: Option<String>) -> RootRun {
+    RootRun {
+        dir,
+        status: if failed.is_some() {
+            RunStatus::Failed
+        } else {
+            RunStatus::Ran
+        },
+        detail: failed,
+    }
 }
 
 /// The project roots a runner runs the suite in: none when `ProjectInfo` found no project of

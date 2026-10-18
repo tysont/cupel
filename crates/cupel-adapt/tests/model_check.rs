@@ -28,14 +28,9 @@ fn checked(scope: &Scope) -> Option<ModelCheckResults> {
     Some(fact.downcast::<ModelCheckResults>().unwrap())
 }
 
-#[test]
-fn kani_refutes_the_overflow_and_the_out_of_bounds_read_and_verifies_the_midpoint() {
-    let Some(results) = checked(&Scope::default()) else {
-        return;
-    };
-    assert_eq!(results.runs.len(), 1);
-    assert_eq!(results.runs[0].status, RunStatus::Ran, "{:?}", results.runs);
-    let summary: Vec<serde_json::Value> = results
+/// Each harness as [name, (file, line), status, [[description, function, (file, line), values]]].
+fn summary(results: &ModelCheckResults) -> Vec<serde_json::Value> {
+    results
         .harnesses
         .iter()
         .map(|harness| {
@@ -64,7 +59,17 @@ fn kani_refutes_the_overflow_and_the_out_of_bounds_read_and_verifies_the_midpoin
                 refuted,
             ])
         })
-        .collect();
+        .collect()
+}
+
+#[test]
+fn kani_refutes_the_overflow_and_the_out_of_bounds_read_and_verifies_the_midpoint() {
+    let Some(results) = checked(&Scope::default()) else {
+        return;
+    };
+    assert_eq!(results.runs.len(), 1);
+    assert_eq!(results.runs[0].status, RunStatus::Ran, "{:?}", results.runs);
+    let summary = summary(&results);
     assert_eq!(
         summary,
         [
