@@ -1,0 +1,6 @@
+# Captured from the real tool on the spec.prove fixture's proofs (P7.5), standard output and error merged; tally.dfy
+# is the file it verified, as proofs/tally.dfy. `dir` is where it ran.
+tool = "Dafny 4.11.0+fcb2042d6d043a2634f0854338c08feeaaaf4ae2"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/p7.5/dcap/out-of-resource"
+command = "dafny verify --json-output --error-limit 0 --resource-limit 100 proofs/tally.dfy"
+exit_code = 4

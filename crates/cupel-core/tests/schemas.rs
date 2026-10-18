@@ -107,6 +107,11 @@ fn the_execution_facts_of_wrapped_tools_are_at_version_one_under_their_kind() {
         FactKind::BenchSamples,
         FactKind::FuzzResults,
         FactKind::RaceReports,
+        FactKind::Histories,
+        FactKind::SimulationResults,
+        FactKind::Traces,
+        FactKind::ModelCheckResults,
+        FactKind::ProofResults,
         FactKind::ContractViolations,
     ]
     .into_iter()
@@ -132,6 +137,31 @@ fn the_execution_facts_of_wrapped_tools_are_at_version_one_under_their_kind() {
                 FactKind::RaceReports,
                 Some(1),
                 json!("https://cupel.dev/schema/v1/fact/race-reports.json")
+            ),
+            (
+                FactKind::Histories,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/histories.json")
+            ),
+            (
+                FactKind::SimulationResults,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/simulation-results.json")
+            ),
+            (
+                FactKind::Traces,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/traces.json")
+            ),
+            (
+                FactKind::ModelCheckResults,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/model-check-results.json")
+            ),
+            (
+                FactKind::ProofResults,
+                Some(1),
+                json!("https://cupel.dev/schema/v1/fact/proof-results.json")
             ),
             (
                 FactKind::ContractViolations,

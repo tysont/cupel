@@ -129,7 +129,7 @@ fn describe_verb_describes_its_arguments_sub_verbs_and_pending_flags() {
     );
     assert_eq!(argument("check", "--cases")["pending_step"], json!(null));
     assert_eq!(argument("check", "--scaffold")["pending_step"], json!(null));
-    assert_eq!(argument("serve", "--mcp")["pending_step"], json!("P7.7"));
+    assert_eq!(argument("serve", "--mcp")["pending_step"], json!(null));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
 }
 

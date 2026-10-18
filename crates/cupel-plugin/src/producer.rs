@@ -10,9 +10,10 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     AnalyzerReport, Availability, BenchSamples, ContractViolations, CostClass, Ctx,
-    DivergenceResults, EventSink, Fact, FactKind, Footprint, FuzzResults, Langs, MutationOutcomes,
-    PerTestMap, ProduceCtx, Producer, ProducerId, ProducerRegistry, PropertyResults, RaceReports,
-    RelationResults, Result, Scope, TestReruns, TestResults,
+    DivergenceResults, EventSink, Fact, FactKind, Footprint, FuzzResults, Histories, Langs,
+    ModelCheckResults, MutationOutcomes, PerTestMap, ProduceCtx, Producer, ProducerId,
+    ProducerRegistry, ProofResults, PropertyResults, RaceReports, RelationResults, Result, Scope,
+    SimulationResults, TestReruns, TestResults, Traces,
 };
 
 use crate::command::PluginCommand;
@@ -23,7 +24,7 @@ use crate::request::{self, Inputs};
 type Register = fn(&mut ProducerRegistry, ProducerManifest, PluginCommand);
 
 /// Every kind a plugin may provide (those with a payload type, ADR-088 §8), with its registration.
-const KINDS: [(FactKind, Register); 24] = [
+const KINDS: [(FactKind, Register); 29] = [
     (FactKind::Symbols, register_as::<Symbols>),
     (FactKind::Decisions, register_as::<Decisions>),
     (FactKind::NormTree, register_as::<NormTree>),
@@ -50,6 +51,17 @@ const KINDS: [(FactKind, Register); 24] = [
     ),
     (FactKind::RelationResults, register_as::<RelationResults>),
     (FactKind::Footprint, register_as::<Footprint>),
+    (FactKind::Histories, register_as::<Histories>),
+    (
+        FactKind::SimulationResults,
+        register_as::<SimulationResults>,
+    ),
+    (FactKind::Traces, register_as::<Traces>),
+    (
+        FactKind::ModelCheckResults,
+        register_as::<ModelCheckResults>,
+    ),
+    (FactKind::ProofResults, register_as::<ProofResults>),
     (
         FactKind::ContractViolations,
         register_as::<ContractViolations>,

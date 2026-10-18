@@ -1,9 +1,11 @@
-// ABOUTME: Keeps the README's generated sections (exit codes, check table, support matrix, check settings)
-// ABOUTME: equal to the binary's `describe` output; `make readme` rewrites them (ADR-073).
+// ABOUTME: Keeps the README's generated sections (exit codes, check table, support matrix, check settings, MCP
+// ABOUTME: tools) equal to the binary's `describe` and `serve --mcp` output; `make readme` rewrites them (ADR-073).
 
 mod support;
 
+use std::io::Write;
 use std::path::PathBuf;
+use std::process::Stdio;
 
 use serde_json::Value;
 use support::described;
@@ -201,8 +203,55 @@ fn exit_codes(cli: &Value) -> String {
     markdown_table(&owned(&["Code", "Name", "Meaning"]), &rows)
 }
 
-/// Each generated section's name and body, rendered from the binary's `describe` output.
-fn generated() -> [(&'static str, String); 4] {
+/// The tools `cupel serve --mcp` lists, asked over its stdin (ADR-121).
+fn listed_tools() -> Vec<Value> {
+    let dir = tempfile::tempdir().expect("temporary directory");
+    let mut command = std::process::Command::new(assert_cmd::cargo::cargo_bin("cupel"));
+    for (key, _) in std::env::vars() {
+        if key.starts_with("CUPEL_") {
+            command.env_remove(key);
+        }
+    }
+    let mut server = command
+        .args(["serve", "--mcp", "--quiet"])
+        .current_dir(dir.path())
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("cupel serve --mcp starts");
+    let mut input = server.stdin.take().expect("stdin is piped");
+    writeln!(input, r#"{{"jsonrpc":"2.0","id":1,"method":"tools/list"}}"#).expect("it reads");
+    drop(input);
+    let output = server.wait_with_output().expect("it answers and exits");
+    let stdout = String::from_utf8(output.stdout).expect("UTF-8");
+    let response: Value = serde_json::from_str(stdout.lines().next().expect("a response"))
+        .expect("a JSON-RPC response");
+    response["result"]["tools"]
+        .as_array()
+        .expect("tools")
+        .clone()
+}
+
+/// One row per MCP tool: its name, the command it runs, and its description.
+fn mcp_tools(tools: &[Value]) -> String {
+    let rows: Vec<Vec<String>> = tools
+        .iter()
+        .map(|tool| {
+            let text = |key: &str| tool[key].as_str().expect("a tool field").to_owned();
+            vec![
+                format!("`{}`", text("name")),
+                format!("`{}`", text("title")),
+                text("description"),
+            ]
+        })
+        .collect();
+    markdown_table(&owned(&["Tool", "Runs", "What it does"]), &rows)
+}
+
+/// Each generated section's name and body, rendered from the binary's `describe` output and
+/// the tools its MCP server lists.
+fn generated() -> [(&'static str, String); 5] {
     let matrix = described(&["matrix"]);
     let manifests = manifests(&matrix);
     [
@@ -210,6 +259,7 @@ fn generated() -> [(&'static str, String); 4] {
         ("check-table", check_table(&matrix, &manifests)),
         ("support-matrix", support_matrix(&matrix)),
         ("check-settings", check_settings(&manifests)),
+        ("mcp-tools", mcp_tools(&listed_tools())),
     ]
 }
 

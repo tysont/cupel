@@ -1108,7 +1108,11 @@ expression: pretty(&schema)
         "divergence-results",
         "relation-results",
         "footprint",
-        "contract-violations"
+        "histories",
+        "simulation-results",
+        "traces",
+        "model-check-results",
+        "proof-results"
       ]
     },
     "FactProducers": {

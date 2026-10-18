@@ -1,0 +1,29 @@
+# Maps every construct of the `histories` conformance inventory (conformance/histories.toml) to the
+# history the fixture's history command writes for it (ADR-119).
+
+[histories.linearizable]
+file = "histories/linearizable.jsonl"
+
+[histories.stale-read]
+file = "histories/stale-read.jsonl"
+
+[histories.indeterminate]
+file = "histories/indeterminate.jsonl"
+
+[histories.unfinished]
+file = "histories/unfinished.jsonl"
+
+[histories.failed-op]
+file = "histories/failed-op.jsonl"
+
+[histories.compare-and-set]
+file = "histories/compare-and-set.jsonl"
+
+[histories.per-key]
+file = "histories/per-key.jsonl"
+
+[histories.unknown-model]
+file = "histories/unknown-model.jsonl"
+
+[histories.unmatched-completion]
+file = "histories/unmatched-completion.jsonl"

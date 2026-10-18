@@ -1,0 +1,17 @@
+# Maps every construct of the `simulation-results` conformance inventory
+# (conformance/simulation-results.toml) to the madsim harness of this fixture that exhibits it (ADR-120).
+# The failing seeds are the first of the range from seed 3 that fail under madsim 0.2.34.
+
+[simulation-results.passes-every-seed]
+file = "tests/sim.rs"
+name = "sequential_deposits_are_all_kept"
+
+[simulation-results.fails-at-a-seed]
+file = "tests/sim.rs"
+name = "concurrent_deposits_are_all_kept"
+expect = { failure = { seed = 4, reproduced = true, location = { file = "tests/sim.rs", line = 23 } } }
+
+[simulation-results.fails-in-a-task]
+file = "tests/sim.rs"
+name = "a_withdrawal_waits_for_its_deposit"
+expect = { failure = { seed = 5, reproduced = true, location = { file = "src/lib.rs", line = 29 } } }

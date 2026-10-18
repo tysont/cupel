@@ -240,3 +240,14 @@ impl GitRepo {
         self.git(&["rev-parse", "HEAD"])
     }
 }
+
+/// How each of `values`, unit enum variants, is spelled in JSON.
+pub fn spelled<T: serde::Serialize>(values: &[T]) -> Vec<String> {
+    values
+        .iter()
+        .map(|value| match serde_json::to_value(value) {
+            Ok(serde_json::Value::String(text)) => text,
+            other => panic!("{other:?} is not a spelling"),
+        })
+        .collect()
+}

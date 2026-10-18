@@ -136,7 +136,11 @@ expression: pretty(&schema)
         "divergence-results",
         "relation-results",
         "footprint",
-        "contract-violations"
+        "histories",
+        "simulation-results",
+        "traces",
+        "model-check-results",
+        "proof-results"
       ]
     },
     "Finding": {
@@ -781,9 +785,6 @@ expression: pretty(&schema)
             "bench-samples": {
               "type": "string"
             },
-            "contract-violations": {
-              "type": "string"
-            },
             "coverage-map": {
               "type": "string"
             },
@@ -797,6 +798,12 @@ expression: pretty(&schema)
               "type": "string"
             },
             "fuzz-results": {
+              "type": "string"
+            },
+            "histories": {
+              "type": "string"
+            },
+            "model-check-results": {
               "type": "string"
             },
             "module-graph": {
@@ -817,6 +824,9 @@ expression: pretty(&schema)
             "project-info": {
               "type": "string"
             },
+            "proof-results": {
+              "type": "string"
+            },
             "property-results": {
               "type": "string"
             },
@@ -827,6 +837,9 @@ expression: pretty(&schema)
               "type": "string"
             },
             "roots": {
+              "type": "string"
+            },
+            "simulation-results": {
               "type": "string"
             },
             "symbols": {
@@ -843,6 +856,9 @@ expression: pretty(&schema)
             },
             "test-results": {
               "type": "string"
+            },
+            "traces": {
+              "type": "string"
             }
           },
           "additionalProperties": false,
@@ -850,27 +866,31 @@ expression: pretty(&schema)
             "analyzer-report",
             "api-surface",
             "bench-samples",
-            "contract-violations",
             "coverage-map",
             "decisions",
             "divergence-results",
             "footprint",
             "fuzz-results",
+            "histories",
+            "model-check-results",
             "module-graph",
             "mutation-outcomes",
             "mutation-sites",
             "norm-tree",
             "per-test-map",
             "project-info",
+            "proof-results",
             "property-results",
             "race-reports",
             "relation-results",
             "roots",
+            "simulation-results",
             "symbols",
             "test-conventions",
             "test-frames",
             "test-reruns",
-            "test-results"
+            "test-results",
+            "traces"
           ]
         },
         "protocol": {

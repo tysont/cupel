@@ -1,0 +1,191 @@
+{
+  "checks": [
+    {
+      "cost": "exhaustive",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "conc.model-check",
+      "metrics": {
+        "failed": 2.0,
+        "harnesses": 3.0,
+        "undetermined": 0.0,
+        "verified": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 3,
+        "unit": "failing",
+        "value": 2.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 5
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix `average` so the property holds for the inputs the model checker found (the replay test reproduces them), then check the harness again."
+      },
+      "check": "conc.model-check",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "description": "attempt to add with overflow",
+        "function": "average",
+        "harness": "proofs::average_never_overflows",
+        "replay": "/// Test generated for harness `proofs::average_never_overflows`\n///\n/// Check for `assertion`: \"attempt to add with overflow\"\n\n#[test]\nfn kani_concrete_playback_average_never_overflows_2036582041107130434() {\n    let concrete_vals: Vec<Vec<u8>> = vec![\n        // 128\n        vec![128],\n        // 128\n        vec![128],\n    ];\n    kani::concrete_playback_run(concrete_vals, average_never_overflows);\n}\n",
+        "tool": "tool.kani",
+        "values": [
+          "128",
+          "128"
+        ]
+      },
+      "id": "fnd_f4c6a6",
+      "kind": "model.counterexample",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 3,
+        "file": "src/lib.rs",
+        "line": 3
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.model-check --paths src/lib.rs",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_f4c6a6 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "harness `proofs::average_never_overflows` refutes `attempt to add with overflow` in `average` with 128, 128"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix `at` so the property holds for the inputs the model checker found (the replay test reproduces them), then check the harness again."
+      },
+      "check": "conc.model-check",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "description": "index out of bounds: the length is less than or equal to the given index",
+        "function": "at",
+        "harness": "proofs::at_stays_in_bounds",
+        "replay": "/// Test generated for harness `proofs::at_stays_in_bounds`\n///\n/// Check for `assertion`: \"index out of bounds: the length is less than or equal to the given index\"\n\n#[test]\nfn kani_concrete_playback_at_stays_in_bounds_10959774726121519048() {\n    let concrete_vals: Vec<Vec<u8>> = vec![\n        // 4ul\n        vec![4, 0, 0, 0, 0, 0, 0, 0],\n    ];\n    kani::concrete_playback_run(concrete_vals, at_stays_in_bounds);\n}\n",
+        "tool": "tool.kani",
+        "values": [
+          "4ul"
+        ]
+      },
+      "id": "fnd_b71e45",
+      "kind": "model.counterexample",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 13,
+        "file": "src/lib.rs",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.model-check --paths src/lib.rs",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_b71e45 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "harness `proofs::at_stays_in_bounds` refutes `index out of bounds: the length is less than or equal to the given index` in `at` with 4ul"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_f4c6a6",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Fix `average` so the property holds for the inputs the model checker found (the replay test reproduces them), then check the harness again."
+    },
+    {
+      "command": null,
+      "finding": "fnd_b71e45",
+      "kind": "fix_bug",
+      "priority": 2,
+      "summary": "Fix `at` so the property holds for the inputs the model checker found (the replay test reproduces them), then check the harness again."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 6
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 2,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

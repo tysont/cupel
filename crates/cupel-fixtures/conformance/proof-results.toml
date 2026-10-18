@@ -1,0 +1,15 @@
+# ABOUTME: Conformance inventory for the `proof-results` fact: the obligations a deductive verifier must report as not
+# ABOUTME: discharged. An execution fact: each producer's tests check its own fact against it (ADR-118).
+fact = "proof-results"
+
+[[constructs]]
+id = "failed"
+summary = "An obligation the verifier cannot prove (a postcondition a return path breaks, an assertion, a loop invariant) is failed, at its place."
+within = "obligations"
+expect = { status = "failed" }
+
+[[constructs]]
+id = "assumed"
+summary = "An obligation the proof assumes instead of proving (an `assume` statement, a lemma or method without a body) is open."
+within = "obligations"
+expect = { status = "open" }

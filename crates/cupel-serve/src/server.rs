@@ -14,6 +14,7 @@ use cupel_core::Cancellation;
 use nix::poll::{PollFd, PollFlags, PollTimeout, poll};
 
 use crate::client::{self, ClientError};
+use crate::lines::Lines;
 use crate::protocol::{
     Body, Build, Done, Invocation, PROTOCOL, Reply, Request, Status, read_message, write_message,
 };
@@ -278,57 +279,16 @@ impl Shared {
             while matches!(input.read(&mut byte), Ok(1)) {}
             hang_up.cancel();
         });
+        // Each complete line goes to the client as a `stderr` reply when written.
         let stderr: Box<dyn Write + Send> = match stream.try_clone() {
-            Ok(stream) => Box::new(Lines::new(stream)),
+            Ok(mut stream) => Box::new(Lines::new(move |text: &str| {
+                let text = text.to_owned();
+                write_message(&mut stream, &Reply::Stderr { text })
+            })),
             Err(_) => Box::new(io::sink()),
         };
         let done = self.handler.run(invocation, stderr, cancel);
         self.served.fetch_add(1, Ordering::SeqCst);
         done
-    }
-}
-
-/// Standard error of a run in the daemon: each complete line goes to the client as a `stderr`
-/// reply when written; a last line without a newline goes when the writer is dropped.
-struct Lines {
-    stream: UnixStream,
-    pending: Vec<u8>,
-}
-
-impl Lines {
-    fn new(stream: UnixStream) -> Self {
-        Self {
-            stream,
-            pending: Vec::new(),
-        }
-    }
-
-    fn send(&mut self, bytes: &[u8]) -> io::Result<()> {
-        let text = String::from_utf8_lossy(bytes).into_owned();
-        write_message(&mut self.stream, &Reply::Stderr { text })
-    }
-}
-
-impl Write for Lines {
-    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        self.pending.extend_from_slice(buf);
-        if let Some(end) = self.pending.iter().rposition(|&byte| byte == b'\n') {
-            let lines: Vec<u8> = self.pending.drain(..=end).collect();
-            self.send(&lines)?;
-        }
-        Ok(buf.len())
-    }
-
-    fn flush(&mut self) -> io::Result<()> {
-        Ok(())
-    }
-}
-
-impl Drop for Lines {
-    fn drop(&mut self) {
-        if !self.pending.is_empty() {
-            let rest = std::mem::take(&mut self.pending);
-            let _ = self.send(&rest);
-        }
     }
 }

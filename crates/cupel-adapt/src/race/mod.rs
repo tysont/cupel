@@ -8,7 +8,7 @@
 //! when it names none), records each root's run, normalizes each report
 //! ([`report::Raw::normalized`]), and keeps those touching the scope, without duplicates.
 
-mod cargo;
+pub(crate) mod cargo;
 mod go;
 mod miri;
 pub(crate) mod report;

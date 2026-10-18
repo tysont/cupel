@@ -32,10 +32,12 @@ mod gate;
 pub mod git;
 mod grade;
 mod hash;
+mod histories;
 mod id;
 mod joint;
 mod lang;
 mod matrix;
+mod model_check;
 mod mutation;
 mod oracle;
 mod per_test;
@@ -43,6 +45,7 @@ mod per_test_impact;
 pub mod plugin;
 mod process;
 mod producer;
+mod proof;
 mod property;
 mod race;
 mod rank;
@@ -54,10 +57,12 @@ mod schedule;
 pub mod schema;
 mod scope;
 mod select;
+mod simulation;
 mod status;
 mod suppression;
 pub mod syntax;
 mod test_results;
+mod trace;
 mod writer;
 
 pub use actions::{NEXT_ACTIONS, next_actions};
@@ -100,9 +105,13 @@ pub use fuzz::{FuzzCrash, FuzzResults, FuzzStatus, FuzzTarget};
 pub use gate::{GATE_CHANGED, GATE_TREE, apply_gate, evaluate_gate, gate_for};
 pub use grade::{CostClass, Tier};
 pub use hash::{FindingId, SiteHash, SymbolHash};
+pub use histories::{Histories, History, HistoryOp, HistoryStatus, HistoryViolation, OpOutcome};
 pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
+pub use model_check::{
+    Counterexample, HarnessStatus, ModelCheckResults, ModelHarness, RefutedProperty,
+};
 pub use mutation::{Mutant, MutantOutcome, MutationOutcomes, MutationStrategy};
 pub use oracle::{OracleReport, OracleState, RunOracle, oracle_content_digest, oracle_identity};
 pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
@@ -113,6 +122,7 @@ pub use producer::{
     Producer, ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand,
     Runners, SharedFact, TestRun, TestSelection, ToolProbe, Upstream,
 };
+pub use proof::{Obligation, ObligationStatus, ProofResults, RelatedPlace};
 pub use property::{PropertyOutcome, PropertyResult, PropertyResults};
 pub use race::{RaceFrame, RaceKind, RaceReport, RaceReports, RaceStack};
 pub use rank::{
@@ -127,9 +137,11 @@ pub use root_run::{RootRun, RunStatus};
 pub use schedule::{Job, Outcome, Production, Scheduler};
 pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;
+pub use simulation::{SimulationFailure, SimulationHarness, SimulationResults, SimulationStatus};
 pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};
 pub use test_results::{
     OUTPUT_TAIL_LINES, RunnerInvocation, TestOutcome, TestResult, TestResults, Unevaluable,
     names_case, output_tail,
 };
+pub use trace::{Trace, TraceDivergence, TraceSpec, TraceStatus, Traces};
 pub use writer::{WriteError, Writer};

@@ -1,0 +1,6 @@
+# Captured from the real tool on the module tool.tlc generated for a trace of the spec.trace Rust fixture (P7.2),
+# standard output and error merged; the modules beside it are what it ran on. `dir` is where it ran.
+tool = "TLC2 Version 2.19 of 08 August 2024 (rev: 5a47802), tla2tools.jar v1.7.4"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/p7.2/cap/conforms"
+command = "tlc -deadlock -workers 1 -metadir states -config CupelTrace.cfg CupelTrace.tla"
+exit_code = 12

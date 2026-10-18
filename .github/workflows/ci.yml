@@ -131,6 +131,32 @@ jobs:
           curl -sSfL -o "$RUNNER_TEMP/posix-install.sh" https://github.com/clojure/brew-install/releases/download/1.12.5.1664/posix-install.sh
           bash "$RUNNER_TEMP/posix-install.sh" --prefix "$HOME/clojure"
           echo "$HOME/clojure/bin" >> "$GITHUB_PATH"
+      # The trace validator, model checker, and verifier that spec.trace, conc.model-check, and spec.prove drive for
+      # real (P7.2, P7.5, ADR-116, ADR-117, ADR-118). Pinned: the goldens hold their verdicts and messages. TLC and
+      # SANY run from the TLA+ tools' jar on the JDK above, through `tlc` and `sany` scripts as tla-bin installs them;
+      # `cargo kani setup` downloads Kani's bundle and installs its own nightly; Dafny's release bundles Z3.
+      - name: Install the TLA+ tools 1.7.4 as tlc and sany
+        run: |
+          mkdir -p "$HOME/tla/bin"
+          curl -sSfL -o "$HOME/tla/tla2tools.jar" https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar
+          printf '#!/bin/sh\nexec java -XX:+UseParallelGC -cp "%s" tlc2.TLC "$@"\n' "$HOME/tla/tla2tools.jar" > "$HOME/tla/bin/tlc"
+          printf '#!/bin/sh\nexec java -cp "%s" tla2sany.SANY "$@"\n' "$HOME/tla/tla2tools.jar" > "$HOME/tla/bin/sany"
+          chmod +x "$HOME/tla/bin/tlc" "$HOME/tla/bin/sany"
+          echo "$HOME/tla/bin" >> "$GITHUB_PATH"
+      - name: Install Kani 0.68.0
+        run: |
+          cargo install --locked kani-verifier --version 0.68.0
+          cargo kani setup
+      - name: Install Dafny 4.11.0
+        run: |
+          case "$RUNNER_OS-$(uname -m)" in
+            Linux-*) asset=dafny-4.11.0-x64-ubuntu-22.04.zip ;;
+            macOS-arm64) asset=dafny-4.11.0-arm64-macos-13.zip ;;
+            *) asset=dafny-4.11.0-x64-macos-13.zip ;;
+          esac
+          curl -sSfL -o "$RUNNER_TEMP/dafny.zip" "https://github.com/dafny-lang/dafny/releases/download/v4.11.0/$asset"
+          unzip -q "$RUNNER_TEMP/dafny.zip" -d "$HOME"
+          echo "$HOME/dafny" >> "$GITHUB_PATH"
       # The contract library tool.icontract reads (P7.1, ADR-113); the spec.contracts Rust fixture fetches the
       # `contracts` crate from crates.io itself. Pinned: the spec.contracts goldens hold icontract's messages.
       - name: Install icontract

@@ -187,6 +187,11 @@ fn fact_kinds_are_the_catalog_rows_in_kebab_case() {
         "divergence-results",
         "relation-results",
         "footprint",
+        "histories",
+        "simulation-results",
+        "traces",
+        "model-check-results",
+        "proof-results",
         "contract-violations",
     ];
     let spelled: Vec<(serde_json::Value, String, &str)> = FactKind::ALL

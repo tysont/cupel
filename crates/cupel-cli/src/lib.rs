@@ -21,6 +21,7 @@ mod explain;
 mod format;
 mod init;
 mod install;
+mod mcp;
 mod oracle;
 mod page;
 mod persist;
@@ -40,4 +41,4 @@ mod tests_verb;
 
 pub use app::{Environment, Output, capture_panics, run};
 pub use connect::invoke;
-pub use session::{Session, Stream};
+pub use session::{Input, Session, Stream};

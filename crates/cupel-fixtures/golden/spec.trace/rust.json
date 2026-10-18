@@ -1,0 +1,213 @@
+{
+  "checks": [
+    {
+      "cost": "exhaustive",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "spec.trace",
+      "metrics": {
+        "diverged": 2.0,
+        "traces": 3.0,
+        "unvalidated": 1.0
+      },
+      "notes": [
+        "trace `torn.jsonl` could not be validated: line 1: not JSON: EOF while parsing a value at line 1 column 10 (rust)"
+      ],
+      "oracle": "counter",
+      "score": {
+        "n": 3,
+        "unit": "diverged",
+        "value": 2.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 5
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Make the implementation take only steps spec/Counter.tla allows from the state before (or correct the spec, if it is what is wrong), then rerun the tests that record the trace."
+      },
+      "check": "spec.trace",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "action": null,
+        "oracle": "counter",
+        "previous": null,
+        "spec": "spec/Counter.tla",
+        "state": {
+          "count": 5,
+          "done": false
+        },
+        "step": 1,
+        "steps": 2,
+        "tool": "tool.tlc",
+        "trace": "restarts.jsonl"
+      },
+      "id": "fnd_2b65c7",
+      "kind": "trace.diverged",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 22,
+        "file": "src/lib.rs",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only spec.trace --oracle counter --paths src/lib.rs",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_2b65c7 --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "trace `restarts.jsonl` starts at {\"count\":5,\"done\":false}, which is not an initial state of spec/Counter.tla"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Make the implementation take only steps spec/Counter.tla allows from the state before (or correct the spec, if it is what is wrong), then rerun the tests that record the trace."
+      },
+      "check": "spec.trace",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "action": "Inc",
+        "oracle": "counter",
+        "previous": {
+          "count": 1,
+          "done": false
+        },
+        "spec": "spec/Counter.tla",
+        "state": {
+          "count": 3,
+          "done": false
+        },
+        "step": 3,
+        "steps": 3,
+        "tool": "tool.tlc",
+        "trace": "bumps.jsonl"
+      },
+      "id": "fnd_c58eaf",
+      "kind": "trace.diverged",
+      "location": {
+        "col": null,
+        "end_col": null,
+        "end_line": 33,
+        "file": "src/lib.rs",
+        "line": 33
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only spec.trace --oracle counter --paths src/lib.rs",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_c58eaf --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 5,
+      "title": "trace `bumps.jsonl` leaves spec/Counter.tla at step 3: `Inc` to {\"count\":3,\"done\":false} is not a step the spec allows from {\"count\":1,\"done\":false}"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_2b65c7",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Make the implementation take only steps spec/Counter.tla allows from the state before (or correct the spec, if it is what is wrong), then rerun the tests that record the trace."
+    },
+    {
+      "command": null,
+      "finding": "fnd_c58eaf",
+      "kind": "fix_bug",
+      "priority": 2,
+      "summary": "Make the implementation take only steps spec/Counter.tla allows from the state before (or correct the spec, if it is what is wrong), then rerun the tests that record the trace."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {
+          "counter": {
+            "cmd": null,
+            "inputs": [],
+            "kind": "spec",
+            "lang": "tla+",
+            "ref": null,
+            "spec": "spec/Counter.tla"
+          }
+        },
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 12
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 2,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

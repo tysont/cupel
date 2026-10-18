@@ -1,0 +1,207 @@
+{
+  "checks": [
+    {
+      "cost": "exhaustive",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "conc.dst",
+      "metrics": {
+        "failures": 2.0,
+        "harnesses": 3.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 3,
+        "unit": "failing",
+        "value": 2.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 4
+    }
+  ],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix the failure `a_withdrawal_waits_for_its_deposit` shows at seed 5 (`RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=5 MADSIM_TEST_NUM=1 cargo test -p ledger --test sim a_withdrawal_waits_for_its_deposit -- --exact` replays it from `.`), then keep the seed as a regression case of the harness."
+      },
+      "check": "conc.dst",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "first_seed": 3,
+        "harness": "a_withdrawal_waits_for_its_deposit",
+        "message": "overdrawn: 10 from 0",
+        "reproduce": "RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=5 MADSIM_TEST_NUM=1 cargo test -p ledger --test sim a_withdrawal_waits_for_its_deposit -- --exact",
+        "reproduced": true,
+        "seed": 5,
+        "seeds": 1000,
+        "tool": "tool.madsim",
+        "trace": [
+          "deposit 10 reads 0",
+          "",
+          "thread '<unnamed>' panicked at src/lib.rs:29:9:",
+          "overdrawn: 10 from 0",
+          "context: node=0 \"madsim-main\", task=2 (spawned at tests/sim.rs:45:22)"
+        ]
+      },
+      "id": "fnd_d7a5ab",
+      "kind": "dst.failure",
+      "location": {
+        "col": 9,
+        "end_col": null,
+        "end_line": 29,
+        "file": "src/lib.rs",
+        "line": 29
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.dst --paths tests/sim.rs --seed 5 --cases 1",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_d7a5ab --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 4,
+      "title": "simulation `a_withdrawal_waits_for_its_deposit` fails at seed 5: overdrawn: 10 from 0"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "fix_bug",
+        "priority": 1,
+        "summary": "Fix the failure `concurrent_deposits_are_all_kept` shows at seed 4 (`RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=4 MADSIM_TEST_NUM=1 cargo test -p ledger --test sim concurrent_deposits_are_all_kept -- --exact` replays it from `.`), then keep the seed as a regression case of the harness."
+      },
+      "check": "conc.dst",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "first_seed": 3,
+        "harness": "concurrent_deposits_are_all_kept",
+        "message": "assertion `left == right` failed: a deposit was lost",
+        "reproduce": "RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=4 MADSIM_TEST_NUM=1 cargo test -p ledger --test sim concurrent_deposits_are_all_kept -- --exact",
+        "reproduced": true,
+        "seed": 4,
+        "seeds": 1000,
+        "tool": "tool.madsim",
+        "trace": [
+          "deposit 10 reads 0",
+          "deposit 20 reads 0",
+          "deposit 10 writes 10",
+          "deposit 20 writes 20",
+          "",
+          "thread '<unnamed>' panicked at tests/sim.rs:23:5:",
+          "assertion `left == right` failed: a deposit was lost",
+          "  left: 20",
+          " right: 30",
+          "context: node=0 \"madsim-main\", task=0"
+        ]
+      },
+      "id": "fnd_350eac",
+      "kind": "dst.failure",
+      "location": {
+        "col": 5,
+        "end_col": null,
+        "end_line": 23,
+        "file": "tests/sim.rs",
+        "line": 23
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only conc.dst --paths tests/sim.rs --seed 4 --cases 1",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_350eac --reason '…'",
+      "suppressed": false,
+      "symbol": null,
+      "tier": 4,
+      "title": "simulation `concurrent_deposits_are_all_kept` fails at seed 4: assertion `left == right` failed: a deposit was lost"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_d7a5ab",
+      "kind": "fix_bug",
+      "priority": 1,
+      "summary": "Fix the failure `a_withdrawal_waits_for_its_deposit` shows at seed 5 (`RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=5 MADSIM_TEST_NUM=1 cargo test -p ledger --test sim a_withdrawal_waits_for_its_deposit -- --exact` replays it from `.`), then keep the seed as a regression case of the harness."
+    },
+    {
+      "command": null,
+      "finding": "fnd_350eac",
+      "kind": "fix_bug",
+      "priority": 2,
+      "summary": "Fix the failure `concurrent_deposits_are_all_kept` shows at seed 4 (`RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=4 MADSIM_TEST_NUM=1 cargo test -p ledger --test sim concurrent_deposits_are_all_kept -- --exact` replays it from `.`), then keep the seed as a regression case of the harness."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 6
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 2,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

@@ -7,19 +7,9 @@ use cupel_core::{
     FuzzResults, FuzzStatus, FuzzTarget, Location, MetricPer, ProducerId, Severity,
 };
 use serde_json::json;
-use support::{Shape, score};
+use support::{Shape, at, score};
 
 const ID: &str = "gen.fuzz";
-
-fn at(file: &str, line: u32) -> Location {
-    Location {
-        file: file.to_owned(),
-        line,
-        col: Some(5),
-        end_line: line,
-        end_col: None,
-    }
-}
 
 fn target(root: &str, name: &str, status: FuzzStatus) -> FuzzTarget {
     FuzzTarget {

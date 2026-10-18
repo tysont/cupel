@@ -1,0 +1,9 @@
+{"model": "kv"}
+{"process": 0, "type": "invoke", "f": "write", "key": "x", "value": 1}
+{"process": 0, "type": "ok", "f": "write", "key": "x", "value": 1}
+{"process": 1, "type": "invoke", "f": "read", "key": "x", "value": null}
+{"process": 1, "type": "ok", "f": "read", "key": "x", "value": 1}
+{"process": 0, "type": "invoke", "f": "write", "key": "y", "value": 1}
+{"process": 0, "type": "ok", "f": "write", "key": "y", "value": 1}
+{"process": 1, "type": "invoke", "f": "read", "key": "y", "value": null}
+{"process": 1, "type": "ok", "f": "read", "key": "y", "value": null}

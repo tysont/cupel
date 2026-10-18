@@ -1,0 +1,4 @@
+{"model": "register"}
+{"process": 0, "type": "invoke", "f": "write", "value": 1}
+{"process": 1, "type": "invoke", "f": "read", "value": null}
+{"process": 1, "type": "ok", "f": "read", "value": 1}

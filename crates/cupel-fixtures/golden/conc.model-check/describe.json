@@ -1,0 +1,156 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "exhaustive",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `model.counterexample`.",
+            "properties": {
+              "description": {
+                "description": "The property refuted, in the checker's words.",
+                "type": "string"
+              },
+              "function": {
+                "description": "The function it fails in, as the checker names it.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "harness": {
+                "description": "The proof harness, as the checker names it.",
+                "type": "string"
+              },
+              "replay": {
+                "description": "A unit test that replays them, when the checker wrote one.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "tool": {
+                "description": "The model checker, such as `tool.kani`.",
+                "type": "string"
+              },
+              "values": {
+                "description": "The values the harness drew that refute it, in order; empty when the checker gave none.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "tool",
+              "harness",
+              "description",
+              "values"
+            ],
+            "title": "Refuted",
+            "type": "object"
+          },
+          "kind": "model.counterexample",
+          "summary": "A bounded model checker found inputs to a proof harness that break a property: an assertion, an arithmetic overflow, an out-of-bounds access, a panic."
+        }
+      ],
+      "id": "conc.model-check",
+      "metrics": [
+        {
+          "name": "harnesses",
+          "per": "scope",
+          "summary": "Proof harnesses the model checker checked."
+        },
+        {
+          "name": "verified",
+          "per": "scope",
+          "summary": "Harnesses whose properties hold for every input within their bounds."
+        },
+        {
+          "name": "failed",
+          "per": "scope",
+          "summary": "Harnesses some input of which refutes a property."
+        },
+        {
+          "name": "undetermined",
+          "per": "scope",
+          "summary": "Harnesses the model checker could not decide."
+        }
+      ],
+      "needs": [
+        "model-check-results"
+      ],
+      "stability": "experimental",
+      "summary": "Model-checks the project's proof harnesses (Kani's `#[kani::proof]`) over every input within their bounds and reports each property refuted, with the inputs that refute it.",
+      "tier": 5,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

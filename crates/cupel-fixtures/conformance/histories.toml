@@ -1,0 +1,52 @@
+# ABOUTME: Conformance inventory for the `histories` fact (ADR-119): the history shapes every checker must decide.
+# ABOUTME: `file` is the history's name as the history command wrote it; each producer's fixture maps every construct.
+fact = "histories"
+
+[[constructs]]
+id = "linearizable"
+summary = "A read concurrent with a write sees the written value: some order consistent with real time explains every operation."
+expect = { status = "linearizable" }
+
+[[constructs]]
+id = "stale-read"
+summary = "A read invoked after a write completed returns the value that write replaced."
+within = "violations"
+expect = { anomaly = "non-linearizable" }
+
+[[constructs]]
+id = "indeterminate"
+summary = "An operation whose outcome is unknown (`info`) may have taken effect: a later read of its value is explained."
+expect = { status = "linearizable" }
+
+[[constructs]]
+id = "unfinished"
+summary = "An invocation the history never completes may have taken effect, as an unknown outcome."
+expect = { status = "linearizable" }
+
+[[constructs]]
+id = "failed-op"
+summary = "An operation that failed (`fail`) did not take effect: a later read of its value is a violation."
+within = "violations"
+expect = { anomaly = "non-linearizable" }
+
+[[constructs]]
+id = "compare-and-set"
+summary = "A compare-and-set that succeeded replaced the value it compared: a later read of the old value is a violation."
+within = "violations"
+expect = { anomaly = "non-linearizable" }
+
+[[constructs]]
+id = "per-key"
+summary = "A key-value history is checked key by key: a violation names the one key no order explains."
+within = "violations"
+expect = { key = "y" }
+
+[[constructs]]
+id = "unknown-model"
+summary = "A history declaring a model the checker does not know is invalid, not passed."
+expect = { status = "invalid" }
+
+[[constructs]]
+id = "unmatched-completion"
+summary = "A completion with no open invocation of its process is invalid, not guessed at."
+expect = { status = "invalid" }
