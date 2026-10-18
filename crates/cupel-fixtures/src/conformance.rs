@@ -47,6 +47,13 @@
 //! | `api-surface` | items in `file` whose `path` is `name` |
 //! | `test-conventions` | the pairing whose `source` is `file`, if its `tests` include `name` |
 //! | `project-info` | roots whose `path` is `file` |
+//! | `histories` | histories whose `name` is `file` |
+//! | `simulation-results` | harnesses defined in `file` whose `name` is `name` |
+//!
+//! An execution fact in [`EXECUTION`] has an inventory too (ADR-119): its producers' real-tool
+//! tests produce it over their own fixture repository (`repos/<check>/<lang>/`), whose
+//! `inventory.toml` maps each construct to what the producer read there, and check it with
+//! [`check_language`].
 //!
 //! A construct a language cannot exhibit is mapped to `not-applicable = "<reason>"`. Facts a
 //! language has no producer for are not checked, so their mappings may be absent. An unmapped
@@ -421,7 +428,17 @@ fn locate(
             .into_iter()
             .filter(|root| is(root, "path", file))
             .collect(),
-        other => return Err(format!("`{other}` is not a syntactic fact")),
+        FactKind::Histories => list(value, "histories")
+            .into_iter()
+            .filter(|history| is(history, "name", file))
+            .collect(),
+        FactKind::SimulationResults => list(value, "harnesses")
+            .into_iter()
+            .filter(|harness| {
+                harness.pointer("/location/file") == Some(&file.into()) && name_is(harness, "name")
+            })
+            .collect(),
+        other => return Err(format!("`{other}` has no conformance inventory")),
     };
     if found.is_empty() {
         Err(format!(
@@ -445,7 +462,9 @@ fn symbol_key(symbol: &Value) -> Value {
 /// Execution facts whose inventories their tool producers' tests check with [`unexhibited`]
 /// (ADR-116): no language exhibits these constructs, the tool does, so each producer makes the
 /// fact from its own conformance input (a fixture its real tool runs on, or its captured output).
-pub const EXECUTION: [FactKind; 3] = [
+pub const EXECUTION: [FactKind; 5] = [
+    FactKind::Histories,
+    FactKind::SimulationResults,
     FactKind::Traces,
     FactKind::ModelCheckResults,
     FactKind::ProofResults,

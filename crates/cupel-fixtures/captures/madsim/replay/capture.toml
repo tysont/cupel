@@ -1,0 +1,7 @@
+# Captured from madsim 0.2.34 on the conc.dst Rust fixture (P7.4) with cargo 1.92.0, standard output and error
+# merged; output.txt is unedited. `dir` is where it ran, `env` what the producer sets.
+tool = "madsim 0.2.34, cargo 1.92.0 (344c4567c 2025-10-21)"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p7/dst/cap"
+env = "RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=4 MADSIM_TEST_NUM=1"
+command = "cargo test -p ledger --test sim concurrent_deposits_are_all_kept --no-fail-fast -- --exact"
+exit_code = 101

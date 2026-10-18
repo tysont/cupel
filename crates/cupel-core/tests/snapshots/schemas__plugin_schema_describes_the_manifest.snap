@@ -136,6 +136,8 @@ expression: pretty(&schema)
         "divergence-results",
         "relation-results",
         "footprint",
+        "histories",
+        "simulation-results",
         "traces",
         "model-check-results",
         "proof-results"
@@ -798,6 +800,9 @@ expression: pretty(&schema)
             "fuzz-results": {
               "type": "string"
             },
+            "histories": {
+              "type": "string"
+            },
             "model-check-results": {
               "type": "string"
             },
@@ -834,6 +839,9 @@ expression: pretty(&schema)
             "roots": {
               "type": "string"
             },
+            "simulation-results": {
+              "type": "string"
+            },
             "symbols": {
               "type": "string"
             },
@@ -863,6 +871,7 @@ expression: pretty(&schema)
             "divergence-results",
             "footprint",
             "fuzz-results",
+            "histories",
             "model-check-results",
             "module-graph",
             "mutation-outcomes",
@@ -875,6 +884,7 @@ expression: pretty(&schema)
             "race-reports",
             "relation-results",
             "roots",
+            "simulation-results",
             "symbols",
             "test-conventions",
             "test-frames",

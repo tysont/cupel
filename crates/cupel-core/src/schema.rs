@@ -17,6 +17,7 @@ use crate::finding::Finding;
 use crate::flake::TestReruns;
 use crate::footprint::Footprint;
 use crate::fuzz::FuzzResults;
+use crate::histories::Histories;
 use crate::model_check::ModelCheckResults;
 use crate::mutation::MutationOutcomes;
 use crate::per_test::PerTestMap;
@@ -25,6 +26,7 @@ use crate::proof::ProofResults;
 use crate::property::PropertyResults;
 use crate::race::RaceReports;
 use crate::relation::RelationResults;
+use crate::simulation::SimulationResults;
 use crate::syntax::{
     ApiSurface, Decisions, ModuleGraph, MutationSites, NormTree, ProjectInfo, Roots, Symbols,
     TestConventions, TestFrames,
@@ -88,7 +90,7 @@ pub fn fact(kind: FactKind) -> Option<Schema> {
 }
 
 /// The fact kinds whose payload types exist, each with its schema.
-const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 26] = [
+const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 28] = [
     (FactKind::Symbols, fact_schema::<Symbols>),
     (FactKind::Decisions, fact_schema::<Decisions>),
     (FactKind::NormTree, fact_schema::<NormTree>),
@@ -115,6 +117,11 @@ const FACT_SCHEMAS: [(FactKind, fn() -> Schema); 26] = [
     ),
     (FactKind::RelationResults, fact_schema::<RelationResults>),
     (FactKind::Footprint, fact_schema::<Footprint>),
+    (FactKind::Histories, fact_schema::<Histories>),
+    (
+        FactKind::SimulationResults,
+        fact_schema::<SimulationResults>,
+    ),
     (FactKind::Traces, fact_schema::<Traces>),
     (
         FactKind::ModelCheckResults,

@@ -1108,6 +1108,8 @@ expression: pretty(&schema)
         "divergence-results",
         "relation-results",
         "footprint",
+        "histories",
+        "simulation-results",
         "traces",
         "model-check-results",
         "proof-results"

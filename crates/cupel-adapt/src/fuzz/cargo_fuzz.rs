@@ -187,7 +187,7 @@ fn bins(manifest: &str) -> Vec<Found> {
 }
 
 /// A Rust panic's message and place: `panicked at <file>:<line>:<col>:` and the line after it.
-fn panic(repository: &Path, output: &str) -> Option<(String, Option<Location>)> {
+pub(crate) fn panic(repository: &Path, output: &str) -> Option<(String, Option<Location>)> {
     let mut lines = output.lines();
     let place = lines
         .by_ref()

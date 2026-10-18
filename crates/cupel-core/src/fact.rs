@@ -35,6 +35,8 @@ pub enum FactKind {
     DivergenceResults,
     RelationResults,
     Footprint,
+    Histories,
+    SimulationResults,
     Traces,
     ModelCheckResults,
     ProofResults,
@@ -65,7 +67,7 @@ impl FactKind {
     }
 
     /// Every kind, in catalog order.
-    pub const ALL: [FactKind; 26] = [
+    pub const ALL: [FactKind; 28] = [
         Self::Symbols,
         Self::Decisions,
         Self::NormTree,
@@ -89,6 +91,8 @@ impl FactKind {
         Self::DivergenceResults,
         Self::RelationResults,
         Self::Footprint,
+        Self::Histories,
+        Self::SimulationResults,
         Self::Traces,
         Self::ModelCheckResults,
         Self::ProofResults,
@@ -110,7 +114,7 @@ impl FactKind {
 }
 
 /// Each kind's name, in declaration order (so `NAMES[kind as usize]` names `kind`).
-const NAMES: [&str; 26] = [
+const NAMES: [&str; 28] = [
     "symbols",
     "decisions",
     "norm-tree",
@@ -134,6 +138,8 @@ const NAMES: [&str; 26] = [
     "divergence-results",
     "relation-results",
     "footprint",
+    "histories",
+    "simulation-results",
     "traces",
     "model-check-results",
     "proof-results",

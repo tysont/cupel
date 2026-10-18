@@ -138,7 +138,7 @@ A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weake
 
 | Flag | Selects |
 |---|---|
-| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`, which adds the checks that run the test suite (`gen.property` and `conc.race` among them) to the `quick` ones; `deep` adds `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`; `exhaustive` adds `spec.trace`, `conc.model-check`, and `spec.prove` |
+| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`, which adds the checks that run the test suite (`gen.property` and `conc.race` among them) to the `quick` ones; `deep` adds `gen.differential`, `gen.metamorphic`, `gen.fuzz`, `perf.bench`, and `conc.linearizability`; `exhaustive` adds `conc.dst`, `spec.trace`, `conc.model-check`, and `spec.prove` |
 | `--only ID`, `--skip ID` | Checks by ID (`static.clones`) or group (`static`, `tests`); repeatable |
 | `--tier N+` | Only checks at or above evidence tier N, e.g. `--tier 2+` |
 | `--budget DURATION` | A wall-clock budget (`250ms`, `20s`, `10m`): run the most valuable selected checks that fit and skip the rest; `CUPEL_BUDGET` or `budget` in `cupel.toml` also set it |
@@ -598,6 +598,38 @@ cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock run
 
 What a warm run still does: walk the tree and hash every file, run the checks over the facts, ask git for the commit, and record the run. When `cargo llvm-cov` (or another coverage tool) is installed and configured, `static.crap` wants a coverage report even at `quick`: a fresh cached report is reused, but after any change to the tree the next run measures coverage again with the whole test suite, cold or warm alike.
 
+### MCP
+
+`cupel serve --mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server on stdin and stdout (JSON-RPC 2.0, one message per line, protocol revision `2025-11-25` or `2025-06-18`), for clients that call tools rather than run commands. Configure it as a stdio server whose working directory, or `--cwd`, is the repository:
+
+```json
+{
+  "mcpServers": {
+    "cupel": {
+      "command": "cupel",
+      "args": ["serve", "--mcp", "--cwd", "/home/me/shop"]
+    }
+  }
+}
+```
+
+The tools, from the server's own `tools/list`:
+
+<!-- generated:mcp-tools -->
+| Tool | Runs | What it does |
+| --- | --- | --- |
+| `check` | `cupel check` | Run checks over a scope at a depth and evaluate the gate. Returns the envelope `cupel check --format json` prints; its exit_code and status say how the run ended. |
+| `survey` | `cupel survey` | Rank a whole tree without a baseline or gate: the worst targets per metric. Returns the envelope `cupel survey --format json` prints; its exit_code and status say how the run ended. |
+| `explain` | `cupel explain` | Give full context and remediation for one finding or check result. Returns the envelope `cupel explain --format json` prints; its exit_code and status say how the run ended. |
+| `tests_impacted` | `cupel tests --impacted` | List the tests a scope impacts, why, and the command that runs them. Returns the envelope `cupel tests --impacted --format json` prints; its exit_code and status say how the run ended. |
+| `describe` | `cupel describe` | Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema. Returns the envelope `cupel describe --format json` prints; its exit_code and status say how the run ended. |
+<!-- end:mcp-tools -->
+
+- **Arguments are the verb's flags.** Each tool's input schema is its verb's flags and the global flags as JSON properties: `--only a b` is `"only": ["a", "b"]`, `--no-gate` is `"no_gate": true`, `--limit 5` is `"limit": 5`, and a positional argument is a property too (`explain`'s `target`, `describe`'s `subject`). `format` takes only `json`, and no tool takes `--no-color`, `--events`, `--describe`, `--help`, or `--jobs`.
+- **The result is the envelope.** A call runs the command line its arguments spell, in the order given, with `--format json` last unless given, exactly as a cold `cupel` run in the repository would (the result's `_meta` names that command line under `cupel.dev/command`). The envelope is the result's `structuredContent` and, for clients that show only text, its text content. `isError` is true for exit 2, 3, 4, and 6; a failed gate (exit 1) or a partial run (exit 5) is a result. An argument the schema does not have, or one of the wrong type, is a usage envelope (exit 2) naming it.
+- **Events are progress.** A call with a `progressToken` receives each event of [the event stream](#global-flags) as a `notifications/progress` whose `message` is the event's JSON line and whose `_meta` holds it under `cupel.dev/event`. What the run writes to stderr arrives as `notifications/message` at level `info` (`logging/setLevel` above `info` silences it).
+- **Lifetime.** The server runs until its stdin closes, its `--timeout`, or Ctrl-C; a `notifications/cancelled` stops that call's run, which gets no response. It keeps its own warm syntax trees across calls, as the daemon does, and `--watch` reparses changed files; it is not the socket daemon and runs beside one. Stdout carries only protocol messages: the server's own envelope (`serve.mcp-stopped`) goes to stderr when it ends.
+
 ### Global flags
 
 | Flag | Meaning |
@@ -618,11 +650,13 @@ What a warm run still does: walk the tree and hash every file, run the checks ov
 
 ## Checks
 
-Every check below exists. Each is supported in all seven languages except `gen.property`, which Go, Java, and Clojure lack (Cupel runs no property framework for them); `gen.metamorphic`, which has a Python harness only; `conc.race`, which has race detectors for Go and Rust only; `gen.fuzz`, which has no TypeScript, Java, or Clojure fuzzer; `perf.bench`, which has no Java or Clojure bench tool; `conc.model-check`, which has a model checker for Rust only; and `gen.differential`, `static.analyze`, and `perf.footprint`, which have no Java or Clojure harness, analyzer, or lockfile reader yet; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, `tests.mutation`, and `conc.race`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default; and `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`, which run from `--depth deep` (or by name with `--only`), the first two once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)). `spec.trace`, `conc.model-check`, and `spec.prove` run from `--depth exhaustive` (or by name with `--only`), `spec.trace` once a spec oracle is defined (see [Trace validation](#trace-validation)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+Every check below exists. Each is supported in all seven languages except `gen.property`, which Go, Java, and Clojure lack (Cupel runs no property framework for them); `gen.metamorphic`, which has a Python harness only; `conc.race`, which has race detectors for Go and Rust only; `gen.fuzz`, which has no TypeScript, Java, or Clojure fuzzer; `perf.bench`, which has no Java or Clojure bench tool; `conc.dst`, which has a simulator for Rust only (madsim); `conc.model-check`, which has a model checker for Rust only; and `gen.differential`, `static.analyze`, and `perf.footprint`, which have no Java or Clojure harness, analyzer, or lockfile reader yet; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, `tests.mutation`, and `conc.race`, which run the project's test suite, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default; and `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`, which run from `--depth deep` (or by name with `--only`), the first two once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)); `conc.linearizability` also runs from `--depth deep`, once a language names the command that records its histories; and `conc.dst`, `spec.trace`, `conc.model-check`, and `spec.prove` run from `--depth exhaustive` (or by name with `--only`), `spec.trace` once a spec oracle is defined (see [Trace validation](#trace-validation)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
 | --- | --- | --- | --- | --- | --- | --- |
+| `conc.dst` | 4 | exhaustive | `dst.failure` | `harnesses`, `failures` | — | rust |
+| `conc.linearizability` | 5 | deep | `consistency.violation` | `histories`, `operations`, `violations`, `unknown`, `invalid` | — |  |
 | `conc.model-check` | 5 | exhaustive | `model.counterexample` | `harnesses`, `verified`, `failed`, `undetermined` | — | rust |
 | `conc.race` | 4 | standard | `race.detected`, `ub.detected` | `races`, `undefined_behavior` | — | go, rust |
 | `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — |  |
@@ -669,6 +703,8 @@ What each check looks for:
 - **`gen.metamorphic`** evaluates the metamorphic relations you declare (sorting a list and sorting its reverse give the same result; `add(a, b) == add(b, a)`) on generated inputs, and reports each relation that does not hold, with the smallest failing input it could find and both outputs. See [Metamorphic relations](#metamorphic-relations).
 - **`gen.fuzz`** runs every fuzz target the project has (cargo-fuzz targets, Go `FuzzXxx` functions, Jazzer.js and atheris modules) with the run's seed and an execution budget, and reports each input that crashes a target (`fuzz.crash`) or runs past the per-input limit (`fuzz.timeout`), with the saved input and the command that reruns it; a project root with no fuzz target is `fuzz.target-missing` (`info`). See [Fuzzing](#fuzzing).
 - **`conc.race`** runs the tests under a race detector (Go's `-race`; Miri or ThreadSanitizer for Rust) and reports each data race (`race.detected`) and each operation with undefined behavior (`ub.detected`), with the stacks of the accesses inside the repository. See [Race detectors](#race-detectors).
+- **`conc.linearizability`** runs the command you name to record histories of concurrent operations (a test or harness writing JSON lines), checks each against the model it declares (a register, a key-value store) with Porcupine, and reports each history, or key, that no order consistent with real time explains (`consistency.violation`), with the operations that cannot come next. See [Linearizability](#linearizability).
+- **`conc.dst`** runs the project's deterministic simulation harnesses (madsim's `#[madsim::test]`) over a range of seeds from the run's seed, and reports each harness's first failing seed (`dst.failure`) with what it printed, replayed alone, and the command that replays it. See [Deterministic simulation](#deterministic-simulation).
 - **`perf.bench`** runs the project's benchmarks (Go's, criterion, pytest-benchmark, or commands timed by hyperfine) at the range's base commit and in the working tree, and compares each benchmark's samples with a Mann-Whitney U test: a significant slowdown of at least 5% is `perf.regression` (`warn`), a speedup `perf.improvement` (`info`). Without a range there is nothing to compare, and it says so. See [Benchmarks](#benchmarks).
 - **`spec.trace`** runs the tests with `CUPEL_TRACE_DIR` set, so the implementation logs each step it takes (its state, and the spec action it took) as JSON lines, and validates every recorded trace against the run's TLA+ spec oracle with TLC. A trace with a step the spec does not allow is `trace.diverged`, at the step, with the state logged there and the last state the spec allows. See [Trace validation](#trace-validation).
 - **`conc.model-check`** model-checks the project's proof harnesses (Kani's `#[kani::proof]` functions for Rust) over every input within their bounds, and reports each property an input breaks (an assertion, an overflow, an out-of-bounds access) as `model.counterexample`, with the values that break it and a test that replays them. See [Model checking](#model-checking).
@@ -685,6 +721,8 @@ The support matrix, from `cupel describe matrix`:
 <!-- generated:support-matrix -->
 | Check | clojure | go | java | javascript | python | rust | typescript |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+| `conc.dst` | unsupported | unsupported | unsupported | unsupported | unsupported | supported | unsupported |
+| `conc.linearizability` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
 | `conc.model-check` | unsupported | unsupported | unsupported | unsupported | unsupported | supported | unsupported |
 | `conc.race` | unsupported | supported | unsupported | unsupported | unsupported | supported | unsupported |
 | `gen.differential` | unsupported | unconfigured | unsupported | unconfigured | unconfigured | unconfigured | unconfigured |
@@ -1089,6 +1127,60 @@ fail (1)
 
 The evidence holds the `target`, the `tool`, the `message`, the `input` (as text, or `hex:` and its bytes), the `reproducer` file and the `reproduce` command (for Go, the commands that make the input a regression case under `testdata/fuzz/`), the `seed`, and the `cases`. An input that runs past the per-input limit is `fuzz.timeout` (`warn`, confidence 0.7: a slow path under load can cross it). A target that does not build is a note. The gate keys are `gen.fuzz.crashes`, `timeouts`, `targets`, and `missing`.
 
+## Linearizability
+
+`conc.linearizability` checks histories of concurrent operations that your own tests or harness record: Cupel never runs the system itself. Name the command in `[lang.<id>] history_command`; Cupel runs it from the repository root with `CUPEL_HISTORY_DIR` set to an empty directory under `.cupel/cache/linearizability/` and `CUPEL_SEED` set to the run's seed, and checks every `*.jsonl` file the command writes there. Until the command is set the check is `unconfigured` for the language.
+
+A history is JSON lines in the order things happened. The first line declares the model, `register` (one value: `read`, `write`, and `cas` with the value `[expected, new]`) or `kv` (the same per `key`, checked key by key); each other line is an event of a process, an `invoke` and then its completion, `ok` (it took effect), `fail` (it did not), or `info` (unknown: a timeout, a crash). An invocation the history never completes is unknown too, and may have taken effect anywhere after it began.
+
+```text
+{"model": "register"}
+{"process": 0, "type": "invoke", "f": "write", "value": 1}
+{"process": 0, "type": "ok", "f": "write", "value": 1}
+{"process": 0, "type": "invoke", "f": "write", "value": 2}
+{"process": 0, "type": "ok", "f": "write", "value": 2}
+{"process": 1, "type": "invoke", "f": "read", "value": null}
+{"process": 1, "type": "ok", "f": "read", "value": 1}
+```
+
+Porcupine (v1.3.1, run with `go run` through a small runner Cupel writes into `.cupel/cache/linearizability/porcupine/`) decides whether some order of the operations, consistent with real time, is a legal run of the model. The read above began after the write of 2 completed, so no order explains it:
+
+```text
+$ cupel check --only conc.linearizability --format text
+fail (1)
+  conc.linearizability
+    history `histories/stale-read.jsonl` (register) is non-linearizable: `read 1` by process 1 (line 6) cannot follow state `2`
+      fnd_a1c5c8 · consistency.violation · tier 5 · confidence 1
+      evidence: anomaly "non-linearizable" · command "cp -R histories "$CUPEL_HISTORY_DIR"/" · history "histories/stale-read.jsonl" · linearized [2] · model "register" · seed 3 · states [1] · stuck [1] · tool "tool.porcupine" (full: cupel explain fnd_a1c5c8)
+      action fix_bug (priority 1): Find why `read 1` by process 1 (line 6) cannot follow state `2` in `histories/stale-read.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories "$CUPEL_HISTORY_DIR"/` records the history again.
+      repro: cupel check --only conc.linearizability --seed 3
+```
+
+The evidence holds the `linearized` operations (the last three of the longest prefix the checker could order), the `states` the model is in after them, and the `stuck` operations that could come next in real time but that the model does not allow; each operation names its `process`, `f`, `key`, `value`, `outcome`, and the `line` that invoked it. A history that is malformed, or declares a model Porcupine does not check, is a note; so is one the checker ran out of time on (30 s per key, 300 s at `exhaustive`). The command's failure is a note, and the histories it wrote are still checked. Porcupine is downloaded from the Go module proxy on the first run; Go must be on `PATH`. The gate keys are `conc.linearizability.violations`, `histories`, `operations`, `unknown`, and `invalid`.
+
+## Deterministic simulation
+
+`conc.dst` runs deterministic simulation harnesses over a range of seeds. A simulator replaces a program's clock, network, scheduler, and randomness with one driven by a seed, so a seed replays the same interleaving, delays, and faults every time. Cupel wraps [madsim](https://github.com/madsim-rs/madsim): in each Rust project root holding a file in scope, every package that depends on `madsim` has its library and test targets run as `cargo test` under `RUSTFLAGS=--cfg madsim`, building into `.cupel/cache/dst/madsim/target`; its `#[madsim::test]` functions are the harnesses. The seeds are the run's seed and the ones after it: `--cases`, else 1 000 at `--depth standard` (with `--only`), 10 000 at `deep`, and 100 000 at `exhaustive`, where the check runs by default. madsim stops a harness at its first failing seed and names it; Cupel then replays that seed alone, which gives the trace of that seed only and shows whether the failure repeats. Other languages have no simulator Cupel wraps, and the matrix says `unsupported`.
+
+On the fixture, where two deposits read a balance, wait on an audit, and write it back, so overlapping audits lose one:
+
+```text
+$ cupel check --only conc.dst --seed 3 --format text
+fail (2)
+  conc.dst
+    simulation `a_withdrawal_waits_for_its_deposit` fails at seed 5: overdrawn: 10 from 0
+      fnd_d7a5ab · dst.failure · tier 4 · confidence 1
+      at src/lib.rs:29:9-29
+      ...
+    simulation `concurrent_deposits_are_all_kept` fails at seed 4: assertion `left == right` failed: a deposit was lost
+      fnd_350eac · dst.failure · tier 4 · confidence 1
+      at tests/sim.rs:23:5-23
+      evidence: first_seed 3 · harness "concurrent_deposits_are_all_kept" · message "assertion `left == right` failed: a depo…" · reproduce "RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEE…" · reproduced true · seed 4 · seeds 1000 · tool "tool.madsim" · trace [10] (full: cupel explain fnd_350eac)
+      action fix_bug (priority 1): Fix the failure `concurrent_deposits_are_all_kept` shows at seed 4 (`RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=4 MADSIM_TEST_NUM=1 cargo test -p ledger --test sim concurrent_deposits_are_all_kept -- --exact` replays it from `.`), then keep the seed as a regression case of the harness.
+      repro: cupel check --only conc.dst --paths tests/sim.rs --seed 4 --cases 1
+```
+
+The repro runs that one seed again (`--seed 4 --cases 1`). The evidence holds the `harness`, the failing `seed`, the range (`first_seed`, `seeds`), the panic's `message`, the `trace` (what the replayed seed printed, at most 50 lines, with thread numbers and paths outside the repository removed), whether it `reproduced` alone (a failure that does not repeat is a harness that is not deterministic, and is reported with confidence 0.5), and the `reproduce` command. A root whose build fails is a note, and so is a root with no harness. The gate keys are `conc.dst.failures` and `harnesses`.
 ## Trace validation
 
 `spec.trace` checks that what the implementation did is a behavior of its specification. The specification is a `spec` oracle in TLA+ (`cupel oracle add counter --kind spec --spec spec/Counter.tla --lang tla+ --write`), and the evidence is a trace the implementation logs while its tests run. The convention is a file format, so it needs no build step or library in any of the seven languages: when the variable `CUPEL_TRACE_DIR` is set, a test writes one `.jsonl` file per behavior into that directory, one JSON object per step, and writes nothing when it is unset.
@@ -1235,6 +1327,7 @@ runner = "cargo-nextest"           # the test runner Cupel uses; see Test runner
 differential_entries = ["src/money.rs:split"]   # what gen.differential compares
 advisories = "advisories"          # OSV advisories perf.footprint matches dependencies against
 race = "tsan"                      # the race detector conc.race uses; Miri by default
+history_command = "cargo test --test history"   # what records conc.linearizability's histories
 
 [lang.javascript]
 bench_commands = ["node bench.js"] # what perf.bench times with hyperfine
@@ -1316,8 +1409,8 @@ All automation goes through `make`.
 | `make lint`, `make fmt` | `cargo fmt --check` and clippy; `cargo fmt` |
 | `make build`, `make doc` | build the workspace; build its rustdoc |
 | `make matrix` | print the check × language support matrix |
-| `make readme` | regenerate this README's exit-code table, check table, check summaries, and support matrix from `cupel describe` |
-| `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)) |
+| `make readme` | regenerate this README's exit-code table, check table, check summaries, and support matrix from `cupel describe`, and its MCP tool table from `cupel serve --mcp` |
+| `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)), and each run of a verb an MCP tool serves again as that tool's call to `cupel serve --mcp` on another copy, which must return the same envelope and stderr ([ADR-121](docs/adr/CUPEL_DECISION_121.md)) |
 | `make dogfood` | Cupel grades itself: `cupel check --changed --gate` against `main`; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`. Both skip `tests.flaky` and `tests.mutation`, which would rerun Cupel's whole suite many times |
 | `make install` | `cargo install --path crates/cupel-cli` |
 
@@ -1325,7 +1418,7 @@ The generated README sections sit between `<!-- generated:NAME -->` and `<!-- en
 
 CI runs `make check` and `make parity` on Linux and macOS and `make dogfood` on every push: the tree gate on `main` and the changed gate on branches. Cupel's own `cupel.toml` is the example to copy.
 
-The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-mutate` is the mutation engine. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-serve` is the daemon's socket protocol, server, client, and file watcher, generic over what it runs. `cupel-cli` is the binary, and the daemon runs requests through the same code a cold invocation does. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
+The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-mutate` is the mutation engine. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-serve` is the daemon's socket protocol, server, client, and file watcher, and the MCP server, generic over what they run. `cupel-cli` is the binary, and the daemon runs requests through the same code a cold invocation does. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
 
 Checks and tool producers register themselves from their own modules ([ADR-074](docs/adr/CUPEL_DECISION_074.md)), so additions made in parallel never edit the same lines. Adding a check is one module in `crates/cupel-checks/src/` that submits itself with `inventory::submit!`, its `mod` line in that crate's `lib.rs`, its fixture code, and its goldens under `crates/cupel-fixtures/golden/<check-id>/` (the matrix golden per language, `describe.json`, and `survey-<lang>.json`); a check can keep its fixture code in its own `crates/cupel-fixtures/repos/<check-id>/<lang>/` so no other check's goldens change. Adding a tool producer is one module in `crates/cupel-adapt/src/` and its `mod` line. Tests derive what must be described, golden, and supported from the registries, so nothing else lists checks; `UPDATE_GOLDENS=1 make test` writes a new check's goldens and `make readme` adds its rows here.
 

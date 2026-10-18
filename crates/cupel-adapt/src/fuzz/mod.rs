@@ -11,7 +11,7 @@
 //! share [`libfuzzer`]'s arguments and output reader.
 
 mod atheris;
-mod cargo_fuzz;
+pub(crate) mod cargo_fuzz;
 mod go;
 mod jazzer;
 mod libfuzzer;

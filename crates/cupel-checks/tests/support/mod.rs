@@ -211,6 +211,17 @@ pub fn assert_counts_add_up(id: &str, metrics: &[&str], unit: &str) {
     );
 }
 
+/// A one-line location at `line` of `file`, from column 5.
+pub fn at(file: &str, line: u32) -> Location {
+    Location {
+        file: file.to_owned(),
+        line,
+        col: Some(5),
+        end_line: line,
+        end_col: None,
+    }
+}
+
 /// A score of `value` in `unit` over `n` targets.
 pub fn score(value: f64, unit: &str, n: u64) -> Score {
     Score {

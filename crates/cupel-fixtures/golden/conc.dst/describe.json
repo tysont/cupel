@@ -1,0 +1,165 @@
+{
+  "checks": [],
+  "cupel": {
+    "schema": "https://cupel.dev/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": {
+    "manifest": {
+      "cost": "exhaustive",
+      "findings": [
+        {
+          "action": "fix_bug",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `dst.failure`.",
+            "properties": {
+              "first_seed": {
+                "description": "The first seed of the range the harness was given.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "harness": {
+                "description": "The harness, as the test runner names it.",
+                "type": "string"
+              },
+              "message": {
+                "description": "What the harness reported.",
+                "type": "string"
+              },
+              "reproduce": {
+                "description": "The command that reruns the failing seed alone, from the project root.",
+                "type": "string"
+              },
+              "reproduced": {
+                "description": "Whether replaying the seed alone failed again.",
+                "type": "boolean"
+              },
+              "seed": {
+                "description": "The failing seed; null when the harness failed outside any one seed.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "seeds": {
+                "description": "How many seeds the range holds.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "tool": {
+                "description": "The simulator that ran it.",
+                "type": "string"
+              },
+              "trace": {
+                "description": "What it printed for the failing seed.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "harness",
+              "tool",
+              "first_seed",
+              "seeds",
+              "message",
+              "trace",
+              "reproduced",
+              "reproduce"
+            ],
+            "title": "Failed",
+            "type": "object"
+          },
+          "kind": "dst.failure",
+          "summary": "A deterministic simulation harness failed at a seed of the run's range: the seed replays the same schedule, faults, and timings, so it reproduces the failure exactly."
+        }
+      ],
+      "id": "conc.dst",
+      "metrics": [
+        {
+          "name": "harnesses",
+          "per": "scope",
+          "summary": "Simulation harnesses found."
+        },
+        {
+          "name": "failures",
+          "per": "scope",
+          "summary": "Harnesses a seed of the range failed."
+        }
+      ],
+      "needs": [
+        "simulation-results"
+      ],
+      "stability": "experimental",
+      "summary": "Runs the deterministic simulation harnesses (madsim) over a range of seeds from the run's seed (`--seed`, `--cases`); reports the first failing seed of each with its trace and the command that replays it.",
+      "tier": 4,
+      "version": 1,
+      "wants": []
+    },
+    "subject": "check"
+  },
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": null,
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "describe"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

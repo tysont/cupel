@@ -80,16 +80,6 @@ impl CupelError {
         }
     }
 
-    /// A flag whose behavior arrives in `step`.
-    pub fn pending_flag(flag: &str, step: &str) -> Self {
-        Self::NotImplemented(Pending {
-            subject: flag.to_owned(),
-            what: format!("`{flag}`"),
-            step: step.to_owned(),
-            fix: format!("Run without {flag}."),
-        })
-    }
-
     /// A `describe` subject whose data arrives in `step`; `subject` names it, such as
     /// `describe matrix`.
     pub fn pending_description(subject: &str, step: &str) -> Self {
@@ -544,7 +534,7 @@ mod tests {
             ExitCode::Usage
         );
         assert_eq!(
-            CupelError::pending_flag("--cases", "P5.4").exit_code(),
+            CupelError::pending_description("describe --agent", "P8.3").exit_code(),
             ExitCode::Usage
         );
         assert_eq!(
@@ -555,10 +545,15 @@ mod tests {
 
     #[test]
     fn findings_are_identified_by_check_kind_and_subject() {
-        let finding = CupelError::pending_flag("--mcp", "P7.7").finding("cupel x");
+        let finding =
+            CupelError::pending_description("describe --agent", "P8.3").finding("cupel x");
         assert_eq!(
             finding.id,
-            FindingId::for_subject(&CheckId::from("cli"), "cli.not-implemented", "--mcp")
+            FindingId::for_subject(
+                &CheckId::from("cli"),
+                "cli.not-implemented",
+                "describe --agent"
+            )
         );
         assert_eq!(finding.repro, "cupel x");
         assert_eq!(finding.check.as_str(), "cli");

@@ -243,3 +243,67 @@ fn facts_without_a_producer_are_not_checked() {
     let lang = LanguageInventory::parse(&LangId::from("rust"), "").unwrap();
     assert!(check_language(&facts, &lang, &[FactKind::Symbols], |_| unreachable!()).is_empty());
 }
+
+#[test]
+fn an_execution_fact_s_entry_is_located_by_the_file_its_producer_read() {
+    let facts = [inventory(
+        "histories",
+        r#"
+        [[constructs]]
+        id = "stale-read"
+        summary = "A stale read."
+        within = "violations"
+        expect = { anomaly = "non-linearizable" }
+        "#,
+    )];
+    let lang = LanguageInventory::parse(
+        &LangId::from("go"),
+        "[histories.stale-read]\nfile = \"histories/stale-read.jsonl\"\n",
+    )
+    .unwrap();
+    let checked = |violations: serde_json::Value| {
+        let fact = json!({ "histories": [
+            { "name": "histories/other.jsonl", "violations": [{ "anomaly": "non-linearizable" }] },
+            { "name": "histories/stale-read.jsonl", "violations": violations },
+        ] });
+        check_language(&facts, &lang, &[FactKind::Histories], |_| Ok(fact.clone()))
+    };
+
+    assert_eq!(checked(json!([{ "anomaly": "non-linearizable" }])), []);
+    assert!(
+        matches!(checked(json!([])).as_slice(), [Failure::NotDetected { construct, .. }] if construct == "stale-read")
+    );
+}
+
+#[test]
+fn a_simulation_harness_is_located_by_its_file_and_name() {
+    let facts = [inventory(
+        "simulation-results",
+        "[[constructs]]\nid = \"fails-at-a-seed\"\nsummary = \"A failing seed.\"\nexpect = { status = \"failed\" }\n",
+    )];
+    let lang = LanguageInventory::parse(
+        &LangId::from("rust"),
+        "[simulation-results.fails-at-a-seed]\nfile = \"tests/sim.rs\"\nname = \"lost\"\n",
+    )
+    .unwrap();
+    let harness = |file: &str, name: &str, status: &str| json!({ "name": name, "location": { "file": file, "line": 3 }, "status": status });
+    let checked = |harnesses: serde_json::Value| {
+        let fact = json!({ "harnesses": harnesses });
+        check_language(&facts, &lang, &[FactKind::SimulationResults], |_| {
+            Ok(fact.clone())
+        })
+    };
+
+    assert_eq!(
+        checked(json!([harness("tests/sim.rs", "lost", "failed")])),
+        []
+    );
+    assert_eq!(
+        checked(json!([
+            harness("tests/other.rs", "lost", "failed"),
+            harness("tests/sim.rs", "lost", "passed")
+        ]))
+        .len(),
+        1
+    );
+}

@@ -603,11 +603,13 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `AnalyzerReport` | per analyzer: ran, missing, unconfigured, or failed; its results normalized to SARIF's rule, level, message, location (ADR-102) | linter/type-checker tool | `static.analyze` |
 | `DivergenceResults` | per generated input: both outputs, minimized | differential engine | `gen.differential`, `gen.metamorphic` |
 | `Footprint` | dependencies from lockfiles and manifests (name, version, direct, license, where listed), whether licenses were read, OSV vulnerabilities and artifact sizes when configured, the range's base dependencies; read offline (ADR-103) | lockfile readers | `perf.footprint` |
+| `Histories` | operation histories a project's configured command recorded as JSON lines (per process: invoke, then ok, fail, or info), each checked against the model it declares: linearizable, violated, unknown, or invalid, and per violated key the longest linearizable prefix's tail, the model's states after it, and the operations that cannot come next (ADR-119) | linearizability checker | `conc.linearizability` |
+| `SimulationResults` | per deterministic simulation harness, run over the seed range from the run's seed: passed or failed, the first failing seed, its message and place, the trace of that seed replayed alone, whether it reproduced, and the command that replays it; each root's run (ADR-120) | simulation tool | `conc.dst` |
 | `Traces` | the traces a test run recorded through the logging convention (JSON lines in `CUPEL_TRACE_DIR`), each validated against the run's spec oracle: conforms, diverged (the step, the action and state logged there, the last state the spec allows, where it was logged), or failed with the reason; the spec validated against (ADR-116) | trace validator tool | `spec.trace` |
 | `ModelCheckResults` | per proof harness a bounded model checker found in the project roots: verified, failed, or undetermined; the properties it refuted (description, function, place) and a counterexample (the values drawn, a test that replays them); each root's run (ADR-117) | model checker tool | `conc.model-check` |
 | `ProofResults` | a deductive verifier's run over the proof files in the project roots: the files, the declarations verified, and each obligation not discharged — failed (the verifier could not prove it) or open (assumed, or undecided in its time or resources) — with its place and related places; each root's run (ADR-118) | verifier tool | `spec.prove` |
 
-P7 adds `Traces`, `Histories`, `ProofResults`, `ContractViolations` under the same rules. Facts carry completeness flags rather than languages carrying capability flags: a `CoverageMap` with `branches: None` makes `tests.coverage` skip branch findings with that reason; whether a language has a per-test map is simply whether a `PerTestMap` producer is registered for it.
+P7 adds `Traces`, `Histories`, `ProofResults`, `ContractViolations`, and `SimulationResults` (ADR-120) under the same rules. Facts carry completeness flags rather than languages carrying capability flags: a `CoverageMap` with `branches: None` makes `tests.coverage` skip branch findings with that reason; whether a language has a per-test map is simply whether a `PerTestMap` producer is registered for it.
 
 #### 8.3.3 Producer contract
 
@@ -842,7 +844,7 @@ Baseline test run happens once, in the real tree, before any mutant; red ⇒ exi
 
 ### 8.10 Daemon (`serve`)
 
-Holds parsed trees (content-hash keyed), store connection, coverage map, and the last plan. File watcher (`notify`) triggers incremental tree-sitter reparse and symbol re-hash. CLI connects over `.cupel/serve.sock` and proxies the request; output is byte-identical to a cold run. MCP mode exposes `check`, `survey`, `explain`, `tests_impacted`, `describe` as tools with the envelope as the result and events as progress notifications.
+Holds parsed trees (content-hash keyed), store connection, coverage map, and the last plan. File watcher (`notify`) triggers incremental tree-sitter reparse and symbol re-hash. CLI connects over `.cupel/serve.sock` and proxies the request; output is byte-identical to a cold run. MCP mode exposes `check`, `survey`, `explain`, `tests_impacted`, `describe` as tools with the envelope as the result and events as progress notifications: MCP 2025-11-25 over stdio, in a process of its own beside the socket daemon, each tool's input schema derived from its verb's flags (ADR-121).
 
 ## 9. Performance design
 

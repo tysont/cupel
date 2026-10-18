@@ -41,6 +41,8 @@
 //! [`Scope`]: cupel_core::Scope
 //! [`Facts`]: cupel_core::Facts
 
+mod conc_dst;
+mod conc_linearizability;
 mod conc_model_check;
 mod conc_race;
 mod finding;
