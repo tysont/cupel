@@ -1404,53 +1404,90 @@ Each wrapped tool is a producer: parser tested on committed real output; integra
 
 ---
 
-### P9 — Dogfood: use Cupel to improve Cupel
+### P9 — Dogfood to completion
 
-**Goal:** Cupel grades its own codebase at full depth and the agent acts on every finding, demonstrating the agent loop the tool exists for.
+**Goal:** Cupel grades its own codebase at full depth in CI and stays green while the follow-up list is burned down; Cupel grades other people's code and every finding an experienced maintainer would dispute is fixed as a check bug with a fixture case.
 
-**Status:** not started
+**Status:** in progress (2026-10-19)
 
-#### P9.1 Survey
+The owner's P9 ruling (2026-10-19) defines three tracks. Track (b), the deep gate, comes first so tracks (a) and (c) keep it green. Track (a) is the follow-up burn-down in the order below. Track (c) is external dogfood. The original P9 sub-steps fold in: the deep survey and acting on its findings into P9.0, raising the gate into P9.0 and P9.1, the performance baseline into P9.0's deep rules, and the agent instructions into P9.0 (the README's generated "For agents" section is the binary's own guide; P9.0 decides whether the repository needs a second copy).
 
-**Status:** not started
-
-- `cupel survey --depth deep` on the repo. Record the full `rankings` section in Notes verbatim (it is the baseline the rest of P9 improves on).
-
-#### P9.2 Act on findings
+#### P9.0 Cupel's own gate at `--depth deep` in CI
 
 **Status:** not started
 
-- Work through `next_actions` in priority order. For each: fix (not suppress) unless the finding is a true false positive, in which case the false positive is a Cupel bug — fix the check, add the case to the fixtures, and note it. Record in Notes every check that produced a false positive or missed something obvious.
+- Track (b). Measure a deep run on the tree and on a one-function change; put the changed gate at `--depth deep` on every push and the tree at `--depth deep` on `main` (per push, or scheduled with `--budget`, whichever the measurements justify); extend `[gate.changed]` and `[gate.tree]` with the deep checks' rules at the strictest values the tree sustains (`tests.mutation.score` floor 0.80); fix what the deep run finds; record the deep `survey` rankings verbatim as the baseline.
 
-#### P9.3 Raise the gate
-
-**Status:** not started
-
-- Tighten `[gate.changed]` and `[gate.tree]` in Cupel's `cupel.toml` to the strictest values the codebase can sustain; `tests.mutation.score ≥ 0.80` is the floor. Record final scores in Notes.
-
-#### P9.4 Performance baseline
+#### P9.1 Relative gate rules
 
 **Status:** not started
 
-- `perf.bench` against the fixture tree with a stored baseline; CI fails on > 10% regression at p95 (§11).
+- Track (a) item 1. `"<= base"`, `">= base - 0.02"`, and the other comparisons against the reference value (baseline or base ref); a rule with no reference is skipped with a reason. Cupel's clone ratchets become `<= base`.
 
-#### P9.5 Agent integration
+#### P9.2 Similarity-based symbol matching across refs
 
 **Status:** not started
 
-- `cupel describe --agent` output added to this repo's agent instructions so every future change to Cupel is graded by Cupel.
+- Track (a) item 2. Symbols matched across refs by `NormTree` similarity, one-to-many and many-to-one, with set-level deltas: a renamed, moved, split, or merged symbol no longer reads as resolved plus new, and a metric compared across a split is compared against the set.
+
+#### P9.3 Protect-first ordering in `survey`
+
+**Status:** not started
+
+- Track (a) item 3. Each target paired with its mutation score; unprotected targets ranked for protection before simplification, and `survey`'s `next_actions` ordered the same way.
+
+#### P9.4 `explain` hints
+
+**Status:** not started
+
+- Track (a) item 4. `clone.cluster` → the common-subtree extraction candidate; `complexity.high` → the deepest nested block; `dep.cycle` → the cheapest edge to cut.
+
+#### P9.5 `#REQ-n` markers as a secondary traceability source
+
+**Status:** not started
+
+- Track (a) item 5. Configured requirement IDs stay primary; `REQ-<n>` markers in test names are the secondary source (ADR-114 amended).
+
+#### P9.6 `References` fact and real dead-symbol detection
+
+**Status:** not started
+
+- Track (a) item 6. A `References` fact for every language; `static.dead-code` decides reachability per symbol (ADR-058 superseded).
+
+#### P9.7 Clone type 1 vs type 2 in evidence
+
+**Status:** not started
+
+- Track (a) item 7. A raw-token digest on `NormTree`; `clone_type` 1, 2, or 3 with the evidence saying what differs (ADR-050 amended).
+
+#### P9.8 Windows `serve` over named pipes
+
+**Status:** not started
+
+- Track (a) item 8. The daemon's transport abstracted with a named-pipe implementation on Windows, the workspace compiling for `x86_64-pc-windows-msvc`, and the Windows release job no longer best-effort.
+
+#### P9.9 External dogfood
+
+**Status:** not started
+
+- Track (c). Two mid-size open-source repositories per native language (Rust, Python, TypeScript) and one per adapter language (Go, Java, Clojure): `survey` and `check --depth deep` on each, every finding triaged; a false positive is a check bug fixed with a fixture case; per-repository reports in `docs/dogfood/` with the false-positive rate per check.
+
+#### P9.10 Release v0.2.0
+
+**Status:** not started
+
+- The follow-up list is empty or every remaining item has a deferring ADR; `v0.2.0` tagged and the release verified as `v0.1.0` was.
 
 #### P9 Definition of Done
 
-- `cupel check --depth deep --gate` exits 0 on the tree.
-- Every finding Cupel raised on itself was fixed, or is suppressed with a reason that names a real limitation.
-- Notes contain: initial survey, list of real defects Cupel found in itself, list of Cupel bugs the dogfood exposed, final scores.
+- The follow-up list is empty, or every remaining item has an ADR deferring it with a reason.
+- Cupel's own gate at `--depth deep` is green in CI.
+- An external dogfood report exists for every language, with the false-positive rate per check.
+- `v0.2.0` is tagged.
 
 #### P9 Notes
 
-_(none yet)_
-
----
+- **P9 — follow-up list** (the burn-down of track (a), in the owner's order, plus the engineering items P8 left open). (1) Relative gate rules. (2) Similarity-based symbol matching with set-level deltas. (3) Protect-first ordering in `survey`. (4) `explain` hints for `clone.cluster`, `complexity.high`, `dep.cycle`. (5) `#REQ-n` markers as a secondary traceability source. (6) `References` fact and real dead-symbol detection (ADR-058). (7) Clone type 1 vs type 2 (ADR-050). (8) Windows `serve` over named pipes, so Windows stops being best-effort (ADR-124). From P8: (9) musl allocator speed under rayon unmeasured; (10) no build cache in the release workflow; (11) the aarch64 Linux and x86_64 macOS binaries are not executed in CI; (12) the agent guide's prose names flags by hand, so a new flag it should mention is not caught; (13) a version bump edits three files (workspace, `package.json`, `cupel.py`); (14) the wrappers' Windows paths are untested; (15) the schema site serves `main`'s tip, not a release. Owned by the owner, not on this list: npm, PyPI (the name `cupel` is taken there), and crates.io (`cupel` and `cupel-core` are taken) names and tokens; the Homebrew tap token; `cupel.dev`.
 
 ## 4. Cross-phase checklist
 
