@@ -1,0 +1,120 @@
+# ABOUTME: Release builds (ADR-124): on a `v*` tag, builds and packages `cupel` for the five design §10 targets with `make dist`
+# ABOUTME: and publishes them with SHA256SUMS as a GitHub Release; `workflow_dispatch` is a dry run that uploads the archives only.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # A tag must name the crate version, which `cupel --version` and the envelope report.
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - id: version
+        name: The crate version, checked against the tag
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            version="$(scripts/release.sh version "$GITHUB_REF_NAME")"
+          else
+            version="$(scripts/release.sh version)"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Static musl binaries, both cross-compiled on one x86_64 runner with cargo-zigbuild: zig is the
+          # C compiler and linker for bundled SQLite, the tree-sitter grammars, and BLAKE3.
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+            runs: true
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-latest
+            zig: true
+          # Both macOS binaries build natively on the arm64 runner with Apple's toolchain.
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            runs: true
+          - target: x86_64-apple-darwin
+            os: macos-latest
+          # Best effort (ADR-124 Consequences): a failure here does not hold back the release.
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            runs: true
+            best-effort: true
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.best-effort || false }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install pinned toolchain and the target
+        run: |
+          rustup toolchain install
+          rustup target add ${{ matrix.target }}
+      - name: Install zig 0.16.0 and cargo-zigbuild 0.23.4
+        if: matrix.zig
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/zig.tar.xz" https://ziglang.org/download/0.16.0/zig-x86_64-linux-0.16.0.tar.xz
+          echo "70e49664a74374b48b51e6f3fdfbf437f6395d42509050588bd49abe52ba3d00  $RUNNER_TEMP/zig.tar.xz" | sha256sum -c
+          tar -xJf "$RUNNER_TEMP/zig.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/zig-x86_64-linux-0.16.0" >> "$GITHUB_PATH"
+          cargo install cargo-zigbuild --version 0.23.4 --locked
+      - name: Install make 4.4.1
+        if: runner.os == 'Windows'
+        run: choco install make --version 4.4.1 --no-progress -y
+      - name: make dist
+        run: make dist TARGET=${{ matrix.target }}
+      - name: The Linux binary is statically linked
+        if: matrix.zig
+        run: scripts/release.sh static target/${{ matrix.target }}/release/cupel
+      - name: The binary runs and reports the crate version
+        if: matrix.runs
+        run: test "$(target/${{ matrix.target }}/release/cupel --version)" = "cupel ${{ needs.version.outputs.version }}"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dist-${{ matrix.target }}
+          path: target/dist/cupel-*
+          if-no-files-found: error
+
+  # Gathers the archives, writes SHA256SUMS, and on a tag publishes the release with generated notes.
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: dist-*
+          path: dist
+          merge-multiple: true
+      - name: Verify every archive and write SHA256SUMS
+        run: |
+          for archive in dist/cupel-*; do scripts/release.sh verify "$archive"; done
+          scripts/release.sh sums dist
+          cat dist/SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-${{ needs.version.outputs.version }}
+          path: dist/*
+          if-no-files-found: error
+      - name: Create the GitHub Release
+        if: github.event_name == 'push' && github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes --title "cupel ${{ needs.version.outputs.version }}" dist/*
