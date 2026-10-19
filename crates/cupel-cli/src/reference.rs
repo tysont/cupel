@@ -5,7 +5,7 @@ use std::path::Path;
 use cupel_core::config::Config;
 use cupel_core::config::GateRuleSpec;
 use cupel_core::git::Git;
-use cupel_core::{Envelope, Event, GateReference, Writer, needs_reference};
+use cupel_core::{Envelope, Event, GateReference, Status, Writer, needs_reference};
 
 use crate::check::{self, gate_rules};
 use crate::cli::ScopeArgs;
@@ -29,8 +29,8 @@ impl Reference {
     }
 }
 
-/// The reference for `envelope`'s gate. Nothing is resolved unless a rule of the gate compares
-/// with `base`. `--against` names it; otherwise a range scope (`--changed`, `--base`) is
+/// The reference for `envelope`'s gate. Nothing is resolved unless the envelope is graded and a
+/// rule of its gate compares with `base`. `--against` names it; otherwise a range scope (`--changed`, `--base`) is
 /// compared with its base, recomputed; any other scope with the default baseline, `compared`.
 pub fn resolve(
     invocation: &Invocation<'_>,
@@ -39,7 +39,8 @@ pub fn resolve(
     envelope: &Envelope,
     compared: Option<Envelope>,
 ) -> Reference {
-    let Some(verb) = envelope.run.verb else {
+    let graded = matches!(envelope.status, Status::Pass | Status::Partial);
+    let Some(verb) = envelope.run.verb.filter(|_| graded) else {
         return Reference::Missing(String::new());
     };
     let rules = gate_rules(envelope, verb, args, config).map(|(_, rules)| rules);
@@ -119,6 +120,7 @@ fn run_at(
     let writer = Writer::new(root, false).map_err(|error| error.to_string())?;
     let mut only: Vec<String> = rules
         .iter()
+        .filter(|rule| needs_reference(std::slice::from_ref(rule)))
         .map(|rule| rule.key.check.to_string())
         .collect();
     only.sort();
