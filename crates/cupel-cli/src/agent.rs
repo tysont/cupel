@@ -1,8 +1,6 @@
 // ABOUTME: `cupel describe --agent`: the Markdown guide an agent harness pastes into CLAUDE.md or AGENTS.md.
 // ABOUTME: The prose lives here; verbs, flags, exit codes, statuses, checks, and MCP tools are rendered from the registries.
-use std::fmt::Write as _;
-
-use cupel_core::{ArgDescription, CheckRegistry, CostClass, schema};
+use cupel_core::{ArgDescription, CheckRegistry, CliDescription, CostClass, schema};
 use serde_json::Value;
 
 use crate::{mcp, registry};
@@ -10,9 +8,12 @@ use crate::{mcp, registry};
 /// The guide, about sixty lines of Markdown ending in one newline.
 pub fn guide(checks: &CheckRegistry) -> String {
     let cli = registry::cli();
-    let mut out = String::new();
-    let _ = write!(
-        out,
+    format!("{}{}", the_loop(&cli), the_results(&cli, checks))
+}
+
+/// What Cupel is, the loop an agent runs, and what each exit code asks of it.
+fn the_loop(cli: &CliDescription) -> String {
+    format!(
         "# Cupel
 
 {summary} It measures structure and test strength over a change or a whole tree and returns one JSON envelope: findings with stable IDs, ranked `next_actions`, and a gate verdict. It never edits code; you fix, it grades.
@@ -34,7 +35,16 @@ pub fn guide(checks: &CheckRegistry) -> String {
 {exit_codes}
 Exit 2 is a mistake in your command line or `cupel.toml`; its finding names the fix. On exit 3 run `cupel doctor` and follow its `install_tool` and `configure` actions. On exit 4 make the test suite pass first.
 
-## The gate
+",
+        summary = cli.summary,
+        exit_codes = exit_codes(cli),
+    )
+}
+
+/// The gate, the depths, how to read the envelope, the MCP server, and the verbs.
+fn the_results(cli: &CliDescription, checks: &CheckRegistry) -> String {
+    format!(
+        "## The gate
 
 `[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `\"static.complexity.cyclomatic_max\" = \"<= 10\"` or `\"tests.weakening\" = \"none\"`. `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
 
@@ -61,15 +71,12 @@ A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instea
 
 The verbs are {verbs}. `cupel describe --all` is every verb, flag, exit code, and schema as one JSON document.
 ",
-        summary = cli.summary,
-        exit_codes = exit_codes(&cli),
         depth = depth(),
         depth_table = depth_table(checks),
         statuses = code_list(&statuses()),
         tools = code_list(&mcp::tools().into_iter().map(|tool| tool.name).collect::<Vec<_>>()),
-        verbs = verbs(&cli),
-    );
-    out
+        verbs = verbs(cli),
+    )
 }
 
 /// Items as inline code, joined with commas.
@@ -90,7 +97,7 @@ fn table(header: &[&str], rows: impl IntoIterator<Item = Vec<String>>) -> String
     format!("{}{}{body}", line(&header), line(&separator))
 }
 
-fn exit_codes(cli: &cupel_core::CliDescription) -> String {
+fn exit_codes(cli: &CliDescription) -> String {
     table(
         &["Code", "Name", "Meaning"],
         cli.exit_codes.iter().map(|code| {
@@ -168,7 +175,7 @@ fn statuses() -> Vec<String> {
     names
 }
 
-fn verbs(cli: &cupel_core::CliDescription) -> String {
+fn verbs(cli: &CliDescription) -> String {
     code_list(
         &cli.verbs
             .iter()
