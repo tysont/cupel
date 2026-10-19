@@ -165,29 +165,85 @@ impl Registries {
     /// A plugin check's pairs are those of its own fixtures (`repos/<check>/<lang>/`) whose
     /// `cupel.toml` registers it (ADR-092 §3).
     pub fn fixture_pairs(&self) -> Vec<Pair> {
+        let mut matrices = BTreeMap::new();
+        self.pair_ids()
+            .into_iter()
+            .filter_map(|(check, lang)| self.pair_in(&check, &lang, &mut matrices))
+            .collect()
+    }
+
+    /// The (check, language) of every pair [`Self::fixture_pairs`] can hold, in its order, without
+    /// computing any support: every native check with every language, then each plugin check's
+    /// `repos/<check>/<lang>/` directory. The matrix test names its trials from these, so listing
+    /// them runs no tool (ADR-129).
+    pub fn pair_ids(&self) -> Vec<(CheckId, LangId)> {
+        let langs = self.languages.ids();
+        let mut ids: Vec<(CheckId, LangId)> = self
+            .checks
+            .iter()
+            .flat_map(|check| {
+                let id = check.manifest().id.clone();
+                langs.iter().map(move |lang| (id.clone(), lang.clone()))
+            })
+            .collect();
         let repos = repo_path(".");
-        let langs = self.languages.langs();
-        let mut matrices: BTreeMap<String, SupportMatrix> = BTreeMap::new();
-        let mut pairs = Vec::new();
-        for check in self.checks.iter() {
-            for lang in &langs {
-                let id = &check.manifest().id;
-                let fixture = fixture_repo(&repos, id, &lang.id);
-                let matrix = matrices
-                    .entry(fixture.clone())
-                    .or_insert_with(|| self.matrix_in(&fixture));
-                pairs.push(Pair {
-                    check: id.clone(),
-                    lang: lang.id.clone(),
-                    support: matrix
-                        .get(id, &lang.id)
-                        .cloned()
-                        .unwrap_or(Support::Supported),
-                });
-            }
+        let mut plugin: Vec<(CheckId, LangId)> = fs::read_dir(&repos)
+            .into_iter()
+            .flatten()
+            .flatten()
+            .map(|entry| entry.file_name().to_string_lossy().into_owned())
+            .filter(|name| {
+                name.contains('.') && self.checks.get(&CheckId::from(name.as_str())).is_none()
+            })
+            .flat_map(|name| {
+                langs
+                    .iter()
+                    .filter(|lang| repos.join(&name).join(lang.as_str()).is_dir())
+                    .map(|lang| (CheckId::from(name.as_str()), lang.clone()))
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+        plugin.sort();
+        ids.extend(plugin);
+        ids
+    }
+
+    /// The pair `check` × `lang` with its support in the fixture repository it runs on; `None`
+    /// for a plugin check whose fixture there does not register it.
+    pub fn fixture_pair(&self, check: &CheckId, lang: &LangId) -> Option<Pair> {
+        self.pair_in(check, lang, &mut BTreeMap::new())
+    }
+
+    /// [`Self::fixture_pair`], reusing and filling `matrices`, the support matrix of each fixture
+    /// repository by name.
+    fn pair_in(
+        &self,
+        check: &CheckId,
+        lang: &LangId,
+        matrices: &mut BTreeMap<String, SupportMatrix>,
+    ) -> Option<Pair> {
+        if self.checks.get(check).is_none() {
+            let fixture = format!("{check}/{lang}");
+            let own = Self::of_fixture(&fixture)?;
+            let support = own.matrix_in(&fixture).get(check, lang)?.clone();
+            return Some(Pair {
+                check: check.clone(),
+                lang: lang.clone(),
+                support,
+            });
         }
-        pairs.extend(self.plugin_pairs(&repos));
-        pairs
+        let fixture = fixture_repo(&repo_path("."), check, lang);
+        let matrix = matrices
+            .entry(fixture.clone())
+            .or_insert_with(|| self.matrix_in(&fixture));
+        Some(Pair {
+            check: check.clone(),
+            lang: lang.clone(),
+            support: matrix
+                .get(check, lang)
+                .cloned()
+                .unwrap_or(Support::Supported),
+        })
     }
 
     /// The support matrix in the fixture repository `fixture`, with its plugins and its
@@ -199,35 +255,6 @@ impl Registries {
             Some(own) => SupportMatrix::compute(&own.checks, &own.producers, &langs, &ctx),
             None => SupportMatrix::compute(&self.checks, &self.producers, &langs, &ctx),
         }
-    }
-
-    /// The pairs of plugin checks: each `repos/<check>/<lang>/` whose plugins register `<check>`
-    /// and whose `<check>` is not a native check.
-    fn plugin_pairs(&self, repos: &Path) -> Vec<Pair> {
-        let mut pairs = Vec::new();
-        for entry in fs::read_dir(repos).into_iter().flatten().flatten() {
-            let name = entry.file_name().to_string_lossy().into_owned();
-            let id = CheckId::from(name.as_str());
-            if !name.contains('.') || self.checks.get(&id).is_some() {
-                continue;
-            }
-            for lang in self.languages.ids() {
-                let fixture = format!("{name}/{lang}");
-                let Some(own) = Self::of_fixture(&fixture) else {
-                    continue;
-                };
-                let matrix = own.matrix_in(&fixture);
-                if let Some(support) = matrix.get(&id, &lang) {
-                    pairs.push(Pair {
-                        check: id.clone(),
-                        lang,
-                        support: support.clone(),
-                    });
-                }
-            }
-        }
-        pairs.sort_by(|a, b| (&a.check, &a.lang).cmp(&(&b.check, &b.lang)));
-        pairs
     }
 
     fn check(&self, id: &CheckId) -> &dyn Check {
@@ -274,25 +301,21 @@ fn programs_installed(file: &ConfigFile, fixture: &str) -> bool {
     })
 }
 
-/// Every way the matrix fails: a supported pair without a passing golden, an unsupported pair
-/// that is not skipped with its reason, invalid evidence, and goldens no supported pair claims.
-pub fn verify(goldens: &Goldens) -> Vec<String> {
-    let registries = Registries::builtin();
-    let pairs = registries.fixture_pairs();
-    let mut problems = Vec::new();
-    for pair in &pairs {
-        let own = Registries::of_fixture(&pair.fixture());
-        let check = own.as_ref().unwrap_or(&registries).check(&pair.check);
-        let outcome = match pair.support {
-            Support::Supported => verify_supported(goldens, check, pair),
-            _ => verify_skipped(pair),
-        };
-        if let Err(problem) = outcome {
-            problems.push(format!("{}: {problem}", pair.golden()));
-        }
+/// Every way one pair fails the matrix: a supported pair without a passing golden or with
+/// invalid evidence, or an unsupported pair that is not skipped with its reason. Each pair is
+/// its own test (ADR-129), so a change reaches only the pairs whose runs execute it.
+///
+/// # Errors
+///
+/// The pair's problem, prefixed with its golden's name.
+pub fn verify_pair(goldens: &Goldens, registries: &Registries, pair: &Pair) -> Result<(), String> {
+    let own = Registries::of_fixture(&pair.fixture());
+    let check = own.as_ref().unwrap_or(registries).check(&pair.check);
+    match pair.support {
+        Support::Supported => verify_supported(goldens, check, pair),
+        _ => verify_skipped(pair),
     }
-    problems.extend(stale_goldens(goldens, &registries, &pairs));
-    problems
+    .map_err(|problem| format!("{}: {problem}", pair.golden()))
 }
 
 /// Runs `check --only <check>` on a copy of the language's fixture repository.
@@ -431,7 +454,7 @@ fn verify_skipped(pair: &Pair) -> Result<(), String> {
 /// registered check owns. A check's directory holds everything golden about that check alone:
 /// `<lang>` per supported pair (the matrix), `describe` (`describe <check>`), and
 /// `survey-<lang>` per language (its slice of the survey envelope).
-fn stale_goldens(goldens: &Goldens, registries: &Registries, pairs: &[Pair]) -> Vec<String> {
+pub fn stale_goldens(goldens: &Goldens, registries: &Registries, pairs: &[Pair]) -> Vec<String> {
     let mut claimed: BTreeSet<String> = pairs
         .iter()
         // A pair whose tool is missing here is supported where it is installed, so its golden
