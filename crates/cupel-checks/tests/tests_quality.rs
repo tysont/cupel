@@ -838,3 +838,12 @@ fn ratios_combine_over_every_languages_tests_and_counts_add_up() {
     )];
     assert_eq!(combined(check, "weak_ratio", &empty), Some(0.0));
 }
+
+#[test]
+fn mock_density_is_a_score_so_a_matched_set_of_tests_compares_its_weighted_mean() {
+    let check = support::check(ID);
+    assert_eq!(
+        (check.averages("mock_density"), check.averages("tests")),
+        (true, false)
+    );
+}

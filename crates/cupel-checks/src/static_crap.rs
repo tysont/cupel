@@ -177,6 +177,11 @@ impl Check for StaticCrap {
             _ => largest(name, results),
         }
     }
+
+    /// CRAP is a score: a matched set of symbols compares its weighted mean (ADR-131).
+    fn averages(&self, name: &str) -> bool {
+        name == "crap"
+    }
 }
 
 /// What scoring reads besides the symbols.

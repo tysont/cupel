@@ -297,6 +297,12 @@ impl Check for TestsQuality {
             _ => sum(name, results),
         }
     }
+
+    /// Mock density is a percentage: a matched set of tests compares its weighted mean
+    /// (ADR-131).
+    fn averages(&self, name: &str) -> bool {
+        name == "mock_density"
+    }
 }
 
 /// The thresholds in force and the per-symbol facts a case joins by its key (ADR-054).

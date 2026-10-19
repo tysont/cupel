@@ -486,3 +486,12 @@ fn max_combines_by_the_largest_and_mean_by_the_mean_over_every_symbol() {
     let empty = [language(check, &[("max", 0.0), ("mean", 0.0)], 0)];
     assert_eq!(combined(check, "mean", &empty), Some(0.0));
 }
+
+#[test]
+fn crap_is_a_score_so_a_matched_set_of_symbols_compares_its_weighted_mean() {
+    let check = support::check(ID);
+    assert_eq!(
+        (check.averages("crap"), check.averages("max")),
+        (true, false)
+    );
+}
