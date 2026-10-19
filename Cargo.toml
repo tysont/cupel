@@ -79,6 +79,10 @@ roxmltree = "0.21.1"
 # the tests run, changing the last digit of parsed coverage floats in goldens.
 jsonschema = { version = "0.46.10", default-features = false }
 
+# Release binaries ship without symbols (ADR-124); `make dist` and `make install` build this profile.
+[profile.release]
+strip = true
+
 [workspace.lints.rust]
 unsafe_code = "forbid"
 

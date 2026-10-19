@@ -1,0 +1,21 @@
+{
+  "name": "cupel",
+  "version": "0.1.0",
+  "description": "Verification suite that grades what a coding agent produced. Runs the cupel release binary for this platform.",
+  "license": "BSD-3-Clause",
+  "homepage": "https://github.com/tysont/cupel",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tysont/cupel.git",
+    "directory": "dist/npm"
+  },
+  "bin": {
+    "cupel": "bin/cupel.js"
+  },
+  "files": [
+    "bin/cupel.js"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

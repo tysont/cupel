@@ -9,6 +9,16 @@ rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 
+# `cargo binstall` downloads the release archive dist/targets.toml names instead of building (ADR-125).
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/v{ version }/cupel-{ version }-{ target }.tar.gz"
+bin-dir = "cupel-{ version }-{ target }/{ bin }{ binary-ext }"
+pkg-fmt = "tgz"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-url = "{ repo }/releases/download/v{ version }/cupel-{ version }-{ target }.zip"
+pkg-fmt = "zip"
+
 [lib]
 path = "src/lib.rs"
 

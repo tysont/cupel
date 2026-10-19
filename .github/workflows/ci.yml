@@ -1,5 +1,5 @@
 # ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, property framework, analyzer, race detector, fuzzer, bench tool, contract library, and JVM build tool
-# ABOUTME: installed, and `make dogfood` (Cupel's own gate) for every push and pull request. Rust comes from rust-toolchain.toml.
+# ABOUTME: installed, `make dogfood` (Cupel's own gate) for every push and pull request, and the installer tests (ADR-125). Rust comes from rust-toolchain.toml.
 name: ci
 
 on:
@@ -186,3 +186,43 @@ jobs:
       - name: make dogfood (tree gate on main, which has no merge base to diff against)
         if: github.ref == 'refs/heads/main'
         run: make dogfood DOGFOOD_SCOPE=tree
+
+  # The installers under dist/ (ADR-125) on an image with only Rust, Node, Python, and ShellCheck added:
+  # install.sh, the Homebrew formula, and the npm and pipx wrappers against a fake release served
+  # locally. INSTALLER_TESTS_REQUIRE_TOOLS turns a test's missing tool into a failure, not a skip.
+  installers:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned toolchain
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install ShellCheck 0.11.0
+        run: |
+          case "$RUNNER_OS-$(uname -m)" in
+            Linux-*) asset=shellcheck-v0.11.0.linux.x86_64.tar.xz ;;
+            macOS-arm64) asset=shellcheck-v0.11.0.darwin.aarch64.tar.xz ;;
+            *) asset=shellcheck-v0.11.0.darwin.x86_64.tar.xz ;;
+          esac
+          curl -sSfL "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/$asset" | tar -xJ -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/shellcheck-v0.11.0" >> "$GITHUB_PATH"
+      - name: make installers
+        run: make installers
+        env:
+          INSTALLER_TESTS_REQUIRE_TOOLS: "1"
+      # Homebrew's own style check of the formula rendered from the fixture SHA256SUMS.
+      - name: brew style
+        if: runner.os == 'macOS'
+        run: |
+          sh dist/homebrew/render.sh 0.1.0 crates/cupel-cli/tests/fixtures/SHA256SUMS > "$RUNNER_TEMP/cupel.rb"
+          brew style "$RUNNER_TEMP/cupel.rb"

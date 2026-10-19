@@ -37,6 +37,20 @@ Add a `[gate.changed]` table to `cupel.toml` (see [Configuration](#configuration
 
 ## Install
 
+### From a release archive
+
+Each [GitHub Release](https://github.com/tysont/cupel/releases) carries one archive per platform, `cupel-<version>-<target>.tar.gz`, for `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl` (static binaries), `aarch64-apple-darwin`, and `x86_64-apple-darwin`, and a `SHA256SUMS` file. Download your platform's archive and `SHA256SUMS`, verify the checksum, and put `cupel` on your PATH:
+
+```sh
+sha256sum --ignore-missing -c SHA256SUMS     # on macOS: shasum -a 256 --ignore-missing -c SHA256SUMS
+tar -xzf cupel-0.1.0-x86_64-unknown-linux-musl.tar.gz
+install cupel-0.1.0-x86_64-unknown-linux-musl/cupel ~/.local/bin/
+```
+
+On Windows, run the Linux archive under WSL.
+
+### From source
+
 Build from source with a Rust toolchain. The pinned version is in `rust-toolchain.toml`.
 
 ```sh
@@ -46,6 +60,22 @@ make install            # cargo install --path crates/cupel-cli
 ```
 
 The binary has no runtime dependencies except `git`, which Cupel calls for `--changed` and `--base` scopes.
+
+Every other route installs a release binary from GitHub Releases, checked against the release's `SHA256SUMS`. The installers are in `dist/` and are tested in CI against a fake release; none has a published release to install yet:
+
+| Route | Command | Available |
+|---|---|---|
+| From source | `make install` in a clone, as above | now |
+| Install script | `curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh \| sh` | after the first release tag |
+| cargo-binstall | `cargo binstall --git https://github.com/tysont/cupel cupel-cli` | after the first release tag |
+| Homebrew | `brew install tysont/cupel/cupel` | once the `tysont/homebrew-cupel` tap is published |
+| npm | `npx cupel` | once the `cupel` package is published to npm |
+| pipx | `pipx install cupel` | once the `cupel` package is published to PyPI |
+| `cupel.dev` | `curl -fsSL https://cupel.dev/install \| sh` | once the domain serves the install script |
+
+- **Install script** (POSIX `sh`): installs Linux x86_64/aarch64 and macOS arm64/x86_64 binaries into `~/.local/bin`, or `CUPEL_INSTALL_DIR`, and prints the line to add to your `PATH` when that directory is not on it. `CUPEL_VERSION=0.1.0` installs that release instead of the latest. It needs `curl` or `wget`, `tar`, and `sha256sum` or `shasum`.
+- **npm and pipx**: the package's `cupel` command downloads the binary of the package's own version on first run into `CUPEL_CACHE_DIR`, else `~/.cache/cupel` (`%LOCALAPPDATA%\cupel` on Windows), then runs it with your arguments, stdio, and exit code. When the binary cannot be downloaded or its checksum differs, it prints why and exits 3. npm needs Node 18 or newer; pipx, Python 3.9 or newer.
+- **Homebrew**: the formula, rendered per release by `dist/homebrew/render.sh` from `SHA256SUMS`, covers macOS and Linux.
 
 ## The agent loop
 
@@ -1567,10 +1597,12 @@ All automation goes through `make`.
 | `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)), and each run of a verb an MCP tool serves again as that tool's call to `cupel serve --mcp` on another copy, which must return the same envelope and stderr ([ADR-121](docs/adr/CUPEL_DECISION_121.md)) |
 | `make dogfood` | Cupel grades itself: `cupel check --changed --gate` against `main`; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`. Both skip `tests.flaky` and `tests.mutation`, which would rerun Cupel's whole suite many times |
 | `make install` | `cargo install --path crates/cupel-cli` |
+| `make dist` | build the stripped release binary and package it as `target/dist/cupel-<version>-<target>.tar.gz` (`.zip` on Windows) with `LICENSE` and this README; `TARGET=<triple>` builds another target, the Linux musl targets through `cargo-zigbuild` with `zig` on PATH ([ADR-124](docs/adr/CUPEL_DECISION_124.md)) |
+| `make installers` | the tests of `dist/`'s installers against a fake release on a local HTTP server ([ADR-125](docs/adr/CUPEL_DECISION_125.md)); `make test` runs them too, skipping a test whose tool (ShellCheck, Ruby, Node, npm, Python) is missing |
 
 The generated README sections sit between `<!-- generated:NAME -->` and `<!-- end:NAME -->` markers. A test in `crates/cupel-cli/tests/readme.rs` renders them from the binary's `describe` output and fails when the committed text differs, so `make check` catches a stale table. Run `make readme` and review the diff.
 
-CI runs `make check` and `make parity` on Linux and macOS and `make dogfood` on every push: the tree gate on `main` and the changed gate on branches. Cupel's own `cupel.toml` is the example to copy.
+CI runs `make check` and `make parity` on Linux and macOS and `make dogfood` on every push: the tree gate on `main` and the changed gate on branches. It runs `make installers` on Linux and macOS images with only Rust, Node, Python, and ShellCheck added, and Homebrew's `brew style` on the rendered formula on macOS. A `v*` tag runs `.github/workflows/release.yml`, which builds each platform's archive with `make dist`, writes `SHA256SUMS`, and publishes the GitHub Release; the tag must be `v` followed by the crate version, and a manual run of the workflow builds and uploads the archives without releasing. Cupel's own `cupel.toml` is the example to copy.
 
 The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-mutate` is the mutation engine. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-serve` is the daemon's socket protocol, server, client, and file watcher, and the MCP server, generic over what they run. `cupel-cli` is the binary, and the daemon runs requests through the same code a cold invocation does. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
 
