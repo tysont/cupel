@@ -55,6 +55,20 @@ fn package(dir: &Path, target: &str, out: &Path) -> PathBuf {
     PathBuf::from(stdout(&output).trim())
 }
 
+/// An archive packaged for `target` into `out`, a directory in `dir`, which lives as long as this does.
+struct Packaged {
+    dir: TempDir,
+    out: PathBuf,
+    archive: PathBuf,
+}
+
+fn packaged(target: &str) -> Packaged {
+    let dir = TempDir::new().unwrap();
+    let out = dir.path().join("dist");
+    let archive = package(dir.path(), target, &out);
+    Packaged { dir, out, archive }
+}
+
 fn tar_entries(archive: &Path) -> Vec<String> {
     let output = Command::new("tar")
         .arg("-tzf")
@@ -100,9 +114,11 @@ fn version_rejects_a_tag_that_differs_from_the_crate_version() {
 
 #[test]
 fn package_writes_a_tarball_of_the_binary_license_and_readme() {
-    let dir = TempDir::new().unwrap();
-    let out = dir.path().join("dist");
-    let archive = package(dir.path(), "x86_64-unknown-linux-musl", &out);
+    let Packaged {
+        dir: _dir,
+        out,
+        archive,
+    } = packaged("x86_64-unknown-linux-musl");
     let top = format!("cupel-{VERSION}-x86_64-unknown-linux-musl");
     assert_eq!(archive, out.join(format!("{top}.tar.gz")));
     assert_eq!(
@@ -127,9 +143,11 @@ fn package_writes_a_tarball_of_the_binary_license_and_readme() {
 
 #[test]
 fn package_writes_a_zip_for_a_windows_target() {
-    let dir = TempDir::new().unwrap();
-    let out = dir.path().join("dist");
-    let archive = package(dir.path(), "x86_64-pc-windows-msvc", &out);
+    let Packaged {
+        dir: _dir,
+        out,
+        archive,
+    } = packaged("x86_64-pc-windows-msvc");
     assert_eq!(
         archive,
         out.join(format!("cupel-{VERSION}-x86_64-pc-windows-msvc.zip"))
@@ -169,9 +187,7 @@ fn verify_rejects_an_archive_without_the_license() {
 
 #[test]
 fn sums_lists_the_sha256_of_every_archive_by_name() {
-    let dir = TempDir::new().unwrap();
-    let out = dir.path().join("dist");
-    package(dir.path(), "x86_64-unknown-linux-musl", &out);
+    let Packaged { dir, out, .. } = packaged("x86_64-unknown-linux-musl");
     package(dir.path(), "aarch64-unknown-linux-musl", &out);
     let output = release(&["sums", out.to_str().unwrap()]);
     assert!(output.status.success(), "sums: {}", stderr(&output));
@@ -233,26 +249,40 @@ fn release_workflow_builds_the_design_targets() {
     );
 }
 
+/// Whether `action` (what follows `uses: `) names a 40-character commit with its release beside it,
+/// as in `actions/checkout@<sha> # v7.0.1`.
+fn is_pinned(action: &str) -> bool {
+    let Some((_, pin)) = action.split_once('@') else {
+        return false;
+    };
+    let Some((sha, release)) = pin.split_once(" # v") else {
+        return false;
+    };
+    sha.len() == 40 && sha.bytes().all(|b| b.is_ascii_hexdigit()) && release.split('.').count() == 3
+}
+
 /// Every action is pinned to a commit, with the release it is in a comment beside it.
 #[test]
 fn release_workflow_pins_every_action_to_a_commit() {
-    let unpinned: Vec<String> = release_workflow()
+    let workflow = release_workflow();
+    let actions: Vec<&str> = workflow
         .lines()
-        .filter_map(|line| {
-            line.split_once("uses: ")
-                .map(|(_, action)| action.to_owned())
-        })
-        .filter(|action| {
-            let Some((_, pin)) = action.split_once('@') else {
-                return true;
-            };
-            let Some((sha, release)) = pin.split_once(" # v") else {
-                return true;
-            };
-            sha.len() != 40
-                || !sha.bytes().all(|b| b.is_ascii_hexdigit())
-                || release.split('.').count() != 3
-        })
+        .filter_map(|line| line.split_once("uses: ").map(|(_, action)| action))
         .collect();
-    assert_eq!(unpinned, Vec::<String>::new());
+    let mut names: Vec<&str> = actions
+        .iter()
+        .filter_map(|action| action.split_once('@').map(|(name, _)| name))
+        .collect();
+    names.sort_unstable();
+    names.dedup();
+    assert_eq!(
+        names,
+        vec![
+            "actions/checkout",
+            "actions/download-artifact",
+            "actions/upload-artifact"
+        ]
+    );
+    let unpinned: Vec<&&str> = actions.iter().filter(|action| !is_pinned(action)).collect();
+    assert_eq!(unpinned, Vec::<&&str>::new());
 }
