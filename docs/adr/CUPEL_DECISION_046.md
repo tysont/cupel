@@ -1,6 +1,6 @@
 # CUPEL_DECISION_046: Baselines, `--against`, and how deltas are computed
 
-**Date:** 2026-10-13 · **Status:** accepted · **Phase:** P2.2
+**Date:** 2026-10-13 · **Status:** accepted; §5's "Nothing is ever re-run" narrowed for gate rules against `base` on a range by [130](CUPEL_DECISION_130.md) · **Phase:** P2.2
 
 ## Context
 

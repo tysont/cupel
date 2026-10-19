@@ -217,7 +217,7 @@ fn exit_1_when_the_gate_fails() {
         json!({
             "result": "fail", "evaluated": "gate.tree",
             "rules": [{"rule": "static.complexity.cyclomatic_max < 3", "actual": 3.0,
-                       "result": "fail"}]
+                       "bound": 3.0, "result": "fail", "reason": null}]
         })
     );
 }

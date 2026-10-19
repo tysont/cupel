@@ -1471,7 +1471,7 @@ ref = "v1.2.0"
 "static.deps.cycles" = "== 0"
 
 [gate.tree]                        # evaluated for whole-tree and --paths scopes
-"static.clones.pairs" = "<= 40"
+"static.clones.pairs" = "<= base"  # no more than the baseline run had
 
 [profile.loop]                     # cupel check --profile loop
 depth = "quick"
@@ -1508,7 +1508,7 @@ depth = "quick"
 | `tests.quality` | `setup_statements_min` | `3` | The fewest leading statements tests in one file must share to be test.duplicate-setup. |
 <!-- end:check-settings -->
 
-**Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the check table under Checks. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number; a number ending in `%` is divided by 100. A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, and any rule that does not pass fails the gate. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening`, `static.api-surface`, `meta.traceability`, or `meta.oracle-independence`, which need a range, is rejected when the config loads.
+**Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the check table under Checks. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number or against `base`; a number ending in `%` is divided by 100. `base` is the metric's value in the reference run, optionally with an offset in the metric's unit (`"<= base"`, `">= base - 0.02"`, `"< base + 3"`): the run `--against` names; otherwise, for `--changed` and `--base`, the base recomputed, by running the rule's checks over the base commit's versions of the changed files in a temporary copy; otherwise the `default` baseline (`cupel baseline set --write`). A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, as is a rule against `base` with no reference value (no baseline is set, or every changed file is new), and any rule that does not pass fails the gate. Each rule in `summary.gate` carries `actual`, the `bound` it was compared with, and for a skipped rule the `reason`. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening`, `static.api-surface`, `meta.traceability`, or `meta.oracle-independence`, which need a range, is rejected when the config loads.
 
 Cupel writes only under `.cupel/` (run records, the SQLite fact store, `cache/` with coverage reports and per-test maps, scratch space) unless `--write` is given. An install you allow (`--install`, or yes to the question) runs your package manager, which for the JavaScript launchers, uv, and poetry adds a dev dependency to `package.json` or `pyproject.toml` and its lockfile. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
 
@@ -1554,7 +1554,7 @@ Exit 2 is a mistake in your command line or `cupel.toml`; its finding names the 
 
 ## The gate
 
-`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`. `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
+`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`; `"static.clones.pairs" = "<= base"` compares with the baseline, or with a range's base. `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
 
 ## Depth
 

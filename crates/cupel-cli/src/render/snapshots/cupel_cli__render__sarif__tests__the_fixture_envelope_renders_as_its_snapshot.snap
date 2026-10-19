@@ -402,16 +402,22 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
             "rules": [
               {
                 "actual": 0.71,
+                "bound": 0.8,
+                "reason": null,
                 "result": "fail",
                 "rule": "tests.mutation.score >= 0.80"
               },
               {
                 "actual": 0.0,
+                "bound": 0.0,
+                "reason": null,
                 "result": "pass",
                 "rule": "tests.weakening none"
               },
               {
                 "actual": null,
+                "bound": null,
+                "reason": "`perf.bench` did not run to completion",
                 "result": "skipped",
                 "rule": "perf.bench.regression < 5%"
               }

@@ -65,7 +65,7 @@ cupel check: [1;31mfail[0m (exit 1)
 [1mgate      [0m[31mfail[0m (gate.changed)
   [31mfail[0m  tests.mutation.score >= 0.80  actual 0.71
   [32mpass[0m  tests.weakening none  actual 0
-  [33mskipped[0m  perf.bench.regression < 5%
+  [33mskipped[0m  perf.bench.regression < 5%  (`perf.bench` did not run to completion)
 
 [1msummary   [0m3 findings · fail 6 · warn 9 · info 22 · new 4 · resolved 2 · suppressed 1
 
