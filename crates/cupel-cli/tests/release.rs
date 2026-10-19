@@ -416,6 +416,25 @@ fn missing(lines: &[String], expected: Vec<String>) -> Vec<String> {
         .collect()
 }
 
+/// The release job stages the downloaded archives under `target/dist`, never the repository's `dist/`,
+/// which holds the installers (ADR-125): `gh release create dist/*` would try to upload `dist/homebrew`.
+#[test]
+fn the_release_job_stages_archives_outside_the_installers_directory() {
+    let jobs = jobs(&release_workflow());
+    let (_, lines) = jobs
+        .iter()
+        .find(|(name, _)| name == "release")
+        .expect("a `release` job");
+    let bare: Vec<&String> = lines
+        .iter()
+        .filter(|line| {
+            line.split(|c: char| c.is_whitespace() || c == ':' || c == '"' || c == '\'')
+                .any(|word| word == "dist" || word.starts_with("dist/"))
+        })
+        .collect();
+    assert_eq!(bare, Vec::<&String>::new());
+}
+
 /// The `secrets` job runs on a tag push after the release and turns each publishing secret into an
 /// output that says whether it is set, writing "skipped: secret X not set" when it is not.
 #[test]
