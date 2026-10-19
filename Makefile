@@ -81,3 +81,11 @@ dogfood:
 
 install:
 	$(CARGO) install --path crates/cupel-cli
+
+# The installers under dist/ (ADR-125) against a fake release on a local HTTP server: install.sh,
+# the Homebrew formula, the npm and pipx wrappers, and the cargo-binstall metadata. `make test` runs
+# them too, skipping a test whose tool (shellcheck, ruby, node, npm, python3) is missing;
+# INSTALLER_TESTS_REQUIRE_TOOLS=1, as CI sets it, makes a missing tool a failure.
+.PHONY: installers
+installers:
+	$(CARGO) test --package cupel-cli --test installers
