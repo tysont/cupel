@@ -1,0 +1,35 @@
+# CUPEL_DECISION_127: Schema URLs on GitHub Pages, and publishing the schemas from CI
+
+**Date:** 2026-10-19 · **Status:** accepted · **Phase:** P8.4
+
+## Context
+
+Every envelope's `cupel.schema` and every JSON Schema's `$id` start with `BASE_URL` in `crates/cupel-core/src/json_schema.rs` (re-exported from `schema.rs`), which was `https://cupel.dev/schema/v1/`, as design §7.1's sample envelope had it. The binary emits five top-level schemas, `run`, `finding`, `events`, `config`, and `plugin`, at `<base><name>.json` (`describe schema <name>`, and all five in `describe --all`), and one per fact kind at `<base>fact/<kind>.json` (`describe fact <kind>`; `FactKind::all()` lists the 29 kinds, ADR-123). Nothing serves any of them: `cupel.dev` has Cloudflare nameservers but no A record, and no one will set it up before the first release, so 0.1.0 would ship a `$id` and an envelope `schema` that 404. A `$id` is an identifier first, but these are written as URLs so a validator, an editor, or an agent can fetch the schema an envelope names, and design §6.5 lists them as the schema URLs `describe` reports. GitHub Pages for this repository is enabled with `build_type: workflow` and serves `https://tysont.github.io/cupel/`. The owner's ruling: if `cupel.dev` will not serve the schemas on day one, switch to the Pages path for this repository, publish the schemas there from CI, and do not ship 0.1.0 with a URL that 404s.
+
+The questions: which base the binary emits, how the set of published files is produced without a hand-written list, and how CI publishes it.
+
+## Options
+
+**Keep `cupel.dev` and set the domain up now.** The URL is short and owned, and a later host move would not touch the binary. But it needs a host, DNS records, and someone to run them before the release, which the owner has ruled out; until then every envelope names a URL that 404s.
+
+**GitHub Pages for this repository, `https://tysont.github.io/cupel/schema/v1/`.** Free, already enabled, deployed by a workflow from `main` with no secrets beyond the workflow's own `id-token`, and served as `application/json`. The URL names the owner's account and the repository, so a rename of either moves it, and it is longer. Keeping the `/schema/v1/` path means a later move to `cupel.dev` (Pages can serve a custom domain) is a change of origin alone.
+
+**A relative or unversioned `$id` (`schema/v1/run.json`, or `urn:cupel:schema:run:v1`).** Nothing to host, and nothing that 404s. But a relative `$id` is resolved against wherever the document was read from, which for an envelope on stdout is nothing, and a URN cannot be fetched, so an agent holding an envelope has no way from it to its schema except `cupel describe`.
+
+**`raw.githubusercontent.com` URLs of checked-in schema files.** No workflow, but the schemas would have to be generated and committed (and kept current by a staleness test), the URL names a branch whose content changes under a fixed `v1` name, and raw serves `text/plain` under rate limits not meant for this.
+
+## Decision
+
+1. **`BASE_URL` is `https://tysont.github.io/cupel/schema/v1/`.** Every `$id`, `describe`'s schema URLs, and every envelope's `cupel.schema` change with it; nothing else in the output changes. The README's sample envelope and design §6.5 and §7.1 name the Pages base.
+2. **`scripts/schemas.sh BINARY OUTDIR`** writes the site: each top-level schema from `BINARY describe --all` (its `schemas[].schema`) and each fact kind's schema from `BINARY describe fact <kind>` for every kind in the `valid` list of the usage error `describe fact` with no kind returns (exit 2), so the set comes from the binary, never a hand list. Each document lands at the path its `$id` names under `https://tysont.github.io/cupel/` (`schema/v1/run.json`, `schema/v1/fact/symbols.json`, …), pretty-printed by `jq`, and `index.html` at the root links them all so the site's root is not a 404. A `$id` outside the site fails the script (exit 1) naming it; `OUTDIR` must not exist. A script rather than a `describe` option because it drives existing subjects without adding a flag the registry, the README's flag tables, and the MCP tool schemas would all carry; it needs `jq`, which the GitHub runners have.
+3. **`.github/workflows/pages.yml`**: on a push to `main` and on `workflow_dispatch`, a `build` job checks out, installs the pinned toolchain, builds `cupel-cli`, runs `scripts/schemas.sh target/debug/cupel _site`, and uploads `_site` with `actions/upload-pages-artifact`; a `deploy` job with `pages: write`, `id-token: write`, and the `github-pages` environment deploys it with `actions/deploy-pages`, only when `github.ref` is `refs/heads/main`, so a dispatch on another branch builds the site and never deploys it. Deployments queue rather than cancel (`concurrency: pages`). Actions are pinned to commits with their release in a comment, as in `release.yml`: `actions/checkout` v7.0.1, `actions/upload-pages-artifact` v5.0.0, `actions/deploy-pages` v5.0.1.
+4. **Tests.** `crates/cupel-cli/tests/pages.rs` runs the script on the built binary and walks every `$id` in `describe --all` and in `describe fact <kind>` for every `FactKind::all()` kind: each lies under the site, maps to a file the script wrote, and that file's `$id` is the URL it is served at; the site holds exactly those files and `index.html`, which links each one; a missing argument is a usage error and a foreign `$id` fails. `release.rs` holds `pages.yml` to the pin rule and checks that it deploys `main` only, with the environment and permissions above.
+
+## Consequences
+
+- The 0.1.0 envelopes and schemas carry the Pages URL for good: an envelope stored by a consumer names `https://tysont.github.io/cupel/schema/v1/run.json` however Cupel is hosted later, so that URL must keep serving the v1 schemas for as long as v1 envelopes exist.
+- A later move to `cupel.dev` changes `BASE_URL`'s origin and the script's `site`, regenerates every golden (the URL is their only change, as in this step), and needs the old Pages URLs kept serving, either by keeping this workflow or by redirecting; Pages with a custom domain redirects the `github.io` URLs to it, which covers both.
+- The published schemas are those of `main`'s tip, not of a release: a schema change merged after a release is served under the same `v1` URL before the release that carries it. `v1` names the envelope contract (design §7), whose changes are additive within a major version, so this is the intended reading; a breaking change takes `v2` and a new path beside `v1`.
+- Renaming the repository or the owner's account moves the URL, and the old Pages URL stops serving; either rename needs the custom-domain move above first.
+- Nothing here runs before the push to `main`: the integrator verifies with `gh run watch` on the `pages` run and then `curl -sSf https://tysont.github.io/cupel/schema/v1/run.json | jq '.["$id"]'`.
+- The script reads the fact kinds from `describe fact`'s usage error; a change to that error's `evidence.valid` breaks the script, and `pages.rs` fails in `make check` when it does.
