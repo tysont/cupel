@@ -14,7 +14,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use cupel_core::config::Config;
 use cupel_core::git::{Change, ChangeKind};
-use cupel_core::syntax::{Decisions, Symbols};
+use cupel_core::matching::Matched;
+use cupel_core::syntax::{Decisions, NormNode, NormTree, NormalizedSymbol, SymbolKey, Symbols};
 use cupel_core::{
     Action, ActionKind, Availability, BaseTree, Check, CheckCtx, CheckId, CheckRegistry,
     CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence, Fact, FactKind,
@@ -1066,6 +1067,85 @@ fn under_a_range_a_check_reads_both_sides_and_the_range() {
         2,
         "once per side"
     );
+}
+
+/// One normalized tree per file in scope, keyed as `symbols_of` keys its symbols: the same
+/// twenty statements for `gone.x` and `b.x`, `b.x` with one more (a move with an edit), and
+/// another tree for `a.x`, the same on both sides.
+fn trees_of(scope: &Scope) -> NormTree {
+    let statement = |n: usize| {
+        NormNode::new(
+            if n % 2 == 0 { "call" } else { "binary" },
+            vec![
+                NormNode::new("arguments", vec![NormNode::leaf("$id"); n % 3 + 1]),
+                NormNode::leaf(if n % 3 == 0 { "+" } else { "<" }),
+            ],
+        )
+    };
+    let tree = |file: &str| {
+        let (first, count) = match file {
+            "a.x" => (100, 20),
+            "b.x" => (0, 21),
+            _ => (0, 20),
+        };
+        NormNode::new("block", (first..first + count).map(statement).collect())
+    };
+    NormTree {
+        symbols: scope
+            .files
+            .iter()
+            .map(|file| {
+                let root = tree(file);
+                let digest = blake3::hash(serde_json::to_string(&root).unwrap().as_bytes());
+                NormalizedSymbol {
+                    symbol: SymbolKey {
+                        file: file.clone(),
+                        line: 1,
+                        col: 1,
+                    },
+                    hash: format!("sh_{}", &digest.to_hex()[..16]).parse().unwrap(),
+                    root,
+                }
+            })
+            .collect(),
+    }
+}
+
+/// A world whose rust producers also make `NormTree`s.
+fn world_with_trees(checks: Vec<Box<dyn Check>>) -> World {
+    let mut world = World::new(checks, "");
+    world.producers.register::<NormTree, _>(Counting {
+        langs: vec!["rust"],
+        count: Arc::new(AtomicUsize::new(0)),
+        make: trees_of,
+    });
+    world
+}
+
+#[test]
+fn under_a_range_the_symbols_the_range_removed_and_added_are_matched() {
+    let world = world_with_trees(vec![check("t.ok", &[FactKind::Symbols], ok)]);
+    let root = world.root().to_path_buf();
+    let (outcome, _) = world.run(&["go", "rust"], |job| {
+        job.base = Some(base_tree(&root));
+    });
+    let matches = outcome.unwrap().matches;
+    let names: Vec<(Vec<String>, Vec<String>)> = matches
+        .iter()
+        .map(|found| {
+            let displays =
+                |side: &[Matched]| side.iter().map(|m| m.symbol.display.clone()).collect();
+            (displays(&found.base), displays(&found.head))
+        })
+        .collect();
+    assert_eq!(names, [(vec!["gone".to_owned()], vec!["b".to_owned()])]);
+}
+
+#[test]
+fn without_a_range_nothing_is_matched() {
+    let world = world_with_trees(vec![check("t.ok", &[FactKind::Symbols], ok)]);
+    let (outcome, _) = world.run(&["rust"], |_| {});
+    assert_eq!(outcome.unwrap().matches, Vec::new());
 }
 
 /// Fails as a check whose producer could not run does.

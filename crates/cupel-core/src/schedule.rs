@@ -19,6 +19,7 @@ use crate::grade::CostClass;
 use crate::id::{LangId, RunId};
 use crate::joint::Deciding;
 use crate::lang::Lang;
+use crate::matching::{self, SymbolMatch};
 use crate::matrix::{Support, SupportMatrix};
 use crate::mutation::MutationOutcomes;
 use crate::oracle::RunOracle;
@@ -95,6 +96,9 @@ pub struct Outcome {
     pub refused: Option<Unevaluable>,
     /// How long each production and check run took, for the store's history (ADR-086 §2).
     pub durations: Vec<TaskDuration>,
+    /// Under a range, the symbols the range removed matched to those it added, per language
+    /// (ADR-131); empty without a range.
+    pub matches: Vec<SymbolMatch>,
 }
 
 /// The scheduler's fact store opened for a verb that reads facts itself rather than running
@@ -175,6 +179,7 @@ impl Scheduler<'_> {
             });
         }
         let (checks, mut findings, measurements) = execution.run_checks(&prepared, sink);
+        let matches = execution.matches();
         let Execution {
             store,
             interrupted,
@@ -196,6 +201,7 @@ impl Scheduler<'_> {
             mutation_outcomes: store.mutation_outcomes,
             refused: None,
             durations,
+            matches,
         })
     }
 
@@ -253,6 +259,7 @@ impl Scheduler<'_> {
             mutation_outcomes: Vec::new(),
             refused: None,
             durations: Vec::new(),
+            matches: Vec::new(),
         })
     }
 
@@ -448,6 +455,28 @@ impl<'a, 'j> Execution<'a, 'j> {
         (checks, findings, measurements)
     }
 
+    /// Under a range, each language's matches between the symbols the range removed and those
+    /// it added (ADR-131), from both sides' `Symbols` and `NormTree`; none for a language where
+    /// a side lacks either. Base-side producer findings describe replaced code: dropped.
+    fn matches(&mut self) -> Vec<SymbolMatch> {
+        let Some(base) = &mut self.base else {
+            return Vec::new();
+        };
+        let mut matches = Vec::new();
+        for lang in &self.job.langs {
+            let (Some(before), Some(after)) = (
+                symbol_trees(base, lang, &mut Vec::new()),
+                symbol_trees(&mut self.store, lang, &mut Vec::new()),
+            ) else {
+                continue;
+            };
+            if let (Some(before), Some(after)) = (candidates(&before), candidates(&after)) {
+                matches.extend(matching::across(&before, &after));
+            }
+        }
+        matches
+    }
+
     /// The baseline test run (ADR-076 §5): `TestResults` for every language a task's needs reach
     /// it in, before any check runs. The first red suite refuses the run; any other failure is
     /// left to the checks that need the fact.
@@ -609,6 +638,25 @@ impl<'a, 'j> Execution<'a, 'j> {
         }
         Ok(facts)
     }
+}
+
+/// `lang`'s `Symbols` and `NormTree` from `store`, when it can make both.
+fn symbol_trees(
+    store: &mut FactStore<'_>,
+    lang: &Lang,
+    sink: &mut dyn EventSink,
+) -> Option<(SharedFact, SharedFact)> {
+    let symbols = store.ensure(FactKind::Symbols, lang, sink).ok()?;
+    let trees = store.ensure(FactKind::NormTree, lang, sink).ok()?;
+    Some((symbols, trees))
+}
+
+/// The symbols of a `(Symbols, NormTree)` pair, joined for matching.
+fn candidates((symbols, trees): &(SharedFact, SharedFact)) -> Option<Vec<matching::Candidate<'_>>> {
+    Some(matching::candidates(
+        symbols.downcast_ref::<Symbols>()?,
+        trees.downcast_ref::<NormTree>()?,
+    ))
 }
 
 /// Whether producing `needs` for `lang` reaches `TestResults`, through any producer's needs.
