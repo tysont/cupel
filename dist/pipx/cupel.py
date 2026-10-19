@@ -2,6 +2,8 @@
 # ABOUTME: first run, checks it against the release's SHA256SUMS, caches it, and runs it with the caller's arguments.
 """Verification suite that grades what a coding agent produced. Runs the cupel release binary for this platform."""
 
+from __future__ import annotations
+
 import hashlib
 import io
 import os
@@ -21,7 +23,7 @@ RELEASES = "https://github.com/tysont/cupel/releases"
 
 # Each release target's triple and archive format, by `<os>-<arch>` in Rust's spelling, as
 # dist/targets.toml lists them.
-TARGETS = {
+TARGETS: dict[str, list[str]] = {
     "linux-x86_64": ["x86_64-unknown-linux-musl", "tar.gz"],
     "linux-aarch64": ["aarch64-unknown-linux-musl", "tar.gz"],
     "macos-x86_64": ["x86_64-apple-darwin", "tar.gz"],
@@ -37,7 +39,7 @@ class InstallError(Exception):
     """The release binary could not be downloaded or checked."""
 
 
-def target():
+def target() -> list[str]:
     system, machine = platform.system(), platform.machine()
     found = TARGETS.get(f"{OS.get(system)}-{ARCH.get(machine)}")
     if found is None:
@@ -45,7 +47,7 @@ def target():
     return found
 
 
-def cache_dir():
+def cache_dir() -> str:
     """Where downloaded binaries are kept: CUPEL_CACHE_DIR, else the user's cache directory."""
     if os.environ.get("CUPEL_CACHE_DIR"):
         return os.environ["CUPEL_CACHE_DIR"]
@@ -54,17 +56,18 @@ def cache_dir():
     return os.path.join(os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache")), "cupel")
 
 
-def download(url):
+def download(url: str) -> bytes:
     try:
         with urllib.request.urlopen(url) as response:
-            return response.read()
+            body: bytes = response.read()
+            return body
     except urllib.error.HTTPError as error:
         raise InstallError(f"could not download {url}: HTTP {error.code}") from error
     except urllib.error.URLError as error:
         raise InstallError(f"could not download {url}: {error.reason}") from error
 
 
-def listed_digest(sums, archive):
+def listed_digest(sums: str, archive: str) -> str:
     """The digest SHA256SUMS gives `archive`, in hex."""
     for line in sums.splitlines():
         fields = line.split()
@@ -73,7 +76,7 @@ def listed_digest(sums, archive):
     raise InstallError(f"SHA256SUMS lists no {archive}")
 
 
-def extract(data, archive_format, into):
+def extract(data: bytes, archive_format: str, into: str) -> None:
     if archive_format == "zip":
         with zipfile.ZipFile(io.BytesIO(data)) as archive:
             archive.extractall(into)
@@ -85,8 +88,8 @@ def extract(data, archive_format, into):
             archive.extractall(into)
 
 
-def install(binary, triple, archive_format):
-    """Downloads the release archive for `triple`, checks it, and moves its binary to `binary`."""
+def install(path: str, triple: str, archive_format: str) -> None:
+    """Downloads the release archive for `triple`, checks it, and moves its binary to `path`."""
     base = f"{os.environ.get('CUPEL_DOWNLOAD_URL') or RELEASES}/download/v{__version__}"
     archive = f"cupel-{__version__}-{triple}.{archive_format}"
     listed = listed_digest(download(f"{base}/SHA256SUMS").decode("utf-8"), archive)
@@ -95,12 +98,12 @@ def install(binary, triple, archive_format):
     actual = hashlib.sha256(data).hexdigest()
     if actual != listed:
         raise InstallError(f"checksum mismatch for {archive}: SHA256SUMS has {listed}, the download is {actual}")
-    with tempfile.TemporaryDirectory(prefix=".download-", dir=os.path.dirname(binary)) as staging:
+    with tempfile.TemporaryDirectory(prefix=".download-", dir=os.path.dirname(path)) as staging:
         extract(data, archive_format, staging)
-        os.replace(os.path.join(staging, f"cupel-{__version__}-{triple}", os.path.basename(binary)), binary)
+        os.replace(os.path.join(staging, f"cupel-{__version__}-{triple}", os.path.basename(path)), path)
 
 
-def binary():
+def binary() -> str:
     """The cached release binary, downloaded first if it is not there."""
     triple, archive_format = target()
     name = "cupel.exe" if os.name == "nt" else "cupel"
@@ -111,7 +114,7 @@ def binary():
     return path
 
 
-def main():
+def main() -> None:
     try:
         path = binary()
     except (InstallError, OSError) as error:

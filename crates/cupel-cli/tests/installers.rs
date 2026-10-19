@@ -341,38 +341,50 @@ fn binstall_render(value: &str, repository: &str, target: &Target) -> String {
         .replace("{ binary-ext }", target.exe())
 }
 
+/// The repository URL the workspace manifest declares, which binstall's `{ repo }` names.
+fn repository() -> String {
+    let workspace = read_toml("Cargo.toml");
+    workspace["workspace"]["package"]["repository"]
+        .as_str()
+        .unwrap()
+        .to_string()
+}
+
+/// binstall's `pkg-url`, `bin-dir`, and `pkg-fmt` for `target`, rendered.
+fn binstall_rendered(target: &Target, repository: &str) -> [String; 3] {
+    let manifest = read_toml("crates/cupel-cli/Cargo.toml");
+    let binstall = &manifest["package"]["metadata"]["binstall"];
+    let render = |key| binstall_render(&binstall_value(binstall, target, key), repository, target);
+    [render("pkg-url"), render("bin-dir"), render("pkg-fmt")]
+}
+
+/// Where dist/targets.toml says `target`'s archive is published, the binary's path in it, and
+/// binstall's name for its format.
+fn published(targets: &Targets, target: &Target, repository: &str) -> [String; 3] {
+    let format = if target.format == "zip" { "zip" } else { "tgz" };
+    [
+        format!(
+            "{repository}/releases/download/v{VERSION}/{}",
+            targets.archive(VERSION, target)
+        ),
+        format!("{}/cupel{}", targets.dir(target), target.exe()),
+        format.to_string(),
+    ]
+}
+
 #[test]
 fn binstall_metadata_names_each_targets_archive_and_binary() {
     let targets = Targets::read();
-    let workspace = read_toml("Cargo.toml");
-    let repository = workspace["workspace"]["package"]["repository"]
-        .as_str()
-        .unwrap();
-    let manifest = read_toml("crates/cupel-cli/Cargo.toml");
-    let binstall = &manifest["package"]["metadata"]["binstall"];
+    let repository = repository();
     let rendered: Vec<[String; 3]> = targets
         .all
         .iter()
-        .map(|target| {
-            let render =
-                |key| binstall_render(&binstall_value(binstall, target, key), repository, target);
-            [render("pkg-url"), render("bin-dir"), render("pkg-fmt")]
-        })
+        .map(|target| binstall_rendered(target, &repository))
         .collect();
     let expected: Vec<[String; 3]> = targets
         .all
         .iter()
-        .map(|target| {
-            let format = if target.format == "zip" { "zip" } else { "tgz" };
-            [
-                format!(
-                    "{repository}/releases/download/v{VERSION}/{}",
-                    targets.archive(VERSION, target)
-                ),
-                format!("{}/cupel{}", targets.dir(target), target.exe()),
-                format.to_string(),
-            ]
-        })
+        .map(|target| published(&targets, target, &repository))
         .collect();
     assert_eq!(rendered, expected);
 }
@@ -526,24 +538,22 @@ fn install_on(system: &str, machine: &str) -> Outcome {
 fn the_install_script_downloads_each_unix_targets_archive() {
     let targets = Targets::read();
     let url = &release().url;
-    let downloads: Vec<String> = targets
-        .unix()
-        .map(|target| {
-            let (system, machine) = target.uname();
-            let stderr = install_on(system, machine).stderr;
-            stderr.lines().next().unwrap_or_default().to_string()
-        })
-        .collect();
+    let downloads: Vec<String> = targets.unix().map(first_download).collect();
     let expected: Vec<String> = targets
         .unix()
         .map(|target| {
-            format!(
-                "cupel install: downloading {url}/latest/download/{}",
-                targets.archive(VERSION, target)
-            )
+            let archive = targets.archive(VERSION, target);
+            format!("cupel install: downloading {url}/latest/download/{archive}")
         })
         .collect();
     assert_eq!(downloads, expected);
+}
+
+/// The first line install.sh writes to stderr on `target`, which names the download.
+fn first_download(target: &Target) -> String {
+    let (system, machine) = target.uname();
+    let stderr = install_on(system, machine).stderr;
+    stderr.lines().next().unwrap_or_default().to_string()
 }
 
 #[test]
@@ -636,17 +646,23 @@ fn the_rendered_formula_is_ruby() {
     assert_eq!(outcome.stdout, "Syntax OK\n");
 }
 
-#[test]
-fn the_formula_is_not_rendered_from_sha256sums_missing_a_target() {
-    let dir = TempDir::new().unwrap();
-    let sums = dir.path().join("SHA256SUMS");
+/// The fixture SHA256SUMS without `triple`'s line, written into `dir`; its path.
+fn sums_without(dir: &Path, triple: &str) -> PathBuf {
+    let sums = dir.join("SHA256SUMS");
     let all = fs::read_to_string(fixture_sums()).unwrap();
     let partial: String = all
         .lines()
-        .filter(|line| !line.contains("aarch64-apple-darwin"))
+        .filter(|line| !line.contains(triple))
         .flat_map(|line| [line, "\n"])
         .collect();
     fs::write(&sums, partial).unwrap();
+    sums
+}
+
+#[test]
+fn the_formula_is_not_rendered_from_sha256sums_missing_a_target() {
+    let dir = TempDir::new().unwrap();
+    let sums = sums_without(dir.path(), "aarch64-apple-darwin");
     let outcome = render_formula(&sums);
     assert_eq!(
         (outcome.code, outcome.stdout, outcome.stderr),
