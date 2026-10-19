@@ -104,16 +104,10 @@ fn exits(args: &[&str], code: i32) -> (Repo, support::Outcome) {
 }
 
 #[test]
-fn a_dry_run_of_a_pending_command_is_still_not_implemented_and_writes_nothing() {
-    let (repo, outcome) = exits(&["describe", "--agent", "--dry-run"], 2);
-    assert_eq!(outcome.finding()["kind"], json!("cli.not-implemented"));
-    assert!(repo.tree().is_empty(), "{:?}", repo.tree());
-}
-
-#[test]
-fn a_dry_run_still_validates_its_command() {
-    let (_repo, outcome) = exits(&["describe", "nonsense", "--dry-run"], 2);
+fn a_dry_run_still_validates_its_command_and_writes_nothing() {
+    let (repo, outcome) = exits(&["describe", "nonsense", "--dry-run"], 2);
     assert_eq!(outcome.finding()["kind"], json!("cli.usage"));
+    assert!(repo.tree().is_empty(), "{:?}", repo.tree());
 }
 
 // ---------------------------------------------------------------- events

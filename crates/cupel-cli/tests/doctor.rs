@@ -76,7 +76,10 @@ fn an_unsatisfied_required_version_exits_3_asking_to_install_cupel() {
         "doctor.version-unsatisfied",
     );
     assert_eq!(finding["action"]["kind"], json!("install_tool"));
-    assert_eq!(finding["evidence"], json!({"required": ">=99.0"}));
+    assert_eq!(
+        finding["evidence"],
+        json!({"required": ">=99.0", "actual": env!("CARGO_PKG_VERSION")})
+    );
     assert_eq!(
         finding["id"],
         doctor_id("doctor.version-unsatisfied", "required_version")

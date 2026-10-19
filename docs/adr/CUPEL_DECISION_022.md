@@ -1,6 +1,6 @@
 # CUPEL_DECISION_022: What `doctor` checks, how it reports, and when it exits 3
 
-**Date:** 2026-10-10 · **Status:** accepted; §6 (`--fix`) superseded by [081](CUPEL_DECISION_081.md) · **Phase:** P0.8
+**Date:** 2026-10-10 · **Status:** accepted; §6 (`--fix`) superseded by [081](CUPEL_DECISION_081.md); §1's evidence and doctor-only check superseded by [126](CUPEL_DECISION_126.md) · **Phase:** P0.8
 
 ## Context
 

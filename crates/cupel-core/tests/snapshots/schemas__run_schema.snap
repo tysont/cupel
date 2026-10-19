@@ -193,6 +193,18 @@ expression: pretty(&schema)
         }
       ]
     },
+    "AgentDescription": {
+      "description": "The agent guide: Markdown for `CLAUDE.md` or `AGENTS.md`, which `--format text` prints as is.",
+      "type": "object",
+      "properties": {
+        "markdown": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "markdown"
+      ]
+    },
     "AllDescription": {
       "description": "Everything `describe` knows, in one document.",
       "type": "object",
@@ -853,6 +865,20 @@ expression: pretty(&schema)
             }
           },
           "$ref": "#/$defs/FindingDescription",
+          "required": [
+            "subject"
+          ]
+        },
+        {
+          "description": "`cupel describe --agent`: the guide an agent harness pastes into its instructions.",
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "const": "agent"
+            }
+          },
+          "$ref": "#/$defs/AgentDescription",
           "required": [
             "subject"
           ]

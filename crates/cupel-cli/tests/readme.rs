@@ -1,14 +1,12 @@
-// ABOUTME: Keeps the README's generated sections (exit codes, check table, support matrix, check settings, MCP
-// ABOUTME: tools) equal to the binary's `describe` and `serve --mcp` output; `make readme` rewrites them (ADR-073).
+// ABOUTME: Keeps the README's generated sections (verbs, global flags, exit codes, checks, matrix, settings, MCP tools,
+// ABOUTME: agent guide) equal to the binary's `describe` and `serve --mcp` output; `make readme` rewrites them (ADR-073).
 
 mod support;
 
-use std::io::Write;
 use std::path::PathBuf;
-use std::process::Stdio;
 
 use serde_json::Value;
-use support::described;
+use support::{described, listed_tools};
 
 /// The command that rewrites the generated sections; failures name it.
 const UPDATE_COMMAND: &str = "make readme";
@@ -203,36 +201,6 @@ fn exit_codes(cli: &Value) -> String {
     markdown_table(&owned(&["Code", "Name", "Meaning"]), &rows)
 }
 
-/// The tools `cupel serve --mcp` lists, asked over its stdin (ADR-121).
-fn listed_tools() -> Vec<Value> {
-    let dir = tempfile::tempdir().expect("temporary directory");
-    let mut command = std::process::Command::new(assert_cmd::cargo::cargo_bin("cupel"));
-    for (key, _) in std::env::vars() {
-        if key.starts_with("CUPEL_") {
-            command.env_remove(key);
-        }
-    }
-    let mut server = command
-        .args(["serve", "--mcp", "--quiet"])
-        .current_dir(dir.path())
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .spawn()
-        .expect("cupel serve --mcp starts");
-    let mut input = server.stdin.take().expect("stdin is piped");
-    writeln!(input, r#"{{"jsonrpc":"2.0","id":1,"method":"tools/list"}}"#).expect("it reads");
-    drop(input);
-    let output = server.wait_with_output().expect("it answers and exits");
-    let stdout = String::from_utf8(output.stdout).expect("UTF-8");
-    let response: Value = serde_json::from_str(stdout.lines().next().expect("a response"))
-        .expect("a JSON-RPC response");
-    response["result"]["tools"]
-        .as_array()
-        .expect("tools")
-        .clone()
-}
-
 /// One row per MCP tool: its name, the command it runs, and its description.
 fn mcp_tools(tools: &[Value]) -> String {
     let rows: Vec<Vec<String>> = tools
@@ -249,13 +217,77 @@ fn mcp_tools(tools: &[Value]) -> String {
     markdown_table(&owned(&["Tool", "Runs", "What it does"]), &rows)
 }
 
+/// One row per verb: its name and summary.
+fn verbs(cli: &Value) -> String {
+    let rows: Vec<Vec<String>> = cli["verbs"]
+        .as_array()
+        .expect("verbs")
+        .iter()
+        .map(|verb| {
+            vec![
+                format!("`cupel {}`", verb["name"].as_str().expect("name")),
+                verb["summary"].as_str().expect("summary").to_owned(),
+            ]
+        })
+        .collect();
+    markdown_table(&owned(&["Verb", "Does"]), &rows)
+}
+
+/// A table cell's text with its pipes escaped.
+fn cell(text: &str) -> String {
+    text.replace('|', "\\|")
+}
+
+/// One row per global flag: how it is spelled with its value, its default, the variable that
+/// also sets it, and what it does.
+fn global_flags(cli: &Value) -> String {
+    let rows: Vec<Vec<String>> = cli["global_flags"]
+        .as_array()
+        .expect("global flags")
+        .iter()
+        .map(|flag| {
+            let name = flag["name"].as_str().expect("name");
+            let values = strings(&flag["values"]);
+            let spelled = match (values.is_empty(), flag["value_name"].as_str()) {
+                (false, _) => format!("{name} {}", values.join("|")),
+                (true, Some(value)) => format!("{name} {value}"),
+                (true, None) => name.to_owned(),
+            };
+            let code = |value: &Value| {
+                value
+                    .as_str()
+                    .map_or_else(|| "—".to_owned(), |text| format!("`{text}`"))
+            };
+            vec![
+                cell(&format!("`{spelled}`")),
+                code(&flag["default"]),
+                code(&flag["env"]),
+                cell(flag["summary"].as_str().expect("summary")),
+            ]
+        })
+        .collect();
+    markdown_table(&owned(&["Flag", "Default", "Variable", "Meaning"]), &rows)
+}
+
+/// The guide `cupel describe --agent` prints, fenced so its headings stay inside the block.
+fn agent_guide() -> String {
+    let outcome = support::run(["describe", "--agent", "--format", "text"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    assert!(!outcome.stdout.contains("```"), "the guide holds no fence");
+    format!("```markdown\n{}```\n", outcome.stdout)
+}
+
 /// Each generated section's name and body, rendered from the binary's `describe` output and
 /// the tools its MCP server lists.
-fn generated() -> [(&'static str, String); 5] {
+fn generated() -> [(&'static str, String); 8] {
+    let cli = described(&[]);
     let matrix = described(&["matrix"]);
     let manifests = manifests(&matrix);
     [
-        ("exit-codes", exit_codes(&described(&[]))),
+        ("verbs", verbs(&cli)),
+        ("global-flags", global_flags(&cli)),
+        ("agent-guide", agent_guide()),
+        ("exit-codes", exit_codes(&cli)),
         ("check-table", check_table(&matrix, &manifests)),
         ("support-matrix", support_matrix(&matrix)),
         ("check-settings", check_settings(&manifests)),

@@ -73,6 +73,22 @@ Every command exits with one of these codes, and the envelope's `exit_code` alwa
 
 Every verb takes the same global flags (below) and writes the same envelope. Run any verb with `--describe` to see its flags instead of running it.
 
+<!-- generated:verbs -->
+| Verb | Does |
+| --- | --- |
+| `cupel init` | Detect project roots, languages, and test, coverage, and bench commands; write cupel.toml. |
+| `cupel doctor` | Verify the binary's version, the configuration, .cupel/ write access, and needed tools. |
+| `cupel describe` | Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema. |
+| `cupel check` | Run checks over a scope at a depth and evaluate the gate. |
+| `cupel survey` | Rank a whole tree without a baseline or gate: the worst targets per metric. |
+| `cupel explain` | Give full context and remediation for one finding or check result. |
+| `cupel baseline` | Set, show, diff, export, or import the baseline runs are compared with. |
+| `cupel oracle` | Add, list, remove, or verify the oracles differential checks compare with. |
+| `cupel tests` | List the tests a scope impacts, why, and the command that runs them. |
+| `cupel suppress` | Suppress a finding, with a reason and an optional expiry. |
+| `cupel serve` | Run the daemon that answers this repository's invocations with warm caches, or stop it. |
+<!-- end:verbs -->
+
 ### `cupel init`
 
 `init` detects project roots and languages and chooses test, coverage, and bench commands for each. It understands Cargo crates and workspaces, Go modules and workspaces, npm, pnpm, and yarn packages and workspaces (TypeScript when `tsconfig.json` is present), and Python projects (`pyproject.toml`, `setup.cfg`, `requirements.txt`).
@@ -85,7 +101,7 @@ cupel init --write --force   # replace an existing cupel.toml
 
 ### `cupel doctor`
 
-`doctor` verifies the binary against `required_version`, the validity of `cupel.toml`, and write access to `.cupel/`. For every tool a configured check needs through its facts (a test runner, for a check that needs test results; a coverage tool, for a language with a `coverage` command), it checks the tool is on `PATH` and reports its version under `run.toolchain`; a `[lang.<id>] runner` that names no runner is a finding listing the valid ones. Every problem is a finding with a `configure` or `install_tool` action. Exit 3 means something required is missing.
+`doctor` verifies the binary against `required_version` (see [Configuration](#configuration); the other verbs refuse to run outside it), the validity of `cupel.toml`, and write access to `.cupel/`. For every tool a configured check needs through its facts (a test runner, for a check that needs test results; a coverage tool, for a language with a `coverage` command), it checks the tool is on `PATH` and reports its version under `run.toolchain`; a `[lang.<id>] runner` that names no runner is a finding listing the valid ones. Every problem is a finding with a `configure` or `install_tool` action. Exit 3 means something required is missing.
 
 A missing tool's finding names the command that installs it, or, for a language toolchain Cupel does not install (`cargo`, `go`, `python3`), what to do by hand. `--fix` runs those commands:
 
@@ -632,21 +648,31 @@ The tools, from the server's own `tools/list`:
 
 ### Global flags
 
-| Flag | Meaning |
-|---|---|
-| `--format json\|jsonl\|text\|sarif` | JSON when stdout is not a terminal, text when it is; `CUPEL_FORMAT` also sets it |
-| `--dry-run` | Preview what would run or be written; change nothing |
-| `--describe` | Describe the verb instead of running it |
-| `--config PATH`, `--profile NAME` | Use this `cupel.toml`, or apply `[profile.NAME]` from it |
-| `--cwd PATH` | The repository root; Cupel never relies on the shell's working directory |
-| `--events PATH\|stderr` | Stream progress as JSON lines; stdout stays reserved for the envelope |
-| `--timeout DURATION` | Stop after this long with partial results and exit 5 |
-| `--seed N` | Recorded in the envelope; random by default. Flake reruns, mutation runs, and property tests take it |
-| `--limit N`, `--offset N` | Page findings; the envelope always carries `truncated` and `total_findings` |
-| `--install`, `--no-install` | Install missing tools without asking, or never; without either, Cupel asks when stdout is a terminal and installs nothing otherwise (`doctor --fix`, `check`, `survey`) |
-| `--write` | Permit writes outside `.cupel/`; installing a tool is governed by `--install` instead |
-| `--no-path-plugins` | Load no `cupel-check-*` or `cupel-produce-*` plugin from `PATH`; `[plugins]` still loads (see [Plugins](#plugins)) |
-| `--quiet`, `--verbose`, `--no-color` | Diagnostics on stderr only; stdout's shape never changes |
+Every verb takes these. A flag's variable sets it too, below the flag and above `cupel.toml` (see [Configuration](#configuration)); `--no-path-plugins` is described under [Plugins](#plugins).
+
+<!-- generated:global-flags -->
+| Flag | Default | Variable | Meaning |
+| --- | --- | --- | --- |
+| `--format json\|jsonl\|text\|sarif` | — | `CUPEL_FORMAT` | Output format: json (the envelope), jsonl, text, or sarif (SARIF 2.1.0); json when stdout is not a terminal, text when it is. |
+| `--dry-run` | — | — | Preview what would run or be written; change nothing. |
+| `--describe` | — | — | Describe this verb instead of running it, and exit 0. |
+| `--config PATH` | — | — | The cupel.toml to use instead of the nearest one. |
+| `--profile NAME` | — | `CUPEL_PROFILE` | Apply [profile.NAME] from cupel.toml. |
+| `--cwd PATH` | — | — | The repository root; defaults to the current directory. |
+| `--quiet` | — | — | Write no diagnostics to stderr. |
+| `--verbose` | — | — | Write extra diagnostics to stderr. |
+| `--events PATH\|stderr` | — | — | Stream progress events as JSON lines to stderr or a file under .cupel/. |
+| `--timeout DURATION` | — | — | Stop after this long, keeping partial results. |
+| `--seed N` | `random` | — | Seed for generative checks; recorded in the envelope. |
+| `--limit N` | — | — | Return at most N findings. |
+| `--offset N` | — | — | Skip the first N findings. |
+| `--no-color` | — | `NO_COLOR` | Render text without color. |
+| `--no-install` | — | — | Never install tools; the default unless stdout is a terminal, where Cupel asks. |
+| `--install` | — | — | Install the missing tools producers need, without asking. |
+| `--write` | — | — | Permit writes outside .cupel/. |
+| `--no-path-plugins` | — | — | Load no cupel-check-* or cupel-produce-* plugins from PATH; [plugins] still loads. |
+| `--help` | — | — | Print help and exit. |
+<!-- end:global-flags -->
 
 ## Checks
 
@@ -1361,6 +1387,7 @@ warn (1)
 `cupel.toml` is found by walking up from `--cwd`. Precedence is flags, then `CUPEL_*` environment variables (`CUPEL_DEPTH`, `CUPEL_FORMAT`, `CUPEL_PROFILE`), then `--profile`, then `cupel.toml`, then defaults. `CUPEL_NO_DAEMON=1` makes an invocation run in its own process even when a daemon serves the repository (see `cupel serve`). The envelope echoes the effective configuration and the layers that contributed under `run.config`. Unknown keys are usage errors (exit 2) that list the valid keys, and `cupel describe schema config` is the full schema.
 
 ```toml
+required_version = ">=0.1"         # a Cargo version requirement this binary must satisfy
 default_branch = "main"            # what --changed diffs against
 depth = "standard"
 
@@ -1414,6 +1441,8 @@ ref = "v1.2.0"
 depth = "quick"
 ```
 
+**`required_version`** is a Cargo version requirement (`>=0.4`, `^0.4`, `~0.4.1`, comma-joined ranges) on the `cupel` binary. When the binary does not satisfy it, `doctor` reports `doctor.version-unsatisfied` with the required and actual versions and an `install_tool` action, and every verb that reads or grades the repository (all but `describe`, `doctor`, `init`, `suppress`, and `serve`) refuses with that finding and exit 3; a requirement that does not parse is `doctor.version-invalid`, exit 2 outside `doctor`. A suppressed version finding (`cupel suppress`) refuses nothing.
+
 **Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. Each check declares its settings in its manifest, and `cupel describe <check>` lists them with their defaults; a key a check does not declare is a configuration error that lists the ones it does. The checks that take settings:
 
 <!-- generated:check-settings -->
@@ -1447,11 +1476,81 @@ depth = "quick"
 
 Cupel writes only under `.cupel/` (run records, the SQLite fact store, `cache/` with coverage reports and per-test maps, scratch space) unless `--write` is given. An install you allow (`--install`, or yes to the question) runs your package manager, which for the JavaScript launchers, uv, and poetry adds a dev dependency to `package.json` or `pyproject.toml` and its lockfile. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
 
-## Agents
+## For agents
 
 An agent can learn Cupel from Cupel. `cupel describe --all` is one JSON document with every verb, flag, exit code, and schema. `cupel describe <check>` and `cupel describe finding <kind>` explain any check or finding the agent meets. Every verb accepts `--describe`, and `--dry-run` shows exactly what a command would do before it does anything.
 
 The loop is the one in [The agent loop](#the-agent-loop): run the gate, take `next_actions[0]`, fix it, confirm with the finding's `repro`, and repeat until the gate exits 0. An agent should parse only stdout, branch on `exit_code` and `status`, and treat exit 2 as a mistake in its own invocation, whose envelope names the fix.
+
+`cupel describe --agent --format text` prints a guide of about sixty lines to paste into `CLAUDE.md` or `AGENTS.md`; `--format json` carries the same Markdown as the envelope's `description.markdown`. Its exit codes, flags, depths, checks, statuses, MCP tools, and verbs come from the binary's registries. This is its output:
+
+<!-- generated:agent-guide -->
+```markdown
+# Cupel
+
+Cupel grades what a coding agent produced. It measures structure and test strength over a change or a whole tree and returns one JSON envelope: findings with stable IDs, ranked `next_actions`, and a gate verdict. It never edits code; you fix, it grades.
+
+## The loop
+
+1. Run `cupel check --changed --format json`.
+2. If `exit_code` is 0, stop: the gate passed, or there is no gate.
+3. Otherwise take `next_actions[0]`, fix what it names, and rerun its finding's `repro` to confirm.
+4. Go back to 1. Do not stop until it exits 0.
+
+- `cupel explain <finding-id>` shows a finding's source, covering tests, and a test skeleton.
+- `cupel tests --impacted --changed` lists the tests the change affects and the command that runs them.
+- `cupel describe <check-id>` and `cupel describe finding <kind>` explain any check or finding kind.
+- `--dry-run` shows what any command would run or write; `<verb> --describe` lists its flags.
+
+## Exit codes
+
+| Code | Name | Meaning |
+| --- | --- | --- |
+| 0 | pass | Ran fully; gate passed or no gate. |
+| 1 | fail | Ran fully; gate failed. |
+| 2 | usage | Bad flags or config; the envelope names the fix. |
+| 3 | environment | Missing tool, oracle, or toolchain; doctor findings attached. |
+| 4 | unevaluable | Baseline test suite fails or build broken; scoring refused. |
+| 5 | partial | Timeout or budget hit; the envelope has valid partial results. |
+| 6 | internal | Cupel bug; the envelope includes a bug-report payload. |
+
+Exit 2 is a mistake in your command line or `cupel.toml`; its finding names the fix. On exit 3 run `cupel doctor` and follow its `install_tool` and `configure` actions. On exit 4 make the test suite pass first.
+
+## The gate
+
+`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`. `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
+
+## Depth
+
+- `--depth quick|standard|deep|exhaustive`, default `standard`. How much evidence to gather.
+- `--budget DURATION`. A wall-clock budget: run the most valuable checks that fit and skip the rest.
+- Scope flags (`--changed`, `--base`, `--paths`, `--symbols`) intersect; `--only` and `--skip` select checks by ID or group.
+
+| Depth | Adds |
+| --- | --- |
+| `quick` | `meta.oracle-independence`, `perf.footprint`, `static.api-surface`, `static.clones`, `static.complexity`, `static.crap`, `static.dead-code`, `static.deps`, `tests.assertion-density`, `tests.quality`, `tests.weakening` |
+| `standard` | `conc.race`, `gen.property`, `meta.traceability`, `spec.contracts`, `static.analyze`, `tests.coverage`, `tests.flaky`, `tests.mutation` |
+| `deep` | `conc.linearizability`, `gen.differential`, `gen.fuzz`, `gen.metamorphic`, `perf.bench` |
+| `exhaustive` | `conc.dst`, `conc.model-check`, `spec.prove`, `spec.trace` |
+
+## The envelope
+
+Stdout is one JSON envelope; diagnostics go to stderr. Read:
+
+- `status`: `pass`, `fail`, `partial`, `error`, `plan`; `exit_code` always equals the process's.
+- `findings[]`: `id`, `check`, `kind`, `severity`, `location`, `title`, `action`, and `repro`, the command that reruns only that check on only that symbol.
+- `next_actions[]`: what to fix, most important first; each has a `kind`, a `summary`, and its `finding`.
+- `summary.gate`: the verdict and each rule's result; `truncated` says `--limit` cut the findings.
+
+## MCP
+
+A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are `check`, `survey`, `explain`, `tests_impacted`, `describe`; each takes its verb's flags as arguments and returns the envelope the command prints.
+
+## More
+
+The verbs are `init`, `doctor`, `describe`, `check`, `survey`, `explain`, `baseline`, `oracle`, `tests`, `suppress`, `serve`. `cupel describe --all` is every verb, flag, exit code, and schema as one JSON document.
+```
+<!-- end:agent-guide -->
 
 ## Development
 
@@ -1464,7 +1563,7 @@ All automation goes through `make`.
 | `make lint`, `make fmt` | `cargo fmt --check` and clippy; `cargo fmt` |
 | `make build`, `make doc` | build the workspace; build its rustdoc |
 | `make matrix` | print the check × language support matrix |
-| `make readme` | regenerate this README's exit-code table, check table, check summaries, and support matrix from `cupel describe`, and its MCP tool table from `cupel serve --mcp` |
+| `make readme` | regenerate this README's verb, global-flag, exit-code, check, check-settings, and support-matrix tables and its agent guide from `cupel describe`, and its MCP tool table from `cupel serve --mcp` |
 | `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)), and each run of a verb an MCP tool serves again as that tool's call to `cupel serve --mcp` on another copy, which must return the same envelope and stderr ([ADR-121](docs/adr/CUPEL_DECISION_121.md)) |
 | `make dogfood` | Cupel grades itself: `cupel check --changed --gate` against `main`; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`. Both skip `tests.flaky` and `tests.mutation`, which would rerun Cupel's whole suite many times |
 | `make install` | `cargo install --path crates/cupel-cli` |

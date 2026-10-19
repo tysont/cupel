@@ -366,7 +366,7 @@ mod tests {
             taken("tests_impacted", &["impacted", "changed"]),
             ["changed"]
         );
-        assert_eq!(taken("describe", &["agent", "all"]), ["all"]);
+        assert_eq!(taken("describe", &["agent", "all"]), ["agent", "all"]);
     }
 
     #[test]

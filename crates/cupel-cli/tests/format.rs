@@ -45,22 +45,20 @@ fn format_text_renders_a_status_line_instead_of_json() {
 
 #[test]
 fn format_text_shows_findings_with_their_fix() {
-    let outcome = run(["describe", "--agent", "--format", "text"]);
+    let outcome = run(["describe", "schema", "nope", "--format", "text"]);
     assert_eq!(outcome.code, 2);
-    let id = cli_finding_id("cli.not-implemented", "describe --agent");
+    let id = cli_finding_id("cli.usage", "describe schema");
     assert!(
         outcome
             .stdout
             .starts_with("cupel describe: error (exit 2)\n")
     );
     let findings = format!(
-        "fail (1)\n  cli\n    `cupel describe --agent` is not implemented yet\n      \
-         {id} · cli.not-implemented · tier 0 · confidence 1\n      \
-         Implemented in plan step P8.3.\n      \
-         evidence: step \"P8.3\" (full: cupel explain {id})\n      \
-         action review (priority 1): Run `cupel describe --all` to see everything that can be \
-         described now.\n      \
-         repro: cupel describe --agent --format text\n      \
+        "fail (1)\n  cli\n    No schema named `nope`\n      \
+         {id} · cli.usage · tier 0 · confidence 1\n      \
+         evidence: argument \"SUBJECT\" · valid [5] · value \"nope\" (full: cupel explain {id})\n      \
+         action configure (priority 1): Name a schema: run, finding, events, config, plugin.\n      \
+         repro: cupel describe schema nope --format text\n      \
          suppress: cupel suppress {id} --reason '…'\n"
     );
     assert!(

@@ -360,7 +360,7 @@ mod tests {
         let partial = Run::interrupted(run.passed(None));
         assert_eq!(partial.status, Status::Partial);
         assert_eq!(partial.exit_code, ExitCode::Partial);
-        let error = run.failed(&CupelError::pending_description("describe --agent", "P8.3"));
+        let error = run.failed(&CupelError::missing_verb(Vec::new()));
         assert_eq!(Run::interrupted(error.clone()), error);
     }
 
@@ -383,7 +383,7 @@ mod tests {
     #[test]
     fn failed_envelopes_count_their_finding_and_carry_its_exit_code() {
         let run = Run::start(vec!["check".to_owned()]);
-        let envelope = run.failed(&CupelError::pending_description("describe --agent", "P8.3"));
+        let envelope = run.failed(&CupelError::missing_verb(Vec::new()));
         assert_eq!(envelope.status, Status::Error);
         assert_eq!(envelope.exit_code, ExitCode::Usage);
         assert_eq!(envelope.summary.findings.fail, 1);

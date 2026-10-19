@@ -6,9 +6,9 @@ use std::fmt::Write as _;
 
 use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::{
-    CheckResult, Envelope, Excerpt, Explanation, Finding, GateOutcome, GateResult, GitInfo,
-    ImpactBasis, Location, Metric, NextAction, OracleReport, PlannedCheck, Rankings, RuleOutcome,
-    RunInfo, RunPlan, ScopeInfo, Severity, Skipped, Status, Summary, TestsReport,
+    CheckResult, Description, Envelope, Excerpt, Explanation, Finding, GateOutcome, GateResult,
+    GitInfo, ImpactBasis, Location, Metric, NextAction, OracleReport, PlannedCheck, Rankings,
+    RuleOutcome, RunInfo, RunPlan, ScopeInfo, Severity, Skipped, Status, Summary, TestsReport,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -20,8 +20,13 @@ const LABEL: usize = 10;
 /// Evidence strings longer than this are shortened in the one-line summary.
 const EVIDENCE_STRING: usize = 40;
 
+/// The envelope as text; the agent guide alone, so `--format text` output can be pasted into an
+/// agent's instructions.
 pub fn render(envelope: &Envelope, color: bool) -> String {
     let paint = Paint { color };
+    if let Some(description @ Description::Agent(_)) = &envelope.description {
+        return description::render(description, &paint);
+    }
     let blocks = [
         status_line(envelope, &paint),
         envelope

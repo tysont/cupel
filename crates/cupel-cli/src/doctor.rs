@@ -13,12 +13,13 @@ use semver::{Version, VersionReq};
 use serde_json::json;
 
 use crate::catalog::Catalog;
-use crate::error::Usage;
+use crate::error::{CupelError, Usage};
 use crate::install::{self, Planned, probe};
 use crate::problem::Problem;
 use crate::project;
 use crate::run::Invocation;
 use crate::serve;
+use crate::suppress;
 
 /// The configuration key `required_version` findings are about.
 const REQUIRED_VERSION: &str = "required_version";
@@ -84,6 +85,30 @@ pub fn run(invocation: &Invocation<'_>, fix: bool) -> Envelope {
         .0
         .extend(versions(&requirements, probed));
     envelope
+}
+
+/// The envelope refusing a verb other than `doctor` when this binary does not satisfy the
+/// configuration's `required_version`: doctor's finding, exit 3, or exit 2 for a requirement that
+/// does not parse. A suppressed version finding refuses nothing, as it fails no `doctor` run.
+pub fn refusal(invocation: &Invocation<'_>) -> Result<Option<Envelope>, CupelError> {
+    let Ok(config) = invocation.config else {
+        return Ok(None);
+    };
+    let Some(problem) = version(config.file.required_version.as_deref(), &own_version()) else {
+        return Ok(None);
+    };
+    let exit_code = match problem.action {
+        ActionKind::InstallTool => ExitCode::Environment,
+        _ => ExitCode::Usage,
+    };
+    let run = invocation.run;
+    let mut envelope = run.reported(
+        Status::Error,
+        exit_code,
+        vec![problem.finding(&run.repro())],
+    );
+    suppress::apply(&mut envelope, invocation.writer)?;
+    Ok((envelope.status == Status::Error).then_some(envelope))
 }
 
 /// The plan of `doctor --dry-run`: with `fix`, the installs `--fix` would attempt.
@@ -387,7 +412,7 @@ fn version(required: Option<&str>, version: &Version) -> Option<Problem> {
         severity: Severity::Fail,
         title,
         detail: Some("This binary's version is the envelope's `cupel.version`.".to_owned()),
-        evidence: json!({"required": required}),
+        evidence: json!({"required": required, "actual": version.to_string()}),
         action,
         fix,
     };

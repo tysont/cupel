@@ -39,6 +39,8 @@ pub enum Description {
     Check(CheckDescription),
     /// `cupel describe finding <kind>`.
     Finding(FindingDescription),
+    /// `cupel describe --agent`: the guide an agent harness pastes into its instructions.
+    Agent(AgentDescription),
 }
 
 /// Verbs, global flags, exit codes, schema URLs, and configuration precedence.
@@ -156,6 +158,12 @@ pub struct SchemaDescription {
     pub url: String,
     pub stability: Stability,
     pub schema: Map<String, Value>,
+}
+
+/// The agent guide: Markdown for `CLAUDE.md` or `AGENTS.md`, which `--format text` prints as is.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct AgentDescription {
+    pub markdown: String,
 }
 
 /// Everything `describe` knows, in one document.

@@ -6,6 +6,7 @@
 //! may build an [`Environment`] themselves and call [`run`] in-process.
 
 mod against;
+mod agent;
 mod app;
 mod baseline;
 mod catalog;

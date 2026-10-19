@@ -1,5 +1,5 @@
 // ABOUTME: `CupelError`, the failure every verb can return, and its mapping to an exit code and a
-// ABOUTME: `cli.*` finding: usage errors and unbuilt features exit 2, internal errors exit 6.
+// ABOUTME: finding: usage errors exit 2, a red baseline exits 4, and internal errors exit 6.
 use clap::error::{ContextKind, ContextValue, ErrorKind};
 use cupel_core::config::ConfigError;
 use cupel_core::{ActionKind, ExitCode, Finding, Severity, Unevaluable};
@@ -13,9 +13,6 @@ pub enum CupelError {
     /// The command line or its inputs are wrong; the finding names the fix.
     #[error("{}", .0.title)]
     Usage(Box<Usage>),
-    /// The command line asks for something a later plan step builds.
-    #[error("{} is not implemented yet", .0.what)]
-    NotImplemented(Pending),
     /// Cupel has a bug.
     #[error("internal error: {}", .0.message)]
     Internal(BugReport),
@@ -42,16 +39,6 @@ pub struct Usage {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Pending {
-    pub subject: String,
-    /// What was asked for, as the user would write it, such as `cupel check`.
-    pub what: String,
-    /// The implementation-plan step that builds it.
-    pub step: String,
-    pub fix: String,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BugReport {
     pub message: String,
     /// Where in Cupel's source the failure happened.
@@ -62,7 +49,7 @@ pub struct BugReport {
 impl CupelError {
     pub fn exit_code(&self) -> ExitCode {
         match self {
-            Self::Usage(_) | Self::NotImplemented(_) => ExitCode::Usage,
+            Self::Usage(_) => ExitCode::Usage,
             Self::Internal(_) => ExitCode::Internal,
             Self::Unevaluable(_) => ExitCode::Unevaluable,
         }
@@ -78,18 +65,6 @@ impl CupelError {
                 .collect(),
             other => vec![other.finding(repro)],
         }
-    }
-
-    /// A `describe` subject whose data arrives in `step`; `subject` names it, such as
-    /// `describe matrix`.
-    pub fn pending_description(subject: &str, step: &str) -> Self {
-        Self::NotImplemented(Pending {
-            subject: subject.to_owned(),
-            what: format!("`cupel {subject}`"),
-            step: step.to_owned(),
-            fix: "Run `cupel describe --all` to see everything that can be described now."
-                .to_owned(),
-        })
     }
 
     /// A usage error about `argument` (a flag or positional name, which is also the subject),
@@ -123,17 +98,6 @@ impl CupelError {
     pub fn finding(&self, repro: &str) -> Finding {
         let problem = match self {
             Self::Usage(usage) => usage.problem("cli", "cli.usage"),
-            Self::NotImplemented(pending) => Problem {
-                check: "cli",
-                kind: "cli.not-implemented",
-                subject: pending.subject.clone(),
-                severity: Severity::Fail,
-                title: self.to_string(),
-                detail: Some(format!("Implemented in plan step {}.", pending.step)),
-                evidence: json!({"step": pending.step}),
-                action: ActionKind::Review,
-                fix: pending.fix.clone(),
-            },
             Self::Unevaluable(red) => crate::refusal::summary(red),
             Self::Internal(report) => Problem {
                 check: "cli",
@@ -528,13 +492,9 @@ mod tests {
     }
 
     #[test]
-    fn usage_and_pending_errors_exit_2_and_internal_errors_exit_6() {
+    fn usage_errors_exit_2_and_internal_errors_exit_6() {
         assert_eq!(
             CupelError::missing_verb(vec![]).exit_code(),
-            ExitCode::Usage
-        );
-        assert_eq!(
-            CupelError::pending_description("describe --agent", "P8.3").exit_code(),
             ExitCode::Usage
         );
         assert_eq!(
@@ -545,15 +505,10 @@ mod tests {
 
     #[test]
     fn findings_are_identified_by_check_kind_and_subject() {
-        let finding =
-            CupelError::pending_description("describe --agent", "P8.3").finding("cupel x");
+        let finding = CupelError::Internal(report()).finding("cupel x");
         assert_eq!(
             finding.id,
-            FindingId::for_subject(
-                &CheckId::from("cli"),
-                "cli.not-implemented",
-                "describe --agent"
-            )
+            FindingId::for_subject(&CheckId::from("cli"), "cli.internal", "src/app.rs:1:1")
         );
         assert_eq!(finding.repro, "cupel x");
         assert_eq!(finding.check.as_str(), "cli");

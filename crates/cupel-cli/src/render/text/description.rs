@@ -30,6 +30,8 @@ pub fn render(description: &Description, paint: &Paint) -> String {
         Description::Matrix(matrix) => render_matrix(matrix, paint),
         Description::Check(check) => render_check(check, paint),
         Description::Finding(finding) => render_finding(finding, paint),
+        // The guide is Markdown to paste as is.
+        Description::Agent(agent) => agent.markdown.clone(),
     }
 }
 

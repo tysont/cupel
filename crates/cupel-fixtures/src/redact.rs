@@ -71,6 +71,12 @@ pub fn redact_sarif(log: &Value, root: &Path) -> Value {
     {
         *id = id.replace(&run_id, RUN_ID);
     }
+    mask_version_repeats(
+        &mut value,
+        "/runs/0/tool/driver/version",
+        "/runs/0/results",
+        "/properties/evidence/actual",
+    );
     for (pointer, placeholder) in SARIF_FIXED {
         mask(&mut value, pointer, placeholder);
     }
@@ -97,9 +103,11 @@ fn mask_run(run: &mut Value) {
     }
 }
 
-/// Masks the volatile fields of an envelope outside its `run`: the binary's version, the CLI
-/// version `describe` reports, and each oracle's verification.
+/// Masks the volatile fields of an envelope outside its `run`: the binary's version, where a
+/// finding's evidence repeats it as `actual` too, the CLI version `describe` reports, and each
+/// oracle's verification.
 fn mask_outside_run(value: &mut Value) {
+    mask_version_repeats(value, "/cupel/version", "/findings", "/evidence/actual");
     mask(value, "/cupel/version", VERSION);
     match value
         .pointer("/description/subject")
@@ -113,6 +121,21 @@ fn mask_outside_run(value: &mut Value) {
         for oracle in oracles {
             mask(oracle, "/verified_at", TIMESTAMP);
             mask(oracle, "/verified_run", RUN_ID);
+        }
+    }
+}
+
+/// Masks `repeat` in each item of the array at `items` where it equals the binary's version, the
+/// value at `version`: a finding's evidence that repeats it, as `doctor.version-*` findings do.
+fn mask_version_repeats(value: &mut Value, version: &str, items: &str, repeat: &str) {
+    let Some(version) = value.pointer(version).cloned() else {
+        return;
+    };
+    if let Some(Value::Array(items)) = value.pointer_mut(items) {
+        for item in items {
+            if item.pointer(repeat) == Some(&version) {
+                mask(item, repeat, VERSION);
+            }
         }
     }
 }

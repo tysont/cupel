@@ -245,7 +245,7 @@ Scope resolution: `--symbols` ⊂ `--paths` ⊂ `--changed`/range ⊂ tree. Mult
 
 **`init`** — Detects project roots (Cargo workspace, go.work, npm/pnpm/yarn workspaces, uv/poetry/pip, Maven/Gradle, deps.edn), languages, test command, coverage command, benchmark command. Writes `cupel.toml` and `.cupel/.gitignore` only with `--write`. `--dry-run` shows the file. Never overwrites an existing `cupel.toml` without `--force`.
 
-**`doctor`** — Checks binary version vs `required_version`, every selected tool producer's presence and version, oracle reachability (`oracle verify --all`), config validity, write access to `.cupel/`. Each problem is a finding with `action.kind: install_tool | configure`. Exit 3 if anything required for the configured checks is missing; 0 otherwise. `--fix --install` attempts installs.
+**`doctor`** — Checks binary version vs `required_version`, every selected tool producer's presence and version, oracle reachability (`oracle verify --all`), config validity, write access to `.cupel/`. Each problem is a finding with `action.kind: install_tool | configure`. Exit 3 if anything required for the configured checks is missing; 0 otherwise. `--fix --install` attempts installs. A binary outside `required_version` also stops every verb that reads or grades the repository (all but `describe`, `doctor`, `init`, `suppress`, `serve`): it exits 3 with doctor's `doctor.version-unsatisfied` finding, or 2 with `doctor.version-invalid` for a requirement that does not parse, unless that finding is suppressed (ADR-126).
 
 **`describe`**
 
@@ -261,7 +261,8 @@ cupel describe languages                # all languages, one line each
 cupel describe fact <kind>              # schema, version, producers per language, checks that consume it
 cupel describe matrix                   # checks × languages: supported | unsupported(fact) | unavailable(tool)
 cupel describe schema run|finding|events|config|plugin   # JSON Schema (draft 2020-12)
-cupel describe --agent                  # ~60 lines markdown for CLAUDE.md / AGENTS.md
+cupel describe --agent                  # ~60 lines markdown for CLAUDE.md / AGENTS.md; --format text prints it
+                                        #   as is, json carries it as description.markdown (ADR-126)
 cupel describe --all                    # everything, one JSON document
 ```
 
@@ -361,6 +362,8 @@ format = "sarif"
 depth = "quick"
 budget = "20s"
 ```
+
+`required_version` is a Cargo version requirement on the `cupel` binary, checked when configuration loads (§6.5 `doctor`).
 
 Gate rule keys are `<check-id>.<metric>` or `<check-id>` (presence); operators `>= > <= < == none no-breaking`. Unknown keys are a usage error (exit 2) with the list of valid keys.
 
@@ -895,7 +898,7 @@ Value per task = `tier_weight[tier] × novelty × (changed ? 2 : 1)`; cost from 
 ## 10. Compatibility and distribution
 
 - **Platforms:** Linux x86_64/aarch64 (musl, static), macOS arm64/x86_64, Windows x86_64 native best-effort (WSL first-class). Built with `cargo-zigbuild`/`cross` in CI.
-- **Distribution:** GitHub Releases; `cargo-binstall`; Homebrew tap; `curl -fsSL https://cupel.dev/install | sh`; thin `npm` (`npx cupel`) and `pipx` wrappers that fetch the platform binary. `required_version` in `cupel.toml`; `doctor` enforces.
+- **Distribution:** GitHub Releases; `cargo-binstall`; Homebrew tap; `curl -fsSL https://cupel.dev/install | sh`; thin `npm` (`npx cupel`) and `pipx` wrappers that fetch the platform binary. `required_version` in `cupel.toml`; `doctor` reports a binary outside it and every verb that reads the repository refuses to run.
 - **Existing tooling:** ingest LCOV, Cobertura, JaCoCo XML, go coverprofile, Istanbul JSON, Stryker JSON, PIT XML, SARIF from other analyzers. Emit SARIF 2.1 and LCOV.
 - **Monorepos:** multiple roots from workspace manifests; per-root scoping; single envelope with `scope.roots`.
 - **Schema versioning:** `schema: v1`; additive within major; `describe schema` serves the exact version; `stability` on every entity.

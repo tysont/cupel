@@ -320,6 +320,23 @@ fn runs_without_configuration(cli: &Cli) -> bool {
     )
 }
 
+/// Whether the verb refuses to run when this binary does not satisfy `required_version`: every
+/// verb that reads or grades the repository. `describe` describes this binary, `doctor` reports
+/// the mismatch, `init` and `suppress` edit the files that settle it, and the daemon checks each
+/// request it serves as a cold run would.
+fn checks_required_version(cli: &Cli) -> bool {
+    !matches!(
+        cli.verb,
+        None | Some(
+            VerbArgs::Describe(_)
+                | VerbArgs::Doctor { .. }
+                | VerbArgs::Init { .. }
+                | VerbArgs::Suppress { .. }
+                | VerbArgs::Serve(_)
+        )
+    )
+}
+
 /// What configuration needs from the command line and the environment.
 fn config_request(environment: &Environment, cli: &Cli, root: PathBuf) -> ConfigRequest {
     let scope = cli.verb.as_ref().and_then(VerbArgs::scope);
@@ -364,6 +381,11 @@ fn execute(
     if cli.global.describe {
         let words = cli.verb.as_ref().map(VerbArgs::words).unwrap_or_default();
         return describe::command(run, &words);
+    }
+    if checks_required_version(cli) {
+        if let Some(refused) = doctor::refusal(invocation)? {
+            return Ok(refused);
+        }
     }
     let cut_short = !cli.plans_only()
         && environment

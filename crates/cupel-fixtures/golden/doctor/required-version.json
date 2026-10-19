@@ -19,6 +19,7 @@
       "confidence": 1.0,
       "detail": "This binary's version is the envelope's `cupel.version`.",
       "evidence": {
+        "actual": "<version>",
         "required": ">=99.0"
       },
       "id": "fnd_202eb1",

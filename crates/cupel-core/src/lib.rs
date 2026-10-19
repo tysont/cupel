@@ -79,12 +79,12 @@ pub use config::{ConfigEcho, ConfigSource};
 pub use contract::{ContractKind, ContractPlace, ContractViolation, ContractViolations};
 pub use delta::{Deltas, deltas};
 pub use describe::{
-    AllDescription, ArgDescription, CheckDescription, CheckSupport, CliDescription,
-    CommandDescription, CommandSummary, CommandTemplate, Description, Example, ExitCodeDescription,
-    FactDescription, FactProducers, FindingDescription, LanguageDescription, LanguageProducers,
-    LanguageSummary, LanguageSupport, LanguagesDescription, LauncherDescription, MatrixCell,
-    MatrixDescription, ProducerDescription, SchemaDescription, SchemaRef, SupportDescription,
-    ToolDescription, ToolchainDescription, ValueType, VerbSupport,
+    AgentDescription, AllDescription, ArgDescription, CheckDescription, CheckSupport,
+    CliDescription, CommandDescription, CommandSummary, CommandTemplate, Description, Example,
+    ExitCodeDescription, FactDescription, FactProducers, FindingDescription, LanguageDescription,
+    LanguageProducers, LanguageSummary, LanguageSupport, LanguagesDescription, LauncherDescription,
+    MatrixCell, MatrixDescription, ProducerDescription, SchemaDescription, SchemaRef,
+    SupportDescription, ToolDescription, ToolchainDescription, ValueType, VerbSupport,
 };
 pub use divergence::{Answer, ComparedOracle, Divergence, DivergenceResults, EntryComparison};
 pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPlan};

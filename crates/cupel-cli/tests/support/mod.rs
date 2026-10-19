@@ -6,8 +6,10 @@
 )]
 
 use std::fs;
+use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
+use std::process::Stdio;
 
 use assert_cmd::Command;
 use cupel_core::{CheckId, CheckRegistry, Envelope, FindingId, Writer};
@@ -386,4 +388,34 @@ pub fn plugin(dir: &Path, name: &str, manifest: &Value) {
     let path = dir.join(name);
     fs::write(&path, body).unwrap();
     fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+}
+
+/// The tools `cupel serve --mcp` lists, asked over its stdin (ADR-121).
+pub fn listed_tools() -> Vec<Value> {
+    let dir = tempfile::tempdir().expect("temporary directory");
+    let mut command = std::process::Command::new(assert_cmd::cargo::cargo_bin("cupel"));
+    for (key, _) in std::env::vars() {
+        if key.starts_with("CUPEL_") {
+            command.env_remove(key);
+        }
+    }
+    let mut server = command
+        .args(["serve", "--mcp", "--quiet"])
+        .current_dir(dir.path())
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("cupel serve --mcp starts");
+    let mut input = server.stdin.take().expect("stdin is piped");
+    writeln!(input, r#"{{"jsonrpc":"2.0","id":1,"method":"tools/list"}}"#).expect("it reads");
+    drop(input);
+    let output = server.wait_with_output().expect("it answers and exits");
+    let stdout = String::from_utf8(output.stdout).expect("UTF-8");
+    let response: Value = serde_json::from_str(stdout.lines().next().expect("a response"))
+        .expect("a JSON-RPC response");
+    response["result"]["tools"]
+        .as_array()
+        .expect("tools")
+        .clone()
 }

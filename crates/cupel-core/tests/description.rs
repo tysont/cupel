@@ -73,7 +73,8 @@ fn every_description_subject_round_trips_inside_an_envelope() {
     let mut cli_body = cli();
     cli_body.as_object_mut().unwrap().remove("subject");
     let all = json!({"subject": "all", "cli": cli_body, "commands": [command()], "schemas": [schema_doc()]});
-    for description in [cli(), command_subject, schema_subject, all] {
+    let agent = json!({"subject": "agent", "markdown": "# Cupel\n"});
+    for description in [cli(), command_subject, schema_subject, all, agent] {
         assert_round_trip(&envelope_with(&json!("describe"), &description));
     }
 }
@@ -89,7 +90,7 @@ fn description_subject_is_the_tag() {
     assert_eq!(
         error,
         "unknown variant `galaxy`, expected one of `cli`, `command`, `schema`, `all`, \
-         `language`, `languages`, `fact`, `matrix`, `check`, `finding`"
+         `language`, `languages`, `fact`, `matrix`, `check`, `finding`, `agent`"
     );
 }
 

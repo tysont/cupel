@@ -130,6 +130,7 @@ fn describe_verb_describes_its_arguments_sub_verbs_and_pending_flags() {
     assert_eq!(argument("check", "--cases")["pending_step"], json!(null));
     assert_eq!(argument("check", "--scaffold")["pending_step"], json!(null));
     assert_eq!(argument("serve", "--mcp")["pending_step"], json!(null));
+    assert_eq!(argument("describe", "--agent")["pending_step"], json!(null));
     insta::assert_snapshot!(serde_json::to_string_pretty(&redacted(envelope)).unwrap());
 }
 
@@ -311,13 +312,6 @@ fn describe_unknown_subject_is_a_usage_error_listing_subjects() {
             "matrix"
         ])
     );
-}
-
-#[test]
-fn describe_subjects_from_later_steps_are_not_implemented_yet() {
-    let finding = assert_rejected(&["describe", "--agent"], "cli.not-implemented");
-    let detail = finding["detail"].as_str().unwrap();
-    assert!(detail.contains("P8.3"), "{detail}");
 }
 
 #[test]

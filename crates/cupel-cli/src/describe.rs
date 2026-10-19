@@ -3,10 +3,12 @@
 use std::path::Path;
 
 use cupel_core::{
-    AllDescription, CheckId, Description, Envelope, FactKind, LangId, SchemaDescription, schema,
+    AgentDescription, AllDescription, CheckId, Description, Envelope, FactKind, LangId,
+    SchemaDescription, schema,
 };
 use serde_json::Value;
 
+use crate::agent;
 use crate::catalog::Catalog;
 use crate::cli::DescribeArgs;
 use crate::error::{CupelError, Usage};
@@ -52,7 +54,9 @@ fn describe(
     root: &Path,
 ) -> Result<Description, CupelError> {
     if args.agent {
-        return Err(CupelError::pending_description("describe --agent", "P8.3"));
+        return Ok(Description::Agent(AgentDescription {
+            markdown: agent::guide(catalog.checks()),
+        }));
     }
     if args.all {
         return Ok(Description::All(AllDescription {

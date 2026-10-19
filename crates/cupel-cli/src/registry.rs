@@ -222,7 +222,6 @@ fn describe_verb() -> CommandDescription {
             switch("--all", "Describe everything in one document.")
                 .conflicts(&["SUBJECT", "--agent"]),
             switch("--agent", "Emit a short agent guide in Markdown.")
-                .pending("P8.3")
                 .conflicts(&["SUBJECT", "--all"]),
         ],
         examples(&[
@@ -235,6 +234,7 @@ fn describe_verb() -> CommandDescription {
             ("cupel describe fact symbols", "A fact's schema, version, and producers per language.", ExitCode::Pass),
             ("cupel describe matrix", "Which checks can run for which languages, and why not.", ExitCode::Pass),
             ("cupel describe --all", "Everything, in one document.", ExitCode::Pass),
+            ("cupel describe --agent --format text", "A Markdown guide for CLAUDE.md or AGENTS.md.", ExitCode::Pass),
             ("cupel check --describe", "Any verb describes itself.", ExitCode::Pass),
         ]),
     )
