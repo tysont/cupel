@@ -78,6 +78,10 @@ cupel check: [1;31mfail[0m (exit 1)
      1. 42.5  rewrite::Planner::push_limit  [2mrust · src/rewrite/planner.rs:140:5-171:6 · sh_4b1d9e0c4b1d9e01[0m
      2. 12  web/limits  [2mtypescript[0m
   static.deps.coupling  module · 0 measured · Afferent plus efferent coupling per module.
+  targets  2 recommended, protect first
+     1. protect  rewrite::Planner::push_limit  mutation 0.5 · coverage 0.8 · tests 3  [2mrust · src/rewrite/planner.rs:140:5-171:6 · sh_4b1d9e0c4b1d9e01[0m
+        [2mstatic.crap.crap 42.5 (#1) · fnd_7c2e1a[0m
+     2. simplify  web/limits  mutation - · coverage - · tests -  [2mtypescript[0m
 
 [1mtests[0m  2 impacted · per-test map: no
   rust  [2mper-test map from tool.llvm-cov-per-test (2 measured, 1236 cached)[0m

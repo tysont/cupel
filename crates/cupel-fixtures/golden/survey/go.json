@@ -9,6 +9,437 @@
   "oracles": null,
   "plan": null,
   "rankings": {
+    "recommended": 18,
+    "targets": [
+      {
+        "findings": [
+          "fnd_ec0009"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 1,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.TestClassifyingRuns",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 24,
+            "file": "ledger_quality_test.go",
+            "line": 22
+          },
+          "symbol": "sh_d93be59fc6b954ee"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 56,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 56,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 6,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_e7d0af"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 2,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.TestStatementIsMailed",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 73,
+            "file": "ledger_test.go",
+            "line": 66
+          },
+          "symbol": "sh_91ea22f895f9f0a9"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 8,
+            "value": 3.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 18,
+            "value": 2.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 22,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_c9f8d6"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 3,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.TestMembersGetADiscount",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 26,
+            "file": "ledger_test.go",
+            "line": 22
+          },
+          "symbol": "sh_53f862293ba6de55"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 21,
+            "value": 2.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 30,
+            "value": 1.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 13,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_c72554"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 4,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.TestNewAccountsAreRegistered",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 33,
+            "file": "ledger_test.go",
+            "line": 28
+          },
+          "symbol": "sh_b5f1dc3fc6ada671"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 22,
+            "value": 2.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 31,
+            "value": 1.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 15,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_e4fb17"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 5,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.TestNewAccountsHaveDistinctIDs",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 46,
+            "file": "ledger_test.go",
+            "line": 41
+          },
+          "symbol": "sh_02914d7263fa737b"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 23,
+            "value": 2.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 32,
+            "value": 1.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 16,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_ce8fb9"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 6,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.TestOpeningAnAccountDoesNotPanic",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 87,
+            "file": "ledger_test.go",
+            "line": 85
+          },
+          "symbol": "sh_8d0bf23821b2d110"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 64,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 64,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 17,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_9335ff"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 7,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.TestParsingGarbageFails",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 39,
+            "file": "ledger_test.go",
+            "line": 35
+          },
+          "symbol": "sh_91f0f96d75ab198b"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 24,
+            "value": 2.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 33,
+            "value": 1.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 21,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_3924cf"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 8,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.TestStatementsAreNotEmpty",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 20,
+            "file": "ledger_quality_test.go",
+            "line": 18
+          },
+          "symbol": "sh_f9bb326a4f0a9a27"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 67,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 67,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 23,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_130664"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 9,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.Label",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 32,
+            "file": "complexity.go",
+            "line": 6
+          },
+          "symbol": "sh_1a1f0a9a227f0600"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 1,
+            "value": 11.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 3,
+            "value": 10.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_86f7cd"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 10,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.Settle",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 49,
+            "file": "complexity.go",
+            "line": 35
+          },
+          "symbol": "sh_e073e3e6ae0851be"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 3,
+            "value": 6.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 1,
+            "value": 15.0
+          }
+        ]
+      }
+    ],
     "top": 10
   },
   "run": {

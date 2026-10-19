@@ -78,6 +78,10 @@ rankings  top 10 per dimension
      1. 42.5  rewrite::Planner::push_limit  rust · src/rewrite/planner.rs:140:5-171:6 · sh_4b1d9e0c4b1d9e01
      2. 12  web/limits  typescript
   static.deps.coupling  module · 0 measured · Afferent plus efferent coupling per module.
+  targets  2 recommended, protect first
+     1. protect  rewrite::Planner::push_limit  mutation 0.5 · coverage 0.8 · tests 3  rust · src/rewrite/planner.rs:140:5-171:6 · sh_4b1d9e0c4b1d9e01
+        static.crap.crap 42.5 (#1) · fnd_7c2e1a
+     2. simplify  web/limits  mutation - · coverage - · tests -  typescript
 
 tests  2 impacted · per-test map: no
   rust  per-test map from tool.llvm-cov-per-test (2 measured, 1236 cached)

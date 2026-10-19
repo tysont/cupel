@@ -9,6 +9,431 @@
   "oracles": null,
   "plan": null,
   "rankings": {
+    "recommended": 16,
+    "targets": [
+      {
+        "findings": [
+          "fnd_6fdd0b"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 1,
+        "recommend": "protect",
+        "target": {
+          "display": "tests.test_ledger.test_an_opening_account_exists",
+          "location": {
+            "col": 1,
+            "end_col": 46,
+            "end_line": 24,
+            "file": "tests/test_ledger.py",
+            "line": 23
+          },
+          "symbol": "sh_db971d577aa0cd88"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 58,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 58,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 5,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_7ef158"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 2,
+        "recommend": "protect",
+        "target": {
+          "display": "tests.test_ledger.test_opening_an_account_does_not_raise",
+          "location": {
+            "col": 1,
+            "end_col": 19,
+            "end_line": 57,
+            "file": "tests/test_ledger.py",
+            "line": 56
+          },
+          "symbol": "sh_6a7a0cff79f0f6ac"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 61,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 61,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 8,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_619e04"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 3,
+        "recommend": "protect",
+        "target": {
+          "display": "tests.test_ledger.test_statement_is_published",
+          "location": {
+            "col": 1,
+            "end_col": 47,
+            "end_line": 38,
+            "file": "tests/test_ledger.py",
+            "line": 37
+          },
+          "symbol": "sh_390999ad4f6fbba9"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 67,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 67,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 12,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_549f35"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 4,
+        "recommend": "protect",
+        "target": {
+          "display": "tests.test_ledger.test_statements_mention_the_owner",
+          "location": {
+            "col": 1,
+            "end_col": 31,
+            "end_line": 16,
+            "file": "tests/test_ledger.py",
+            "line": 15
+          },
+          "symbol": "sh_84686d9c4e16ec31"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 68,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 68,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 13,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_76da2f"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 5,
+        "recommend": "protect",
+        "target": {
+          "display": "tests.test_pricing.PricingTest.test_members_get_a_discount",
+          "location": {
+            "col": 5,
+            "end_col": 56,
+            "end_line": 18,
+            "file": "tests/test_pricing.py",
+            "line": 17
+          },
+          "symbol": "sh_696931544fae7506"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 70,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 70,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 14,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_70663c"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 6,
+        "recommend": "protect",
+        "target": {
+          "display": "tests.test_quality_signals.test_classifying_runs",
+          "location": {
+            "col": 1,
+            "end_col": 25,
+            "end_line": 22,
+            "file": "tests/test_quality_signals.py",
+            "line": 21
+          },
+          "symbol": "sh_8218cb33e54aaeda"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 74,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 74,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 17,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_045970"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 7,
+        "recommend": "protect",
+        "target": {
+          "display": "tests.test_quality_signals.test_statements_are_not_empty",
+          "location": {
+            "col": 1,
+            "end_col": 38,
+            "end_line": 18,
+            "file": "tests/test_quality_signals.py",
+            "line": 17
+          },
+          "symbol": "sh_d5864a23c59d6394"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 79,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 79,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 24,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_da1290"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 8,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.complexity.label",
+          "location": {
+            "col": 1,
+            "end_col": 16,
+            "end_line": 27,
+            "file": "src/ledger/complexity.py",
+            "line": 4
+          },
+          "symbol": "sh_b9016df6df5687e8"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 1,
+            "value": 11.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 3,
+            "value": 10.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_1d8c00"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 9,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.complexity.settle",
+          "location": {
+            "col": 1,
+            "end_col": 19,
+            "end_line": 38,
+            "file": "src/ledger/complexity.py",
+            "line": 30
+          },
+          "symbol": "sh_dcb5b60ff46aec47"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 2,
+            "value": 6.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 1,
+            "value": 15.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_388503"
+        ],
+        "lang": "python",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 10,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.clones_settlement.settle_invoices",
+          "location": {
+            "col": 1,
+            "end_col": 31,
+            "end_line": 12,
+            "file": "src/ledger/clones_settlement.py",
+            "line": 4
+          },
+          "symbol": "sh_46a99291992c7f37"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 6,
+            "value": 3.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 9,
+            "value": 3.0
+          }
+        ]
+      }
+    ],
     "top": 10
   },
   "run": {

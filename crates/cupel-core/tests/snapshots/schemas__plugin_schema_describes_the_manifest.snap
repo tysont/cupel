@@ -427,6 +427,18 @@ expression: pretty(&schema)
           "description": "What one value describes (ADR-062).",
           "$ref": "#/$defs/MetricPer"
         },
+        "protection": {
+          "description": "Which protection value a per-target metric is, for `survey`'s protect-first targets;\nlower is weaker (ADR-132). Absent for every other metric.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProtectionMetric"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-cupel-optional": true
+        },
         "summary": {
           "type": "string"
         }
@@ -697,6 +709,26 @@ expression: pretty(&schema)
         "summary",
         "version",
         "wants"
+      ]
+    },
+    "ProtectionMetric": {
+      "description": "How well tests protect a target, as a per-target metric reports it; lower is weaker\n(ADR-132).",
+      "oneOf": [
+        {
+          "description": "The killed ratio of the target's scored mutants.",
+          "type": "string",
+          "const": "mutation-score"
+        },
+        {
+          "description": "The ratio of the target's instrumented lines a test ran.",
+          "type": "string",
+          "const": "coverage"
+        },
+        {
+          "description": "How many tests ran against the target.",
+          "type": "string",
+          "const": "tests"
+        }
       ]
     },
     "Provides": {

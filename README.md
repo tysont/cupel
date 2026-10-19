@@ -114,7 +114,7 @@ Every verb takes the same global flags (below) and writes the same envelope. Run
 | `cupel doctor` | Verify the binary's version, the configuration, .cupel/ write access, and needed tools. |
 | `cupel describe` | Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema. |
 | `cupel check` | Run checks over a scope at a depth and evaluate the gate. |
-| `cupel survey` | Rank a whole tree without a baseline or gate: the worst targets per metric. |
+| `cupel survey` | Rank a whole tree without a baseline or gate: the worst targets per metric, protect-first. |
 | `cupel explain` | Give full context and remediation for one finding or check result. |
 | `cupel baseline` | Set, show, diff, export, or import the baseline runs are compared with. |
 | `cupel oracle` | Add, list, remove, or verify the oracles differential checks compare with. |
@@ -678,7 +678,7 @@ The tools, from the server's own `tools/list`:
 | Tool | Runs | What it does |
 | --- | --- | --- |
 | `check` | `cupel check` | Run checks over a scope at a depth and evaluate the gate. Returns the envelope `cupel check --format json` prints; its exit_code and status say how the run ended. |
-| `survey` | `cupel survey` | Rank a whole tree without a baseline or gate: the worst targets per metric. Returns the envelope `cupel survey --format json` prints; its exit_code and status say how the run ended. |
+| `survey` | `cupel survey` | Rank a whole tree without a baseline or gate: the worst targets per metric, protect-first. Returns the envelope `cupel survey --format json` prints; its exit_code and status say how the run ended. |
 | `explain` | `cupel explain` | Give full context and remediation for one finding or check result. Returns the envelope `cupel explain --format json` prints; its exit_code and status say how the run ended. |
 | `tests_impacted` | `cupel tests --impacted` | List the tests a scope impacts, why, and the command that runs them. Returns the envelope `cupel tests --impacted --format json` prints; its exit_code and status say how the run ended. |
 | `describe` | `cupel describe` | Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema. Returns the envelope `cupel describe --format json` prints; its exit_code and status say how the run ended. |
@@ -747,9 +747,9 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 | `static.dead-code` | 0 | quick | `dead.symbol`, `dead.export` | `dead_symbols`, `dead_exports` | — | clojure, go, java, javascript, python, rust, typescript |
 | `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.assertion-density` | 2 | quick | `density.sparse-test`, `density.sparse-file` | `assertions_per_test`, `assertions_per_public_function`, `tested_public_functions`, `sparse_tests`, `sparse_files` | — | clojure, go, java, javascript, python, rust, typescript |
-| `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines` |  |
+| `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines`, `line_coverage` |  |
 | `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | clojure, go, java, javascript, python, rust, typescript |
-| `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.uncovered`, `mutant.equivalent?` | `score`, `killed`, `survived`, `timeout`, `uncovered`, `unviable`, `equivalent`, `executed`, `reused`, `schemata`, `fallback` | `survivors` |  |
+| `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.uncovered`, `mutant.equivalent?` | `score`, `killed`, `survived`, `timeout`, `uncovered`, `unviable`, `equivalent`, `executed`, `reused`, `schemata`, `fallback` | `survivors`, `mutation_score`, `tests` |  |
 | `tests.quality` | 2 | quick | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | `assertion_density`, `weak_ratio`, `no_assertion` | `mock_density` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | clojure, go, java, javascript, python, rust, typescript |
 <!-- end:check-table -->

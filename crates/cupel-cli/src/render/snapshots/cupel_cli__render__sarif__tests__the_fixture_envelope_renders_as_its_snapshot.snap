@@ -376,7 +376,8 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
               "measured": 11,
               "metric": "crap",
               "per": "symbol",
-              "summary": "CRAP score per function."
+              "summary": "CRAP score per function.",
+              "worst": "highest"
             },
             {
               "check": "static.deps",
@@ -384,7 +385,60 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
               "measured": 0,
               "metric": "coupling",
               "per": "module",
-              "summary": "Afferent plus efferent coupling per module."
+              "summary": "Afferent plus efferent coupling per module.",
+              "worst": "highest"
+            }
+          ],
+          "recommended": 2,
+          "targets": [
+            {
+              "findings": [
+                "fnd_7c2e1a"
+              ],
+              "lang": "rust",
+              "protection": {
+                "coverage": 0.8,
+                "mutation_score": 0.5,
+                "tests": 3
+              },
+              "rank": 1,
+              "recommend": "protect",
+              "target": {
+                "display": "rewrite::Planner::push_limit",
+                "location": {
+                  "col": 5,
+                  "end_col": 6,
+                  "end_line": 171,
+                  "file": "src/rewrite/planner.rs",
+                  "line": 140
+                },
+                "symbol": "sh_4b1d9e0c4b1d9e01"
+              },
+              "values": [
+                {
+                  "check": "static.crap",
+                  "metric": "crap",
+                  "rank": 1,
+                  "value": 42.5
+                }
+              ]
+            },
+            {
+              "findings": [],
+              "lang": "typescript",
+              "protection": {
+                "coverage": null,
+                "mutation_score": null,
+                "tests": null
+              },
+              "rank": 2,
+              "recommend": "simplify",
+              "target": {
+                "display": "web/limits",
+                "location": null,
+                "symbol": null
+              },
+              "values": []
             }
           ],
           "top": 10

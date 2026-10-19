@@ -253,6 +253,18 @@
           "name": "survivors",
           "per": "symbol",
           "summary": "Mutants of the function that survived."
+        },
+        {
+          "name": "mutation_score",
+          "per": "symbol",
+          "protection": "mutation-score",
+          "summary": "Killed / (killed + survived) over the function's mutants; absent when none was scored."
+        },
+        {
+          "name": "tests",
+          "per": "symbol",
+          "protection": "tests",
+          "summary": "Distinct tests run against the function's mutants."
         }
       ],
       "needs": [

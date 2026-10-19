@@ -649,7 +649,8 @@
       "measured": 24,
       "metric": "mock_density",
       "per": "symbol",
-      "summary": "Test doubles per test as a percentage of its doubles plus assertions."
+      "summary": "Test doubles per test as a percentage of its doubles plus assertions.",
+      "worst": "highest"
     }
   ]
 }

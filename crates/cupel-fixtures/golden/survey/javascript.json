@@ -9,6 +9,449 @@
   "oracles": null,
   "plan": null,
   "rankings": {
+    "recommended": 19,
+    "targets": [
+      {
+        "findings": [
+          "fnd_5d3c04"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 1,
+        "recommend": "protect",
+        "target": {
+          "display": "test.math.add.can be called without checking",
+          "location": {
+            "col": 40,
+            "end_col": 4,
+            "end_line": 36,
+            "file": "test/math.test.js",
+            "line": 34
+          },
+          "symbol": "sh_bf0343c3ce7d69fa"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 53,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 53,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 1,
+            "value": 100.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_c68fe9"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 2,
+        "recommend": "protect",
+        "target": {
+          "display": "test.decide.labels through a stub",
+          "location": {
+            "col": 31,
+            "end_col": 2,
+            "end_line": 16,
+            "file": "test/decide.test.js",
+            "line": 13
+          },
+          "symbol": "sh_28e4dbb5c64f2d1e"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 48,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 48,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 4,
+            "value": 50.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_856cac"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 3,
+        "recommend": "protect",
+        "target": {
+          "display": "test.format.money.is not called by accident",
+          "location": {
+            "col": 35,
+            "end_col": 4,
+            "end_line": 13,
+            "file": "test/format.spec.js",
+            "line": 10
+          },
+          "symbol": "sh_5b1225ff4dc742c4"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 50,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 50,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 5,
+            "value": 50.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_93908d"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 4,
+        "recommend": "protect",
+        "target": {
+          "display": "test.math.add.does not return zero",
+          "location": {
+            "col": 30,
+            "end_col": 4,
+            "end_line": 28,
+            "file": "test/math.test.js",
+            "line": 26
+          },
+          "symbol": "sh_402ad96ffaca78ce"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 54,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 54,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 7,
+            "value": 50.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_ecc65a"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 5,
+        "recommend": "protect",
+        "target": {
+          "display": "test.math.add.is truthy for non-zero sums",
+          "location": {
+            "col": 37,
+            "end_col": 4,
+            "end_line": 20,
+            "file": "test/math.test.js",
+            "line": 18
+          },
+          "symbol": "sh_fef9afb424924459"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 56,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 56,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 9,
+            "value": 50.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_b4238a"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 6,
+        "recommend": "protect",
+        "target": {
+          "display": "test.math.add.returns a defined value",
+          "location": {
+            "col": 33,
+            "end_col": 4,
+            "end_line": 24,
+            "file": "test/math.test.js",
+            "line": 22
+          },
+          "symbol": "sh_3b17a5b2b135ff52"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 57,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 57,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 10,
+            "value": 50.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_5cac0a"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 7,
+        "recommend": "protect",
+        "target": {
+          "display": "test.math.parseCents.throws on nothing",
+          "location": {
+            "col": 27,
+            "end_col": 4,
+            "end_line": 46,
+            "file": "test/math.test.js",
+            "line": 44
+          },
+          "symbol": "sh_191786f58d469e46"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 61,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 61,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 13,
+            "value": 50.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_7836df"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 8,
+        "recommend": "protect",
+        "target": {
+          "display": "test.decide.does not call an empty balance rich",
+          "location": {
+            "col": 45,
+            "end_col": 2,
+            "end_line": 11,
+            "file": "test/decide.test.js",
+            "line": 9
+          },
+          "symbol": "sh_7d1b0833554ede31"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 47,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 47,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 18,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_f3fa9c"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 9,
+        "recommend": "protect",
+        "target": {
+          "display": "test.math.quality.returns something",
+          "location": {
+            "col": 27,
+            "end_col": 4,
+            "end_line": 16,
+            "file": "test/math.quality.test.js",
+            "line": 14
+          },
+          "symbol": "sh_ca5f5692309acbb6"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 67,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 67,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 27,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_5d3c04"
+        ],
+        "lang": "javascript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 10,
+        "recommend": "protect",
+        "target": {
+          "display": "test.math.quality.runs without checking",
+          "location": {
+            "col": 31,
+            "end_col": 4,
+            "end_line": 20,
+            "file": "test/math.quality.test.js",
+            "line": 18
+          },
+          "symbol": "sh_bf0343c3ce7d69fa"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 68,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 68,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 28,
+            "value": 0.0
+          }
+        ]
+      }
+    ],
     "top": 10
   },
   "run": {

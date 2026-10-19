@@ -110,6 +110,12 @@
           "name": "uncovered_lines",
           "per": "symbol",
           "summary": "Instrumented lines of the function that never ran."
+        },
+        {
+          "name": "line_coverage",
+          "per": "symbol",
+          "protection": "coverage",
+          "summary": "Instrumented lines of the function that ran, as a ratio of all of them."
         }
       ],
       "needs": [

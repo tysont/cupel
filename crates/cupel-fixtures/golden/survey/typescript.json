@@ -9,6 +9,437 @@
   "oracles": null,
   "plan": null,
   "rankings": {
+    "recommended": 17,
+    "targets": [
+      {
+        "findings": [
+          "fnd_8273ce"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 1,
+        "recommend": "protect",
+        "target": {
+          "display": "math.add.can be called without checking",
+          "location": {
+            "col": 40,
+            "end_col": 4,
+            "end_line": 35,
+            "file": "src/math.test.ts",
+            "line": 33
+          },
+          "symbol": "sh_94c27b48bcd0a5a6"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 39,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 39,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 1,
+            "value": 100.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_3cf2ea"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 2,
+        "recommend": "protect",
+        "target": {
+          "display": "math.add.does not return zero",
+          "location": {
+            "col": 30,
+            "end_col": 4,
+            "end_line": 27,
+            "file": "src/math.test.ts",
+            "line": 25
+          },
+          "symbol": "sh_529308faeb202e08"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 40,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 40,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 5,
+            "value": 50.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_0441b7"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 3,
+        "recommend": "protect",
+        "target": {
+          "display": "math.add.is truthy for non-zero sums",
+          "location": {
+            "col": 37,
+            "end_col": 4,
+            "end_line": 19,
+            "file": "src/math.test.ts",
+            "line": 17
+          },
+          "symbol": "sh_41715ce8ae58f7e5"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 42,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 42,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 7,
+            "value": 50.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_c533c7"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 4,
+        "recommend": "protect",
+        "target": {
+          "display": "math.add.returns a defined value",
+          "location": {
+            "col": 33,
+            "end_col": 4,
+            "end_line": 23,
+            "file": "src/math.test.ts",
+            "line": 21
+          },
+          "symbol": "sh_998f329df407a76d"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 43,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 43,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 8,
+            "value": 50.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_48b390"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 5,
+        "recommend": "protect",
+        "target": {
+          "display": "__tests__.pricing.discounted.tallies stay within bounds",
+          "location": {
+            "col": 38,
+            "end_col": 4,
+            "end_line": 13,
+            "file": "src/__tests__/pricing.test.ts",
+            "line": 9
+          },
+          "symbol": "sh_1e13c9f06bb1fb2d"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 22,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 22,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 10,
+            "value": 33.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_ce66fb"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 6,
+        "recommend": "protect",
+        "target": {
+          "display": "math.quality.returns something",
+          "location": {
+            "col": 27,
+            "end_col": 4,
+            "end_line": 15,
+            "file": "src/math.quality.test.ts",
+            "line": 13
+          },
+          "symbol": "sh_b9803ecda343337b"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 49,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 49,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 19,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_8273ce"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 7,
+        "recommend": "protect",
+        "target": {
+          "display": "math.quality.runs without checking",
+          "location": {
+            "col": 31,
+            "end_col": 4,
+            "end_line": 19,
+            "file": "src/math.quality.test.ts",
+            "line": 17
+          },
+          "symbol": "sh_94c27b48bcd0a5a6"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 50,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 50,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 20,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_6d78b7"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 8,
+        "recommend": "protect",
+        "target": {
+          "display": "test.decide.waits for the ledger server",
+          "location": {
+            "col": 37,
+            "end_col": 2,
+            "end_line": 16,
+            "file": "test/decide.test.ts",
+            "line": 13
+          },
+          "symbol": "sh_26948c57862b645b"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 66,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 66,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 23,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_01e66c"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 9,
+        "recommend": "simplify",
+        "target": {
+          "display": "complexity.label",
+          "location": {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 29,
+            "file": "src/complexity.ts",
+            "line": 3
+          },
+          "symbol": "sh_89983ab5c464c8d1"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 1,
+            "value": 11.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 3,
+            "value": 10.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_b7f885"
+        ],
+        "lang": "typescript",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 10,
+        "recommend": "simplify",
+        "target": {
+          "display": "complexity.settle",
+          "location": {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 45,
+            "file": "src/complexity.ts",
+            "line": 31
+          },
+          "symbol": "sh_7b6a36c322da7c7c"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 2,
+            "value": 6.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 1,
+            "value": 15.0
+          }
+        ]
+      }
+    ],
     "top": 10
   },
   "run": {

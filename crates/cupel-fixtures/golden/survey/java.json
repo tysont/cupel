@@ -9,6 +9,437 @@
   "oracles": null,
   "plan": null,
   "rankings": {
+    "recommended": 17,
+    "targets": [
+      {
+        "findings": [
+          "fnd_a62d91"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 1,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.LedgerQualityTest.classifyingRuns",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 30,
+            "file": "src/test/java/ledger/LedgerQualityTest.java",
+            "line": 27
+          },
+          "symbol": "sh_c4d3c0dfba256d30"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 54,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 54,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 5,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_d54232"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 2,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.LedgerQualityTest.statementsAreNotEmpty",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 25,
+            "file": "src/test/java/ledger/LedgerQualityTest.java",
+            "line": 22
+          },
+          "symbol": "sh_e77f936707c5555a"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 59,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 59,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 11,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_3cef39"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 3,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.LedgerTest.membersGetADiscount",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 35,
+            "file": "src/test/java/ledger/LedgerTest.java",
+            "line": 32
+          },
+          "symbol": "sh_05bc76ac829de082"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 62,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 62,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 14,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_13c85c"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 4,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.LedgerTest.newAccountsAreRegistered",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 40,
+            "file": "src/test/java/ledger/LedgerTest.java",
+            "line": 37
+          },
+          "symbol": "sh_df3b3e8e6c8dfa89"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 63,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 63,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 15,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_d7637c"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 5,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.LedgerTest.newAccountsHaveDistinctIds",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 50,
+            "file": "src/test/java/ledger/LedgerTest.java",
+            "line": 47
+          },
+          "symbol": "sh_80190dc045168527"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 64,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 64,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 16,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_eab9bd"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 6,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.LedgerTest.openingAnAccountDoesNotThrow",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 74,
+            "file": "src/test/java/ledger/LedgerTest.java",
+            "line": 71
+          },
+          "symbol": "sh_102d75c5c156af08"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 66,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 66,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 17,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_dc9cb6"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 7,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.LedgerTest.parsingGarbageFails",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 45,
+            "file": "src/test/java/ledger/LedgerTest.java",
+            "line": 42
+          },
+          "symbol": "sh_4c9cae135381f3a7"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 68,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 68,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 19,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_3dde04"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 8,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.LedgerTest.statementIsMailed",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 64,
+            "file": "src/test/java/ledger/LedgerTest.java",
+            "line": 60
+          },
+          "symbol": "sh_a6c5b500d2dc0fa8"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 69,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 69,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 20,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_3e8c8d"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 9,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.Complexity.label",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 37,
+            "file": "src/main/java/ledger/Complexity.java",
+            "line": 11
+          },
+          "symbol": "sh_2d30bc640f6376a8"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 1,
+            "value": 11.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 3,
+            "value": 10.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_734f42"
+        ],
+        "lang": "java",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 10,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.Complexity.settle",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 54,
+            "file": "src/main/java/ledger/Complexity.java",
+            "line": 40
+          },
+          "symbol": "sh_6519bb6d84c93862"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 2,
+            "value": 6.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 1,
+            "value": 15.0
+          }
+        ]
+      }
+    ],
     "top": 10
   },
   "run": {

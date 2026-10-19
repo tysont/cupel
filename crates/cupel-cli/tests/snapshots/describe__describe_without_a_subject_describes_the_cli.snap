@@ -538,7 +538,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "name": "survey",
         "pending_step": null,
         "stability": "experimental",
-        "summary": "Rank a whole tree without a baseline or gate: the worst targets per metric."
+        "summary": "Rank a whole tree without a baseline or gate: the worst targets per metric, protect-first."
       },
       {
         "name": "explain",

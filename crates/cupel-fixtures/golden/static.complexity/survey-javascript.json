@@ -340,7 +340,8 @@
       "measured": 77,
       "metric": "cyclomatic",
       "per": "symbol",
-      "summary": "Modified cyclomatic complexity per function (a match counts once)."
+      "summary": "Modified cyclomatic complexity per function (a match counts once).",
+      "worst": "highest"
     },
     {
       "check": "static.complexity",
@@ -509,7 +510,8 @@
       "measured": 77,
       "metric": "cognitive",
       "per": "symbol",
-      "summary": "Cognitive complexity per function."
+      "summary": "Cognitive complexity per function.",
+      "worst": "highest"
     }
   ]
 }

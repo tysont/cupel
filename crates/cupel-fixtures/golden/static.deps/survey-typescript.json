@@ -261,7 +261,8 @@
       "measured": 7,
       "metric": "distance",
       "per": "module",
-      "summary": "Distance from the main sequence per module that declares a type and has a coupling."
+      "summary": "Distance from the main sequence per module that declares a type and has a coupling.",
+      "worst": "highest"
     },
     {
       "check": "static.deps",
@@ -430,7 +431,8 @@
       "measured": 22,
       "metric": "coupling",
       "per": "module",
-      "summary": "Afferent plus efferent coupling per module."
+      "summary": "Afferent plus efferent coupling per module.",
+      "worst": "highest"
     },
     {
       "check": "static.deps",
@@ -455,7 +457,8 @@
       "measured": 1,
       "metric": "cycle_size",
       "per": "group",
-      "summary": "Modules in each import cycle."
+      "summary": "Modules in each import cycle.",
+      "worst": "highest"
     }
   ]
 }

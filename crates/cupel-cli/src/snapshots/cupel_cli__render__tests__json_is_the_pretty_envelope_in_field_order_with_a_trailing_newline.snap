@@ -480,6 +480,7 @@ expression: out
         "metric": "crap",
         "per": "symbol",
         "summary": "CRAP score per function.",
+        "worst": "highest",
         "measured": 11,
         "entries": [
           {
@@ -515,8 +516,61 @@ expression: out
         "metric": "coupling",
         "per": "module",
         "summary": "Afferent plus efferent coupling per module.",
+        "worst": "highest",
         "measured": 0,
         "entries": []
+      }
+    ],
+    "recommended": 2,
+    "targets": [
+      {
+        "rank": 1,
+        "recommend": "protect",
+        "lang": "rust",
+        "target": {
+          "display": "rewrite::Planner::push_limit",
+          "symbol": "sh_4b1d9e0c4b1d9e01",
+          "location": {
+            "file": "src/rewrite/planner.rs",
+            "line": 140,
+            "col": 5,
+            "end_line": 171,
+            "end_col": 6
+          }
+        },
+        "protection": {
+          "mutation_score": 0.5,
+          "coverage": 0.8,
+          "tests": 3
+        },
+        "values": [
+          {
+            "check": "static.crap",
+            "metric": "crap",
+            "value": 42.5,
+            "rank": 1
+          }
+        ],
+        "findings": [
+          "fnd_7c2e1a"
+        ]
+      },
+      {
+        "rank": 2,
+        "recommend": "simplify",
+        "lang": "typescript",
+        "target": {
+          "display": "web/limits",
+          "symbol": null,
+          "location": null
+        },
+        "protection": {
+          "mutation_score": null,
+          "coverage": null,
+          "tests": null
+        },
+        "values": [],
+        "findings": []
       }
     ]
   },

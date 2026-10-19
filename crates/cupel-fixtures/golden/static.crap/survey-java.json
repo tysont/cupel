@@ -22,7 +22,8 @@
       "measured": 0,
       "metric": "crap",
       "per": "symbol",
-      "summary": "CRAP per function."
+      "summary": "CRAP per function.",
+      "worst": "highest"
     }
   ]
 }

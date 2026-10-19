@@ -391,7 +391,8 @@
       "measured": 4,
       "metric": "cluster_size",
       "per": "group",
-      "summary": "Symbols in each clone group: 2 for a pair, more for a cluster."
+      "summary": "Symbols in each clone group: 2 for a pair, more for a cluster.",
+      "worst": "highest"
     }
   ]
 }

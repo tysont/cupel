@@ -9,6 +9,437 @@
   "oracles": null,
   "plan": null,
   "rankings": {
+    "recommended": 14,
+    "targets": [
+      {
+        "findings": [
+          "fnd_56aeba"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 1,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.core-test/members-get-a-discount",
+          "location": {
+            "col": 1,
+            "end_col": 49,
+            "end_line": 13,
+            "file": "test/ledger/core_test.clj",
+            "line": 12
+          },
+          "symbol": "sh_faed73f9978222db"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 31,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 31,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 5,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_216445"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 2,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.core-test/new-accounts-are-registered",
+          "location": {
+            "col": 1,
+            "end_col": 54,
+            "end_line": 17,
+            "file": "test/ledger/core_test.clj",
+            "line": 15
+          },
+          "symbol": "sh_e92d0c47ce81ebf1"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 32,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 32,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 6,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_5206ff"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 3,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.core-test/new-accounts-have-distinct-ids",
+          "location": {
+            "col": 1,
+            "end_col": 81,
+            "end_line": 23,
+            "file": "test/ledger/core_test.clj",
+            "line": 22
+          },
+          "symbol": "sh_4586e4d2c1ca4d1b"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 33,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 33,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 7,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_2de49e"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 4,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.core-test/opening-an-account-does-not-throw",
+          "location": {
+            "col": 1,
+            "end_col": 29,
+            "end_line": 34,
+            "file": "test/ledger/core_test.clj",
+            "line": 33
+          },
+          "symbol": "sh_552f51a88ec35760"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 34,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 34,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 8,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_baac8e"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 5,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.core-test/parsing-garbage-fails",
+          "location": {
+            "col": 1,
+            "end_col": 42,
+            "end_line": 20,
+            "file": "test/ledger/core_test.clj",
+            "line": 19
+          },
+          "symbol": "sh_f9cb8cfd8bbb9998"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 36,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 36,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 10,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_a1accb"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 6,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.quality-test/classifying-runs",
+          "location": {
+            "col": 1,
+            "end_col": 28,
+            "end_line": 17,
+            "file": "test/ledger/quality_test.clj",
+            "line": 16
+          },
+          "symbol": "sh_cbfe659c4025795e"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 64,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 64,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 16,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_566d21"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 7,
+        "recommend": "protect",
+        "target": {
+          "display": "ledger.quality-test/statements-are-not-empty",
+          "location": {
+            "col": 1,
+            "end_col": 57,
+            "end_line": 14,
+            "file": "test/ledger/quality_test.clj",
+            "line": 13
+          },
+          "symbol": "sh_7176655bab6a5cd8"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 72,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 72,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 22,
+            "value": 0.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_a93b67"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 8,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.complexity/label",
+          "location": {
+            "col": 1,
+            "end_col": 19,
+            "end_line": 18,
+            "file": "src/ledger/complexity.clj",
+            "line": 4
+          },
+          "symbol": "sh_3f6b8dd416106191"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 1,
+            "value": 11.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 2,
+            "value": 10.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_e727b9"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 9,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.complexity/settle",
+          "location": {
+            "col": 1,
+            "end_col": 15,
+            "end_line": 30,
+            "file": "src/ledger/complexity.clj",
+            "line": 20
+          },
+          "symbol": "sh_44cec65dd328a478"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 2,
+            "value": 6.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 1,
+            "value": 15.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_bc1c58"
+        ],
+        "lang": "clojure",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 10,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.quality-test/computed-entries-count-toward-the-balance",
+          "location": {
+            "col": 1,
+            "end_col": 47,
+            "end_line": 32,
+            "file": "test/ledger/quality_test.clj",
+            "line": 29
+          },
+          "symbol": "sh_4a961e99e251307b"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 7,
+            "value": 3.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 5,
+            "value": 3.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 17,
+            "value": 0.0
+          }
+        ]
+      }
+    ],
     "top": 10
   },
   "run": {

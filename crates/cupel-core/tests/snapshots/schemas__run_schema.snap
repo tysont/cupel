@@ -1956,6 +1956,18 @@ expression: pretty(&schema)
           "description": "What one value describes (ADR-062).",
           "$ref": "#/$defs/MetricPer"
         },
+        "protection": {
+          "description": "Which protection value a per-target metric is, for `survey`'s protect-first targets;\nlower is weaker (ADR-132). Absent for every other metric.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProtectionMetric"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-cupel-optional": true
+        },
         "summary": {
           "type": "string"
         }
@@ -2318,6 +2330,59 @@ expression: pretty(&schema)
       "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
       "type": "string"
     },
+    "Protection": {
+      "description": "The protection values measured for a target; null where nothing measured one.",
+      "type": "object",
+      "properties": {
+        "coverage": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "mutation_score": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "tests": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "coverage",
+        "mutation_score",
+        "tests"
+      ]
+    },
+    "ProtectionMetric": {
+      "description": "How well tests protect a target, as a per-target metric reports it; lower is weaker\n(ADR-132).",
+      "oneOf": [
+        {
+          "description": "The killed ratio of the target's scored mutants.",
+          "type": "string",
+          "const": "mutation-score"
+        },
+        {
+          "description": "The ratio of the target's instrumented lines a test ran.",
+          "type": "string",
+          "const": "coverage"
+        },
+        {
+          "description": "How many tests ran against the target.",
+          "type": "string",
+          "const": "tests"
+        }
+      ]
+    },
     "RankedTarget": {
       "type": "object",
       "properties": {
@@ -2325,7 +2390,7 @@ expression: pretty(&schema)
           "$ref": "#/$defs/LangId"
         },
         "rank": {
-          "description": "1 is the highest value.",
+          "description": "1 is the worst value.",
           "type": "integer",
           "format": "uint64",
           "minimum": 0
@@ -2353,7 +2418,7 @@ expression: pretty(&schema)
           "$ref": "#/$defs/CheckId"
         },
         "entries": {
-          "description": "The highest values first, at most `top`.",
+          "description": "The worst values first, at most `top`.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/RankedTarget"
@@ -2374,6 +2439,10 @@ expression: pretty(&schema)
         "summary": {
           "description": "The metric's summary from the manifest.",
           "type": "string"
+        },
+        "worst": {
+          "description": "Which end of the metric is worse, and so ranks first.",
+          "$ref": "#/$defs/Worst"
         }
       },
       "required": [
@@ -2382,11 +2451,12 @@ expression: pretty(&schema)
         "measured",
         "metric",
         "per",
-        "summary"
+        "summary",
+        "worst"
       ]
     },
     "Rankings": {
-      "description": "What `survey` adds to its envelope: the highest values of every ranking dimension.",
+      "description": "What `survey` adds to its envelope: the worst values of every ranking dimension, and the\nsymbols to act on joined across them, protect-first (ADR-132).",
       "type": "object",
       "properties": {
         "dimensions": {
@@ -2395,8 +2465,21 @@ expression: pretty(&schema)
             "$ref": "#/$defs/RankingDimension"
           }
         },
+        "recommended": {
+          "description": "How many symbols have a finding whose action protects or simplifies them.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "targets": {
+          "description": "Those symbols, the ones to protect first, at most `top`.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RecommendedTarget"
+          }
+        },
         "top": {
-          "description": "The most entries a dimension lists.",
+          "description": "The most entries a dimension, and `targets`, lists.",
           "type": "integer",
           "format": "uint64",
           "minimum": 0
@@ -2404,7 +2487,76 @@ expression: pretty(&schema)
       },
       "required": [
         "dimensions",
+        "recommended",
+        "targets",
         "top"
+      ]
+    },
+    "Recommendation": {
+      "description": "What to do about a target, protect-first: write or strengthen the tests that protect it\nbefore refactoring it (ADR-132).",
+      "oneOf": [
+        {
+          "description": "A finding asks for a test (`write_test`, `strengthen_assertion`).",
+          "type": "string",
+          "const": "protect"
+        },
+        {
+          "description": "A finding asks for a refactoring (`reduce_complexity`, `refactor_extract`).",
+          "type": "string",
+          "const": "simplify"
+        },
+        {
+          "description": "Both: protect it first, then simplify it.",
+          "type": "string",
+          "const": "both"
+        }
+      ]
+    },
+    "RecommendedTarget": {
+      "description": "One symbol joined across the ranking dimensions, with what protects it and what to do.",
+      "type": "object",
+      "properties": {
+        "findings": {
+          "description": "The findings that recommend it, in envelope order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FindingId"
+          }
+        },
+        "lang": {
+          "$ref": "#/$defs/LangId"
+        },
+        "protection": {
+          "$ref": "#/$defs/Protection"
+        },
+        "rank": {
+          "description": "1 is the first to act on.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "recommend": {
+          "$ref": "#/$defs/Recommendation"
+        },
+        "target": {
+          "$ref": "#/$defs/Target"
+        },
+        "values": {
+          "description": "Every per-target value measured for the symbol, in dimension order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TargetValue"
+          }
+        }
+      },
+      "required": [
+        "findings",
+        "lang",
+        "protection",
+        "rank",
+        "recommend",
+        "target",
+        "values"
       ]
     },
     "RuleOutcome": {
@@ -3030,6 +3182,34 @@ expression: pretty(&schema)
         "symbol"
       ]
     },
+    "TargetValue": {
+      "description": "One value of a target in one dimension, with the target's rank there.",
+      "type": "object",
+      "properties": {
+        "check": {
+          "$ref": "#/$defs/CheckId"
+        },
+        "metric": {
+          "type": "string"
+        },
+        "rank": {
+          "description": "Its rank among every target the dimension measured; 1 is the worst.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "value": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "check",
+        "metric",
+        "rank",
+        "value"
+      ]
+    },
     "TestCommand": {
       "description": "A command that runs one language's impacted tests in one project root.",
       "type": "object",
@@ -3299,6 +3479,14 @@ expression: pretty(&schema)
         "fact",
         "languages",
         "verb"
+      ]
+    },
+    "Worst": {
+      "description": "Which end of a ranking dimension is worse: `lowest` for a protection metric, `highest` for\nevery other (ADR-132).",
+      "type": "string",
+      "enum": [
+        "highest",
+        "lowest"
       ]
     }
   }
