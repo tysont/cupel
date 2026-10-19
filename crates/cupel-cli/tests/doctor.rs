@@ -86,8 +86,49 @@ fn an_unsatisfied_required_version_exits_3_asking_to_install_cupel() {
     );
     assert_eq!(
         finding["action"]["summary"],
-        json!("Install a cupel matching `>=99.0`, or change required_version.")
+        json!(format!(
+            "Install a cupel matching `>=99.0`, or change required_version. Live install routes: {}.",
+            install_commands(true).join("; ")
+        ))
     );
+}
+
+/// The commands of the install routes `cupel describe` lists as live (or not), each in backticks.
+fn install_commands(live: bool) -> Vec<String> {
+    support::described(&[])["install_routes"]
+        .as_array()
+        .expect("install_routes")
+        .iter()
+        .filter(|route| route["live"] == json!(live))
+        .map(|route| format!("`{}`", route["command"].as_str().expect("command")))
+        .collect()
+}
+
+/// An agent whose binary is too old learns every route that installs another today, and none that
+/// does not work yet (ADR-128).
+#[test]
+fn the_version_finding_names_every_live_install_route_and_no_other() {
+    let finding = assert_environment(
+        &doctor_with("cupel.toml", "required_version = \">=99.0\"\n"),
+        "doctor.version-unsatisfied",
+    );
+    let summary = finding["action"]["summary"]
+        .as_str()
+        .expect("summary")
+        .to_owned();
+    let live = install_commands(true);
+    let named: Vec<&String> = live
+        .iter()
+        .filter(|command| summary.contains(*command))
+        .collect();
+    let pending = install_commands(false);
+    let misnamed: Vec<&String> = pending
+        .iter()
+        .filter(|command| summary.contains(*command))
+        .collect();
+    assert!(!live.is_empty() && !pending.is_empty());
+    assert_eq!(named, live.iter().collect::<Vec<_>>());
+    assert_eq!(misnamed, Vec::<&String>::new());
 }
 
 #[test]

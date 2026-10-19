@@ -47,7 +47,9 @@ fn cli() -> Value {
         "global_flags": [flag()], "flags": [],
         "exit_codes": [{"code": 2, "name": "usage", "meaning": "Bad flags or config; the envelope names the fix.", "stability": "stable"}],
         "schemas": [{"name": "run", "url": "https://tysont.github.io/cupel/schema/v1/run.json", "stability": "experimental"}],
-        "config_precedence": ["flags", "env", "profile", "cupel.toml", "defaults"]
+        "config_precedence": ["flags", "env", "profile", "cupel.toml", "defaults"],
+        "install_routes": [{"name": "npm", "command": "npx cupel", "platforms": ["linux", "macos"], "live": false,
+                            "pending": "once the `cupel` package is published to npm", "stability": "experimental"}]
     })
 }
 

@@ -61,17 +61,21 @@ make install            # cargo install --path crates/cupel-cli
 
 The binary has no runtime dependencies except `git`, which Cupel calls for `--changed` and `--base` scopes.
 
-Every other route installs a release binary from GitHub Releases, checked against the release's `SHA256SUMS`. The installers are in `dist/` and are tested in CI against a fake release; none has a published release to install yet:
+Every other route installs a release binary from GitHub Releases, checked against the release's `SHA256SUMS`; `<target>` is one of the targets above. The installers are in `dist/` and are tested in CI against a fake release. The table is the binary's own: `cupel describe` lists the same routes as `install_routes`, and `doctor`'s `doctor.version-unsatisfied` finding names the ones available now.
 
-| Route | Command | Available |
-|---|---|---|
-| From source | `make install` in a clone, as above | now |
-| Install script | `curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh \| sh` | after the first release tag |
-| cargo-binstall | `cargo binstall --git https://github.com/tysont/cupel cupel-cli` | after the first release tag |
-| Homebrew | `brew install tysont/cupel/cupel` | once the `tysont/homebrew-cupel` tap is published |
-| npm | `npx cupel` | once the `cupel` package is published to npm |
-| pipx | `pipx install cupel` | once the `cupel` package is published to PyPI |
-| `cupel.dev` | `curl -fsSL https://cupel.dev/install \| sh` | once the domain serves the install script |
+<!-- generated:install-routes -->
+| Route | Command | Platforms | Available |
+| --- | --- | --- | --- |
+| Install script | `curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh \| sh` | Linux, macOS | now |
+| cargo-binstall | `cargo binstall --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
+| Release archive | `gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz'` | Linux, macOS | now |
+| From source | `cargo install --locked --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
+| Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap |
+| npm | `npx cupel` | Linux, macOS | once the `cupel` package is published to npm |
+| pipx | `pipx install cupel` | Linux, macOS | once Cupel's package is on PyPI; the `cupel` there is another project's |
+| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the crates are published to crates.io |
+| cupel.dev | `curl -fsSL https://cupel.dev/install \| sh` | Linux, macOS | once cupel.dev serves the install script |
+<!-- end:install-routes -->
 
 - **Install script** (POSIX `sh`): installs Linux x86_64/aarch64 and macOS arm64/x86_64 binaries into `~/.local/bin`, or `CUPEL_INSTALL_DIR`, and prints the line to add to your `PATH` when that directory is not on it. `CUPEL_VERSION=0.1.0` installs that release instead of the latest. It needs `curl` or `wget`, `tar`, and `sha256sum` or `shasum`.
 - **npm and pipx**: the package's `cupel` command downloads the binary of the package's own version on first run into `CUPEL_CACHE_DIR`, else `~/.cache/cupel` (`%LOCALAPPDATA%\cupel` on Windows), then runs it with your arguments, stdio, and exit code. When the binary cannot be downloaded or its checksum differs, it prints why and exits 3. npm needs Node 18 or newer; pipx, Python 3.9 or newer.
@@ -1473,7 +1477,7 @@ ref = "v1.2.0"
 depth = "quick"
 ```
 
-**`required_version`** is a Cargo version requirement (`>=0.4`, `^0.4`, `~0.4.1`, comma-joined ranges) on the `cupel` binary. When the binary does not satisfy it, `doctor` reports `doctor.version-unsatisfied` with the required and actual versions and an `install_tool` action, and every verb that reads or grades the repository (all but `describe`, `doctor`, `init`, `suppress`, and `serve`) refuses with that finding and exit 3; a requirement that does not parse is `doctor.version-invalid`, exit 2 outside `doctor`. A suppressed version finding (`cupel suppress`) refuses nothing.
+**`required_version`** is a Cargo version requirement (`>=0.4`, `^0.4`, `~0.4.1`, comma-joined ranges) on the `cupel` binary. When the binary does not satisfy it, `doctor` reports `doctor.version-unsatisfied` with the required and actual versions and an `install_tool` action naming the [install routes](#install) available now, and every verb that reads or grades the repository (all but `describe`, `doctor`, `init`, `suppress`, and `serve`) refuses with that finding and exit 3; a requirement that does not parse is `doctor.version-invalid`, exit 2 outside `doctor`. A suppressed version finding (`cupel suppress`) refuses nothing.
 
 **Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. Each check declares its settings in its manifest, and `cupel describe <check>` lists them with their defaults; a key a check does not declare is a configuration error that lists the ones it does. The checks that take settings:
 

@@ -81,10 +81,10 @@ pub use delta::{Deltas, deltas};
 pub use describe::{
     AgentDescription, AllDescription, ArgDescription, CheckDescription, CheckSupport,
     CliDescription, CommandDescription, CommandSummary, CommandTemplate, Description, Example,
-    ExitCodeDescription, FactDescription, FactProducers, FindingDescription, LanguageDescription,
-    LanguageProducers, LanguageSummary, LanguageSupport, LanguagesDescription, LauncherDescription,
-    MatrixCell, MatrixDescription, ProducerDescription, SchemaDescription, SchemaRef,
-    SupportDescription, ToolDescription, ToolchainDescription, ValueType, VerbSupport,
+    ExitCodeDescription, FactDescription, FactProducers, FindingDescription, InstallRoute,
+    LanguageDescription, LanguageProducers, LanguageSummary, LanguageSupport, LanguagesDescription,
+    LauncherDescription, MatrixCell, MatrixDescription, ProducerDescription, SchemaDescription,
+    SchemaRef, SupportDescription, ToolDescription, ToolchainDescription, ValueType, VerbSupport,
 };
 pub use divergence::{Answer, ComparedOracle, Divergence, DivergenceResults, EntryComparison};
 pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPlan};

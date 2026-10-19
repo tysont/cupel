@@ -13,7 +13,7 @@
         "hints": {},
         "kind": "install_tool",
         "priority": 1,
-        "summary": "Install a cupel matching `>=99.0`, or change required_version."
+        "summary": "Install a cupel matching `>=99.0`, or change required_version. Live install routes: `curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh | sh`; `cargo binstall --git https://github.com/tysont/cupel cupel-cli`; `gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz'`; `cargo install --locked --git https://github.com/tysont/cupel cupel-cli`."
       },
       "check": "doctor",
       "confidence": 1.0,

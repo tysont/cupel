@@ -75,10 +75,9 @@ fn the_refusal_is_doctors_finding_with_the_required_and_actual_version() {
         json!({"required": ">=99.0", "actual": VERSION})
     );
     assert_eq!(finding["action"]["kind"], json!("install_tool"));
-    assert_eq!(
-        finding["action"]["summary"],
-        json!("Install a cupel matching `>=99.0`, or change required_version.")
-    );
+    let envelope = requiring(">=99.0").run(&["doctor"]).envelope();
+    let doctor = support::finding(&envelope, &version_id("doctor.version-unsatisfied"));
+    assert_eq!(finding["action"]["summary"], doctor["action"]["summary"]);
 }
 
 #[test]

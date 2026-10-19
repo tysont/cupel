@@ -4,9 +4,9 @@ use std::fmt::Write as _;
 
 use cupel_core::{
     AllDescription, ArgDescription, CheckDescription, CliDescription, CommandDescription,
-    Description, FactDescription, FindingDescription, LanguageDescription, LanguagesDescription,
-    Manifest, MatrixDescription, ProducerDescription, SchemaDescription, Stability,
-    SupportDescription, ToolDescription, ToolchainDescription, ValueType,
+    Description, FactDescription, FindingDescription, InstallRoute, LanguageDescription,
+    LanguagesDescription, Manifest, MatrixDescription, ProducerDescription, SchemaDescription,
+    SchemaRef, Stability, SupportDescription, ToolDescription, ToolchainDescription, ValueType,
 };
 
 use super::{Paint, continued, name};
@@ -510,9 +510,28 @@ fn render_cli(cli: &CliDescription, paint: &Paint) -> String {
             stability(code.stability, reference)
         );
     }
+    schema_refs(&mut out, &cli.schemas, reference, paint);
+    let precedence: Vec<String> = cli.config_precedence.iter().map(|s| name(*s)).collect();
+    let _ = writeln!(
+        out,
+        "\n{}\n  {}",
+        paint.bold("configuration precedence"),
+        precedence.join(" > ")
+    );
+    install_routes(&mut out, &cli.install_routes, paint);
+    out
+}
+
+/// One line per published schema: its name, URL, and stability where it differs from the CLI's.
+fn schema_refs(
+    out: &mut String,
+    schemas: &[SchemaRef],
+    reference: Option<Stability>,
+    paint: &Paint,
+) {
     let _ = writeln!(out, "\n{}", paint.bold("schemas"));
-    let width = column(cli.schemas.iter().map(|schema| schema.name.len()));
-    for schema in &cli.schemas {
+    let width = column(schemas.iter().map(|schema| schema.name.len()));
+    for schema in schemas {
         let _ = writeln!(
             out,
             "  {:<width$}  {}{}",
@@ -521,14 +540,27 @@ fn render_cli(cli: &CliDescription, paint: &Paint) -> String {
             stability(schema.stability, reference)
         );
     }
-    let precedence: Vec<String> = cli.config_precedence.iter().map(|s| name(*s)).collect();
-    let _ = writeln!(
-        out,
-        "\n{}\n  {}",
-        paint.bold("configuration precedence"),
-        precedence.join(" > ")
-    );
-    out
+}
+
+/// One line per install route: its name, command, platforms, and what it waits for when it is
+/// not live (ADR-128).
+fn install_routes(out: &mut String, routes: &[InstallRoute], paint: &Paint) {
+    let _ = writeln!(out, "\n{}", paint.bold("install routes"));
+    let width = column(routes.iter().map(|route| route.name.len()));
+    for route in routes {
+        let pending = route
+            .pending
+            .as_deref()
+            .map(|pending| format!(" · {pending}"))
+            .unwrap_or_default();
+        let _ = writeln!(
+            out,
+            "  {:<width$}  {} · {}{pending}",
+            route.name,
+            route.command,
+            route.platforms.join(", ")
+        );
+    }
 }
 
 /// A command at `indent`, then its arguments, examples, and sub-verbs (each one level deeper).
@@ -735,6 +767,7 @@ mod tests {
                 "exit codes",
                 "schemas",
                 "configuration precedence",
+                "install routes",
                 "cupel init",
                 "cupel doctor",
                 "cupel describe",

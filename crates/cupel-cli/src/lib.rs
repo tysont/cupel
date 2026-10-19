@@ -32,6 +32,7 @@ mod refusal;
 mod registry;
 mod render;
 mod resources;
+mod routes;
 mod run;
 mod scaffold;
 mod serve;
