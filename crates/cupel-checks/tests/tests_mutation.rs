@@ -8,8 +8,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts, Finding, LangId,
-    MetricPer, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, ProducerId, Scope,
-    Severity,
+    MetricPer, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, ProducerId,
+    ProtectionMetric, Scope, Severity,
 };
 use serde_json::{Value, json};
 use support::{Recorded, Shape, combined, language};
@@ -150,6 +150,22 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("schemata", MetricPer::Scope),
             ("fallback", MetricPer::Scope),
             ("survivors", MetricPer::Symbol),
+            ("mutation_score", MetricPer::Symbol),
+            ("tests", MetricPer::Symbol),
+        ]
+    );
+    let protection: Vec<(&str, Option<ProtectionMetric>)> = check
+        .manifest()
+        .metrics
+        .iter()
+        .filter(|metric| metric.protection.is_some())
+        .map(|metric| (metric.name.as_str(), metric.protection))
+        .collect();
+    assert_eq!(
+        protection,
+        [
+            ("mutation_score", Some(ProtectionMetric::MutationScore)),
+            ("tests", Some(ProtectionMetric::Tests)),
         ]
     );
 }
@@ -361,7 +377,53 @@ fn only_mutants_of_symbols_in_scope_are_reported_and_ranked() {
     assert!(recorded.findings.is_empty());
     assert_eq!(result.score.unwrap().n, 0);
     let (_, inside) = run(vec![mutant(6, 14, ">=", ">", MutantOutcome::Survived)]);
-    assert_eq!(inside.measured(), [("survivors", "discount.discount", 1.0)]);
+    assert_eq!(
+        inside.measured(),
+        [
+            ("survivors", "discount.discount", 1.0),
+            ("mutation_score", "discount.discount", 0.0),
+            ("tests", "discount.discount", 1.0),
+        ]
+    );
+}
+
+#[test]
+fn each_function_is_measured_for_its_killed_ratio_and_the_tests_run_against_it() {
+    let mut also_small = mutant(6, 14, ">=", "<", MutantOutcome::Killed);
+    also_small
+        .tests
+        .push("tests/test_small.py::test_small".to_owned());
+    let mut equivalent = mutant(8, 12, "*", "/", MutantOutcome::Survived);
+    equivalent.equivalent = Some("multiplies by one".to_owned());
+    let (_, recorded) = run(vec![
+        mutant(6, 14, ">=", ">", MutantOutcome::Survived),
+        also_small,
+        mutant(7, 16, "-", "+", MutantOutcome::Killed),
+        mutant(7, 9, "return", "pass", MutantOutcome::Timeout),
+        equivalent,
+    ]);
+    assert_eq!(
+        recorded.measured(),
+        [
+            ("survivors", "discount.discount", 1.0),
+            ("mutation_score", "discount.discount", 2.0 / 3.0),
+            ("tests", "discount.discount", 2.0),
+        ]
+    );
+}
+
+#[test]
+fn a_function_with_no_scored_mutant_has_no_killed_ratio() {
+    let mut uncovered = mutant(6, 14, ">=", ">", MutantOutcome::Uncovered);
+    uncovered.tests.clear();
+    let (_, recorded) = run(vec![uncovered]);
+    assert_eq!(
+        recorded.measured(),
+        [
+            ("survivors", "discount.discount", 0.0),
+            ("tests", "discount.discount", 0.0),
+        ]
+    );
 }
 
 #[test]

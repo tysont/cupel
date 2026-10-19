@@ -1,8 +1,8 @@
 // ABOUTME: Builders every native check's manifest and evidence share: finding kinds whose evidence is a
-// ABOUTME: JSON Schema, `scope` and per-target metric specs, settings, and evidence (ADR-012, ADR-062, ADR-111).
+// ABOUTME: JSON Schema, `scope`, per-target, and protection metric specs, settings, and evidence (ADR-012, ADR-062, ADR-111, ADR-132).
 use cupel_core::{
     ActionKind, CheckId, CostClass, FactKind, FindingKindSpec, Manifest, MetricPer, MetricSpec,
-    SettingSpec, Stability, Tier,
+    ProtectionMetric, SettingSpec, Stability, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -34,6 +34,15 @@ pub fn ranked(name: &str, per: MetricPer, summary: &str) -> MetricSpec {
         summary: summary.to_owned(),
         per,
         protection: None,
+    }
+}
+
+/// A per-symbol metric that says how well tests protect the symbol, lower weaker: a `survey`
+/// ranking dimension ranked lowest first, and a value of each protect-first target (ADR-132).
+pub fn protection(name: &str, protection: ProtectionMetric, summary: &str) -> MetricSpec {
+    MetricSpec {
+        protection: Some(protection),
+        ..ranked(name, MetricPer::Symbol, summary)
     }
 }
 

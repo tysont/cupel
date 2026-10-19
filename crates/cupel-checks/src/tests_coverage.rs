@@ -6,14 +6,14 @@ use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{NormTree, SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
-    Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Plan, Result, Scope, Score,
-    Severity, Stability, SymbolHash, Tier,
+    Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Plan, ProtectionMetric, Result,
+    Scope, Score, Severity, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::finding::{SymbolFinding, with_nearest_test};
-use crate::manifest::{kind, metric, ranked};
+use crate::manifest::{kind, metric, protection, ranked};
 use crate::metrics::{hashes_by_symbol, sum, symbol_lines, symbol_target, weighted_mean};
 use crate::outcome;
 use crate::settings::Limits;
@@ -113,6 +113,11 @@ fn metrics() -> Vec<MetricSpec> {
             "uncovered_lines",
             MetricPer::Symbol,
             "Instrumented lines of the function that never ran.",
+        ),
+        protection(
+            "line_coverage",
+            ProtectionMetric::Coverage,
+            "Instrumented lines of the function that ran, as a ratio of all of them.",
         ),
     ]
 }
@@ -296,6 +301,11 @@ impl TestsCoverage {
         sink.measure(Measurement {
             metric: "uncovered_lines".to_owned(),
             value: f64::from(measured.lines - measured.covered),
+            target: symbol_target(symbol, hash),
+        });
+        sink.measure(Measurement {
+            metric: "line_coverage".to_owned(),
+            value: f64::from(measured.covered) / f64::from(measured.lines),
             target: symbol_target(symbol, hash),
         });
         if measured.covered == 0 {

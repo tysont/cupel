@@ -1,20 +1,20 @@
 // ABOUTME: `tests.mutation`: scores MutationOutcomes, whoever produced them (ADR-080): surviving mutants as failures at
 // ABOUTME: their site, timeouts and uncovered sites as notes, ADR-004's equivalents, ADR-082's fallbacks, killed ratio.
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::syntax::{SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
     Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant, MutantOutcome,
-    MutationOutcomes, MutationStrategy, Plan, Result, Scope, Score, Severity, SiteHash, Stability,
-    SymbolHash, Tier,
+    MutationOutcomes, MutationStrategy, Plan, ProtectionMetric, Result, Scope, Score, Severity,
+    SiteHash, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::Value;
 
 use crate::finding::{SymbolFinding, with_nearest_test};
-use crate::manifest::{kind, metric, ranked};
+use crate::manifest::{kind, metric, protection, ranked};
 use crate::metrics::{scored, sum, symbol_target, weighted_mean};
 use crate::outcome;
 use crate::settings::Limits;
@@ -157,11 +157,23 @@ fn metrics() -> Vec<MetricSpec> {
     .into_iter()
     .map(|(name, summary)| metric(name, summary))
     .collect();
-    metrics.push(ranked(
-        "survivors",
-        MetricPer::Symbol,
-        "Mutants of the function that survived.",
-    ));
+    metrics.extend([
+        ranked(
+            "survivors",
+            MetricPer::Symbol,
+            "Mutants of the function that survived.",
+        ),
+        protection(
+            "mutation_score",
+            ProtectionMetric::MutationScore,
+            "Killed / (killed + survived) over the function's mutants; absent when none was scored.",
+        ),
+        protection(
+            "tests",
+            ProtectionMetric::Tests,
+            "Distinct tests run against the function's mutants.",
+        ),
+    ]);
     metrics
 }
 
@@ -195,8 +207,7 @@ impl Check for TestsMutation {
             .collect();
         let conventions = facts.get::<TestConventions>().ok();
         let mut tally = Tally::default();
-        let mut survivors: BTreeMap<&SymbolKey, (&SymbolDef, Option<&SymbolHash>, u32)> =
-            BTreeMap::new();
+        let mut by_symbol: BTreeMap<&SymbolKey, Protection<'_>> = BTreeMap::new();
         for mutant in outcomes
             .mutants
             .iter()
@@ -206,22 +217,17 @@ impl Check for TestsMutation {
                 continue;
             };
             tally.count(mutant);
-            let entry =
-                survivors
-                    .entry(&mutant.symbol)
-                    .or_insert((symbol, mutant.symbol_hash.as_ref(), 0));
-            entry.2 += u32::from(surviving(mutant));
+            by_symbol
+                .entry(&mutant.symbol)
+                .or_insert_with(|| Protection::of(symbol, mutant.symbol_hash.as_ref()))
+                .count(mutant);
             if let Some(finding) = self.finding(mutant, symbol, conventions) {
                 tally.findings += 1;
                 sink.emit(Event::Finding(Box::new(finding)));
             }
         }
-        for (symbol, hash, survived) in survivors.into_values() {
-            sink.measure(Measurement {
-                metric: "survivors".to_owned(),
-                value: f64::from(survived),
-                target: symbol_target(symbol, hash),
-            });
+        for protection in by_symbol.values() {
+            protection.measure(sink);
         }
         Ok(tally.result(&self.manifest))
     }
@@ -244,6 +250,56 @@ impl Check for TestsMutation {
 /// Whether `mutant` survived and counts against the score: not possibly equivalent.
 fn surviving(mutant: &Mutant) -> bool {
     mutant.outcome == MutantOutcome::Survived && mutant.equivalent.is_none()
+}
+
+/// How well one function's tests protect it, from its mutants (ADR-132).
+struct Protection<'a> {
+    symbol: &'a SymbolDef,
+    hash: Option<&'a SymbolHash>,
+    killed: u32,
+    survived: u32,
+    tests: BTreeSet<&'a str>,
+}
+
+impl<'a> Protection<'a> {
+    fn of(symbol: &'a SymbolDef, hash: Option<&'a SymbolHash>) -> Self {
+        Self {
+            symbol,
+            hash,
+            killed: 0,
+            survived: 0,
+            tests: BTreeSet::new(),
+        }
+    }
+
+    fn count(&mut self, mutant: &'a Mutant) {
+        self.survived += u32::from(surviving(mutant));
+        self.killed += u32::from(mutant.outcome == MutantOutcome::Killed);
+        self.tests.extend(mutant.tests.iter().map(String::as_str));
+    }
+
+    /// Reports its survivors, its killed ratio when a mutant was scored, and its tests.
+    fn measure(&self, sink: &mut dyn EventSink) {
+        let scored = self.killed + self.survived;
+        let tests = u32::try_from(self.tests.len()).unwrap_or(u32::MAX);
+        let values = [
+            ("survivors", Some(f64::from(self.survived))),
+            (
+                "mutation_score",
+                (scored > 0).then(|| f64::from(self.killed) / f64::from(scored)),
+            ),
+            ("tests", Some(f64::from(tests))),
+        ];
+        for (metric, value) in values {
+            if let Some(value) = value {
+                sink.measure(Measurement {
+                    metric: metric.to_owned(),
+                    value,
+                    target: symbol_target(self.symbol, self.hash),
+                });
+            }
+        }
+    }
 }
 
 /// What the mutants in scope added up to.

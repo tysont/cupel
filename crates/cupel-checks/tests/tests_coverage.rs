@@ -9,7 +9,7 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, Check, CheckId, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts,
-    Finding, FindingId, LangId, MetricPer, Scope, Severity,
+    Finding, FindingId, LangId, MetricPer, ProtectionMetric, Scope, Severity,
 };
 use serde_json::{Value, json};
 use support::{Recorded, combined, language};
@@ -155,9 +155,20 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
                 ("branches", MetricPer::Scope),
                 ("uncovered", MetricPer::Scope),
                 ("uncovered_lines", MetricPer::Symbol),
+                ("line_coverage", MetricPer::Symbol),
             ],
             evidence: vec!["object"; 2],
         }
+    );
+    let protection: Vec<(&str, Option<ProtectionMetric>)> = manifest
+        .metrics
+        .iter()
+        .filter(|metric| metric.protection.is_some())
+        .map(|metric| (metric.name.as_str(), metric.protection))
+        .collect();
+    assert_eq!(
+        protection,
+        [("line_coverage", Some(ProtectionMetric::Coverage))]
     );
 }
 
@@ -301,8 +312,11 @@ fn the_result_measures_line_and_branch_coverage_of_the_scored_symbols() {
         recorded.measured(),
         [
             ("uncovered_lines", "m::a", 2.0),
+            ("line_coverage", "m::a", 0.0),
             ("uncovered_lines", "m::b", 1.0),
-            ("uncovered_lines", "m::c", 0.0)
+            ("line_coverage", "m::b", 0.5),
+            ("uncovered_lines", "m::c", 0.0),
+            ("line_coverage", "m::c", 1.0),
         ]
     );
 }
