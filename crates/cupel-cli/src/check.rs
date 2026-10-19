@@ -235,6 +235,8 @@ fn schedule(
         test_results: std::mem::take(&mut outcome.test_results),
         mutation_outcomes: std::mem::take(&mut outcome.mutation_outcomes),
         durations: std::mem::take(&mut outcome.durations),
+        measurements: outcome.measurements.clone(),
+        matches: std::mem::take(&mut outcome.matches),
     });
     match outcome.refused.take() {
         Some(red) => Err(CupelError::Unevaluable(Box::new(red))),

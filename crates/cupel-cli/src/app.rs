@@ -507,7 +507,12 @@ fn graded(
                 oracle::cap::cap(&mut envelope, writer, config, &invocation.run.repro())?;
             }
             suppress::apply(&mut envelope, writer)?;
-            against::compare(&mut envelope, writer, scope.against.as_deref())?;
+            against::compare(
+                &mut envelope,
+                writer,
+                scope.against.as_deref(),
+                invocation.run,
+            )?;
             if let (Some(verb), Ok(config)) = (envelope.run.verb, config) {
                 check::grade(&mut envelope, verb, scope, config);
             }
