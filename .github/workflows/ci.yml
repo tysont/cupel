@@ -220,9 +220,12 @@ jobs:
         run: make installers
         env:
           INSTALLER_TESTS_REQUIRE_TOOLS: "1"
-      # Homebrew's own style check of the formula rendered from the fixture SHA256SUMS.
+      # Homebrew's own style check of the formula rendered from the fixture SHA256SUMS. It is rendered
+      # under a Formula/ directory, as a tap holds it: Homebrew's RuboCop config exempts formulae from
+      # the Sorbet sigil and frozen-string-literal cops by that path alone.
       - name: brew style
         if: runner.os == 'macOS'
         run: |
-          sh dist/homebrew/render.sh 0.1.0 crates/cupel-cli/tests/fixtures/SHA256SUMS > "$RUNNER_TEMP/cupel.rb"
-          brew style "$RUNNER_TEMP/cupel.rb"
+          mkdir -p "$RUNNER_TEMP/Formula"
+          sh dist/homebrew/render.sh 0.1.0 crates/cupel-cli/tests/fixtures/SHA256SUMS > "$RUNNER_TEMP/Formula/cupel.rb"
+          brew style "$RUNNER_TEMP/Formula/cupel.rb"
