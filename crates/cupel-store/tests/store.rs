@@ -487,6 +487,36 @@ fn the_last_run_of_a_check_has_its_result_findings_and_metrics() {
 }
 
 #[test]
+fn a_runs_per_symbol_metrics_are_read_back_by_check_without_its_scores() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let complexity = CheckId::from("static.complexity");
+    let crap = CheckId::from("static.crap");
+    record(
+        &store,
+        1,
+        "check",
+        &[],
+        &[check("static.complexity", Some(0.5))],
+    );
+    let cyclomatic = metric(Some(symbol_hash(0xaa)), "cyclomatic", 12.0);
+    let score = metric(Some(symbol_hash(0xbb)), "crap", 30.0);
+    store
+        .record_metrics(&run_id(1), &complexity, std::slice::from_ref(&cyclomatic))
+        .unwrap();
+    store
+        .record_metrics(&run_id(1), &crap, std::slice::from_ref(&score))
+        .unwrap();
+    record(&store, 2, "check", &[], &[]);
+
+    assert_eq!(
+        store.symbol_metrics(&run_id(1)).unwrap(),
+        [(complexity, cyclomatic), (crap, score)]
+    );
+    assert_eq!(store.symbol_metrics(&run_id(2)).unwrap(), []);
+}
+
+#[test]
 fn the_latest_result_run_skips_bookkeeping_verbs_and_failed_invocations() {
     let repo = Repo::new();
     let store = repo.store();
