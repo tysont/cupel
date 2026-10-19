@@ -270,7 +270,7 @@ Every described entity carries `stability: stable | experimental`. Every schema'
 
 **`check`** — The workhorse. Resolves scope → selects checks by depth/`--only`/`--skip`/`--tier` → builds task DAG → runs under budget → evaluates gate → returns envelope. `--dry-run` returns the plan (§6.8).
 
-**`survey`** — Same scope/depth machinery; no gate, no baseline required. Output adds `rankings`: top-N per dimension (worst CRAP, largest clone clusters, weakest mutation score, most-coupled modules, flakiest tests, dependency cycles). Intended as the first command on an unfamiliar repo.
+**`survey`** — Same scope/depth machinery; no gate, no baseline required. Output adds `rankings`: top-N per dimension (worst CRAP, largest clone clusters, weakest mutation score, most-coupled modules, flakiest tests, dependency cycles), and `targets`: the symbols findings ask to protect (`write_test`, `strengthen_assertion`) or simplify (`reduce_complexity`, `refactor_extract`), joined across the dimensions, each with its protection (mutation score, coverage, tests) and `recommend: protect | simplify | both`, ordered protect-first because refactoring unprotected code is unsafe; `next_actions` follow that order (ADR-132). Intended as the first command on an unfamiliar repo.
 
 **`explain`** — `explain <finding-id>` returns the finding plus: source excerpt with context, the mutant diff / counterexample / clone pair side-by-side, covering tests, nearest test file, a test skeleton (for `write_test` actions), and a `repro`. `explain <check-id>` returns the last run's full result for that check including per-symbol scores. Reads from the fact store; never re-runs.
 

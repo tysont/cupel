@@ -396,6 +396,30 @@ fn describe_check_text_lists_each_setting_with_its_default_and_summary() {
 }
 
 #[test]
+fn describe_check_says_which_metrics_are_protection_values() {
+    let manifest = described(&["tests.mutation"])["manifest"].clone();
+    let protection: Vec<(&str, &str)> = manifest["metrics"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter_map(|m| Some((m["name"].as_str()?, m["protection"].as_str()?)))
+        .collect();
+    assert_eq!(
+        protection,
+        [("mutation_score", "mutation-score"), ("tests", "tests")]
+    );
+    let outcome = run(["describe", "tests.mutation", "--format", "text"]);
+    let rows = section_rows(&outcome.stdout, "metrics");
+    let tests = rows.iter().find(|row| row[0] == "tests").unwrap();
+    assert_eq!(
+        tests,
+        &words(
+            "tests symbol · protection tests · Distinct tests run against the function's mutants."
+        )
+    );
+}
+
+#[test]
 fn describe_finding_shows_its_check_action_and_evidence_schema() {
     let description = assert_described(&["describe", "finding", "complexity.high"], "finding");
     let required = json!(["cyclomatic", "cognitive", "cyclomatic_max", "cognitive_max"]);

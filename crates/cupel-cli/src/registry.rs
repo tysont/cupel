@@ -271,7 +271,7 @@ fn check_verb() -> CommandDescription {
 fn survey_verb() -> CommandDescription {
     verb(
         "survey",
-        "Rank a whole tree without a baseline or gate: the worst targets per metric.",
+        "Rank a whole tree without a baseline or gate: the worst targets per metric, protect-first.",
         None,
         scope_flags(),
         examples(&[(

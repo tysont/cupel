@@ -82,7 +82,16 @@ fn manifest_sections(manifest: &Manifest) -> Vec<(&'static str, Vec<(String, Str
     let metrics = manifest
         .metrics
         .iter()
-        .map(|m| (m.name.clone(), format!("{} · {}", name(m.per), m.summary)))
+        .map(|m| {
+            let protection = m
+                .protection
+                .map(|p| format!("protection {} · ", name(p)))
+                .unwrap_or_default();
+            (
+                m.name.clone(),
+                format!("{} · {protection}{}", name(m.per), m.summary),
+            )
+        })
         .collect();
     let settings: Vec<(String, String)> = manifest
         .settings

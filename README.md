@@ -399,7 +399,9 @@ Every object has a fixed key set; an absent value is `null`, never a missing key
 
 ### `cupel survey`
 
-`survey` is the first command to run on an unfamiliar repository. It takes the same scope and selection flags as `check`, never gates, and adds `rankings`: the ten worst targets for every per-symbol, per-module, and per-group metric.
+`survey` is the first command to run on an unfamiliar repository. It takes the same scope and selection flags as `check`, never gates, and adds `rankings`: the ten worst targets for every per-symbol, per-module, and per-group metric (`worst` says which end ranks first: `lowest` for the protection metrics `tests.mutation.mutation_score`, `tests.mutation.tests`, and `tests.coverage.line_coverage`, `highest` for every other), and `targets`, protect-first.
+
+`targets` are the symbols a finding asks to protect (`write_test`, `strengthen_assertion`) or to simplify (`reduce_complexity`, `refactor_extract`), each with its `recommend` (`protect`, `simplify`, or `both`), its `protection` (`mutation_score`, `coverage`, and `tests`; null where nothing measured them), its value and rank in every dimension, and the findings that recommend it. Refactoring code no test protects is unsafe, so targets to protect come first, the weakest protection (the mutation score, else coverage) first among them; equal protection falls back to the target's best rank in any other dimension. `recommended` counts them all; `targets` lists the first ten. `survey`'s `next_actions` follow the same order: an action to protect each target, then one to simplify each, then the rest. Protection is measured from `--depth standard`, where `tests.mutation` and `tests.coverage` run; at `--depth quick` it is null and only the findings say what to do. Suppressed findings recommend nothing.
 
 ```console
 $ cupel survey --depth quick --format text
@@ -423,6 +425,11 @@ rankings  top 10 per dimension
      1. 1  src/shop/pricing.py  python · src/shop/pricing.py:1
      2. 1  tests/test_pricing.py  python · tests/test_pricing.py:1
   …
+  targets  2 recommended, protect first
+     1. simplify  shop.shipping.shipping_cost  mutation - · coverage - · tests -  python · src/shop/shipping.py:1:1-27:16 · sh_c7dca337c9ad7dd1
+        static.complexity.cyclomatic 15 (#1) · static.complexity.cognitive 19 (#1) · …
+     2. simplify  shop.pricing.apply_discount  mutation - · coverage - · tests -  python · src/shop/pricing.py:5:1-8:41 · sh_1daf7938d546f072
+        static.complexity.cyclomatic 3 (#2) · … · fnd_c5c4da
 
 warn (3)
   static.clones
