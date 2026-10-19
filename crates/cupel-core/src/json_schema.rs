@@ -5,8 +5,9 @@ use schemars::transform::transform_subschemas;
 use schemars::{JsonSchema, Schema};
 use serde_json::{Value, json};
 
-/// Every published schema's `$id` starts with this.
-pub const BASE_URL: &str = "https://cupel.dev/schema/v1/";
+/// Every published schema's `$id` starts with this: the `schema/v1/` path of this repository's GitHub Pages
+/// site, where the pages workflow publishes every schema (ADR-127).
+pub const BASE_URL: &str = "https://tysont.github.io/cupel/schema/v1/";
 
 /// Schema of a type Cupel emits: every property is required (ADR-013).
 pub(crate) fn root<T: JsonSchema>(id: &str) -> Schema {
