@@ -12,7 +12,7 @@ use crate::facts::Facts;
 use crate::finding::ActionKind;
 use crate::grade::{CostClass, Tier};
 use crate::id::CheckId;
-use crate::rank::MetricPer;
+use crate::rank::{MetricPer, ProtectionMetric};
 use crate::result::{CheckResult, Score};
 use crate::scope::Scope;
 use crate::writer::Writer;
@@ -108,6 +108,11 @@ pub struct MetricSpec {
     pub summary: String,
     /// What one value describes (ADR-062).
     pub per: MetricPer,
+    /// Which protection value a per-target metric is, for `survey`'s protect-first targets;
+    /// lower is weaker (ADR-132). Absent for every other metric.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub protection: Option<ProtectionMetric>,
 }
 
 /// Whether a described entity's contract may still change.

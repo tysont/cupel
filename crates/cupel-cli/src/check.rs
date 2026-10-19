@@ -8,9 +8,9 @@ use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
     BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, Finding, GitInfo, Job, Lang,
-    Outcome, PlannedInstall, PlannedWrite, ProducerRegistry, RANKED, Range, ResolvedFiles,
-    Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Verb, Writer, apply_gate, evaluate_gate,
-    gate_for, next_actions, rankings,
+    Manifest, Measured, Outcome, PlannedInstall, PlannedWrite, ProducerRegistry, Range,
+    ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Verb, Writer, apply_gate,
+    evaluate_gate, gate_for, next_actions,
 };
 use cupel_lang::LanguageRegistry;
 
@@ -303,14 +303,16 @@ impl CheckRun {
         }
     }
 
-    /// The rankings of every per-target metric of the checks that have a result (ADR-062).
-    pub fn rankings(&self) -> cupel_core::Rankings {
-        let registry = crate::catalog::checks();
-        let manifests = registry
+    /// What `survey` ranks: the manifests of the checks that have a result, and every
+    /// per-target value they measured (ADR-062).
+    pub fn take_measurements(&mut self) -> (Vec<Manifest>, Vec<Measured>) {
+        let manifests = crate::catalog::checks()
             .iter()
             .map(cupel_core::Check::manifest)
-            .filter(|manifest| self.outcome.checks.iter().any(|c| c.id == manifest.id));
-        rankings(manifests, &self.outcome.measurements, RANKED)
+            .filter(|manifest| self.outcome.checks.iter().any(|c| c.id == manifest.id))
+            .cloned()
+            .collect();
+        (manifests, std::mem::take(&mut self.outcome.measurements))
     }
 
     /// The envelope of a real run: `pass` (exit 0), or `partial` (exit 5) when the timeout cut

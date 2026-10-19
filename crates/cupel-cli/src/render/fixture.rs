@@ -12,7 +12,7 @@ use cupel_core::{
     PlannedWrite, ProducerId, RankedTarget, RankingDimension, Rankings, RuleOutcome, RunInfo,
     RunPlan, ScopeInfo, ScopeMode, Score, Severity, SeverityCounts, SkipReason, Skipped, Stability,
     Status, Summary, Symbol, Target, TestCommand, TestsReport, Tier, ToolId, ToolchainInfo,
-    ValueType, Verb,
+    ValueType, Verb, Worst,
 };
 use cupel_core::{OracleReport, OracleState};
 use serde_json::{Map, Value, json};
@@ -414,6 +414,7 @@ fn rankings() -> Rankings {
                 metric: "crap".to_owned(),
                 per: MetricPer::Symbol,
                 summary: "CRAP score per function.".to_owned(),
+                worst: Worst::Highest,
                 measured: 11,
                 entries: vec![
                     RankedTarget {
@@ -449,10 +450,13 @@ fn rankings() -> Rankings {
                 metric: "coupling".to_owned(),
                 per: MetricPer::Module,
                 summary: "Afferent plus efferent coupling per module.".to_owned(),
+                worst: Worst::Highest,
                 measured: 0,
                 entries: Vec::new(),
             },
         ],
+        recommended: 0,
+        targets: Vec::new(),
     }
 }
 

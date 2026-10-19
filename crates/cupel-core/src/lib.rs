@@ -127,7 +127,8 @@ pub use proof::{Obligation, ObligationStatus, ProofResults, RelatedPlace};
 pub use property::{PropertyOutcome, PropertyResult, PropertyResults};
 pub use race::{RaceFrame, RaceKind, RaceReport, RaceReports, RaceStack};
 pub use rank::{
-    Measured, Measurement, MetricPer, RANKED, RankedTarget, RankingDimension, Rankings, Target,
+    Measured, Measurement, MetricPer, Protection, ProtectionMetric, RANKED, RankedTarget,
+    RankingDimension, Rankings, Recommendation, RecommendedTarget, Target, TargetValue, Worst,
 };
 pub use ranking::rankings;
 pub use relation::{
