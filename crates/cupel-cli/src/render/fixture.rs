@@ -9,10 +9,10 @@ use cupel_core::{
     Envelope, Evidence, Example, Excerpt, ExcerptLine, ExitCode, ExplainSubject, Explanation,
     FactKind, Finding, GateOutcome, GateResult, GateRule, GitInfo, ImpactBasis, ImpactedTest,
     LangId, Location, Metric, MetricPer, NextAction, PlannedCheck, PlannedInstall, PlannedSkip,
-    PlannedWrite, ProducerId, RankedTarget, RankingDimension, Rankings, RuleOutcome, RunInfo,
-    RunPlan, ScopeInfo, ScopeMode, Score, Severity, SeverityCounts, SkipReason, Skipped, Stability,
-    Status, Summary, Symbol, Target, TestCommand, TestsReport, Tier, ToolId, ToolchainInfo,
-    ValueType, Verb, Worst,
+    PlannedWrite, ProducerId, Protection, RankedTarget, RankingDimension, Rankings, Recommendation,
+    RecommendedTarget, RuleOutcome, RunInfo, RunPlan, ScopeInfo, ScopeMode, Score, Severity,
+    SeverityCounts, SkipReason, Skipped, Stability, Status, Summary, Symbol, Target, TargetValue,
+    TestCommand, TestsReport, Tier, ToolId, ToolchainInfo, ValueType, Verb, Worst,
 };
 use cupel_core::{OracleReport, OracleState};
 use serde_json::{Map, Value, json};
@@ -455,8 +455,50 @@ fn rankings() -> Rankings {
                 entries: Vec::new(),
             },
         ],
-        recommended: 0,
-        targets: Vec::new(),
+        recommended: 2,
+        targets: vec![
+            RecommendedTarget {
+                rank: 1,
+                recommend: Recommendation::Protect,
+                lang: LangId::from("rust"),
+                target: Target {
+                    display: "rewrite::Planner::push_limit".to_owned(),
+                    symbol: Some("sh_4b1d9e0c4b1d9e01".parse().expect("valid hash")),
+                    location: Some(Location {
+                        file: "src/rewrite/planner.rs".to_owned(),
+                        line: 140,
+                        col: Some(5),
+                        end_line: 171,
+                        end_col: Some(6),
+                    }),
+                },
+                protection: Protection {
+                    mutation_score: Some(0.5),
+                    coverage: Some(0.8),
+                    tests: Some(3),
+                },
+                values: vec![TargetValue {
+                    check: CheckId::from("static.crap"),
+                    metric: "crap".to_owned(),
+                    value: 42.5,
+                    rank: 1,
+                }],
+                findings: vec!["fnd_7c2e1a".parse().expect("valid finding ID")],
+            },
+            RecommendedTarget {
+                rank: 2,
+                recommend: Recommendation::Simplify,
+                lang: LangId::from("typescript"),
+                target: Target {
+                    display: "web/limits".to_owned(),
+                    symbol: None,
+                    location: None,
+                },
+                protection: Protection::default(),
+                values: Vec::new(),
+                findings: Vec::new(),
+            },
+        ],
     }
 }
 

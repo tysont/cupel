@@ -99,6 +99,88 @@ fn a_survey_dry_run_is_a_plan_without_rankings() {
     );
 }
 
+/// Each target as (rank, display, recommend, protection).
+fn targets(envelope: &Value) -> Vec<(u64, &str, &str, Value)> {
+    envelope["rankings"]["targets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|t| {
+            (
+                t["rank"].as_u64().unwrap(),
+                t["target"]["display"].as_str().unwrap(),
+                t["recommend"].as_str().unwrap(),
+                t["protection"].clone(),
+            )
+        })
+        .collect()
+}
+
+#[test]
+fn a_standard_survey_protects_the_untested_function_before_simplifying_the_complex_one() {
+    let Some(repo) = Repo::python_fixture("tests.mutation") else {
+        return;
+    };
+    let config = std::fs::read_to_string(repo.path("cupel.toml")).unwrap();
+    repo.write(
+        "cupel.toml",
+        &format!("{config}\n[checks.\"static.complexity\"]\ncyclomatic_max = 2\n"),
+    );
+    let outcome = repo.run(&["survey", "--depth", "standard"]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let envelope = outcome.envelope();
+    // `refund` no test runs; `discount` is tested, but one mutant of four survives, and it is
+    // more complex than the limit.
+    assert_eq!(
+        targets(&envelope),
+        [
+            (
+                1,
+                "discount.refund",
+                "protect",
+                json!({"mutation_score": null, "coverage": 0.0, "tests": 0})
+            ),
+            (
+                2,
+                "discount.discount",
+                "both",
+                json!({"mutation_score": 0.75, "coverage": 1.0, "tests": 2})
+            ),
+        ]
+    );
+    let score = dimension(&envelope, "mutation_score");
+    assert_eq!(
+        (
+            &score["check"],
+            &score["worst"],
+            &score["entries"][0]["value"]
+        ),
+        (&json!("tests.mutation"), &json!("lowest"), &json!(0.75))
+    );
+    let first: Vec<(&str, &str)> = envelope["next_actions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .take(3)
+        .map(|a| (a["kind"].as_str().unwrap(), a["summary"].as_str().unwrap()))
+        .collect();
+    assert_eq!(
+        first,
+        [
+            ("write_test", "Write a test that calls `refund`."),
+            (
+                "write_test",
+                "Add a test that fails when `>=` at discount.py:6 becomes `>`."
+            ),
+            (
+                "reduce_complexity",
+                "Split `discount` into smaller functions or replace conditional chains with data, \
+                 until cyclomatic is at most 2 and cognitive at most 15."
+            ),
+        ]
+    );
+}
+
 #[test]
 fn text_lists_each_dimension_with_its_ranked_targets() {
     let outcome = repo().run(&["survey", "--format", "text"]);

@@ -113,6 +113,26 @@ mod tests {
     }
 
     #[test]
+    fn text_lists_the_targets_protect_first_with_their_protection() {
+        let out = text::render(&fixture::envelope(), false);
+        let block: Vec<&str> = out
+            .lines()
+            .skip_while(|line| !line.starts_with("  targets"))
+            .take(4)
+            .collect();
+        assert_eq!(
+            block,
+            [
+                "  targets  2 recommended, protect first",
+                "     1. protect  rewrite::Planner::push_limit  mutation 0.5 · coverage 0.8 · \
+                 tests 3  rust · src/rewrite/planner.rs:140:5-171:6 · sh_4b1d9e0c4b1d9e01",
+                "        static.crap.crap 42.5 (#1) · fnd_7c2e1a",
+                "     2. simplify  web/limits  mutation - · coverage - · tests -  typescript",
+            ]
+        );
+    }
+
+    #[test]
     fn text_in_color_adds_only_escape_codes() {
         let plain = text::render(&fixture::envelope(), false);
         let colored = text::render(&fixture::envelope(), true);

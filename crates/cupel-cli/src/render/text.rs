@@ -7,8 +7,9 @@ use std::fmt::Write as _;
 use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::{
     CheckResult, Description, Envelope, Excerpt, Explanation, Finding, GateOutcome, GateResult,
-    GitInfo, ImpactBasis, Location, Metric, NextAction, OracleReport, PlannedCheck, Rankings,
-    RuleOutcome, RunInfo, RunPlan, ScopeInfo, Severity, Skipped, Status, Summary, TestsReport,
+    GitInfo, ImpactBasis, LangId, Location, Metric, NextAction, OracleReport, PlannedCheck,
+    Rankings, RecommendedTarget, RuleOutcome, RunInfo, RunPlan, ScopeInfo, Severity, Skipped,
+    Status, Summary, Target, TestsReport,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -287,7 +288,8 @@ fn checks_block(checks: &[CheckResult], paint: &Paint) -> String {
     out
 }
 
-/// Each dimension as `check.metric (per, measured)` with its ranked targets beneath (ADR-062).
+/// Each dimension as `check.metric (per, measured)` with its ranked targets beneath (ADR-062),
+/// then the protect-first targets with their protection, values, and findings (ADR-132).
 fn rankings_block(rankings: &Rankings, paint: &Paint) -> String {
     let mut out = format!(
         "{}  top {} per dimension\n",
@@ -305,24 +307,64 @@ fn rankings_block(rankings: &Rankings, paint: &Paint) -> String {
             dimension.summary
         );
         for entry in &dimension.entries {
-            let mut facts = vec![entry.lang.to_string()];
-            if let Some(at) = &entry.target.location {
-                facts.push(location(at));
-            }
-            if let Some(symbol) = &entry.target.symbol {
-                facts.push(symbol.to_string());
-            }
             let _ = writeln!(
                 out,
                 "    {:>2}. {}  {}  {}",
                 entry.rank,
                 entry.value,
                 entry.target.display,
-                paint.dim(&facts.join(" · "))
+                paint.dim(&place(&entry.lang, &entry.target))
             );
         }
     }
+    let _ = writeln!(
+        out,
+        "  targets  {} recommended, protect first",
+        rankings.recommended
+    );
+    for target in &rankings.targets {
+        target_lines(&mut out, target, paint);
+    }
     out
+}
+
+/// A protect-first target: what to do, its protection, and where it is; beneath, its value in
+/// each dimension with its rank there, and the findings that recommend it.
+fn target_lines(out: &mut String, target: &RecommendedTarget, paint: &Paint) {
+    let protection = &target.protection;
+    let shown = |value: Option<String>| value.unwrap_or_else(|| "-".to_owned());
+    let _ = writeln!(
+        out,
+        "    {:>2}. {}  {}  mutation {} · coverage {} · tests {}  {}",
+        target.rank,
+        name(target.recommend),
+        target.target.display,
+        shown(protection.mutation_score.map(|v| v.to_string())),
+        shown(protection.coverage.map(|v| v.to_string())),
+        shown(protection.tests.map(|v| v.to_string())),
+        paint.dim(&place(&target.lang, &target.target))
+    );
+    let details: Vec<String> = target
+        .values
+        .iter()
+        .map(|v| format!("{}.{} {} (#{})", v.check, v.metric, v.value, v.rank))
+        .chain(target.findings.iter().map(ToString::to_string))
+        .collect();
+    if !details.is_empty() {
+        let _ = writeln!(out, "        {}", paint.dim(&details.join(" · ")));
+    }
+}
+
+/// A ranked target's language, location, and structural hash, as far as it has them.
+fn place(lang: &LangId, target: &Target) -> String {
+    let mut facts = vec![lang.to_string()];
+    if let Some(at) = &target.location {
+        facts.push(location(at));
+    }
+    if let Some(symbol) = &target.symbol {
+        facts.push(symbol.to_string());
+    }
+    facts.join(" · ")
 }
 
 /// How much of a language's per-test map came from its producer's cache (ADR-083), such as
