@@ -15,8 +15,9 @@ pub const CONTAINMENT: f64 = 0.8;
 /// The least Jaccard similarity of a match's two sides, each side taken as one tree.
 pub const SET_SIMILARITY: f64 = 0.5;
 
-/// The fewest nodes a tree needs to be matched: smaller trees are too generic to tell apart.
-pub const MIN_NODES: u32 = 12;
+/// The fewest nodes a tree needs to be matched. A smaller tree is mostly its signature and one
+/// statement, so one holds most of the shapes of another that does something else.
+pub const MIN_NODES: u32 = 30;
 
 /// A symbol offered for matching: its definition, structural hash, and normalized tree.
 #[derive(Debug, Clone, Copy)]
@@ -563,11 +564,59 @@ mod tests {
 
     #[test]
     fn trees_too_small_to_tell_apart_are_not_matched() {
-        let tiny = NormNode::new("function", vec![NormNode::leaf("$id")]);
-        let base = Side::of(vec![("a", "src/a.rs", tiny.clone())]);
-        let mut grown = tiny;
-        grown.children.push(NormNode::leaf("$lit"));
-        let head = Side::of(vec![("b", "src/a.rs", grown)]);
+        // Two one-assertion Go tests, `assert.Equal(t, 10, 5+5)` deleted and
+        // `assert.Equal(t, 7, 7)` added: their trees (22 and 19 nodes) are mostly the test
+        // signature, so one holds most of the other's shapes though they test different things.
+        let test = |arguments: Vec<NormNode>| {
+            let leaf = NormNode::leaf;
+            let node = NormNode::new;
+            let signature = node(
+                "parameter_list",
+                vec![node(
+                    "parameter_declaration",
+                    vec![
+                        leaf("$id"),
+                        node(
+                            "pointer_type",
+                            vec![
+                                leaf("*"),
+                                node("qualified_type", vec![leaf("$id"), leaf("$id")]),
+                            ],
+                        ),
+                    ],
+                )],
+            );
+            let call = node(
+                "call_expression",
+                vec![
+                    node("selector_expression", vec![leaf("$id"), leaf("Equal")]),
+                    node("argument_list", arguments),
+                ],
+            );
+            let body = node(
+                "block",
+                vec![node(
+                    "statement_list",
+                    vec![node("expression_statement", vec![call])],
+                )],
+            );
+            node("function_declaration", vec![signature, body])
+        };
+        let (id, lit) = (NormNode::leaf("$id"), NormNode::leaf("$lit"));
+        let sum = NormNode::new(
+            "binary_expression",
+            vec![lit.clone(), NormNode::leaf("+"), lit.clone()],
+        );
+        let base = Side::of(vec![(
+            "TestGoesAway",
+            "weak_test.go",
+            test(vec![id.clone(), lit.clone(), sum]),
+        )]);
+        let head = Side::of(vec![(
+            "TestAddsACheck",
+            "weak_test.go",
+            test(vec![id, lit.clone(), lit]),
+        )]);
         assert_eq!(names(&matched(&base, &head)), Vec::new());
     }
 
