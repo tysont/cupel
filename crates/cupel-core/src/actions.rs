@@ -1,11 +1,12 @@
-// ABOUTME: `next_actions` (design §7.1, ADR-061): findings ranked by severity, novelty, and tier, plus
-// ABOUTME: rerun/install/configure actions for gate rules and checks that could not run; de-duplicated, capped.
+// ABOUTME: `next_actions` (design §7.1, ADR-061, ADR-132): `survey`'s targets protect-first, then findings ranked by
+// ABOUTME: severity, novelty, and tier, and rerun/install/configure actions; de-duplicated, capped.
 use std::cmp::Reverse;
 use std::collections::HashSet;
 
 use crate::envelope::{Envelope, GateRule, NextAction, RuleOutcome};
 use crate::finding::{ActionKind, Finding, Severity};
 use crate::grade::Tier;
+use crate::rank::{Rankings, Recommendation};
 use crate::result::{CheckResult, SkipReason, Skipped};
 
 /// The most actions an envelope lists (ADR-061 §5).
@@ -19,6 +20,7 @@ const SKIPPED: u8 = 3;
 const INFO: u8 = 4;
 
 /// One possible action with what it ranks and de-duplicates by.
+#[derive(Clone)]
 struct Candidate {
     band: u8,
     new: bool,
@@ -27,9 +29,10 @@ struct Candidate {
     action: NextAction,
 }
 
-/// What to do next about a graded envelope, most urgent first. `rerun` is the command that
-/// reruns the run's own verb and scope, such as `cupel check --changed`; a rerun action appends
-/// `--only <check>` to it.
+/// What to do next about a graded envelope, most urgent first: with `survey`'s rankings, one
+/// action to protect each target in their order, then one to simplify each (ADR-132), then
+/// the rest. `rerun` is the command that reruns the run's own verb and scope, such as
+/// `cupel check --changed`; a rerun action appends `--only <check>` to it.
 pub fn next_actions(envelope: &Envelope, rerun: &str) -> Vec<NextAction> {
     let mut candidates: Vec<Candidate> = envelope
         .findings
@@ -52,6 +55,10 @@ pub fn next_actions(envelope: &Envelope, rerun: &str) -> Vec<NextAction> {
     );
     // A stable sort keeps envelope order, then gate-rule and `checks[]` order, within ties.
     candidates.sort_by_key(|candidate| (candidate.band, !candidate.new, Reverse(candidate.tier)));
+    if let Some(rankings) = &envelope.rankings {
+        let first = protect_first(rankings, &candidates);
+        candidates.splice(0..0, first);
+    }
     let mut seen = HashSet::new();
     candidates
         .into_iter()
@@ -61,6 +68,29 @@ pub fn next_actions(envelope: &Envelope, rerun: &str) -> Vec<NextAction> {
         .map(|(candidate, priority)| NextAction {
             priority,
             ..candidate.action
+        })
+        .collect()
+}
+
+/// For each target in order, the most urgent of `candidates` that protects it; then, for each,
+/// the most urgent that simplifies it.
+fn protect_first(rankings: &Rankings, candidates: &[Candidate]) -> Vec<Candidate> {
+    [Recommendation::Protect, Recommendation::Simplify]
+        .into_iter()
+        .flat_map(|category| {
+            rankings.targets.iter().filter_map(move |target| {
+                candidates
+                    .iter()
+                    .find(|candidate| {
+                        Recommendation::of(candidate.action.kind) == Some(category)
+                            && candidate
+                                .action
+                                .finding
+                                .as_ref()
+                                .is_some_and(|id| target.findings.contains(id))
+                    })
+                    .cloned()
+            })
         })
         .collect()
 }

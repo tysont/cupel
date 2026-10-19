@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 
 use crate::check::Manifest;
-use crate::finding::{ActionKind, Finding, Symbol};
+use crate::finding::{Finding, Symbol};
 use crate::hash::SymbolHash;
 use crate::rank::{
     Measured, MetricPer, Protection, ProtectionMetric, RankedTarget, RankingDimension, Rankings,
@@ -105,7 +105,7 @@ fn recommended(ranked: &[Ranked<'_>], findings: &[Finding]) -> Vec<Joined> {
     let mut joined: Vec<Joined> = Vec::new();
     let mut index: HashMap<(&str, &SymbolHash), usize> = HashMap::new();
     for finding in findings.iter().filter(|finding| !finding.suppressed) {
-        let Some(category) = category(finding.action.kind) else {
+        let Some(category) = Recommendation::of(finding.action.kind) else {
             continue;
         };
         let Some(symbol) = &finding.symbol else {
@@ -174,17 +174,6 @@ fn join(
         });
     }
     Joined { target, best }
-}
-
-/// Whether an action protects or simplifies its symbol; `None` for any other action.
-fn category(kind: ActionKind) -> Option<Recommendation> {
-    match kind {
-        ActionKind::WriteTest | ActionKind::StrengthenAssertion => Some(Recommendation::Protect),
-        ActionKind::ReduceComplexity | ActionKind::RefactorExtract => {
-            Some(Recommendation::Simplify)
-        }
-        _ => None,
-    }
 }
 
 fn combined(a: Recommendation, b: Recommendation) -> Recommendation {

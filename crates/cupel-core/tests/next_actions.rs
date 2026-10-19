@@ -1,5 +1,5 @@
-// ABOUTME: Tests for `next_actions` (ADR-061): ranking by severity, novelty, and tier; de-duplication by
-// ABOUTME: action kind and location; rerun, install, and configure actions; suppressed findings; the cap.
+// ABOUTME: Tests for `next_actions` (ADR-061, ADR-132): ranking by severity, novelty, and tier; de-duplication by
+// ABOUTME: kind and location; rerun, install, and configure actions; suppressed findings; the cap; protect-first.
 use cupel_core::{ActionKind, Envelope, NEXT_ACTIONS, NextAction, next_actions};
 use serde_json::{Value, json};
 
@@ -361,4 +361,101 @@ fn at_most_ten_actions_are_listed() {
     let actions = next_actions(&envelope(&many, &[], &Value::Null), "cupel check");
     assert_eq!(actions.len(), NEXT_ACTIONS);
     assert_eq!(NEXT_ACTIONS, 10);
+}
+
+/// A finding about the symbol `display` whose action is `action`.
+fn symbol_finding(id: &str, display: &str, severity: &str, action: &str) -> Value {
+    let mut finding = finding(&F0);
+    finding["id"] = json!(id);
+    finding["severity"] = json!(severity);
+    finding["action"]["kind"] = json!(action);
+    finding["action"]["summary"] = json!(format!("act on {id}"));
+    finding["symbol"] = json!({"display": display, "hash": "sh_00000000000000aa", "lang": "rust"});
+    finding["location"]["file"] = json!(format!("{display}.rs"));
+    finding
+}
+
+/// A survey's `rankings` whose targets are `targets`, each `(display, recommend, findings)`.
+fn rankings(targets: &[(&str, &str, &[&str])]) -> cupel_core::Rankings {
+    let targets: Vec<Value> = targets
+        .iter()
+        .zip(1..)
+        .map(|((display, recommend, findings), rank)| {
+            json!({
+                "rank": rank, "recommend": recommend, "lang": "rust",
+                "target": {"display": display, "symbol": "sh_00000000000000aa", "location": null},
+                "protection": {"mutation_score": null, "coverage": null, "tests": null},
+                "values": [], "findings": findings
+            })
+        })
+        .collect();
+    serde_json::from_value(json!({
+        "top": 10, "dimensions": [], "recommended": targets.len(), "targets": targets
+    }))
+    .unwrap()
+}
+
+fn ids_of(ids: &[&str]) -> Vec<String> {
+    ids.iter().map(ToString::to_string).collect()
+}
+
+#[test]
+fn a_survey_lists_every_target_protect_action_before_any_simplify_action() {
+    let findings = [
+        symbol_finding("fnd_00000c", "c", "fail", "fix_bug"),
+        symbol_finding("fnd_0000a1", "a", "warn", "reduce_complexity"),
+        symbol_finding("fnd_0000b2", "b", "warn", "refactor_extract"),
+        symbol_finding("fnd_0000a2", "a", "info", "strengthen_assertion"),
+        symbol_finding("fnd_0000b1", "b", "info", "write_test"),
+    ];
+    let mut survey = envelope(&findings, &[], &Value::Null);
+    let before = ids(&next_actions(&survey, "cupel survey"));
+    survey.rankings = Some(rankings(&[
+        ("a", "both", &["fnd_0000a1", "fnd_0000a2"]),
+        ("b", "both", &["fnd_0000b2", "fnd_0000b1"]),
+    ]));
+    let actions = next_actions(&survey, "cupel survey");
+    let kinds: Vec<ActionKind> = actions.iter().map(|action| action.kind).collect();
+    assert_eq!(
+        (before, ids(&actions), kinds),
+        (
+            ids_of(&[
+                "fnd_00000c",
+                "fnd_0000a1",
+                "fnd_0000b2",
+                "fnd_0000a2",
+                "fnd_0000b1"
+            ]),
+            ids_of(&[
+                "fnd_0000a2",
+                "fnd_0000b1",
+                "fnd_0000a1",
+                "fnd_0000b2",
+                "fnd_00000c"
+            ]),
+            vec![
+                ActionKind::StrengthenAssertion,
+                ActionKind::WriteTest,
+                ActionKind::ReduceComplexity,
+                ActionKind::RefactorExtract,
+                ActionKind::FixBug,
+            ]
+        )
+    );
+}
+
+#[test]
+fn a_target_whose_finding_is_suppressed_gets_no_action_for_it() {
+    let mut suppressed = symbol_finding("fnd_0000a2", "a", "info", "write_test");
+    suppressed["suppressed"] = json!(true);
+    let findings = [
+        symbol_finding("fnd_0000a1", "a", "warn", "reduce_complexity"),
+        suppressed,
+    ];
+    let mut survey = envelope(&findings, &[], &Value::Null);
+    survey.rankings = Some(rankings(&[("a", "both", &["fnd_0000a1", "fnd_0000a2"])]));
+    assert_eq!(
+        ids(&next_actions(&survey, "cupel survey")),
+        ids_of(&["fnd_0000a1"])
+    );
 }

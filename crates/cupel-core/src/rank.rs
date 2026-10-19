@@ -4,7 +4,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use crate::finding::Location;
+use crate::finding::{ActionKind, Location};
 use crate::hash::{FindingId, SymbolHash};
 use crate::id::{CheckId, LangId};
 
@@ -127,6 +127,15 @@ pub enum Recommendation {
 }
 
 impl Recommendation {
+    /// Whether an action protects or simplifies its symbol; `None` for any other action.
+    pub fn of(kind: ActionKind) -> Option<Self> {
+        match kind {
+            ActionKind::WriteTest | ActionKind::StrengthenAssertion => Some(Self::Protect),
+            ActionKind::ReduceComplexity | ActionKind::RefactorExtract => Some(Self::Simplify),
+            _ => None,
+        }
+    }
+
     /// Whether the target is to be protected before anything else is done to it.
     pub fn protects(self) -> bool {
         matches!(self, Self::Protect | Self::Both)
