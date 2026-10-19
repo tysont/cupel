@@ -359,16 +359,25 @@ fn pages_workflow_pins_every_action_to_a_commit() {
 #[test]
 fn pages_workflow_deploys_main_only() {
     let workflow = workflow("pages.yml");
-    assert!(
-        workflow.contains("\n  push:\n    branches: [main]\n"),
-        "{workflow}"
-    );
+    assert_eq!(setting(&workflow, "branches"), Some("[main]"));
     let (_, deploy) = workflow.split_once("\n  deploy:\n").expect("a deploy job");
-    assert!(
-        deploy.contains("\n    if: github.ref == 'refs/heads/main'\n"),
-        "{deploy}"
+    let settings: Vec<Option<&str>> = ["if", "name", "pages", "id-token"]
+        .iter()
+        .map(|key| setting(deploy, key))
+        .collect();
+    assert_eq!(
+        settings,
+        vec![
+            Some("github.ref == 'refs/heads/main'"),
+            Some("github-pages"),
+            Some("write"),
+            Some("write"),
+        ]
     );
-    assert!(deploy.contains("\n      name: github-pages\n"), "{deploy}");
-    assert!(deploy.contains("\n      pages: write\n"), "{deploy}");
-    assert!(deploy.contains("\n      id-token: write\n"), "{deploy}");
+}
+
+/// The value of the first `key: value` line in `yaml`, at any indentation.
+fn setting<'a>(yaml: &'a str, key: &str) -> Option<&'a str> {
+    yaml.lines()
+        .find_map(|line| line.trim_start().strip_prefix(key)?.strip_prefix(": "))
 }

@@ -109,27 +109,38 @@ impl Site {
         files(&self.root(), "", &mut found);
         found
     }
+
+    /// The `$id` and `$schema` of the file served at the URL `id`.
+    fn served(&self, id: &str) -> (Value, Value) {
+        let path = id
+            .strip_prefix(SITE)
+            .unwrap_or_else(|| panic!("`{id}` is not under the Pages site {SITE}"));
+        let file = self.root().join(path);
+        let text = fs::read_to_string(&file)
+            .unwrap_or_else(|error| panic!("{id}: {}: {error}", file.display()));
+        let schema: Value = serde_json::from_str(&text).unwrap();
+        (schema["$id"].clone(), schema["$schema"].clone())
+    }
+}
+
+const DRAFT: &str = "https://json-schema.org/draft/2020-12/schema";
+
+/// The five top-level schemas and one per fact kind.
+fn published_count() -> usize {
+    5 + FactKind::all().len()
 }
 
 #[test]
 fn every_emitted_id_is_a_file_whose_id_is_the_url_it_is_served_at() {
     let site = Site::write();
     let ids = emitted_ids(site.dir.path());
-    assert!(ids.len() > FactKind::all().len(), "{ids:?}");
-    for id in &ids {
-        let path = id
-            .strip_prefix(SITE)
-            .unwrap_or_else(|| panic!("`{id}` is not under the Pages site {SITE}"));
-        let file = site.root().join(path);
-        let text = fs::read_to_string(&file)
-            .unwrap_or_else(|error| panic!("{id}: {}: {error}", file.display()));
-        let schema: Value = serde_json::from_str(&text).unwrap();
-        assert_eq!(schema["$id"], Value::String(id.clone()), "{path}");
-        assert_eq!(
-            schema["$schema"], "https://json-schema.org/draft/2020-12/schema",
-            "{path}"
-        );
-    }
+    assert_eq!(ids.len(), published_count(), "{ids:?}");
+    let served: Vec<(Value, Value)> = ids.iter().map(|id| site.served(id)).collect();
+    let expected: Vec<(Value, Value)> = ids
+        .iter()
+        .map(|id| (Value::from(id.as_str()), Value::from(DRAFT)))
+        .collect();
+    assert_eq!(served, expected);
 }
 
 #[test]
@@ -146,26 +157,36 @@ fn the_site_holds_the_emitted_schemas_and_the_index_only() {
 #[test]
 fn the_root_schemas_and_each_fact_kind_land_under_schema_v1() {
     let files = Site::write().files();
-    for name in ["run", "finding", "events", "config", "plugin"] {
-        assert!(files.contains(&format!("schema/v1/{name}.json")), "{name}");
-    }
-    for kind in FactKind::all() {
-        assert!(
-            files.contains(&format!("schema/v1/fact/{kind}.json")),
-            "{kind}"
-        );
-    }
+    let mut expected: BTreeSet<String> = ["run", "finding", "events", "config", "plugin"]
+        .iter()
+        .map(|name| format!("schema/v1/{name}.json"))
+        .chain(
+            FactKind::all()
+                .iter()
+                .map(|kind| format!("schema/v1/fact/{kind}.json")),
+        )
+        .collect();
+    expected.insert("index.html".to_owned());
+    assert_eq!(files, expected);
 }
 
 #[test]
 fn the_index_links_every_schema_by_its_url() {
     let site = Site::write();
     let index = fs::read_to_string(site.root().join("index.html")).unwrap();
-    assert!(index.starts_with("<!doctype html>\n"), "{index}");
-    for path in site.files().iter().filter(|path| *path != "index.html") {
-        let link = format!("<a href=\"{path}\">{SITE}{path}</a>");
-        assert!(index.contains(&link), "{link} not in\n{index}");
-    }
+    assert_eq!(index.lines().next(), Some("<!doctype html>"));
+    let links: BTreeSet<&str> = index
+        .lines()
+        .filter(|line| line.starts_with("<li>"))
+        .collect();
+    let expected: BTreeSet<String> = site
+        .files()
+        .iter()
+        .filter(|path| *path != "index.html")
+        .map(|path| format!("<li><a href=\"{path}\">{SITE}{path}</a></li>"))
+        .collect();
+    assert_eq!(links, expected.iter().map(String::as_str).collect());
+    assert_eq!(links.len(), published_count());
 }
 
 #[test]
