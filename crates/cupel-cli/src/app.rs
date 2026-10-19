@@ -24,8 +24,8 @@ use crate::page::Page;
 use crate::problem::Problem;
 use crate::run::{Invocation, Run};
 use crate::{
-    against, baseline, catalog, check, describe, doctor, explain, init, oracle, persist, registry,
-    render, scaffold, serve, suppress, survey, tests_verb,
+    against, baseline, catalog, check, describe, doctor, explain, init, oracle, persist, reference,
+    registry, render, scaffold, serve, suppress, survey, tests_verb,
 };
 
 /// How an envelope reaches stdout: its renderer, whether text is colored, the findings page, and
@@ -487,7 +487,8 @@ fn init_verb(
 /// A finished run of a verb that grades the repository with the repository's suppressions
 /// applied (ADR-047 §5) and, for `check` and `survey`, results against an unverified oracle
 /// capped first (ADR-091 §4), then deltas against `--against` or the default baseline
-/// (ADR-046 §5), the gate, and `next_actions` (ADR-060, ADR-061). Plans and the bookkeeping
+/// (ADR-046 §5), the gate with its reference run (ADR-060, ADR-130), and `next_actions`
+/// (ADR-061). Plans and the bookkeeping
 /// verbs pass through unchanged.
 fn graded(
     mut envelope: Envelope,
@@ -507,9 +508,10 @@ fn graded(
                 oracle::cap::cap(&mut envelope, writer, config, &invocation.run.repro())?;
             }
             suppress::apply(&mut envelope, writer)?;
-            against::compare(&mut envelope, writer, scope.against.as_deref())?;
+            let compared = against::compare(&mut envelope, writer, scope.against.as_deref())?;
             if let (Some(verb), Ok(config)) = (envelope.run.verb, config) {
-                check::grade(&mut envelope, verb, scope, config);
+                let reference = reference::resolve(invocation, config, scope, &envelope, compared);
+                check::grade(&mut envelope, verb, scope, config, &reference.as_gate());
             }
             if let Some(VerbArgs::Check { scaffold: true, .. }) = &cli.verb {
                 scaffold::apply(

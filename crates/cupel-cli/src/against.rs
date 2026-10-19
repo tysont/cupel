@@ -98,13 +98,14 @@ pub fn resolve(
 
 /// Records on `envelope` its deltas against `against`, or against the default baseline when
 /// `against` is absent and that baseline is set; otherwise leaves it alone (ADR-046 §5–6).
+/// Returns the run compared with, if any.
 pub fn compare(
     envelope: &mut Envelope,
     writer: &Writer,
     against: Option<&str>,
-) -> Result<(), CupelError> {
+) -> Result<Option<Envelope>, CupelError> {
     let Some(store) = persist::open_for_reading(writer)? else {
-        return Ok(());
+        return Ok(None);
     };
     if against.is_none()
         && store
@@ -112,12 +113,12 @@ pub fn compare(
             .map_err(|error| persist::unusable(&error))?
             .is_none()
     {
-        return Ok(());
+        return Ok(None);
     }
     let spec = against.unwrap_or("baseline");
     let reference = resolve(&store, writer.root(), spec, DEFAULT_BASELINE)?;
     deltas(envelope, &reference.envelope).apply(envelope, reference.baseline, &reference.vs);
-    Ok(())
+    Ok(Some(reference.envelope))
 }
 
 #[cfg(test)]

@@ -1,5 +1,5 @@
 // ABOUTME: Integration tests for gates on `cupel check` (ADR-060): the default and `--gate`/`--no-gate`,
-// ABOUTME: which table a scope uses, suppressed findings, rerun actions, and rules on every kind of check.
+// ABOUTME: which table a scope uses, suppressed findings, rerun actions, rules on every kind of check, and `base`.
 mod support;
 
 use serde_json::{Value, json};
@@ -98,8 +98,8 @@ fn an_unselected_check_fails_the_gate_with_a_rerun_action() {
     let envelope = outcome.envelope();
     assert_eq!(
         gate(&envelope)["rules"][0],
-        json!({"rule": "static.complexity.cyclomatic_max < 30", "actual": null,
-               "result": "skipped"})
+        json!({"rule": "static.complexity.cyclomatic_max < 30", "actual": null, "bound": null,
+               "result": "skipped", "reason": "`static.complexity` did not run to completion"})
     );
     assert_eq!(
         envelope["next_actions"][0],
@@ -278,4 +278,203 @@ fn a_tree_gate_rule_on_a_check_that_needs_a_range_is_rejected_at_load() {
         "{finding}"
     );
     assert_eq!(outcome.envelope()["checks"], json!([]));
+}
+
+// ---------------------------------------------------------------- rules against `base` (ADR-130)
+
+/// A function of the shape every clone shares, named `name`.
+fn clone_of(name: &str) -> String {
+    format!(
+        "pub fn {name}(values: &[i32]) -> i32 {{\n    let mut total = 0;\n    for value in values {{\n        \
+         if *value > 10 {{\n            total += value * 2;\n        }} else {{\n            total -= 1;\n        \
+         }}\n    }}\n    total\n}}\n"
+    )
+}
+
+#[test]
+fn a_tree_rule_against_base_compares_with_the_stored_baseline() {
+    let repo = repo("[gate.tree]\n\"static.clones.pairs\" = \"<= base\"\n");
+    repo.write(
+        "src/sums.rs",
+        &[clone_of("alpha"), clone_of("beta")].concat(),
+    );
+    let check = ["check", "--only", "static.clones"];
+
+    let unset = repo.run(&check);
+    assert_eq!(unset.code, 1, "{}", unset.stdout);
+    let envelope = unset.envelope();
+    assert_eq!(
+        gate(&envelope)["rules"][0],
+        json!({"rule": "static.clones.pairs <= base", "actual": 1.0, "bound": null,
+               "result": "skipped", "reason": "no reference: no baseline is set"})
+    );
+    assert_eq!(
+        envelope["next_actions"][0],
+        json!({
+            "priority": 1, "finding": null, "kind": "configure",
+            "summary": "Give the gate rule `static.clones.pairs <= base` a reference \
+                        (no reference: no baseline is set): set a baseline with \
+                        `cupel baseline set --write`, or pass --against REF|run:ID.",
+            "command": "cupel baseline set --write"
+        })
+    );
+
+    let set = repo.run(&["baseline", "set", "--write"]);
+    assert_eq!(set.code, 0, "{}", set.stdout);
+    let held = repo.run(&check);
+    assert_eq!(held.code, 0, "{}", held.stdout);
+    assert_eq!(
+        gate(&held.envelope())["rules"][0],
+        json!({"rule": "static.clones.pairs <= base", "actual": 1.0, "bound": 1.0,
+               "result": "pass", "reason": null})
+    );
+
+    repo.write(
+        "src/sums.rs",
+        &[clone_of("alpha"), clone_of("beta"), clone_of("gamma")].concat(),
+    );
+    let grown = repo.run(&check);
+    assert_eq!(grown.code, 1, "{}", grown.stdout);
+    assert_eq!(
+        gate(&grown.envelope())["rules"][0],
+        json!({"rule": "static.clones.pairs <= base", "actual": 3.0, "bound": 1.0,
+               "result": "fail", "reason": null})
+    );
+}
+
+/// A function `wide` with `count` parameters and cyclomatic complexity 2.
+fn with_params(count: usize) -> String {
+    let params: Vec<String> = (0..count).map(|n| format!("p{n}: i32")).collect();
+    format!(
+        "pub fn wide({}) -> i32 {{\n    if p0 > 1 {{ p1 }} else {{ p0 }}\n}}\n",
+        params.join(", ")
+    )
+}
+
+/// A committed repository with `wide` of seven parameters and `config` as its gate.
+fn committed(config: &str) -> Option<Repo> {
+    let repo = repo(config);
+    repo.write(".gitignore", ".cupel/\n");
+    repo.write("src/wide.rs", &with_params(7));
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
+        eprintln!("SKIPPED: git not installed");
+        return None;
+    }
+    assert!(repo.git(&["add", "--all"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "first"]));
+    Some(repo)
+}
+
+#[test]
+fn a_changed_rule_against_base_recomputes_the_value_at_the_base_commit() {
+    let Some(repo) = committed(
+        "[gate.changed]\n\"static.complexity.params_max\" = \"<= base\"\n\
+         \"static.complexity.cyclomatic_max\" = \">= base - 0.5\"\n",
+    ) else {
+        return;
+    };
+    let check = ["check", "--changed", "--only", "static.complexity"];
+    let rules_of = |outcome: &support::Outcome| gate(&outcome.envelope())["rules"].clone();
+
+    repo.write("src/wide.rs", &with_params(8));
+    let widened = repo.run(&check);
+    assert_eq!(widened.code, 1, "{}", widened.stdout);
+    assert_eq!(
+        rules_of(&widened),
+        json!([
+            {"rule": "static.complexity.params_max <= base", "actual": 8.0, "bound": 7.0,
+             "result": "fail", "reason": null},
+            {"rule": "static.complexity.cyclomatic_max >= base - 0.5", "actual": 2.0,
+             "bound": 1.5, "result": "pass", "reason": null}
+        ])
+    );
+
+    repo.write("src/wide.rs", &with_params(6));
+    let narrowed = repo.run(&check);
+    assert_eq!(narrowed.code, 0, "{}", narrowed.stdout);
+    assert_eq!(
+        rules_of(&narrowed)[0],
+        json!({"rule": "static.complexity.params_max <= base", "actual": 6.0, "bound": 7.0,
+               "result": "pass", "reason": null})
+    );
+
+    let stored = repo.run(&["check", "--only", "static.complexity", "--no-gate"]);
+    let stored_id = stored.envelope()["run"]["id"].as_str().unwrap().to_owned();
+    repo.write("src/wide.rs", &with_params(9));
+    let against = format!("run:{stored_id}");
+    let compared = repo.run(&[
+        "check",
+        "--changed",
+        "--only",
+        "static.complexity",
+        "--against",
+        &against,
+    ]);
+    assert_eq!(compared.code, 1, "{}", compared.stdout);
+    assert_eq!(
+        rules_of(&compared)[0],
+        json!({"rule": "static.complexity.params_max <= base", "actual": 9.0, "bound": 6.0,
+               "result": "fail", "reason": null}),
+        "--against names the reference run, so nothing is recomputed"
+    );
+}
+
+#[test]
+fn a_changed_rule_against_base_has_no_reference_when_every_changed_file_is_new() {
+    let Some(repo) = committed("[gate.changed]\n\"static.complexity.params_max\" = \"<= base\"\n")
+    else {
+        return;
+    };
+    repo.write("src/narrow.rs", &with_params(2));
+    let outcome = repo.run(&["check", "--changed", "--only", "static.complexity"]);
+    assert_eq!(outcome.code, 1, "{}", outcome.stdout);
+    assert_eq!(
+        gate(&outcome.envelope())["rules"][0],
+        json!({"rule": "static.complexity.params_max <= base", "actual": 2.0, "bound": null,
+               "result": "skipped",
+               "reason": "no reference: none of the range's files existed at its base"})
+    );
+}
+
+#[test]
+fn a_changed_mutation_rule_against_base_reruns_the_suite_at_the_base_commit() {
+    let Some(repo) = Repo::python_fixture("tests.mutation") else {
+        return;
+    };
+    let config = std::fs::read_to_string(repo.path("cupel.toml")).unwrap();
+    repo.write(
+        "cupel.toml",
+        &format!("{config}\n[gate.changed]\n\"tests.mutation.score\" = \">= base - 0.02\"\n"),
+    );
+    repo.write(".gitignore", ".cupel/\n");
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
+        eprintln!("SKIPPED: git not installed");
+        return;
+    }
+    assert!(repo.git(&["add", "--all"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "fixture"]));
+    let source = std::fs::read_to_string(repo.path("discount.py")).unwrap();
+    let check = ["check", "--changed", "--only", "tests.mutation"];
+
+    // The base's discount.py scores 0.75; the changed lines of `refund` have no covering test.
+    repo.write("discount.py", &source.replace("total - 5", "total - 6"));
+    let untested = repo.run(&check);
+    assert_eq!(untested.code, 1, "{}", untested.stdout);
+    assert_eq!(
+        gate(&untested.envelope())["rules"][0],
+        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 0.0, "bound": 0.73,
+               "result": "fail", "reason": null})
+    );
+
+    repo.write(
+        "tests/test_refund.py",
+        "from discount import refund\n\n\ndef test_refunds_less_six():\n    assert refund(10) == 4\n",
+    );
+    let tested = repo.run(&check);
+    assert_eq!(tested.code, 0, "{}", tested.stdout);
+    assert_eq!(
+        gate(&tested.envelope())["rules"][0],
+        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 1.0, "bound": 0.73,
+               "result": "pass", "reason": null})
+    );
 }

@@ -176,6 +176,40 @@ fn a_rename_is_a_deletion_and_an_addition() {
 }
 
 #[test]
+fn export_writes_a_commit_s_files_and_leaves_the_index_and_work_tree_alone() {
+    let Some((repo, base)) = GitRepo::committed(&[
+        ("top.rs", "fn t() {}\n"),
+        ("sub/a.rs", "fn a() {}\n"),
+        ("sub/deep/b.rs", "fn b() {}\n"),
+    ]) else {
+        return;
+    };
+    repo.write("sub/a.rs", "fn a() { 1; }\n");
+    repo.commit("edit");
+    repo.write("sub/a.rs", "fn a() { 2; }\n");
+    repo.write("sub/new.rs", "fn n() {}\n");
+    let git = Git::open(&repo.root().join("sub")).unwrap();
+    let before = git.changed_since("HEAD").unwrap();
+    let dest = tempfile::tempdir().unwrap();
+
+    let root = git.export(&base, &dest.path().join("tree")).unwrap();
+
+    assert_eq!(root, dest.path().join("tree").join("sub/"));
+    let read = |path: &str| std::fs::read_to_string(dest.path().join("tree").join(path)).unwrap();
+    assert_eq!(
+        [read("top.rs"), read("sub/a.rs"), read("sub/deep/b.rs")],
+        ["fn t() {}\n", "fn a() {}\n", "fn b() {}\n"]
+    );
+    assert!(!dest.path().join("tree/sub/new.rs").exists());
+    assert!(!dest.path().join("tree.index").exists());
+    assert_eq!(git.changed_since("HEAD").unwrap(), before);
+    assert_eq!(
+        std::fs::read_to_string(repo.root().join("sub/a.rs")).unwrap(),
+        "fn a() { 2; }\n"
+    );
+}
+
+#[test]
 fn show_reads_a_file_as_it_was_at_a_commit_relative_to_the_root() {
     let Some((repo, base)) = GitRepo::committed(&[("sub/a.rs", "fn a() {}\n")]) else {
         return;

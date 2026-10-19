@@ -1,9 +1,9 @@
 // ABOUTME: Tests for gate evaluation (ADR-060): every operator passing and failing, absent metrics and
-// ABOUTME: checks, presence after suppression, `no-breaking`, table choice by scope mode, and status.
+// ABOUTME: checks, presence after suppression, `no-breaking`, rules against a reference run, table choice, and status.
 use cupel_core::config::{ConfigFile, GateRuleSpec};
 use cupel_core::{
-    Envelope, ExitCode, GateOutcome, GateResult, RuleOutcome, ScopeInfo, ScopeMode, Status,
-    apply_gate, evaluate_gate, gate_for,
+    Envelope, ExitCode, GateOutcome, GateReference, GateResult, GateRule, RuleOutcome, ScopeInfo,
+    ScopeMode, Status, apply_gate, evaluate_gate, gate_for,
 };
 use serde_json::{Value, json};
 
@@ -70,10 +70,37 @@ fn rule(key: &str, condition: &str) -> GateRuleSpec {
     GateRuleSpec::parse(key, condition).unwrap()
 }
 
+/// The reference of a run with no baseline and no range.
+fn unset() -> GateReference<'static> {
+    GateReference::Missing("no baseline is set".to_owned())
+}
+
+/// One rule's result against `envelope`, with `reference` as `base`.
+fn against(key: &str, condition: &str, envelope: &Envelope, reference: &GateReference) -> GateRule {
+    let gate = evaluate_gate("gate.tree", &[rule(key, condition)], envelope, reference);
+    gate.rules.into_iter().next().unwrap()
+}
+
 /// One rule's `(actual, result)` against `envelope`.
 fn one(key: &str, condition: &str, envelope: &Envelope) -> (Option<f64>, RuleOutcome) {
-    let gate = evaluate_gate("gate.tree", &[rule(key, condition)], envelope);
-    (gate.rules[0].actual, gate.rules[0].result)
+    let rule = against(key, condition, envelope, &unset());
+    (rule.actual, rule.result)
+}
+
+fn gate_rule(
+    rule: &str,
+    actual: Option<f64>,
+    bound: Option<f64>,
+    result: RuleOutcome,
+    reason: Option<&str>,
+) -> GateRule {
+    GateRule {
+        rule: rule.to_owned(),
+        actual,
+        bound,
+        result,
+        reason: reason.map(str::to_owned),
+    }
 }
 
 #[test]
@@ -139,7 +166,12 @@ fn a_rule_whose_metric_or_check_is_absent_is_skipped_and_fails_the_gate() {
             "{key} {condition}"
         );
     }
-    let gate = evaluate_gate("gate.tree", &[rule("tests.weakening", "none")], &skipped);
+    let gate = evaluate_gate(
+        "gate.tree",
+        &[rule("tests.weakening", "none")],
+        &skipped,
+        &unset(),
+    );
     assert_eq!(gate.result, GateOutcome::Fail);
 }
 
@@ -253,6 +285,7 @@ fn the_gate_passes_only_when_every_rule_passes_and_reports_rules_as_written() {
             rule("tests.mutation.score", ">= 0.80"),
         ],
         &envelope,
+        &unset(),
     );
     assert_eq!(gate.evaluated, "gate.changed");
     assert_eq!(gate.result, GateOutcome::Fail);
@@ -268,7 +301,7 @@ fn the_gate_passes_only_when_every_rule_passes_and_reports_rules_as_written() {
             ("tests.mutation.score >= 0.8", RuleOutcome::Fail),
         ]
     );
-    let empty = evaluate_gate("gate.tree", &[], &envelope);
+    let empty = evaluate_gate("gate.tree", &[], &envelope, &unset());
     assert_eq!(empty.result, GateOutcome::Pass);
 }
 
@@ -343,9 +376,175 @@ fn an_empty_scope_passes_every_rule_vacuously() {
         &[
             rule("static.crap.max", "< 30"),
             rule("tests.weakening", "none"),
+            rule("static.crap.max", "<= base"),
         ],
         &empty,
+        &unset(),
     );
     assert_eq!(gate.result, GateOutcome::Pass);
     assert!(gate.rules.iter().all(|rule| rule.actual.is_none()));
+}
+
+#[test]
+fn a_skipped_rule_says_why_and_an_evaluated_one_carries_its_bound() {
+    let envelope = envelope(
+        "pass",
+        &[
+            check("static.crap", "skipped", &json!({})),
+            check("tests.mutation", "pass", &json!({"score": 0.75})),
+        ],
+        &[],
+    );
+    let rules = [
+        against("static.crap.max", "< 30", &envelope, &unset()),
+        against("tests.mutation.max", "< 30", &envelope, &unset()),
+        against("tests.mutation.score", ">= 70%", &envelope, &unset()),
+        against("tests.mutation", "none", &envelope, &unset()),
+    ];
+    assert_eq!(
+        rules,
+        [
+            gate_rule(
+                "static.crap.max < 30",
+                None,
+                None,
+                RuleOutcome::Skipped,
+                Some("`static.crap` did not run to completion"),
+            ),
+            gate_rule(
+                "tests.mutation.max < 30",
+                None,
+                None,
+                RuleOutcome::Skipped,
+                Some("`tests.mutation` did not report `max`"),
+            ),
+            gate_rule(
+                "tests.mutation.score >= 70%",
+                Some(0.75),
+                Some(0.7),
+                RuleOutcome::Pass,
+                None,
+            ),
+            gate_rule(
+                "tests.mutation none",
+                Some(0.0),
+                Some(0.0),
+                RuleOutcome::Pass,
+                None,
+            ),
+        ]
+    );
+}
+
+#[test]
+fn a_rule_against_base_compares_with_the_reference_value_plus_its_offset() {
+    let current = measured();
+    let reference = envelope(
+        "pass",
+        &[check("static.crap", "pass", &json!({"max": 20.0}))],
+        &[],
+    );
+    let base = GateReference::Run(&reference);
+    let rules: Vec<GateRule> = [
+        "<= base",
+        "< base",
+        ">= base + 1",
+        "> base - 0.5",
+        "== base",
+    ]
+    .into_iter()
+    .map(|condition| against("static.crap.max", condition, &current, &base))
+    .collect();
+    assert_eq!(
+        rules,
+        [
+            gate_rule(
+                "static.crap.max <= base",
+                Some(20.0),
+                Some(20.0),
+                RuleOutcome::Pass,
+                None
+            ),
+            gate_rule(
+                "static.crap.max < base",
+                Some(20.0),
+                Some(20.0),
+                RuleOutcome::Fail,
+                None
+            ),
+            gate_rule(
+                "static.crap.max >= base + 1",
+                Some(20.0),
+                Some(21.0),
+                RuleOutcome::Fail,
+                None,
+            ),
+            gate_rule(
+                "static.crap.max > base - 0.5",
+                Some(20.0),
+                Some(19.5),
+                RuleOutcome::Pass,
+                None,
+            ),
+            gate_rule(
+                "static.crap.max == base",
+                Some(20.0),
+                Some(20.0),
+                RuleOutcome::Pass,
+                None
+            ),
+        ]
+    );
+}
+
+#[test]
+fn a_rule_against_base_without_a_reference_value_is_skipped_and_fails_the_gate() {
+    let current = measured();
+    let unmeasured = envelope(
+        "pass",
+        &[
+            check("static.crap", "pass", &json!({})),
+            check("tests.mutation", "skipped", &json!({})),
+        ],
+        &[],
+    );
+    let ran = GateReference::Run(&unmeasured);
+    let rules = [
+        against("static.crap.max", "<= base", &current, &unset()),
+        against("static.crap.max", "<= base", &current, &ran),
+        against("tests.mutation.score", ">= base - 0.02", &current, &ran),
+    ];
+    assert_eq!(
+        rules,
+        [
+            gate_rule(
+                "static.crap.max <= base",
+                Some(20.0),
+                None,
+                RuleOutcome::Skipped,
+                Some("no reference: no baseline is set"),
+            ),
+            gate_rule(
+                "static.crap.max <= base",
+                Some(20.0),
+                None,
+                RuleOutcome::Skipped,
+                Some("no reference: the reference run did not report `static.crap.max`"),
+            ),
+            gate_rule(
+                "tests.mutation.score >= base - 0.02",
+                Some(0.75),
+                None,
+                RuleOutcome::Skipped,
+                Some("no reference: the reference run did not report `tests.mutation.score`"),
+            ),
+        ]
+    );
+    let gate = evaluate_gate(
+        "gate.tree",
+        &[rule("static.crap.max", "<= base")],
+        &current,
+        &unset(),
+    );
+    assert_eq!(gate.result, GateOutcome::Fail);
 }

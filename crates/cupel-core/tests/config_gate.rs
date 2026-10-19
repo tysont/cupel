@@ -192,3 +192,148 @@ fn error_message_quotes_the_rule_and_lists_the_operators() {
          expected one of `>=`, `>`, `<=`, `<`, `==`, `none`, `no-breaking`"
     );
 }
+
+fn relative(op: Comparison, offset: f64) -> GateCondition {
+    GateCondition::Relative { op, offset }
+}
+
+#[test]
+fn parses_every_comparison_against_the_reference_value() {
+    assert_parses(&[
+        (
+            "static.clones.pairs",
+            "<= base",
+            key("static.clones", Some("pairs")),
+            relative(Comparison::Le, 0.0),
+        ),
+        (
+            "tests.mutation.score",
+            ">= base - 0.02",
+            key("tests.mutation", Some("score")),
+            relative(Comparison::Ge, -0.02),
+        ),
+        (
+            "static.crap.max",
+            "> base + 1",
+            key("static.crap", Some("max")),
+            relative(Comparison::Gt, 1.0),
+        ),
+        (
+            "static.crap.max",
+            "<base",
+            key("static.crap", Some("max")),
+            relative(Comparison::Lt, 0.0),
+        ),
+        (
+            "static.deps.cycles",
+            "  ==base+0  ",
+            key("static.deps", Some("cycles")),
+            relative(Comparison::Eq, 0.0),
+        ),
+        (
+            "tests.mutation.score",
+            ">=base-0.5",
+            key("tests.mutation", Some("score")),
+            relative(Comparison::Ge, -0.5),
+        ),
+    ]);
+}
+
+#[test]
+fn a_rule_against_the_reference_value_round_trips_through_its_display() {
+    let cases = [
+        ("<= base", "static.clones.pairs <= base"),
+        (">= base - 0.02", "static.clones.pairs >= base - 0.02"),
+        ("> base + 1", "static.clones.pairs > base + 1"),
+        ("==base+0", "static.clones.pairs == base"),
+        ("<base-0", "static.clones.pairs < base"),
+    ];
+    let displayed: Vec<String> = cases
+        .iter()
+        .map(|(condition, _)| {
+            GateRuleSpec::parse("static.clones.pairs", condition)
+                .unwrap()
+                .to_string()
+        })
+        .collect();
+    let expected: Vec<&str> = cases.iter().map(|(_, display)| *display).collect();
+    assert_eq!(displayed, expected);
+    let reparsed: Vec<GateRuleSpec> = expected
+        .iter()
+        .map(|display| {
+            let condition = display.trim_start_matches("static.clones.pairs ");
+            GateRuleSpec::parse("static.clones.pairs", condition).unwrap()
+        })
+        .collect();
+    let parsed: Vec<GateRuleSpec> = cases
+        .iter()
+        .map(|(condition, _)| GateRuleSpec::parse("static.clones.pairs", condition).unwrap())
+        .collect();
+    assert_eq!(reparsed, parsed);
+}
+
+#[test]
+fn malformed_rules_against_the_reference_value_name_the_fix() {
+    let cases = [
+        (
+            ">= base * 2",
+            "`base` takes an offset written `base + <number>` or `base - <number>`",
+        ),
+        (
+            ">= base 2",
+            "`base` takes an offset written `base + <number>` or `base - <number>`",
+        ),
+        (
+            ">= base - 2%",
+            "an offset from `base` is a number in the metric's unit, not a percentage: \
+             write `base - 0.02`",
+        ),
+        (
+            "<= base + 5%",
+            "an offset from `base` is a number in the metric's unit, not a percentage: \
+             write `base + 0.05`",
+        ),
+        (
+            ">= base -",
+            "`base -` expects a non-negative number, such as `base - 0.02`",
+        ),
+        (
+            ">= base - -1",
+            "`base -` expects a non-negative number, such as `base - 0.02`",
+        ),
+        (
+            "<= base + inf",
+            "`base +` expects a non-negative number, such as `base + 0.02`",
+        ),
+        (
+            ">= baseline",
+            "`>=` expects a number (optionally with a `%` suffix) or `base` \
+             (optionally `base + <number>` or `base - <number>`)",
+        ),
+    ];
+    let reasons: Vec<(&str, String)> = cases
+        .iter()
+        .map(|(condition, _)| {
+            let err = GateRuleSpec::parse("tests.mutation.score", condition).unwrap_err();
+            let ConfigError::InvalidGateRule { reason, .. } = err else {
+                panic!("{condition}: unexpected error {err:?}");
+            };
+            (*condition, reason)
+        })
+        .collect();
+    let expected: Vec<(&str, String)> = cases
+        .iter()
+        .map(|(condition, reason)| (*condition, (*reason).to_owned()))
+        .collect();
+    assert_eq!(reasons, expected);
+}
+
+#[test]
+fn a_rule_against_the_reference_value_needs_a_metric() {
+    let err = GateRuleSpec::parse("static.clones", "<= base").unwrap_err();
+    assert_eq!(
+        err.to_string(),
+        "invalid gate rule `\"static.clones\" = \"<= base\"`: \
+         `<=` needs a metric: write `<check-id>.<metric>`"
+    );
+}

@@ -121,7 +121,7 @@ fn time_limit(value: &str) -> Result<TimeLimit, String> {
 
 /// Scope, depth, and selection flags shared by the analysis verbs (design §6.4). They parse now
 /// and take effect in the steps the registry names.
-#[derive(Debug, Args)]
+#[derive(Debug, Default, Args)]
 #[command(next_help_heading = "Scope, depth, and selection")]
 #[allow(
     clippy::struct_excessive_bools,
