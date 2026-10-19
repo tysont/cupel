@@ -26,8 +26,10 @@ fn protection(name: &str, protection: ProtectionMetric) -> MetricSpec {
 
 /// A structural hash for the symbol `display`, distinct per display name.
 fn hash(display: &str) -> String {
-    let digits: String = display.bytes().map(|b| format!("{b:02x}")).collect();
-    format!("sh_{digits:0>16}")
+    let digits = display
+        .bytes()
+        .fold(0u64, |hash, byte| (hash << 8) | u64::from(byte));
+    format!("sh_{digits:016x}")
 }
 
 fn manifest(id: &str, metrics: Vec<MetricSpec>) -> Manifest {
