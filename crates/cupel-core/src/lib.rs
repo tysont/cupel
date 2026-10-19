@@ -58,6 +58,7 @@ mod schedule;
 pub mod schema;
 mod scope;
 mod select;
+pub mod similarity;
 mod simulation;
 mod status;
 mod suppression;

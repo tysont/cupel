@@ -1,6 +1,6 @@
-// ABOUTME: Near-duplicate search for static.clones: per-tree subtree fingerprint sets, MinHash signatures,
-// ABOUTME: LSH banding into candidate pairs, and exact Jaccard similarity (design §9.2, ADR-050).
-use cupel_core::syntax::NormNode;
+// ABOUTME: Near-duplicate search over normalized trees for static.clones and symbol matching: subtree fingerprint
+// ABOUTME: sets, MinHash signatures, LSH banding into candidate pairs, and exact Jaccard (design §9.2, ADR-050).
+use crate::syntax::NormNode;
 
 /// The length of a min-hash signature: the number of independent hash functions.
 pub const SIGNATURE: usize = 128;

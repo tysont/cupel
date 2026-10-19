@@ -1,10 +1,9 @@
 // ABOUTME: `static.clones`: near-duplicate functions within a language family, from NormTree subtree
 // ABOUTME: fingerprints through MinHash and LSH to exact Jaccard, reported as pairs and clusters (ADR-050).
-mod similarity;
-
 use std::collections::BTreeMap;
 
 use cupel_core::config::{ConfigError, Table};
+use cupel_core::similarity::{Fingerprints, Similar, combine, mix, search};
 use cupel_core::syntax::{NormNode, NormTree, SymbolDef, Symbols};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
@@ -15,8 +14,6 @@ use cupel_core::{
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
-
-use similarity::{Fingerprints, Similar, combine, mix, search};
 
 use crate::manifest::{evidence, kind, metric, ranked, setting};
 use crate::metrics::{largest, sum, trees_by_symbol};
