@@ -37,3 +37,4 @@ Design §6.5 and §8.10 specify `cupel serve [--socket PATH] [--mcp] [--watch]`:
 - Rebuilding `cupel` makes every client fall back, with a one-line note, until the daemon is restarted; a stale daemon can never answer for a newer binary.
 - Tool-backed facts (coverage, per-test maps) cost the same through the daemon as cold until their producers can keep a decoded map with its freshness record.
 - The test harness and anyone else can drive a daemon over the socket without the CLI client; MCP (P7.7) will be one more transport over the same handler.
+- A served request runs with the daemon's `PATH` (`Requests.path`), so the `cupel-check-*` and `cupel-produce-*` plugins a cold run finds on `PATH` (ADR-089) are found by the daemon too; the daemon already refuses a client whose `PATH` differs, so both see the same plugins. Before this, a daemon-served run built its environment with no `PATH` and reported `--only <plugin>` as an unknown check (found by P7.7's parity work).

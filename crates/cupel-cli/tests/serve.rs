@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 use cupel_core::Envelope;
 use cupel_serve::{Body, Build, Reply, Request, Status};
 use serde_json::{Value, json};
-use support::{Outcome, Repo, cupel, run_with};
+use support::{Outcome, Repo, cupel, manifest, plugin, run_with};
 
 /// `src/lib.rs` with a function of `branches` decisions (over the default `cyclomatic_max` of 10
 /// from 10 on) and a simple one, so `static.complexity` has a finding to report.
@@ -41,10 +41,16 @@ struct Daemon {
 
 impl Daemon {
     fn start(repo: &Repo, extra: &[&str]) -> Self {
+        Self::start_on_path(repo, extra, &std::env::var("PATH").unwrap_or_default())
+    }
+
+    /// A daemon whose `PATH` is `path`; only a client with the same `PATH` is served.
+    fn start_on_path(repo: &Repo, extra: &[&str], path: &str) -> Self {
         let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
         command
             .args(["serve", "--timeout", "300s", "--format", "json"])
             .args(extra)
+            .env("PATH", path)
             .current_dir(repo.root())
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
@@ -172,6 +178,37 @@ fn a_running_daemon_answers_the_cli_with_what_a_cold_run_prints() {
     assert_eq!(
         served.envelope()["findings"][0]["kind"],
         json!("complexity.high")
+    );
+}
+
+#[test]
+fn a_plugin_on_the_daemons_path_is_found_by_the_runs_it_serves() {
+    let repo = repo();
+    let bin = tempfile::tempdir().unwrap();
+    plugin(bin.path(), "cupel-check-sample", &manifest());
+    let path = format!(
+        "{}:{}",
+        bin.path().display(),
+        std::env::var("PATH").unwrap_or_default()
+    );
+    let daemon = Daemon::start_on_path(&repo, &[], &path);
+    let args = ["check", "--only", "ref.sample", "--format", "json"];
+    let served = repo.run_with(cupel().env("PATH", &path), &args);
+    assert_eq!(daemon.status().served, 1, "the run went through the daemon");
+    let local = repo.run_with(
+        cupel().env("PATH", &path).env("CUPEL_NO_DAEMON", "1"),
+        &args,
+    );
+    assert_eq!(
+        redacted(&served, &repo.root()),
+        redacted(&local, &repo.root())
+    );
+    assert_eq!(
+        (
+            served.code,
+            served.envelope()["checks"][0]["status"].clone()
+        ),
+        (0, json!("fail"))
     );
 }
 

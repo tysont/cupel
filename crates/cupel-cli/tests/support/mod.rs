@@ -6,6 +6,7 @@
 )]
 
 use std::fs;
+use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 
 use assert_cmd::Command;
@@ -339,4 +340,50 @@ pub fn complexity_check(score: f64) -> Value {
         "score": {"value": score, "unit": "ratio", "n": 4}, "metrics": {},
         "delta": null, "findings": 1, "duration_ms": 3, "skipped": null, "oracle": null
     })
+}
+
+/// The check plugin `ref.sample` (ADR-088): needs the symbols of each language and reports one finding.
+pub fn manifest() -> Value {
+    json!({
+        "kind": "check", "id": "ref.sample", "version": 1, "tier": 1, "cost": "quick",
+        "needs": ["symbols"], "wants": [],
+        "findings": [{
+            "kind": "ref.sample-file", "action": "review", "summary": "A sample finding.",
+            "evidence": {"type": "object", "properties": {"file": {"type": "string"}}}
+        }],
+        "metrics": [{"name": "files", "summary": "Files seen.", "per": "scope"}],
+        "stability": "experimental", "summary": "A sample check plugin."
+    })
+}
+
+fn sample_finding() -> Value {
+    json!({
+        "ev": "finding", "id": "fnd_0a1b2c", "check": "ref.sample", "kind": "ref.sample-file",
+        "severity": "warn", "confidence": 1.0, "tier": 1, "symbol": null,
+        "location": {"file": "src/a.py", "line": 1, "col": null, "end_line": 1, "end_col": null},
+        "title": "src/a.py was seen", "detail": null, "evidence": {"file": "src/a.py"},
+        "action": {"kind": "review", "priority": 1, "summary": "Look at it.", "hints": {}},
+        "repro": "cupel check --only ref.sample", "suppress": "cupel suppress fnd_0a1b2c",
+        "new_since_baseline": false, "suppressed": false
+    })
+}
+
+/// Writes the plugin script `name` in `dir`: it describes `manifest`, plans 1 target in 25 ms,
+/// and runs by saving its request beside itself, then reporting one finding and a failing result.
+pub fn plugin(dir: &Path, name: &str, manifest: &Value) {
+    let result = json!({
+        "ev": "result", "status": "fail", "score": null, "metrics": {"files": 1}, "notes": []
+    });
+    let body = format!(
+        "#!/bin/sh\ncase \"$1\" in\n\
+         describe) echo '{manifest}' ;;\n\
+         plan) echo '{{\"targets\": 1, \"est_ms\": 25}}' ;;\n\
+         run) cat > '{saved}'; echo '{finding}'; echo '{result}' ;;\n\
+         esac\n",
+        saved = dir.join(format!("{name}.request.json")).display(),
+        finding = sample_finding(),
+    );
+    let path = dir.join(name);
+    fs::write(&path, body).unwrap();
+    fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
 }

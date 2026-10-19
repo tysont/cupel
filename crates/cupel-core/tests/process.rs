@@ -271,11 +271,7 @@ fn a_java_temporary_directory_is_appended_to_the_jvms_tool_options() {
         .java_tmpdir(dir.path())
         .run(&Cancellation::new())
         .unwrap();
-    let expected = format!("-Djava.io.tmpdir={}", dir.path().display());
-    assert_eq!(
-        captured.stdout.rsplit(' ').next(),
-        Some(expected.as_str()),
-        "{:?}",
-        captured.stdout
-    );
+    let inherited = std::env::var("JAVA_TOOL_OPTIONS").unwrap_or_default();
+    let expected = format!("{inherited} -Djava.io.tmpdir={}", dir.path().display());
+    assert_eq!(captured.stdout, expected.trim_start());
 }
