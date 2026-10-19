@@ -90,8 +90,10 @@ package() {
 
 sums() {
 	cd "$1"
-	# shellcheck disable=SC2046
-	set -- $(ls cupel-*.tar.gz cupel-*.zip 2>/dev/null | LC_ALL=C sort)
+	set --
+	for archive in cupel-*.tar.gz cupel-*.zip; do
+		if [ -f "$archive" ]; then set -- "$@" "$archive"; fi
+	done
 	[ $# -gt 0 ] || fail "no archives in $(pwd)"
 	sha256 "$@" >SHA256SUMS
 }
@@ -103,7 +105,7 @@ entries() {
 		if command -v unzip >/dev/null 2>&1; then
 			unzip -Z1 "$1"
 		else
-			7z l -ba -slt "$1" | sed -n 's/^Path = //p' | tr '\\' /
+			7z l -ba -slt "$1" | sed -n 's/^Path = //p' | tr '\134' /
 		fi
 		;;
 	*) tar -tzf "$1" ;;
