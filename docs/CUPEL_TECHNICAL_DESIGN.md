@@ -575,6 +575,8 @@ Consequences:
 
 A language that lacks a producer for some fact simply does not support the checks that need it, and the support matrix says so. Nothing breaks; coverage gaps are visible, not silent.
 
+A fact kind registers from its payload module: the module submits the kind's catalog entry (name, payload version, schema, a decoder for payloads that arrive as JSON, whether it is syntactic or has a conformance inventory) with `inventory::submit!`, and its `FactKind` variant is the only list it joins (ADR-123).
+
 #### 8.3.2 Fact catalog (v1)
 
 Syntactic facts come from language producers and are keyed by file content hash and producer version. Execution facts come from tools and engines and are keyed by their input facts and the toolchain hash.
@@ -611,6 +613,8 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `ContractViolations` | per violated contract: kind (precondition, postcondition, invariant), function, message, where it is declared, the test that violated it; whether a project root declares the contract library, each root's run (ADR-113) | contract tool, from the baseline runner's run with contract checking on | `spec.contracts` |
 
 P7 added `Traces`, `Histories`, `ProofResults`, `ContractViolations`, `SimulationResults` (ADR-120), and `ModelCheckResults` (ADR-117) under the same rules. Facts carry completeness flags rather than languages carrying capability flags: a `CoverageMap` with `branches: None` makes `tests.coverage` skip branch findings with that reason; whether a language has a per-test map is simply whether a `PerTestMap` producer is registered for it.
+
+The catalog is read from those entries, in `FactKind`'s declaration order, so the table above has no counterpart list in code; each kind's schema is pinned by a snapshot of its own (ADR-123).
 
 #### 8.3.3 Producer contract
 
