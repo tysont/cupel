@@ -16,7 +16,9 @@ use crate::id::{LangId, RunId};
 use crate::oracle::OracleReport;
 use crate::per_test_impact::TestsReport;
 use crate::rank::Rankings;
-pub use crate::result::{CheckResult, CheckStatus, Delta, Score, SkipReason, Skipped};
+pub use crate::result::{
+    CheckResult, CheckStatus, Delta, Score, SetDelta, SetFindings, SetMetric, SkipReason, Skipped,
+};
 pub use crate::scope::ScopeMode;
 pub use crate::status::{ExitCode, Status};
 

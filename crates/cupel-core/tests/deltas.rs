@@ -1,6 +1,14 @@
-// ABOUTME: Tests for `deltas`: comparing two runs' findings by ID and check scores, and applying
-// ABOUTME: the result to an envelope's findings, summary, checks, and `run.baseline` (ADR-046).
-use cupel_core::{BaselineRef, CheckId, Envelope, FindingId, RunId, deltas};
+// ABOUTME: Tests for `deltas`: comparing two runs' findings by ID and across symbol matches, check scores and
+// ABOUTME: per-symbol metrics, and applying the result to an envelope (ADR-046, ADR-131).
+use std::collections::BTreeSet;
+use std::str::FromStr;
+
+use cupel_core::matching::{Matched, SymbolMatch};
+use cupel_core::syntax::SymbolKey;
+use cupel_core::{
+    BaselineRef, CheckId, Delta, Envelope, FindingId, LangId, Matching, RunId, Symbol,
+    SymbolMetrics, deltas, deltas_matched,
+};
 use serde_json::{Value, json};
 
 fn finding(id: &str) -> Value {
@@ -137,4 +145,205 @@ fn identical_runs_have_no_deltas() {
     let deltas = deltas(&current, &against);
     assert!(deltas.new.is_empty());
     assert!(deltas.resolved.is_empty());
+}
+
+// ---------------------------------------------------------------- across symbol matches
+
+/// A finding of `kind` about the symbol `hash`.
+fn on_symbol(id: &str, kind: &str, hash: &str) -> Value {
+    let mut finding = finding(id);
+    finding["kind"] = json!(kind);
+    finding["symbol"] = json!({"display": hash, "hash": hash, "lang": "rust"});
+    finding
+}
+
+fn with_findings(run: &str, findings: Vec<Value>, checks: &[Value]) -> Envelope {
+    let mut envelope = envelope(run, &[], checks);
+    envelope.findings = findings
+        .into_iter()
+        .map(|finding| serde_json::from_value(finding).unwrap())
+        .collect();
+    envelope
+}
+
+fn member(hash: &str, nodes: u32) -> Matched {
+    Matched {
+        key: SymbolKey {
+            file: "src/lib.rs".to_owned(),
+            line: nodes,
+            col: 1,
+        },
+        symbol: Symbol {
+            display: hash.to_owned(),
+            hash: hash.parse().unwrap(),
+            lang: LangId::from("rust"),
+        },
+        nodes,
+    }
+}
+
+const OLD: &str = "sh_0000000000000001";
+const LEFT: &str = "sh_0000000000000002";
+const RIGHT: &str = "sh_0000000000000003";
+
+/// The reference's OLD split into LEFT and RIGHT.
+fn split() -> Vec<SymbolMatch> {
+    vec![SymbolMatch {
+        base: vec![member(OLD, 30)],
+        head: vec![member(LEFT, 40), member(RIGHT, 20)],
+        similarity: 0.8,
+    }]
+}
+
+#[test]
+fn a_finding_carried_across_a_match_is_neither_new_nor_resolved() {
+    let against = with_findings(
+        A,
+        vec![on_symbol("fnd_000001", "complexity.high", OLD)],
+        &[],
+    );
+    let current = with_findings(
+        B,
+        vec![on_symbol("fnd_000002", "complexity.high", LEFT)],
+        &[],
+    );
+    let matches = split();
+    let matching = Matching {
+        matches: &matches,
+        ..Matching::default()
+    };
+
+    let deltas = deltas_matched(&current, &against, &matching);
+
+    assert_eq!(deltas.new, Vec::<FindingId>::new());
+    assert_eq!(ids(&deltas.resolved), Vec::<String>::new());
+    let sets = &deltas.sets[&CheckId::from("static.complexity")];
+    assert_eq!(
+        serde_json::to_value(sets).unwrap(),
+        json!([{
+            "base": [{"display": OLD, "hash": OLD, "lang": "rust"}],
+            "head": [
+                {"display": LEFT, "hash": LEFT, "lang": "rust"},
+                {"display": RIGHT, "hash": RIGHT, "lang": "rust"}
+            ],
+            "similarity": 0.8,
+            "findings": {"base": ["fnd_000001"], "head": ["fnd_000002"]},
+            "metrics": {}
+        }])
+    );
+}
+
+#[test]
+fn findings_of_another_kind_or_outside_the_match_stay_new_and_resolved() {
+    let against = with_findings(
+        A,
+        vec![
+            on_symbol("fnd_000001", "complexity.high", OLD),
+            on_symbol("fnd_000003", "complexity.high", "sh_00000000000000ff"),
+        ],
+        &[],
+    );
+    let current = with_findings(
+        B,
+        vec![
+            on_symbol("fnd_000002", "nesting.deep", LEFT),
+            on_symbol("fnd_000004", "complexity.high", "sh_00000000000000fe"),
+        ],
+        &[],
+    );
+    let matches = split();
+    let matching = Matching {
+        matches: &matches,
+        ..Matching::default()
+    };
+
+    let deltas = deltas_matched(&current, &against, &matching);
+
+    let new: Vec<String> = deltas.new.iter().map(FindingId::to_string).collect();
+    assert_eq!(new, ["fnd_000002", "fnd_000004"]);
+    assert_eq!(ids(&deltas.resolved), ["fnd_000001", "fnd_000003"]);
+    assert!(deltas.sets.is_empty());
+}
+
+#[test]
+fn per_symbol_metrics_compare_as_sums_and_scores_as_means_weighted_by_tree_size() {
+    let check = CheckId::from("static.complexity");
+    let against = envelope(A, &[], &[]);
+    let current = envelope(B, &[], &[]);
+    let mut reference = SymbolMetrics::default();
+    reference.insert(&check, "cyclomatic", OLD.parse().unwrap(), 12.0);
+    reference.insert(&check, "crap", OLD.parse().unwrap(), 30.0);
+    let mut now = SymbolMetrics::default();
+    now.insert(&check, "cyclomatic", LEFT.parse().unwrap(), 7.0);
+    now.insert(&check, "cyclomatic", RIGHT.parse().unwrap(), 6.0);
+    now.insert(&check, "crap", LEFT.parse().unwrap(), 10.0);
+    now.insert(&check, "crap", RIGHT.parse().unwrap(), 40.0);
+    // Measured only at head: nothing to compare against.
+    now.insert(&check, "cognitive", LEFT.parse().unwrap(), 3.0);
+    let matches = split();
+    let matching = Matching {
+        matches: &matches,
+        current: now,
+        reference,
+        means: BTreeSet::from([(check.clone(), "crap".to_owned())]),
+    };
+
+    let deltas = deltas_matched(&current, &against, &matching);
+
+    assert_eq!(
+        serde_json::to_value(&deltas.sets[&check][0].metrics).unwrap(),
+        // crap: (10 × 40 + 40 × 20) / (40 + 20).
+        json!({"crap": {"base": 30.0, "head": 20.0}, "cyclomatic": {"base": 12.0, "head": 13.0}})
+    );
+}
+
+#[test]
+fn applying_puts_each_checks_sets_on_its_delta() {
+    let complexity = check("static.complexity", Some(10.0));
+    let against = with_findings(
+        A,
+        vec![on_symbol("fnd_000001", "complexity.high", OLD)],
+        std::slice::from_ref(&complexity),
+    );
+    let mut current = with_findings(
+        B,
+        vec![on_symbol("fnd_000002", "complexity.high", RIGHT)],
+        &[complexity],
+    );
+    let matches = split();
+    let matching = Matching {
+        matches: &matches,
+        ..Matching::default()
+    };
+
+    deltas_matched(&current, &against, &matching).apply(
+        &mut current,
+        BaselineRef {
+            id: A.parse().unwrap(),
+            name: "main".to_owned(),
+        },
+        "main",
+    );
+
+    assert!(!current.findings[0].new_since_baseline);
+    assert_eq!((current.summary.new, current.summary.resolved), (0, 0));
+    let delta = current.checks[0].delta.as_ref().unwrap();
+    assert_eq!(delta.sets.len(), 1);
+    assert_eq!(
+        delta.sets[0].findings.head,
+        [FindingId::from_str("fnd_000002").unwrap()]
+    );
+}
+
+#[test]
+fn a_delta_without_sets_serializes_as_before() {
+    let delta = Delta {
+        vs: "baseline".to_owned(),
+        value: 0.5,
+        sets: Vec::new(),
+    };
+    assert_eq!(
+        serde_json::to_value(delta).unwrap(),
+        json!({"vs": "baseline", "value": 0.5})
+    );
 }

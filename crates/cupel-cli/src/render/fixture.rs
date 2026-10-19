@@ -340,6 +340,7 @@ fn checks() -> Vec<CheckResult> {
             delta: Some(Delta {
                 vs: "baseline".to_owned(),
                 value: -0.12,
+                sets: Vec::new(),
             }),
             findings: 2,
             duration_ms: 41_000,

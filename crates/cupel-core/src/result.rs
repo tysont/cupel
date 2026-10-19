@@ -6,7 +6,9 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::fact::FactKind;
+use crate::finding::Symbol;
 use crate::grade::{CostClass, Tier};
+use crate::hash::FindingId;
 use crate::id::{CheckId, LangId, ToolId};
 
 /// One check's outcome within a run.
@@ -63,6 +65,48 @@ pub struct Delta {
     /// `baseline`, a git ref, or `run:<id>`.
     pub vs: String,
     pub value: f64,
+    /// The reference run's symbols matched to this run's by similarity, where the check had
+    /// findings or per-symbol metrics to compare across them (ADR-131). Absent when empty: an
+    /// optional property of an emitted type, so deltas without matches are unchanged.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub sets: Vec<SetDelta>,
+}
+
+/// A set of the reference run's symbols matched to a set of this run's (ADR-131): one to one for
+/// a rename, a move, or an edit; one to many for a split; many to one for a merge.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct SetDelta {
+    /// The reference run's symbols.
+    pub base: Vec<Symbol>,
+    /// This run's symbols.
+    pub head: Vec<Symbol>,
+    /// The Jaccard similarity of the two sets' subtree fingerprints, to three decimals.
+    pub similarity: f64,
+    /// The check's findings carried across the match: neither resolved nor new.
+    pub findings: SetFindings,
+    /// Each per-symbol metric measured on both sides, compared across the sets, by name.
+    pub metrics: BTreeMap<String, SetMetric>,
+}
+
+/// Findings of one check carried across a match: each of the reference run's findings on the
+/// base set has a finding of the same kind on the head set in this run, and the reverse.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct SetFindings {
+    /// The reference run's findings on the base set.
+    pub base: Vec<FindingId>,
+    /// This run's findings on the head set.
+    pub head: Vec<FindingId>,
+}
+
+/// One per-symbol metric over a matched set: the sum of a count, or the mean of a score weighted
+/// by each symbol's tree size, over the members measured.
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+pub struct SetMetric {
+    /// Over the base set, in the reference run.
+    pub base: f64,
+    /// Over the head set, in this run.
+    pub head: f64,
 }
 
 /// Why a check did not run (design §8.3.5).

@@ -79,7 +79,7 @@ pub use check::{
 };
 pub use config::{ConfigEcho, ConfigSource};
 pub use contract::{ContractKind, ContractPlace, ContractViolation, ContractViolations};
-pub use delta::{Deltas, deltas};
+pub use delta::{Deltas, Matching, SymbolMetrics, deltas, deltas_matched};
 pub use describe::{
     AgentDescription, AllDescription, ArgDescription, CheckDescription, CheckSupport,
     CliDescription, CommandDescription, CommandSummary, CommandTemplate, Description, Example,
@@ -93,7 +93,8 @@ pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPl
 pub use envelope::{
     BaselineRef, CheckResult, CheckStatus, CupelInfo, Delta, Envelope, ExitCode, GateOutcome,
     GateResult, GateRule, GitInfo, NextAction, RuleOutcome, RunInfo, ScopeInfo, ScopeMode, Score,
-    SeverityCounts, SkipReason, Skipped, Status, Summary, ToolchainInfo, Verb,
+    SetDelta, SetFindings, SetMetric, SeverityCounts, SkipReason, Skipped, Status, Summary,
+    ToolchainInfo, Verb,
 };
 pub use error::{ArgumentError, Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
