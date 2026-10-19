@@ -1,9 +1,10 @@
-// ABOUTME: The fact vocabulary: the fact kinds, the `Fact` trait payloads implement, and the catalog each
-// ABOUTME: payload module joins with its own `inventory::submit!` entry (design §8.3.2, ADR-123).
+// ABOUTME: The fact vocabulary: the fact kinds, the `Fact` trait payloads implement, facts with their type erased,
+// ABOUTME: and the catalog each payload module joins with its own `inventory::submit!` entry (design §8.3.2, ADR-123).
 mod kind;
 
+use std::any::Any;
 use std::fmt;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 
 use schemars::{JsonSchema, Schema};
 use serde::Serialize;
@@ -12,7 +13,7 @@ use serde_json::Value;
 
 pub use kind::FactKind;
 
-use crate::producer::Produced;
+use crate::json_schema;
 
 impl fmt::Display for FactKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -104,7 +105,7 @@ impl FactEntry {
             syntactic: false,
             conformance: false,
             pin_key: None,
-            schema: crate::schema::fact_schema::<F>,
+            schema: schema::<F>,
             decode: decode::<F>,
         }
     }
@@ -147,6 +148,17 @@ impl FactEntry {
     }
 }
 
+/// A fact payload's schema, carrying the fact version it describes.
+fn schema<F: Fact>() -> Schema {
+    let mut schema =
+        json_schema::root::<F>(&format!("{}fact/{}.json", json_schema::BASE_URL, F::KIND));
+    schema.insert(
+        "x-cupel-fact-version".to_owned(),
+        serde_json::json!(F::VERSION),
+    );
+    schema
+}
+
 fn decode<F: Fact>(value: Value) -> serde_json::Result<Produced> {
     serde_json::from_value::<F>(value).map(Produced::new)
 }
@@ -182,4 +194,94 @@ fn catalog() -> &'static Catalog {
             syntactic,
         }
     })
+}
+
+/// A fact a producer made, with its type erased: what [`RegisteredProducer::produce`](crate::RegisteredProducer::produce) returns.
+/// Callers that know the kind take the typed value back with [`downcast`](Self::downcast);
+/// callers that do not (the conformance harness, `explain`) read it as JSON.
+pub struct Produced {
+    kind: FactKind,
+    value: Box<dyn Any + Send + Sync>,
+    to_json: fn(&(dyn Any + Send + Sync)) -> Value,
+}
+
+impl Produced {
+    pub fn new<F: Fact>(fact: F) -> Self {
+        Self {
+            kind: F::KIND,
+            value: Box::new(fact),
+            to_json: |value| {
+                value
+                    .downcast_ref::<F>()
+                    .and_then(|fact| serde_json::to_value(fact).ok())
+                    .unwrap_or(Value::Null)
+            },
+        }
+    }
+
+    pub fn kind(&self) -> FactKind {
+        self.kind
+    }
+
+    pub fn downcast_ref<F: Fact>(&self) -> Option<&F> {
+        self.value.downcast_ref()
+    }
+
+    pub fn downcast<F: Fact>(self) -> Option<F> {
+        self.value.downcast().ok().map(|fact| *fact)
+    }
+
+    /// The fact as it serializes.
+    pub fn to_json(&self) -> Value {
+        (self.to_json)(self.value.as_ref())
+    }
+
+    /// This fact behind an `Arc`, so several checks can read one production.
+    pub fn share(self) -> SharedFact {
+        SharedFact {
+            kind: self.kind,
+            value: Arc::from(self.value),
+            to_json: self.to_json,
+        }
+    }
+}
+
+/// A produced fact several checks share; what [`Facts::insert_shared`](crate::Facts) takes.
+#[derive(Clone)]
+pub struct SharedFact {
+    kind: FactKind,
+    value: Arc<dyn Any + Send + Sync>,
+    to_json: fn(&(dyn Any + Send + Sync)) -> Value,
+}
+
+impl SharedFact {
+    pub fn kind(&self) -> FactKind {
+        self.kind
+    }
+
+    pub fn downcast_ref<F: Fact>(&self) -> Option<&F> {
+        self.value.downcast_ref()
+    }
+
+    /// The fact as it serializes.
+    pub fn to_json(&self) -> Value {
+        (self.to_json)(self.value.as_ref())
+    }
+}
+
+impl fmt::Debug for SharedFact {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SharedFact")
+            .field("kind", &self.kind)
+            .finish_non_exhaustive()
+    }
+}
+
+impl fmt::Debug for Produced {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Produced")
+            .field("kind", &self.kind)
+            .field("value", &(self.to_json)(self.value.as_ref()))
+            .finish()
+    }
 }

@@ -6,8 +6,7 @@ use serde_json::Value;
 
 use crate::base::Range;
 use crate::error::{Error, Result};
-use crate::fact::{Fact, FactKind};
-use crate::producer::{Produced, SharedFact};
+use crate::fact::{Fact, FactKind, Produced, SharedFact};
 
 /// The facts a check may read: exactly the kinds its manifest declares in `needs` and `wants`.
 /// Facts are shared, so one production serves every check that declares the kind. Under a

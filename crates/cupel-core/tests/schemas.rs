@@ -102,24 +102,36 @@ fn fact_schemas_exist_exactly_for_kinds_with_payloads() {
     assert_eq!(without, []);
 }
 
-/// One snapshot per kind, `schemas__fact_<kind>.snap`, so a new kind adds a file (ADR-123).
-#[test]
-fn fact_schemas() {
+/// Snapshots each kind's schema as `schemas__fact_<kind>.snap`, so a new kind adds a file
+/// (ADR-123), and returns each kind's draft, `$id`, and version.
+fn snapshot_fact_schemas() -> Vec<(Value, Value, Value)> {
+    let mut identities = Vec::new();
     for &kind in FactKind::all() {
         let schema = schema::fact(kind).unwrap();
         let value = schema.as_value();
-        assert_eq!(value["$schema"], json!(DRAFT_2020_12));
-        assert_eq!(
-            value["$id"],
-            json!(format!("https://cupel.dev/schema/v1/fact/{kind}.json"))
-        );
-        assert_eq!(
-            value["x-cupel-fact-version"],
-            json!(schema::fact_version(kind)),
-            "{kind}"
-        );
+        identities.push((
+            value["$schema"].clone(),
+            value["$id"].clone(),
+            value["x-cupel-fact-version"].clone(),
+        ));
         insta::assert_snapshot!(format!("fact_{kind}"), pretty(&schema));
     }
+    identities
+}
+
+#[test]
+fn fact_schemas() {
+    let expected: Vec<(Value, Value, Value)> = FactKind::all()
+        .iter()
+        .map(|kind| {
+            (
+                json!(DRAFT_2020_12),
+                json!(format!("https://cupel.dev/schema/v1/fact/{kind}.json")),
+                json!(schema::fact_version(*kind)),
+            )
+        })
+        .collect();
+    assert_eq!(snapshot_fact_schemas(), expected);
 }
 
 #[test]

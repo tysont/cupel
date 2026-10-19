@@ -60,16 +60,24 @@ fn served(entry: &FactEntry) -> (Value, Value, Option<u32>) {
 
 #[test]
 fn every_entry_serves_a_schema_at_its_version_of_at_least_one() {
-    for entry in FactEntry::catalog() {
-        assert!(entry.version >= 1, "{}", entry.name);
-        let id = format!("https://cupel.dev/schema/v1/fact/{}.json", entry.name);
-        assert_eq!(
-            served(entry),
-            (json!(id), json!(entry.version), Some(entry.version)),
-            "{}",
-            entry.name
-        );
-    }
+    let unversioned: Vec<&str> = FactEntry::catalog()
+        .iter()
+        .filter(|entry| entry.version < 1)
+        .map(|entry| entry.name)
+        .collect();
+    assert_eq!(unversioned, Vec::<&str>::new());
+    let served: Vec<(Value, Value, Option<u32>)> = FactEntry::catalog()
+        .iter()
+        .map(|entry| served(entry))
+        .collect();
+    let expected: Vec<(Value, Value, Option<u32>)> = FactEntry::catalog()
+        .iter()
+        .map(|entry| {
+            let id = format!("https://cupel.dev/schema/v1/fact/{}.json", entry.name);
+            (json!(id), json!(entry.version), Some(entry.version))
+        })
+        .collect();
+    assert_eq!(served, expected);
 }
 
 #[test]
@@ -90,13 +98,12 @@ fn the_syntactic_kinds_are_the_entries_marked_syntactic_and_each_has_conformance
 
 #[test]
 fn every_entry_decodes_only_its_own_payload_shape() {
-    for entry in FactEntry::catalog() {
-        assert!(
-            (entry.decode)(json!("not a payload")).is_err(),
-            "{}",
-            entry.name
-        );
-    }
+    let accepting: Vec<&str> = FactEntry::catalog()
+        .iter()
+        .filter(|entry| (entry.decode)(json!("not a payload")).is_ok())
+        .map(|entry| entry.name)
+        .collect();
+    assert_eq!(accepting, Vec::<&str>::new());
     let decoded = (FactKind::Symbols.entry().decode)(json!({"symbols": []})).unwrap();
     assert_eq!(decoded.kind(), FactKind::Symbols);
     assert_eq!(decoded.to_json(), json!({"symbols": []}));
@@ -105,8 +112,11 @@ fn every_entry_decodes_only_its_own_payload_shape() {
 /// The schemas come from the entries, so `schema.rs` holds no per-kind table to edit (ADR-123).
 #[test]
 fn the_schema_module_names_no_fact_kind() {
-    let source = include_str!("../src/schema.rs");
-    assert!(!source.contains(concat!("FactKind", "::")));
+    let naming: Vec<&str> = include_str!("../src/schema.rs")
+        .lines()
+        .filter(|line| line.contains(concat!("FactKind", "::")))
+        .collect();
+    assert_eq!(naming, Vec::<&str>::new());
 }
 
 #[test]
@@ -117,7 +127,10 @@ fn pin_keys_are_unique_and_come_from_the_entries() {
         .collect();
     let unique: BTreeSet<&str> = keys.iter().copied().collect();
     assert_eq!(unique.len(), keys.len());
-    for entry in FactEntry::catalog() {
-        assert_eq!(entry.kind.pin_key(), entry.pin_key, "{}", entry.name);
-    }
+    let read: Vec<Option<&str>> = FactKind::all().iter().map(|kind| kind.pin_key()).collect();
+    let submitted: Vec<Option<&str>> = FactEntry::catalog()
+        .iter()
+        .map(|entry| entry.pin_key)
+        .collect();
+    assert_eq!(read, submitted);
 }

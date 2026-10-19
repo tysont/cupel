@@ -170,6 +170,10 @@ mod tests {
     /// Registration goes through the catalog, so this module holds no per-kind table (ADR-123).
     #[test]
     fn this_module_names_no_fact_kind() {
-        assert!(!include_str!("producer.rs").contains(concat!("FactKind", "::")));
+        let naming: Vec<&str> = include_str!("producer.rs")
+            .lines()
+            .filter(|line| line.contains(concat!("FactKind", "::")))
+            .collect();
+        assert_eq!(naming, Vec::<&str>::new());
     }
 }

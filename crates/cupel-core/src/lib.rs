@@ -35,6 +35,7 @@ mod hash;
 mod histories;
 mod id;
 mod joint;
+mod json_schema;
 mod lang;
 mod matrix;
 mod model_check;
@@ -96,7 +97,7 @@ pub use error::{ArgumentError, Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
 pub use exclude::{ALWAYS_EXCLUDED, Exclude};
 pub use explanation::{Excerpt, ExcerptLine, ExplainSubject, Explanation, Metric};
-pub use fact::{Fact, FactEntry, FactKind};
+pub use fact::{Fact, FactEntry, FactKind, Produced, SharedFact};
 pub use facts::Facts;
 pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Symbol};
 pub use flake::{RunOrder, TestRerun, TestReruns};
@@ -118,9 +119,9 @@ pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
-    Availability, ChangedLines, Ctx, Estimate, Focus, Install, JointProducer, ProduceCtx, Produced,
-    Producer, ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand,
-    Runners, SharedFact, TestRun, TestSelection, ToolProbe, Upstream,
+    Availability, ChangedLines, Ctx, Estimate, Focus, Install, JointProducer, ProduceCtx, Producer,
+    ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand, Runners,
+    TestRun, TestSelection, ToolProbe, Upstream,
 };
 pub use proof::{Obligation, ObligationStatus, ProofResults, RelatedPlace};
 pub use property::{PropertyOutcome, PropertyResult, PropertyResults};

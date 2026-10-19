@@ -271,10 +271,10 @@ fn a_java_temporary_directory_is_appended_to_the_jvms_tool_options() {
         .java_tmpdir(dir.path())
         .run(&Cancellation::new())
         .unwrap();
-    assert!(
-        captured
-            .stdout
-            .ends_with(&format!("-Djava.io.tmpdir={}", dir.path().display())),
+    let expected = format!("-Djava.io.tmpdir={}", dir.path().display());
+    assert_eq!(
+        captured.stdout.rsplit(' ').next(),
+        Some(expected.as_str()),
         "{:?}",
         captured.stdout
     );

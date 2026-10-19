@@ -1,6 +1,5 @@
 // ABOUTME: The producer contract and registry: anything that makes a fact, and runners, which also select tests.
 // ABOUTME: The registry maps (fact kind, language) to producers in selection order (design §8.3.3, ADR-077).
-use std::any::Any;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::marker::PhantomData;
@@ -16,7 +15,7 @@ use crate::config::Table;
 use crate::error::Result;
 use crate::event::EventSink;
 use crate::exclude::Exclude;
-use crate::fact::{Fact, FactKind};
+use crate::fact::{Fact, FactKind, Produced, SharedFact};
 use crate::flake::RunOrder;
 use crate::grade::CostClass;
 use crate::id::{LangId, ProducerId, ToolId};
@@ -385,96 +384,6 @@ pub trait Runner: Producer<TestResults> {
     /// the tree must not share with the original or another copy (ADR-080 §8).
     fn outputs(&self) -> &'static [&'static str] {
         &[]
-    }
-}
-
-/// A fact a producer made, with its type erased: what [`RegisteredProducer::produce`] returns.
-/// Callers that know the kind take the typed value back with [`downcast`](Self::downcast);
-/// callers that do not (the conformance harness, `explain`) read it as JSON.
-pub struct Produced {
-    kind: FactKind,
-    value: Box<dyn Any + Send + Sync>,
-    to_json: fn(&(dyn Any + Send + Sync)) -> Value,
-}
-
-impl Produced {
-    pub fn new<F: Fact>(fact: F) -> Self {
-        Self {
-            kind: F::KIND,
-            value: Box::new(fact),
-            to_json: |value| {
-                value
-                    .downcast_ref::<F>()
-                    .and_then(|fact| serde_json::to_value(fact).ok())
-                    .unwrap_or(Value::Null)
-            },
-        }
-    }
-
-    pub fn kind(&self) -> FactKind {
-        self.kind
-    }
-
-    pub fn downcast_ref<F: Fact>(&self) -> Option<&F> {
-        self.value.downcast_ref()
-    }
-
-    pub fn downcast<F: Fact>(self) -> Option<F> {
-        self.value.downcast().ok().map(|fact| *fact)
-    }
-
-    /// The fact as it serializes.
-    pub fn to_json(&self) -> Value {
-        (self.to_json)(self.value.as_ref())
-    }
-
-    /// This fact behind an `Arc`, so several checks can read one production.
-    pub fn share(self) -> SharedFact {
-        SharedFact {
-            kind: self.kind,
-            value: Arc::from(self.value),
-            to_json: self.to_json,
-        }
-    }
-}
-
-/// A produced fact several checks share; what [`Facts::insert_shared`](crate::Facts) takes.
-#[derive(Clone)]
-pub struct SharedFact {
-    kind: FactKind,
-    value: Arc<dyn Any + Send + Sync>,
-    to_json: fn(&(dyn Any + Send + Sync)) -> Value,
-}
-
-impl SharedFact {
-    pub fn kind(&self) -> FactKind {
-        self.kind
-    }
-
-    pub fn downcast_ref<F: Fact>(&self) -> Option<&F> {
-        self.value.downcast_ref()
-    }
-
-    /// The fact as it serializes.
-    pub fn to_json(&self) -> Value {
-        (self.to_json)(self.value.as_ref())
-    }
-}
-
-impl fmt::Debug for SharedFact {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("SharedFact")
-            .field("kind", &self.kind)
-            .finish_non_exhaustive()
-    }
-}
-
-impl fmt::Debug for Produced {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Produced")
-            .field("kind", &self.kind)
-            .field("value", &(self.to_json)(self.value.as_ref()))
-            .finish()
     }
 }
 

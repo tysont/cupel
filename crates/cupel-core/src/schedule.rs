@@ -12,7 +12,7 @@ use crate::config::Config;
 use crate::dry_run::{PlannedCheck, PlannedSkip, RunPlan};
 use crate::error::{ArgumentError, Error, Result};
 use crate::event::{Event, EventSink};
-use crate::fact::FactKind;
+use crate::fact::{FactKind, SharedFact};
 use crate::facts::Facts;
 use crate::finding::{Finding, Severity};
 use crate::grade::CostClass;
@@ -23,7 +23,7 @@ use crate::matrix::{Support, SupportMatrix};
 use crate::mutation::MutationOutcomes;
 use crate::oracle::RunOracle;
 use crate::producer::{
-    Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, SharedFact, Upstream,
+    Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, Upstream,
 };
 use crate::rank::{Measured, Measurement};
 use crate::result::{CheckResult, CheckStatus, SkipReason, Skipped};
@@ -1240,7 +1240,7 @@ impl<'a> FactStore<'a> {
             let produced = self.timed(&producer.id(), lang, &estimate, sink, &mut |events| {
                 producer.produce(&ctx, &scope, events)
             });
-            return produced.map(crate::producer::Produced::share);
+            return produced.map(crate::fact::Produced::share);
         }
         Err(Error::AbsentFact { kind })
     }
