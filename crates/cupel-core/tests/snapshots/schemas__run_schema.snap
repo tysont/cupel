@@ -511,6 +511,13 @@ expression: pretty(&schema)
             "$ref": "#/$defs/ArgDescription"
           }
         },
+        "install_routes": {
+          "description": "The ways to install `cupel`, those available now first (ADR-128).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/InstallRoute"
+          }
+        },
         "name": {
           "type": "string"
         },
@@ -541,6 +548,7 @@ expression: pretty(&schema)
         "exit_codes",
         "flags",
         "global_flags",
+        "install_routes",
         "name",
         "schemas",
         "stability",
@@ -1491,6 +1499,49 @@ expression: pretty(&schema)
         "id",
         "lang",
         "reason"
+      ]
+    },
+    "InstallRoute": {
+      "description": "One way to install `cupel`, and whether it installs a released binary today (ADR-128).",
+      "type": "object",
+      "properties": {
+        "command": {
+          "description": "The command line that installs `cupel` this way.",
+          "type": "string"
+        },
+        "live": {
+          "description": "Whether the route works today.",
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Such as `Install script` or `Homebrew`.",
+          "type": "string"
+        },
+        "pending": {
+          "description": "What the route waits for, such as \"once the `cupel` package is published to npm\"; null\nwhen it is live.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "platforms": {
+          "description": "The operating systems it installs on, as Rust spells them (`linux`, `macos`, `windows`).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stability": {
+          "$ref": "#/$defs/Stability"
+        }
+      },
+      "required": [
+        "command",
+        "live",
+        "name",
+        "pending",
+        "platforms",
+        "stability"
       ]
     },
     "LangFamily": {

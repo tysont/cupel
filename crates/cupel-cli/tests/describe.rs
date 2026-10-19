@@ -955,3 +955,108 @@ fn describe_subjects_that_need_an_argument_say_which() {
         );
     }
 }
+
+/// The install routes `cupel describe` lists (ADR-128).
+fn install_routes() -> Vec<Value> {
+    described(&[])["install_routes"]
+        .as_array()
+        .expect("install_routes")
+        .clone()
+}
+
+fn route_text(route: &Value, key: &str) -> String {
+    route[key].as_str().unwrap_or_default().to_owned()
+}
+
+/// The operating systems dist/targets.toml releases for, in Rust's spelling (ADR-125).
+fn released_systems() -> Vec<String> {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../dist/targets.toml");
+    let document: toml_edit::DocumentMut = std::fs::read_to_string(path).unwrap().parse().unwrap();
+    document["target"]
+        .as_array_of_tables()
+        .expect("[[target]] tables")
+        .iter()
+        .map(|table| table["os"].as_str().unwrap().to_owned())
+        .collect()
+}
+
+#[test]
+fn describe_lists_install_routes_each_live_or_saying_what_it_waits_for() {
+    let routes = install_routes();
+    let live: Vec<String> = routes
+        .iter()
+        .filter(|route| route["live"] == json!(true) && route["pending"].is_null())
+        .map(|route| route_text(route, "name"))
+        .collect();
+    let pending: Vec<String> = routes
+        .iter()
+        .filter(|route| {
+            route["live"] == json!(false) && route_text(route, "pending").starts_with("once ")
+        })
+        .map(|route| route_text(route, "name"))
+        .collect();
+    assert_eq!(
+        live,
+        [
+            "Install script",
+            "cargo-binstall",
+            "Release archive",
+            "From source"
+        ]
+    );
+    assert_eq!(
+        pending,
+        ["Homebrew", "npm", "pipx", "crates.io", "cupel.dev"]
+    );
+}
+
+/// Each command is one trimmed line run by a known installer, for platforms Cupel releases for.
+#[test]
+fn every_install_route_is_one_command_for_released_platforms() {
+    let programs = ["curl", "cargo", "gh", "brew", "npx", "pipx"];
+    let systems = released_systems();
+    let malformed: Vec<Value> = install_routes()
+        .into_iter()
+        .filter(|route| {
+            let command = route_text(route, "command");
+            let platforms = route["platforms"].as_array().cloned().unwrap_or_default();
+            command.trim() != command
+                || command.contains('\n')
+                || !programs.contains(&command.split(' ').next().unwrap_or_default())
+                || platforms.is_empty()
+                || platforms
+                    .iter()
+                    .any(|os| !systems.iter().any(|system| os == system))
+        })
+        .collect();
+    assert_eq!(malformed, Vec::<Value>::new());
+}
+
+/// Every URL a route's command fetches is this repository, a file in it on `main`, or `cupel.dev`.
+#[test]
+fn install_routes_fetch_from_this_repository() {
+    let repository = env!("CARGO_PKG_REPOSITORY");
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let raw = repository.replace("https://github.com/", "https://raw.githubusercontent.com/");
+    let urls: Vec<String> = install_routes()
+        .iter()
+        .flat_map(|route| {
+            route_text(route, "command")
+                .split(' ')
+                .filter(|word| word.starts_with("https://"))
+                .map(str::to_owned)
+                .collect::<Vec<_>>()
+        })
+        .collect();
+    let foreign: Vec<&String> = urls
+        .iter()
+        .filter(|url| {
+            let in_repository = url
+                .strip_prefix(&format!("{raw}/main/"))
+                .is_some_and(|path| root.join(path).is_file());
+            *url != repository && !in_repository && !url.starts_with("https://cupel.dev/")
+        })
+        .collect();
+    assert!(urls.len() >= 4, "{urls:?}");
+    assert_eq!(foreign, Vec::<&String>::new());
+}

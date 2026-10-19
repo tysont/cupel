@@ -528,6 +528,22 @@ fn render_cli(cli: &CliDescription, paint: &Paint) -> String {
         paint.bold("configuration precedence"),
         precedence.join(" > ")
     );
+    let _ = writeln!(out, "\n{}", paint.bold("install routes"));
+    let width = column(cli.install_routes.iter().map(|route| route.name.len()));
+    for route in &cli.install_routes {
+        let pending = route
+            .pending
+            .as_deref()
+            .map(|pending| format!(" · {pending}"))
+            .unwrap_or_default();
+        let _ = writeln!(
+            out,
+            "  {:<width$}  {} · {}{pending}",
+            route.name,
+            route.command,
+            route.platforms.join(", ")
+        );
+    }
     out
 }
 
@@ -735,6 +751,7 @@ mod tests {
                 "exit codes",
                 "schemas",
                 "configuration precedence",
+                "install routes",
                 "cupel init",
                 "cupel doctor",
                 "cupel describe",

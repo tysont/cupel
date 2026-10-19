@@ -1,5 +1,5 @@
-// ABOUTME: Keeps the README's generated sections (verbs, global flags, exit codes, checks, matrix, settings, MCP tools,
-// ABOUTME: agent guide) equal to the binary's `describe` and `serve --mcp` output; `make readme` rewrites them (ADR-073).
+// ABOUTME: Keeps the README's generated sections (install routes, verbs, global flags, exit codes, checks, matrix,
+// ABOUTME: settings, MCP tools, agent guide) equal to the binary's `describe` and `serve --mcp` output; `make readme` rewrites them (ADR-073).
 
 mod support;
 
@@ -277,13 +277,51 @@ fn agent_guide() -> String {
     format!("```markdown\n{}```\n", outcome.stdout)
 }
 
+/// An operating system as Rust spells it (`std::env::consts::OS`), as people write it.
+fn system(os: &str) -> &str {
+    match os {
+        "linux" => "Linux",
+        "macos" => "macOS",
+        "windows" => "Windows",
+        other => other,
+    }
+}
+
+/// One row per install route (ADR-128): its name, command, platforms, and `now` when it is live
+/// or what it waits for.
+fn install_routes(cli: &Value) -> String {
+    let rows: Vec<Vec<String>> = cli["install_routes"]
+        .as_array()
+        .expect("install routes")
+        .iter()
+        .map(|route| {
+            let platforms = strings(&route["platforms"]);
+            let platforms: Vec<&str> = platforms.iter().map(|os| system(os)).collect();
+            vec![
+                route["name"].as_str().expect("name").to_owned(),
+                cell(&format!(
+                    "`{}`",
+                    route["command"].as_str().expect("command")
+                )),
+                platforms.join(", "),
+                route["pending"].as_str().unwrap_or("now").to_owned(),
+            ]
+        })
+        .collect();
+    markdown_table(
+        &owned(&["Route", "Command", "Platforms", "Available"]),
+        &rows,
+    )
+}
+
 /// Each generated section's name and body, rendered from the binary's `describe` output and
 /// the tools its MCP server lists.
-fn generated() -> [(&'static str, String); 8] {
+fn generated() -> [(&'static str, String); 9] {
     let cli = described(&[]);
     let matrix = described(&["matrix"]);
     let manifests = manifests(&matrix);
     [
+        ("install-routes", install_routes(&cli)),
         ("verbs", verbs(&cli)),
         ("global-flags", global_flags(&cli)),
         ("agent-guide", agent_guide()),

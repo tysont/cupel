@@ -52,7 +52,7 @@ fn volatile_envelope(root: &str, canonical_root: &str) -> Envelope {
             "subject": "cli", "name": "cupel", "version": "9.8.7-volatile",
             "summary": "Cupel grades what a coding agent produced.", "stability": "experimental",
             "verbs": [], "global_flags": [], "flags": [], "exit_codes": [], "schemas": [],
-            "config_precedence": []
+            "config_precedence": [], "install_routes": []
         },
         "truncated": false,
         "total_findings": 1

@@ -59,6 +59,25 @@ pub struct CliDescription {
     pub schemas: Vec<SchemaRef>,
     /// Configuration layers, highest precedence first.
     pub config_precedence: Vec<ConfigSource>,
+    /// The ways to install `cupel`, those available now first (ADR-128).
+    pub install_routes: Vec<InstallRoute>,
+}
+
+/// One way to install `cupel`, and whether it installs a released binary today (ADR-128).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct InstallRoute {
+    /// Such as `Install script` or `Homebrew`.
+    pub name: String,
+    /// The command line that installs `cupel` this way.
+    pub command: String,
+    /// The operating systems it installs on, as Rust spells them (`linux`, `macos`, `windows`).
+    pub platforms: Vec<String>,
+    /// Whether the route works today.
+    pub live: bool,
+    /// What the route waits for, such as "once the `cupel` package is published to npm"; null
+    /// when it is live.
+    pub pending: Option<String>,
+    pub stability: Stability,
 }
 
 /// One line about a verb; `describe <verb>` has the rest.

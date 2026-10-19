@@ -373,6 +373,107 @@
         "values": []
       }
     ],
+    "install_routes": [
+      {
+        "command": "curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh | sh",
+        "live": true,
+        "name": "Install script",
+        "pending": null,
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "stability": "experimental"
+      },
+      {
+        "command": "cargo binstall --git https://github.com/tysont/cupel cupel-cli",
+        "live": true,
+        "name": "cargo-binstall",
+        "pending": null,
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "stability": "experimental"
+      },
+      {
+        "command": "gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz'",
+        "live": true,
+        "name": "Release archive",
+        "pending": null,
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "stability": "experimental"
+      },
+      {
+        "command": "cargo install --locked --git https://github.com/tysont/cupel cupel-cli",
+        "live": true,
+        "name": "From source",
+        "pending": null,
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "stability": "experimental"
+      },
+      {
+        "command": "brew install tysont/cupel/cupel",
+        "live": false,
+        "name": "Homebrew",
+        "pending": "once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap",
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "stability": "experimental"
+      },
+      {
+        "command": "npx cupel",
+        "live": false,
+        "name": "npm",
+        "pending": "once the `cupel` package is published to npm",
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "stability": "experimental"
+      },
+      {
+        "command": "pipx install cupel",
+        "live": false,
+        "name": "pipx",
+        "pending": "once Cupel's package is on PyPI; the `cupel` there is another project's",
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "stability": "experimental"
+      },
+      {
+        "command": "cargo install --locked cupel-cli",
+        "live": false,
+        "name": "crates.io",
+        "pending": "once the crates are published to crates.io",
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "stability": "experimental"
+      },
+      {
+        "command": "curl -fsSL https://cupel.dev/install | sh",
+        "live": false,
+        "name": "cupel.dev",
+        "pending": "once cupel.dev serves the install script",
+        "platforms": [
+          "linux",
+          "macos"
+        ],
+        "stability": "experimental"
+      }
+    ],
     "name": "cupel",
     "schemas": [
       {

@@ -1,5 +1,5 @@
-# ABOUTME: Release builds (ADR-124): on a `v*` tag, builds and packages `cupel` for the five design §10 targets with `make dist`
-# ABOUTME: and publishes them with SHA256SUMS as a GitHub Release; `workflow_dispatch` is a dry run that uploads the archives only.
+# ABOUTME: Release builds (ADR-124): on a `v*` tag, builds and packages `cupel` for the five design §10 targets with `make dist`,
+# ABOUTME: publishes them with SHA256SUMS as a GitHub Release, then to each registry whose secret is set (ADR-128); `workflow_dispatch` is a dry run that uploads the archives only.
 name: release
 
 on:
@@ -118,3 +118,110 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes --title "cupel ${{ needs.version.outputs.version }}" dist/*
+
+  # Which publishing secrets are set, on a tag push once the release exists (ADR-128). A job-level `if`
+  # cannot read `secrets`, so this job reads them through `env`, and each publish job below runs only
+  # when its secret is set. An unset secret skips its job with a notice; the run still succeeds.
+  secrets:
+    needs: release
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    outputs:
+      npm: ${{ steps.probe.outputs.npm }}
+      pypi: ${{ steps.probe.outputs.pypi }}
+      homebrew: ${{ steps.probe.outputs.homebrew }}
+      crates: ${{ steps.probe.outputs.crates }}
+    steps:
+      - id: probe
+        name: Which publishing secrets are set
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        # probe <output> <secret>: the output is whether the variable named <secret> is non-empty.
+        run: |
+          probe() {
+            if [ -n "${!2}" ]; then
+              echo "$1=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "$1=false" >> "$GITHUB_OUTPUT"
+              echo "::notice title=publish-$1::skipped: secret $2 not set"
+              echo "publish-$1 skipped: secret $2 not set" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          }
+          probe npm NPM_TOKEN
+          probe pypi PYPI_API_TOKEN
+          probe homebrew HOMEBREW_TAP_TOKEN
+          probe crates CARGO_REGISTRY_TOKEN
+
+  # The npm wrapper (ADR-125), whose version the installer tests hold to the crate's. The `./` keeps npm
+  # from reading `dist/npm` as the GitHub repository `dist/npm`.
+  publish-npm:
+    needs: secrets
+    if: needs.secrets.outputs.npm == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: npm publish ./dist/npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm config set //registry.npmjs.org/:_authToken "$NODE_AUTH_TOKEN"
+          npm publish ./dist/npm --access public
+
+  # The pipx wrapper (ADR-125), built with flit_core and uploaded with twine, both pinned.
+  publish-pypi:
+    needs: secrets
+    if: needs.secrets.outputs.pypi == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build dist/pipx and upload it to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install build==1.6.1 twine==7.0.0
+          "$RUNNER_TEMP/venv/bin/python" -m build --outdir "$RUNNER_TEMP/pypi" dist/pipx
+          "$RUNNER_TEMP/venv/bin/twine" upload "$RUNNER_TEMP"/pypi/*
+
+  # The Homebrew formula, rendered from the published SHA256SUMS and committed to the tap as
+  # Formula/cupel.rb on its main branch.
+  publish-homebrew:
+    needs: secrets
+    if: needs.secrets.outputs.homebrew == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Render Formula/cupel.rb and push it to tysont/homebrew-cupel
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern SHA256SUMS --dir "$RUNNER_TEMP"
+          git clone "https://x-access-token:$TAP_TOKEN@github.com/tysont/homebrew-cupel.git" "$RUNNER_TEMP/tap"
+          mkdir -p "$RUNNER_TEMP/tap/Formula"
+          sh dist/homebrew/render.sh "$GITHUB_REF_NAME" "$RUNNER_TEMP/SHA256SUMS" > "$RUNNER_TEMP/tap/Formula/cupel.rb"
+          cd "$RUNNER_TEMP/tap"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/cupel.rb
+          git diff --cached --quiet || git commit -m "cupel ${GITHUB_REF_NAME#v}"
+          git push origin HEAD:main
+
+  # The workspace's crates, in dependency order: `cargo publish --workspace` orders them and leaves
+  # out `cupel-fixtures` (`publish = false`).
+  publish-crates:
+    needs: secrets
+    if: needs.secrets.outputs.crates == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install pinned toolchain
+        run: rustup toolchain install
+      - name: cargo publish --workspace
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish --workspace --locked

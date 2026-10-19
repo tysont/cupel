@@ -17,6 +17,7 @@ use crate::error::{CupelError, Usage};
 use crate::install::{self, Planned, probe};
 use crate::problem::Problem;
 use crate::project;
+use crate::routes;
 use crate::run::Invocation;
 use crate::serve;
 use crate::suppress;
@@ -422,7 +423,15 @@ fn version(required: Option<&str>, version: &Version) -> Option<Problem> {
             "doctor.version-unsatisfied",
             format!("This cupel does not satisfy required_version `{required}`"),
             ActionKind::InstallTool,
-            format!("Install a cupel matching `{required}`, or change required_version."),
+            format!(
+                "Install a cupel matching `{required}`, or change required_version. Live install \
+                 routes: {}.",
+                routes::live_commands()
+                    .iter()
+                    .map(|command| format!("`{command}`"))
+                    .collect::<Vec<_>>()
+                    .join("; ")
+            ),
         )),
         Err(error) => Some(problem(
             "doctor.version-invalid",

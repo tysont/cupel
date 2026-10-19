@@ -319,3 +319,113 @@ fn release_workflow_pins_every_action_to_a_commit() {
     let unpinned: Vec<&&str> = actions.iter().filter(|action| !is_pinned(action)).collect();
     assert_eq!(unpinned, Vec::<&&str>::new());
 }
+
+/// Each job of the release workflow by name, with the lines of its body (ADR-128).
+fn jobs(workflow: &str) -> Vec<(String, Vec<String>)> {
+    let body = workflow.split_once("\njobs:\n").expect("a `jobs:` map").1;
+    let mut jobs: Vec<(String, Vec<String>)> = Vec::new();
+    for line in body.lines() {
+        let name = line
+            .strip_prefix("  ")
+            .filter(|rest| !rest.starts_with([' ', '#']))
+            .and_then(|rest| rest.strip_suffix(':'));
+        match (name, jobs.last_mut()) {
+            (Some(name), _) => jobs.push((name.to_owned(), Vec::new())),
+            (None, Some((_, lines))) => lines.push(line.trim().to_owned()),
+            (None, None) => {}
+        }
+    }
+    jobs
+}
+
+/// The publish jobs: each job's name, the `secrets` output it is gated on, and its secret.
+const PUBLISHERS: [(&str, &str, &str); 4] = [
+    ("publish-npm", "npm", "NPM_TOKEN"),
+    ("publish-pypi", "pypi", "PYPI_API_TOKEN"),
+    ("publish-homebrew", "homebrew", "HOMEBREW_TAP_TOKEN"),
+    ("publish-crates", "crates", "CARGO_REGISTRY_TOKEN"),
+];
+
+/// Lines `lines` lacks of `expected`.
+fn missing(lines: &[String], expected: Vec<String>) -> Vec<String> {
+    expected
+        .into_iter()
+        .filter(|line| !lines.contains(line))
+        .collect()
+}
+
+/// The `secrets` job runs on a tag push after the release and turns each publishing secret into an
+/// output that says whether it is set, writing "skipped: secret X not set" when it is not.
+#[test]
+fn the_secrets_job_probes_each_publishing_secret_on_a_tag_push() {
+    let jobs = jobs(&release_workflow());
+    let (_, lines) = jobs
+        .iter()
+        .find(|(name, _)| name == "secrets")
+        .expect("a `secrets` job");
+    let mut expected = vec![
+        "needs: release".to_owned(),
+        "if: github.event_name == 'push' && github.ref_type == 'tag'".to_owned(),
+        "echo \"::notice title=publish-$1::skipped: secret $2 not set\"".to_owned(),
+    ];
+    expected.extend(PUBLISHERS.iter().flat_map(|(_, output, secret)| {
+        [
+            format!("{output}: ${{{{ steps.probe.outputs.{output} }}}}"),
+            format!("{secret}: ${{{{ secrets.{secret} }}}}"),
+            format!("probe {output} {secret}"),
+        ]
+    }));
+    assert_eq!(missing(lines, expected), Vec::<String>::new());
+}
+
+/// Every publish job runs only when the `secrets` job found its secret, and reads that secret.
+#[test]
+fn every_publish_job_is_gated_on_its_secret() {
+    let jobs = jobs(&release_workflow());
+    let ungated: Vec<(&str, Vec<String>)> = PUBLISHERS
+        .iter()
+        .map(|(job, output, secret)| {
+            let lines = jobs
+                .iter()
+                .find(|(name, _)| name == job)
+                .map(|(_, lines)| lines.clone())
+                .unwrap_or_default();
+            let expected = vec![
+                "needs: secrets".to_owned(),
+                format!("if: needs.secrets.outputs.{output} == 'true'"),
+            ];
+            let mut absent = missing(&lines, expected);
+            if !lines
+                .iter()
+                .any(|line| line.ends_with(&format!("${{{{ secrets.{secret} }}}}")))
+            {
+                absent.push(format!("secrets.{secret}"));
+            }
+            (*job, absent)
+        })
+        .filter(|(_, absent)| !absent.is_empty())
+        .collect();
+    assert_eq!(ungated, Vec::<(&str, Vec<String>)>::new());
+}
+
+/// Nothing but the `secrets` job and the publish job a secret gates reads that secret.
+#[test]
+fn only_its_publish_job_and_the_probe_read_each_secret() {
+    let jobs = jobs(&release_workflow());
+    let readers: Vec<(String, String)> = jobs
+        .iter()
+        .flat_map(|(name, lines)| {
+            lines
+                .iter()
+                .filter_map(|line| line.split_once("${{ secrets.").map(|(_, rest)| rest))
+                .map(|rest| (name.clone(), rest.trim_end_matches(" }}").to_owned()))
+                .collect::<Vec<_>>()
+        })
+        .filter(|(name, _)| name != "secrets")
+        .collect();
+    let expected: Vec<(String, String)> = PUBLISHERS
+        .iter()
+        .map(|(job, _, secret)| ((*job).to_owned(), (*secret).to_owned()))
+        .collect();
+    assert_eq!(readers, expected);
+}

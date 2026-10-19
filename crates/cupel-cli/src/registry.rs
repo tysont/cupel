@@ -15,6 +15,7 @@ use cupel_core::{
 };
 
 use crate::cli::Cli;
+use crate::routes;
 
 /// The one-sentence summary of the tool.
 const SUMMARY: &str = "Cupel grades what a coding agent produced.";
@@ -54,6 +55,7 @@ pub fn cli() -> CliDescription {
             ConfigSource::CupelToml,
             ConfigSource::Defaults,
         ],
+        install_routes: routes::all(),
     }
 }
 
