@@ -61,6 +61,7 @@ pub fn verb(
     let requests = Requests {
         session: Arc::clone(&environment.session),
         run,
+        path: environment.path.clone(),
     };
     if args.mcp {
         return serve_mcp(invocation, args.watch, quiet, requests, environment);
@@ -149,7 +150,6 @@ fn serve_mcp(
         root: root.to_path_buf(),
         variables: environment.variables.clone(),
         no_color: environment.no_color_variable,
-        path: environment.path.clone(),
     };
     let identity = Server {
         name: "cupel".to_owned(),
@@ -308,6 +308,9 @@ fn unserved(root: &Path, socket: &Path, error: &ServeError) -> Problem {
 struct Requests {
     session: Arc<Session>,
     run: Runs,
+    /// The serving process's `PATH`, where a run finds `cupel-check-*` and `cupel-produce-*`
+    /// plugins (ADR-089); the daemon serves only clients with the same one.
+    path: Option<String>,
 }
 
 impl Requests {
@@ -323,6 +326,7 @@ impl Requests {
             variables: invocation.variables,
             no_color_variable: invocation.no_color,
             stderr,
+            path: self.path.clone(),
             session: Arc::clone(&self.session),
             cancel,
             ..Environment::new(
@@ -369,7 +373,6 @@ struct Verbs {
     /// The server's `CUPEL_*` variables.
     variables: BTreeMap<String, String>,
     no_color: bool,
-    path: Option<String>,
 }
 
 impl Tools for Verbs {
@@ -401,7 +404,6 @@ impl Tools for Verbs {
             .requests
             .environment(invocation, stderr.clone(), call.cancel);
         environment.events = Some(Stream::new(call.events));
-        environment.path.clone_from(&self.path);
         let done = self.requests.execute(environment);
         let _ = stderr.write_all(done.stderr.as_bytes());
         Called {
@@ -430,11 +432,11 @@ mod tests {
             requests: Requests {
                 session: Arc::default(),
                 run: crate::app::run,
+                path: None,
             },
             root: dir.path().to_path_buf(),
             variables: BTreeMap::from([("CUPEL_DEBUG_SLEEP_MS".to_owned(), "60000".to_owned())]),
             no_color: false,
-            path: None,
         };
         let cancel = Cancellation::new();
         let firing = cancel.clone();
