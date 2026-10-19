@@ -212,7 +212,7 @@ fn release_workflow() -> String {
     .unwrap()
 }
 
-/// Design §10's platforms: Linux x86_64 and aarch64 (musl), macOS arm64 and x86_64, Windows x86_64.
+/// Design §10's platforms: Linux `x86_64` and `aarch64` (musl), macOS `arm64` and `x86_64`, Windows `x86_64`.
 #[test]
 fn release_workflow_builds_the_design_targets() {
     let mut targets: Vec<String> = release_workflow()
