@@ -8,7 +8,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood parity install
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood parity install dist installers
 
 build:
 	$(CARGO) build --workspace
@@ -82,10 +82,23 @@ dogfood:
 install:
 	$(CARGO) install --path crates/cupel-cli
 
+# A release archive (ADR-124): builds the stripped release binary for TARGET (the host by default)
+# and packages it with LICENSE and README.md as target/dist/cupel-<version>-<TARGET>.tar.gz (.zip
+# on Windows). The Linux musl targets build through cargo-zigbuild, which needs `zig` on PATH; every
+# target needs `rustup target add <TARGET>`. The release workflow runs this target per platform.
+TARGET ?= $(shell rustc -vV | sed -n 's/^host: //p')
+DIST_DIR ?= target/dist
+DIST_BUILD = $(if $(findstring -linux-musl,$(TARGET)),zigbuild,build)
+DIST_BINARY = target/$(TARGET)/release/cupel$(if $(findstring windows,$(TARGET)),.exe)
+
+dist:
+	$(CARGO) $(DIST_BUILD) --release --locked --package cupel-cli --target $(TARGET)
+	@archive="$$(scripts/release.sh package $(DIST_BINARY) $(TARGET) $(DIST_DIR))" && \
+		scripts/release.sh verify "$$archive" && echo "$$archive"
+
 # The installers under dist/ (ADR-125) against a fake release on a local HTTP server: install.sh,
 # the Homebrew formula, the npm and pipx wrappers, and the cargo-binstall metadata. `make test` runs
 # them too, skipping a test whose tool (shellcheck, ruby, node, npm, python3) is missing;
 # INSTALLER_TESTS_REQUIRE_TOOLS=1, as CI sets it, makes a missing tool a failure.
-.PHONY: installers
 installers:
 	$(CARGO) test --package cupel-cli --test installers
