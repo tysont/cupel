@@ -188,12 +188,14 @@
         }
       ],
       "needs": [
-        "test-frames"
+        "test-frames",
+        "symbols",
+        "norm-tree"
       ],
       "stability": "experimental",
       "summary": "Diff of the test suite against the range's base: removed and loosened assertions, skipped and deleted tests, rewritten snapshots. Runs only with --changed or --base.",
       "tier": 2,
-      "version": 1,
+      "version": 2,
       "wants": []
     },
     "subject": "check"

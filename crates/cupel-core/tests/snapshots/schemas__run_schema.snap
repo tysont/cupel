@@ -720,6 +720,14 @@ expression: pretty(&schema)
       "description": "Change in score against a reference run.",
       "type": "object",
       "properties": {
+        "sets": {
+          "description": "The reference run's symbols matched to this run's by similarity, where the check had\nfindings or per-symbol metrics to compare across them (ADR-131). Absent when empty: an\noptional property of an emitted type, so deltas without matches are unchanged.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SetDelta"
+          },
+          "x-cupel-optional": true
+        },
         "value": {
           "type": "number",
           "format": "double"
@@ -2700,6 +2708,93 @@ expression: pretty(&schema)
         "n",
         "unit",
         "value"
+      ]
+    },
+    "SetDelta": {
+      "description": "A set of the reference run's symbols matched to a set of this run's (ADR-131): one to one for\na rename, a move, or an edit; one to many for a split; many to one for a merge.",
+      "type": "object",
+      "properties": {
+        "base": {
+          "description": "The reference run's symbols.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Symbol"
+          }
+        },
+        "findings": {
+          "description": "The check's findings carried across the match: neither resolved nor new.",
+          "$ref": "#/$defs/SetFindings"
+        },
+        "head": {
+          "description": "This run's symbols.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Symbol"
+          }
+        },
+        "metrics": {
+          "description": "Each per-symbol metric measured on both sides, compared across the sets, by name.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/SetMetric"
+          }
+        },
+        "similarity": {
+          "description": "The Jaccard similarity of the two sets' subtree fingerprints, to three decimals.",
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "base",
+        "findings",
+        "head",
+        "metrics",
+        "similarity"
+      ]
+    },
+    "SetFindings": {
+      "description": "Findings of one check carried across a match: each of the reference run's findings on the\nbase set has a finding of the same kind on the head set in this run, and the reverse.",
+      "type": "object",
+      "properties": {
+        "base": {
+          "description": "The reference run's findings on the base set.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FindingId"
+          }
+        },
+        "head": {
+          "description": "This run's findings on the head set.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FindingId"
+          }
+        }
+      },
+      "required": [
+        "base",
+        "head"
+      ]
+    },
+    "SetMetric": {
+      "description": "One per-symbol metric over a matched set: the sum of a count, or the mean of a score weighted\nby each symbol's tree size, over the members measured.",
+      "type": "object",
+      "properties": {
+        "base": {
+          "description": "Over the base set, in the reference run.",
+          "type": "number",
+          "format": "double"
+        },
+        "head": {
+          "description": "Over the head set, in this run.",
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "base",
+        "head"
       ]
     },
     "SettingSpec": {

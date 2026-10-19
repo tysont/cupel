@@ -82,6 +82,44 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
           {
             "cost": "standard",
             "delta": {
+              "sets": [
+                {
+                  "base": [
+                    {
+                      "display": "exonym::rewrite::Planner::push_limit",
+                      "hash": "sh_00000000000000a1",
+                      "lang": "rust"
+                    }
+                  ],
+                  "findings": {
+                    "base": [
+                      "fnd_0aa0aa"
+                    ],
+                    "head": [
+                      "fnd_7c2e1b"
+                    ]
+                  },
+                  "head": [
+                    {
+                      "display": "exonym::rewrite::Planner::push_limit_inner",
+                      "hash": "sh_00000000000000b2",
+                      "lang": "rust"
+                    },
+                    {
+                      "display": "exonym::rewrite::Planner::push_limit_outer",
+                      "hash": "sh_00000000000000c3",
+                      "lang": "rust"
+                    }
+                  ],
+                  "metrics": {
+                    "survivors": {
+                      "base": 3.0,
+                      "head": 4.0
+                    }
+                  },
+                  "similarity": 0.871
+                }
+              ],
               "value": -0.12,
               "vs": "baseline"
             },

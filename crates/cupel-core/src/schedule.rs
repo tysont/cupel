@@ -464,10 +464,11 @@ impl<'a, 'j> Execution<'a, 'j> {
         };
         let mut matches = Vec::new();
         for lang in &self.job.langs {
-            let (Some(before), Some(after)) = (
-                symbol_trees(base, lang, &mut Vec::new()),
-                symbol_trees(&mut self.store, lang, &mut Vec::new()),
-            ) else {
+            // The head side first: a language without trees there needs nothing from the base.
+            let Some(after) = symbol_trees(&mut self.store, lang, &mut Vec::new()) else {
+                continue;
+            };
+            let Some(before) = symbol_trees(base, lang, &mut Vec::new()) else {
                 continue;
             };
             if let (Some(before), Some(after)) = (candidates(&before), candidates(&after)) {
