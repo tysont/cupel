@@ -790,24 +790,37 @@ fn host_download() -> (String, String) {
     )
 }
 
-fn downloads_the_release_binary_once_and_runs_it(wrapper: &Wrapper) {
+/// One run's exit code, stdout, and stderr.
+type Ran = (i32, String, String);
+
+fn ran(outcome: Outcome) -> Ran {
+    (outcome.code, outcome.stdout, outcome.stderr)
+}
+
+/// Two `cupel --version` runs through `wrapper` with an empty cache: each run, and the files
+/// cached after the first.
+fn version_twice(wrapper: &Wrapper) -> (Ran, Vec<String>, Ran) {
+    let url = &release().url;
+    let first = ran(run(&mut wrapper.command(url), &["--version"]));
+    let cached = files(&wrapper.cache());
+    let second = ran(run(&mut wrapper.command(url), &["--version"]));
+    (first, cached, second)
+}
+
+/// What `version_twice` sees: one download, then the cached binary alone.
+fn downloaded_once() -> (Ran, Vec<String>, Ran) {
     let url = &release().url;
     let (archive, cached) = host_download();
-    let first = run(&mut wrapper.command(url), &["--version"]);
-    assert_eq!(
-        (first.code, first.stdout, first.stderr),
+    let version = format!("cupel {VERSION}\n");
+    (
         (
             0,
-            format!("cupel {VERSION}\n"),
-            format!("cupel: downloading {url}/download/v{VERSION}/{archive}\n")
-        )
-    );
-    assert_eq!(files(&wrapper.cache()), [cached]);
-    let second = run(&mut wrapper.command(url), &["--version"]);
-    assert_eq!(
-        (second.code, second.stdout, second.stderr),
-        (0, format!("cupel {VERSION}\n"), String::new())
-    );
+            version.clone(),
+            format!("cupel: downloading {url}/download/v{VERSION}/{archive}\n"),
+        ),
+        vec![cached],
+        (0, version, String::new()),
+    )
 }
 
 /// A repository whose tree gate fails: one function of seven parameters against `< 5`.
@@ -824,33 +837,30 @@ fn failing_gate() -> Repo {
     repo
 }
 
-fn forwards_the_exit_code(wrapper: &Wrapper) {
+/// `cupel check` on `failing_gate()` through `wrapper`: its exit code and the envelope's gate result.
+fn failing_check(wrapper: &Wrapper) -> (i32, Value) {
     let repo = failing_gate();
     let outcome = repo.run_with(&mut wrapper.command(&release().url), &["check"]);
-    assert_eq!(outcome.code, 1, "{}", outcome.stderr);
-    assert_eq!(
-        outcome.envelope()["summary"]["gate"]["result"],
-        json!("fail")
-    );
+    let envelope = outcome.envelope();
+    (outcome.code, envelope["summary"]["gate"]["result"].clone())
 }
 
-fn refuses_an_archive_whose_checksum_differs(wrapper: &Wrapper) {
+/// `cupel --version` through `wrapper` against the tampered release, and the files it cached.
+fn tampered_version(wrapper: &Wrapper) -> (Ran, Vec<String>) {
+    let outcome = run(&mut wrapper.command(&tampered().url), &["--version"]);
+    (ran(outcome), files(&wrapper.cache()))
+}
+
+/// What `tampered_version` sees: exit 3, the mismatch named, and nothing cached.
+fn refused() -> (Ran, Vec<String>) {
     let url = &tampered().url;
     let (archive, _) = host_download();
     let actual = sha256(&host_archive().1);
-    let outcome = run(&mut wrapper.command(url), &["--version"]);
-    assert_eq!(
-        (outcome.code, outcome.stdout, outcome.stderr),
-        (
-            3,
-            String::new(),
-            format!(
-                "cupel: downloading {url}/download/v{VERSION}/{archive}\n\
-                 cupel: checksum mismatch for {archive}: SHA256SUMS has {WRONG_DIGEST}, the download is {actual}\n"
-            )
-        )
+    let stderr = format!(
+        "cupel: downloading {url}/download/v{VERSION}/{archive}\n\
+         cupel: checksum mismatch for {archive}: SHA256SUMS has {WRONG_DIGEST}, the download is {actual}\n"
     );
-    assert_eq!(files(&wrapper.cache()), Vec::<String>::new());
+    ((3, String::new(), stderr), Vec::new())
 }
 
 /// The version and target table every wrapper must carry: Cupel's, and dist/targets.toml's.
@@ -864,78 +874,66 @@ fn expected_release() -> Value {
     json!({ "version": VERSION, "targets": table })
 }
 
-fn json_of(outcome: &Outcome) -> Value {
-    serde_json::from_str(&outcome.stdout)
-        .unwrap_or_else(|error| panic!("{error}: {}", outcome.stdout))
+/// The wrapper module `path` under dist/ loaded by `program` with `args` and `script`, which
+/// prints its version and target table as JSON; `None` without `program`.
+fn wrapper_release(program: &str, args: &[&str], script: &str, path: &str) -> Option<Value> {
+    if !installed(program) {
+        return None;
+    }
+    let outcome = succeed(
+        Command::new(program)
+            .args(args)
+            .arg(script)
+            .arg(workspace().join(path)),
+    );
+    let release = serde_json::from_str(&outcome.stdout)
+        .unwrap_or_else(|error| panic!("{error}: {}", outcome.stdout));
+    Some(release)
 }
 
-#[test]
-fn the_npm_wrapper_downloads_the_release_binary_once_and_runs_it() {
-    if let Some(wrapper) = Wrapper::npm() {
-        downloads_the_release_binary_once_and_runs_it(&wrapper);
-    }
+/// The npm and pipx wrappers, each installed; one whose tools are missing is left out.
+fn wrappers() -> Vec<(&'static str, Wrapper)> {
+    [("npm", Wrapper::npm()), ("pipx", Wrapper::pipx())]
+        .into_iter()
+        .filter_map(|(name, wrapper)| Some((name, wrapper?)))
+        .collect()
 }
 
+/// Through each wrapper, with its cache empty: the tampered release is refused and caches
+/// nothing; the release is then downloaded once and run; and a failing gate exits 1.
 #[test]
-fn the_npm_wrapper_forwards_the_exit_code() {
-    if let Some(wrapper) = Wrapper::npm() {
-        forwards_the_exit_code(&wrapper);
-    }
-}
-
-#[test]
-fn the_npm_wrapper_refuses_an_archive_whose_checksum_differs() {
-    if let Some(wrapper) = Wrapper::npm() {
-        refuses_an_archive_whose_checksum_differs(&wrapper);
-    }
+fn each_wrapper_refuses_a_bad_checksum_downloads_once_and_forwards_the_exit_code() {
+    let wrappers = wrappers();
+    let seen: Vec<_> = wrappers
+        .iter()
+        .map(|(name, wrapper)| {
+            let refusal = tampered_version(wrapper);
+            let runs = version_twice(wrapper);
+            (*name, refusal, runs, failing_check(wrapper))
+        })
+        .collect();
+    let expected: Vec<_> = wrappers
+        .iter()
+        .map(|(name, _)| (*name, refused(), downloaded_once(), (1, json!("fail"))))
+        .collect();
+    assert_eq!(seen, expected);
 }
 
 #[test]
 fn the_npm_wrapper_fetches_cupels_version_for_each_release_target() {
-    if !installed("node") {
-        return;
-    }
     let script = "const m = require(process.argv[1]); console.log(JSON.stringify({ version: m.VERSION, targets: m.TARGETS }));";
-    let outcome = succeed(
-        Command::new("node")
-            .args(["-e", script])
-            .arg(workspace().join("dist/npm/bin/cupel.js")),
-    );
-    assert_eq!(json_of(&outcome), expected_release());
-}
-
-#[test]
-fn the_pipx_wrapper_downloads_the_release_binary_once_and_runs_it() {
-    if let Some(wrapper) = Wrapper::pipx() {
-        downloads_the_release_binary_once_and_runs_it(&wrapper);
-    }
-}
-
-#[test]
-fn the_pipx_wrapper_forwards_the_exit_code() {
-    if let Some(wrapper) = Wrapper::pipx() {
-        forwards_the_exit_code(&wrapper);
-    }
-}
-
-#[test]
-fn the_pipx_wrapper_refuses_an_archive_whose_checksum_differs() {
-    if let Some(wrapper) = Wrapper::pipx() {
-        refuses_an_archive_whose_checksum_differs(&wrapper);
-    }
+    let Some(release) = wrapper_release("node", &["-e"], script, "dist/npm/bin/cupel.js") else {
+        return;
+    };
+    assert_eq!(release, expected_release());
 }
 
 #[test]
 fn the_pipx_wrapper_fetches_cupels_version_for_each_release_target() {
-    if !installed("python3") {
-        return;
-    }
     // `-B`: importing the module from dist/ writes no bytecode into the repository.
     let script = "import json, sys; sys.path.insert(0, sys.argv[1]); import cupel; print(json.dumps({'version': cupel.__version__, 'targets': cupel.TARGETS}))";
-    let outcome = succeed(
-        Command::new("python3")
-            .args(["-B", "-c", script])
-            .arg(workspace().join("dist/pipx")),
-    );
-    assert_eq!(json_of(&outcome), expected_release());
+    let Some(release) = wrapper_release("python3", &["-B", "-c"], script, "dist/pipx") else {
+        return;
+    };
+    assert_eq!(release, expected_release());
 }
