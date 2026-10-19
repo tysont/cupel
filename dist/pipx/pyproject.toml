@@ -1,0 +1,18 @@
+# ABOUTME: Packaging for the `cupel` Python distribution (ADR-125), which pipx installs: one standard-library module
+# ABOUTME: whose `cupel` console script downloads and runs this platform's release binary.
+[build-system]
+requires = ["flit_core>=3.11,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "cupel"
+# The version and description come from cupel.py's `__version__` and docstring.
+dynamic = ["version", "description"]
+license = "BSD-3-Clause"
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "https://github.com/tysont/cupel"
+
+[project.scripts]
+cupel = "cupel:main"

@@ -1,0 +1,40 @@
+# ABOUTME: The targets Cupel releases and how each target's archive is named on GitHub Releases (ADR-125).
+# ABOUTME: The release workflow, cargo-binstall metadata, install script, Homebrew formula, and wrappers follow it.
+
+# A release `v{version}` publishes, under https://github.com/tysont/cupel/releases/download/v{version}/,
+# one archive per target and `checksums`, which lists each archive's SHA-256 as `sha256sum` prints it.
+# Each archive holds one directory, `dir`, containing the binary `cupel` (`cupel.exe` on Windows).
+archive = "cupel-{version}-{target}.{format}"
+dir = "cupel-{version}-{target}"
+checksums = "SHA256SUMS"
+
+# `os` and `arch` are Rust's spellings (`std::env::consts`); each installer maps its platform's names to them.
+[[target]]
+triple = "x86_64-unknown-linux-musl"
+os = "linux"
+arch = "x86_64"
+format = "tar.gz"
+
+[[target]]
+triple = "aarch64-unknown-linux-musl"
+os = "linux"
+arch = "aarch64"
+format = "tar.gz"
+
+[[target]]
+triple = "x86_64-apple-darwin"
+os = "macos"
+arch = "x86_64"
+format = "tar.gz"
+
+[[target]]
+triple = "aarch64-apple-darwin"
+os = "macos"
+arch = "aarch64"
+format = "tar.gz"
+
+[[target]]
+triple = "x86_64-pc-windows-msvc"
+os = "windows"
+arch = "x86_64"
+format = "zip"
