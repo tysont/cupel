@@ -382,10 +382,10 @@ fn execute(
         let words = cli.verb.as_ref().map(VerbArgs::words).unwrap_or_default();
         return describe::command(run, &words);
     }
-    if checks_required_version(cli) {
-        if let Some(refused) = doctor::refusal(invocation)? {
-            return Ok(refused);
-        }
+    if checks_required_version(cli)
+        && let Some(refused) = doctor::refusal(invocation)?
+    {
+        return Ok(refused);
     }
     let cut_short = !cli.plans_only()
         && environment

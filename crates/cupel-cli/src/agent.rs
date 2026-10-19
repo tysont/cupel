@@ -140,7 +140,7 @@ fn depth_table(checks: &CheckRegistry) -> String {
         classes.into_iter().map(|class| {
             let ids: Vec<String> = checks
                 .iter()
-                .map(|check| check.manifest())
+                .map(cupel_core::Check::manifest)
                 .filter(|manifest| manifest.cost == class)
                 .map(|manifest| manifest.id.to_string())
                 .collect();
