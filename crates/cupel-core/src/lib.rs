@@ -37,6 +37,7 @@ mod id;
 mod joint;
 mod json_schema;
 mod lang;
+pub mod matching;
 mod matrix;
 mod model_check;
 mod mutation;
