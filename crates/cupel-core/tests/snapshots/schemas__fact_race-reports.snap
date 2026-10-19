@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/race-reports.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/race-reports.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "RaceReports",
   "description": "Data races and undefined behavior one detector found running a language's tests (ADR-105).",

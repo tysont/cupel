@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/coverage-map.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/coverage-map.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "CoverageMap",
   "description": "Which lines (and, when the producer measures them, branches) the test suite ran.\n\nFiles are sorted by path, lines by number, and branches by line and index, each once; build\none with [`CoverageMap::new`] to get that shape from records in any order (ADR-079).",

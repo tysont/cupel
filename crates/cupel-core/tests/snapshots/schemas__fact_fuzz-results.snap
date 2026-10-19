@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/fuzz-results.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/fuzz-results.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "FuzzResults",
   "description": "The fuzz targets of a language's projects, each fuzzed once with an execution budget\n(ADR-107).",

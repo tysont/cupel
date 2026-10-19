@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/property-results.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/property-results.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PropertyResults",
   "description": "The property tests in scope, run once with a seed and a case budget (ADR-095).",

@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/plugin.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/plugin.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PluginMessage",
   "description": "Any message of the protocol: what `describe` prints, what `plan` and `run` read, what\n`plan` prints, and one line of `run`'s output. The root of `describe schema plugin`.",

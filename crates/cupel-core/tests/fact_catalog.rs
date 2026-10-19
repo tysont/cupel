@@ -73,7 +73,10 @@ fn every_entry_serves_a_schema_at_its_version_of_at_least_one() {
     let expected: Vec<(Value, Value, Option<u32>)> = FactEntry::catalog()
         .iter()
         .map(|entry| {
-            let id = format!("https://cupel.dev/schema/v1/fact/{}.json", entry.name);
+            let id = format!(
+                "https://tysont.github.io/cupel/schema/v1/fact/{}.json",
+                entry.name
+            );
             (json!(id), json!(entry.version), Some(entry.version))
         })
         .collect();

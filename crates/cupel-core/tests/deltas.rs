@@ -25,7 +25,7 @@ fn check(id: &str, score: Option<f64>) -> Value {
 fn envelope(run: &str, findings: &[&str], checks: &[Value]) -> Envelope {
     let findings: Vec<Value> = findings.iter().map(|id| finding(id)).collect();
     serde_json::from_value(json!({
-        "cupel": {"version": "0.1.0", "schema": "https://cupel.dev/schema/v1/run.json"},
+        "cupel": {"version": "0.1.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json"},
         "run": {
             "id": run, "verb": "check", "started": "2026-10-13T10:00:00Z", "duration_ms": 1,
             "git": null, "scope": null, "depth": "standard", "budget_ms": null, "seed": 1,

@@ -124,7 +124,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
           }
         ],
         "cupel": {
-          "schema": "https://cupel.dev/schema/v1/run.json",
+          "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
           "version": "9.8.7"
         },
         "description": {

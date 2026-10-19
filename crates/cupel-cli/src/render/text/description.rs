@@ -683,7 +683,7 @@ mod tests {
     fn tiny_schema(schema: &serde_json::Value) -> SchemaDescription {
         SchemaDescription {
             name: "tiny".to_owned(),
-            url: "https://cupel.dev/schema/v1/tiny.json".to_owned(),
+            url: "https://tysont.github.io/cupel/schema/v1/tiny.json".to_owned(),
             stability: Stability::Experimental,
             schema: schema.as_object().cloned().expect("an object"),
         }
@@ -706,7 +706,7 @@ mod tests {
         let schema = tiny_schema(&serde_json::json!({"type": "object", "required": ["a"]}));
         assert_eq!(
             plain(&Description::Schema(schema)),
-            "schema tiny · https://cupel.dev/schema/v1/tiny.json · experimental\n{\n  \
+            "schema tiny · https://tysont.github.io/cupel/schema/v1/tiny.json · experimental\n{\n  \
              \"required\": [\n    \"a\"\n  ],\n  \"type\": \"object\"\n}\n"
         );
     }

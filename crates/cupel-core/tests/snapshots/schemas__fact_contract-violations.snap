@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/contract-violations.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/contract-violations.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ContractViolations",
   "description": "What one contract library reported while a language's tests ran with every contract it\nchecks turned on and generated inputs at the run's case budget (ADR-113).",

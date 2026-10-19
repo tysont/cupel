@@ -143,7 +143,7 @@ config    from flags, profile, cupel.toml
           checks: {"static.clones":{"threshold":0.82}}
           depth: deep
           profile: ci
-cupel     9.8.7 · https://cupel.dev/schema/v1/run.json
+cupel     9.8.7 · https://tysont.github.io/cupel/schema/v1/run.json
 
 next actions
   1. write_test: Add a boundary test for push_limit. (finding fnd_7c2e1a)

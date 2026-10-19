@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 
 fn envelope_with(verb: &Value, description: &Value) -> Value {
     json!({
-        "cupel": {"version": "0.1.0", "schema": "https://cupel.dev/schema/v1/run.json"},
+        "cupel": {"version": "0.1.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json"},
         "run": {
             "id": "run_01JA2B3C4D5E6F7G8H9JKMNPQR", "verb": verb,
             "started": "2026-10-10T16:31:04Z", "duration_ms": 3,
@@ -46,13 +46,13 @@ fn cli() -> Value {
         "verbs": [{"name": "check", "summary": "Run checks.", "stability": "experimental", "pending_step": "P2.1"}],
         "global_flags": [flag()], "flags": [],
         "exit_codes": [{"code": 2, "name": "usage", "meaning": "Bad flags or config; the envelope names the fix.", "stability": "stable"}],
-        "schemas": [{"name": "run", "url": "https://cupel.dev/schema/v1/run.json", "stability": "experimental"}],
+        "schemas": [{"name": "run", "url": "https://tysont.github.io/cupel/schema/v1/run.json", "stability": "experimental"}],
         "config_precedence": ["flags", "env", "profile", "cupel.toml", "defaults"]
     })
 }
 
 fn schema_doc() -> Value {
-    json!({"name": "run", "url": "https://cupel.dev/schema/v1/run.json", "stability": "experimental",
+    json!({"name": "run", "url": "https://tysont.github.io/cupel/schema/v1/run.json", "stability": "experimental",
            "schema": {"type": "object"}})
 }
 

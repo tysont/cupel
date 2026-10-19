@@ -642,7 +642,7 @@ fn describe_fact_shows_version_schema_and_producers_for_every_language() {
     assert!(description["version"].as_u64().is_some());
     assert_eq!(
         description["schema"]["$id"],
-        json!("https://cupel.dev/schema/v1/fact/norm-tree.json")
+        json!("https://tysont.github.io/cupel/schema/v1/fact/norm-tree.json")
     );
     let langs: Vec<&str> = description["producers"]
         .as_array()
@@ -681,7 +681,10 @@ fn describe_fact_of_every_catalog_kind_has_its_entry_version_and_schema() {
     let expected: Vec<Value> = entries
         .iter()
         .map(|entry| {
-            let id = format!("https://cupel.dev/schema/v1/fact/{}.json", entry.name);
+            let id = format!(
+                "https://tysont.github.io/cupel/schema/v1/fact/{}.json",
+                entry.name
+            );
             json!([entry.syntactic, entry.version, id])
         })
         .collect();

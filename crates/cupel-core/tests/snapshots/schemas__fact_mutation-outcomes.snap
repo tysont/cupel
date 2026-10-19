@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/mutation-outcomes.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/mutation-outcomes.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "MutationOutcomes",
   "description": "What mutation testing found in scope (ADR-080; version 2 adds how each mutant was built,\nADR-082).",

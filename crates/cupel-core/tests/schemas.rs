@@ -20,7 +20,11 @@ fn assert_identity(schema: &Schema, id: &str, title: &str) {
 #[test]
 fn run_schema() {
     let schema = schema::run();
-    assert_identity(&schema, "https://cupel.dev/schema/v1/run.json", "Envelope");
+    assert_identity(
+        &schema,
+        "https://tysont.github.io/cupel/schema/v1/run.json",
+        "Envelope",
+    );
     insta::assert_snapshot!(pretty(&schema));
 }
 
@@ -29,7 +33,7 @@ fn finding_schema() {
     let schema = schema::finding();
     assert_identity(
         &schema,
-        "https://cupel.dev/schema/v1/finding.json",
+        "https://tysont.github.io/cupel/schema/v1/finding.json",
         "Finding",
     );
     insta::assert_snapshot!(pretty(&schema));
@@ -38,7 +42,11 @@ fn finding_schema() {
 #[test]
 fn events_schema() {
     let schema = schema::events();
-    assert_identity(&schema, "https://cupel.dev/schema/v1/events.json", "Event");
+    assert_identity(
+        &schema,
+        "https://tysont.github.io/cupel/schema/v1/events.json",
+        "Event",
+    );
     insta::assert_snapshot!(pretty(&schema));
 }
 
@@ -47,7 +55,7 @@ fn plugin_schema_describes_the_manifest() {
     let schema = schema::plugin();
     assert_identity(
         &schema,
-        "https://cupel.dev/schema/v1/plugin.json",
+        "https://tysont.github.io/cupel/schema/v1/plugin.json",
         "PluginMessage",
     );
     let defs = schema.as_value()["$defs"].as_object().unwrap();
@@ -68,7 +76,7 @@ fn config_schema() {
     let schema = schema::config();
     assert_identity(
         &schema,
-        "https://cupel.dev/schema/v1/config.json",
+        "https://tysont.github.io/cupel/schema/v1/config.json",
         "ConfigFile",
     );
     insta::assert_snapshot!(pretty(&schema));
@@ -126,7 +134,9 @@ fn fact_schemas() {
         .map(|kind| {
             (
                 json!(DRAFT_2020_12),
-                json!(format!("https://cupel.dev/schema/v1/fact/{kind}.json")),
+                json!(format!(
+                    "https://tysont.github.io/cupel/schema/v1/fact/{kind}.json"
+                )),
                 json!(schema::fact_version(*kind)),
             )
         })

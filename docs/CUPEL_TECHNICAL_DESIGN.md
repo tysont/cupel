@@ -266,7 +266,7 @@ cupel describe --agent                  # ~60 lines markdown for CLAUDE.md / AGE
 cupel describe --all                    # everything, one JSON document
 ```
 
-Every described entity carries `stability: stable | experimental`.
+Every described entity carries `stability: stable | experimental`. Every schema's `$id` lies under `https://tysont.github.io/cupel/schema/v1/` (`<name>.json`, `fact/<kind>.json`), where CI publishes them from `main` (ADR-127).
 
 **`check`** — The workhorse. Resolves scope → selects checks by depth/`--only`/`--skip`/`--tier` → builds task DAG → runs under budget → evaluates gate → returns envelope. `--dry-run` returns the plan (§6.8).
 
@@ -435,7 +435,7 @@ Every verb returns this shape on stdout (one JSON document; `jsonl` emits one fi
 
 ```json
 {
-  "cupel": {"version": "0.4.0", "schema": "https://cupel.dev/schema/v1/run.json"},
+  "cupel": {"version": "0.4.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json"},
   "run": {
     "id": "run_01JA…", "verb": "check",
     "started": "2026-10-10T16:31:04Z", "duration_ms": 48211,

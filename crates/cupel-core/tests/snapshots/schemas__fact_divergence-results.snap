@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/divergence-results.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/divergence-results.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "DivergenceResults",
   "description": "Entry points compared with an oracle on generated inputs (ADR-093 §1).",

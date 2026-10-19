@@ -9,7 +9,7 @@ use serde_json::{Value, json};
 /// An envelope with every volatile field set to a value that appears nowhere else.
 fn volatile_envelope(root: &str, canonical_root: &str) -> Envelope {
     let value = json!({
-        "cupel": {"version": "9.8.7-volatile", "schema": "https://cupel.dev/schema/v1/run.json"},
+        "cupel": {"version": "9.8.7-volatile", "schema": "https://tysont.github.io/cupel/schema/v1/run.json"},
         "run": {
             "id": "run_01ARZ3NDEKTSV4RRFFQ69G5FAV",
             "verb": "check",
@@ -143,7 +143,7 @@ fn contract_fields_survive_redaction() {
     for (path, expected) in [
         (
             "/cupel/schema",
-            json!("https://cupel.dev/schema/v1/run.json"),
+            json!("https://tysont.github.io/cupel/schema/v1/run.json"),
         ),
         ("/run/verb", json!("check")),
         ("/run/budget_ms", json!(null)),
@@ -201,7 +201,7 @@ fn a_filesystem_root_is_never_treated_as_the_repository_root() {
 
     assert_eq!(
         pointer(&redacted, "/cupel/schema"),
-        &json!("https://cupel.dev/schema/v1/run.json")
+        &json!("https://tysont.github.io/cupel/schema/v1/run.json")
     );
     assert_eq!(
         pointer(&redacted, "/findings/0/location/file"),

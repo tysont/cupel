@@ -1343,6 +1343,13 @@ Each wrapped tool is a producer: parser tested on committed real output; integra
 - `describe --agent`: ~60 lines of markdown for `CLAUDE.md`/`AGENTS.md`.
 - README verb/check/exit-code tables and the **support matrix** (checks × languages) generated from `describe --all` and `describe matrix` by a `make readme` target; a test fails if the README is stale.
 
+#### P8.4 Schema URL and schema publishing
+
+**Status:** complete (2026-10-19, SHA; [ADR-127](adr/CUPEL_DECISION_127.md))
+
+- Every `$id` and every envelope's `cupel.schema` name a URL that serves the schema: `BASE_URL` is the GitHub Pages path of this repository, `https://tysont.github.io/cupel/schema/v1/`, since `cupel.dev` serves nothing.
+- `scripts/schemas.sh` writes every schema the binary emits at the path its `$id` names, with an index; `.github/workflows/pages.yml` deploys it from `main`.
+
 #### P8 Definition of Done
 
 - A fresh machine can install Cupel by every advertised route and run the quick start.

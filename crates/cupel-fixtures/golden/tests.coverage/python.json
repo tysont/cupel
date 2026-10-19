@@ -25,7 +25,7 @@
     }
   ],
   "cupel": {
-    "schema": "https://cupel.dev/schema/v1/run.json",
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
     "version": "<version>"
   },
   "description": null,

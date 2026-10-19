@@ -38,7 +38,11 @@ fn cupel(args: &[&str], cwd: &Path) -> Value {
         .current_dir(cwd)
         .output()
         .unwrap();
-    assert!(output.status.success(), "cupel {args:?}: {}", stderr(&output));
+    assert!(
+        output.status.success(),
+        "cupel {args:?}: {}",
+        stderr(&output)
+    );
     serde_json::from_slice(&output.stdout).unwrap()
 }
 
@@ -61,7 +65,10 @@ fn emitted_ids(cwd: &Path) -> BTreeSet<String> {
     let mut found = BTreeSet::new();
     ids(&cupel(&["describe", "--all"], cwd), &mut found);
     for kind in FactKind::all() {
-        ids(&cupel(&["describe", "fact", kind.as_str()], cwd), &mut found);
+        ids(
+            &cupel(&["describe", "fact", kind.as_str()], cwd),
+            &mut found,
+        );
     }
     found
 }
@@ -143,7 +150,10 @@ fn the_root_schemas_and_each_fact_kind_land_under_schema_v1() {
         assert!(files.contains(&format!("schema/v1/{name}.json")), "{name}");
     }
     for kind in FactKind::all() {
-        assert!(files.contains(&format!("schema/v1/fact/{kind}.json")), "{kind}");
+        assert!(
+            files.contains(&format!("schema/v1/fact/{kind}.json")),
+            "{kind}"
+        );
     }
 }
 

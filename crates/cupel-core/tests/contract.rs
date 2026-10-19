@@ -73,7 +73,7 @@ fn design_finding() -> Value {
 /// `metrics` (ADR-060).
 fn design_envelope() -> Value {
     json!({
-        "cupel": {"version": "0.4.0", "schema": "https://cupel.dev/schema/v1/run.json"},
+        "cupel": {"version": "0.4.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json"},
         "run": {
             "id": "run_01JA2B3C4D5E6F7G8H9JKMNPQR", "verb": "check",
             "started": "2026-10-10T16:31:04Z", "duration_ms": 48211,

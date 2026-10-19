@@ -1,5 +1,5 @@
 // ABOUTME: Tests for scripts/release.sh, which `make dist` and the release workflow use to package the binary:
-// ABOUTME: the tag-to-version check, the archive name and layout per target, SHA256SUMS, and the static-binary check.
+// ABOUTME: the tag-to-version check, archive names and layout, SHA256SUMS, the static check, and workflow action pins.
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
@@ -221,11 +221,17 @@ fn static_rejects_a_dynamically_linked_binary() {
     );
 }
 
-fn release_workflow() -> String {
+fn workflow(name: &str) -> String {
     fs::read_to_string(
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../.github/workflows/release.yml"),
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../.github/workflows")
+            .join(name),
     )
     .unwrap()
+}
+
+fn release_workflow() -> String {
+    workflow("release.yml")
 }
 
 /// dist/targets.toml (ADR-125): each `[[target]]`'s triple and archive format, in file order.
@@ -294,20 +300,31 @@ fn is_pinned(action: &str) -> bool {
     sha.len() == 40 && sha.bytes().all(|b| b.is_ascii_hexdigit()) && release.split('.').count() == 3
 }
 
-/// Every action is pinned to a commit, with the release it is in a comment beside it.
-#[test]
-fn release_workflow_pins_every_action_to_a_commit() {
-    let workflow = release_workflow();
-    let actions: Vec<&str> = workflow
+/// What follows `uses: ` on each line of `workflow` that names an action.
+fn actions(workflow: &str) -> Vec<&str> {
+    workflow
         .lines()
         .filter_map(|line| line.split_once("uses: ").map(|(_, action)| action))
-        .collect();
+        .collect()
+}
+
+/// The distinct names (before `@`) of `actions`, sorted.
+fn action_names<'a>(actions: &[&'a str]) -> Vec<&'a str> {
     let mut names: Vec<&str> = actions
         .iter()
         .filter_map(|action| action.split_once('@').map(|(name, _)| name))
         .collect();
     names.sort_unstable();
     names.dedup();
+    names
+}
+
+/// Every action is pinned to a commit, with the release it is in a comment beside it.
+#[test]
+fn release_workflow_pins_every_action_to_a_commit() {
+    let workflow = release_workflow();
+    let actions = actions(&workflow);
+    let names = action_names(&actions);
     assert_eq!(
         names,
         vec![
@@ -318,4 +335,40 @@ fn release_workflow_pins_every_action_to_a_commit() {
     );
     let unpinned: Vec<&&str> = actions.iter().filter(|action| !is_pinned(action)).collect();
     assert_eq!(unpinned, Vec::<&&str>::new());
+}
+
+/// The pages workflow (ADR-127) holds its actions to the release workflow's rule.
+#[test]
+fn pages_workflow_pins_every_action_to_a_commit() {
+    let workflow = workflow("pages.yml");
+    let actions = actions(&workflow);
+    assert_eq!(
+        action_names(&actions),
+        vec![
+            "actions/checkout",
+            "actions/deploy-pages",
+            "actions/upload-pages-artifact"
+        ]
+    );
+    let unpinned: Vec<&&str> = actions.iter().filter(|action| !is_pinned(action)).collect();
+    assert_eq!(unpinned, Vec::<&&str>::new());
+}
+
+/// The pages workflow deploys from `main` only: a push elsewhere does not start it, and a
+/// `workflow_dispatch` on another branch builds the site but skips the deploy job.
+#[test]
+fn pages_workflow_deploys_main_only() {
+    let workflow = workflow("pages.yml");
+    assert!(
+        workflow.contains("\n  push:\n    branches: [main]\n"),
+        "{workflow}"
+    );
+    let (_, deploy) = workflow.split_once("\n  deploy:\n").expect("a deploy job");
+    assert!(
+        deploy.contains("\n    if: github.ref == 'refs/heads/main'\n"),
+        "{deploy}"
+    );
+    assert!(deploy.contains("\n      name: github-pages\n"), "{deploy}");
+    assert!(deploy.contains("\n      pages: write\n"), "{deploy}");
+    assert!(deploy.contains("\n      id-token: write\n"), "{deploy}");
 }

@@ -67,4 +67,4 @@ depth     standard
 config    from flags, defaults
           depth: standard
           format: text
-cupel     [version] · https://cupel.dev/schema/v1/run.json
+cupel     [version] · https://tysont.github.io/cupel/schema/v1/run.json

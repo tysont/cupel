@@ -164,6 +164,8 @@ cupel describe schema config        # a JSON Schema (draft 2020-12): run | findi
 cupel describe --all                # the CLI, every verb, and every schema as one JSON document
 ```
 
+Each schema's `$id` is the URL it is published at, under [`https://tysont.github.io/cupel/schema/v1/`](https://tysont.github.io/cupel/): `run.json`, `finding.json`, `events.json`, `config.json`, `plugin.json`, and `fact/<kind>.json` for each fact kind. The `pages` workflow publishes them from `main` with `scripts/schemas.sh` ([ADR-127](docs/adr/CUPEL_DECISION_127.md)).
+
 ### `cupel check`
 
 `check` is the workhorse. It resolves a scope, selects checks, produces the facts those checks need, runs them, applies baselines and suppressions, and evaluates the gate.
@@ -322,7 +324,7 @@ The same run as JSON, trimmed to two checks, one finding, and one action:
 
 ```json
 {
-  "cupel": { "version": "0.1.0", "schema": "https://cupel.dev/schema/v1/run.json" },
+  "cupel": { "version": "0.1.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
   "run": {
     "id": "run_01M4X8VR2HBT70ZRQAKXSM7MFV", "verb": "check",
     "started": "2026-10-14T13:15:38Z", "duration_ms": 261,

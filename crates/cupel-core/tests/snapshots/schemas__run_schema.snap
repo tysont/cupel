@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/run.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/run.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Envelope",
   "description": "The single output shape of every verb.",

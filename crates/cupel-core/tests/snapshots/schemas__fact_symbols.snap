@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/symbols.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/symbols.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Symbols",
   "description": "Functions and methods in scope.",

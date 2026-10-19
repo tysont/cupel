@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/analyzer-report.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/analyzer-report.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "AnalyzerReport",
   "description": "What a language's analyzers reported, one entry per analyzer in the toolchain table's order\n(ADR-102).",

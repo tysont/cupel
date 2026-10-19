@@ -153,7 +153,7 @@ pub fn envelope() -> Envelope {
     Envelope {
         cupel: CupelInfo {
             version: "9.8.7".to_owned(),
-            schema: "https://cupel.dev/schema/v1/run.json".to_owned(),
+            schema: "https://tysont.github.io/cupel/schema/v1/run.json".to_owned(),
         },
         run: run_info(),
         status: Status::Fail,

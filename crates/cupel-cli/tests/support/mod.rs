@@ -303,7 +303,7 @@ pub fn run_id(n: u8) -> String {
 /// A finished `verb` run `run` with `findings` and `checks` (JSON values of the envelope types).
 pub fn envelope(run: &str, verb: &str, findings: &[Value], checks: &[Value]) -> Envelope {
     serde_json::from_value(json!({
-        "cupel": {"version": "0.1.0", "schema": "https://cupel.dev/schema/v1/run.json"},
+        "cupel": {"version": "0.1.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json"},
         "run": {
             "id": run, "verb": verb, "started": "2026-10-13T10:00:00Z", "duration_ms": 1,
             "git": null, "scope": null, "depth": "standard", "budget_ms": null, "seed": 7,

@@ -64,11 +64,11 @@ exit codes
   6  internal     Cupel bug; the envelope includes a bug-report payload. · stable
 
 schemas
-  run      https://cupel.dev/schema/v1/run.json
-  finding  https://cupel.dev/schema/v1/finding.json
-  events   https://cupel.dev/schema/v1/events.json
-  config   https://cupel.dev/schema/v1/config.json
-  plugin   https://cupel.dev/schema/v1/plugin.json
+  run      https://tysont.github.io/cupel/schema/v1/run.json
+  finding  https://tysont.github.io/cupel/schema/v1/finding.json
+  events   https://tysont.github.io/cupel/schema/v1/events.json
+  config   https://tysont.github.io/cupel/schema/v1/config.json
+  plugin   https://tysont.github.io/cupel/schema/v1/plugin.json
 
 configuration precedence
   flags > env > profile > cupel.toml > defaults

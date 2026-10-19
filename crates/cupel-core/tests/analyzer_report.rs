@@ -17,7 +17,7 @@ fn analyzer_report_is_an_execution_fact_with_a_versioned_schema() {
             false,
             Some(1),
             Some(json!(
-                "https://cupel.dev/schema/v1/fact/analyzer-report.json"
+                "https://tysont.github.io/cupel/schema/v1/fact/analyzer-report.json"
             )),
         )
     );

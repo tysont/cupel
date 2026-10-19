@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/project-info.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/project-info.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ProjectInfo",
   "description": "The project roots detected in the repository: what each language's ecosystem files say,\nnot which tools to run. `cupel init` and `doctor` join a root with the toolchain table to\nchoose commands (ADR-037).",

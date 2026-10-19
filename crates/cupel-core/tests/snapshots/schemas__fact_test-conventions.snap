@@ -3,7 +3,7 @@ source: crates/cupel-core/tests/schemas.rs
 expression: pretty(&schema)
 ---
 {
-  "$id": "https://cupel.dev/schema/v1/fact/test-conventions.json",
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/test-conventions.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "TestConventions",
   "description": "How test files are recognized and which tests belong to which source file.",

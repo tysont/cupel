@@ -5,7 +5,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
 {
   "checks": [],
   "cupel": {
-    "schema": "https://cupel.dev/schema/v1/run.json",
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
     "version": "[version]"
   },
   "description": {
@@ -382,27 +382,27 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
       {
         "name": "run",
         "stability": "experimental",
-        "url": "https://cupel.dev/schema/v1/run.json"
+        "url": "https://tysont.github.io/cupel/schema/v1/run.json"
       },
       {
         "name": "finding",
         "stability": "experimental",
-        "url": "https://cupel.dev/schema/v1/finding.json"
+        "url": "https://tysont.github.io/cupel/schema/v1/finding.json"
       },
       {
         "name": "events",
         "stability": "experimental",
-        "url": "https://cupel.dev/schema/v1/events.json"
+        "url": "https://tysont.github.io/cupel/schema/v1/events.json"
       },
       {
         "name": "config",
         "stability": "experimental",
-        "url": "https://cupel.dev/schema/v1/config.json"
+        "url": "https://tysont.github.io/cupel/schema/v1/config.json"
       },
       {
         "name": "plugin",
         "stability": "experimental",
-        "url": "https://cupel.dev/schema/v1/plugin.json"
+        "url": "https://tysont.github.io/cupel/schema/v1/plugin.json"
       }
     ],
     "stability": "experimental",
