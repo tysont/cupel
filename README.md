@@ -495,6 +495,8 @@ warn (3)
       …
 ```
 
+A finding's ID is derived from its function's structure, so renaming or moving a function keeps it, but editing the function changes it. Under `--changed` or `--base`, the functions the range removed are matched to the ones it added by how much of their structure they share: a rename with an edit, a move, a function split in two, or two merged into one. A finding on the old function with a finding of the same check and kind on any of its successors is neither new nor resolved. Each check's `delta` lists these matches as `sets`: the functions on each side, how similar they are, the findings carried across, and each per-function metric over each side (the sum of a count such as `cyclomatic`, the size-weighted mean of a score such as `crap`). `tests.weakening` matches a renamed or split test the same way instead of reporting it deleted ([ADR-131](docs/adr/CUPEL_DECISION_131.md)).
+
 ### `cupel oracle`
 
 An oracle is something a check compares against: an earlier version at a git ref, a command that computes the reference answer, or a specification. Oracles are defined in `cupel.toml` as `[oracles.<name>]` tables, so they are reviewed and committed like the rest of the configuration; whether each one is verified is recorded in the fact store. `add` and `remove` change only that table, keeping the rest of the file as it was, and preview the diff until you pass `--write`.

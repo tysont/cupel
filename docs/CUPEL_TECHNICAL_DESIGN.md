@@ -472,6 +472,8 @@ Every verb returns this shape on stdout (one JSON document; `jsonl` emits one fi
 
 `status` ∈ `pass | fail | partial | error | plan`. `partial` and `error` are distinct from `fail`; agents must branch on them differently.
 
+Under a range (`--changed`, `--base`), the symbols the range removed are matched to those it added by structural similarity: one to one for a rename, move, or edit, one to many for a split, many to one for a merge (ADR-131). A check's `delta` then carries `sets`, absent when empty: per match on which the check had findings or per-symbol metrics, the reference run's symbols (`base`), this run's (`head`), their `similarity`, the findings carried across (`findings.base`, `findings.head`: neither resolved nor new), and each per-symbol metric over each set (`metrics.<name>.base`, `.head`: the sum of a count, the size-weighted mean of a score).
+
 ### 7.2 Finding
 
 ```json
@@ -495,7 +497,7 @@ Every verb returns this shape on stdout (one JSON document; `jsonl` emits one fi
 }
 ```
 
-**Finding ID** = `fnd_` + first 24 bits-hex of `blake3(check ∥ kind ∥ symbol.hash ∥ site_hash)` where `site_hash` is the structural position of the site within the symbol (not the line number). Stable across reformatting and relocation.
+**Finding ID** = `fnd_` + first 24 bits-hex of `blake3(check ∥ kind ∥ symbol.hash ∥ site_hash)` where `site_hash` is the structural position of the site within the symbol (not the line number). Stable across reformatting and relocation. An edit changes `symbol.hash` and so the ID; under a range, a finding whose symbol was matched to one the reference run had a finding of the same check and kind on is carried across the match, so `new_since_baseline` stays false (§7.1, ADR-131).
 
 **`action.kind`** is a closed enum:
 
