@@ -3,12 +3,20 @@
 
 CARGO ?= cargo
 
+# The pinned development tools (ADR-139). `make dev-setup` installs them under CUPEL_DEV_TOOLS, and every
+# target runs with the PATH and variables scripts/dev-env.sh gives them, so nothing is sourced by hand;
+# without that directory (as on a CI runner) nothing changes. CUPEL_DEV_TOOLS itself is not exported:
+# Cupel reads CUPEL_* variables from its environment.
+CUPEL_DEV_TOOLS ?= $(HOME)/.cache/cupel/dev-tools
+DEV_ENV = CUPEL_DEV_TOOLS='$(CUPEL_DEV_TOOLS)' sh -c '. "$$0" && $$1' $(CURDIR)/scripts/dev-env.sh
+$(foreach variable,$(shell $(DEV_ENV) cupel_dev_env),$(eval export $(variable)))
+
 # A fingerprint of the working tree: status (including untracked files) plus the content diff.
 TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git hash-object --stdin
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood parity install dist installers
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood parity install dist installers dev-setup dev-env
 
 build:
 	$(CARGO) build --workspace
@@ -102,3 +110,12 @@ dist:
 # INSTALLER_TESTS_REQUIRE_TOOLS=1, as CI sets it, makes a missing tool a failure.
 installers:
 	$(CARGO) test --package cupel-cli --test installers
+
+# Installs or verifies every tool the merge procedure needs, at the versions CI pins (ADR-139), under
+# CUPEL_DEV_TOOLS. A second run installs nothing; each run ends with each tool's version.
+dev-setup:
+	CUPEL_DEV_TOOLS='$(CUPEL_DEV_TOOLS)' $(CURDIR)/scripts/dev-setup.sh
+
+# The tools' environment as `export` lines, for running cargo outside make: `eval "$$(make -s dev-env)"`.
+dev-env:
+	@$(DEV_ENV) cupel_dev_env_exports
