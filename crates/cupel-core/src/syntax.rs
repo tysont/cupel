@@ -230,7 +230,7 @@ pub enum OperatorSet {
 pub struct TestFrames {
     pub files: Vec<TestFile>,
 }
-fact!(TestFrames, TestFrames, "test-frames", 2);
+fact!(TestFrames, TestFrames, "test-frames", 3);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct TestFile {
@@ -252,6 +252,9 @@ pub struct TestCase {
     /// The property-based framework that generates the case's inputs, such as `proptest` or
     /// `hypothesis`; `None` for a case with fixed inputs (ADR-095).
     pub property: Option<String>,
+    /// The case's doc comment or docstring as written, comment markers and quotes included;
+    /// `None` without one (ADR-134).
+    pub doc: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

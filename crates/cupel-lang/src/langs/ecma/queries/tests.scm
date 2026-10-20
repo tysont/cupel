@@ -258,3 +258,16 @@
 (call_expression
   function: (identifier) @_hook
   (#any-of? @_hook "beforeEach" "beforeAll" "afterEach" "afterAll" "before" "after")) @test.setup
+
+; Doc comments (ADR-134): a `/** … */` block directly above the statement that calls `it` or
+; `test`. It documents only a case the patterns above found.
+((comment) @test.doc
+  .
+  (expression_statement
+    (call_expression
+      arguments: (arguments
+        .
+        (string)
+        .
+        [(arrow_function) (function_expression)] @doc.target)))
+  (#match? @test.doc "^/\\*\\*"))

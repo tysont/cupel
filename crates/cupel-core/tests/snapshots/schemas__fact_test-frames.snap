@@ -19,7 +19,7 @@ expression: pretty(&schema)
   "required": [
     "files"
   ],
-  "x-cupel-fact-version": 2,
+  "x-cupel-fact-version": 3,
   "$defs": {
     "Assertion": {
       "type": "object",
@@ -133,6 +133,13 @@ expression: pretty(&schema)
             "$ref": "#/$defs/Assertion"
           }
         },
+        "doc": {
+          "description": "The case's doc comment or docstring as written, comment markers and quotes included;\n`None` without one (ADR-134).",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "mocks": {
           "type": "array",
           "items": {
@@ -165,6 +172,7 @@ expression: pretty(&schema)
       },
       "required": [
         "assertions",
+        "doc",
         "mocks",
         "name",
         "property",

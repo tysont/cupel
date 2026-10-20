@@ -210,11 +210,13 @@ fn test_frames_payload_shape() {
                     span: span(7),
                 }),
                 property: Some("proptest".into()),
+                doc: Some("/// Sorting pushes through. REQ-4".into()),
             }],
         }],
     });
     let case = &json["files"][0]["cases"][0];
     assert_eq!(case["property"], json!("proptest"));
+    assert_eq!(case["doc"], json!("/// Sorting pushes through. REQ-4"));
     assert_eq!(case["assertions"][0]["kind"], json!("equality"));
     assert_eq!(case["assertions"][0]["strength"], json!("weak"));
     assert_eq!(case["skip"]["reason"], json!("flaky on CI"));
@@ -381,7 +383,7 @@ fn each_payload_declares_its_own_kind_and_version() {
             (FactKind::Decisions, 2),
             (FactKind::NormTree, 1),
             (FactKind::MutationSites, 1),
-            (FactKind::TestFrames, 2),
+            (FactKind::TestFrames, 3),
             (FactKind::ModuleGraph, 2),
             (FactKind::ApiSurface, 1),
             (FactKind::Roots, 1),
