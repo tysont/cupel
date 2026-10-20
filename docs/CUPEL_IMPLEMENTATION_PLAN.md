@@ -150,6 +150,7 @@ All build, test, lint, and run steps go through `make`. Agents and CI never call
 
 | Target | Does |
 |---|---|
+| `make dev-setup` | installs or verifies every tool the merge procedure needs at CI's pins under `CUPEL_DEV_TOOLS`; every other target runs with them on `PATH` ([ADR-139](adr/CUPEL_DECISION_139.md)) |
 | `make build` | `cargo build --workspace` |
 | `make test` | `cargo test --workspace` |
 | `make lint` | `cargo fmt --check` + `cargo clippy --workspace --all-targets -- -D warnings` (with `disallowed_methods` forbidding `std::process` and `std::fs` in `cupel-checks`) |
