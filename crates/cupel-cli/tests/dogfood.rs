@@ -44,12 +44,16 @@ fn make_dogfood_runs_the_changed_gate_at_deep_depth_under_the_budget() {
     );
 }
 
-/// On `main`, the tree gate at `deep`, without mutating the whole tree, under the same budget.
+/// On `main`, the tree gate at `deep`, without mutating the whole tree, under the same budget,
+/// against the committed baseline (ADR-140), imported first so a fresh store has the reference
+/// the `base` rules need.
 #[test]
 fn make_dogfood_runs_the_tree_gate_at_deep_depth_without_mutating_the_tree() {
     assert_eq!(
         dogfood(&["DOGFOOD_SCOPE=tree"]),
-        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --budget 30m \
+        "cargo run --quiet --package cupel-cli -- baseline import .cupel/baseline.json --write \
+         --format text >/dev/null\n\
+         scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --budget 30m \
          --gate --no-install --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
     );
 }
@@ -64,8 +68,68 @@ fn an_empty_dogfood_budget_runs_the_full_deep_set() {
     );
     assert_eq!(
         dogfood(&["DOGFOOD_SCOPE=tree", "DOGFOOD_BUDGET="]),
-        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --gate \
+        "cargo run --quiet --package cupel-cli -- baseline import .cupel/baseline.json --write \
+         --format text >/dev/null\n\
+         scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --gate \
          --no-install --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
+    );
+}
+
+/// `make baseline` refreshes the committed baseline from the last tree run: the store's baseline
+/// is set to it and exported to the file the tree dogfood imports.
+#[test]
+fn make_baseline_sets_and_exports_the_committed_baseline() {
+    let output = Command::new("make")
+        .args(["-n", "--no-print-directory", "baseline", "CARGO=cargo"])
+        .current_dir(root())
+        .output()
+        .expect("make runs");
+    assert_eq!(
+        String::from_utf8(output.stdout).unwrap(),
+        "cargo run --quiet --package cupel-cli -- baseline set --write --format text >/dev/null\n\
+         cargo run --quiet --package cupel-cli -- baseline export .cupel/baseline.json --write \
+         --format text >/dev/null\n"
+    );
+}
+
+/// The committed baseline is a run of the whole tree on `main`, holding the metrics the tree
+/// gate's `base` rules compare with.
+#[test]
+fn the_committed_baseline_is_a_tree_run_on_main_with_the_ratcheted_metrics() {
+    let baseline: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(root().join(".cupel/baseline.json")).unwrap())
+            .unwrap();
+    assert_eq!(
+        (
+            baseline["run"]["scope"]["mode"].as_str(),
+            baseline["run"]["git"]["branch"].as_str(),
+            baseline["run"]["git"]["dirty"].as_bool(),
+        ),
+        (Some("tree"), Some("main"), Some(false))
+    );
+    let clones = baseline["checks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|check| check["id"] == "static.clones")
+        .expect("a static.clones result");
+    assert!(clones["metrics"]["pairs"].is_number() && clones["metrics"]["clusters"].is_number());
+}
+
+/// Both tree clone rules ratchet against the committed baseline rather than a literal.
+#[test]
+fn the_tree_gates_clone_rules_ratchet_against_base() {
+    let config: toml_edit::DocumentMut = fs::read_to_string(root().join("cupel.toml"))
+        .unwrap()
+        .parse()
+        .unwrap();
+    let tree = &config["gate"]["tree"];
+    assert_eq!(
+        (
+            tree["static.clones.pairs"].as_str(),
+            tree["static.clones.clusters"].as_str()
+        ),
+        (Some("<= base"), Some("<= base"))
     );
 }
 

@@ -4,6 +4,7 @@
 # Cupel's own working directory (suppressions are committable)
 /.cupel/*
 !/.cupel/suppressions.toml
+!/.cupel/baseline.json
 
 # OS / editor
 .DS_Store
