@@ -25,6 +25,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "tally_reports_overdraft",
           "property": null,
@@ -49,6 +50,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "discount_snapshot",
           "property": null,
@@ -62,6 +64,7 @@
         },
         {
           "assertions": [],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -110,6 +113,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "deposit_adds_to_the_balance",
           "property": null,
@@ -134,6 +138,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "members_get_a_discount",
           "property": null,
@@ -158,6 +163,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "statements_mention_the_balance",
           "property": null,
@@ -182,6 +188,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "parsing_garbage_fails",
           "property": null,
@@ -206,6 +213,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "huge_deposits_overflow",
           "property": null,
@@ -230,6 +238,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "statement_is_mailed",
           "property": null,
@@ -251,6 +260,7 @@
         },
         {
           "assertions": [],
+          "doc": "/// An account opens without a deposit (REQ-1).",
           "mocks": [],
           "name": "opening_an_account_does_not_panic",
           "property": null,
@@ -258,8 +268,8 @@
           "span": {
             "col": 1,
             "end_col": 2,
-            "end_line": 44,
-            "line": 42
+            "end_line": 45,
+            "line": 43
           }
         }
       ],
@@ -282,6 +292,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "discounts_never_raise_the_price",
           "property": "proptest",
@@ -313,6 +324,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "members_pay_exactly_the_discounted_price",
           "property": null,
@@ -337,6 +349,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "overflowing_balances_panic",
           "property": null,
@@ -361,6 +374,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "statements_are_not_empty",
           "property": null,
@@ -374,6 +388,7 @@
         },
         {
           "assertions": [],
+          "doc": null,
           "mocks": [],
           "name": "classifying_runs",
           "property": null,
@@ -398,6 +413,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -450,6 +466,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "every_entry_counts_toward_the_balance",
           "property": null,
@@ -474,6 +491,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "computed_entries_count_toward_the_balance",
           "property": null,
@@ -498,6 +516,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "display_shows_owner_and_balance",
           "property": null,
@@ -522,6 +541,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "statements_show_the_balance",
           "property": null,
@@ -546,6 +566,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "a_comparison_inside_assert_pins_the_balance",
           "property": null,
@@ -570,6 +591,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "an_assertion_helper_is_an_assertion",
           "property": null,
@@ -594,6 +616,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "every_listed_entry_counts_toward_the_balance",
           "property": null,
@@ -618,6 +641,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "an_assertion_helper_called_with_a_turbofish_is_an_assertion",
           "property": null,

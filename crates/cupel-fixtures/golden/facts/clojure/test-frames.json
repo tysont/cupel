@@ -15,6 +15,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "deposit-adds-to-the-balance",
           "property": null,
@@ -39,6 +40,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "members-get-a-discount",
           "property": null,
@@ -63,6 +65,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "new-accounts-are-registered",
           "property": null,
@@ -87,6 +90,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "parsing-garbage-fails",
           "property": null,
@@ -111,6 +115,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "new-accounts-have-distinct-ids",
           "property": null,
@@ -135,6 +140,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "classify-handles-every-case",
           "property": null,
@@ -159,6 +165,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "parse-cents-trims-spaces",
           "property": null,
@@ -172,6 +179,7 @@
         },
         {
           "assertions": [],
+          "doc": ";; An account opens without a deposit (REQ-1).",
           "mocks": [],
           "name": "opening-an-account-does-not-throw",
           "property": null,
@@ -179,8 +187,8 @@
           "span": {
             "col": 1,
             "end_col": 29,
-            "end_line": 34,
-            "line": 33
+            "end_line": 35,
+            "line": 34
           }
         }
       ],
@@ -220,6 +228,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "tally-reports-overdraft",
           "property": null,
@@ -244,6 +253,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "parse-cents-accepts-digits",
           "property": null,
@@ -268,6 +278,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "parse-cents-rejects-blanks",
           "property": null,
@@ -292,6 +303,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -333,6 +345,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "balance-of-one-entry-is-the-entry",
           "property": "test-check",
@@ -364,6 +377,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "members-pay-exactly-the-discounted-price",
           "property": null,
@@ -388,6 +402,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "blank-amounts-are-rejected",
           "property": null,
@@ -412,6 +427,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "statements-are-not-empty",
           "property": null,
@@ -425,6 +441,7 @@
         },
         {
           "assertions": [],
+          "doc": null,
           "mocks": [],
           "name": "classifying-runs",
           "property": null,
@@ -449,6 +466,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -501,6 +519,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "every-entry-counts-toward-the-balance",
           "property": null,
@@ -525,6 +544,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "computed-entries-count-toward-the-balance",
           "property": null,
@@ -549,6 +569,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "deposits-keep-the-owner",
           "property": null,
@@ -573,6 +594,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "deposits-accumulate",
           "property": null,

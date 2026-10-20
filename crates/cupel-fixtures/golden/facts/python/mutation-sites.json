@@ -6219,12 +6219,12 @@
           "from": "Account(\"ada\")",
           "operator": "statement-deletion",
           "set": "extended",
-          "site_hash": "ab6d1d18dc681475",
+          "site_hash": "0ee4a1b2ac315eb9",
           "span": {
             "col": 5,
             "end_col": 19,
-            "end_line": 57,
-            "line": 57
+            "end_line": 58,
+            "line": 58
           },
           "to": [
             "pass"

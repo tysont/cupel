@@ -1280,8 +1280,8 @@
       "body": {
         "col": 40,
         "end_col": 2,
-        "end_line": 44,
-        "line": 42
+        "end_line": 45,
+        "line": 43
       },
       "display": "tests::ledger::opening_an_account_does_not_panic",
       "file": "tests/ledger.rs",
@@ -1293,8 +1293,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 44,
-        "line": 42
+        "end_line": 45,
+        "line": 43
       },
       "visibility": "private"
     },

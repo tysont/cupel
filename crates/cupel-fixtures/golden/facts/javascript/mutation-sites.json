@@ -6842,8 +6842,8 @@
           "span": {
             "col": 5,
             "end_col": 29,
-            "end_line": 54,
-            "line": 54
+            "end_line": 55,
+            "line": 55
           },
           "to": [
             ""
@@ -6857,8 +6857,8 @@
           "span": {
             "col": 5,
             "end_col": 43,
-            "end_line": 55,
-            "line": 55
+            "end_line": 56,
+            "line": 56
           },
           "to": [
             ""
@@ -6872,8 +6872,8 @@
           "span": {
             "col": 38,
             "end_col": 41,
-            "end_line": 55,
-            "line": 55
+            "end_line": 56,
+            "line": 56
           },
           "to": [
             "0"
@@ -6883,7 +6883,7 @@
       "symbol": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       }
     },
     {

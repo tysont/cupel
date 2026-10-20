@@ -597,9 +597,9 @@
       "location": {
         "col": 32,
         "end_col": 4,
-        "end_line": 56,
+        "end_line": 57,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_153cb3730cef98a6",

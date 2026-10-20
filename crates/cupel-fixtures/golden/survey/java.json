@@ -248,9 +248,9 @@
           "location": {
             "col": 5,
             "end_col": 6,
-            "end_line": 74,
+            "end_line": 75,
             "file": "src/test/java/ledger/LedgerTest.java",
-            "line": 71
+            "line": 72
           },
           "symbol": "sh_102d75c5c156af08"
         },

@@ -2028,8 +2028,8 @@
       "body": {
         "col": 41,
         "end_col": 6,
-        "end_line": 74,
-        "line": 72
+        "end_line": 75,
+        "line": 73
       },
       "display": "ledger.LedgerTest.openingAnAccountDoesNotThrow",
       "file": "src/test/java/ledger/LedgerTest.java",
@@ -2041,8 +2041,8 @@
       "span": {
         "col": 5,
         "end_col": 6,
-        "end_line": 74,
-        "line": 71
+        "end_line": 75,
+        "line": 72
       },
       "visibility": "internal"
     },

@@ -5004,8 +5004,8 @@
           "span": {
             "col": 2,
             "end_col": 19,
-            "end_line": 86,
-            "line": 86
+            "end_line": 87,
+            "line": 87
           },
           "to": [
             ""
@@ -5015,7 +5015,7 @@
       "symbol": {
         "col": 1,
         "file": "ledger_test.go",
-        "line": 85
+        "line": 86
       }
     },
     {

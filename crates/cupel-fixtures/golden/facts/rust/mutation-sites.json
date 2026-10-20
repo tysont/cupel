@@ -4380,8 +4380,8 @@
           "span": {
             "col": 5,
             "end_col": 25,
-            "end_line": 43,
-            "line": 43
+            "end_line": 44,
+            "line": 44
           },
           "to": [
             ""
@@ -4391,7 +4391,7 @@
       "symbol": {
         "col": 1,
         "file": "tests/ledger.rs",
-        "line": 42
+        "line": 43
       }
     },
     {

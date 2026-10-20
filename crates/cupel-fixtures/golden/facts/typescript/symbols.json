@@ -994,8 +994,8 @@
       "body": {
         "col": 36,
         "end_col": 4,
-        "end_line": 47,
-        "line": 43
+        "end_line": 48,
+        "line": 44
       },
       "display": "math.range.is consumed by a spy",
       "file": "src/math.test.ts",
@@ -1007,8 +1007,8 @@
       "span": {
         "col": 30,
         "end_col": 4,
-        "end_line": 47,
-        "line": 43
+        "end_line": 48,
+        "line": 44
       },
       "visibility": "private"
     },

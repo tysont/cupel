@@ -5014,8 +5014,8 @@
           "span": {
             "col": 5,
             "end_col": 31,
-            "end_line": 45,
-            "line": 45
+            "end_line": 46,
+            "line": 46
           },
           "to": [
             ""
@@ -5029,8 +5029,8 @@
           "span": {
             "col": 23,
             "end_col": 24,
-            "end_line": 45,
-            "line": 45
+            "end_line": 46,
+            "line": 46
           },
           "to": [
             "1"
@@ -5044,8 +5044,8 @@
           "span": {
             "col": 26,
             "end_col": 27,
-            "end_line": 45,
-            "line": 45
+            "end_line": 46,
+            "line": 46
           },
           "to": [
             "0"
@@ -5059,8 +5059,8 @@
           "span": {
             "col": 5,
             "end_col": 46,
-            "end_line": 46,
-            "line": 46
+            "end_line": 47,
+            "line": 47
           },
           "to": [
             ""
@@ -5074,8 +5074,8 @@
           "span": {
             "col": 43,
             "end_col": 44,
-            "end_line": 46,
-            "line": 46
+            "end_line": 47,
+            "line": 47
           },
           "to": [
             "0"
@@ -5085,7 +5085,7 @@
       "symbol": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       }
     },
     {
