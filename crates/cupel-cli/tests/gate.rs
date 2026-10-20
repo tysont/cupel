@@ -456,12 +456,18 @@ fn a_changed_mutation_rule_against_base_reruns_the_suite_at_the_base_commit() {
     let source = std::fs::read_to_string(repo.path("discount.py")).unwrap();
     let check = ["check", "--changed", "--only", "tests.mutation"];
 
-    // The base's discount.py scores 0.75; the changed lines of `refund` have no covering test.
+    // The base's discount.py scores 0.75. The changed line of `refund` is covered by a test
+    // that pins no value, so its mutants survive. (A change no test covers has every mutant
+    // uncovered, which the score leaves out; `tests.coverage` is the rule for that.)
     repo.write("discount.py", &source.replace("total - 5", "total - 6"));
-    let untested = repo.run(&check);
-    assert_eq!(untested.code, 1, "{}", untested.stdout);
+    repo.write(
+        "tests/test_refund.py",
+        "from discount import refund\n\n\ndef test_refunds_a_number():\n    assert isinstance(refund(10), int)\n",
+    );
+    let weak = repo.run(&check);
+    assert_eq!(weak.code, 1, "{}", weak.stdout);
     assert_eq!(
-        gate(&untested.envelope())["rules"][0],
+        gate(&weak.envelope())["rules"][0],
         json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 0.0, "bound": 0.73,
                "result": "fail", "reason": null})
     );
