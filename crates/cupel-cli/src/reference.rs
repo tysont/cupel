@@ -104,20 +104,13 @@ fn recompute(
         .export(&commit, &copy.path().join("tree"))
         .map_err(|error| format!("the base could not be written: {error}"))?;
     let short = &commit[..commit.len().min(12)];
-    run_at(invocation, config, args, rules, &root, files)
+    run_at(invocation, config, &base_scope(args, rules, files), &root)
         .map_err(|error| format!("the run at the base {short} failed: {error}"))
 }
 
-/// The checks `rules` name, run over `files` in the tree at `root`.
-fn run_at(
-    invocation: &Invocation<'_>,
-    config: &Config,
-    args: &ScopeArgs,
-    rules: &[GateRuleSpec],
-    root: &Path,
-    files: Vec<String>,
-) -> Result<Envelope, String> {
-    let writer = Writer::new(root, false).map_err(|error| error.to_string())?;
+/// The base run's flags: `files` as its paths, the checks of the rules against `base` as its
+/// selection, and `args`'s `--jobs`.
+fn base_scope(args: &ScopeArgs, rules: &[GateRuleSpec], files: Vec<String>) -> ScopeArgs {
     let mut only: Vec<String> = rules
         .iter()
         .filter(|rule| needs_reference(std::slice::from_ref(rule)))
@@ -125,13 +118,23 @@ fn run_at(
         .collect();
     only.sort();
     only.dedup();
-    let base_args = ScopeArgs {
+    ScopeArgs {
         paths: files,
         only,
         jobs: args.jobs,
         no_gate: true,
         ..ScopeArgs::default()
-    };
+    }
+}
+
+/// The run `base_args` describes, in the tree at `root`.
+fn run_at(
+    invocation: &Invocation<'_>,
+    config: &Config,
+    base_args: &ScopeArgs,
+    root: &Path,
+) -> Result<Envelope, String> {
+    let writer = Writer::new(root, false).map_err(|error| error.to_string())?;
     let base = Invocation {
         run: invocation.run,
         writer: &writer,
@@ -143,6 +146,6 @@ fn run_at(
     };
     let mut events: Vec<Event> = Vec::new();
     let checked =
-        check::run(&base, config, &base_args, &mut events).map_err(|error| error.to_string())?;
+        check::run(&base, config, base_args, &mut events).map_err(|error| error.to_string())?;
     Ok(checked.into_envelope(invocation.run, &writer, &mut events))
 }

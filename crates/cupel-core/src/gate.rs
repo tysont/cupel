@@ -147,44 +147,53 @@ fn evaluate_rule(
     };
     match rule.condition {
         GateCondition::Compare { op, threshold } => {
-            let Some(actual) = metric(entry, rule) else {
-                return Evaluation::skipped(None, unreported(rule));
-            };
             let bound = if threshold.percent {
                 threshold.value / 100.0
             } else {
                 threshold.value
             };
-            Evaluation::compared(actual, bound, compare(op, actual, bound))
+            compared_metric(rule, entry, op, Ok(bound))
         }
         GateCondition::Relative { op, offset } => {
-            let Some(actual) = metric(entry, rule) else {
-                return Evaluation::skipped(None, unreported(rule));
-            };
-            match reference_value(rule, reference) {
-                Ok(base) => {
-                    let bound = base + offset;
-                    Evaluation::compared(actual, bound, compare(op, actual, bound))
-                }
-                Err(why) => Evaluation::skipped(Some(actual), format!("{NO_REFERENCE}: {why}")),
-            }
+            let bound = reference_value(rule, reference).map(|base| base + offset);
+            compared_metric(rule, entry, op, bound)
         }
-        GateCondition::None | GateCondition::NoBreaking => {
-            let breaking_only = rule.condition == GateCondition::NoBreaking;
-            let present = envelope
-                .findings
-                .iter()
-                .filter(|finding| finding.check == entry.id && finding.severity != Severity::Info)
-                .filter(|finding| !breaking_only || is_breaking(&finding.kind))
-                .count();
-            #[allow(
-                clippy::cast_precision_loss,
-                reason = "finding counts stay far below 2^52, where f64 is exact"
-            )]
-            let actual = present as f64;
-            Evaluation::compared(actual, 0.0, present == 0)
-        }
+        GateCondition::None | GateCondition::NoBreaking => presence(rule, envelope, entry),
     }
+}
+
+/// A comparison of the rule's metric in `entry` with `bound`, or why there is no bound.
+fn compared_metric(
+    rule: &GateRuleSpec,
+    entry: &CheckResult,
+    op: Comparison,
+    bound: Result<f64, String>,
+) -> Evaluation {
+    let Some(actual) = metric(entry, rule) else {
+        return Evaluation::skipped(None, unreported(rule));
+    };
+    match bound {
+        Ok(bound) => Evaluation::compared(actual, bound, compare(op, actual, bound)),
+        Err(why) => Evaluation::skipped(Some(actual), format!("{NO_REFERENCE}: {why}")),
+    }
+}
+
+/// `none` or `no-breaking`: the count of the check's unsuppressed findings above `info` (only
+/// the breaking ones for `no-breaking`) must be 0.
+fn presence(rule: &GateRuleSpec, envelope: &Envelope, entry: &CheckResult) -> Evaluation {
+    let breaking_only = rule.condition == GateCondition::NoBreaking;
+    let present = envelope
+        .findings
+        .iter()
+        .filter(|finding| finding.check == entry.id && finding.severity != Severity::Info)
+        .filter(|finding| !breaking_only || is_breaking(&finding.kind))
+        .count();
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "finding counts stay far below 2^52, where f64 is exact"
+    )]
+    let actual = present as f64;
+    Evaluation::compared(actual, 0.0, present == 0)
 }
 
 /// The rule's metric as `entry` reports it.
