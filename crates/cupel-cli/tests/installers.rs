@@ -13,7 +13,7 @@ use std::process::Command;
 use std::sync::OnceLock;
 
 use serde_json::{Value, json};
-use support::{Outcome, Repo, installed};
+use support::{Outcome, Repo, installed, workspace};
 use tempfile::TempDir;
 use toml_edit::{DocumentMut, Item, Table};
 
@@ -22,13 +22,6 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// The release `tests/fixtures/SHA256SUMS` lists.
 const FIXTURE_VERSION: &str = "0.1.0";
-
-fn workspace() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .unwrap()
-}
 
 fn read_toml(relative: &str) -> DocumentMut {
     fs::read_to_string(workspace().join(relative))

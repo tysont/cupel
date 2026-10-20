@@ -3,18 +3,11 @@
 mod support;
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 
-use support::{installed, jobs, workflow};
+use support::{installed, jobs, workflow, workspace};
 use tempfile::TempDir;
-
-fn workspace() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .unwrap()
-}
 
 fn dev_setup_script() -> String {
     fs::read_to_string(workspace().join("scripts/dev-setup.sh")).unwrap()
@@ -25,13 +18,45 @@ fn is_version(text: &str) -> bool {
     text.starts_with(|c: char| c.is_ascii_digit()) || text.starts_with("nightly-")
 }
 
+/// The version segments of a URL's path: `v1.7.4` and `3.9.16`, not `maven-3`.
+fn url_versions(url: &str) -> impl Iterator<Item = &str> {
+    url.split('/')
+        .skip(1)
+        .map(|segment| segment.strip_prefix('v').unwrap_or(segment))
+        .filter(|segment| {
+            segment.split('.').count() > 1
+                && segment.split('.').all(|part| part.parse::<u64>().is_ok())
+        })
+}
+
+/// The versions `words[i]` names: a URL's version segments, `pkg==X`, `pkg@X`, or the word itself
+/// after `--version`, a `<tool>-version:` key, or `toolchain install`.
+fn word_versions<'a>(words: &[&'a str], i: usize) -> Vec<&'a str> {
+    let word = words[i];
+    let previous = |back: usize| i.checked_sub(back).map(|j| words[j]);
+    if let Some(at) = word.find("://") {
+        return url_versions(&word[at + 3..]).collect();
+    }
+    let named = word
+        .split_once("==")
+        .or_else(|| word.rsplit_once('@'))
+        .map(|(_, version)| version);
+    let after_key = previous(1) == Some("--version")
+        || previous(1).is_some_and(|key| key.ends_with("-version:"))
+        || (previous(2), previous(1)) == (Some("toolchain"), Some("install"));
+    named
+        .or(after_key.then_some(word))
+        .into_iter()
+        .filter(|version| is_version(version))
+        .collect()
+}
+
 /// The versions `lines` of a workflow pin, each with the line it is on: `pkg==X`, `pkg@X`,
 /// `--version X`, `<tool>-version: 'X'`, `toolchain install X`, and version segments of URL
 /// paths. Comments and `uses:` lines (action references, pinned by release.rs) are not read.
 fn pins<'a>(lines: impl IntoIterator<Item = &'a str>) -> Vec<(String, String)> {
     let mut pins = Vec::new();
-    for line in lines {
-        let line = line.trim();
+    for line in lines.into_iter().map(str::trim) {
         let body = line.strip_prefix("- ").unwrap_or(line);
         if body.starts_with('#') || body.starts_with("uses:") {
             continue;
@@ -40,36 +65,11 @@ fn pins<'a>(lines: impl IntoIterator<Item = &'a str>) -> Vec<(String, String)> {
             .split_whitespace()
             .map(|word| word.trim_matches(|c| c == '"' || c == '\''))
             .collect();
-        for (i, word) in words.iter().enumerate() {
-            let previous = |back: usize| i.checked_sub(back).map(|j| words[j]);
-            let mut found: Vec<&str> = Vec::new();
-            if let Some(url) = word.find("://").map(|at| &word[at + 3..]) {
-                found.extend(
-                    url.split('/')
-                        .skip(1)
-                        .map(|segment| segment.strip_prefix('v').unwrap_or(segment))
-                        .filter(|segment| {
-                            segment.split('.').count() > 1
-                                && segment.split('.').all(|part| part.parse::<u64>().is_ok())
-                        }),
-                );
-            } else if let Some((_, version)) = word.split_once("==") {
-                found.push(version);
-            } else if let Some((_, version)) = word.rsplit_once('@') {
-                found.push(version);
-            } else if previous(1) == Some("--version")
-                || previous(1).is_some_and(|key| key.ends_with("-version:"))
-                || (previous(2), previous(1)) == (Some("toolchain"), Some("install"))
-            {
-                found.push(word);
-            }
-            pins.extend(
-                found
-                    .into_iter()
-                    .filter(|version| is_version(version))
-                    .map(|version| (line.to_owned(), version.to_owned())),
-            );
-        }
+        pins.extend(
+            (0..words.len())
+                .flat_map(|i| word_versions(&words, i))
+                .map(|version| (line.to_owned(), version.to_owned())),
+        );
     }
     pins
 }
@@ -156,42 +156,50 @@ fn dev_setup_installs_every_version_the_workflows_pin() {
     assert_eq!(missing, Vec::<&(String, String)>::new());
 }
 
-/// ci.yml names a version for every tool it installs by name (`tool:` entries and the packages of
-/// `pip install` and `npm install`) and a patch release of Node and Python, so a local install
-/// can match it. Go's `1.23` is its final minor release and the JDK's `21` is Temurin's latest
-/// build, which scripts/dev-setup.sh names exactly.
+/// Whether a package argument of `pip install` or `npm install` names its version.
+fn names_a_version(package: &str) -> bool {
+    package.contains("==")
+        || package
+            .rsplit_once('@')
+            .is_some_and(|(_, version)| is_version(version))
+}
+
+/// Whether a ci.yml line that installs by name pins what it installs: a `tool:` entry with `@X`,
+/// a Node or Python version with its patch release, and every package of `pip install` and
+/// `npm install` (flags and quoted paths are not packages). Other lines pin nothing to check.
+fn pins_what_it_installs(line: &str) -> bool {
+    let command = line.strip_prefix("run: ").unwrap_or(line);
+    if let Some(tool) = command.strip_prefix("tool: ") {
+        return tool.contains('@');
+    }
+    if let Some(version) = command
+        .strip_prefix("node-version: ")
+        .or_else(|| command.strip_prefix("python-version: "))
+    {
+        return version.trim_matches('"').split('.').count() == 3;
+    }
+    if !(command.contains("pip install ") || command.contains("npm install ")) {
+        return true;
+    }
+    command
+        .split_whitespace()
+        .skip_while(|word| *word != "install")
+        .skip(1)
+        .filter(|word| !word.starts_with(['-', '"']))
+        .all(names_a_version)
+}
+
+/// ci.yml names a version for every tool it installs by name and a patch release of Node and
+/// Python, so a local install can match it. Go's `1.23` is its final minor release and the JDK's
+/// `21` resolves to one release, which scripts/dev-setup.sh names exactly.
 #[test]
 fn ci_pins_every_package_and_runtime_it_installs() {
     let ci = workflow("ci.yml");
-    let mut unpinned: Vec<&str> = Vec::new();
-    for line in ci.lines().map(str::trim) {
-        let command = line.strip_prefix("run: ").unwrap_or(line);
-        let pinned = if let Some(tool) = command.strip_prefix("tool: ") {
-            tool.contains('@')
-        } else if let Some(version) = command
-            .strip_prefix("node-version: ")
-            .or_else(|| command.strip_prefix("python-version: "))
-        {
-            version.trim_matches('"').split('.').count() == 3
-        } else if command.contains("pip install ") || command.contains("npm install ") {
-            command
-                .split_whitespace()
-                .skip_while(|word| *word != "install")
-                .skip(1)
-                .filter(|word| !word.starts_with(['-', '"']))
-                .all(|package| {
-                    package.contains("==")
-                        || package
-                            .rsplit_once('@')
-                            .is_some_and(|(_, version)| is_version(version))
-                })
-        } else {
-            true
-        };
-        if !pinned {
-            unpinned.push(line);
-        }
-    }
+    let unpinned: Vec<&str> = ci
+        .lines()
+        .map(str::trim)
+        .filter(|line| !pins_what_it_installs(line))
+        .collect();
     assert_eq!(unpinned, Vec::<&str>::new());
 }
 

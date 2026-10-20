@@ -420,6 +420,14 @@ pub fn listed_tools() -> Vec<Value> {
         .clone()
 }
 
+/// The repository's root.
+pub fn workspace() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .unwrap()
+}
+
 /// A workflow under `.github/workflows`, by file name.
 pub fn workflow(name: &str) -> String {
     fs::read_to_string(
