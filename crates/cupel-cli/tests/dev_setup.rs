@@ -50,9 +50,7 @@ fn pins<'a>(lines: impl IntoIterator<Item = &'a str>) -> Vec<(String, String)> {
                         .map(|segment| segment.strip_prefix('v').unwrap_or(segment))
                         .filter(|segment| {
                             segment.split('.').count() > 1
-                                && segment
-                                    .split('.')
-                                    .all(|part| part.parse::<u64>().is_ok())
+                                && segment.split('.').all(|part| part.parse::<u64>().is_ok())
                         }),
                 );
             } else if let Some((_, version)) = word.split_once("==") {
