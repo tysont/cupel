@@ -98,10 +98,14 @@ fn run(base: TestFrames, head: TestFrames, changes: Vec<Change>) -> (CheckResult
 fn body(first: usize, count: usize) -> NormNode {
     let statement = |n: usize| {
         NormNode::new(
-            if n % 2 == 0 { "call" } else { "binary" },
+            if n.is_multiple_of(2) {
+                "call"
+            } else {
+                "binary"
+            },
             vec![
                 NormNode::new("arguments", vec![NormNode::leaf("$id"); n % 3 + 1]),
-                NormNode::leaf(if n % 5 == 0 { "+" } else { "<" }),
+                NormNode::leaf(if n.is_multiple_of(5) { "+" } else { "<" }),
             ],
         )
     };

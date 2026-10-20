@@ -1075,10 +1075,14 @@ fn under_a_range_a_check_reads_both_sides_and_the_range() {
 fn trees_of(scope: &Scope) -> NormTree {
     let statement = |n: usize| {
         NormNode::new(
-            if n % 2 == 0 { "call" } else { "binary" },
+            if n.is_multiple_of(2) {
+                "call"
+            } else {
+                "binary"
+            },
             vec![
                 NormNode::new("arguments", vec![NormNode::leaf("$id"); n % 3 + 1]),
-                NormNode::leaf(if n % 3 == 0 { "+" } else { "<" }),
+                NormNode::leaf(if n.is_multiple_of(3) { "+" } else { "<" }),
             ],
         )
     };

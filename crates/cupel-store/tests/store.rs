@@ -500,18 +500,18 @@ fn a_runs_per_symbol_metrics_are_read_back_by_check_without_its_scores() {
         &[check("static.complexity", Some(0.5))],
     );
     let cyclomatic = metric(Some(symbol_hash(0xaa)), "cyclomatic", 12.0);
-    let score = metric(Some(symbol_hash(0xbb)), "crap", 30.0);
+    let mean = metric(Some(symbol_hash(0xbb)), "crap", 30.0);
     store
         .record_metrics(&run_id(1), &complexity, std::slice::from_ref(&cyclomatic))
         .unwrap();
     store
-        .record_metrics(&run_id(1), &crap, std::slice::from_ref(&score))
+        .record_metrics(&run_id(1), &crap, std::slice::from_ref(&mean))
         .unwrap();
     record(&store, 2, "check", &[], &[]);
 
     assert_eq!(
         store.symbol_metrics(&run_id(1)).unwrap(),
-        [(complexity, cyclomatic), (crap, score)]
+        [(complexity, cyclomatic), (crap, mean)]
     );
     assert_eq!(store.symbol_metrics(&run_id(2)).unwrap(), []);
 }
