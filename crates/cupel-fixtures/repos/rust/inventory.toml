@@ -229,6 +229,11 @@ file = "tests/properties.rs"
 name = "discounts_never_raise_the_price"
 expect = { property = "proptest" }
 
+[test-frames.doc]
+file = "tests/ledger.rs"
+name = "opening_an_account_does_not_panic"
+expect = { doc = "/// An account opens without a deposit (REQ-1)." }
+
 [test-conventions.separate-test-file]
 file = "src/lib.rs"
 name = "tests/ledger.rs"

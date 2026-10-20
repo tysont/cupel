@@ -120,9 +120,16 @@ class TestDates:
 #[test]
 fn python_reads_the_docstring() {
     assert_eq!(
-        docs("python", &[("tests/test_dates.py", PYTHON)], "tests/test_dates.py"),
+        docs(
+            "python",
+            &[("tests/test_dates.py", PYTHON)],
+            "tests/test_dates.py"
+        ),
         [
-            row("test_parses", Some("\"\"\"Parses week dates (REQ-1).\"\"\"")),
+            row(
+                "test_parses",
+                Some("\"\"\"Parses week dates (REQ-1).\"\"\"")
+            ),
             row("test_plain", None),
             row("test_method", Some("'''Traces REQ-2.'''")),
         ]

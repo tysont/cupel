@@ -40,6 +40,7 @@ describe("range", () => {
     expect([...range(0, 3)]).toMatchSnapshot();
   });
 
+  /** A range is consumed whole (REQ-1). */
   it("is consumed by a spy", () => {
     const consume = vi.fn<(values: number[]) => void>();
     consume([...range(0, 2)]);

@@ -226,6 +226,11 @@ file = "ledger_property_test.go"
 name = "TestBalanceOfOneEntryIsTheEntry"
 expect = { property = "testing-quick" }
 
+[test-frames.doc]
+file = "ledger_test.go"
+name = "TestOpeningAnAccountDoesNotPanic"
+expect = { doc = "// TestOpeningAnAccountDoesNotPanic covers REQ-1: an account opens without a deposit." }
+
 [test-conventions.separate-test-file]
 file = "ledger.go"
 name = "ledger_test.go"

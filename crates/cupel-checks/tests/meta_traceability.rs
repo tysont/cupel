@@ -1,5 +1,5 @@
-// ABOUTME: meta.traceability over synthetic base and head TestFrames: requirement IDs matched in test names, a
-// ABOUTME: requirement traced only by a test the range added, the finding and its evidence, settings, and the score (ADR-114).
+// ABOUTME: meta.traceability over synthetic base and head TestFrames: requirement IDs matched in test names and docs,
+// ABOUTME: traced only by a test the range added, `REQ-<n>` markers, the findings, settings, and the score (ADR-114, ADR-134).
 mod support;
 
 use cupel_core::syntax::{Span, TestCase, TestFile, TestFrames};
@@ -12,7 +12,7 @@ use support::{Shape, score};
 
 const ID: &str = "meta.traceability";
 
-fn case(name: &str, line: u32) -> TestCase {
+fn case(name: &str, doc: Option<&str>, line: u32) -> TestCase {
     TestCase {
         name: name.to_owned(),
         span: Span {
@@ -25,20 +25,26 @@ fn case(name: &str, line: u32) -> TestCase {
         mocks: Vec::new(),
         skip: None,
         property: None,
-        doc: None,
+        doc: doc.map(str::to_owned),
     }
 }
 
 fn frames(file: &str, names: &[&str]) -> TestFrames {
+    let cases: Vec<(&str, Option<&str>)> = names.iter().map(|name| (*name, None)).collect();
+    documented(file, &cases)
+}
+
+/// `cases` as (name, doc) in one pytest file, four lines apart.
+fn documented(file: &str, cases: &[(&str, Option<&str>)]) -> TestFrames {
     TestFrames {
         files: vec![TestFile {
             file: file.to_owned(),
             framework: "pytest".to_owned(),
             setup: Vec::new(),
-            cases: names
+            cases: cases
                 .iter()
                 .enumerate()
-                .map(|(index, name)| case(name, 1 + 4 * u32::try_from(index).unwrap()))
+                .map(|(index, (name, doc))| case(name, *doc, 1 + 4 * u32::try_from(index).unwrap()))
                 .collect(),
         }],
     }
@@ -113,6 +119,7 @@ fn a_requirement_only_a_pre_existing_test_names_is_untested_and_its_evidence_say
         serde_json::to_value(&pre_existing.evidence).unwrap(),
         json!({
             "requirement": "REQ-12",
+            "source": "config",
             "base": "0a1b2c3",
             "tests": [{"file": "tests/test_dates.py", "name": "test_req_12_parses", "added": false, "line": 1}],
         })
@@ -156,9 +163,16 @@ fn an_id_matches_whole_tokens_in_any_case_and_separator() {
         &["test_req_120_other", "TestREQ1Camel"],
     );
     let (_, findings) = traced(head, frames("x.py", &[]), requirements(&["REQ-1"]));
+    let kinds: Vec<(&str, &str)> = findings
+        .iter()
+        .map(|f| (f.kind.as_str(), f.title.split(' ').nth(1).unwrap()))
+        .collect();
     assert_eq!(
-        findings.len(),
-        1,
+        kinds,
+        [
+            ("spec.untested-requirement", "REQ-1"),
+            ("spec.unlisted-requirement", "REQ-120"),
+        ],
         "REQ-1 is neither REQ-120 nor inside a camel-case word"
     );
 }
@@ -221,9 +235,134 @@ fn the_manifest_reads_test_frames_on_both_sides_of_the_range() {
             wants: vec![],
             tier: 2,
             cost: CostClass::Standard,
-            kinds: vec![("spec.untested-requirement", ActionKind::WriteTest)],
+            kinds: vec![
+                ("spec.untested-requirement", ActionKind::WriteTest),
+                ("spec.unlisted-requirement", ActionKind::Configure),
+            ],
             metrics: vec![("untested", MetricPer::Scope)],
-            evidence: vec!["object"],
+            evidence: vec!["object", "object"],
         }
     );
+}
+
+#[test]
+fn a_configured_requirement_an_added_test_names_only_in_its_doc_is_traced() {
+    let base = frames("tests/test_dates.py", &["test_parses_iso"]);
+    let head = documented(
+        "tests/test_dates.py",
+        &[
+            ("test_parses_iso", None),
+            (
+                "test_parses_week_dates",
+                Some("\"\"\"Parses week dates (REQ-12).\"\"\""),
+            ),
+            ("test_body_only", None),
+        ],
+    );
+    let (result, findings) = traced(head, base, requirements(&["REQ-12"]));
+    assert_eq!(findings, []);
+    assert_eq!(result.score, Some(score(0.0, "untested requirements", 1)));
+}
+
+#[test]
+fn a_marker_on_an_added_test_lists_a_requirement_the_configuration_does_not() {
+    let base = frames("tests/test_dates.py", &["test_parses_iso"]);
+    let head = documented(
+        "tests/test_dates.py",
+        &[
+            ("test_parses_iso", None),
+            ("test_req_12_parses_week_dates", None),
+            ("parses leap days", Some("/** Leap days, #REQ-7. */")),
+        ],
+    );
+    let (result, findings) = traced(head, base, requirements(&["REQ-12"]));
+    assert_eq!(findings.len(), 1);
+    let listed = &findings[0];
+    assert_eq!(
+        (
+            listed.kind.as_str(),
+            listed.severity,
+            listed.action.kind,
+            listed.confidence
+        ),
+        (
+            "spec.unlisted-requirement",
+            Severity::Info,
+            ActionKind::Configure,
+            1.0
+        )
+    );
+    assert_eq!(
+        listed.title,
+        "requirement REQ-7 is named by 1 test the change added, but not configured"
+    );
+    assert_eq!(
+        serde_json::to_value(&listed.evidence).unwrap(),
+        json!({
+            "requirement": "REQ-7",
+            "source": "marker",
+            "base": "0a1b2c3",
+            "tests": [{"file": "tests/test_dates.py", "name": "parses leap days", "added": true, "line": 9}],
+        })
+    );
+    assert_eq!(
+        listed.id,
+        FindingId::for_subject(&CheckId::from(ID), "spec.unlisted-requirement", "REQ-7")
+    );
+    assert_eq!(listed.location, None);
+    assert_eq!(result.status, CheckStatus::Pass);
+    assert_eq!(result.findings, 1);
+    assert_eq!(result.metrics, [("untested".to_owned(), 0.0)].into());
+    assert_eq!(result.score, Some(score(0.0, "untested requirements", 2)));
+}
+
+#[test]
+fn without_configuration_the_markers_of_added_tests_are_the_requirements() {
+    let base = frames("tests/test_dates.py", &["test_req_9_parses_iso"]);
+    let head = frames(
+        "tests/test_dates.py",
+        &[
+            "test_req_9_parses_iso",
+            "test_req_5_parses_week_dates",
+            "test_req_5_rejects_week_54",
+        ],
+    );
+    let (result, findings) = traced(head, base, json!({}));
+    let titles: Vec<&str> = findings.iter().map(|f| f.title.as_str()).collect();
+    assert_eq!(
+        titles,
+        ["requirement REQ-5 is named by 2 tests the change added, but not configured"],
+        "REQ-9 is marked only on a test that existed before the change"
+    );
+    assert_eq!(result.status, CheckStatus::Pass);
+    assert_eq!(result.score, Some(score(0.0, "untested requirements", 1)));
+}
+
+#[test]
+fn a_marker_is_req_then_a_word_of_digits_and_a_configured_id_is_matched_in_any_case() {
+    let head = frames(
+        "tests/test_dates.py",
+        &[
+            "test_req_3_and_req_04",
+            "TestREQ12Camel",
+            "requirement 12",
+            "test_req_12a",
+            "test_prereq_8",
+        ],
+    );
+    let (_, findings) = traced(head, frames("x.py", &[]), requirements(&["req-3"]));
+    let subjects: Vec<String> = findings
+        .iter()
+        .map(|f| format!("{} {}", f.kind, f.title.split(' ').nth(1).unwrap()))
+        .collect();
+    assert_eq!(subjects, ["spec.unlisted-requirement REQ-04"]);
+}
+
+#[test]
+fn markers_only_on_tests_that_existed_before_leave_nothing_to_trace() {
+    let old = frames("tests/test_dates.py", &["test_req_9_parses_iso"]);
+    let (result, findings) = traced(old.clone(), old, json!({}));
+    assert_eq!(findings, []);
+    assert_eq!(result.score, None);
+    assert_eq!(result.notes.len(), 1);
 }

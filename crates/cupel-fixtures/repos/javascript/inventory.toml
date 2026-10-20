@@ -230,6 +230,11 @@ file = "test/properties.test.js"
 name = "sums do not depend on the order"
 expect = { property = "fast-check" }
 
+[test-frames.doc]
+file = "test/math.test.js"
+name = "reports what it parsed"
+expect = { doc = "/** Parsing reports the cents it parsed (REQ-1). */" }
+
 [test-conventions.separate-test-file]
 file = "src/math.js"
 name = "test/math.test.js"

@@ -72,3 +72,8 @@ summary = "The framework a test file is written for. Map the file only; the mapp
 id = "property"
 summary = "A property test case whose inputs a framework generates (proptest, Hypothesis `@given`, fast-check `fc.assert`, `quick.Check`); the mapping's `expect` names the framework (ADR-095)."
 expect = {}
+
+[[constructs]]
+id = "doc"
+summary = "A test case's doc comment or docstring (`///`, Go's `//` lines, a Python docstring, JSDoc and Javadoc `/** */`, Clojure's `;` lines above `deftest`), as written (ADR-134); the mapping's `expect` gives its text."
+expect = {}

@@ -224,6 +224,11 @@ file = "test/ledger/property_test.clj"
 name = "balance-of-one-entry-is-the-entry"
 expect = { property = "test-check" }
 
+[test-frames.doc]
+file = "test/ledger/core_test.clj"
+name = "opening-an-account-does-not-throw"
+expect = { doc = ";; An account opens without a deposit (REQ-1)." }
+
 [test-conventions.separate-test-file]
 file = "src/ledger/core.clj"
 name = "test/ledger/core_test.clj"

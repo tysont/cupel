@@ -76,7 +76,7 @@ const MATH_CASES: &[Expected] = &[
         &[(Equality, Strong)],
         None,
         &[MODULE, "vi.fn"],
-        52,
+        53,
     ),
 ];
 
@@ -224,7 +224,7 @@ fn typescript_vitest_cases_match_their_javascript_twins() {
                 &[(Equality, Strong)],
                 Runs,
                 &[module, "vi.fn"],
-                43
+                44
             ),
         ]
     );

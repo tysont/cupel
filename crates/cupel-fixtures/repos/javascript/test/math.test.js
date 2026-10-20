@@ -49,6 +49,7 @@ describe("parseCents", () => {
     expect([...range(0, 3)]).toMatchSnapshot();
   });
 
+  /** Parsing reports the cents it parsed (REQ-1). */
   it("reports what it parsed", () => {
     const log = vi.fn();
     log(parseCents("1.00"));
