@@ -308,13 +308,22 @@ link "$dir" jazzer
 
 # --- The JVM tools, with their caches under $tools (scripts/dev-env.sh points the tools at them) ---
 
-jdk_version=$jdk_release+$jdk_build
-download "jdk-$jdk_version" \
-	"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$jdk_release%2B$jdk_build/OpenJDK21U-jdk_${jdk_platform}_hotspot_${jdk_release}_$jdk_build.tar.gz"
-if [ -d "$dir/jdk-$jdk_version/Contents/Home" ]; then
-	link "$dir/jdk-$jdk_version/Contents/Home" jdk
+# Homebrew's openjdk@21 keg is used when it is exactly the pinned release (on the owner's Mac it is
+# 21.0.12.1, the OpenJDK release Temurin 21.0.12.1+1 builds): a per-application firewall there (LuLu)
+# allows that keg's java by its path and holds back a newly downloaded one, so a JVM from Temurin's
+# archive cannot reach Maven Central until someone approves it (ADR-139). Elsewhere, Temurin's archive.
+jdk_keg=$(brew --prefix 2>/dev/null || true)/Cellar/openjdk@21/$jdk_release/libexec/openjdk.jdk/Contents/Home
+if [ -x "$jdk_keg/bin/java" ]; then
+	link "$jdk_keg" jdk
 else
-	link "$dir/jdk-$jdk_version" jdk
+	jdk_version=$jdk_release+$jdk_build
+	download "jdk-$jdk_version" \
+		"https://github.com/adoptium/temurin21-binaries/releases/download/jdk-$jdk_release%2B$jdk_build/OpenJDK21U-jdk_${jdk_platform}_hotspot_${jdk_release}_$jdk_build.tar.gz"
+	if [ -d "$dir/jdk-$jdk_version/Contents/Home" ]; then
+		link "$dir/jdk-$jdk_version/Contents/Home" jdk
+	else
+		link "$dir/jdk-$jdk_version" jdk
+	fi
 fi
 
 download "maven-$maven_version" \
@@ -418,8 +427,8 @@ for package in $npm_packages; do
 	report "${package%@*}" "${package##*@}" "$(package_version "$npm_root/${package%@*}")"
 done
 report @jazzer.js/core "$jazzer_version" "$(package_version "$tools/jazzer/node_modules/@jazzer.js/core")"
-# Temurin's build string carries -LTS after the release and build.
-report java "$jdk_version-LTS" "$(found java -version | sed -n 's/.*(build \(.*\))$/\1/p' | sed -n 1p)"
+# The release, without Temurin's build number and -LTS.
+report java "$jdk_release" "$(found java -version | sed -n 's/.*(build \([^+-]*\).*)$/\1/p' | sed -n 1p)"
 report maven "$maven_version" "$(found mvn --version | word 3)"
 report gradle "$gradle_version" "$(found gradle --version | sed -n 's/^Gradle //p')"
 report clojure "$clojure_version" "$(found clojure --version | word 4)"
