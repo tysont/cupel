@@ -205,10 +205,10 @@ jobs:
         run: git branch --force main origin/main
       - name: make dogfood (changed gate)
         if: github.ref != 'refs/heads/main'
-        run: make dogfood
+        run: make dogfood DOGFOOD_BUDGET=
       - name: make dogfood (tree gate on main, which has no merge base to diff against)
         if: github.ref == 'refs/heads/main'
-        run: make dogfood DOGFOOD_SCOPE=tree
+        run: make dogfood DOGFOOD_SCOPE=tree DOGFOOD_BUDGET=
 
   # The installers under dist/ (ADR-125) on an image with only Rust, Node, Python, and ShellCheck added:
   # install.sh, the Homebrew formula, and the npm and pipx wrappers against a fake release served

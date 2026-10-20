@@ -27,23 +27,38 @@ fn dogfood(vars: &[&str]) -> String {
 
 /// On a branch, the changed gate at `deep`: everything deep selects but the flake engine, which
 /// reruns the whole suite serially and cannot rerun nextest, and the race detector, which cannot
-/// run Cupel's process-spawning tests under Miri.
+/// run Cupel's process-spawning tests under Miri. A local run is bounded by `DOGFOOD_BUDGET`.
 #[test]
-fn make_dogfood_runs_the_changed_gate_at_deep_depth() {
+fn make_dogfood_runs_the_changed_gate_at_deep_depth_under_the_budget() {
     assert_eq!(
         dogfood(&[]),
-        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep --gate --no-install \
-         --skip tests.flaky --skip conc.race --format text\n"
+        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep \
+         --budget 20m --gate --no-install --skip tests.flaky --skip conc.race --format text\n"
     );
 }
 
-/// On `main`, the tree gate at `deep`, without mutating the whole tree.
+/// On `main`, the tree gate at `deep`, without mutating the whole tree, under the same budget.
 #[test]
 fn make_dogfood_runs_the_tree_gate_at_deep_depth_without_mutating_the_tree() {
     assert_eq!(
         dogfood(&["DOGFOOD_SCOPE=tree"]),
-        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --gate --no-install \
-         --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
+        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --budget 20m \
+         --gate --no-install --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
+    );
+}
+
+/// CI clears the budget, so both gates run every check deep selects.
+#[test]
+fn an_empty_dogfood_budget_runs_the_full_deep_set() {
+    assert_eq!(
+        dogfood(&["DOGFOOD_BUDGET="]),
+        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep \
+         --gate --no-install --skip tests.flaky --skip conc.race --format text\n"
+    );
+    assert_eq!(
+        dogfood(&["DOGFOOD_SCOPE=tree", "DOGFOOD_BUDGET="]),
+        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --gate \
+         --no-install --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
     );
 }
 
@@ -62,7 +77,8 @@ fn dogfood_job() -> Vec<String> {
 
 /// The dogfood job installs the runner and coverage tool the suite run and the mutation engine
 /// drive (cargo-nextest, cargo-llvm-cov with the LLVM tools), frees the disk the mutation slots
-/// need, and builds without debug info, as the measurements in ADR-129 ran.
+/// need, builds without debug info, as the measurements in ADR-129 ran, and clears the local
+/// budget so both gates run in full.
 #[test]
 fn the_dogfood_job_installs_what_the_deep_checks_run() {
     let job = dogfood_job();
@@ -73,8 +89,8 @@ fn the_dogfood_job_installs_what_the_deep_checks_run() {
         "tool: cargo-nextest@0.9.148",
         "tool: cargo-llvm-cov@0.9.1",
         "run: rustup component add llvm-tools-preview",
-        "run: make dogfood",
-        "run: make dogfood DOGFOOD_SCOPE=tree",
+        "run: make dogfood DOGFOOD_BUDGET=",
+        "run: make dogfood DOGFOOD_SCOPE=tree DOGFOOD_BUDGET=",
     ];
     let missing: Vec<&str> = expected
         .into_iter()

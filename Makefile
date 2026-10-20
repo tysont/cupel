@@ -78,6 +78,11 @@ clean-check:
 # `--changed` needs a local `main` branch and the history back to the merge base.
 DOGFOOD_SCOPE ?= changed
 
+# A local dogfood runs under a wall-clock budget, so it ends in bounded time and lists what the
+# budget left out (exit 5 when it left anything out); CI clears it with `DOGFOOD_BUDGET=` and runs
+# every check the depth selects (ADR-129).
+DOGFOOD_BUDGET ?= 20m
+
 # The gate runs at `--depth deep` (ADR-129). `tests.flaky` is skipped: the flake engine reruns the
 # whole suite three times, one test at a time, and does not rerun cargo-nextest, Cupel's runner.
 # `conc.race` is skipped: Miri interprets every test and cannot run the process spawning and file
@@ -89,7 +94,7 @@ DOGFOOD_SCOPE ?= changed
 # on the machine run one at a time (the mutation engine's slots default to half the cores, at most
 # four), and it refuses to start from a working tree that was deleted under the invoking shell.
 dogfood:
-	scripts/dogfood.sh $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed )--depth deep --gate --no-install --skip tests.flaky --skip conc.race $(if $(filter tree,$(DOGFOOD_SCOPE)),--skip tests.mutation )--format text
+	scripts/dogfood.sh $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed )--depth deep $(if $(DOGFOOD_BUDGET),--budget $(DOGFOOD_BUDGET) )--gate --no-install --skip tests.flaky --skip conc.race $(if $(filter tree,$(DOGFOOD_SCOPE)),--skip tests.mutation )--format text
 
 install:
 	$(CARGO) install --path crates/cupel-cli
