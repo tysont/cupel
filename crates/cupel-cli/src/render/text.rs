@@ -6,10 +6,10 @@ use std::fmt::Write as _;
 
 use cupel_core::config::{OracleConfig, OracleKind};
 use cupel_core::{
-    CheckResult, Description, Envelope, Excerpt, Explanation, Finding, GateOutcome, GateResult,
-    GitInfo, ImpactBasis, LangId, Location, Metric, NextAction, OracleReport, PlannedCheck,
-    Rankings, RecommendedTarget, RuleOutcome, RunInfo, RunPlan, ScopeInfo, Severity, Skipped,
-    Status, Summary, Target, TestsReport,
+    CheckResult, Description, Envelope, Excerpt, Explanation, Finding, FindingId, GateOutcome,
+    GateResult, GitInfo, ImpactBasis, LangId, Location, Metric, NextAction, OracleReport,
+    PlannedCheck, Rankings, RecommendedTarget, RuleOutcome, RunInfo, RunPlan, ScopeInfo, SetDelta,
+    Severity, Skipped, Status, Summary, Symbol, Target, TestsReport,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -205,7 +205,23 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
             .actual
             .map(|actual| format!("  actual {actual}"))
             .unwrap_or_default();
-        let _ = writeln!(out, "  {}  {}{actual}", paint.rule(rule.result), rule.rule);
+        // A rule against `base` does not show the value it was compared with; the others do.
+        let bound = rule
+            .bound
+            .filter(|_| rule.rule.contains(" base"))
+            .map(|bound| format!("  bound {bound}"))
+            .unwrap_or_default();
+        let reason = rule
+            .reason
+            .as_ref()
+            .map(|reason| format!("  ({reason})"))
+            .unwrap_or_default();
+        let _ = writeln!(
+            out,
+            "  {}  {}{actual}{bound}{reason}",
+            paint.rule(rule.result),
+            rule.rule
+        );
     }
     out
 }
@@ -284,8 +300,41 @@ fn checks_block(checks: &[CheckResult], paint: &Paint) -> String {
             name(check.status),
             facts.join(" · ")
         );
+        for set in check.delta.iter().flat_map(|delta| &delta.sets) {
+            let _ = writeln!(out, "    {}", matched_set(set));
+        }
     }
     out
+}
+
+/// One matched set of a check's delta (ADR-131): its symbols, similarity, the findings carried
+/// across it, and each per-symbol metric over each side.
+fn matched_set(set: &SetDelta) -> String {
+    let symbols = |side: &[Symbol]| -> String {
+        let names: Vec<&str> = side.iter().map(|symbol| symbol.display.as_str()).collect();
+        names.join(", ")
+    };
+    let mut facts = vec![
+        format!("matched {} → {}", symbols(&set.base), symbols(&set.head)),
+        format!("similarity {}", set.similarity),
+    ];
+    if !set.findings.base.is_empty() {
+        let ids = |side: &[FindingId]| -> String {
+            let ids: Vec<&str> = side.iter().map(FindingId::as_str).collect();
+            ids.join(", ")
+        };
+        facts.push(format!(
+            "carried {} → {}",
+            ids(&set.findings.base),
+            ids(&set.findings.head)
+        ));
+    }
+    facts.extend(
+        set.metrics
+            .iter()
+            .map(|(metric, value)| format!("{metric} {} → {}", value.base, value.head)),
+    );
+    facts.join(" · ")
 }
 
 /// Each dimension as `check.metric (per, measured)` with its ranked targets beneath (ADR-062),

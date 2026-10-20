@@ -3,10 +3,11 @@
 use std::cell::RefCell;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
+use cupel_core::matching::SymbolMatch;
 use cupel_core::{
     Cancellation, ConfigEcho, CostClass, CupelInfo, Description, Envelope, Event, EventSink,
-    ExitCode, Finding, LangId, MutationOutcomes, RunId, RunInfo, RunPlan, SeverityCounts, Status,
-    Summary, TestResults, ToolchainInfo, Verb, Writer, schema,
+    ExitCode, Finding, LangId, Measured, MutationOutcomes, RunId, RunInfo, RunPlan, SeverityCounts,
+    Status, Summary, TestResults, ToolchainInfo, Verb, Writer, schema,
 };
 
 use cupel_core::budget::TaskDuration;
@@ -47,6 +48,10 @@ pub struct Executions {
     pub mutation_outcomes: Vec<(LangId, MutationOutcomes)>,
     /// How long its productions and check runs took (ADR-086 §2).
     pub durations: Vec<TaskDuration>,
+    /// Every per-target value its checks measured; the store keeps the per-symbol ones.
+    pub measurements: Vec<Measured>,
+    /// Under a range, the symbols the range removed matched to those it added (ADR-131).
+    pub matches: Vec<SymbolMatch>,
 }
 
 impl Run {
@@ -93,6 +98,13 @@ impl Run {
         kept.test_results.extend(executed.test_results);
         kept.mutation_outcomes.extend(executed.mutation_outcomes);
         kept.durations.extend(executed.durations);
+        kept.measurements.extend(executed.measurements);
+        kept.matches.extend(executed.matches);
+    }
+
+    /// Reads what was kept so far, leaving it for the run record.
+    pub fn kept<R>(&self, read: impl FnOnce(&Executions) -> R) -> R {
+        read(&self.executions.borrow())
     }
 
     /// When `limit` after the invocation started passes, as `--timeout` counts (ADR-086 §6).

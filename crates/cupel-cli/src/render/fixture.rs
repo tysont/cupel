@@ -10,9 +10,10 @@ use cupel_core::{
     FactKind, Finding, GateOutcome, GateResult, GateRule, GitInfo, ImpactBasis, ImpactedTest,
     LangId, Location, Metric, MetricPer, NextAction, PlannedCheck, PlannedInstall, PlannedSkip,
     PlannedWrite, ProducerId, Protection, RankedTarget, RankingDimension, Rankings, Recommendation,
-    RecommendedTarget, RuleOutcome, RunInfo, RunPlan, ScopeInfo, ScopeMode, Score, Severity,
-    SeverityCounts, SkipReason, Skipped, Stability, Status, Summary, Symbol, Target, TargetValue,
-    TestCommand, TestsReport, Tier, ToolId, ToolchainInfo, ValueType, Verb, Worst,
+    RecommendedTarget, RuleOutcome, RunInfo, RunPlan, ScopeInfo, ScopeMode, Score, SetDelta,
+    SetFindings, SetMetric, Severity, SeverityCounts, SkipReason, Skipped, Stability, Status,
+    Summary, Symbol, Target, TargetValue, TestCommand, TestsReport, Tier, ToolId, ToolchainInfo,
+    ValueType, Verb, Worst,
 };
 use cupel_core::{OracleReport, OracleState};
 use serde_json::{Map, Value, json};
@@ -26,6 +27,40 @@ fn object(value: Value) -> Map<String, Value> {
 
 fn tier(value: u8) -> Tier {
     Tier::try_from(value).expect("valid tier")
+}
+
+/// A symbol of a matched set (ADR-131), named `exonym::rewrite::Planner::<name>`.
+fn matched_symbol(name: &str, hash: u64) -> Symbol {
+    Symbol {
+        display: format!("exonym::rewrite::Planner::{name}"),
+        hash: format!("sh_{hash:016x}")
+            .parse()
+            .expect("valid symbol hash"),
+        lang: LangId::from("rust"),
+    }
+}
+
+/// A split matched across the baseline (ADR-131): one finding carried and the survivors compared.
+fn split_set() -> SetDelta {
+    SetDelta {
+        base: vec![matched_symbol("push_limit", 0xa1)],
+        head: vec![
+            matched_symbol("push_limit_inner", 0xb2),
+            matched_symbol("push_limit_outer", 0xc3),
+        ],
+        similarity: 0.871,
+        findings: SetFindings {
+            base: vec!["fnd_0aa0aa".parse().expect("valid finding ID")],
+            head: vec!["fnd_7c2e1b".parse().expect("valid finding ID")],
+        },
+        metrics: BTreeMap::from([(
+            "survivors".to_owned(),
+            SetMetric {
+                base: 3.0,
+                head: 4.0,
+            },
+        )]),
+    }
 }
 
 /// A finding with every field set; `n` varies the distinctive values.
@@ -340,6 +375,7 @@ fn checks() -> Vec<CheckResult> {
             delta: Some(Delta {
                 vs: "baseline".to_owned(),
                 value: -0.12,
+                sets: vec![split_set()],
             }),
             findings: 2,
             duration_ms: 41_000,
@@ -388,17 +424,23 @@ fn summary() -> Summary {
                 GateRule {
                     rule: "tests.mutation.score >= 0.80".to_owned(),
                     actual: Some(0.71),
+                    bound: Some(0.8),
                     result: RuleOutcome::Fail,
+                    reason: None,
                 },
                 GateRule {
                     rule: "tests.weakening none".to_owned(),
                     actual: Some(0.0),
+                    bound: Some(0.0),
                     result: RuleOutcome::Pass,
+                    reason: None,
                 },
                 GateRule {
                     rule: "perf.bench.regression < 5%".to_owned(),
                     actual: None,
+                    bound: None,
                     result: RuleOutcome::Skipped,
+                    reason: Some("`perf.bench` did not run to completion".to_owned()),
                 },
             ],
         }),

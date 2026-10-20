@@ -1,6 +1,6 @@
-// ABOUTME: Near-duplicate search for static.clones: per-tree subtree fingerprint sets, MinHash signatures,
-// ABOUTME: LSH banding into candidate pairs, and exact Jaccard similarity (design §9.2, ADR-050).
-use cupel_core::syntax::NormNode;
+// ABOUTME: Near-duplicate search over normalized trees for static.clones and symbol matching: subtree fingerprint
+// ABOUTME: sets, MinHash signatures, LSH banding into candidate pairs, and exact Jaccard (design §9.2, ADR-050).
+use crate::syntax::NormNode;
 
 /// The length of a min-hash signature: the number of independent hash functions.
 pub const SIGNATURE: usize = 128;
@@ -251,10 +251,63 @@ pub fn search(sets: &[Fingerprints], threshold: f64) -> Search {
     Search { pairs, compared }
 }
 
+/// Reproducible synthetic trees for the tests of similarity and of symbol matching.
+#[cfg(test)]
+pub(crate) mod synthetic {
+    use super::{NormNode, mix};
+
+    /// splitmix64, for reproducible synthetic trees.
+    pub(crate) struct Rng(pub(crate) u64);
+
+    impl Rng {
+        pub(crate) fn below(&mut self, n: usize) -> usize {
+            self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
+            usize::try_from(mix(self.0) % n as u64).unwrap()
+        }
+    }
+
+    const LABELS: [&str; 24] = [
+        "if",
+        "loop",
+        "call",
+        "binary",
+        "assignment",
+        "return",
+        "block",
+        "member",
+        "index",
+        "arguments",
+        "unary",
+        "match",
+        "arm",
+        "closure",
+        "let",
+        "tuple",
+        "array",
+        "field",
+        "try",
+        "await",
+        "range",
+        "cast",
+        "struct",
+        "macro",
+    ];
+
+    /// A random statement-like subtree `depth` levels deep, each node with a leaf.
+    pub(crate) fn random_tree(rng: &mut Rng, depth: u32) -> NormNode {
+        let label = LABELS[rng.below(LABELS.len())];
+        let width = if depth == 0 { 0 } else { 1 + rng.below(3) };
+        let mut children: Vec<NormNode> = (0..width).map(|_| random_tree(rng, depth - 1)).collect();
+        children.push(NormNode::leaf(["$id", "$lit", "+", "<"][rng.below(4)]));
+        NormNode::new(label, children)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use proptest::prelude::*;
 
+    use super::synthetic::{Rng, random_tree};
     use super::*;
 
     /// `statements` copies of `$id = $id + $lit` in a block under a function.
@@ -418,52 +471,6 @@ mod tests {
                 b.extend(&extra[split..]);
                 (a, b, noise)
             })
-    }
-
-    /// splitmix64, for reproducible synthetic trees.
-    struct Rng(u64);
-
-    impl Rng {
-        fn below(&mut self, n: usize) -> usize {
-            self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
-            usize::try_from(mix(self.0) % n as u64).unwrap()
-        }
-    }
-
-    const LABELS: [&str; 24] = [
-        "if",
-        "loop",
-        "call",
-        "binary",
-        "assignment",
-        "return",
-        "block",
-        "member",
-        "index",
-        "arguments",
-        "unary",
-        "match",
-        "arm",
-        "closure",
-        "let",
-        "tuple",
-        "array",
-        "field",
-        "try",
-        "await",
-        "range",
-        "cast",
-        "struct",
-        "macro",
-    ];
-
-    /// A random statement-like subtree `depth` levels deep, each node with a leaf.
-    fn random_tree(rng: &mut Rng, depth: u32) -> NormNode {
-        let label = LABELS[rng.below(LABELS.len())];
-        let width = if depth == 0 { 0 } else { 1 + rng.below(3) };
-        let mut children: Vec<NormNode> = (0..width).map(|_| random_tree(rng, depth - 1)).collect();
-        children.push(NormNode::leaf(["$id", "$lit", "+", "<"][rng.below(4)]));
-        NormNode::new(label, children)
     }
 
     /// Design §9.2's "approximately linear", for plan P2.4's 10k symbols: about 120 nodes

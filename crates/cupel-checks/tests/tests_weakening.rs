@@ -1,14 +1,17 @@
-// ABOUTME: tests.weakening over synthetic base and head TestFrames: matching (repeats, moves), the five
-// ABOUTME: kinds and their combinations, snapshot attribution, identity, settings, and the score (ADR-057).
+// ABOUTME: tests.weakening over synthetic base and head TestFrames: matching (repeats, moves, renames, splits),
+// ABOUTME: the five kinds and their combinations, snapshots, identity, settings, and the score (ADR-057, ADR-131).
 mod support;
+
+use std::hash::{DefaultHasher, Hash, Hasher};
 
 use cupel_core::git::{Change, ChangeKind};
 use cupel_core::syntax::{
-    Assertion, AssertionKind, AssertionStrength, SkipMarker, Span, TestCase, TestFile, TestFrames,
+    Assertion, AssertionKind, AssertionStrength, NormNode, NormTree, NormalizedSymbol, SkipMarker,
+    Span, SymbolDef, SymbolKind, Symbols, TestCase, TestFile, TestFrames, Visibility,
 };
 use cupel_core::{
-    Check, CheckId, CheckResult, CheckStatus, Error, Facts, Finding, FindingId, Produced, Range,
-    Scope, Score,
+    Check, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding, FindingId, LangId,
+    Produced, Range, Scope, Score,
 };
 use serde_json::{Value, json};
 use support::{combined, language};
@@ -84,14 +87,92 @@ fn modified(path: &str) -> Change {
     }
 }
 
-/// Runs the check comparing `base` with `head` over a range with `changes`.
+/// Runs the check comparing `base` with `head` over a range with `changes`, no test having a
+/// normalized tree to match by.
 fn run(base: TestFrames, head: TestFrames, changes: Vec<Change>) -> (CheckResult, Vec<Finding>) {
+    run_matched((base, &[]), (head, &[]), changes)
+}
+
+/// The tree of a test body of `count` assertions from `first` on, each comparing a call with
+/// a literal: twenty assertions make a tree of about a hundred nodes.
+fn body(first: usize, count: usize) -> NormNode {
+    let assertion = |n: usize| {
+        let call = NormNode::new("call", vec![NormNode::leaf("$id"); n % 4 + 1]);
+        let expected = NormNode::leaf(if n.is_multiple_of(3) { "$lit" } else { "$id" });
+        NormNode::new(
+            "macro",
+            vec![NormNode::new("arguments", vec![call, expected])],
+        )
+    };
+    NormNode::new("block", (first..first + count).map(assertion).collect())
+}
+
+/// A tree of `count` loops over conditions, sharing no shape with `body`.
+fn loops(count: usize) -> NormNode {
+    let statement = |n: usize| {
+        NormNode::new(
+            "loop",
+            vec![NormNode::new("if", vec![NormNode::leaf("$lit"); n % 4 + 1])],
+        )
+    };
+    NormNode::new("block", (0..count).map(statement).collect())
+}
+
+/// The `Symbols` and `NormTree` of `frames`' tests that `trees` gives a tree, by test name.
+fn symbols(frames: &TestFrames, trees: &[(&str, NormNode)]) -> (Symbols, NormTree) {
+    let mut symbols = Symbols::default();
+    let mut normalized = NormTree::default();
+    for file in &frames.files {
+        for case in &file.cases {
+            let Some((_, root)) = trees.iter().find(|(name, _)| *name == case.name) else {
+                continue;
+            };
+            let def = SymbolDef {
+                name: case.name.clone(),
+                namespace: String::new(),
+                display: case.name.clone(),
+                kind: SymbolKind::Function,
+                visibility: Visibility::Private,
+                lang: LangId::from("rust"),
+                file: file.file.clone(),
+                span: case.span,
+                body: None,
+                parameters: 0,
+            };
+            let mut hasher = DefaultHasher::new();
+            serde_json::to_string(root).unwrap().hash(&mut hasher);
+            normalized.symbols.push(NormalizedSymbol {
+                symbol: def.key(),
+                hash: format!("sh_{:016x}", hasher.finish()).parse().unwrap(),
+                root: root.clone(),
+            });
+            symbols.symbols.push(def);
+        }
+    }
+    (symbols, normalized)
+}
+
+/// Runs the check comparing `base` with `head` over a range with `changes`; each side's tests
+/// named in its trees have those normalized trees.
+fn run_matched(
+    (base, base_trees): (TestFrames, &[(&str, NormNode)]),
+    (head, head_trees): (TestFrames, &[(&str, NormNode)]),
+    changes: Vec<Change>,
+) -> (CheckResult, Vec<Finding>) {
     let check = support::check(ID);
     let mut facts = Facts::for_manifest(check.manifest());
+    let (head_symbols, head_normalized) = symbols(&head, head_trees);
+    let (base_symbols, base_normalized) = symbols(&base, base_trees);
     facts.insert(head).unwrap();
-    facts
-        .insert_base_shared(&Produced::new(base).share())
-        .unwrap();
+    facts.insert(head_symbols).unwrap();
+    facts.insert(head_normalized).unwrap();
+    for fact in [
+        Produced::new(base).share(),
+        Produced::new(base_symbols).share(),
+        Produced::new(base_normalized).share(),
+    ] {
+        facts.insert_base_shared(&fact).unwrap();
+    }
     facts.set_range(Range {
         commit: "c0ffee".to_owned(),
         changes,
@@ -207,6 +288,89 @@ fn a_deleted_test_is_located_where_it_was_at_the_base() {
     );
     assert_eq!(result.status, CheckStatus::Fail);
     assert_eq!(result.findings, 1);
+}
+
+#[test]
+fn a_renamed_test_is_compared_with_its_predecessor_and_not_deleted() {
+    let base = frames(vec![(
+        "t.x",
+        vec![case("checks_totals", 1, vec![strong(), strong()])],
+    )]);
+    let head = frames(vec![(
+        "t.x",
+        vec![case("totals_add_up", 1, vec![strong()])],
+    )]);
+    let (result, findings) = run_matched(
+        (base, &[("checks_totals", body(0, 20))]),
+        (head, &[("totals_add_up", body(0, 19))]),
+        vec![],
+    );
+    assert_eq!(kinds(&findings), [("assertion.removed", "totals_add_up")]);
+    assert_eq!(result.score.map(|score| score.n), Some(1));
+}
+
+#[test]
+fn a_renamed_test_with_an_unchanged_body_is_not_a_weakening() {
+    let base = frames(vec![("t.x", vec![case("old_name", 1, vec![strong()])])]);
+    let head = frames(vec![("t.x", vec![case("new_name", 1, vec![strong()])])]);
+    let (_, findings) = run_matched(
+        (base, &[("old_name", body(0, 20))]),
+        (head, &[("new_name", body(0, 20))]),
+        vec![],
+    );
+    assert_eq!(findings, []);
+}
+
+#[test]
+fn a_test_split_in_two_is_compared_with_the_sum_of_its_parts() {
+    let whole = || {
+        frames(vec![(
+            "t.x",
+            vec![case("covers_everything", 1, vec![strong(); 4])],
+        )])
+    };
+    let parts = |first: usize, second: usize| {
+        frames(vec![(
+            "t.x",
+            vec![
+                case("covers_loading", 1, vec![strong(); first]),
+                case("covers_saving", 9, vec![strong(); second]),
+            ],
+        )])
+    };
+    let trees = [
+        ("covers_loading", body(0, 12)),
+        ("covers_saving", body(12, 12)),
+    ];
+    let (kept, unchanged) = run_matched(
+        (whole(), &[("covers_everything", body(0, 24))]),
+        (parts(2, 2), &trees),
+        vec![],
+    );
+    assert_eq!(unchanged, []);
+    assert_eq!(kept.score.map(|score| score.n), Some(2));
+    let (_, fewer) = run_matched(
+        (whole(), &[("covers_everything", body(0, 24))]),
+        (parts(2, 1), &trees),
+        vec![],
+    );
+    assert_eq!(kinds(&fewer), [("assertion.removed", "covers_loading")]);
+    assert_eq!(
+        Value::Object(fewer[0].evidence.0.clone()),
+        json!({"test": "covers_loading", "base": 4, "head": 3})
+    );
+}
+
+#[test]
+fn a_deleted_test_unlike_any_added_one_is_still_deleted() {
+    let base = frames(vec![("t.x", vec![case("gone", 1, vec![strong()])])]);
+    let head = frames(vec![("t.x", vec![case("unrelated", 1, vec![strong()])])]);
+    let (_, findings) = run_matched(
+        (base, &[("gone", body(0, 20))]),
+        (head, &[("unrelated", loops(20))]),
+        vec![],
+    );
+    assert_eq!(kinds(&findings), [("test.deleted", "gone")]);
 }
 
 // ---------------------------------------------------------------- kinds
@@ -347,8 +511,9 @@ fn a_snapshot_file_shared_with_a_new_test_only_grew() {
 #[test]
 fn the_check_reads_the_base_side_of_test_frames_and_has_no_settings() {
     let check = support::check(ID);
-    assert_eq!(check.base_needs(), [cupel_core::FactKind::TestFrames]);
-    assert_eq!(check.manifest().needs, [cupel_core::FactKind::TestFrames]);
+    let sides = [FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree];
+    assert_eq!(check.base_needs(), sides);
+    assert_eq!(check.manifest().needs, sides);
     let (ctx, _dir) = support::ctx(
         Scope::of_files(vec!["t.x".to_owned()]),
         json!({"threshold": 1}),

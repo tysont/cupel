@@ -1,14 +1,19 @@
-// ABOUTME: `--against baseline|REF|run:ID`: resolving the reference run from the fact store and git, and
-// ABOUTME: recording deltas against it on an envelope; `check` and `survey` compare this way (ADR-046).
+// ABOUTME: `--against baseline|REF|run:ID`: resolving the reference run from the fact store and git, and recording
+// ABOUTME: deltas against it, across the run's symbol matches, on an envelope (ADR-046, ADR-131).
+use std::collections::BTreeSet;
 use std::path::Path;
 
-use cupel_core::{BaselineRef, Envelope, RunId, Writer, deltas};
+use cupel_core::{
+    BaselineRef, CheckId, Envelope, Matching, MetricPer, RunId, SymbolMetrics, Writer,
+    deltas_matched,
+};
 use cupel_store::Store;
 
 use crate::error::CupelError;
 use cupel_core::git::Git;
 
 use crate::persist;
+use crate::run::Run;
 
 /// The baseline `--against` names when it is absent or says `baseline` without `--name`.
 pub const DEFAULT_BASELINE: &str = "default";
@@ -98,13 +103,16 @@ pub fn resolve(
 
 /// Records on `envelope` its deltas against `against`, or against the default baseline when
 /// `against` is absent and that baseline is set; otherwise leaves it alone (ADR-046 §5–6).
+/// Findings and per-symbol metrics are compared across the symbol matches `run` kept, with the
+/// reference run's stored per-symbol metrics (ADR-131). Returns the run compared with, if any.
 pub fn compare(
     envelope: &mut Envelope,
     writer: &Writer,
     against: Option<&str>,
-) -> Result<(), CupelError> {
+    run: &Run,
+) -> Result<Option<Envelope>, CupelError> {
     let Some(store) = persist::open_for_reading(writer)? else {
-        return Ok(());
+        return Ok(None);
     };
     if against.is_none()
         && store
@@ -112,21 +120,59 @@ pub fn compare(
             .map_err(|error| persist::unusable(&error))?
             .is_none()
     {
-        return Ok(());
+        return Ok(None);
     }
     let spec = against.unwrap_or("baseline");
     let reference = resolve(&store, writer.root(), spec, DEFAULT_BASELINE)?;
-    deltas(envelope, &reference.envelope).apply(envelope, reference.baseline, &reference.vs);
-    Ok(())
+    let mut stored = SymbolMetrics::default();
+    for (check, metric) in store
+        .symbol_metrics(&reference.baseline.id)
+        .map_err(|error| persist::unusable(&error))?
+    {
+        if let Some(symbol) = metric.symbol {
+            stored.insert(&check, &metric.key, symbol, metric.value);
+        }
+    }
+    let deltas = run.kept(|kept| {
+        let matching = Matching {
+            matches: &kept.matches,
+            current: SymbolMetrics::of(&kept.measurements),
+            reference: stored,
+            means: means(),
+        };
+        deltas_matched(envelope, &reference.envelope, &matching)
+    });
+    deltas.apply(envelope, reference.baseline, &reference.vs);
+    Ok(Some(reference.envelope))
+}
+
+/// The `(check, metric)` pairs of every per-symbol metric a registered check averages.
+fn means() -> BTreeSet<(CheckId, String)> {
+    crate::catalog::checks()
+        .iter()
+        .flat_map(|check| {
+            let manifest = check.manifest();
+            manifest
+                .metrics
+                .iter()
+                .filter(|metric| metric.per != MetricPer::Scope && check.averages(&metric.name))
+                .map(|metric| (manifest.id.clone(), metric.name.clone()))
+        })
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
-    use cupel_core::{CheckId, ExitCode, Finding, FindingId, Severity, Status};
+    use cupel_core::matching::{Matched, SymbolMatch};
+    use cupel_core::syntax::SymbolKey;
+    use cupel_core::{
+        CheckId, ExitCode, Finding, FindingId, LangId, Measured, Measurement, Metric, Severity,
+        Status, Symbol, Target,
+    };
 
     use super::*;
     use crate::problem::Problem;
-    use crate::run::Run;
+    use crate::run::{Executions, Run};
 
     fn finding(subject: &str) -> Finding {
         Problem {
@@ -161,7 +207,7 @@ mod tests {
         let writer = Writer::new(dir.path(), false).unwrap();
         let mut current = envelope(&["a"]);
         let before = current.clone();
-        compare(&mut current, &writer, None).unwrap();
+        compare(&mut current, &writer, None, &Run::start(Vec::new())).unwrap();
         assert_eq!(current, before);
     }
 
@@ -183,7 +229,7 @@ mod tests {
             .unwrap();
         let mut current = envelope(&["b", "c"]);
 
-        compare(&mut current, &writer, None).unwrap();
+        compare(&mut current, &writer, None, &Run::start(Vec::new())).unwrap();
 
         let new: Vec<bool> = current
             .findings
@@ -202,16 +248,118 @@ mod tests {
         );
     }
 
+    /// A `complexity.high` finding about the symbol `hash`, from a scored `static.complexity`.
+    fn complex(hash: &str) -> Envelope {
+        let check = CheckId::from("static.complexity");
+        let mut finding = finding(hash);
+        finding.check = check.clone();
+        finding.kind = "complexity.high".to_owned();
+        let hash: cupel_core::SymbolHash = hash.parse().unwrap();
+        finding.id = FindingId::compute(&check, "complexity.high", &hash, None);
+        finding.symbol = Some(Symbol {
+            display: hash.to_string(),
+            hash,
+            lang: LangId::from("rust"),
+        });
+        let mut envelope = Run::start(vec!["check".to_owned()]).reported(
+            Status::Pass,
+            ExitCode::Pass,
+            vec![finding],
+        );
+        envelope.checks = vec![
+            serde_json::from_value(serde_json::json!({
+                "id": "static.complexity", "status": "pass", "tier": 1, "cost": "quick",
+                "score": {"value": 12.0, "unit": "cyclomatic_max", "n": 1},
+                "delta": null, "findings": 1, "duration_ms": 1, "skipped": null, "oracle": null
+            }))
+            .unwrap(),
+        ];
+        envelope
+    }
+
+    fn member(hash: &str) -> Matched {
+        Matched {
+            key: SymbolKey {
+                file: "src/lib.rs".to_owned(),
+                line: 1,
+                col: 1,
+            },
+            symbol: Symbol {
+                display: hash.to_owned(),
+                hash: hash.parse().unwrap(),
+                lang: LangId::from("rust"),
+            },
+            nodes: 50,
+        }
+    }
+
+    #[test]
+    fn a_finding_on_a_renamed_symbol_is_carried_and_its_metrics_compared_across_the_match() {
+        const OLD: &str = "sh_00000000000000a1";
+        const NEW: &str = "sh_00000000000000b2";
+        let reference = complex(OLD);
+        let (_dir, writer, store) = store_with(&reference);
+        let check = CheckId::from("static.complexity");
+        let stored = Metric {
+            symbol: Some(OLD.parse().unwrap()),
+            key: "cyclomatic".to_owned(),
+            value: 12.0,
+        };
+        store
+            .record_metrics(&reference.run.id, &check, &[stored])
+            .unwrap();
+        let run = Run::start(vec!["check".to_owned()]);
+        run.keep(Executions {
+            measurements: vec![Measured {
+                check,
+                lang: LangId::from("rust"),
+                measurement: Measurement {
+                    metric: "cyclomatic".to_owned(),
+                    value: 9.0,
+                    target: Target {
+                        display: NEW.to_owned(),
+                        symbol: Some(NEW.parse().unwrap()),
+                        location: None,
+                    },
+                },
+            }],
+            matches: vec![SymbolMatch {
+                base: vec![member(OLD)],
+                head: vec![member(NEW)],
+                similarity: 0.9,
+            }],
+            ..Executions::default()
+        });
+        let mut current = complex(NEW);
+        let spec = format!("run:{}", reference.run.id);
+
+        compare(&mut current, &writer, Some(&spec), &run).unwrap();
+
+        assert_eq!((current.summary.new, current.summary.resolved), (0, 0));
+        assert!(!current.findings[0].new_since_baseline);
+        let delta = current.checks[0].delta.as_ref().unwrap();
+        assert_eq!(
+            serde_json::to_value(&delta.sets[0].metrics).unwrap(),
+            serde_json::json!({"cyclomatic": {"base": 12.0, "head": 9.0}})
+        );
+    }
+
     #[test]
     fn an_explicit_run_is_compared_and_an_unknown_one_is_a_usage_error() {
         let reference = envelope(&["a"]);
         let (_dir, writer, _store) = store_with(&reference);
         let spec = format!("run:{}", reference.run.id);
         let mut current = envelope(&["a"]);
-        compare(&mut current, &writer, Some(&spec)).unwrap();
+        compare(&mut current, &writer, Some(&spec), &Run::start(Vec::new())).unwrap();
         assert_eq!(current.run.baseline.map(|b| b.name), Some(spec));
 
-        let error = compare(&mut envelope(&[]), &writer, Some("run:nonsense")).unwrap_err();
+        let error = compare(
+            &mut envelope(&[]),
+            &writer,
+            Some("run:nonsense"),
+            &Run::start(Vec::new()),
+        )
+        .unwrap_err();
         assert_eq!(
             (error.exit_code(), error.to_string()),
             (

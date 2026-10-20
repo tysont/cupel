@@ -1,5 +1,5 @@
-// ABOUTME: How native checks join the registry (ADR-074): each module submits itself, so `lib.rs`
-// ABOUTME: names a check only on its `mod` line, and `register` lists checks in ID order.
+// ABOUTME: How native checks join the registry (ADR-074): each module submits itself, `lib.rs` names a check
+// ABOUTME: only on its `mod` line, `register` lists checks in ID order; which metrics are scores (ADR-131).
 mod support;
 
 /// `lib.rs` as written, so the test sees exactly what a new check would have to edit. Comments
@@ -52,4 +52,29 @@ fn register_lists_checks_in_id_order() {
     let mut sorted = ids.clone();
     sorted.sort();
     assert_eq!(ids, sorted);
+}
+
+#[test]
+fn the_metrics_compared_as_weighted_means_across_matched_symbols_are_crap_and_mock_density() {
+    let registry = support::registry();
+    let scores: Vec<(String, String)> = registry
+        .iter()
+        .flat_map(|check| {
+            let id = check.manifest().id.as_str().to_owned();
+            check
+                .manifest()
+                .metrics
+                .iter()
+                .filter(|metric| check.averages(&metric.name))
+                .map(move |metric| (id.clone(), metric.name.clone()))
+                .collect::<Vec<_>>()
+        })
+        .collect();
+    assert_eq!(
+        scores,
+        [
+            ("static.crap".to_owned(), "crap".to_owned()),
+            ("tests.quality".to_owned(), "mock_density".to_owned()),
+        ]
+    );
 }

@@ -350,9 +350,11 @@ cmd  = "psql -X -A -t -c {input}"
 "static.crap.max"        = "< 30"
 "perf.bench.regression"  = "< 5%"
 "static.api-surface"     = "no-breaking"
+"tests.coverage.line"    = ">= base - 0.02"   # no worse than the range's base, recomputed
 
 [gate.tree]                               # evaluated for whole-tree scopes
 "tests.mutation.score"   = ">= 0.70"
+"static.clones.pairs"    = "<= base"          # no more than the baseline
 
 [profile.ci]
 depth = "deep"
@@ -366,6 +368,16 @@ budget = "20s"
 `required_version` is a Cargo version requirement on the `cupel` binary, checked when configuration loads (§6.5 `doctor`).
 
 Gate rule keys are `<check-id>.<metric>` or `<check-id>` (presence); operators `>= > <= < == none no-breaking`. Unknown keys are a usage error (exit 2) with the list of valid keys.
+
+A comparison's operand is a number (a `%` suffix divides it by 100) or `base`, optionally `base + k` or `base - k` with `k` a non-negative number in the metric's unit (ADR-130):
+
+```
+condition := comparison | "none" | "no-breaking"
+comparison := op ( number ["%"] | "base" [ ("+" | "-") number ] )
+op         := ">=" | ">" | "<=" | "<" | "=="
+```
+
+`base` is the metric's value in the reference run: the run `--against` names; else, for `--changed`/`--base`, the base recomputed (the rule's checks run over the base commit's versions of the changed files); else the `default` baseline. A rule against `base` with no reference value is `skipped` with reason `no reference: …` and fails the gate. Every rule result carries `bound`, the value `actual` was compared with, and a skipped one its `reason`.
 
 Configuration follows the three axes: `[checks."<id>"]` is language-neutral, `[checks."<id>".lang.<lang>]` overrides it for one language, and `[lang.<lang>]` chooses tools and producers for that language (`coverage = "coverage.py"` pins a producer when several exist). A check never reads `[lang.*]`; a producer never reads `[checks.*]`.
 
@@ -459,7 +471,8 @@ Every verb returns this shape on stdout (one JSON document; `jsonl` emits one fi
     "findings": {"fail": 6, "warn": 9, "info": 22},
     "new": 4, "resolved": 2, "suppressed": 1,
     "gate": {"result": "fail", "evaluated": "gate.changed",
-             "rules": [{"rule": "tests.mutation.score >= 0.80", "actual": 0.71, "result": "fail"}]}
+             "rules": [{"rule": "tests.mutation.score >= 0.80", "actual": 0.71, "bound": 0.8,
+                        "result": "fail", "reason": null}]}
   },
   "next_actions": [
     {"priority": 1, "finding": "fnd_7c2e1a", "kind": "write_test", "summary": "…"},
@@ -471,6 +484,8 @@ Every verb returns this shape on stdout (one JSON document; `jsonl` emits one fi
 ```
 
 `status` ∈ `pass | fail | partial | error | plan`. `partial` and `error` are distinct from `fail`; agents must branch on them differently.
+
+Under a range (`--changed`, `--base`), the symbols the range removed are matched to those it added by structural similarity: one to one for a rename, move, or edit, one to many for a split, many to one for a merge (ADR-131). A check's `delta` then carries `sets`, absent when empty: per match on which the check had findings or per-symbol metrics, the reference run's symbols (`base`), this run's (`head`), their `similarity`, the findings carried across (`findings.base`, `findings.head`: neither resolved nor new), and each per-symbol metric over each set (`metrics.<name>.base`, `.head`: the sum of a count, the size-weighted mean of a score).
 
 ### 7.2 Finding
 
@@ -495,7 +510,7 @@ Every verb returns this shape on stdout (one JSON document; `jsonl` emits one fi
 }
 ```
 
-**Finding ID** = `fnd_` + first 24 bits-hex of `blake3(check ∥ kind ∥ symbol.hash ∥ site_hash)` where `site_hash` is the structural position of the site within the symbol (not the line number). Stable across reformatting and relocation.
+**Finding ID** = `fnd_` + first 24 bits-hex of `blake3(check ∥ kind ∥ symbol.hash ∥ site_hash)` where `site_hash` is the structural position of the site within the symbol (not the line number). Stable across reformatting and relocation. An edit changes `symbol.hash` and so the ID; under a range, a finding whose symbol was matched to one the reference run had a finding of the same check and kind on is carried across the match, so `new_since_baseline` stays false (§7.1, ADR-131).
 
 **`action.kind`** is a closed enum:
 

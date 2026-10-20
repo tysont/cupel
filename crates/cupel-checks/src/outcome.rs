@@ -66,16 +66,16 @@ pub fn maximum(scores: &[Score]) -> Option<Score> {
 }
 
 /// Ratios combined over every language's targets together: each language's value weighted by
-/// the targets its score covers; zero when none does.
+/// the targets its score covers; when none covers any, the languages' own values averaged.
 pub fn weighted(scores: &[Score]) -> Option<Score> {
     let first = scores.first()?;
     let targets: u64 = scores.iter().map(|score| score.n).sum();
     #[allow(
         clippy::cast_precision_loss,
-        reason = "target counts stay far below 2^52, where f64 is exact"
+        reason = "target and language counts stay far below 2^52, where f64 is exact"
     )]
     let value = if targets == 0 {
-        0.0
+        scores.iter().map(|score| score.value).sum::<f64>() / scores.len() as f64
     } else {
         scores
             .iter()
@@ -127,4 +127,42 @@ pub fn counted(value: usize, unit: &str, n: usize) -> Score {
 /// How many of `items` have the status `wanted`, as `status` reads it.
 pub fn tally<T, S: PartialEq>(items: &[T], status: impl Fn(&T) -> S, wanted: &S) -> usize {
     items.iter().filter(|item| status(item) == *wanted).count()
+}
+
+#[cfg(test)]
+mod tests {
+    use cupel_core::{CostClass, FactKind};
+
+    use super::*;
+    use crate::manifest::Declared;
+
+    fn manifest() -> Manifest {
+        Declared {
+            id: "x.subject",
+            tier: 2,
+            cost: CostClass::Quick,
+            needs: FactKind::Symbols,
+            findings: Vec::new,
+            metrics: &[],
+            summary: "",
+        }
+        .manifest()
+    }
+
+    /// A language's result carries its findings and nothing the scheduler adds: the scheduler
+    /// times the check and records why it was skipped.
+    #[test]
+    fn a_language_result_leaves_its_duration_and_skip_to_the_scheduler() {
+        let result = result(&manifest(), CheckStatus::Fail, None, BTreeMap::new(), 2);
+        assert_eq!((result.duration_ms, result.findings), (0, 2));
+        assert!(result.skipped.is_none() && result.notes.is_empty());
+    }
+
+    #[test]
+    fn an_unmeasured_pass_has_no_finding_metric_or_score_and_says_why() {
+        let result = unmeasured(&manifest(), "nothing to measure".to_owned());
+        assert_eq!((result.status, result.findings), (CheckStatus::Pass, 0));
+        assert!(result.score.is_none() && result.metrics.is_empty());
+        assert_eq!(result.notes, ["nothing to measure"]);
+    }
 }

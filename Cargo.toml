@@ -78,6 +78,9 @@ roxmltree = "0.21.1"
 # turn on serde_json's `float_roundtrip`, which feature unification would put into the `cupel` binary
 # the tests run, changing the last digit of parsed coverage floats in goldens.
 jsonschema = { version = "0.46.10", default-features = false }
+# The matrix test's harness: one trial per (check, language), derived from the registries at run time,
+# so each pair is a test of its own that nextest runs in its own process (ADR-129).
+libtest-mimic = "0.8.2"
 
 # Release binaries ship without symbols (ADR-124); `make dist` and `make install` build this profile.
 [profile.release]

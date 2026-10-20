@@ -15,7 +15,9 @@
 //!   check scores; [`Store::run`], [`Store::finding`], [`Store::last_run_for_check`],
 //!   [`Store::last_result_run`], and [`Store::last_result_run_at`] read them back.
 //! - **Baselines.** [`Store::baseline`] and [`Store::set_baseline`] (ADR-046).
-//! - **Per-symbol metrics.** [`Store::record_metrics`], for the scheduler to fill.
+//! - **Per-symbol metrics.** [`Store::record_metrics`], which every run fills with its checks'
+//!   per-symbol measurements, and [`Store::symbol_metrics`], which a comparison across symbol
+//!   matches reads back (ADR-131).
 //! - **Facts.** [`Store::put_fact`] and [`Store::fact`] by [`CacheKey::digest`] (design §8.3.6).
 //! - **Symbols.** [`Store::record_symbols`] and [`Store::symbols_new_since`], which answers
 //!   `--since-baseline`.
@@ -478,6 +480,35 @@ impl Store {
                     key,
                     value,
                 })
+            })
+            .collect()
+    }
+
+    /// Every per-symbol metric stored for `run`, with its check, in check then recorded order.
+    pub fn symbol_metrics(&self, run: &RunId) -> Result<Vec<(CheckId, Metric)>> {
+        let mut metrics = self.connection.prepare(
+            "SELECT check_id, symbol_hash, key, value FROM metrics
+             WHERE run_id = ?1 AND symbol_hash IS NOT NULL ORDER BY check_id, rowid",
+        )?;
+        metrics
+            .query_map([run.to_string()], |row| {
+                Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                    row.get::<_, f64>(3)?,
+                ))
+            })?
+            .map(|row| {
+                let (check, symbol, key, value) = row?;
+                Ok((
+                    CheckId::from(check),
+                    Metric {
+                        symbol: Some(parse_symbol(&symbol)?),
+                        key,
+                        value,
+                    },
+                ))
             })
             .collect()
     }

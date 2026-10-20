@@ -81,7 +81,45 @@ expression: out
       },
       "delta": {
         "vs": "baseline",
-        "value": -0.12
+        "value": -0.12,
+        "sets": [
+          {
+            "base": [
+              {
+                "display": "exonym::rewrite::Planner::push_limit",
+                "hash": "sh_00000000000000a1",
+                "lang": "rust"
+              }
+            ],
+            "head": [
+              {
+                "display": "exonym::rewrite::Planner::push_limit_inner",
+                "hash": "sh_00000000000000b2",
+                "lang": "rust"
+              },
+              {
+                "display": "exonym::rewrite::Planner::push_limit_outer",
+                "hash": "sh_00000000000000c3",
+                "lang": "rust"
+              }
+            ],
+            "similarity": 0.871,
+            "findings": {
+              "base": [
+                "fnd_0aa0aa"
+              ],
+              "head": [
+                "fnd_7c2e1b"
+              ]
+            },
+            "metrics": {
+              "survivors": {
+                "base": 3.0,
+                "head": 4.0
+              }
+            }
+          }
+        ]
       },
       "findings": 2,
       "duration_ms": 41000,
@@ -280,17 +318,23 @@ expression: out
         {
           "rule": "tests.mutation.score >= 0.80",
           "actual": 0.71,
-          "result": "fail"
+          "bound": 0.8,
+          "result": "fail",
+          "reason": null
         },
         {
           "rule": "tests.weakening none",
           "actual": 0.0,
-          "result": "pass"
+          "bound": 0.0,
+          "result": "pass",
+          "reason": null
         },
         {
           "rule": "perf.bench.regression < 5%",
           "actual": null,
-          "result": "skipped"
+          "bound": null,
+          "result": "skipped",
+          "reason": "`perf.bench` did not run to completion"
         }
       ]
     }

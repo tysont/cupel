@@ -1,0 +1,360 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": {
+        "sets": [
+          {
+            "base": [
+              {
+                "display": "billing.settle",
+                "hash": "sh_6e255b951cf3510f",
+                "lang": "python"
+              }
+            ],
+            "findings": {
+              "base": [
+                "fnd_d48534"
+              ],
+              "head": [
+                "fnd_1c3828"
+              ]
+            },
+            "head": [
+              {
+                "display": "billing.settle_invoices",
+                "hash": "sh_97617fb7eb7ddc72",
+                "lang": "python"
+              }
+            ],
+            "metrics": {
+              "cognitive": {
+                "base": 17.0,
+                "head": 18.0
+              },
+              "cyclomatic": {
+                "base": 11.0,
+                "head": 12.0
+              }
+            },
+            "similarity": 0.906
+          },
+          {
+            "base": [
+              {
+                "display": "billing.reconcile",
+                "hash": "sh_33f5270655700e19",
+                "lang": "python"
+              }
+            ],
+            "findings": {
+              "base": [
+                "fnd_6d48f7"
+              ],
+              "head": [
+                "fnd_854a0d"
+              ]
+            },
+            "head": [
+              {
+                "display": "billing.match_payment",
+                "hash": "sh_3b186a6fb517fe3b",
+                "lang": "python"
+              },
+              {
+                "display": "billing.reconcile",
+                "hash": "sh_6c75eac73669478d",
+                "lang": "python"
+              }
+            ],
+            "metrics": {
+              "cognitive": {
+                "base": 25.0,
+                "head": 22.0
+              },
+              "cyclomatic": {
+                "base": 15.0,
+                "head": 16.0
+              }
+            },
+            "similarity": 0.869
+          },
+          {
+            "base": [
+              {
+                "display": "tests.test_billing.Invoice.__init__",
+                "hash": "sh_117299f2108a9602",
+                "lang": "python"
+              }
+            ],
+            "findings": {
+              "base": [],
+              "head": []
+            },
+            "head": [
+              {
+                "display": "tests.test_billing.Invoice.__init__",
+                "hash": "sh_fe2f7afc737663e1",
+                "lang": "python"
+              }
+            ],
+            "metrics": {
+              "cognitive": {
+                "base": 0.0,
+                "head": 0.0
+              },
+              "cyclomatic": {
+                "base": 1.0,
+                "head": 1.0
+              }
+            },
+            "similarity": 0.708
+          },
+          {
+            "base": [
+              {
+                "display": "tests.test_billing.test_settle_skips_paid_invoices_and_applies_credits",
+                "hash": "sh_ee43be8d9b38e66a",
+                "lang": "python"
+              }
+            ],
+            "findings": {
+              "base": [],
+              "head": []
+            },
+            "head": [
+              {
+                "display": "tests.test_billing.test_settled_totals_skip_paid_invoices_and_apply_credits",
+                "hash": "sh_99baf1510fa5c7bf",
+                "lang": "python"
+              }
+            ],
+            "metrics": {
+              "cognitive": {
+                "base": 0.0,
+                "head": 0.0
+              },
+              "cyclomatic": {
+                "base": 1.0,
+                "head": 1.0
+              }
+            },
+            "similarity": 0.871
+          }
+        ],
+        "value": -3.0,
+        "vs": "main"
+      },
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 18.0,
+        "cyclomatic_max": 12.0,
+        "length_max": 21.0,
+        "nesting_max": 2.0,
+        "params_max": 3.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 6,
+        "unit": "cyclomatic_max",
+        "value": 12.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    },
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.weakening",
+      "metrics": {
+        "weakened": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 1,
+        "unit": "weakened",
+        "value": 0.0
+      },
+      "skipped": null,
+      "status": "pass",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `settle_invoices` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 18,
+        "cognitive_max": 15,
+        "cyclomatic": 12,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_1c3828",
+      "kind": "complexity.high",
+      "location": {
+        "col": 1,
+        "end_col": 17,
+        "end_line": 24,
+        "file": "src/billing.py",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_97617fb7eb7ddc72",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1c3828 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "billing.settle_invoices",
+        "hash": "sh_97617fb7eb7ddc72",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`billing.settle_invoices` is too complex: cyclomatic 12 (max 10), cognitive 18 (max 15)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "reduce_complexity",
+        "priority": 2,
+        "summary": "Split `reconcile` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "cognitive": 16,
+        "cognitive_max": 15,
+        "cyclomatic": 11,
+        "cyclomatic_max": 10
+      },
+      "id": "fnd_854a0d",
+      "kind": "complexity.high",
+      "location": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 58,
+        "file": "src/billing.py",
+        "line": 38
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_6c75eac73669478d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_854a0d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "billing.reconcile",
+        "hash": "sh_6c75eac73669478d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`billing.reconcile` is too complex: cyclomatic 11 (max 10), cognitive 16 (max 15)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_1c3828",
+      "kind": "reduce_complexity",
+      "priority": 1,
+      "summary": "Split `settle_invoices` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+    },
+    {
+      "command": null,
+      "finding": "fnd_854a0d",
+      "kind": "reduce_complexity",
+      "priority": 2,
+      "summary": "Split `reconcile` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": {
+      "id": "<run-id>",
+      "name": "main"
+    },
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": {
+      "base": "<sha>",
+      "branch": "<branch>",
+      "dirty": "<dirty>",
+      "sha": "<sha>"
+    },
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "python"
+      ],
+      "mode": "changed",
+      "roots": [
+        "."
+      ],
+      "symbols": 6
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 2
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

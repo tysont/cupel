@@ -37,11 +37,15 @@ fn exit_2_for_an_unknown_flag_names_the_flag_and_a_fix() {
 
 #[test]
 fn exit_2_for_a_misspelled_flag_suggests_the_right_one() {
-    let finding = run(["describe", "--formt", "json"]).finding();
     assert_eq!(
-        finding["action"]["summary"],
+        usage_action(&["describe", "--formt", "json"]),
         json!("Did you mean --format?")
     );
+}
+
+/// The action summary of the usage finding a run with `args` reports.
+fn usage_action(args: &[&str]) -> Value {
+    run(args).finding()["action"]["summary"].clone()
 }
 
 #[test]
@@ -86,9 +90,8 @@ fn exit_2_for_a_missing_required_argument_names_it() {
 
 #[test]
 fn exit_2_for_conflicting_flags_names_both() {
-    let finding = run(["describe", "--quiet", "--verbose"]).finding();
     assert_eq!(
-        finding["action"]["summary"],
+        usage_action(&["describe", "--quiet", "--verbose"]),
         json!("Pass only one of --quiet and --verbose.")
     );
 }
@@ -217,7 +220,7 @@ fn exit_1_when_the_gate_fails() {
         json!({
             "result": "fail", "evaluated": "gate.tree",
             "rules": [{"rule": "static.complexity.cyclomatic_max < 3", "actual": 3.0,
-                       "result": "fail"}]
+                       "bound": 3.0, "result": "fail", "reason": null}]
         })
     );
 }

@@ -65,12 +65,13 @@ explain   finding fnd_7c2e1a from run_01J9ZZZZZZZZZZZZZZZZZZZZZZ
 gate      fail (gate.changed)
   fail  tests.mutation.score >= 0.80  actual 0.71
   pass  tests.weakening none  actual 0
-  skipped  perf.bench.regression < 5%
+  skipped  perf.bench.regression < 5%  (`perf.bench` did not run to completion)
 
 summary   3 findings · fail 6 · warn 9 · info 22 · new 4 · resolved 2 · suppressed 1
 
 checks
   tests.mutation  fail     tier 3 · standard · score 0.71 killed_ratio (n 34) · metrics score 0.71, survivors 10 · delta -0.12 vs baseline · 2 findings · 41000 ms · oracle pg
+    matched exonym::rewrite::Planner::push_limit → exonym::rewrite::Planner::push_limit_inner, exonym::rewrite::Planner::push_limit_outer · similarity 0.871 · carried fnd_0aa0aa → fnd_7c2e1b · survivors 3 → 4
   perf.bench      skipped  tier 5 · exhaustive · 0 findings · 0 ms · skipped: unavailable (fact symbols, lang go, tool cargo-criterion, see `cupel doctor`)
 
 rankings  top 10 per dimension

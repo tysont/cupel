@@ -36,5 +36,13 @@ similar.workspace = true
 tempfile.workspace = true
 jsonschema.workspace = true
 
+# The matrix test builds its trials from the registries (ADR-129).
+[[test]]
+name = "matrix"
+harness = false
+
+[dev-dependencies]
+libtest-mimic.workspace = true
+
 [lints]
 workspace = true

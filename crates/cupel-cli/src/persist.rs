@@ -1,6 +1,8 @@
 // ABOUTME: The CLI's access to the fact store: opening it for verbs (failures are usage errors) and the
 // ABOUTME: persistence hook that records every run and mirrors the suppressions file (ADR-045 §8, §10).
-use cupel_core::{Envelope, Suppressions, Writer};
+use std::collections::BTreeMap;
+
+use cupel_core::{CheckId, Envelope, Measured, Metric, Suppressions, Writer};
 use cupel_store::{Store, StoreError};
 
 use crate::error::CupelError;
@@ -35,9 +37,10 @@ pub fn unusable(error: &StoreError) -> CupelError {
 }
 
 /// Records `envelope` in the store with what it executed (its test runs, ADR-076 §7, its
-/// mutation outcomes, ADR-080 §10, and its durations, ADR-086 §2) and mirrors `suppressions`
-/// (`.cupel/suppressions.toml`, when it loads) into it. The error is for one stderr line; it
-/// never changes the run's outcome (ADR-045 §8).
+/// mutation outcomes, ADR-080 §10, its durations, ADR-086 §2, and its checks' per-symbol
+/// measurements, which a later comparison across symbol matches reads, ADR-131) and mirrors
+/// `suppressions` (`.cupel/suppressions.toml`, when it loads) into it. The error is for one
+/// stderr line; it never changes the run's outcome (ADR-045 §8).
 pub fn record(
     writer: &Writer,
     envelope: &Envelope,
@@ -61,10 +64,30 @@ pub fn record(
     store
         .record_durations(&envelope.run.id, &executed.durations)
         .map_err(|error| error.to_string())?;
+    for (check, metrics) in symbol_metrics(&executed.measurements) {
+        store
+            .record_metrics(&envelope.run.id, &check, &metrics)
+            .map_err(|error| error.to_string())?;
+    }
     if let Some(suppressions) = suppressions {
         store
             .replace_suppressions(suppressions.entries())
             .map_err(|error| error.to_string())?;
     }
     Ok(())
+}
+
+/// The measurements of symbols among `measured`, grouped by check in measured order.
+fn symbol_metrics(measured: &[Measured]) -> BTreeMap<CheckId, Vec<Metric>> {
+    let mut metrics: BTreeMap<CheckId, Vec<Metric>> = BTreeMap::new();
+    for each in measured {
+        if let Some(symbol) = &each.measurement.target.symbol {
+            metrics.entry(each.check.clone()).or_default().push(Metric {
+                symbol: Some(symbol.clone()),
+                key: each.measurement.metric.clone(),
+                value: each.measurement.value,
+            });
+        }
+    }
+    metrics
 }

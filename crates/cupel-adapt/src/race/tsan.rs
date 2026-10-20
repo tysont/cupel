@@ -76,13 +76,24 @@ fn command(invocation: &Invocation<'_>) -> cupel_core::Result<Process> {
         .find_map(|line| line.strip_prefix("host: "))
         .unwrap_or_default()
         .to_owned();
-    Ok(Process::new("cargo", invocation.dir)
-        .args([NIGHTLY, "test", "-Zbuild-std", "--target", &host])
-        .args(["--tests", "--no-fail-fast", "--", "--test-threads=1"])
+    Ok(instrumented(
+        Process::new("cargo", invocation.dir)
+            .args([NIGHTLY, "test", "-Zbuild-std", "--target", &host])
+            .args(["--tests", "--no-fail-fast", "--", "--test-threads=1"])
+            .env("CARGO_TARGET_DIR", &invocation.cache.to_string_lossy()),
+    )
+    .merged())
+}
+
+/// `cargo` with the sanitizer in its flags and line tables in its debug info: a report places
+/// each access by file and line, which a build without debug info (a project's profile, or an
+/// environment such as a CI job's `CARGO_PROFILE_DEV_DEBUG=0`) would leave as addresses. The
+/// build is in the cache, so the setting touches nothing of the project's own.
+fn instrumented(cargo: Process) -> Process {
+    cargo
         .env("RUSTFLAGS", SANITIZE)
         .env("RUSTDOCFLAGS", SANITIZE)
-        .env("CARGO_TARGET_DIR", &invocation.cache.to_string_lossy())
-        .merged())
+        .env("CARGO_PROFILE_DEV_DEBUG", "line-tables-only")
 }
 
 /// Every warning between `WARNING: ThreadSanitizer:` and `SUMMARY: ThreadSanitizer:` in the
@@ -181,6 +192,23 @@ mod tests {
 
     use super::*;
     use crate::race::cargo::merged;
+
+    /// The build is sanitized and keeps line tables whatever the environment says of debug info.
+    #[test]
+    fn the_build_sanitizes_every_crate_and_keeps_line_tables() {
+        let cargo = instrumented(Process::new("cargo", "."));
+        assert_eq!(
+            cargo.environment(),
+            [
+                ("RUSTFLAGS".to_owned(), "-Zsanitizer=thread".to_owned()),
+                ("RUSTDOCFLAGS".to_owned(), "-Zsanitizer=thread".to_owned()),
+                (
+                    "CARGO_PROFILE_DEV_DEBUG".to_owned(),
+                    "line-tables-only".to_owned()
+                ),
+            ]
+        );
+    }
 
     #[test]
     fn a_data_race_is_its_two_accesses_without_the_threads_creation() {

@@ -37,6 +37,7 @@ mod id;
 mod joint;
 mod json_schema;
 mod lang;
+pub mod matching;
 mod matrix;
 mod model_check;
 mod mutation;
@@ -58,6 +59,7 @@ mod schedule;
 pub mod schema;
 mod scope;
 mod select;
+pub mod similarity;
 mod simulation;
 mod status;
 mod suppression;
@@ -77,7 +79,7 @@ pub use check::{
 };
 pub use config::{ConfigEcho, ConfigSource};
 pub use contract::{ContractKind, ContractPlace, ContractViolation, ContractViolations};
-pub use delta::{Deltas, deltas};
+pub use delta::{Deltas, Matching, SymbolMetrics, deltas, deltas_matched};
 pub use describe::{
     AgentDescription, AllDescription, ArgDescription, CheckDescription, CheckSupport,
     CliDescription, CommandDescription, CommandSummary, CommandTemplate, Description, Example,
@@ -91,7 +93,8 @@ pub use dry_run::{PlannedCheck, PlannedInstall, PlannedSkip, PlannedWrite, RunPl
 pub use envelope::{
     BaselineRef, CheckResult, CheckStatus, CupelInfo, Delta, Envelope, ExitCode, GateOutcome,
     GateResult, GateRule, GitInfo, NextAction, RuleOutcome, RunInfo, ScopeInfo, ScopeMode, Score,
-    SeverityCounts, SkipReason, Skipped, Status, Summary, ToolchainInfo, Verb,
+    SetDelta, SetFindings, SetMetric, SeverityCounts, SkipReason, Skipped, Status, Summary,
+    ToolchainInfo, Verb,
 };
 pub use error::{ArgumentError, Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
@@ -103,7 +106,10 @@ pub use finding::{Action, ActionKind, Evidence, Finding, Location, Severity, Sym
 pub use flake::{RunOrder, TestRerun, TestReruns};
 pub use footprint::{Artifact, Dependency, Footprint, FootprintBase, Vulnerability};
 pub use fuzz::{FuzzCrash, FuzzResults, FuzzStatus, FuzzTarget};
-pub use gate::{GATE_CHANGED, GATE_TREE, apply_gate, evaluate_gate, gate_for};
+pub use gate::{
+    GATE_CHANGED, GATE_TREE, GateReference, NO_REFERENCE, apply_gate, evaluate_gate, gate_for,
+    needs_reference,
+};
 pub use grade::{CostClass, Tier};
 pub use hash::{FindingId, SiteHash, SymbolHash};
 pub use histories::{Histories, History, HistoryOp, HistoryStatus, HistoryViolation, OpOutcome};

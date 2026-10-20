@@ -1,6 +1,7 @@
 // ABOUTME: Read-only git access: the default branch, HEAD, merge bases, and changed files, answered by
 // ABOUTME: running the `git` on PATH in the repository root (ADR-002). The only place Cupel runs git.
 use std::collections::BTreeMap;
+use std::ffi::OsStr;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -185,6 +186,27 @@ impl Git {
         self.bytes(&["show", &format!("{rev}:./{path}")])
     }
 
+    /// Writes every file of the commit `rev` under `dest` through a private index, leaving the
+    /// repository's index and work tree alone, and returns the directory under `dest` that
+    /// corresponds to the root (ADR-130).
+    pub fn export(&self, rev: &str, dest: &Path) -> Result<PathBuf, GitError> {
+        let top = Self {
+            root: PathBuf::from(self.text(&["rev-parse", "--show-toplevel"])?),
+        };
+        let prefix = self.output(&["rev-parse", "--show-prefix"])?;
+        let index = dest.with_extension("index");
+        let target = format!("--prefix={}/", dest.display());
+        let index_env = [("GIT_INDEX_FILE", index.as_os_str())];
+        let exported = top
+            .bytes_with(&["read-tree", rev], &index_env)
+            .and_then(|_| {
+                top.bytes_with(&["checkout-index", "--all", "--force", &target], &index_env)
+            });
+        let _ = std::fs::remove_file(&index);
+        exported?;
+        Ok(dest.join(prefix.trim()))
+    }
+
     /// `git diff --name-status` against `revs`, relative to the root.
     fn statuses(&self, revs: &[&str]) -> Result<Vec<Change>, GitError> {
         let mut args = vec!["diff", "--name-status", "--no-renames", "-z", "--relative"];
@@ -232,8 +254,14 @@ impl Git {
 
     /// Raw standard output of `git <args>` run in the root, failing on a non-zero exit.
     fn bytes(&self, args: &[&str]) -> Result<Vec<u8>, GitError> {
+        self.bytes_with(args, &[])
+    }
+
+    /// `bytes` with the environment variables `env` set for git.
+    fn bytes_with(&self, args: &[&str], env: &[(&str, &OsStr)]) -> Result<Vec<u8>, GitError> {
         let output = Command::new("git")
             .args(args)
+            .envs(env.iter().copied())
             .current_dir(&self.root)
             .stdin(Stdio::null())
             .output()

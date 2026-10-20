@@ -38,6 +38,9 @@ pub enum GateCondition {
         op: Comparison,
         threshold: Threshold,
     },
+    /// The metric compares with its value in the reference run plus `offset` (`<= base`,
+    /// `>= base - 0.02`; ADR-130).
+    Relative { op: Comparison, offset: f64 },
     /// The check produced no findings.
     None,
     /// The check found no breaking change.
@@ -63,10 +66,14 @@ impl GateRuleSpec {
         let gate_condition = parse_condition(condition).map_err(invalid)?;
         let has_metric = gate_key.metric.is_some();
         match gate_condition {
-            GateCondition::Compare { op, .. } if !has_metric => Err(invalid(format!(
-                "`{}` needs a metric: write `<check-id>.<metric>`",
-                op.symbol()
-            ))),
+            GateCondition::Compare { op, .. } | GateCondition::Relative { op, .. }
+                if !has_metric =>
+            {
+                Err(invalid(format!(
+                    "`{}` needs a metric: write `<check-id>.<metric>`",
+                    op.symbol()
+                )))
+            }
             GateCondition::None | GateCondition::NoBreaking if has_metric => Err(invalid(format!(
                 "`{}` applies to a check, not a metric: write `<check-id>`",
                 gate_condition.word()
@@ -99,7 +106,7 @@ impl GateCondition {
     /// The operator as written in `cupel.toml`.
     fn word(self) -> &'static str {
         match self {
-            Self::Compare { op, .. } => op.symbol(),
+            Self::Compare { op, .. } | Self::Relative { op, .. } => op.symbol(),
             Self::None => "none",
             Self::NoBreaking => "no-breaking",
         }
@@ -122,6 +129,13 @@ impl fmt::Display for GateCondition {
                 let suffix = if threshold.percent { "%" } else { "" };
                 write!(f, "{} {}{suffix}", op.symbol(), threshold.value)
             }
+            Self::Relative { op, offset } if *offset > 0.0 => {
+                write!(f, "{} {BASE} + {offset}", op.symbol())
+            }
+            Self::Relative { op, offset } if *offset < 0.0 => {
+                write!(f, "{} {BASE} - {}", op.symbol(), -offset)
+            }
+            Self::Relative { op, .. } => write!(f, "{} {BASE}", op.symbol()),
             Self::None | Self::NoBreaking => f.write_str(self.word()),
         }
     }
@@ -186,9 +200,17 @@ fn parse_condition(raw: &str) -> Result<GateCondition, String> {
     let text = raw.trim();
     for op in Comparison::MATCH_ORDER {
         if let Some(operand) = text.strip_prefix(op.symbol()) {
-            let threshold = parse_threshold(operand.trim()).ok_or_else(|| {
+            let operand = operand.trim();
+            if let Some(offset) = relative_operand(operand) {
+                return Ok(GateCondition::Relative {
+                    op,
+                    offset: parse_offset(offset)?,
+                });
+            }
+            let threshold = parse_threshold(operand).ok_or_else(|| {
                 format!(
-                    "`{}` expects a number, optionally with a `%` suffix",
+                    "`{}` expects a number (optionally with a `%` suffix) or `{BASE}` \
+                     (optionally `{BASE} + <number>` or `{BASE} - <number>`)",
                     op.symbol()
                 )
             })?;
@@ -209,6 +231,54 @@ fn parse_condition(raw: &str) -> Result<GateCondition, String> {
         Ok(condition)
     } else {
         Err(format!("`{word}` takes no operand"))
+    }
+}
+
+/// The word naming the metric's value in the reference run.
+const BASE: &str = "base";
+
+/// What follows `base` when `operand` is `base` alone or `base` with an offset; `None` when the
+/// operand is something else (`baseline`, a number).
+fn relative_operand(operand: &str) -> Option<&str> {
+    let rest = operand.strip_prefix(BASE)?;
+    let boundary = rest
+        .chars()
+        .next()
+        .is_none_or(|next| next.is_whitespace() || !next.is_ascii_alphanumeric());
+    boundary.then(|| rest.trim())
+}
+
+/// The signed offset written after `base`: nothing, or `+`/`-` and a non-negative number in
+/// the metric's unit.
+fn parse_offset(offset: &str) -> Result<f64, String> {
+    if offset.is_empty() {
+        return Ok(0.0);
+    }
+    let (sign, factor, magnitude) = match (offset.strip_prefix('+'), offset.strip_prefix('-')) {
+        (Some(magnitude), _) => ('+', 1.0, magnitude.trim()),
+        (_, Some(magnitude)) => ('-', -1.0, magnitude.trim()),
+        _ => {
+            return Err(format!(
+                "`{BASE}` takes an offset written `{BASE} + <number>` or `{BASE} - <number>`"
+            ));
+        }
+    };
+    if let Some(Threshold {
+        value,
+        percent: true,
+    }) = parse_threshold(magnitude)
+    {
+        return Err(format!(
+            "an offset from `{BASE}` is a number in the metric's unit, not a percentage: \
+             write `{BASE} {sign} {}`",
+            value / 100.0
+        ));
+    }
+    match magnitude.parse::<f64>() {
+        Ok(value) if value.is_finite() && value >= 0.0 => Ok(factor * value),
+        _ => Err(format!(
+            "`{BASE} {sign}` expects a non-negative number, such as `{BASE} {sign} 0.02`"
+        )),
     }
 }
 

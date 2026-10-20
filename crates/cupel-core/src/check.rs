@@ -217,6 +217,13 @@ pub trait Check: Send + Sync {
             .filter_map(|result| result.metrics.get(name).copied())
             .reduce(f64::max)
     }
+
+    /// Whether the per-symbol metric `name` is a score, compared across a matched set of
+    /// symbols as the mean weighted by each symbol's tree size (ADR-131). The default is a
+    /// count, compared as the sum.
+    fn averages(&self, _name: &str) -> bool {
+        false
+    }
 }
 
 /// Every registered check, in registration order, unique by ID.

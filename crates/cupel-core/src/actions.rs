@@ -5,6 +5,7 @@ use std::collections::HashSet;
 
 use crate::envelope::{Envelope, GateRule, NextAction, RuleOutcome};
 use crate::finding::{ActionKind, Finding, Severity};
+use crate::gate::NO_REFERENCE;
 use crate::grade::Tier;
 use crate::rank::{Rankings, Recommendation};
 use crate::result::{CheckResult, SkipReason, Skipped};
@@ -124,7 +125,8 @@ fn finding_action(finding: &Finding) -> Candidate {
 }
 
 /// A rerun for a rule whose check did not run, or a configuration fix for one Cupel cannot
-/// evaluate. A check skipped because it needs a range reruns as its skip says (ADR-056).
+/// evaluate. A check skipped because it needs a range reruns as its skip says (ADR-056); a rule
+/// against `base` with no reference value asks for one (ADR-130).
 fn rule_action(rule: &GateRule, rerun: &str, checks: &[CheckResult]) -> Option<Candidate> {
     let check = rule_check(&rule.rule);
     let command = checks
@@ -134,9 +136,24 @@ fn rule_action(rule: &GateRule, rerun: &str, checks: &[CheckResult]) -> Option<C
         .find(|skipped| skipped.reason == SkipReason::NeedsRange)
         .and_then(|skipped| skipped.see.clone())
         .unwrap_or_else(|| format!("{rerun} --only {check}"));
-    match rule.result {
-        RuleOutcome::Pass | RuleOutcome::Fail => None,
-        RuleOutcome::Skipped => Some(other(
+    let no_reference = rule
+        .reason
+        .as_deref()
+        .filter(|reason| reason.starts_with(NO_REFERENCE));
+    match (rule.result, no_reference) {
+        (RuleOutcome::Pass | RuleOutcome::Fail, _) => None,
+        (RuleOutcome::Skipped, Some(reason)) => Some(other(
+            GATE,
+            ActionKind::Configure,
+            check,
+            format!(
+                "Give the gate rule `{}` a reference ({reason}): set a baseline with \
+                 `cupel baseline set --write`, or pass --against REF|run:ID.",
+                rule.rule
+            ),
+            Some("cupel baseline set --write".to_owned()),
+        )),
+        (RuleOutcome::Skipped, None) => Some(other(
             GATE,
             ActionKind::Rerun,
             check,
@@ -146,7 +163,7 @@ fn rule_action(rule: &GateRule, rerun: &str, checks: &[CheckResult]) -> Option<C
             ),
             Some(command),
         )),
-        RuleOutcome::Unsupported => Some(other(
+        (RuleOutcome::Unsupported, _) => Some(other(
             GATE,
             ActionKind::Configure,
             check,

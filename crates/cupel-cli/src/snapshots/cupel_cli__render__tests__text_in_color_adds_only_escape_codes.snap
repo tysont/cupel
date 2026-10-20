@@ -65,12 +65,13 @@ cupel check: [1;31mfail[0m (exit 1)
 [1mgate      [0m[31mfail[0m (gate.changed)
   [31mfail[0m  tests.mutation.score >= 0.80  actual 0.71
   [32mpass[0m  tests.weakening none  actual 0
-  [33mskipped[0m  perf.bench.regression < 5%
+  [33mskipped[0m  perf.bench.regression < 5%  (`perf.bench` did not run to completion)
 
 [1msummary   [0m3 findings · fail 6 · warn 9 · info 22 · new 4 · resolved 2 · suppressed 1
 
 [1mchecks[0m
   tests.mutation  fail     tier 3 · standard · score 0.71 killed_ratio (n 34) · metrics score 0.71, survivors 10 · delta -0.12 vs baseline · 2 findings · 41000 ms · oracle pg
+    matched exonym::rewrite::Planner::push_limit → exonym::rewrite::Planner::push_limit_inner, exonym::rewrite::Planner::push_limit_outer · similarity 0.871 · carried fnd_0aa0aa → fnd_7c2e1b · survivors 3 → 4
   perf.bench      skipped  tier 5 · exhaustive · 0 findings · 0 ms · skipped: unavailable (fact symbols, lang go, tool cargo-criterion, see `cupel doctor`)
 
 [1mrankings[0m  top 10 per dimension

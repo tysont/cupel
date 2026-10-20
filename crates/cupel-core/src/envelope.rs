@@ -16,7 +16,9 @@ use crate::id::{LangId, RunId};
 use crate::oracle::OracleReport;
 use crate::per_test_impact::TestsReport;
 use crate::rank::Rankings;
-pub use crate::result::{CheckResult, CheckStatus, Delta, Score, SkipReason, Skipped};
+pub use crate::result::{
+    CheckResult, CheckStatus, Delta, Score, SetDelta, SetFindings, SetMetric, SkipReason, Skipped,
+};
 pub use crate::scope::ScopeMode;
 pub use crate::status::{ExitCode, Status};
 
@@ -192,7 +194,14 @@ pub struct GateRule {
     pub rule: String,
     /// The measured value; null when the rule could not be evaluated.
     pub actual: Option<f64>,
+    /// The value `actual` was compared with: the threshold, the reference value plus the
+    /// offset for a rule against `base` (ADR-130), or 0 for a presence rule; null when the
+    /// rule was not evaluated.
+    pub bound: Option<f64>,
     pub result: RuleOutcome,
+    /// Why a `skipped` rule was not evaluated, such as `no reference: no baseline is set`;
+    /// null otherwise.
+    pub reason: Option<String>,
 }
 
 /// One gate rule's result (ADR-060 §6). Only `pass` passes.

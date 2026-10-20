@@ -1,9 +1,12 @@
-// ABOUTME: `tests.weakening`: diffs TestFrames between a range's base and head and fails on removed and
-// ABOUTME: loosened assertions, newly skipped and deleted tests, and rewritten snapshots (ADR-056, ADR-057).
-use std::collections::{BTreeMap, HashMap};
+// ABOUTME: `tests.weakening`: diffs TestFrames between a range's base and head, tests matched by name or by body
+// ABOUTME: similarity, and fails on removed or loosened assertions, skips, deletions, and rewritten snapshots.
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::git::ChangeKind;
-use cupel_core::syntax::{AssertionKind, AssertionStrength, Span, TestCase, TestFrames};
+use cupel_core::matching::{self, Candidate};
+use cupel_core::syntax::{
+    AssertionKind, AssertionStrength, NormTree, Span, SymbolKey, Symbols, TestCase, TestFrames,
+};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result, Scope, Score,
@@ -22,6 +25,10 @@ const ID: &str = "tests.weakening";
 
 /// The check has no settings; any key is a configuration error (ADR-057).
 const SETTINGS: Limits = Limits::new(&[]);
+
+/// What the check reads on both sides: the tests, and the symbols and normalized trees that
+/// match a test the range renamed, moved and edited, split, or merged (ADR-131).
+const SIDES: [FactKind; 3] = [FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree];
 
 /// Evidence of `assertion.removed`.
 #[derive(Serialize, JsonSchema)]
@@ -90,10 +97,10 @@ impl TestsWeakening {
         Self {
             manifest: Manifest {
                 id: CheckId::from(ID),
-                version: 1,
+                version: 2,
                 tier: Tier::try_from(2).expect("tier 2 exists"),
                 cost: CostClass::Quick,
-                needs: vec![FactKind::TestFrames],
+                needs: SIDES.to_vec(),
                 wants: vec![],
                 findings: vec![
                     kind::<AssertionRemoved>(
@@ -145,7 +152,7 @@ impl Check for TestsWeakening {
     }
 
     fn base_needs(&self) -> &[FactKind] {
-        &[FactKind::TestFrames]
+        &SIDES
     }
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
@@ -165,23 +172,18 @@ impl Check for TestsWeakening {
         let base = Tests::of(facts.base::<TestFrames>()?);
         let range = facts.range();
         let commit = range.map_or("", |range| range.commit.as_str());
-        let matched = matches(&base, &head);
-        let mut findings = Vec::new();
-        for (base_index, head_index) in matched.iter().enumerate() {
-            ctx.cancel.checkpoint()?;
-            let old = &base.tests[base_index];
-            match head_index {
-                Some(index) => findings.extend(self.compare(old, &head.tests[*index], commit)),
-                None => findings.push(self.deleted(old, commit)),
-            }
-        }
+        let named = matches(&base, &head);
+        let similar = similar(&base, &head, &named, facts)?;
+        let mut compared: BTreeSet<usize> = named.iter().flatten().copied().collect();
+        compared.extend(similar.iter().flat_map(|(_, news)| news.iter().copied()));
+        let mut findings = self.paired(ctx, (&base, &head), (&named, &similar), commit)?;
         let modified_snapshots = range
             .into_iter()
             .flat_map(|range| &range.changes)
             .filter(|change| change.kind == ChangeKind::Modified && is_snapshot(&change.path))
             .map(|change| change.path.as_str());
         for snapshot in modified_snapshots {
-            if let Some(finding) = self.snapshot(snapshot, &head, &matched, commit) {
+            if let Some(finding) = self.snapshot(snapshot, &head, &compared, commit) {
                 findings.push(finding);
             }
         }
@@ -200,7 +202,7 @@ impl Check for TestsWeakening {
             Some(Score {
                 value,
                 unit: "weakened".to_owned(),
-                n: matched.iter().flatten().count() as u64,
+                n: compared.len() as u64,
             }),
             BTreeMap::from([("weakened".to_owned(), value)]),
             count,
@@ -300,6 +302,84 @@ pub(crate) fn matches(base: &Tests<'_>, head: &Tests<'_>) -> Vec<Option<usize>> 
     matched
 }
 
+/// Base tests matched by similarity to head tests, as indexes into each side's `Tests`.
+type MatchedSet = (Vec<usize>, Vec<usize>);
+
+/// The base tests [`matches`] left unmatched paired with the head tests no base test matched,
+/// by the similarity of their bodies (ADR-131): each match as (base indexes, head indexes), in
+/// base order. A test with no symbol of its name over its span takes no part.
+fn similar(
+    base: &Tests<'_>,
+    head: &Tests<'_>,
+    named: &[Option<usize>],
+    facts: &Facts,
+) -> Result<Vec<MatchedSet>> {
+    let taken: BTreeSet<usize> = named.iter().flatten().copied().collect();
+    let gone: Vec<usize> = (0..base.tests.len())
+        .filter(|index| named[*index].is_none())
+        .collect();
+    let came: Vec<usize> = (0..head.tests.len())
+        .filter(|index| !taken.contains(index))
+        .collect();
+    if gone.is_empty() || came.is_empty() {
+        return Ok(Vec::new());
+    }
+    let before = matching::candidates(facts.base::<Symbols>()?, facts.base::<NormTree>()?);
+    let after = matching::candidates(facts.get::<Symbols>()?, facts.get::<NormTree>()?);
+    let (removed, removed_tests) = bodies(base, &gone, &before);
+    let (added, added_tests) = bodies(head, &came, &after);
+    let test_of = |candidates: &[Candidate<'_>], tests: &[usize], key: &SymbolKey| {
+        candidates
+            .iter()
+            .position(|candidate| candidate.def.key() == *key)
+            .map(|at| tests[at])
+    };
+    let mut groups: Vec<(Vec<usize>, Vec<usize>)> = matching::match_symbols(&removed, &added)
+        .into_iter()
+        .map(|found| {
+            let mut olds: Vec<usize> = found
+                .base
+                .iter()
+                .filter_map(|member| test_of(&removed, &removed_tests, &member.key))
+                .collect();
+            let mut news: Vec<usize> = found
+                .head
+                .iter()
+                .filter_map(|member| test_of(&added, &added_tests, &member.key))
+                .collect();
+            olds.sort_unstable();
+            news.sort_unstable();
+            (olds, news)
+        })
+        .collect();
+    groups.sort();
+    Ok(groups)
+}
+
+/// The symbol of each test of `tests` at `indexes` that has one (same file and name, spans
+/// overlapping), with the test's index.
+fn bodies<'a>(
+    tests: &Tests<'_>,
+    indexes: &[usize],
+    candidates: &[Candidate<'a>],
+) -> (Vec<Candidate<'a>>, Vec<usize>) {
+    indexes
+        .iter()
+        .filter_map(|index| {
+            let test = &tests.tests[*index];
+            let span = &test.case.span;
+            let candidate = candidates.iter().find(|candidate| {
+                let def = candidate.def;
+                def.file == test.file
+                    && def.name == test.case.name
+                    && def.span.line <= span.end_line
+                    && span.line <= def.span.end_line
+            })?;
+            Some((*candidate, *index))
+        })
+        .unzip()
+}
+
 /// For each head test, whether no base test matches it ([`matches`]): the range added it.
 pub(crate) fn added(base: &Tests<'_>, head: &Tests<'_>) -> Vec<bool> {
     let mut added = vec![true; head.tests.len()];
@@ -317,6 +397,22 @@ struct Counts {
 }
 
 impl Counts {
+    /// The counts of every test of `tests` together.
+    fn sum(tests: &[&Test<'_>]) -> Self {
+        tests.iter().map(|test| Self::of(test.case)).fold(
+            Self {
+                total: 0,
+                strong: 0,
+                weak: 0,
+            },
+            |sum, counts| Self {
+                total: sum.total + counts.total,
+                strong: sum.strong + counts.strong,
+                weak: sum.weak + counts.weak,
+            },
+        )
+    }
+
     fn of(case: &TestCase) -> Self {
         let count = |strength| {
             u32::try_from(
@@ -370,18 +466,59 @@ struct Said {
 }
 
 impl TestsWeakening {
-    /// What weakened between a base test and its head counterpart.
-    fn compare(&self, old: &Test<'_>, new: &Test<'_>, commit: &str) -> Vec<Finding> {
-        let (before, after) = (Counts::of(old.case), Counts::of(new.case));
-        [
-            skipped(old, new),
-            removed(new, &before, &after, commit),
-            loosened(new, &before, &after),
-        ]
-        .into_iter()
-        .flatten()
-        .map(|said| self.report(said, new, commit))
-        .collect()
+    /// The findings of every base test against its successors: the head test paired by name,
+    /// the set matched by similarity (compared once, at its first base test), or none (deleted).
+    fn paired(
+        &self,
+        ctx: &CheckCtx,
+        (base, head): (&Tests<'_>, &Tests<'_>),
+        (named, similar): (&[Option<usize>], &[MatchedSet]),
+        commit: &str,
+    ) -> Result<Vec<Finding>> {
+        let mut findings = Vec::new();
+        for (base_index, head_index) in named.iter().enumerate() {
+            ctx.cancel.checkpoint()?;
+            let old = &base.tests[base_index];
+            let group = similar.iter().find(|(olds, _)| olds.contains(&base_index));
+            match (head_index, group) {
+                (Some(index), _) => {
+                    findings.extend(self.compare(&[old], &[&head.tests[*index]], commit));
+                }
+                (None, Some((olds, news))) if olds[0] == base_index => {
+                    let olds: Vec<&Test<'_>> = olds.iter().map(|i| &base.tests[*i]).collect();
+                    let news: Vec<&Test<'_>> = news.iter().map(|i| &head.tests[*i]).collect();
+                    findings.extend(self.compare(&olds, &news, commit));
+                }
+                (None, Some(_)) => {}
+                (None, None) => findings.push(self.deleted(old, commit)),
+            }
+        }
+        Ok(findings)
+    }
+
+    /// What weakened between base tests and their head counterparts: one and one, or a set
+    /// matched across a split or merge, whose assertions are compared together and reported on
+    /// the first head test (ADR-131).
+    fn compare(&self, olds: &[&Test<'_>], news: &[&Test<'_>], commit: &str) -> Vec<Finding> {
+        let (before, after) = (Counts::sum(olds), Counts::sum(news));
+        let was_skipped = olds.iter().any(|old| old.case.skip.is_some());
+        let first = news[0];
+        let mut said: Vec<(Said, &Test<'_>)> = news
+            .iter()
+            .filter_map(|new| Some((skipped(was_skipped, new)?, *new)))
+            .collect();
+        said.extend(
+            [
+                removed(first, &before, &after, commit),
+                loosened(first, &before, &after),
+            ]
+            .into_iter()
+            .flatten()
+            .map(|said| (said, first)),
+        );
+        said.into_iter()
+            .map(|(said, test)| self.report(said, test, commit))
+            .collect()
     }
 
     fn deleted(&self, old: &Test<'_>, commit: &str) -> Finding {
@@ -410,11 +547,11 @@ impl TestsWeakening {
         &self,
         snapshot: &str,
         head: &Tests<'_>,
-        matched: &[Option<usize>],
+        compared: &BTreeSet<usize>,
         commit: &str,
     ) -> Option<Finding> {
         let owners = owners(snapshot, head);
-        if owners.iter().any(|index| !matched.contains(&Some(*index))) {
+        if owners.iter().any(|index| !compared.contains(index)) {
             return None;
         }
         let tests: Vec<String> = owners
@@ -485,10 +622,10 @@ impl TestsWeakening {
     }
 }
 
-/// `test.skipped` when the head test is skipped and the base one was not.
-fn skipped(old: &Test<'_>, new: &Test<'_>) -> Option<Said> {
+/// `test.skipped` when the head test is skipped and its base counterparts were not.
+fn skipped(was_skipped: bool, new: &Test<'_>) -> Option<Said> {
     let name = &new.case.name;
-    let skip = new.case.skip.as_ref().filter(|_| old.case.skip.is_none())?;
+    let skip = new.case.skip.as_ref().filter(|_| !was_skipped)?;
     Some(Said {
         kind: "test.skipped",
         title: format!("`{name}` is now skipped"),
