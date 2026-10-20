@@ -15,10 +15,12 @@ test = "cargo nextest run --workspace"
 coverage = "cargo llvm-cov --lcov --output-path {out}"
 bench = "cargo bench --bench {name} -- --save-baseline {id}"
 
-# The deep checks' rules (ADR-129) sit at the strictest values the tree sustains: line coverage
-# of at least 0.96 (the tree measures 0.968), CRAP at most 20 (the tree's maximum), no analyzer
-# finding, no falsified property, and no contract violated. A changed function's mutants must be 80% killed. `perf.bench` has no
-# benchmark to compare yet and `gen.fuzz` no target, so neither has a rule.
+# The deep checks' rules (ADR-129) sit at the strictest values the tree sustains: on the tree,
+# line coverage of at least 0.96 (it measures 0.968); on a change, no changed function without
+# coverage (a change with no instrumented line has a line ratio of 0, so the ratio cannot be its
+# rule) and 80% of its mutants killed; on both, CRAP at most 20 (the tree's maximum), no analyzer
+# finding, no falsified property, and no contract violated. `perf.bench` has no benchmark to
+# compare yet and `gen.fuzz` no target, so neither has a rule.
 [gate.changed]
 "tests.weakening" = "none"
 "static.complexity" = "none"
@@ -29,7 +31,7 @@ bench = "cargo bench --bench {name} -- --save-baseline {id}"
 "static.dead-code" = "none"
 "tests.quality" = "none"
 "static.analyze" = "none"
-"tests.coverage.line" = ">= 0.96"
+"tests.coverage" = "none"
 "static.crap.max" = "<= 20"
 "tests.mutation.score" = ">= 0.80"
 "gen.property.falsified" = "== 0"
