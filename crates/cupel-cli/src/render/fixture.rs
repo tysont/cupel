@@ -39,6 +39,29 @@ fn matched_symbol(name: &str, hash: u64) -> Symbol {
     }
 }
 
+/// A split matched across the baseline (ADR-131): one finding carried and the survivors compared.
+fn split_set() -> SetDelta {
+    SetDelta {
+        base: vec![matched_symbol("push_limit", 0xa1)],
+        head: vec![
+            matched_symbol("push_limit_inner", 0xb2),
+            matched_symbol("push_limit_outer", 0xc3),
+        ],
+        similarity: 0.871,
+        findings: SetFindings {
+            base: vec!["fnd_0aa0aa".parse().expect("valid finding ID")],
+            head: vec!["fnd_7c2e1b".parse().expect("valid finding ID")],
+        },
+        metrics: BTreeMap::from([(
+            "survivors".to_owned(),
+            SetMetric {
+                base: 3.0,
+                head: 4.0,
+            },
+        )]),
+    }
+}
+
 /// A finding with every field set; `n` varies the distinctive values.
 pub fn finding(n: u32, check: &str, kind: &str, severity: Severity) -> Finding {
     let id = format!("fnd_{:06x}", 0x7c_2e1a + n);
@@ -351,25 +374,7 @@ fn checks() -> Vec<CheckResult> {
             delta: Some(Delta {
                 vs: "baseline".to_owned(),
                 value: -0.12,
-                sets: vec![SetDelta {
-                    base: vec![matched_symbol("push_limit", 0xa1)],
-                    head: vec![
-                        matched_symbol("push_limit_inner", 0xb2),
-                        matched_symbol("push_limit_outer", 0xc3),
-                    ],
-                    similarity: 0.871,
-                    findings: SetFindings {
-                        base: vec!["fnd_0aa0aa".parse().expect("valid finding ID")],
-                        head: vec!["fnd_7c2e1b".parse().expect("valid finding ID")],
-                    },
-                    metrics: BTreeMap::from([(
-                        "survivors".to_owned(),
-                        SetMetric {
-                            base: 3.0,
-                            head: 4.0,
-                        },
-                    )]),
-                }],
+                sets: vec![split_set()],
             }),
             findings: 2,
             duration_ms: 41_000,

@@ -358,51 +358,13 @@ fn name_similarity(a: &str, b: &str) -> f64 {
 mod tests {
     use super::*;
     use crate::id::LangId;
-    use crate::similarity::mix;
+    use crate::similarity::synthetic::{Rng, random_tree};
     use crate::syntax::{Span, SymbolKind, Visibility};
-
-    /// splitmix64, for reproducible synthetic trees.
-    struct Rng(u64);
-
-    impl Rng {
-        fn below(&mut self, n: usize) -> usize {
-            self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
-            usize::try_from(mix(self.0) % n as u64).unwrap()
-        }
-    }
-
-    const LABELS: [&str; 16] = [
-        "if",
-        "loop",
-        "call",
-        "binary",
-        "assignment",
-        "return",
-        "block",
-        "member",
-        "index",
-        "arguments",
-        "unary",
-        "match",
-        "arm",
-        "let",
-        "tuple",
-        "field",
-    ];
-
-    /// A random statement-like subtree `depth` levels deep, each node with a leaf.
-    fn statement(rng: &mut Rng, depth: u32) -> NormNode {
-        let label = LABELS[rng.below(LABELS.len())];
-        let width = if depth == 0 { 0 } else { 1 + rng.below(3) };
-        let mut children: Vec<NormNode> = (0..width).map(|_| statement(rng, depth - 1)).collect();
-        children.push(NormNode::leaf(["$id", "$lit", "+", "<"][rng.below(4)]));
-        NormNode::new(label, children)
-    }
 
     /// `count` random statements from `seed`.
     fn statements(seed: u64, count: usize) -> Vec<NormNode> {
         let mut rng = Rng(seed);
-        (0..count).map(|_| statement(&mut rng, 3)).collect()
+        (0..count).map(|_| random_tree(&mut rng, 3)).collect()
     }
 
     /// A function whose body is `body`.
@@ -414,6 +376,15 @@ mod tests {
                 NormNode::new("block", body),
             ],
         )
+    }
+
+    /// A function of eight random statements from `seed`, and a copy with `edit` applied to
+    /// its statements.
+    fn edited(seed: u64, edit: impl FnOnce(&mut Vec<NormNode>)) -> (NormNode, NormNode) {
+        let body = statements(seed, 8);
+        let mut changed = body.clone();
+        edit(&mut changed);
+        (function(body), function(changed))
     }
 
     /// One side's symbols: (name, file, tree) each, laid out one per ten lines of its file.
@@ -496,11 +467,9 @@ mod tests {
 
     #[test]
     fn a_renamed_and_edited_function_matches_its_predecessor() {
-        let body = statements(1, 8);
-        let mut edited = body.clone();
-        edited[3] = statements(99, 1).remove(0);
-        let base = Side::of(vec![("settle", "src/a.rs", function(body))]);
-        let head = Side::of(vec![("settle_invoices", "src/a.rs", function(edited))]);
+        let (body, edited) = edited(1, |body| body[3] = statements(99, 1).remove(0));
+        let base = Side::of(vec![("settle", "src/a.rs", body)]);
+        let head = Side::of(vec![("settle_invoices", "src/a.rs", edited)]);
         let found = matched(&base, &head);
         assert_eq!(names(&found), [(vec!["settle"], vec!["settle_invoices"])]);
         assert!(found[0].similarity >= 0.5 && found[0].similarity < 1.0);
@@ -508,11 +477,9 @@ mod tests {
 
     #[test]
     fn a_function_moved_to_another_file_and_edited_matches() {
-        let body = statements(2, 8);
-        let mut edited = body.clone();
-        edited.push(statements(98, 1).remove(0));
-        let base = Side::of(vec![("price", "src/a.rs", function(body))]);
-        let head = Side::of(vec![("price", "src/b.rs", function(edited))]);
+        let (body, edited) = edited(2, |body| body.push(statements(98, 1).remove(0)));
+        let base = Side::of(vec![("price", "src/a.rs", body)]);
+        let head = Side::of(vec![("price", "src/b.rs", edited)]);
         let found = matched(&base, &head);
         assert_eq!(names(&found), [(vec!["price"], vec!["price"])]);
         assert_eq!(found[0].head[0].key.file, "src/b.rs");

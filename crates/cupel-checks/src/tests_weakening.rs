@@ -176,24 +176,7 @@ impl Check for TestsWeakening {
         let similar = similar(&base, &head, &named, facts)?;
         let mut compared: BTreeSet<usize> = named.iter().flatten().copied().collect();
         compared.extend(similar.iter().flat_map(|(_, news)| news.iter().copied()));
-        let mut findings = Vec::new();
-        for (base_index, head_index) in named.iter().enumerate() {
-            ctx.cancel.checkpoint()?;
-            let old = &base.tests[base_index];
-            let group = similar.iter().find(|(olds, _)| olds.contains(&base_index));
-            match (head_index, group) {
-                (Some(index), _) => {
-                    findings.extend(self.compare(&[old], &[&head.tests[*index]], commit));
-                }
-                (None, Some((olds, news))) if olds[0] == base_index => {
-                    let olds: Vec<&Test<'_>> = olds.iter().map(|i| &base.tests[*i]).collect();
-                    let news: Vec<&Test<'_>> = news.iter().map(|i| &head.tests[*i]).collect();
-                    findings.extend(self.compare(&olds, &news, commit));
-                }
-                (None, Some(_)) => {}
-                (None, None) => findings.push(self.deleted(old, commit)),
-            }
-        }
+        let mut findings = self.paired(ctx, (&base, &head), (&named, &similar), commit)?;
         let modified_snapshots = range
             .into_iter()
             .flat_map(|range| &range.changes)
@@ -319,6 +302,9 @@ pub(crate) fn matches(base: &Tests<'_>, head: &Tests<'_>) -> Vec<Option<usize>> 
     matched
 }
 
+/// Base tests matched by similarity to head tests, as indexes into each side's `Tests`.
+type MatchedSet = (Vec<usize>, Vec<usize>);
+
 /// The base tests [`matches`] left unmatched paired with the head tests no base test matched,
 /// by the similarity of their bodies (ADR-131): each match as (base indexes, head indexes), in
 /// base order. A test with no symbol of its name over its span takes no part.
@@ -327,7 +313,7 @@ fn similar(
     head: &Tests<'_>,
     named: &[Option<usize>],
     facts: &Facts,
-) -> Result<Vec<(Vec<usize>, Vec<usize>)>> {
+) -> Result<Vec<MatchedSet>> {
     let taken: BTreeSet<usize> = named.iter().flatten().copied().collect();
     let gone: Vec<usize> = (0..base.tests.len())
         .filter(|index| named[*index].is_none())
@@ -480,6 +466,36 @@ struct Said {
 }
 
 impl TestsWeakening {
+    /// The findings of every base test against its successors: the head test paired by name,
+    /// the set matched by similarity (compared once, at its first base test), or none (deleted).
+    fn paired(
+        &self,
+        ctx: &CheckCtx,
+        (base, head): (&Tests<'_>, &Tests<'_>),
+        (named, similar): (&[Option<usize>], &[MatchedSet]),
+        commit: &str,
+    ) -> Result<Vec<Finding>> {
+        let mut findings = Vec::new();
+        for (base_index, head_index) in named.iter().enumerate() {
+            ctx.cancel.checkpoint()?;
+            let old = &base.tests[base_index];
+            let group = similar.iter().find(|(olds, _)| olds.contains(&base_index));
+            match (head_index, group) {
+                (Some(index), _) => {
+                    findings.extend(self.compare(&[old], &[&head.tests[*index]], commit));
+                }
+                (None, Some((olds, news))) if olds[0] == base_index => {
+                    let olds: Vec<&Test<'_>> = olds.iter().map(|i| &base.tests[*i]).collect();
+                    let news: Vec<&Test<'_>> = news.iter().map(|i| &head.tests[*i]).collect();
+                    findings.extend(self.compare(&olds, &news, commit));
+                }
+                (None, Some(_)) => {}
+                (None, None) => findings.push(self.deleted(old, commit)),
+            }
+        }
+        Ok(findings)
+    }
+
     /// What weakened between base tests and their head counterparts: one and one, or a set
     /// matched across a split or merge, whose assertions are compared together and reported on
     /// the first head test (ADR-131).

@@ -93,23 +93,18 @@ fn run(base: TestFrames, head: TestFrames, changes: Vec<Change>) -> (CheckResult
     run_matched((base, &[]), (head, &[]), changes)
 }
 
-/// The tree of a test body of `count` statements from `first` on: twenty statements make a
-/// tree of about a hundred nodes.
+/// The tree of a test body of `count` assertions from `first` on, each comparing a call with
+/// a literal: twenty assertions make a tree of about a hundred nodes.
 fn body(first: usize, count: usize) -> NormNode {
-    let statement = |n: usize| {
+    let assertion = |n: usize| {
+        let call = NormNode::new("call", vec![NormNode::leaf("$id"); n % 4 + 1]);
+        let expected = NormNode::leaf(if n.is_multiple_of(3) { "$lit" } else { "$id" });
         NormNode::new(
-            if n.is_multiple_of(2) {
-                "call"
-            } else {
-                "binary"
-            },
-            vec![
-                NormNode::new("arguments", vec![NormNode::leaf("$id"); n % 3 + 1]),
-                NormNode::leaf(if n.is_multiple_of(5) { "+" } else { "<" }),
-            ],
+            "macro",
+            vec![NormNode::new("arguments", vec![call, expected])],
         )
     };
-    NormNode::new("block", (first..first + count).map(statement).collect())
+    NormNode::new("block", (first..first + count).map(assertion).collect())
 }
 
 /// A tree of `count` loops over conditions, sharing no shape with `body`.

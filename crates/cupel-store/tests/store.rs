@@ -488,10 +488,12 @@ fn the_last_run_of_a_check_has_its_result_findings_and_metrics() {
 
 #[test]
 fn a_runs_per_symbol_metrics_are_read_back_by_check_without_its_scores() {
+    let (complexity, crap) = (
+        CheckId::from("static.complexity"),
+        CheckId::from("static.crap"),
+    );
     let repo = Repo::new();
     let store = repo.store();
-    let complexity = CheckId::from("static.complexity");
-    let crap = CheckId::from("static.crap");
     record(
         &store,
         1,
