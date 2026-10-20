@@ -148,7 +148,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 
 | ID | Measures | Finding kinds | Cost |
 |---|---|---|---|
-| `meta.traceability` | Each requirement ID in the task spec (config or `--spec FILE`) maps to ≥1 test that fails without the change | `spec.untested-requirement` | standard |
+| `meta.traceability` | Each requirement ID in the task spec (config or `--spec FILE`) maps to ≥1 test that fails without the change; a `REQ-<n>` marker in an added test's name or doc comment names a requirement too (ADR-134) | `spec.untested-requirement`, `spec.unlisted-requirement` | standard |
 | `meta.oracle-independence` | Labels each passing check by whether its oracle is independent of the change author (reference impl, spec, pre-existing tests) vs self-authored | `evidence.self-authored-only` | quick |
 
 ### 5.8 Depth → cost class mapping
