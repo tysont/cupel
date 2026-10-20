@@ -9,11 +9,18 @@ fn root() -> PathBuf {
 }
 
 /// The commands `make -n dogfood <vars>` would run, with `cargo` for `$(CARGO)` (a test runs with
-/// `CARGO` set to the toolchain's own path).
+/// `CARGO` set to the toolchain's own path). The suite itself runs under make, in `make check` and
+/// in the dogfood's own baseline run, whose command-line variables (`DOGFOOD_BUDGET=` in CI)
+/// reach this make through `MAKEFLAGS`; it sees only `vars`.
 fn dogfood(vars: &[&str]) -> String {
     let output = Command::new("make")
         .args(["-n", "--no-print-directory", "dogfood", "CARGO=cargo"])
         .args(vars)
+        .env_remove("MAKEFLAGS")
+        .env_remove("MFLAGS")
+        .env_remove("MAKELEVEL")
+        .env_remove("DOGFOOD_BUDGET")
+        .env_remove("DOGFOOD_SCOPE")
         .current_dir(root())
         .output()
         .expect("make runs");
