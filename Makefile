@@ -81,7 +81,7 @@ DOGFOOD_SCOPE ?= changed
 # A local dogfood runs under a wall-clock budget, so it ends in bounded time and lists what the
 # budget left out (exit 5 when it left anything out); CI clears it with `DOGFOOD_BUDGET=` and runs
 # every check the depth selects (ADR-129).
-DOGFOOD_BUDGET ?= 20m
+DOGFOOD_BUDGET ?= 30m
 
 # The gate runs at `--depth deep` (ADR-129). `tests.flaky` is skipped: the flake engine reruns the
 # whole suite three times, one test at a time, and does not rerun cargo-nextest, Cupel's runner.

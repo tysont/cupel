@@ -33,7 +33,7 @@ fn make_dogfood_runs_the_changed_gate_at_deep_depth_under_the_budget() {
     assert_eq!(
         dogfood(&[]),
         "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep \
-         --budget 20m --gate --no-install --skip tests.flaky --skip conc.race --format text\n"
+         --budget 30m --gate --no-install --skip tests.flaky --skip conc.race --format text\n"
     );
 }
 
@@ -42,7 +42,7 @@ fn make_dogfood_runs_the_changed_gate_at_deep_depth_under_the_budget() {
 fn make_dogfood_runs_the_tree_gate_at_deep_depth_without_mutating_the_tree() {
     assert_eq!(
         dogfood(&["DOGFOOD_SCOPE=tree"]),
-        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --budget 20m \
+        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --budget 30m \
          --gate --no-install --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
     );
 }

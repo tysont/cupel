@@ -15,8 +15,10 @@ test = "cargo nextest run --workspace"
 coverage = "cargo llvm-cov --lcov --output-path {out}"
 bench = "cargo bench --bench {name} -- --save-baseline {id}"
 
-# `static.crap` reports nothing until a coverage producer exists (P3.2, ADR-067), so no rule on
-# `static.crap.max` can pass yet; it joins both gates with coverage.
+# The deep checks' rules (ADR-129) sit at the strictest values the tree sustains: line coverage
+# of at least 0.96 (the tree measures 0.968), CRAP at most 20 (the tree's maximum), no analyzer
+# finding, no falsified property, and no contract violated. A changed function's mutants must be 80% killed. `perf.bench` has no
+# benchmark to compare yet and `gen.fuzz` no target, so neither has a rule.
 [gate.changed]
 "tests.weakening" = "none"
 "static.complexity" = "none"
@@ -26,6 +28,12 @@ bench = "cargo bench --bench {name} -- --save-baseline {id}"
 "static.deps.cycles" = "== 0"
 "static.dead-code" = "none"
 "tests.quality" = "none"
+"static.analyze" = "none"
+"tests.coverage.line" = ">= 0.96"
+"static.crap.max" = "<= 20"
+"tests.mutation.score" = ">= 0.80"
+"gen.property.falsified" = "== 0"
+"spec.contracts" = "none"
 
 # The tree still holds 86 clone groups (169 similar pairs), mostly per-language test scaffolding
 # and same-shape data variants; the tree gate holds them from growing while the changed gate
@@ -39,3 +47,8 @@ bench = "cargo bench --bench {name} -- --save-baseline {id}"
 "static.deps.cycles" = "== 0"
 "static.dead-code" = "none"
 "tests.quality" = "none"
+"static.analyze" = "none"
+"tests.coverage.line" = ">= 0.96"
+"static.crap.max" = "<= 20"
+"gen.property.falsified" = "== 0"
+"spec.contracts" = "none"
