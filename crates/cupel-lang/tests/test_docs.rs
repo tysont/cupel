@@ -5,19 +5,12 @@ mod support;
 use cupel_core::syntax::TestFrames;
 use support::{file, produce, tree};
 
-/// (name, doc) for each case of `path` in a tree of `files`, produced as `lang`.
-fn docs(lang: &str, files: &[(&str, &str)], path: &str) -> Vec<(String, Option<String>)> {
-    let dir = tree(files);
-    let frames: TestFrames = produce(lang, dir.path());
-    file(&frames, path)
-        .cases
-        .iter()
-        .map(|case| (case.name.clone(), case.doc.clone()))
-        .collect()
-}
-
-fn row(name: &str, doc: Option<&str>) -> (String, Option<String>) {
-    (name.to_owned(), doc.map(str::to_owned))
+/// A test file in one language and the doc each of its cases should carry, by name.
+struct Documented {
+    lang: &'static str,
+    path: &'static str,
+    source: &'static str,
+    docs: &'static [(&'static str, Option<&'static str>)],
 }
 
 const RUST: &str = "\
@@ -50,22 +43,6 @@ fn after_a_documented_helper() {
 }
 ";
 
-#[test]
-fn rust_reads_outer_doc_lines_and_blocks_above_the_attributes() {
-    assert_eq!(
-        docs("rust", &[("tests/dates.rs", RUST)], "tests/dates.rs"),
-        [
-            row(
-                "parses_week_dates",
-                Some("/// Parses week dates.\n/// Traces REQ-1.")
-            ),
-            row("plain", None),
-            row("block", Some("/** Traces REQ-2. */")),
-            row("after_a_documented_helper", None),
-        ]
-    );
-}
-
 const GO: &str = "\
 package dates
 
@@ -86,20 +63,6 @@ func TestPlain(t *testing.T) {
 }
 ";
 
-#[test]
-fn go_reads_the_comment_lines_directly_above_the_function() {
-    assert_eq!(
-        docs("go", &[("dates_test.go", GO)], "dates_test.go"),
-        [
-            row(
-                "TestParses",
-                Some("// TestParses parses week dates.\n// It traces REQ-1.")
-            ),
-            row("TestPlain", None),
-        ]
-    );
-}
-
 const PYTHON: &str = "\
 def test_parses():
     \"\"\"Parses week dates (REQ-1).\"\"\"
@@ -116,25 +79,6 @@ class TestDates:
         '''Traces REQ-2.'''
         assert 1 == 1
 ";
-
-#[test]
-fn python_reads_the_docstring() {
-    assert_eq!(
-        docs(
-            "python",
-            &[("tests/test_dates.py", PYTHON)],
-            "tests/test_dates.py"
-        ),
-        [
-            row(
-                "test_parses",
-                Some("\"\"\"Parses week dates (REQ-1).\"\"\"")
-            ),
-            row("test_plain", None),
-            row("test_method", Some("'''Traces REQ-2.'''")),
-        ]
-    );
-}
 
 const ECMA: &str = "\
 describe(\"dates\", () => {
@@ -156,24 +100,6 @@ test(\"at the top level\", () => {
   expect(1).toBe(1);
 });
 ";
-
-#[test]
-fn javascript_and_typescript_read_the_jsdoc_block_above_the_call() {
-    for (lang, path) in [
-        ("javascript", "test/dates.test.js"),
-        ("typescript", "src/dates.test.ts"),
-    ] {
-        assert_eq!(
-            docs(lang, &[(path, ECMA)], path),
-            [
-                row("parses", Some("/** Parses week dates (REQ-1). */")),
-                row("plain", None),
-                row("at the top level", Some("/**\n * Traces REQ-2.\n */")),
-            ],
-            "{lang}"
-        );
-    }
-}
 
 const JAVA: &str = "\
 package dates;
@@ -197,18 +123,6 @@ class DatesTest {
 }
 ";
 
-#[test]
-fn java_reads_the_javadoc_above_the_method() {
-    let path = "src/test/java/dates/DatesTest.java";
-    assert_eq!(
-        docs("java", &[(path, JAVA)], path),
-        [
-            row("parses", Some("/** Parses week dates (REQ-1). */")),
-            row("plain", None),
-        ]
-    );
-}
-
 const CLOJURE: &str = "\
 (ns dates.core-test
   (:require [clojure.test :refer [deftest is]]))
@@ -222,14 +136,97 @@ const CLOJURE: &str = "\
   (is (= 1 1)))
 ";
 
+const DOCUMENTED: [Documented; 7] = [
+    Documented {
+        lang: "rust",
+        path: "tests/dates.rs",
+        source: RUST,
+        docs: &[
+            (
+                "parses_week_dates",
+                Some("/// Parses week dates.\n/// Traces REQ-1."),
+            ),
+            ("plain", None),
+            ("block", Some("/** Traces REQ-2. */")),
+            ("after_a_documented_helper", None),
+        ],
+    },
+    Documented {
+        lang: "go",
+        path: "dates_test.go",
+        source: GO,
+        docs: &[
+            (
+                "TestParses",
+                Some("// TestParses parses week dates.\n// It traces REQ-1."),
+            ),
+            ("TestPlain", None),
+        ],
+    },
+    Documented {
+        lang: "python",
+        path: "tests/test_dates.py",
+        source: PYTHON,
+        docs: &[
+            (
+                "test_parses",
+                Some("\"\"\"Parses week dates (REQ-1).\"\"\""),
+            ),
+            ("test_plain", None),
+            ("test_method", Some("'''Traces REQ-2.'''")),
+        ],
+    },
+    Documented {
+        lang: "javascript",
+        path: "test/dates.test.js",
+        source: ECMA,
+        docs: ECMA_DOCS,
+    },
+    Documented {
+        lang: "typescript",
+        path: "src/dates.test.ts",
+        source: ECMA,
+        docs: ECMA_DOCS,
+    },
+    Documented {
+        lang: "java",
+        path: "src/test/java/dates/DatesTest.java",
+        source: JAVA,
+        docs: &[
+            ("parses", Some("/** Parses week dates (REQ-1). */")),
+            ("plain", None),
+        ],
+    },
+    Documented {
+        lang: "clojure",
+        path: "test/dates/core_test.clj",
+        source: CLOJURE,
+        docs: &[
+            ("parses", Some(";; Parses week dates.\n;; Traces REQ-1.")),
+            ("plain", None),
+        ],
+    },
+];
+
+const ECMA_DOCS: &[(&str, Option<&str>)] = &[
+    ("parses", Some("/** Parses week dates (REQ-1). */")),
+    ("plain", None),
+    ("at the top level", Some("/**\n * Traces REQ-2.\n */")),
+];
+
+/// Rust's `///` lines and `/** */` above the attributes, Go's `//` lines, Python's docstring,
+/// `/** */` above the `it`/`test` statement and above a Java method, and Clojure's `;` lines; a
+/// plain comment, or a doc on a function that is not a test, documents no case.
 #[test]
-fn clojure_reads_the_comment_lines_above_the_form() {
-    let path = "test/dates/core_test.clj";
-    assert_eq!(
-        docs("clojure", &[(path, CLOJURE)], path),
-        [
-            row("parses", Some(";; Parses week dates.\n;; Traces REQ-1.")),
-            row("plain", None),
-        ]
-    );
+fn each_language_reads_its_own_doc_form_above_a_test() {
+    for documented in &DOCUMENTED {
+        let dir = tree(&[(documented.path, documented.source)]);
+        let frames: TestFrames = produce(documented.lang, dir.path());
+        let docs: Vec<(&str, Option<&str>)> = file(&frames, documented.path)
+            .cases
+            .iter()
+            .map(|case| (case.name.as_str(), case.doc.as_deref()))
+            .collect();
+        assert_eq!(docs, documented.docs, "{}", documented.lang);
+    }
 }
