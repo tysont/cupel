@@ -66,16 +66,16 @@ pub fn maximum(scores: &[Score]) -> Option<Score> {
 }
 
 /// Ratios combined over every language's targets together: each language's value weighted by
-/// the targets its score covers; zero when none does.
+/// the targets its score covers; when none covers any, the languages' own values averaged.
 pub fn weighted(scores: &[Score]) -> Option<Score> {
     let first = scores.first()?;
     let targets: u64 = scores.iter().map(|score| score.n).sum();
     #[allow(
         clippy::cast_precision_loss,
-        reason = "target counts stay far below 2^52, where f64 is exact"
+        reason = "target and language counts stay far below 2^52, where f64 is exact"
     )]
     let value = if targets == 0 {
-        0.0
+        scores.iter().map(|score| score.value).sum::<f64>() / scores.len() as f64
     } else {
         scores
             .iter()
