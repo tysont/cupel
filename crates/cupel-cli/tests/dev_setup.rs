@@ -1,4 +1,4 @@
-// ABOUTME: Tests for the development tool environment (ADR-139): every version ci.yml and release.yml's build job pin
+// ABOUTME: Tests for the development tool environment (ADR-139): every version ci.yml, its tools action, and release.yml's build job pin
 // ABOUTME: appears in scripts/dev-setup.sh, the scripts pass ShellCheck, and `make dev-env` exports only tools that exist.
 mod support;
 
@@ -86,12 +86,18 @@ fn steps(lines: &[String]) -> Vec<&[String]> {
         .collect()
 }
 
-/// Every pin the development environment mirrors: all of ci.yml, and the steps of release.yml's
+/// The composite action that installs the tools ci.yml's `check` and `dogfood` jobs share.
+fn tools_action() -> String {
+    fs::read_to_string(workspace().join(".github/actions/tools/action.yml")).unwrap()
+}
+
+/// Every pin the development environment mirrors: all of ci.yml and its tools action, and the steps of release.yml's
 /// `build` job that run on Linux or macOS (`make dist` is the local route to them). The Windows-only
 /// step (`choco install make`) and the publish jobs, which only CI runs, are not mirrored.
 fn workflow_pins() -> Vec<(String, String)> {
     let ci = workflow("ci.yml");
     let mut all = pins(ci.lines());
+    all.extend(pins(tools_action().lines()));
     let release = jobs(&workflow("release.yml"));
     let (_, build) = release
         .iter()
@@ -142,7 +148,7 @@ node-version: \"22.23.3\"
     );
 }
 
-/// A version pinned in ci.yml or release.yml's build job and not in scripts/dev-setup.sh means the
+/// A version pinned in ci.yml, its tools action, or release.yml's build job and not in scripts/dev-setup.sh means the
 /// local environment and CI have drifted: goldens regenerated locally would not match CI's.
 #[test]
 fn dev_setup_installs_every_version_the_workflows_pin() {
@@ -189,12 +195,12 @@ fn pins_what_it_installs(line: &str) -> bool {
         .all(names_a_version)
 }
 
-/// ci.yml names a version for every tool it installs by name and a patch release of Node and
+/// ci.yml and its tools action name a version for every tool they install by name and a patch release of Node and
 /// Python, so a local install can match it. Go's `1.23` is its final minor release and the JDK's
 /// `21` resolves to one release, which scripts/dev-setup.sh names exactly.
 #[test]
 fn ci_pins_every_package_and_runtime_it_installs() {
-    let ci = workflow("ci.yml");
+    let ci = workflow("ci.yml") + &tools_action();
     let unpinned: Vec<&str> = ci
         .lines()
         .map(str::trim)

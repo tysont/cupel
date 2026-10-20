@@ -1,5 +1,5 @@
 // ABOUTME: Tests for how Cupel grades itself (ADR-129): `make dogfood` runs the gate at `--depth deep`, CI's dogfood
-// ABOUTME: job installs what the deep checks run, and cupel.toml's gates hold the deep checks' rules.
+// ABOUTME: job installs what the deep checks run through the shared tools action, and cupel.toml's gates hold the deep checks' rules.
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
@@ -82,9 +82,9 @@ fn dogfood_job() -> Vec<String> {
         .collect()
 }
 
-/// The dogfood job installs the runner and coverage tool the suite run and the mutation engine
-/// drive (cargo-nextest, cargo-llvm-cov with the LLVM tools), frees the disk the mutation slots
-/// need, builds without debug info, as the measurements in ADR-129 ran, and clears the local
+/// The dogfood job installs every tool the suite drives (the deep run executes the suite under
+/// coverage as its baseline) through the action the `check` job uses, frees the disk the mutation
+/// slots need, builds without debug info, as the measurements in ADR-129 ran, and clears the local
 /// budget so both gates run in full.
 #[test]
 fn the_dogfood_job_installs_what_the_deep_checks_run() {
@@ -93,9 +93,7 @@ fn the_dogfood_job_installs_what_the_deep_checks_run() {
         "timeout-minutes: 90",
         "CARGO_PROFILE_DEV_DEBUG: \"0\"",
         "run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL",
-        "tool: cargo-nextest@0.9.148",
-        "tool: cargo-llvm-cov@0.9.1",
-        "run: rustup component add llvm-tools-preview",
+        "- uses: ./.github/actions/tools",
         "run: make dogfood DOGFOOD_BUDGET=",
         "run: make dogfood DOGFOOD_SCOPE=tree DOGFOOD_BUDGET=",
     ];
@@ -104,4 +102,21 @@ fn the_dogfood_job_installs_what_the_deep_checks_run() {
         .filter(|line| !job.iter().any(|have| have == line))
         .collect();
     assert_eq!(missing, Vec::<&str>::new(), "{job:#?}");
+}
+
+/// The `check` job installs its tools through the same action, so the suite and the dogfood's
+/// baseline run of it see one tool set.
+#[test]
+fn the_check_job_installs_its_tools_through_the_same_action() {
+    let workflow = fs::read_to_string(root().join(".github/workflows/ci.yml")).unwrap();
+    let (_, job) = workflow.split_once("\n  check:\n").expect("a check job");
+    let (job, _) = job
+        .split_once("\n  dogfood:\n")
+        .expect("the dogfood job after it");
+    assert_eq!(
+        job.lines()
+            .filter(|line| line.trim() == "- uses: ./.github/actions/tools")
+            .count(),
+        1
+    );
 }

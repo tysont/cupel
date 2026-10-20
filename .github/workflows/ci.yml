@@ -1,7 +1,6 @@
 # ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, property framework, analyzer, race detector, fuzzer, bench tool, contract library, and JVM build tool
 # ABOUTME: installed, `make dogfood` (Cupel's own gate at `--depth deep`, ADR-129) for every push and pull request, and the installer tests (ADR-125). Rust comes from rust-toolchain.toml.
-# Every version pinned here is also pinned in scripts/dev-setup.sh, which installs the same tools for local runs
-# (ADR-139); crates/cupel-cli/tests/dev_setup.rs fails while the two differ.
+# The tools every job but installers needs come from .github/actions/tools (ADR-129, ADR-139).
 name: ci
 
 on:
@@ -20,149 +19,7 @@ jobs:
       - name: Install pinned toolchain
         run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
-      # The test runners the runner producers' integration tests drive for real (P3.1); without
-      # them those tests report SKIPPED instead of running.
-      - name: Install cargo-nextest
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-nextest@0.9.148
-      # The coverage tools the coverage producers' integration tests drive for real (P3.2, ADR-077).
-      - name: Install cargo-llvm-cov and llvm-tools-preview
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-llvm-cov@0.9.1
-      - name: Add llvm-tools-preview
-        run: rustup component add llvm-tools-preview
-      # Pinned to the Go release the coverage fixtures' committed coverprofile and the real-tool
-      # tests' block counts come from: coverprofile block boundaries differ between Go releases.
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.23'
-          cache: false
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12.10"
-      - name: Install pytest
-        run: python -m pip install pytest==9.1.1
-      # Per-test coverage (P3.3): the per-test map producers' integration tests drive
-      # cargo-llvm-cov (with the LLVM tools) and pytest-cov for real.
-      - name: Install llvm-tools-preview
-        run: rustup component add llvm-tools-preview
-      - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-llvm-cov@0.9.1
-      - name: Install pytest-cov
-        run: python -m pip install pytest-cov==7.1.0
-      - name: Install pytest and pytest-cov
-        run: python -m pip install pytest==9.1.1 pytest-cov==7.1.0
-      # The property framework the property engine's Python tests drive for real (P5.4, ADR-095).
-      # Pinned: the gen.property fixture's everyday suite passes with a pinned seed, and which
-      # inputs a seed generates can change between releases.
-      - name: Install Hypothesis
-        run: python -m pip install hypothesis==6.170.1
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22.23.3"
-      - name: Install vitest, its v8 coverage provider, and jest
-        run: npm install --global vitest@5.0.5 @vitest/coverage-v8@5.0.5 jest@30.5.2
-      # fast-check for the property engine's JavaScript and TypeScript tests (P5.4, ADR-095); the
-      # gen.property fixtures resolve it beside the global vitest and jest. Pinned for the same
-      # reason as Hypothesis.
-      - name: Install fast-check
-        run: npm install --global fast-check@4.10.2
-      # The analyzers static.analyze runs (P6.2, ADR-102); clippy comes with rust-toolchain.toml
-      # and go vet with Go. Pinned: the static.analyze goldens hold each tool's messages.
-      - name: Install mypy and ruff
-        run: python -m pip install mypy==2.4.0 ruff==0.17.1
-      - name: Install TypeScript and ESLint
-        run: npm install --global typescript@7.0.2 eslint@10.13.0
-      - name: Install staticcheck
-        run: |
-          go install honnef.co/go/tools/cmd/staticcheck@2024.1.1
-          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
-      # The race detectors and cargo-fuzz (P6.3, ADR-105, ADR-107) run through `cargo +nightly`.
-      # Pinned to the nightly the conc.race and gen.fuzz goldens were made with (Miri's messages and
-      # rustc's panic text follow it), installed under the name `nightly` the producers ask rustup for.
-      - name: Install the pinned nightly as nightly, with Miri and the standard library's source
-        run: |
-          rustup toolchain install nightly-2026-03-26 --profile minimal --component miri --component rust-src
-          toolchains="$(rustup show home)/toolchains"
-          host="$(rustc -vV | sed -n 's/^host: //p')"
-          ln -sfn "$toolchains/nightly-2026-03-26-$host" "$toolchains/nightly-$host"
-          cargo +nightly miri setup
-      # The fuzzers and bench tools gen.fuzz and perf.bench drive for real (P6.3, ADR-106, ADR-107).
-      # Pinned: the goldens hold their messages. atheris is not installed: it builds only against a
-      # clang that ships libFuzzer, so gen.fuzz stays `unavailable` for Python here as on macOS.
-      # ThreadSanitizer symbolizes its stacks through llvm-symbolizer when its runtime has no symbolizer
-      # of its own; frames left as addresses are outside the repository and conc.race keeps the race
-      # without a place (ADR-105).
-      - name: Install llvm-symbolizer
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y llvm
-      - name: Install cargo-fuzz and hyperfine
-        run: |
-          cargo install cargo-fuzz --version 0.13.2 --locked
-          cargo install hyperfine --version 1.20.0 --locked
-      - name: Install pytest-benchmark
-        run: python -m pip install pytest-benchmark==5.1.0
-      # A global install nests Jazzer.js's own packages under core/node_modules, where core does not
-      # look for its bug detectors (`@jazzer.js/bug-detectors/dist/internal` beside it), and every run
-      # ends at start; a local install hoists them, so Jazzer.js gets a prefix of its own on PATH.
-      - name: Install Jazzer.js
-        run: |
-          npm install --prefix "$RUNNER_TEMP/jazzer" @jazzer.js/core@4.0.0
-          echo "$RUNNER_TEMP/jazzer/node_modules/.bin" >> "$GITHUB_PATH"
-      # Java and Clojure (P6.4, ADR-108, ADR-109): the JDK, Maven, Gradle, and the Clojure CLI that the Java and
-      # Clojure runner, coverage, and PIT plugin tests and goldens drive for real. Pinned: the coverage fixtures'
-      # committed JaCoCo and Cloverage reports and the PIT capture come from these releases. Each tool downloads the
-      # fixtures' dependencies (JUnit, JaCoCo, PIT, Cloverage, test.check) into its own cache on first use.
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - name: Install Maven 3.9.16
-        run: |
-          curl -sSfL https://archive.apache.org/dist/maven/maven-3/3.9.16/binaries/apache-maven-3.9.16-bin.tar.gz | tar xz -C "$HOME"
-          echo "$HOME/apache-maven-3.9.16/bin" >> "$GITHUB_PATH"
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '9.6.1'
-      - name: Install the Clojure CLI 1.12.5.1664
-        run: |
-          curl -sSfL -o "$RUNNER_TEMP/posix-install.sh" https://github.com/clojure/brew-install/releases/download/1.12.5.1664/posix-install.sh
-          bash "$RUNNER_TEMP/posix-install.sh" --prefix "$HOME/clojure"
-          echo "$HOME/clojure/bin" >> "$GITHUB_PATH"
-      # The trace validator, model checker, and verifier that spec.trace, conc.model-check, and spec.prove drive for
-      # real (P7.2, P7.5, ADR-116, ADR-117, ADR-118). Pinned: the goldens hold their verdicts and messages. TLC and
-      # SANY run from the TLA+ tools' jar on the JDK above, through `tlc` and `sany` scripts as tla-bin installs them;
-      # `cargo kani setup` downloads Kani's bundle and installs its own nightly; Dafny's release bundles Z3.
-      - name: Install the TLA+ tools 1.7.4 as tlc and sany
-        run: |
-          mkdir -p "$HOME/tla/bin"
-          curl -sSfL -o "$HOME/tla/tla2tools.jar" https://github.com/tlaplus/tlaplus/releases/download/v1.7.4/tla2tools.jar
-          printf '#!/bin/sh\nexec java -XX:+UseParallelGC -cp "%s" tlc2.TLC "$@"\n' "$HOME/tla/tla2tools.jar" > "$HOME/tla/bin/tlc"
-          printf '#!/bin/sh\nexec java -cp "%s" tla2sany.SANY "$@"\n' "$HOME/tla/tla2tools.jar" > "$HOME/tla/bin/sany"
-          chmod +x "$HOME/tla/bin/tlc" "$HOME/tla/bin/sany"
-          echo "$HOME/tla/bin" >> "$GITHUB_PATH"
-      - name: Install Kani 0.68.0
-        run: |
-          cargo install --locked kani-verifier --version 0.68.0
-          cargo kani setup
-      - name: Install Dafny 4.11.0
-        run: |
-          case "$RUNNER_OS-$(uname -m)" in
-            Linux-*) asset=dafny-4.11.0-x64-ubuntu-22.04.zip ;;
-            macOS-arm64) asset=dafny-4.11.0-arm64-macos-13.zip ;;
-            *) asset=dafny-4.11.0-x64-macos-13.zip ;;
-          esac
-          curl -sSfL -o "$RUNNER_TEMP/dafny.zip" "https://github.com/dafny-lang/dafny/releases/download/v4.11.0/$asset"
-          unzip -q "$RUNNER_TEMP/dafny.zip" -d "$HOME"
-          echo "$HOME/dafny" >> "$GITHUB_PATH"
-      # The contract library tool.icontract reads (P7.1, ADR-113); the spec.contracts Rust fixture fetches the
-      # `contracts` crate from crates.io itself. Pinned: the spec.contracts goldens hold icontract's messages.
-      - name: Install icontract
-        run: python -m pip install icontract==2.7.3
+      - uses: ./.github/actions/tools
       - name: make check
         run: make check
       # Every golden-harness run again through the daemon, compared with the cold run (ADR-085 §11).
@@ -189,17 +46,9 @@ jobs:
       - name: Install pinned toolchain
         run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
-      # The runner cupel.toml names and the coverage tool of the suite run (ADR-084).
-      - name: Install cargo-nextest
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-nextest@0.9.148
-      - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-llvm-cov@0.9.1
-      - name: Add llvm-tools-preview
-        run: rustup component add llvm-tools-preview
+      # The deep run executes the suite under coverage as its baseline, so the dogfood needs every
+      # tool `make check` needs, not only the runner and coverage tool cupel.toml names (ADR-084).
+      - uses: ./.github/actions/tools
       - name: Local main branch for --changed
         if: github.ref != 'refs/heads/main'
         run: git branch --force main origin/main
