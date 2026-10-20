@@ -415,3 +415,26 @@ fn scores_combine_weighted_by_the_mutants_they_score_and_counts_add_up() {
         Some(7.0 / 8.0)
     );
 }
+
+/// A scope with no mutant scores 1 in every language (nothing survived), and so combined: a
+/// change that touches no mutable code meets any score floor.
+#[test]
+fn languages_that_scored_no_mutant_combine_to_a_score_of_one() {
+    let check = support::check(ID);
+    let none = || {
+        language(
+            check,
+            &[("score", 1.0), ("killed", 0.0), ("survived", 0.0)],
+            0,
+        )
+    };
+    let results = [none(), none()];
+    assert_eq!(combined(check, "score", &results), Some(1.0));
+    assert_eq!(combined(check, "score", &results[..1]), Some(1.0));
+    let scores = [
+        support::score(1.0, "killed_ratio", 0),
+        support::score(1.0, "killed_ratio", 0),
+    ];
+    let score = check.combine(&scores).unwrap();
+    assert_eq!((score.value, score.n), (1.0, 0));
+}

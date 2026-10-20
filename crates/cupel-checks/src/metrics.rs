@@ -115,7 +115,9 @@ pub fn sum(name: &str, results: &[&CheckResult]) -> Option<f64> {
 }
 
 /// A ratio over the whole scope: each language's ratio weighted by what it is a ratio of, so
-/// the result is the ratio over every language's targets together. Zero when nothing weighs.
+/// the result is the ratio over every language's targets together. When nothing weighs, the
+/// languages' own values for an empty scope, averaged (a check's convention for "nothing to
+/// score", such as a mutation score of 1, survives the combining).
 pub fn weighted_mean(
     name: &str,
     results: &[&CheckResult],
@@ -123,12 +125,25 @@ pub fn weighted_mean(
 ) -> Option<f64> {
     let mut total = 0.0;
     let mut weighted = 0.0;
+    let mut plain = 0.0;
     for result in results {
         let value = result.metrics.get(name)?;
         total += weight(result);
         weighted += value * weight(result);
+        plain += value;
     }
-    (!results.is_empty()).then(|| if total == 0.0 { 0.0 } else { weighted / total })
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "language counts stay far below 2^52, where f64 is exact"
+    )]
+    let languages = results.len() as f64;
+    (!results.is_empty()).then(|| {
+        if total == 0.0 {
+            plain / languages
+        } else {
+            weighted / total
+        }
+    })
 }
 
 /// The targets a language's score covers, as a weight.

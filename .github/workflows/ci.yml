@@ -1,5 +1,5 @@
 # ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, property framework, analyzer, race detector, fuzzer, bench tool, contract library, and JVM build tool
-# ABOUTME: installed, `make dogfood` (Cupel's own gate) for every push and pull request, and the installer tests (ADR-125). Rust comes from rust-toolchain.toml.
+# ABOUTME: installed, `make dogfood` (Cupel's own gate at `--depth deep`, ADR-129) for every push and pull request, and the installer tests (ADR-125). Rust comes from rust-toolchain.toml.
 # Every version pinned here is also pinned in scripts/dev-setup.sh, which installs the same tools for local runs
 # (ADR-139); crates/cupel-cli/tests/dev_setup.rs fails while the two differ.
 name: ci
@@ -169,25 +169,46 @@ jobs:
       - name: make parity
         run: make parity
 
+  # Cupel's own gate at `--depth deep` (ADR-129): the suite runs once under instrumentation for
+  # coverage and the per-test map, and the changed gate mutates every function of every changed
+  # file, each mutant built in one of two slots (`[lang.rust] mutation`) that each hold a build of
+  # the workspace, so the runner's preinstalled SDKs are removed for the disk. Debug info is off,
+  # as in the measurements, which keeps those builds smaller and faster.
   dogfood:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CARGO_PROFILE_DEV_DEBUG: "0"
     steps:
       - uses: actions/checkout@v4
         with:
           # `--changed` diffs against the merge base with main, so the history must be there.
           fetch-depth: 0
+      - name: Free disk space for the mutation slots
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
       - name: Install pinned toolchain
         run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
+      # The runner cupel.toml names and the coverage tool of the suite run (ADR-084).
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-nextest@0.9.148
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-llvm-cov@0.9.1
+      - name: Add llvm-tools-preview
+        run: rustup component add llvm-tools-preview
       - name: Local main branch for --changed
         if: github.ref != 'refs/heads/main'
         run: git branch --force main origin/main
       - name: make dogfood (changed gate)
         if: github.ref != 'refs/heads/main'
-        run: make dogfood
+        run: make dogfood DOGFOOD_BUDGET=
       - name: make dogfood (tree gate on main, which has no merge base to diff against)
         if: github.ref == 'refs/heads/main'
-        run: make dogfood DOGFOOD_SCOPE=tree
+        run: make dogfood DOGFOOD_SCOPE=tree DOGFOOD_BUDGET=
 
   # The installers under dist/ (ADR-125) on an image with only Rust, Node, Python, and ShellCheck added:
   # install.sh, the Homebrew formula, and the npm and pipx wrappers against a fake release served
