@@ -419,3 +419,53 @@ pub fn listed_tools() -> Vec<Value> {
         .expect("tools")
         .clone()
 }
+
+/// The repository's root.
+pub fn workspace() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .canonicalize()
+        .unwrap()
+}
+
+/// A workflow under `.github/workflows`, by file name.
+pub fn workflow(name: &str) -> String {
+    fs::read_to_string(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../.github/workflows")
+            .join(name),
+    )
+    .unwrap()
+}
+
+/// Each job of a workflow by name, with the trimmed lines of its body (ADR-128).
+pub fn jobs(workflow: &str) -> Vec<(String, Vec<String>)> {
+    let body = workflow.split_once("\njobs:\n").expect("a `jobs:` map").1;
+    let mut jobs: Vec<(String, Vec<String>)> = Vec::new();
+    for line in body.lines() {
+        let name = line
+            .strip_prefix("  ")
+            .filter(|rest| !rest.starts_with([' ', '#']))
+            .and_then(|rest| rest.strip_suffix(':'));
+        match (name, jobs.last_mut()) {
+            (Some(name), _) => jobs.push((name.to_owned(), Vec::new())),
+            (None, Some((_, lines))) => lines.push(line.trim().to_owned()),
+            (None, None) => {}
+        }
+    }
+    jobs
+}
+
+/// Whether `program` is installed. Without it the test reports itself skipped, unless
+/// `INSTALLER_TESTS_REQUIRE_TOOLS` is set (CI's installers job sets it), when it fails.
+pub fn installed(program: &str) -> bool {
+    if cupel_core::find_program(program).is_some() {
+        return true;
+    }
+    assert!(
+        std::env::var_os("INSTALLER_TESTS_REQUIRE_TOOLS").is_none(),
+        "{program} is not installed and INSTALLER_TESTS_REQUIRE_TOOLS is set"
+    );
+    eprintln!("SKIPPED: {program} not installed; this test did not run");
+    false
+}

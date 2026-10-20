@@ -1594,8 +1594,11 @@ The verbs are `init`, `doctor`, `describe`, `check`, `survey`, `explain`, `basel
 
 All automation goes through `make`.
 
+`make dev-setup` installs the pinned tool environment the tests, goldens, and gates need: every runner, coverage tool, analyzer, fuzzer, JVM build tool, and verifier CI installs, at CI's versions, under `~/.cache/cupel/dev-tools` (or `CUPEL_DEV_TOOLS`); a second run only verifies them. `make check` and every other target run with those tools first on `PATH`, and `eval "$(make -s dev-env)"` gives a shell that runs cargo directly the same environment ([ADR-139](docs/adr/CUPEL_DECISION_139.md)).
+
 | Target | Does |
 |---|---|
+| `make dev-setup` | install or verify the pinned development tools and print each one's version |
 | `make check` | fmt, clippy with `-D warnings`, every test, rustdoc with `-D warnings`, and a check that the build left the tree clean; the pre-commit bar |
 | `make test` | `cargo test --workspace`; `UPDATE_GOLDENS=1 make test` rewrites golden envelopes |
 | `make lint`, `make fmt` | `cargo fmt --check` and clippy; `cargo fmt` |
