@@ -442,7 +442,7 @@ On the tree, `survey` finds the clone the changed-scope `check` above did not: `
 
 ### `cupel explain`
 
-`explain` reads the fact store and never re-runs anything. Given a finding ID it returns the stored finding with a source excerpt and its full evidence. Given a check ID it returns that check's result, findings, and metrics from the last run that included it.
+`explain` reads the fact store and never re-runs anything. Given a finding ID it returns the stored finding with a source excerpt, its full evidence, and its remediation hint in full: for `clone.cluster` the largest subtree every member shares (its place in each member and the names and literals that differ, the extracted function's parameters), for `complexity.high` the most deeply nested block (its place, the constructs on the path to it, and the complexity it carries), and for `dep.cycle` the cheapest import to cut (the names it carries, and whether removing it breaks every cycle among the modules). The checks compute these hints when they report the finding, so `check` and `survey` carry them in `action.hints` too. Given a check ID it returns that check's result, findings, and metrics from the last run that included it.
 
 ```console
 $ cupel explain fnd_c5c4da --format text

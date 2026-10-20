@@ -57,6 +57,14 @@ expression: pretty(&schema)
           "format": "uint32",
           "minimum": 0
         },
+        "names": {
+          "description": "The names the statement imports from its target, as written (not a local alias); empty\nwhen it imports the module whole or the language's import names nothing (ADR-133).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-cupel-optional": true
+        },
         "relative": {
           "description": "True for path-relative imports such as `./b`.",
           "type": "boolean"

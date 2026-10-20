@@ -9,7 +9,11 @@
 //!   use tree such as `crate::a::{b, c}`). A statement importing several modules matches once
 //!   per specifier.
 //! - `@import.name` (optional, repeatable) on each name the statement imports from the module
-//!   (`from pkg import a, b`).
+//!   (`from pkg import a, b`), as the module spells it (not a local alias).
+//! - `@import.default` (optional) on the local name of a default import (`import d from`): the
+//!   statement imports the name `default`.
+//! - `@import.names` (optional) on a list whose named children each import one name (`{ a, b as
+//!   c }`): each child's `name` field, or the child itself when it has none, as written.
 //! - `@import.module` (optional) marks a declaration of a child module whose file sits next to
 //!   the declaring file (Rust `mod a;`): an edge of kind `declaration`.
 //! - `@import.reexport` (optional) marks a statement that exports what it imports (Rust
@@ -98,8 +102,17 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
             let statement = m.node(capture::IMPORT)?;
             let specifier = m.node(capture::IMPORT_SPECIFIER)?;
             let names: Vec<String> = m
-                .nodes(capture::IMPORT_NAME)
-                .map(|n| parsed.text(n).to_owned())
+                .has(capture::IMPORT_DEFAULT)
+                .then(|| "default".to_owned())
+                .into_iter()
+                .chain(
+                    m.nodes(capture::IMPORT_NAME)
+                        .map(|n| parsed.text(n).to_owned()),
+                )
+                .chain(
+                    m.nodes(capture::IMPORT_NAMES)
+                        .flat_map(|list| listed(parsed, list)),
+                )
                 .collect();
             Some(RawImport {
                 specifier: unquote(parsed.text(specifier)).to_owned(),
@@ -120,6 +133,18 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
         })
         .collect();
     FileImports { imports, modules }
+}
+
+/// The names a list of imported names holds: each named child's `name` field, or the child.
+fn listed(parsed: &Parsed, list: tree_sitter::Node<'_>) -> Vec<String> {
+    let mut cursor = list.walk();
+    list.named_children(&mut cursor)
+        .filter(|child| !child.is_extra())
+        .map(|child| {
+            let name = child.child_by_field_name("name").unwrap_or(child);
+            parsed.text(name).to_owned()
+        })
+        .collect()
 }
 
 /// What the import `m` matched does with its module: declares it, re-exports it (by its

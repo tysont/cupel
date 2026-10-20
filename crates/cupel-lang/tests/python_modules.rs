@@ -3,7 +3,10 @@
 mod support;
 
 use cupel_core::syntax::{EdgeKind, ModuleGraph};
-use support::{Edge, EdgeRow, edge_rows, fixture, kind, kinds, produce, row, tree, under};
+use support::{
+    Edge, EdgeRow, edge_rows, fixture, imported_names, kind, kinds, names_rows, produce, row, tree,
+    under,
+};
 
 const FIXTURE_EDGES: &[Edge<'static>] = &[
     (
@@ -439,5 +442,28 @@ fn imports_of_names_listed_in_all_are_re_exports() {
             kind("shop/__init__.py", ".cart.Cart", EdgeKind::ReExport),
             kind("shop/__init__.py", ".prices.total", EdgeKind::Import),
         ]
+    );
+}
+
+#[test]
+fn an_edge_names_what_a_from_import_takes_unless_it_is_a_submodule_or_a_wildcard() {
+    let dir = tree(&[
+        ("pkg/__init__.py", ""),
+        (
+            "pkg/a.py",
+            "from .b import B, C as D\nfrom . import b\nfrom .b import *\nimport pkg.b\n",
+        ),
+        ("pkg/b.py", "B = 1\nC = 2\n"),
+    ]);
+    let graph: ModuleGraph = produce("python", dir.path());
+    assert_eq!(
+        imported_names(&graph, "pkg/a.py"),
+        names_rows(&[
+            (".b.B", &["B"]),
+            (".b.C", &["C"]),
+            (".b", &[]),
+            (".b.*", &[]),
+            ("pkg.b", &[]),
+        ])
     );
 }

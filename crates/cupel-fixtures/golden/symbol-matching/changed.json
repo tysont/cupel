@@ -195,7 +195,24 @@
   "findings": [
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "deepest_block": {
+            "cognitive": 3,
+            "cyclomatic": 2,
+            "location": {
+              "col": 9,
+              "end_col": 21,
+              "end_line": 11,
+              "file": "src/billing.py",
+              "line": 10
+            },
+            "nesting": 1,
+            "path": [
+              "loop",
+              "branch"
+            ]
+          }
+        },
         "kind": "reduce_complexity",
         "priority": 2,
         "summary": "Split `settle_invoices` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
@@ -233,7 +250,24 @@
     },
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "deepest_block": {
+            "cognitive": 11,
+            "cyclomatic": 7,
+            "location": {
+              "col": 9,
+              "end_col": 45,
+              "end_line": 55,
+              "file": "src/billing.py",
+              "line": 46
+            },
+            "nesting": 1,
+            "path": [
+              "loop",
+              "branch"
+            ]
+          }
+        },
         "kind": "reduce_complexity",
         "priority": 2,
         "summary": "Split `reconcile` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."

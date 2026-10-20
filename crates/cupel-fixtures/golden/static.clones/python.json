@@ -154,7 +154,93 @@
     },
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "common_subtree": {
+            "location": {
+              "col": 1,
+              "end_col": 13,
+              "end_line": 5,
+              "file": "src/ledger/twins.py",
+              "line": 1
+            },
+            "nodes": 26,
+            "others": [
+              {
+                "location": {
+                  "col": 1,
+                  "end_col": 13,
+                  "end_line": 12,
+                  "file": "src/ledger/twins.py",
+                  "line": 8
+                },
+                "symbol": "ledger.twins.sum_after_charge"
+              },
+              {
+                "location": {
+                  "col": 1,
+                  "end_col": 14,
+                  "end_line": 19,
+                  "file": "src/ledger/twins.py",
+                  "line": 15
+                },
+                "symbol": "ledger.twins.net_total_floor"
+              },
+              {
+                "location": {
+                  "col": 1,
+                  "end_col": 13,
+                  "end_line": 30,
+                  "file": "src/ledger/twins.py",
+                  "line": 22
+                },
+                "symbol": "ledger.twins.net_total_laid_out"
+              }
+            ],
+            "parameters": [
+              {
+                "kind": "identifier",
+                "occurrences": 2,
+                "values": [
+                  "entries",
+                  "items",
+                  "entries",
+                  "entries"
+                ]
+              },
+              {
+                "kind": "identifier",
+                "occurrences": 3,
+                "values": [
+                  "fee",
+                  "charge",
+                  "fee",
+                  "fee"
+                ]
+              },
+              {
+                "kind": "identifier",
+                "occurrences": 3,
+                "values": [
+                  "total",
+                  "amount",
+                  "total",
+                  "total"
+                ]
+              },
+              {
+                "kind": "literal",
+                "occurrences": 1,
+                "values": [
+                  "0",
+                  "0",
+                  "10",
+                  "0"
+                ]
+              }
+            ],
+            "share": 1.0
+          }
+        },
         "kind": "refactor_extract",
         "priority": 2,
         "summary": "Extract the structure `net_total` shares with 3 other symbols into one function and call it from each."

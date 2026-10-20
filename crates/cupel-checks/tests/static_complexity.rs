@@ -1,13 +1,14 @@
 // ABOUTME: static.complexity over synthetic facts: metrics from Decisions and Symbols, thresholds and
-// ABOUTME: their validation, finding identity and shape, scope filtering, and the score (ADR-042).
+// ABOUTME: their validation, finding identity and shape, scope filtering, the score (ADR-042), the deepest block (ADR-133).
 mod support;
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use cupel_core::hint::{self, DeepestBlock};
 use cupel_core::syntax::{Decision, DecisionKind, Span, SymbolDef, SymbolKind, Visibility};
 use cupel_core::{
     ActionKind, Check, CheckId, CheckResult, CheckStatus, FactKind, Facts, Finding, FindingId,
-    LangId, MetricPer, Plan, Scope, Score, Severity,
+    LangId, Location, MetricPer, Plan, Scope, Score, Severity,
 };
 use serde_json::{Map, Value, json};
 
@@ -36,6 +37,7 @@ fn symbol(name: &str, line: u32, lines: u32, parameters: u32) -> SymbolDef {
 
 fn decision(kind: DecisionKind, nesting: u32, cyclomatic: u32, cognitive: u32) -> Decision {
     Decision {
+        span: None,
         kind,
         nesting,
         cyclomatic,
@@ -150,6 +152,7 @@ fn metrics_follow_the_weights_and_nesting_the_producer_attached() {
 fn a_match_counts_once_toward_cyclomatic_complexity_however_many_arms_it_has() {
     use DecisionKind::{Branch, Case};
     let arm = |continues| Decision {
+        span: None,
         continues,
         ..decision(Case, 0, 1, u32::from(!continues))
     };
@@ -388,4 +391,111 @@ fn each_symbol_in_scope_is_measured_for_cyclomatic_and_cognitive_rankings() {
         (location.file.as_str(), location.line, location.end_line),
         ("f.x", 1, 12)
     );
+}
+
+/// `decision` whose construct spans lines `line..=end_line`, from column 5 to 6.
+fn placed(decision: Decision, line: u32, end_line: u32) -> Decision {
+    Decision {
+        span: Some(Span {
+            line,
+            col: 5,
+            end_line,
+            end_col: 6,
+        }),
+        ..decision
+    }
+}
+
+/// A function whose two blocks nest equally deep: the first (lines 4–5) holds nothing, the
+/// second (lines 9–15) holds a condition and a return.
+fn two_deep_blocks() -> World {
+    use DecisionKind::{BooleanOp, Branch, EarlyReturn, Loop};
+    World {
+        symbols: vec![(
+            symbol("tangled", 1, 30, 1),
+            vec![
+                placed(decision(Branch, 0, 1, 1), 2, 20),
+                placed(decision(Loop, 1, 1, 1), 3, 6),
+                placed(decision(Branch, 2, 1, 1), 4, 5),
+                placed(decision(Loop, 1, 1, 1), 8, 18),
+                placed(decision(Branch, 2, 1, 1), 9, 15),
+                placed(decision(BooleanOp, 2, 1, 1), 9, 9),
+                placed(decision(EarlyReturn, 3, 0, 1), 10, 10),
+            ],
+        )],
+    }
+}
+
+fn complexity_high(findings: &[Finding]) -> &Finding {
+    findings
+        .iter()
+        .find(|finding| finding.kind == "complexity.high")
+        .unwrap()
+}
+
+#[test]
+fn a_complex_function_names_its_deepest_block_with_the_path_to_it_and_what_it_weighs() {
+    use DecisionKind::{Branch, Loop};
+    let (_, findings) = run(
+        &two_deep_blocks(),
+        json!({"cyclomatic_max": 1, "cognitive_max": 1}),
+    );
+    let found: DeepestBlock = hint::read(&complexity_high(&findings).action.hints).unwrap();
+    assert_eq!(
+        found,
+        DeepestBlock {
+            location: Location {
+                file: "f.x".to_owned(),
+                line: 9,
+                col: Some(5),
+                end_line: 15,
+                end_col: Some(6),
+            },
+            nesting: 2,
+            path: vec![Branch, Loop, Branch],
+            cyclomatic: 2,
+            cognitive: 5,
+        }
+    );
+}
+
+#[test]
+fn only_complexity_high_carries_the_deepest_block() {
+    let (_, findings) = run(
+        &two_deep_blocks(),
+        json!({"cyclomatic_max": 1, "cognitive_max": 1, "nesting_max": 0, "length_max": 1}),
+    );
+    let hinted: Vec<&str> = findings
+        .iter()
+        .filter(|finding| !finding.action.hints.is_empty())
+        .map(|finding| finding.kind.as_str())
+        .collect();
+    assert_eq!(hinted, ["complexity.high"]);
+}
+
+#[test]
+fn decisions_without_spans_give_no_deepest_block() {
+    use DecisionKind::{Branch, Loop};
+    let world = World {
+        symbols: vec![(
+            symbol("plain", 1, 10, 1),
+            vec![decision(Branch, 0, 1, 1), decision(Loop, 1, 1, 1)],
+        )],
+    };
+    let (_, findings) = run(&world, json!({"cyclomatic_max": 1, "cognitive_max": 1}));
+    assert!(complexity_high(&findings).action.hints.is_empty());
+}
+
+#[test]
+fn complexity_high_declares_its_deepest_block_hint() {
+    let manifest = support::check(ID).manifest().clone();
+    let hinted: Vec<(&str, Vec<&String>)> = manifest
+        .findings
+        .iter()
+        .map(|spec| (spec.kind.as_str(), spec.hints.keys().collect::<Vec<_>>()))
+        .filter(|(_, keys)| !keys.is_empty())
+        .collect();
+    assert_eq!(hinted.len(), 1);
+    assert_eq!(hinted[0].0, "complexity.high");
+    assert_eq!(hinted[0].1, ["deepest_block"]);
 }

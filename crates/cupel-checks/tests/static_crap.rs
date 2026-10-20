@@ -42,6 +42,7 @@ fn symbol(name: &str, line: u32) -> SymbolDef {
 fn branches(cyclomatic: u32) -> Vec<Decision> {
     (1..cyclomatic)
         .map(|_| Decision {
+            span: None,
             kind: DecisionKind::Branch,
             nesting: 0,
             cyclomatic: 1,

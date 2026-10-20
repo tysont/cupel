@@ -303,6 +303,11 @@ pub struct FindingDescription {
     pub summary: String,
     /// JSON Schema of this kind's `evidence` object.
     pub evidence: Map<String, Value>,
+    /// The remediation hints this kind's action carries, by `action.hints` key, each with its
+    /// JSON Schema (ADR-133). Absent when the kind carries none.
+    #[serde(default, skip_serializing_if = "Map::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub hints: Map<String, Value>,
     pub stability: Stability,
 }
 
@@ -315,6 +320,7 @@ impl FindingDescription {
             action: spec.action,
             summary: spec.summary.clone(),
             evidence: spec.evidence.clone(),
+            hints: spec.hints.clone(),
             stability: manifest.stability,
         }
     }

@@ -76,7 +76,9 @@ pub struct Action {
     pub kind: ActionKind,
     pub priority: u32,
     pub summary: String,
-    /// Kind-specific pointers, such as `nearest_test_file` or `covering_tests`.
+    /// Kind-specific pointers, such as `nearest_test_file` or `covering_tests`, and the
+    /// remediation hints of `crate::hint` (ADR-133).
+    #[schemars(schema_with = "crate::hint::hints_schema")]
     pub hints: Map<String, Value>,
 }
 

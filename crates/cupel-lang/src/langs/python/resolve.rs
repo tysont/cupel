@@ -68,14 +68,23 @@ fn edge(imports: &Imports<'_>, roots: &[String], file: &str, import: &RawImport)
         Some(name) => format!("{}.{name}", import.specifier),
         None => import.specifier.clone(),
     };
-    let target = if dots > 0 {
-        (1..dots)
-            .try_fold(dir_of(file), |dir, _| parent(&dir))
-            .and_then(|start| resolve_below(imports, &start, &segments, name))
-            .map_or(ImportTarget::Unresolved, |path| ImportTarget::File { path })
-    } else {
-        absolute(imports, roots, &segments, name)
+    let resolve = |name: Option<&str>| {
+        if dots > 0 {
+            (1..dots)
+                .try_fold(dir_of(file), |dir, _| parent(&dir))
+                .and_then(|start| resolve_below(imports, &start, &segments, name))
+                .map_or(ImportTarget::Unresolved, |path| ImportTarget::File { path })
+        } else {
+            absolute(imports, roots, &segments, name)
+        }
     };
+    let target = resolve(name);
+    // A name that leads somewhere its module alone does not is a submodule, imported whole.
+    let names = name
+        .filter(|name| *name != "*" && target == resolve(None))
+        .map(str::to_owned)
+        .into_iter()
+        .collect();
     ImportEdge {
         from: file.to_owned(),
         specifier,
@@ -83,6 +92,7 @@ fn edge(imports: &Imports<'_>, roots: &[String], file: &str, import: &RawImport)
         relative: dots > 0,
         line: import.line,
         edge_kind: import.kind,
+        names,
     }
 }
 

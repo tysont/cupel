@@ -60,6 +60,7 @@ pub fn graph(imports: &Imports<'_>) -> ModuleGraph {
                 relative: false,
                 line: import.line,
                 edge_kind: import.kind,
+                names: Vec::new(),
             });
         }
     }

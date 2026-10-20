@@ -28,6 +28,9 @@
           "edge_kind": "import",
           "from": "src/account.rs",
           "line": 5,
+          "names": [
+            "render"
+          ],
           "relative": false,
           "specifier": "crate::report::format::render",
           "target": {
@@ -39,6 +42,9 @@
           "edge_kind": "import",
           "from": "src/deps_cycle/alpha.rs",
           "line": 1,
+          "names": [
+            "BETA"
+          ],
           "relative": true,
           "specifier": "super::beta::BETA",
           "target": {
@@ -50,6 +56,9 @@
           "edge_kind": "import",
           "from": "src/deps_cycle/beta.rs",
           "line": 1,
+          "names": [
+            "ALPHA"
+          ],
           "relative": true,
           "specifier": "super::alpha::ALPHA",
           "target": {
@@ -94,6 +103,9 @@
           "edge_kind": "import",
           "from": "src/deps_layers/domain/mod.rs",
           "line": 3,
+          "names": [
+            "Store"
+          ],
           "relative": true,
           "specifier": "super::infra::Store",
           "target": {
@@ -138,6 +150,9 @@
           "edge_kind": "import",
           "from": "src/deps_layers/port.rs",
           "line": 1,
+          "names": [
+            "Cents"
+          ],
           "relative": true,
           "specifier": "super::domain::money::Cents",
           "target": {
@@ -149,6 +164,9 @@
           "edge_kind": "import",
           "from": "src/deps_layers/port.rs",
           "line": 2,
+          "names": [
+            "Order"
+          ],
           "relative": true,
           "specifier": "super::domain::Order",
           "target": {
@@ -160,6 +178,9 @@
           "edge_kind": "import",
           "from": "src/deps_layers/port.rs",
           "line": 3,
+          "names": [
+            "Store"
+          ],
           "relative": true,
           "specifier": "super::infra::Store",
           "target": {
@@ -171,6 +192,9 @@
           "edge_kind": "import",
           "from": "src/deps_tree/leaf.rs",
           "line": 1,
+          "names": [
+            "LIMIT"
+          ],
           "relative": true,
           "specifier": "super::LIMIT",
           "target": {
@@ -258,6 +282,9 @@
           "edge_kind": "re-export",
           "from": "src/lib.rs",
           "line": 11,
+          "names": [
+            "Account"
+          ],
           "relative": true,
           "specifier": "account::Account",
           "target": {
@@ -302,6 +329,9 @@
           "edge_kind": "import",
           "from": "src/main.rs",
           "line": 1,
+          "names": [
+            "balance"
+          ],
           "relative": false,
           "specifier": "ledger::balance",
           "target": {
@@ -346,6 +376,9 @@
           "edge_kind": "import",
           "from": "src/report/mod.rs",
           "line": 3,
+          "names": [
+            "square"
+          ],
           "relative": false,
           "specifier": "shapes::square",
           "target": {
@@ -357,6 +390,9 @@
           "edge_kind": "import",
           "from": "tests/ledger.rs",
           "line": 1,
+          "names": [
+            "Account"
+          ],
           "relative": false,
           "specifier": "ledger::Account",
           "target": {
@@ -368,6 +404,9 @@
           "edge_kind": "import",
           "from": "tests/ledger.rs",
           "line": 2,
+          "names": [
+            "discounted"
+          ],
           "relative": false,
           "specifier": "ledger::pricing::discounted",
           "target": {
@@ -379,6 +418,9 @@
           "edge_kind": "import",
           "from": "tests/properties.rs",
           "line": 1,
+          "names": [
+            "discounted"
+          ],
           "relative": false,
           "specifier": "ledger::pricing::discounted",
           "target": {
@@ -400,6 +442,9 @@
           "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 1,
+          "names": [
+            "balance"
+          ],
           "relative": false,
           "specifier": "ledger::balance",
           "target": {
@@ -411,6 +456,9 @@
           "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 2,
+          "names": [
+            "classify"
+          ],
           "relative": false,
           "specifier": "ledger::decide::classify",
           "target": {
@@ -422,6 +470,9 @@
           "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 3,
+          "names": [
+            "discounted"
+          ],
           "relative": false,
           "specifier": "ledger::pricing::discounted",
           "target": {
@@ -433,6 +484,9 @@
           "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 3,
+          "names": [
+            "tally"
+          ],
           "relative": false,
           "specifier": "ledger::pricing::tally",
           "target": {
@@ -444,6 +498,9 @@
           "edge_kind": "import",
           "from": "tests/quality_signals.rs",
           "line": 4,
+          "names": [
+            "Account"
+          ],
           "relative": false,
           "specifier": "ledger::Account",
           "target": {

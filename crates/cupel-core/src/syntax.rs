@@ -124,6 +124,11 @@ pub struct Decision {
     /// A `case` arm after the first of its match or switch: the same multiway decision, which
     /// modified cyclomatic complexity counts once (ADR-072). Always false for other kinds.
     pub continues: bool,
+    /// Where the decision's construct is in the file; absent when the producer does not say
+    /// (ADR-133).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub span: Option<Span>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
@@ -153,10 +158,38 @@ pub struct NormalizedSymbol {
 }
 
 /// A node of a normalized tree. Labels are language-independent so trees in one family compare.
+/// Its shape is its label and its children's shapes; the span and text say where it came from
+/// and are not part of the shape (ADR-133).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct NormNode {
     pub label: String,
     pub children: Vec<NormNode>,
+    /// Where the syntax node this node was normalized from is in the file; absent when the
+    /// producer does not say.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub span: Option<Span>,
+    /// The source text of an identifier or literal that normalized to a marker (`$id`, `$lit`);
+    /// absent for every other node.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub text: Option<String>,
+}
+
+/// A node's shape as it serializes: its label and its children's shapes.
+#[derive(Serialize)]
+struct Shape<'a> {
+    label: &'a str,
+    children: Vec<Shape<'a>>,
+}
+
+impl<'a> Shape<'a> {
+    fn of(node: &'a NormNode) -> Self {
+        Self {
+            label: &node.label,
+            children: node.children.iter().map(Shape::of).collect(),
+        }
+    }
 }
 
 impl NormNode {
@@ -165,12 +198,41 @@ impl NormNode {
         Self {
             label: label.to_owned(),
             children,
+            span: None,
+            text: None,
         }
     }
 
     /// A node labelled `label` without children.
     pub fn leaf(label: &str) -> Self {
         Self::new(label, Vec::new())
+    }
+
+    /// This node at `span`.
+    #[must_use]
+    pub fn at(self, span: Span) -> Self {
+        Self {
+            span: Some(span),
+            ..self
+        }
+    }
+
+    /// Whether `other` has this node's shape: the same labels with the same children, whatever
+    /// their spans and texts.
+    pub fn same_shape(&self, other: &NormNode) -> bool {
+        self.label == other.label
+            && self.children.len() == other.children.len()
+            && self
+                .children
+                .iter()
+                .zip(&other.children)
+                .all(|(a, b)| a.same_shape(b))
+    }
+
+    /// The shape as JSON, `{"label":…,"children":[…]}`: what the structural hash is taken over
+    /// (ADR-025), unchanged by spans and texts (ADR-133).
+    pub fn shape_json(&self) -> Vec<u8> {
+        serde_json::to_vec(&Shape::of(self)).unwrap_or_default()
     }
 }
 
@@ -317,6 +379,11 @@ pub struct ImportEdge {
     pub line: u32,
     /// What the statement does with the module (ADR-068).
     pub edge_kind: EdgeKind,
+    /// The names the statement imports from its target, as written (not a local alias); empty
+    /// when it imports the module whole or the language's import names nothing (ADR-133).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub names: Vec<String>,
 }
 
 /// What an import statement does with the module it names.

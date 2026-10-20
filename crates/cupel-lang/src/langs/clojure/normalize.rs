@@ -18,6 +18,7 @@ use crate::language::Language;
 use crate::normalize::structural_hash;
 use crate::parse::{ParseCache, Parsed};
 use crate::producer::{QueryProducer, Source};
+use crate::query::span;
 use crate::symbols::definitions;
 
 /// What a name that is not a call's function becomes.
@@ -50,7 +51,7 @@ pub fn extract(source: &Source<'_>) -> NormTree {
                 let root = if nodes.len() == 1 {
                     nodes.remove(0)
                 } else {
-                    NormNode::new(definition.node.kind(), nodes)
+                    NormNode::new(definition.node.kind(), nodes).at(span(definition.node))
                 };
                 NormalizedSymbol {
                     symbol: definition.symbol.key(),
@@ -76,10 +77,11 @@ impl Normalizer<'_> {
         }
         match node.kind() {
             "sym_lit" if self.is_own_name(node) => Vec::new(),
-            "sym_lit" if head => vec![NormNode::leaf(&self.called(node))],
-            "sym_lit" | "kwd_lit" => vec![NormNode::leaf(NAME)],
+            "sym_lit" if head => vec![NormNode::leaf(&self.called(node)).at(span(node))],
+            "sym_lit" => vec![marker(NAME, self.called(node), node)],
+            "kwd_lit" => vec![marker(NAME, self.parsed.text(node).to_owned(), node)],
             "num_lit" | "str_lit" | "char_lit" | "regex_lit" | "bool_lit" | "nil_lit" => {
-                vec![NormNode::leaf(LITERAL)]
+                vec![marker(LITERAL, self.parsed.text(node).to_owned(), node)]
             }
             "meta_lit" | "old_meta_lit" => Vec::new(),
             kind => {
@@ -93,7 +95,7 @@ impl Normalizer<'_> {
                     }
                     children.extend(form);
                 }
-                vec![NormNode::new(kind, children)]
+                vec![NormNode::new(kind, children).at(span(node))]
             }
         }
     }
@@ -105,7 +107,7 @@ impl Normalizer<'_> {
             .is_some_and(|name| name.id() == self.skip)
     }
 
-    /// The name a call's function symbol is written with, metadata left out: `f`, `str/join`.
+    /// The name a symbol is written with, metadata left out: `f`, `str/join`.
     fn called(&self, symbol: Node<'_>) -> String {
         let text = |field: &str| {
             symbol
@@ -117,5 +119,13 @@ impl Normalizer<'_> {
             (None, Some(name)) => name.to_owned(),
             _ => self.parsed.text(symbol).to_owned(),
         }
+    }
+}
+
+/// The leaf `label` standing for `node`, whose text is `text` (ADR-133).
+fn marker(label: &str, text: String, node: Node<'_>) -> NormNode {
+    NormNode {
+        text: Some(text),
+        ..NormNode::leaf(label).at(span(node))
     }
 }

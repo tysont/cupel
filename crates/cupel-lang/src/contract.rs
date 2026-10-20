@@ -61,6 +61,8 @@ pub mod capture {
     pub const IMPORT: &str = "import";
     pub const IMPORT_SPECIFIER: &str = "import.specifier";
     pub const IMPORT_NAME: &str = "import.name";
+    pub const IMPORT_DEFAULT: &str = "import.default";
+    pub const IMPORT_NAMES: &str = "import.names";
     pub const IMPORT_MODULE: &str = "import.module";
     pub const IMPORT_REEXPORT: &str = "import.reexport";
     pub const REEXPORT_NAME: &str = "reexport.name";
@@ -212,6 +214,8 @@ const IMPORTS: Contract = Contract {
     required: &[&[c::IMPORT], &[c::IMPORT_SPECIFIER]],
     optional: &[
         c::IMPORT_NAME,
+        c::IMPORT_DEFAULT,
+        c::IMPORT_NAMES,
         c::IMPORT_MODULE,
         c::IMPORT_REEXPORT,
         c::REEXPORT_NAME,

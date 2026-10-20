@@ -32,6 +32,7 @@ mod gate;
 pub mod git;
 mod grade;
 mod hash;
+pub mod hint;
 mod histories;
 mod id;
 mod joint;

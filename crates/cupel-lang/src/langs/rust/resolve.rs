@@ -177,18 +177,23 @@ impl Tree {
     /// The edges one import statement of `from` contributes.
     fn edges(&self, from: &Importer<'_>, import: &RawImport) -> Vec<ImportEdge> {
         let location = from.location;
-        let edge = |specifier: String, target: ImportTarget, relative: bool| ImportEdge {
+        let edge = |specifier: String, target: Resolved, relative: bool| ImportEdge {
             from: from.file.to_owned(),
             specifier,
-            target,
+            target: target.target,
             relative,
             line: import.line,
             edge_kind: import.kind,
+            names: target.name.into_iter().collect(),
         };
         if import.kind == EdgeKind::Declaration {
             let target = child_file(from.imports, &location.children_dir, import)
                 .map_or(ImportTarget::Unresolved, |path| ImportTarget::File { path });
-            return vec![edge(import.specifier.clone(), target, true)];
+            return vec![edge(
+                import.specifier.clone(),
+                Resolved::whole(target),
+                true,
+            )];
         }
         let here = [location.path.as_slice(), &import.scope].concat();
         expand(&import.specifier)
@@ -202,12 +207,7 @@ impl Tree {
 
     /// Where a `use` path written by `from` in module `here` of its crate leads, and whether
     /// it is relative to `here`.
-    fn resolve(
-        &self,
-        from: &Importer<'_>,
-        here: &[String],
-        path: &[String],
-    ) -> (ImportTarget, bool) {
+    fn resolve(&self, from: &Importer<'_>, here: &[String], path: &[String]) -> (Resolved, bool) {
         let root = from.location.root.as_str();
         match self.start(root, here, path) {
             Start::Within {
@@ -215,12 +215,14 @@ impl Tree {
                 skip,
                 relative,
             } => (self.walk_down(root, &base, &path[skip..]), relative),
-            Start::AboveRoot => (ImportTarget::Unresolved, true),
+            Start::AboveRoot => (Resolved::whole(ImportTarget::Unresolved), true),
             Start::Outside(first) => {
                 let target = match from.extern_crate(first) {
                     Extern::Crate(lib) => self.walk_down(&lib, &[], &path[1..]),
-                    Extern::External(name) => ImportTarget::External { package: name },
-                    Extern::Missing => ImportTarget::Unresolved,
+                    Extern::External(name) => {
+                        Resolved::whole(ImportTarget::External { package: name })
+                    }
+                    Extern::Missing => Resolved::whole(ImportTarget::Unresolved),
                 };
                 (target, false)
             }
@@ -255,25 +257,43 @@ impl Tree {
         }
     }
 
-    /// The file of the deepest module `rest` names below `base` in the crate at `root`.
-    fn walk_down(&self, root: &str, base: &[String], rest: &[String]) -> ImportTarget {
+    /// The file of the deepest module `rest` names below `base` in the crate at `root`, and the
+    /// segment after that module: the item the path imports from it, unless it is a glob.
+    fn walk_down(&self, root: &str, base: &[String], rest: &[String]) -> Resolved {
         let mut current = base.to_vec();
+        let mut name = None;
         for segment in rest {
             current.push(segment.clone());
             if !self.has(root, &current) {
                 current.pop();
+                name = Some(segment).filter(|segment| *segment != "*").cloned();
                 break;
             }
         }
-        self.modules
+        let target = self
+            .modules
             .get(&(root.to_owned(), current))
             .map_or(ImportTarget::Unresolved, |path| ImportTarget::File {
                 path: path.clone(),
-            })
+            });
+        Resolved { target, name }
     }
 
     fn has(&self, root: &str, path: &[String]) -> bool {
         self.modules.contains_key(&(root.to_owned(), path.to_vec()))
+    }
+}
+
+/// Where a `use` path leads, and the item it imports from the module there, if it names one.
+struct Resolved {
+    target: ImportTarget,
+    name: Option<String>,
+}
+
+impl Resolved {
+    /// `target`, imported whole.
+    fn whole(target: ImportTarget) -> Self {
+        Self { target, name: None }
     }
 }
 

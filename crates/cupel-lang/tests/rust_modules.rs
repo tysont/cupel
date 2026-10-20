@@ -3,7 +3,10 @@
 mod support;
 
 use cupel_core::syntax::{EdgeKind, ModuleGraph};
-use support::{Edge, EdgeRow, edge_rows, fixture, kind, kinds, produce, row, tree, under};
+use support::{
+    Edge, EdgeRow, edge_rows, fixture, imported_names, kind, kinds, names_rows, produce, row, tree,
+    under,
+};
 
 /// Whether an edge starts or ends in the `deps_` fixtures, which `static.deps` reads and
 /// `the_deps_fixtures_are_a_module_cycle_and_a_layered_tree` pins separately.
@@ -348,5 +351,32 @@ fn mod_declarations_are_declarations_and_visible_uses_re_exports() {
             kind("src/lib.rs", "child::Other", EdgeKind::ReExport),
             kind("src/lib.rs", "std::fmt", EdgeKind::Import),
         ]
+    );
+}
+
+#[test]
+fn an_edge_names_the_item_its_path_imports_from_the_module_it_resolves_to() {
+    let dir = tree(&[
+        ("Cargo.toml", "[package]\nname = \"app\"\n"),
+        ("src/lib.rs", "mod a;\nmod b;\n"),
+        (
+            "src/a.rs",
+            "use crate::b::{self, B, C as D};\nuse crate::b::*;\nuse super::b::E::V;\n",
+        ),
+        (
+            "src/b.rs",
+            "pub struct B;\npub struct C;\npub enum E { V }\n",
+        ),
+    ]);
+    let graph: ModuleGraph = produce("rust", dir.path());
+    assert_eq!(
+        imported_names(&graph, "src/a.rs"),
+        names_rows(&[
+            ("crate::b", &[]),
+            ("crate::b::B", &["B"]),
+            ("crate::b::C", &["C"]),
+            ("crate::b::*", &[]),
+            ("super::b::E::V", &["E"]),
+        ])
     );
 }

@@ -67,7 +67,7 @@ fn a_javascript_function_and_its_typescript_annotated_twin_normalize_alike() {
     ] {
         let javascript = tree_of(&javascript, &js_symbols, display);
         let typescript = tree_of(&typescript, &ts_symbols, display);
-        assert_eq!(javascript.root, typescript.root, "{display}");
+        assert!(javascript.root.same_shape(&typescript.root), "{display}");
         // The language is part of the hash (ADR-025): equal trees, different identities.
         assert_ne!(javascript.hash, typescript.hash, "{display}");
     }

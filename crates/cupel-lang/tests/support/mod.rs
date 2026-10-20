@@ -202,6 +202,29 @@ pub fn edge_rows(graph: &ModuleGraph) -> Vec<EdgeRow> {
         .collect()
 }
 
+/// Each edge of `graph` from `from`: its specifier and the names it imports, in edge order.
+pub fn imported_names(graph: &ModuleGraph, from: &str) -> Vec<(String, Vec<String>)> {
+    graph
+        .roots
+        .iter()
+        .flat_map(|root| &root.edges)
+        .filter(|edge| edge.from == from)
+        .map(|edge| (edge.specifier.clone(), edge.names.clone()))
+        .collect()
+}
+
+/// `(specifier, names)` rows as `imported_names` returns them.
+pub fn names_rows(rows: &[(&str, &[&str])]) -> Vec<(String, Vec<String>)> {
+    rows.iter()
+        .map(|(specifier, names)| {
+            (
+                (*specifier).to_owned(),
+                names.iter().map(|name| (*name).to_owned()).collect(),
+            )
+        })
+        .collect()
+}
+
 /// The expected `edge` in the root `root`.
 pub fn row(root: &str, edge: Edge<'_>) -> EdgeRow {
     let (from, line, specifier, target, relative) = edge;

@@ -438,6 +438,31 @@ fn describe_finding_shows_its_check_action_and_evidence_schema() {
 }
 
 #[test]
+fn describe_finding_shows_the_remediation_hints_a_kind_carries() {
+    for (kind, key, field) in [
+        ("clone.cluster", "common_subtree", "parameters"),
+        ("complexity.high", "deepest_block", "path"),
+        ("dep.cycle", "cheapest_cut", "breaks_component"),
+    ] {
+        let description = assert_described(&["describe", "finding", kind], "finding");
+        let hints = description["hints"].as_object().unwrap();
+        assert_eq!(hints.keys().collect::<Vec<_>>(), [key], "{kind}");
+        assert!(
+            hints[key]["required"]
+                .as_array()
+                .unwrap()
+                .contains(&json!(field)),
+            "{kind}: {}",
+            hints[key]
+        );
+        let text = run(["describe", "finding", kind, "--format", "text"]).stdout;
+        assert!(text.contains(&format!("hint {key}")), "{kind}:\n{text}");
+    }
+    let plain = assert_described(&["describe", "finding", "nesting.deep"], "finding");
+    assert!(plain.get("hints").is_none(), "{plain}");
+}
+
+#[test]
 fn describe_finding_resolves_a_reported_kind_through_its_template() {
     let description = assert_described(&["describe", "finding", "analyze.ruff.F401"], "finding");
     assert_eq!(

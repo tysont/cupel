@@ -112,6 +112,7 @@ impl Catalog {
                     action: spec.action,
                     summary: spec.summary,
                     evidence: spec.evidence,
+                    hints: spec.hints,
                     stability: Stability::Experimental,
                 })
         })

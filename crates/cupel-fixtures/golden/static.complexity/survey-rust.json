@@ -27,7 +27,23 @@
   "findings": [
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "deepest_block": {
+            "cognitive": 10,
+            "cyclomatic": 10,
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 29,
+              "file": "src/complexity.rs",
+              "line": 7
+            },
+            "nesting": 0,
+            "path": [
+              "branch"
+            ]
+          }
+        },
         "kind": "reduce_complexity",
         "priority": 2,
         "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
