@@ -128,3 +128,41 @@ pub fn counted(value: usize, unit: &str, n: usize) -> Score {
 pub fn tally<T, S: PartialEq>(items: &[T], status: impl Fn(&T) -> S, wanted: &S) -> usize {
     items.iter().filter(|item| status(item) == *wanted).count()
 }
+
+#[cfg(test)]
+mod tests {
+    use cupel_core::{CostClass, FactKind};
+
+    use super::*;
+    use crate::manifest::Declared;
+
+    fn manifest() -> Manifest {
+        Declared {
+            id: "x.subject",
+            tier: 2,
+            cost: CostClass::Quick,
+            needs: FactKind::Symbols,
+            findings: Vec::new,
+            metrics: &[],
+            summary: "",
+        }
+        .manifest()
+    }
+
+    /// A language's result carries its findings and nothing the scheduler adds: the scheduler
+    /// times the check and records why it was skipped.
+    #[test]
+    fn a_language_result_leaves_its_duration_and_skip_to_the_scheduler() {
+        let result = result(&manifest(), CheckStatus::Fail, None, BTreeMap::new(), 2);
+        assert_eq!((result.duration_ms, result.findings), (0, 2));
+        assert!(result.skipped.is_none() && result.notes.is_empty());
+    }
+
+    #[test]
+    fn an_unmeasured_pass_has_no_finding_metric_or_score_and_says_why() {
+        let result = unmeasured(&manifest(), "nothing to measure".to_owned());
+        assert_eq!((result.status, result.findings), (CheckStatus::Pass, 0));
+        assert!(result.score.is_none() && result.metrics.is_empty());
+        assert_eq!(result.notes, ["nothing to measure"]);
+    }
+}
