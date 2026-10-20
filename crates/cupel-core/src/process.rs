@@ -72,6 +72,11 @@ impl Process {
         self
     }
 
+    /// The variables set in the child's environment, in the order they were set.
+    pub fn environment(&self) -> &[(String, String)] {
+        &self.env
+    }
+
     /// Sends standard error to the same pipe as standard output, so the two keep their order.
     #[must_use]
     pub fn merged(mut self) -> Self {
