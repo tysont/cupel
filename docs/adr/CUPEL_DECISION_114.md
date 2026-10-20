@@ -1,6 +1,6 @@
 # CUPEL_DECISION_114: `meta.traceability`: requirement IDs from configuration, traced by the names of tests the range added
 
-**Date:** 2026-10-17 · **Status:** accepted · **Phase:** P7.6
+**Date:** 2026-10-17 · **Status:** accepted; §2 (a test names a requirement by its name only) and §1 (requirements come only from configuration) amended by [134](CUPEL_DECISION_134.md) (`REQ-<n>` markers and doc comments) · **Phase:** P7.6
 
 ## Context
 
