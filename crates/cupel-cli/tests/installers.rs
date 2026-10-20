@@ -13,7 +13,7 @@ use std::process::Command;
 use std::sync::OnceLock;
 
 use serde_json::{Value, json};
-use support::{Outcome, Repo};
+use support::{Outcome, Repo, installed, workspace};
 use tempfile::TempDir;
 use toml_edit::{DocumentMut, Item, Table};
 
@@ -22,13 +22,6 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// The release `tests/fixtures/SHA256SUMS` lists.
 const FIXTURE_VERSION: &str = "0.1.0";
-
-fn workspace() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .unwrap()
-}
 
 fn read_toml(relative: &str) -> DocumentMut {
     fs::read_to_string(workspace().join(relative))
@@ -147,20 +140,6 @@ impl Targets {
             .collect::<Vec<String>>()
             .concat()
     }
-}
-
-/// Whether `program` is installed. Without it the test reports itself skipped, unless
-/// `INSTALLER_TESTS_REQUIRE_TOOLS` is set (CI's installers job sets it), when it fails.
-fn installed(program: &str) -> bool {
-    if cupel_core::find_program(program).is_some() {
-        return true;
-    }
-    assert!(
-        std::env::var_os("INSTALLER_TESTS_REQUIRE_TOOLS").is_none(),
-        "{program} is not installed and INSTALLER_TESTS_REQUIRE_TOOLS is set"
-    );
-    eprintln!("SKIPPED: {program} not installed; this installer test did not run");
-    false
 }
 
 fn outcome(command: &mut Command) -> Outcome {
