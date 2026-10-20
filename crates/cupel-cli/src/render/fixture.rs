@@ -456,50 +456,56 @@ fn rankings() -> Rankings {
             },
         ],
         recommended: 2,
-        targets: vec![
-            RecommendedTarget {
-                rank: 1,
-                recommend: Recommendation::Protect,
-                lang: LangId::from("rust"),
-                target: Target {
-                    display: "rewrite::Planner::push_limit".to_owned(),
-                    symbol: Some("sh_4b1d9e0c4b1d9e01".parse().expect("valid hash")),
-                    location: Some(Location {
-                        file: "src/rewrite/planner.rs".to_owned(),
-                        line: 140,
-                        col: Some(5),
-                        end_line: 171,
-                        end_col: Some(6),
-                    }),
-                },
-                protection: Protection {
-                    mutation_score: Some(0.5),
-                    coverage: Some(0.8),
-                    tests: Some(3),
-                },
-                values: vec![TargetValue {
-                    check: CheckId::from("static.crap"),
-                    metric: "crap".to_owned(),
-                    value: 42.5,
-                    rank: 1,
-                }],
-                findings: vec!["fnd_7c2e1a".parse().expect("valid finding ID")],
-            },
-            RecommendedTarget {
-                rank: 2,
-                recommend: Recommendation::Simplify,
-                lang: LangId::from("typescript"),
-                target: Target {
-                    display: "web/limits".to_owned(),
-                    symbol: None,
-                    location: None,
-                },
-                protection: Protection::default(),
-                values: Vec::new(),
-                findings: Vec::new(),
-            },
-        ],
+        targets: targets(),
     }
+}
+
+/// A target to protect with its protection and one value, and one to simplify with nothing
+/// measured.
+fn targets() -> Vec<RecommendedTarget> {
+    vec![
+        RecommendedTarget {
+            rank: 1,
+            recommend: Recommendation::Protect,
+            lang: LangId::from("rust"),
+            target: Target {
+                display: "rewrite::Planner::push_limit".to_owned(),
+                symbol: Some("sh_4b1d9e0c4b1d9e01".parse().expect("valid hash")),
+                location: Some(Location {
+                    file: "src/rewrite/planner.rs".to_owned(),
+                    line: 140,
+                    col: Some(5),
+                    end_line: 171,
+                    end_col: Some(6),
+                }),
+            },
+            protection: Protection {
+                mutation_score: Some(0.5),
+                coverage: Some(0.8),
+                tests: Some(3),
+            },
+            values: vec![TargetValue {
+                check: CheckId::from("static.crap"),
+                metric: "crap".to_owned(),
+                value: 42.5,
+                rank: 1,
+            }],
+            findings: vec!["fnd_7c2e1a".parse().expect("valid finding ID")],
+        },
+        RecommendedTarget {
+            rank: 2,
+            recommend: Recommendation::Simplify,
+            lang: LangId::from("typescript"),
+            target: Target {
+                display: "web/limits".to_owned(),
+                symbol: None,
+                location: None,
+            },
+            protection: Protection::default(),
+            values: Vec::new(),
+            findings: Vec::new(),
+        },
+    ]
 }
 
 fn next_actions() -> Vec<NextAction> {

@@ -116,11 +116,10 @@ fn targets(envelope: &Value) -> Vec<(u64, &str, &str, Value)> {
         .collect()
 }
 
-#[test]
-fn a_standard_survey_protects_the_untested_function_before_simplifying_the_complex_one() {
-    let Some(repo) = Repo::python_fixture("tests.mutation") else {
-        return;
-    };
+/// `survey --depth standard` on the Python mutation fixture with a cyclomatic limit of 2;
+/// `None` without pytest.
+fn standard_survey() -> Option<Value> {
+    let repo = Repo::python_fixture("tests.mutation")?;
     let config = std::fs::read_to_string(repo.path("cupel.toml")).unwrap();
     repo.write(
         "cupel.toml",
@@ -128,7 +127,25 @@ fn a_standard_survey_protects_the_untested_function_before_simplifying_the_compl
     );
     let outcome = repo.run(&["survey", "--depth", "standard"]);
     assert_eq!(outcome.code, 0, "{}", outcome.stdout);
-    let envelope = outcome.envelope();
+    Some(outcome.envelope())
+}
+
+/// The kind and summary of the first `n` next actions.
+fn first_actions(envelope: &Value, n: usize) -> Vec<(&str, &str)> {
+    envelope["next_actions"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .take(n)
+        .map(|a| (a["kind"].as_str().unwrap(), a["summary"].as_str().unwrap()))
+        .collect()
+}
+
+#[test]
+fn a_standard_survey_protects_the_untested_function_before_simplifying_the_complex_one() {
+    let Some(envelope) = standard_survey() else {
+        return;
+    };
     // `refund` no test runs; `discount` is tested, but one mutant of four survives, and it is
     // more complex than the limit.
     assert_eq!(
@@ -157,15 +174,8 @@ fn a_standard_survey_protects_the_untested_function_before_simplifying_the_compl
         ),
         (&json!("tests.mutation"), &json!("lowest"), &json!(0.75))
     );
-    let first: Vec<(&str, &str)> = envelope["next_actions"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .take(3)
-        .map(|a| (a["kind"].as_str().unwrap(), a["summary"].as_str().unwrap()))
-        .collect();
     assert_eq!(
-        first,
+        first_actions(&envelope, 3),
         [
             ("write_test", "Write a test that calls `refund`."),
             (

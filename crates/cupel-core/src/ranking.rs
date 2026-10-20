@@ -3,7 +3,7 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 
-use crate::check::Manifest;
+use crate::check::{Manifest, MetricSpec};
 use crate::finding::{Finding, Symbol};
 use crate::hash::SymbolHash;
 use crate::rank::{
@@ -29,42 +29,7 @@ pub fn rankings<'a>(
                 .filter(|spec| spec.per != MetricPer::Scope)
                 .map(move |spec| (manifest, spec))
         })
-        .map(|(manifest, spec)| {
-            let mut values: Vec<&Measured> = measured
-                .iter()
-                .filter(|m| m.check == manifest.id && m.measurement.metric == spec.name)
-                .collect();
-            let worst = if spec.protection.is_some() {
-                Worst::Lowest
-            } else {
-                Worst::Highest
-            };
-            values.sort_by(|a, b| order(worst, a, b));
-            let dimension = RankingDimension {
-                check: manifest.id.clone(),
-                metric: spec.name.clone(),
-                per: spec.per,
-                summary: spec.summary.clone(),
-                worst,
-                measured: values.len() as u64,
-                entries: values
-                    .iter()
-                    .take(top)
-                    .zip(1..)
-                    .map(|(m, rank)| RankedTarget {
-                        rank,
-                        value: m.measurement.value,
-                        lang: m.lang.clone(),
-                        target: m.measurement.target.clone(),
-                    })
-                    .collect(),
-            };
-            Ranked {
-                dimension,
-                protection: spec.protection,
-                values,
-            }
-        })
+        .map(|(manifest, spec)| ranked(manifest, spec, measured, top))
         .collect();
     let mut targets = recommended(&ranked, findings);
     targets.sort_by(protect_first);
@@ -82,6 +47,49 @@ pub fn rankings<'a>(
             })
             .collect(),
         dimensions: ranked.into_iter().map(|r| r.dimension).collect(),
+    }
+}
+
+/// The dimension `spec` of `manifest` over `measured`, its `top` worst values listed.
+fn ranked<'a>(
+    manifest: &Manifest,
+    spec: &MetricSpec,
+    measured: &'a [Measured],
+    top: usize,
+) -> Ranked<'a> {
+    let mut values: Vec<&Measured> = measured
+        .iter()
+        .filter(|m| m.check == manifest.id && m.measurement.metric == spec.name)
+        .collect();
+    let worst = if spec.protection.is_some() {
+        Worst::Lowest
+    } else {
+        Worst::Highest
+    };
+    values.sort_by(|a, b| order(worst, a, b));
+    let dimension = RankingDimension {
+        check: manifest.id.clone(),
+        metric: spec.name.clone(),
+        per: spec.per,
+        summary: spec.summary.clone(),
+        worst,
+        measured: values.len() as u64,
+        entries: values
+            .iter()
+            .take(top)
+            .zip(1..)
+            .map(|(m, rank)| RankedTarget {
+                rank,
+                value: m.measurement.value,
+                lang: m.lang.clone(),
+                target: m.measurement.target.clone(),
+            })
+            .collect(),
+    };
+    Ranked {
+        dimension,
+        protection: spec.protection,
+        values,
     }
 }
 
