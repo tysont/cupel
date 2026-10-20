@@ -240,19 +240,22 @@ const MARKED: [Marked; 7] = [
     },
 ];
 
-/// `text` with `test` added as its last test: inside the last closing brace for Java, whose
+/// `source` with `case` added as its last test: inside the last closing brace for Java, whose
 /// tests are a class's methods, else at the end.
-fn with_test(lang: &str, text: &str, test: &str) -> String {
+fn with_test(lang: &str, source: &str, case: &str) -> String {
     if lang == "java" {
-        let close = text.rfind('}').expect("a class");
-        format!("{}{test}{}", &text[..close], &text[close..])
+        let close = source.rfind('}').expect("a class");
+        format!("{}{case}{}", &source[..close], &source[close..])
     } else {
-        format!("{text}{test}")
+        format!("{source}{case}")
     }
 }
 
-/// Each finding as (kind, title, source, [(test name, added)]), by kind.
-fn traced(envelope: &Envelope) -> Vec<(String, String, Value, Vec<(String, bool)>)> {
+/// A finding as (kind, title, source, [(test name, added)]).
+type Traced = (String, String, Value, Vec<(String, bool)>);
+
+/// Each finding, by kind.
+fn traced(envelope: &Envelope) -> Vec<Traced> {
     let mut traced: Vec<_> = envelope
         .findings
         .iter()

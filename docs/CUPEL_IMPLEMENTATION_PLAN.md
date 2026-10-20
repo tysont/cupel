@@ -1447,7 +1447,7 @@ The owner's P9 ruling (2026-10-19) defines three tracks. Track (b), the deep gat
 
 #### P9.5 `#REQ-n` markers as a secondary traceability source
 
-**Status:** not started
+**Status:** in progress (2026-10-20)
 
 - Track (a) item 5. Configured requirement IDs stay primary; `REQ-<n>` markers in test names are the secondary source (ADR-114 amended).
 
