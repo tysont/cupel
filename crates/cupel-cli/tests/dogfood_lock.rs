@@ -67,11 +67,14 @@ fn the_script_passes_shellcheck() {
 #[test]
 fn make_dogfood_runs_through_the_script() {
     let makefile = fs::read_to_string(workspace().join("Makefile")).unwrap();
+    // The recipe's grading line (its import of the baseline, ADR-140, writes only the store).
     let recipe = makefile
         .lines()
         .skip_while(|line| !line.starts_with("dogfood:"))
-        .nth(1)
-        .expect("a dogfood recipe");
+        .skip(1)
+        .take_while(|line| line.starts_with('\t'))
+        .find(|line| line.contains(" -- check "))
+        .expect("a dogfood recipe line that runs check");
     assert_eq!(
         recipe.split_whitespace().take(2).collect::<Vec<_>>(),
         ["scripts/dogfood.sh", "$(CARGO)"]
