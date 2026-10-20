@@ -92,16 +92,21 @@ mod tests {
         insta::assert_snapshot!(text::render(&fixture::envelope(), false));
     }
 
+    /// The `n` lines of the fixture envelope's text that start at the first line beginning with
+    /// `start`.
+    fn text_block(start: &str, n: usize) -> Vec<String> {
+        text::render(&fixture::envelope(), false)
+            .lines()
+            .skip_while(|line| !line.starts_with(start))
+            .take(n)
+            .map(str::to_owned)
+            .collect()
+    }
+
     #[test]
     fn text_lists_each_oracle_with_its_definition_state_and_verification() {
-        let out = text::render(&fixture::envelope(), false);
-        let block: Vec<&str> = out
-            .lines()
-            .skip_while(|line| !line.starts_with("oracles"))
-            .take(3)
-            .collect();
         assert_eq!(
-            block,
+            text_block("oracles", 3),
             [
                 "oracles  2",
                 "  bc  command `bc -l <<< {input}` · inputs 1 · changed · recorded \
@@ -114,14 +119,8 @@ mod tests {
 
     #[test]
     fn text_lists_the_targets_protect_first_with_their_protection() {
-        let out = text::render(&fixture::envelope(), false);
-        let block: Vec<&str> = out
-            .lines()
-            .skip_while(|line| !line.starts_with("  targets"))
-            .take(4)
-            .collect();
         assert_eq!(
-            block,
+            text_block("  targets", 4),
             [
                 "  targets  2 recommended, protect first",
                 "     1. protect  rewrite::Planner::push_limit  mutation 0.5 · coverage 0.8 · \
