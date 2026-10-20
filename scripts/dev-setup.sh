@@ -222,14 +222,17 @@ done
 
 # The race detectors and cargo-fuzz run through `cargo +nightly`; ci.yml installs the pinned nightly
 # and links it as `nightly`. A `nightly` rustup installed itself is replaced, so it cannot shadow the pin.
-nightly_components=$(rustup component list --installed --toolchain "$nightly" 2>/dev/null || true)
-case $nightly_components in
-*miri*rust-src* | *rust-src*miri*) ;;
-*)
+# Whether the pinned nightly is installed with Miri and rust-src.
+nightly_installed() {
+	case $(rustup component list --installed --toolchain "$nightly" 2>/dev/null || true) in
+	*miri*rust-src* | *rust-src*miri*) return 0 ;;
+	*) return 1 ;;
+	esac
+}
+if ! nightly_installed; then
 	installing "$nightly with Miri and rust-src"
 	rustup toolchain install "$nightly" --profile minimal --component miri --component rust-src
-	;;
-esac
+fi
 toolchains="$(rustup show home)/toolchains"
 nightly_link=$toolchains/nightly-$host
 if [ ! -L "$nightly_link" ] && [ -e "$nightly_link" ]; then
@@ -276,8 +279,9 @@ python=$dir/python/bin/python3
 venv=venv-$python_version-$(echo "$python_packages" | cksum | cut -d' ' -f1)
 if needs_in_place "$venv"; then
 	"$python" -m venv "$dir"
+	# --isolated: pip ignores the user's configuration, whose `user = true` would refuse a venv install.
 	# shellcheck disable=SC2086 # one word per package
-	"$dir/bin/python" -m pip install --quiet --disable-pip-version-check $python_packages
+	"$dir/bin/python" -m pip install --isolated --quiet --disable-pip-version-check $python_packages
 	mark
 fi
 link "$dir" venv
@@ -352,6 +356,7 @@ bin "$dir/bin/sany"
 # --- Verification: every tool, through the environment the Makefile gives every target ---
 
 CUPEL_DEV_TOOLS=$tools
+# shellcheck disable=SC1091 # dev-env.sh is checked on its own
 . "$root/scripts/dev-env.sh"
 
 failures=0
@@ -392,15 +397,13 @@ for target in $release_targets; do
 		"$(rustup target list --installed --toolchain "$channel" | grep -qx "$target" && echo installed)"
 done
 report "nightly" "$(found rustc "+$nightly" --version)" "$(found rustc +nightly --version)"
-report "nightly miri, rust-src" installed "$(case $(rustup component list --installed --toolchain "$nightly") in
-	*miri*rust-src* | *rust-src*miri*) echo installed ;;
-	esac)"
+report "nightly miri, rust-src" installed "$(nightly_installed && echo installed)"
 report cargo-nextest "$nextest_version" "$(found cargo nextest --version | word 2)"
 report cargo-llvm-cov "$llvm_cov_version" "$(found cargo llvm-cov --version | word 2)"
 report cargo-fuzz "$cargo_fuzz_version" "$(found cargo fuzz --version | word 2)"
 report hyperfine "$hyperfine_version" "$(found hyperfine --version | word 2)"
 report cargo-zigbuild "$zigbuild_version" "$(found cargo-zigbuild --version | word 2)"
-report kani "$kani_version" "$(found cargo kani --version | word 2)"
+report kani "$kani_version" "$(found cargo kani --version | word 4)"
 report "kani bundle" "$kani_version" "$([ -d "$KANI_HOME/kani-$kani_version" ] && echo "$kani_version")"
 report go "go$go_version" "$(found go version | word 3)"
 report staticcheck "$staticcheck_version" "$(found staticcheck -version | word 2)"
@@ -415,7 +418,8 @@ for package in $npm_packages; do
 	report "${package%@*}" "${package##*@}" "$(package_version "$npm_root/${package%@*}")"
 done
 report @jazzer.js/core "$jazzer_version" "$(package_version "$tools/jazzer/node_modules/@jazzer.js/core")"
-report java "$jdk_version" "$(found java -version | sed -n 's/.*(build \(.*\))$/\1/p' | sed -n 1p)"
+# Temurin's build string carries -LTS after the release and build.
+report java "$jdk_version-LTS" "$(found java -version | sed -n 's/.*(build \(.*\))$/\1/p' | sed -n 1p)"
 report maven "$maven_version" "$(found mvn --version | word 3)"
 report gradle "$gradle_version" "$(found gradle --version | sed -n 's/^Gradle //p')"
 report clojure "$clojure_version" "$(found clojure --version | word 4)"
