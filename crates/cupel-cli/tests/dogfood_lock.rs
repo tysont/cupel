@@ -72,9 +72,9 @@ fn make_dogfood_runs_through_the_script() {
         .skip_while(|line| !line.starts_with("dogfood:"))
         .nth(1)
         .expect("a dogfood recipe");
-    assert!(
-        recipe.starts_with("\tscripts/dogfood.sh "),
-        "the dogfood recipe runs through scripts/dogfood.sh: {recipe}"
+    assert_eq!(
+        recipe.split_whitespace().take(2).collect::<Vec<_>>(),
+        ["scripts/dogfood.sh", "$(CARGO)"]
     );
 }
 
