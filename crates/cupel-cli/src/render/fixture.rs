@@ -423,17 +423,23 @@ fn summary() -> Summary {
                 GateRule {
                     rule: "tests.mutation.score >= 0.80".to_owned(),
                     actual: Some(0.71),
+                    bound: Some(0.8),
                     result: RuleOutcome::Fail,
+                    reason: None,
                 },
                 GateRule {
                     rule: "tests.weakening none".to_owned(),
                     actual: Some(0.0),
+                    bound: Some(0.0),
                     result: RuleOutcome::Pass,
+                    reason: None,
                 },
                 GateRule {
                     rule: "perf.bench.regression < 5%".to_owned(),
                     actual: None,
+                    bound: None,
                     result: RuleOutcome::Skipped,
+                    reason: Some("`perf.bench` did not run to completion".to_owned()),
                 },
             ],
         }),

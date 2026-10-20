@@ -1379,6 +1379,21 @@ expression: pretty(&schema)
           ],
           "format": "double"
         },
+        "bound": {
+          "description": "The value `actual` was compared with: the threshold, the reference value plus the\noffset for a rule against `base` (ADR-130), or 0 for a presence rule; null when the\nrule was not evaluated.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "reason": {
+          "description": "Why a `skipped` rule was not evaluated, such as `no reference: no baseline is set`;\nnull otherwise.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "result": {
           "$ref": "#/$defs/RuleOutcome"
         },
@@ -1389,6 +1404,8 @@ expression: pretty(&schema)
       },
       "required": [
         "actual",
+        "bound",
+        "reason",
         "result",
         "rule"
       ]

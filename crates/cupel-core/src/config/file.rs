@@ -366,13 +366,13 @@ impl JsonSchema for GateSection {
     fn json_schema(_: &mut SchemaGenerator) -> Schema {
         json_schema!({
             "type": "object",
-            "description": "Gate rules: `<check-id>.<metric>` with `>= > <= < ==` and a number (optionally `%`), or `<check-id>` with `none` or `no-breaking`.",
+            "description": "Gate rules: `<check-id>.<metric>` with `>= > <= < ==` and a number (optionally `%`) or `base` (the metric in the reference run: the baseline, `--against`, or a range's base; optionally `base + <number>` or `base - <number>`), or `<check-id>` with `none` or `no-breaking`.",
             "propertyNames": {
                 "pattern": "^[a-z][a-z0-9_-]*\\.[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)?$"
             },
             "additionalProperties": {
                 "type": "string",
-                "pattern": "^\\s*((>=|>|<=|<|==)\\s*[-+]?[0-9.eE+-]+%?|none|no-breaking)\\s*$"
+                "pattern": "^\\s*((>=|>|<=|<|==)\\s*([-+]?[0-9.eE+-]+%?|base(\\s*[-+]\\s*[0-9.eE+-]+)?)|none|no-breaking)\\s*$"
             }
         })
     }

@@ -203,7 +203,9 @@ link "$dir/dafny" dafny
 
 channel=$(sed -n 's/^channel = "\(.*\)"$/\1/p' "$root/rust-toolchain.toml")
 host=$(rustup show | sed -n 's/^Default host: //p')
-[ -n "$channel" ] && [ -n "$host" ] || fail "cannot read the toolchain channel or rustup's host"
+if [ -z "$channel" ] || [ -z "$host" ]; then
+	fail "cannot read the toolchain channel or rustup's host"
+fi
 
 if ! rustup toolchain list | grep -q "^$channel-$host"; then
 	installing "Rust $channel"

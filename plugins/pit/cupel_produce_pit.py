@@ -17,6 +17,8 @@ The command runs in a copy of the project under the run's scratch directory, so 
 written into the tree. With `pit_report_ready = true` the report already in the tree is read
 instead and PIT is not run.
 """
+from __future__ import annotations
+
 import hashlib
 import json
 import os
@@ -24,7 +26,11 @@ import re
 import shutil
 import subprocess
 import sys
-import xml.etree.ElementTree as ElementTree
+from typing import Any, NoReturn
+from xml.etree import ElementTree
+
+# A JSON object as `json` reads it: the requests, facts, and payloads the protocol carries.
+Json = Any
 
 PRODUCER = "plugin.pit"
 
@@ -35,8 +41,10 @@ NEEDS = ["symbols", "norm-tree", "mutation-sites"]
 # PIT plugin (with its JUnit 5 plugin) in the `pom.xml`; Gradle needs the `info.solidsoft.pitest`
 # plugin configured with `outputFormats = ['XML']` and `timestampedReports = false`.
 MAVEN = (
-    "mvn -B -q --no-transfer-progress test-compile org.pitest:pitest-maven:mutationCoverage "
-    "-DoutputFormats=XML -DtimestampedReports=false -DfullMutationMatrix=true",
+    (
+        "mvn -B -q --no-transfer-progress test-compile org.pitest:pitest-maven:mutationCoverage "
+        "-DoutputFormats=XML -DtimestampedReports=false -DfullMutationMatrix=true"
+    ),
     "target/pit-reports/mutations.xml",
 )
 GRADLE = ("gradle pitest --console=plain", "build/reports/pitest/mutations.xml")
@@ -75,7 +83,7 @@ OUTCOMES = {
 }
 
 
-def manifest():
+def manifest() -> dict[str, Json]:
     return {
         "kind": "producer",
         "id": PRODUCER,
@@ -90,14 +98,14 @@ def manifest():
     }
 
 
-def math_operators(description):
+def math_operators(description: str) -> list[str]:
     """The operator a MathMutator's description names: addition and subtraction, or the rest."""
     if re.search(r"addition|subtraction", description):
         return ["arith-add-sub"]
     return ["arith-mul-div"]
 
 
-def operators_of(mutator, description):
+def operators_of(mutator: str, description: str) -> tuple[list[str], bool]:
     """The Cupel operators PIT's `mutator` maps to, and whether its replacement is Cupel's."""
     name = mutator.rsplit(".", 1)[-1]
     if name == "MathMutator":
@@ -105,7 +113,7 @@ def operators_of(mutator, description):
     return MUTATORS.get(name, ([], False))
 
 
-def runner_id(name):
+def runner_id(name: str) -> str:
     """A PIT test name as the Maven runner's ID, `<class>#<method>`."""
     found = re.search(r"\[class:([^\]]+)\].*\[method:([^\](]+)", name)
     if found:
@@ -116,16 +124,16 @@ def runner_id(name):
     return name
 
 
-def named_tests(element, tag):
+def named_tests(element: ElementTree.Element, tag: str) -> list[str]:
     """The runner IDs PIT lists under `tag`, sorted: PIT names them in the order it ran them,
     which follows the file system's listing of the test classes."""
     text = element.findtext(tag) or ""
     return sorted(runner_id(name) for name in text.split("|") if name)
 
 
-def read_report(text):
+def read_report(text: str) -> list[dict[str, Json]]:
     """Every mutation in PIT's XML report, as plain values."""
-    mutations = []
+    mutations: list[dict[str, Json]] = []
     for element in ElementTree.fromstring(text).iter("mutation"):
         mutations.append(
             {
@@ -145,7 +153,7 @@ def read_report(text):
     return mutations
 
 
-def file_of(mutation, files):
+def file_of(mutation: dict[str, Json], files: list[str]) -> str | None:
     """The file in `files` the mutated class's source is: its package path and source file name."""
     package = mutation["class"].rsplit(".", 1)[0] if "." in mutation["class"] else ""
     suffix = "/".join(filter(None, [package.replace(".", "/"), mutation["source"]]))
@@ -158,19 +166,19 @@ def file_of(mutation, files):
 class Facts:
     """The facts the plugin needs, indexed by file, and the root their files are below."""
 
-    def __init__(self, root, symbols, norm_tree, sites):
+    def __init__(self, root: str, symbols: Json, norm_tree: Json, sites: Json) -> None:
         self.root = root
-        self.symbols = symbols["symbols"]
+        self.symbols: list[Json] = symbols["symbols"]
         self.hashes = {key(entry["symbol"]): entry["hash"] for entry in norm_tree["symbols"]}
-        self.sites = {}
+        self.sites: dict[str, list[tuple[Json, Json]]] = {}
         for entry in sites["symbols"]:
             for site in entry["sites"]:
                 self.sites.setdefault(entry["symbol"]["file"], []).append((entry["symbol"], site))
 
-    def files(self):
+    def files(self) -> list[str]:
         return sorted({symbol["file"] for symbol in self.symbols})
 
-    def sites_at(self, file, line, operators):
+    def sites_at(self, file: str, line: int, operators: list[str]) -> list[tuple[Json, Json]]:
         """The sites on `line` of `file` with one of `operators`, in operator order, then column."""
         found = [
             (symbol, site)
@@ -179,7 +187,7 @@ class Facts:
         ]
         return sorted(found, key=lambda pair: (operators.index(pair[1]["operator"]), pair[1]["span"]["col"]))
 
-    def symbol_at(self, file, line):
+    def symbol_at(self, file: str, line: int) -> Json | None:
         """The innermost symbol of `file` whose span holds `line`."""
         holding = [
             symbol
@@ -191,27 +199,27 @@ class Facts:
         return min(holding, key=lambda symbol: symbol["span"]["end_line"] - symbol["span"]["line"])
 
 
-def key(symbol):
+def key(symbol: Json) -> tuple[str, int, int]:
     return (symbol["file"], symbol["line"], symbol["col"])
 
 
-def symbol_key(symbol):
+def symbol_key(symbol: Json) -> dict[str, Json]:
     return {"file": symbol["file"], "line": symbol["span"]["line"], "col": symbol["span"]["col"]}
 
 
-def fallback_hash(mutation):
+def fallback_hash(mutation: dict[str, Json]) -> str:
     """A site hash for a mutation no Cupel site matches, from what identifies it in PIT."""
     parts = [mutation["class"], mutation["method"], mutation["signature"], mutation["mutator"]]
     digest = hashlib.blake2b("/".join(parts + mutation["indexes"]).encode(), digest_size=8)
     return digest.hexdigest()
 
 
-def described(mutation):
+def described(mutation: dict[str, Json]) -> str:
     """PIT's description of a mutation without the method it names (`for a/B::c`)."""
     return re.sub(r" for \S+::\S+$", "", mutation["description"])
 
 
-def line_text(root, file, line):
+def line_text(root: str, file: str, line: int) -> str:
     """Line `line` of `file` below `root`, as written; empty when it cannot be read."""
     try:
         with open(os.path.join(root, file), encoding="utf-8") as source:
@@ -221,7 +229,9 @@ def line_text(root, file, line):
     return lines[line - 1] if 0 < line <= len(lines) else ""
 
 
-def placed(mutation, file, facts, taken):
+def placed(
+    mutation: dict[str, Json], file: str, facts: Facts, taken: dict[tuple[str, int, str], int]
+) -> tuple[Json, str, str, str, str, Json] | None:
     """Where `mutation` sits among Cupel's sites: its symbol key, site, operator, and texts; the
     k-th PIT mutation of one mutator on a line takes the k-th matching site."""
     operators, cupel_replacement = operators_of(mutation["mutator"], mutation["description"])
@@ -244,7 +254,9 @@ def placed(mutation, file, facts, taken):
     return symbol_key(symbol), fallback_hash(mutation), operators[0], source, described(mutation), span
 
 
-def mutant(mutation, file, facts, taken):
+def mutant(
+    mutation: dict[str, Json], file: str, facts: Facts, taken: dict[tuple[str, int, str], int]
+) -> dict[str, Json] | None:
     """The `Mutant` a PIT mutation is, or None when it falls outside every symbol."""
     where = placed(mutation, file, facts, taken)
     if where is None:
@@ -272,11 +284,11 @@ def mutant(mutation, file, facts, taken):
     }
 
 
-def outcomes(mutations, facts, scope, depth):
+def outcomes(mutations: list[dict[str, Json]], facts: Facts, scope: set[str], depth: str | None) -> dict[str, Json]:
     """The `mutation-outcomes` payload of `mutations` whose files are in `scope`."""
     files = facts.files()
-    taken = {}
-    mutants = []
+    taken: dict[tuple[str, int, str], int] = {}
+    mutants: list[dict[str, Json]] = []
     for mutation in mutations:
         file = file_of(mutation, files)
         if file is None or (scope and file not in scope):
@@ -294,12 +306,12 @@ def outcomes(mutations, facts, scope, depth):
     }
 
 
-def build_tool(root):
+def build_tool(root: str) -> tuple[str, str]:
     """PIT's command and report for the build in `root`: Maven's, else Gradle's."""
     return MAVEN if os.path.isfile(os.path.join(root, "pom.xml")) else GRADLE
 
 
-def copy_tree(source, target):
+def copy_tree(source: str, target: str) -> None:
     shutil.copytree(
         source,
         target,
@@ -308,7 +320,7 @@ def copy_tree(source, target):
     )
 
 
-def run_pit(request, command):
+def run_pit(request: Json, command: str) -> str:
     """Runs `command` in a copy of the project in the scratch directory; that copy's root."""
     work = os.path.join(request["scratch"], "tree")
     shutil.rmtree(work, ignore_errors=True)
@@ -320,6 +332,7 @@ def run_pit(request, command):
             cwd=work,
             capture_output=True,
             text=True,
+            check=False,
             timeout=budget / 1000 if budget else None,
         )
     except subprocess.TimeoutExpired:
@@ -330,7 +343,7 @@ def run_pit(request, command):
     return work
 
 
-def report_text(request):
+def report_text(request: Json) -> str:
     """PIT's XML report: the one in the tree when the configuration says it is ready, else the
     one a fresh run of PIT writes in its copy of the tree, which is removed once read."""
     config = request.get("config") or {}
@@ -346,7 +359,7 @@ def report_text(request):
         shutil.rmtree(work, ignore_errors=True)
 
 
-def read_text(root, report):
+def read_text(root: str, report: str) -> str:
     try:
         with open(os.path.join(root, report), encoding="utf-8") as source:
             return source.read()
@@ -354,16 +367,16 @@ def read_text(root, report):
         fail(f"no PIT report at {report}: {error}")
 
 
-def load(path):
+def load(path: str) -> Json:
     with open(path, encoding="utf-8") as source:
         return json.load(source)
 
 
-def run(request):
+def run(request: Json) -> None:
     paths = request.get("facts") or {}
     if not all(kind in paths for kind in NEEDS):
         # Without the facts to place mutations on there is nothing to report, so PIT does not run.
-        none = {"symbols": []}
+        none: Json = {"symbols": []}
         facts = Facts(request["root"], none, none, none)
         emit_outcomes(outcomes([], facts, set(), request.get("depth")))
         return
@@ -378,20 +391,20 @@ def run(request):
     emit_outcomes(outcomes(mutations, facts, scope, request.get("depth")))
 
 
-def emit_outcomes(payload):
+def emit_outcomes(payload: dict[str, Json]) -> None:
     emit({"ev": "fact", "kind": "mutation-outcomes", "version": 2, "payload": payload})
 
 
-def fail(message):
+def fail(message: str) -> NoReturn:
     print(message, file=sys.stderr)
     sys.exit(1)
 
 
-def emit(message):
+def emit(message: dict[str, Json]) -> None:
     print(json.dumps(message, ensure_ascii=False))
 
 
-def main():
+def main() -> None:
     command = sys.argv[1] if len(sys.argv) > 1 else ""
     if command == "describe":
         emit(manifest())

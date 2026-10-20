@@ -3,14 +3,14 @@
 use std::collections::BTreeSet;
 use std::path::Path;
 
-use cupel_core::config::Config;
+use cupel_core::config::{Config, GateRuleSpec};
 use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, Finding, GitInfo, Job, Lang,
-    Outcome, PlannedInstall, PlannedWrite, ProducerRegistry, RANKED, Range, ResolvedFiles,
-    Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Verb, Writer, apply_gate, evaluate_gate,
-    gate_for, next_actions, rankings,
+    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, Finding, GateReference, GitInfo,
+    Job, Lang, Outcome, PlannedInstall, PlannedWrite, ProducerRegistry, RANKED, Range,
+    ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Verb, Writer, apply_gate,
+    evaluate_gate, gate_for, next_actions, rankings,
 };
 use cupel_lang::LanguageRegistry;
 
@@ -43,21 +43,41 @@ pub fn verb(
 }
 
 /// Grades a finished `check` or `survey` envelope after suppressions and deltas: `check`
-/// evaluates the applicable gate unless `--no-gate` (ADR-060), then both rank `next_actions`
-/// (ADR-061). Plans and errors pass through unchanged.
-pub fn grade(envelope: &mut Envelope, verb: Verb, args: &ScopeArgs, config: &Config) {
+/// evaluates the applicable gate unless `--no-gate` (ADR-060), with `reference` as `base`
+/// (ADR-130), then both rank `next_actions` (ADR-061). Plans and errors pass through unchanged.
+pub fn grade(
+    envelope: &mut Envelope,
+    verb: Verb,
+    args: &ScopeArgs,
+    config: &Config,
+    reference: &GateReference,
+) {
     if !matches!(envelope.status, Status::Pass | Status::Partial) {
         return;
     }
-    if verb == Verb::Check
-        && !args.no_gate
-        && let Some(scope) = &envelope.run.scope
-        && let (table, Some(section)) = gate_for(&config.file.gate, scope.mode)
-    {
-        let gate = evaluate_gate(table, section.rules(), envelope);
+    if let Some((table, rules)) = gate_rules(envelope, verb, args, config) {
+        let gate = evaluate_gate(table, rules, envelope, reference);
         apply_gate(envelope, gate);
     }
     envelope.next_actions = next_actions(envelope, &rerun(verb, args));
+}
+
+/// The gate table `grade` evaluates on `envelope`, as `(name, rules)`: none for `survey`, under
+/// `--no-gate`, or when the configuration lacks the scope's table.
+pub fn gate_rules<'a>(
+    envelope: &Envelope,
+    verb: Verb,
+    args: &ScopeArgs,
+    config: &'a Config,
+) -> Option<(&'static str, &'a [GateRuleSpec])> {
+    if verb != Verb::Check || args.no_gate {
+        return None;
+    }
+    let scope = envelope.run.scope.as_ref()?;
+    match gate_for(&config.file.gate, scope.mode) {
+        (table, Some(section)) => Some((table, section.rules())),
+        (_, None) => None,
+    }
 }
 
 /// The command that reruns `verb` over the scope `args` name (`--only` is appended per check).
@@ -337,7 +357,7 @@ impl CheckRun {
 }
 
 /// The changed files that existed at the range's base and that a language owns (ADR-056).
-fn base_files(languages: &LanguageRegistry, resolved: &ResolvedFiles) -> Vec<String> {
+pub(crate) fn base_files(languages: &LanguageRegistry, resolved: &ResolvedFiles) -> Vec<String> {
     resolved
         .changes
         .iter()

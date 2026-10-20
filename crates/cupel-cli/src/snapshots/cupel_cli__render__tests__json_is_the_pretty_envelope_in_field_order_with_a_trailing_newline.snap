@@ -318,17 +318,23 @@ expression: out
         {
           "rule": "tests.mutation.score >= 0.80",
           "actual": 0.71,
-          "result": "fail"
+          "bound": 0.8,
+          "result": "fail",
+          "reason": null
         },
         {
           "rule": "tests.weakening none",
           "actual": 0.0,
-          "result": "pass"
+          "bound": 0.0,
+          "result": "pass",
+          "reason": null
         },
         {
           "rule": "perf.bench.regression < 5%",
           "actual": null,
-          "result": "skipped"
+          "bound": null,
+          "result": "skipped",
+          "reason": "`perf.bench` did not run to completion"
         }
       ]
     }

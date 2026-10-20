@@ -205,7 +205,23 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
             .actual
             .map(|actual| format!("  actual {actual}"))
             .unwrap_or_default();
-        let _ = writeln!(out, "  {}  {}{actual}", paint.rule(rule.result), rule.rule);
+        // A rule against `base` does not show the value it was compared with; the others do.
+        let bound = rule
+            .bound
+            .filter(|_| rule.rule.contains(" base"))
+            .map(|bound| format!("  bound {bound}"))
+            .unwrap_or_default();
+        let reason = rule
+            .reason
+            .as_ref()
+            .map(|reason| format!("  ({reason})"))
+            .unwrap_or_default();
+        let _ = writeln!(
+            out,
+            "  {}  {}{actual}{bound}{reason}",
+            paint.rule(rule.result),
+            rule.rule
+        );
     }
     out
 }

@@ -42,6 +42,7 @@ serde_json.workspace = true
 semver.workspace = true
 thiserror.workspace = true
 toml_edit.workspace = true
+tempfile.workspace = true
 
 [dev-dependencies]
 cupel-fixtures.workspace = true
@@ -49,7 +50,6 @@ inventory.workspace = true
 assert_cmd.workspace = true
 predicates.workspace = true
 insta.workspace = true
-tempfile.workspace = true
 proptest.workspace = true
 
 [lints]
