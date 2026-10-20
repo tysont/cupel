@@ -76,8 +76,11 @@ DOGFOOD_SCOPE ?= changed
 # `conc.race` is skipped: Miri interprets every test and cannot run the process spawning and file
 # access nearly all of Cupel's tests do (ADR-105 Consequences).
 # `--no-install`: grading Cupel never asks to install a tool, even from a terminal (ADR-081).
+# scripts/dogfood.sh holds a machine-wide lock while the gate runs, so dogfoods from every checkout
+# on the machine run one at a time (the mutation engine's slots default to half the cores, at most
+# four), and it refuses to start from a working tree that was deleted under the invoking shell.
 dogfood:
-	$(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed) --gate --no-install --skip tests.flaky --skip tests.mutation --skip conc.race --format text
+	scripts/dogfood.sh $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed) --gate --no-install --skip tests.flaky --skip tests.mutation --skip conc.race --format text
 
 install:
 	$(CARGO) install --path crates/cupel-cli
