@@ -1,10 +1,13 @@
 // ABOUTME: Tests for scripts/release.sh, which `make dist` and the release workflow use to package the binary:
 // ABOUTME: the tag-to-version check, archive names and layout, SHA256SUMS, the static check, and workflow action pins.
+mod support;
+
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
+use support::{jobs, workflow};
 use tempfile::TempDir;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -221,15 +224,6 @@ fn static_rejects_a_dynamically_linked_binary() {
     );
 }
 
-fn workflow(name: &str) -> String {
-    fs::read_to_string(
-        Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("../../.github/workflows")
-            .join(name),
-    )
-    .unwrap()
-}
-
 fn release_workflow() -> String {
     workflow("release.yml")
 }
@@ -382,24 +376,6 @@ fn setting<'a>(yaml: &'a str, key: &str) -> Option<&'a str> {
         .find_map(|line| line.trim_start().strip_prefix(key)?.strip_prefix(": "))
 }
 
-/// Each job of the release workflow by name, with the lines of its body (ADR-128).
-fn jobs(workflow: &str) -> Vec<(String, Vec<String>)> {
-    let body = workflow.split_once("\njobs:\n").expect("a `jobs:` map").1;
-    let mut jobs: Vec<(String, Vec<String>)> = Vec::new();
-    for line in body.lines() {
-        let name = line
-            .strip_prefix("  ")
-            .filter(|rest| !rest.starts_with([' ', '#']))
-            .and_then(|rest| rest.strip_suffix(':'));
-        match (name, jobs.last_mut()) {
-            (Some(name), _) => jobs.push((name.to_owned(), Vec::new())),
-            (None, Some((_, lines))) => lines.push(line.trim().to_owned()),
-            (None, None) => {}
-        }
-    }
-    jobs
-}
-
 /// The publish jobs: each job's name, the `secrets` output it is gated on, and its secret.
 const PUBLISHERS: [(&str, &str, &str); 4] = [
     ("publish-npm", "npm", "NPM_TOKEN"),
@@ -414,6 +390,25 @@ fn missing(lines: &[String], expected: Vec<String>) -> Vec<String> {
         .into_iter()
         .filter(|line| !lines.contains(line))
         .collect()
+}
+
+/// The release job stages the downloaded archives under `target/dist`, never the repository's `dist/`,
+/// which holds the installers (ADR-125): `gh release create dist/*` would try to upload `dist/homebrew`.
+#[test]
+fn the_release_job_stages_archives_outside_the_installers_directory() {
+    let jobs = jobs(&release_workflow());
+    let (_, lines) = jobs
+        .iter()
+        .find(|(name, _)| name == "release")
+        .expect("a `release` job");
+    let bare: Vec<&String> = lines
+        .iter()
+        .filter(|line| {
+            line.split(|c: char| c.is_whitespace() || c == ':' || c == '"' || c == '\'')
+                .any(|word| word == "dist" || word.starts_with("dist/"))
+        })
+        .collect();
+    assert_eq!(bare, Vec::<&String>::new());
 }
 
 /// The `secrets` job runs on a tag push after the release and turns each publishing secret into an
