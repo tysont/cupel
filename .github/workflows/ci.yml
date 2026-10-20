@@ -1,5 +1,7 @@
 # ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, property framework, analyzer, race detector, fuzzer, bench tool, contract library, and JVM build tool
 # ABOUTME: installed, `make dogfood` (Cupel's own gate at `--depth deep`, ADR-129) for every push and pull request, and the installer tests (ADR-125). Rust comes from rust-toolchain.toml.
+# Every version pinned here is also pinned in scripts/dev-setup.sh, which installs the same tools for local runs
+# (ADR-139); crates/cupel-cli/tests/dev_setup.rs fails while the two differ.
 name: ci
 
 on:
@@ -23,12 +25,12 @@ jobs:
       - name: Install cargo-nextest
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-nextest
+          tool: cargo-nextest@0.9.148
       # The coverage tools the coverage producers' integration tests drive for real (P3.2, ADR-077).
       - name: Install cargo-llvm-cov and llvm-tools-preview
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-llvm-cov
+          tool: cargo-llvm-cov@0.9.1
       - name: Add llvm-tools-preview
         run: rustup component add llvm-tools-preview
       # Pinned to the Go release the coverage fixtures' committed coverprofile and the real-tool
@@ -39,9 +41,9 @@ jobs:
           cache: false
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.12.10"
       - name: Install pytest
-        run: python -m pip install pytest
+        run: python -m pip install pytest==9.1.1
       # Per-test coverage (P3.3): the per-test map producers' integration tests drive
       # cargo-llvm-cov (with the LLVM tools) and pytest-cov for real.
       - name: Install llvm-tools-preview
@@ -49,11 +51,11 @@ jobs:
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-llvm-cov
+          tool: cargo-llvm-cov@0.9.1
       - name: Install pytest-cov
-        run: python -m pip install pytest-cov
+        run: python -m pip install pytest-cov==7.1.0
       - name: Install pytest and pytest-cov
-        run: python -m pip install pytest pytest-cov
+        run: python -m pip install pytest==9.1.1 pytest-cov==7.1.0
       # The property framework the property engine's Python tests drive for real (P5.4, ADR-095).
       # Pinned: the gen.property fixture's everyday suite passes with a pinned seed, and which
       # inputs a seed generates can change between releases.
@@ -61,9 +63,9 @@ jobs:
         run: python -m pip install hypothesis==6.170.1
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "22.23.3"
       - name: Install vitest, its v8 coverage provider, and jest
-        run: npm install --global vitest @vitest/coverage-v8 jest
+        run: npm install --global vitest@5.0.5 @vitest/coverage-v8@5.0.5 jest@30.5.2
       # fast-check for the property engine's JavaScript and TypeScript tests (P5.4, ADR-095); the
       # gen.property fixtures resolve it beside the global vitest and jest. Pinned for the same
       # reason as Hypothesis.
@@ -224,10 +226,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "22.23.3"
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.12.10"
       - name: Install ShellCheck 0.11.0
         run: |
           case "$RUNNER_OS-$(uname -m)" in

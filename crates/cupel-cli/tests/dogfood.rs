@@ -32,7 +32,7 @@ fn dogfood(vars: &[&str]) -> String {
 fn make_dogfood_runs_the_changed_gate_at_deep_depth() {
     assert_eq!(
         dogfood(&[]),
-        "cargo run --quiet --package cupel-cli -- check --changed --depth deep --gate --no-install \
+        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep --gate --no-install \
          --skip tests.flaky --skip conc.race --format text\n"
     );
 }
@@ -42,7 +42,7 @@ fn make_dogfood_runs_the_changed_gate_at_deep_depth() {
 fn make_dogfood_runs_the_tree_gate_at_deep_depth_without_mutating_the_tree() {
     assert_eq!(
         dogfood(&["DOGFOOD_SCOPE=tree"]),
-        "cargo run --quiet --package cupel-cli -- check --depth deep --gate --no-install \
+        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --gate --no-install \
          --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
     );
 }
