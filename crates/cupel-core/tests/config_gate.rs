@@ -185,12 +185,17 @@ fn rejects_malformed_rules_with_a_reason() {
 
 #[test]
 fn error_message_quotes_the_rule_and_lists_the_operators() {
-    let err = GateRuleSpec::parse("tests.mutation.score", "=> 0.8").unwrap_err();
-    assert_eq!(
-        err.to_string(),
+    assert_parse_error(
+        ("tests.mutation.score", "=> 0.8"),
         "invalid gate rule `\"tests.mutation.score\" = \"=> 0.8\"`: unknown operator; \
-         expected one of `>=`, `>`, `<=`, `<`, `==`, `none`, `no-breaking`"
+         expected one of `>=`, `>`, `<=`, `<`, `==`, `none`, `no-breaking`",
     );
+}
+
+/// Asserts that the rule `key = condition` fails to parse with exactly `message`.
+fn assert_parse_error((key, condition): (&str, &str), message: &str) {
+    let err = GateRuleSpec::parse(key, condition).unwrap_err();
+    assert_eq!(err.to_string(), message);
 }
 
 fn relative(op: Comparison, offset: f64) -> GateCondition {
@@ -330,10 +335,9 @@ fn malformed_rules_against_the_reference_value_name_the_fix() {
 
 #[test]
 fn a_rule_against_the_reference_value_needs_a_metric() {
-    let err = GateRuleSpec::parse("static.clones", "<= base").unwrap_err();
-    assert_eq!(
-        err.to_string(),
+    assert_parse_error(
+        ("static.clones", "<= base"),
         "invalid gate rule `\"static.clones\" = \"<= base\"`: \
-         `<=` needs a metric: write `<check-id>.<metric>`"
+         `<=` needs a metric: write `<check-id>.<metric>`",
     );
 }
