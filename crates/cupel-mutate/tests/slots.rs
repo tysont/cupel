@@ -4,7 +4,7 @@ use std::fs;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
 
-use cupel_mutate::slots::{Claim, Reclaim, claim_in, slot_dir, usage};
+use cupel_mutate::slots::{Claim, Reclaim, claim_in, measure, slot_dir, usage};
 
 const DAY: Duration = Duration::from_secs(24 * 60 * 60);
 
@@ -13,6 +13,17 @@ const LENIENT: Reclaim = Reclaim {
     idle: Duration::MAX,
     total: u64::MAX,
 };
+
+/// A rule that removes everything it may.
+const STRICT: Reclaim = Reclaim {
+    idle: Duration::ZERO,
+    total: 1,
+};
+
+/// The bytes of the build file `claimed` wrote into the slots in `dir`; 0 when it is gone.
+fn built(dir: &Path) -> u64 {
+    fs::metadata(dir.join("python/0/build.out")).map_or(0, |meta| meta.len())
+}
 
 /// A claim of `repo`'s slots under `root` by `rule`, its slots then holding `bytes`.
 fn claimed(root: &Path, repo: &Path, rule: Reclaim, bytes: usize) -> Claim {
@@ -122,35 +133,26 @@ fn beyond_the_total_size_the_least_recently_used_slots_of_other_repositories_go_
 
 #[test]
 fn the_repository_being_graded_keeps_its_slots_whatever_their_size() {
-    let root = tempfile::tempdir().unwrap();
-    let rule = Reclaim {
-        idle: Duration::ZERO,
-        total: 1,
-    };
-    let own = tempfile::tempdir().unwrap();
+    let (root, own) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
     drop(claimed(root.path(), own.path(), LENIENT, 5_000));
-    let claim = claim_in(root.path(), own.path(), rule).unwrap();
-    assert!(claim.dir().join("python/0/build.out").exists());
+    let claim = claim_in(root.path(), own.path(), STRICT).unwrap();
+    assert_eq!(built(claim.dir()), 5_000);
 }
 
 #[test]
 fn slots_a_running_production_holds_are_never_removed() {
-    let root = tempfile::tempdir().unwrap();
-    let rule = Reclaim {
-        idle: Duration::ZERO,
-        total: 1,
-    };
-    let running = tempfile::tempdir().unwrap();
+    let (root, running) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
     let held = claimed(root.path(), running.path(), LENIENT, 5_000);
     last_used(held.dir(), 30 * DAY);
     let own = tempfile::tempdir().unwrap();
-    drop(claim_in(root.path(), own.path(), rule).unwrap());
-    assert!(held.dir().join("python/0/build.out").exists());
+    drop(claim_in(root.path(), own.path(), STRICT).unwrap());
+    let while_held = built(held.dir());
     drop(held);
-    drop(claim_in(root.path(), own.path(), rule).unwrap());
-    assert!(
-        !slot_dir_under(root.path(), &running),
-        "once the production ends, the rule applies"
+    drop(claim_in(root.path(), own.path(), STRICT).unwrap());
+    assert_eq!(
+        (while_held, slot_dir_under(root.path(), &running)),
+        (5_000, false),
+        "kept while held; once the production ends, the rule applies"
     );
 }
 
@@ -170,12 +172,10 @@ fn a_claim_records_the_bytes_its_slots_hold_when_it_ends() {
     let claim = claimed(root.path(), repo.path(), LENIENT, 4_096);
     let dir = claim.dir().to_path_buf();
     drop(claim);
-    let recorded: u64 = fs::read_to_string(dir.join("size"))
-        .unwrap()
-        .parse()
-        .unwrap();
-    // The slot's file and the small records beside it.
-    assert!((4_096..4_096 + 1_024).contains(&recorded), "{recorded}");
+    let text = fs::read_to_string(dir.join("size")).unwrap();
+    let recorded: u64 = text.parse().unwrap();
+    // Everything in the directory when it ended: all of it now but the record itself.
+    assert_eq!(recorded, measure(&dir) - text.len() as u64);
 }
 
 #[test]
@@ -219,12 +219,12 @@ fn slots_with_no_lock_file_are_removed_only_when_gone_or_idle() {
         .to_path_buf();
     fs::remove_file(slots.join("lock")).unwrap();
     drop(claim_in(root.path(), own.path(), rule).unwrap());
-    assert!(
-        slots.join("python/0/build.out").exists(),
-        "kept over the size"
-    );
-    assert!(!slots.join("lock").exists(), "and left as it was");
+    let over_the_size = (built(&slots), slots.join("lock").exists());
     last_used(&slots, 8 * DAY);
     drop(claim_in(root.path(), own.path(), rule).unwrap());
-    assert!(!slots.exists(), "removed when idle");
+    assert_eq!(
+        (over_the_size, slots.exists()),
+        ((5_000, false), false),
+        "kept over the size and left without a lock; removed when idle"
+    );
 }

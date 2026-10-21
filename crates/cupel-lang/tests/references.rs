@@ -53,11 +53,16 @@ fn shapes(found: &[(ReferenceKind, String, Vec<u32>)]) -> HashSet<(ReferenceKind
         .collect()
 }
 
+/// A plain name an import binds, as itself or under an alias (ADR-141: ES `import { square as
+/// side }`, Python `from .references import exported_rate as tripled`), resolves to the function
+/// the import names.
 #[test]
 fn a_plain_name_an_import_binds_resolves_to_the_function_in_the_imported_file() {
     for (lang, file, name, line) in [
         ("rust", "src/rates.rs", "imported_rate", 13),
         ("python", "src/ledger/rates.py", "_imported_rate", 11),
+        ("javascript", "src/ledger.js", "side", 1),
+        ("python", "src/ledger/rates.py", "tripled", 7),
     ] {
         let fact = of(lang, &fixture(lang));
         assert_eq!(
@@ -84,23 +89,6 @@ fn an_es_import_binds_the_names_it_lists_not_its_specifiers_last_segment() {
         resolved(2, "imported", 10),
         "the import and the call"
     );
-}
-
-/// An aliased import binds its local name to the imported one (ADR-141): ES `import { square as
-/// side }` and Python `from .references import exported_rate as tripled`.
-#[test]
-fn an_aliased_import_binds_its_local_name_to_the_imported_function() {
-    for (lang, file, local, line) in [
-        ("javascript", "src/ledger.js", "side", 1),
-        ("python", "src/ledger/rates.py", "tripled", 7),
-    ] {
-        let fact = of(lang, &fixture(lang));
-        assert_eq!(
-            named(&fact, file, local),
-            resolved(2, "imported", line),
-            "{lang}: the alias and its use"
-        );
-    }
 }
 
 #[test]

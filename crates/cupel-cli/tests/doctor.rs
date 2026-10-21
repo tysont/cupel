@@ -341,8 +341,9 @@ fn doctor_says_nothing_of_mutation_slots_when_there_are_none() {
     let repo = Repo::new();
     let outcome = repo.run_with(cupel().env("TMPDIR", tmp.path()), &["doctor"]);
     let kinds = support::finding_fields(&outcome.envelope(), "kind");
-    assert!(
-        !kinds.contains(&"doctor.mutation-slots".to_owned()),
-        "{kinds:?}"
-    );
+    let reported = kinds
+        .iter()
+        .filter(|kind| *kind == "doctor.mutation-slots")
+        .count();
+    assert_eq!(reported, 0, "{kinds:?}");
 }

@@ -428,11 +428,16 @@ fn each_function_is_measured_for_its_killed_ratio_and_the_tests_run_against_it()
     );
 }
 
+/// A mutant of `discount` with `outcome` that no test ran against.
+fn untested(outcome: MutantOutcome) -> Mutant {
+    let mut mutant = mutant(6, 14, ">=", ">", outcome);
+    mutant.tests.clear();
+    mutant
+}
+
 #[test]
 fn a_function_with_no_scored_mutant_has_no_killed_ratio() {
-    let mut timeout = mutant(6, 14, ">=", ">", MutantOutcome::Timeout);
-    timeout.tests.clear();
-    let (_, recorded) = run(vec![timeout]);
+    let (_, recorded) = run(vec![untested(MutantOutcome::Timeout)]);
     assert_eq!(
         recorded.measured(),
         [
@@ -446,9 +451,7 @@ fn a_function_with_no_scored_mutant_has_no_killed_ratio() {
 /// and ranks first for protection (ADR-132).
 #[test]
 fn a_function_whose_mutants_no_test_runs_has_a_killed_ratio_of_zero() {
-    let mut uncovered = mutant(6, 14, ">=", ">", MutantOutcome::Uncovered);
-    uncovered.tests.clear();
-    let (_, recorded) = run(vec![uncovered]);
+    let (_, recorded) = run(vec![untested(MutantOutcome::Uncovered)]);
     assert_eq!(
         recorded.measured(),
         [

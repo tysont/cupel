@@ -76,7 +76,9 @@ impl Claim {
 
 impl Drop for Claim {
     fn drop(&mut self) {
-        // A size that cannot be written is measured again by the next claim that needs it.
+        // The record measures what the slots hold, not itself; a size that cannot be written
+        // is measured again by the next claim that needs it.
+        let _ = fs::remove_file(self.dir.join(SIZE));
         let _ = fs::write(self.dir.join(SIZE), measure(&self.dir).to_string());
     }
 }
@@ -166,6 +168,16 @@ struct Idle {
     _lock: File,
 }
 
+/// What a claim finds in another repository's slot directory.
+enum Found {
+    /// Held by a production, or made by one that takes no lock: kept, counting its bytes.
+    Kept(u64),
+    /// Its repository is gone or it is idle too long: removed.
+    Removed,
+    /// Locked by this claim, so the size rule may remove it.
+    Idle(Idle),
+}
+
 /// Removes the slots under `root` other than `own` that no production holds: those of a gone
 /// repository or unused for longer than `rule.idle`, then, while every repository's slots hold
 /// more than `rule.total` bytes, the least recently used of those a locking production made.
@@ -176,39 +188,17 @@ fn reclaim(root: &Path, own: &Path, rule: Reclaim) {
     let now = SystemTime::now();
     let mut total = recorded(own);
     let mut idle = Vec::new();
-    for entry in entries.flatten() {
-        let dir = entry.path();
+    for dir in entries.flatten().map(|entry| entry.path()) {
         if dir == own || !dir.is_dir() {
             continue;
         }
-        // Slots a production made without taking a lock (an earlier Cupel) may be in use now:
-        // only the gone and idle rules apply to them.
-        let lock = if dir.join(LOCK).exists() {
-            let Some(lock) = idle_lock(&dir) else {
-                total += recorded(&dir);
-                continue;
-            };
-            Some(lock)
-        } else {
-            None
-        };
-        let (owner, used) = owner(&dir);
-        let gone = !owner.as_deref().is_some_and(Path::is_dir);
-        let stale = now.duration_since(used).is_ok_and(|age| age > rule.idle);
-        if gone || stale {
-            // Another claim may be removing it too; what is left goes next time.
-            let _ = fs::remove_dir_all(&dir);
-            continue;
-        }
-        let bytes = recorded(&dir);
-        total += bytes;
-        if let Some(lock) = lock {
-            idle.push(Idle {
-                dir,
-                used,
-                bytes,
-                _lock: lock,
-            });
+        match found(dir, now, rule) {
+            Found::Kept(bytes) => total += bytes,
+            Found::Removed => {}
+            Found::Idle(slots) => {
+                total += slots.bytes;
+                idle.push(slots);
+            }
         }
     }
     idle.sort_by_key(|slots| slots.used);
@@ -219,6 +209,38 @@ fn reclaim(root: &Path, own: &Path, rule: Reclaim) {
         if fs::remove_dir_all(&slots.dir).is_ok() {
             total = total.saturating_sub(slots.bytes);
         }
+    }
+}
+
+/// What `dir`, another repository's slots, is to a claim at `now` under `rule`, after removing
+/// it when its repository is gone or it is idle. Slots a production made without taking a lock
+/// (an earlier Cupel) may be in use now: only the gone and idle rules apply to them.
+fn found(dir: PathBuf, now: SystemTime, rule: Reclaim) -> Found {
+    let lock = if dir.join(LOCK).exists() {
+        let Some(lock) = idle_lock(&dir) else {
+            return Found::Kept(recorded(&dir));
+        };
+        Some(lock)
+    } else {
+        None
+    };
+    let (owner, used) = owner(&dir);
+    let gone = !owner.as_deref().is_some_and(Path::is_dir);
+    let stale = now.duration_since(used).is_ok_and(|age| age > rule.idle);
+    if gone || stale {
+        // Another claim may be removing it too; what is left goes next time.
+        let _ = fs::remove_dir_all(&dir);
+        return Found::Removed;
+    }
+    let bytes = recorded(&dir);
+    match lock {
+        Some(lock) => Found::Idle(Idle {
+            dir,
+            used,
+            bytes,
+            _lock: lock,
+        }),
+        None => Found::Kept(bytes),
     }
 }
 

@@ -101,17 +101,14 @@ fn mutants_that_end_in_an_error_leave_the_slots_holding_the_original_file() {
     let produced = support::produce(dir.path(), "python", &support::Run::default());
     assert!(produced.is_err(), "the reference run is red in a slot");
     let original = std::fs::read_to_string(dir.path().join("discount.py")).unwrap();
-    let slots: Vec<std::path::PathBuf> = (0..8)
+    let held: Vec<String> = (0..8)
         .map(|index| cupel_mutate::slots::slot_dir(dir.path(), "python", index))
-        .filter(|slot| slot.exists())
+        .filter_map(|slot| std::fs::read_to_string(slot.join("discount.py")).ok())
         .collect();
-    assert!(!slots.is_empty());
-    for slot in slots {
-        assert_eq!(
-            std::fs::read_to_string(slot.join("discount.py")).unwrap(),
-            original,
-            "{}",
-            slot.display()
-        );
-    }
+    let used = held.len().max(1);
+    assert_eq!(
+        held,
+        vec![original; used],
+        "every slot used holds the original"
+    );
 }

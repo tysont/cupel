@@ -143,6 +143,17 @@ fn a_sync_replaces_a_file_left_mutated_with_a_copy_dated_now() {
     }
 }
 
+#[test]
+fn a_runners_build_outputs_are_the_slots_own_and_kept_between_syncs() {
+    let Synced { repo, slot, _work } = synced(&["target"]);
+    assert!(!slot.root().join("target").exists());
+    fs::create_dir_all(slot.root().join("target/debug")).unwrap();
+    fs::write(slot.root().join("target/debug/own"), "slot build\n").unwrap();
+    slot.sync(repo.path(), &["target"]).unwrap();
+    assert_eq!(read(slot.root(), "target/debug/own"), "slot build\n");
+    assert_eq!(read(repo.path(), "target/build.out"), "built\n");
+}
+
 #[cfg(unix)]
 #[test]
 fn a_symlink_in_the_tree_is_the_same_symlink_in_the_slot() {
