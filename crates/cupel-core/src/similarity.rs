@@ -405,37 +405,62 @@ mod tests {
         assert_eq!((ab.set.len(), ba.set.len(), shared), (1, 1, 0));
     }
 
-    /// `function(2)` with the given texts on its marker leaves, in pre-order.
-    fn texted(values: &[&str]) -> NormNode {
-        fn fill(node: &mut NormNode, values: &mut std::slice::Iter<'_, &str>) {
-            if node.label.starts_with('$') {
-                node.text = values.next().map(|value| (*value).to_owned());
-            }
-            for child in &mut node.children {
-                fill(child, values);
-            }
+    /// A marker leaf (`$id`, `$lit`) standing for `text`.
+    fn marker(label: &str, text: &str) -> NormNode {
+        NormNode {
+            text: Some(text.to_owned()),
+            ..NormNode::leaf(label)
         }
-        let mut root = function(2);
-        fill(&mut root, &mut values.iter());
-        root
     }
 
-    const TEXTS: [&str; 7] = ["items", "a", "a", "1", "b", "b", "2"];
+    /// A function over `items` whose block assigns, per `(target, operand, literal)`,
+    /// `target = operand + literal`.
+    fn texted(statements: &[(&str, &str, &str)]) -> NormNode {
+        let assignment = |(target, operand, literal): &(&str, &str, &str)| {
+            NormNode::new(
+                "assignment",
+                vec![
+                    marker("$id", target),
+                    NormNode::leaf("="),
+                    NormNode::new(
+                        "binary",
+                        vec![
+                            marker("$id", operand),
+                            NormNode::leaf("+"),
+                            marker("$lit", literal),
+                        ],
+                    ),
+                ],
+            )
+        };
+        NormNode::new(
+            "function",
+            vec![
+                NormNode::new("parameters", vec![marker("$id", "items")]),
+                NormNode::new("block", statements.iter().map(assignment).collect()),
+            ],
+        )
+    }
+
+    const TEXTS: [(&str, &str, &str); 2] = [("a", "a", "1"), ("b", "b", "2")];
 
     #[test]
     fn token_digests_agree_exactly_when_shapes_and_texts_agree() {
         let digest = token_digest(&texted(&TEXTS));
-        assert!(digest.is_some());
-        assert_eq!(digest, token_digest(&texted(&TEXTS)));
-        let mut renamed = TEXTS;
-        renamed[1] = "c";
-        assert_ne!(digest, token_digest(&texted(&renamed)));
-        let mut relit = TEXTS;
-        relit[6] = "3";
-        assert_ne!(digest, token_digest(&texted(&relit)));
-        let mut reshaped = texted(&TEXTS);
-        reshaped.children[1].children[1].children[2].children[1] = NormNode::leaf("-");
-        assert_ne!(digest, token_digest(&reshaped));
+        let variants = [
+            texted(&TEXTS),
+            texted(&[("c", "a", "1"), ("b", "b", "2")]),
+            texted(&[("a", "a", "1"), ("b", "b", "3")]),
+            texted(&[("a", "1", "a"), ("b", "b", "2")]),
+            texted(&TEXTS[..1]),
+        ];
+        let agree: Vec<bool> = variants
+            .iter()
+            .map(|variant| token_digest(variant) == digest)
+            .collect();
+        // The same texts agree; a renamed identifier, a changed literal, a text moved to another
+        // marker, and a missing statement do not.
+        assert_eq!(agree, [true, false, false, false, false]);
     }
 
     #[test]
@@ -452,20 +477,16 @@ mod tests {
 
     #[test]
     fn a_tree_with_a_marker_lacking_its_text_has_no_token_digest() {
-        assert_eq!(token_digest(&texted(&TEXTS[..6])), None);
+        let mut untexted = texted(&TEXTS);
+        untexted.children[0].children[0].text = None;
+        assert_eq!(token_digest(&untexted), None);
         assert_eq!(token_digest(&function(2)), None);
         let operators = NormNode::new("binary", vec![NormNode::leaf("+")]);
-        assert!(token_digest(&operators).is_some());
-    }
-
-    #[test]
-    fn moving_a_text_to_another_marker_changes_the_token_digest() {
-        let mut swapped = TEXTS;
-        swapped.swap(3, 6);
-        assert_ne!(
-            token_digest(&texted(&TEXTS)),
-            token_digest(&texted(&swapped))
+        assert_eq!(
+            token_digest(&operators),
+            token_digest(&NormNode::new("binary", vec![NormNode::leaf("+")]))
         );
+        assert!(token_digest(&operators).is_some());
     }
 
     #[test]
