@@ -89,6 +89,32 @@ pub fn combine(hash: u64, value: u64) -> u64 {
     mix(hash.rotate_left(23) ^ value.wrapping_add(0x9e37_79b9_7f4a_7c15))
 }
 
+/// The labels a normalizer gives an identifier or a literal, whose source text the node keeps
+/// (ADR-025, ADR-133).
+const MARKERS: [&str; 2] = ["$id", "$lit"];
+
+/// A digest of the tree's tokens: every label with its child count and every text, in pre-order,
+/// so two trees share it when they have one shape and the same identifier and literal texts
+/// (type-1 clones, ADR-136). Spans are not part of it. `None` when an identifier or literal
+/// leaf lacks its text, so a tree whose producer kept no texts never matches as type 1.
+pub fn token_digest(root: &NormNode) -> Option<u64> {
+    fn fold(node: &NormNode, hash: u64) -> Option<u64> {
+        let mut hash = combine(
+            combine(hash, label(&node.label)),
+            node.children.len() as u64,
+        );
+        hash = match &node.text {
+            Some(text) => combine(combine(hash, 1), label(text)),
+            None if MARKERS.contains(&node.label.as_str()) => return None,
+            None => combine(hash, 0),
+        };
+        node.children
+            .iter()
+            .try_fold(hash, |hash, child| fold(child, hash))
+    }
+    fold(root, 0).map(mix)
+}
+
 /// The min-hash signature of `set`: for each of `SIGNATURE` hash functions, the least hash of
 /// any element. Two sets agree at a position with probability equal to their Jaccard
 /// similarity. The functions are `x ↦ mix(x ⊕ seedᵢ)` with fixed seeds, so signatures are
@@ -377,6 +403,69 @@ mod tests {
         // Each tree has one fingerprint, the call's, and the two have none in common.
         let shared = ab.set.iter().filter(|print| ba.set.contains(print)).count();
         assert_eq!((ab.set.len(), ba.set.len(), shared), (1, 1, 0));
+    }
+
+    /// `function(2)` with the given texts on its marker leaves, in pre-order.
+    fn texted(values: &[&str]) -> NormNode {
+        fn fill(node: &mut NormNode, values: &mut std::slice::Iter<'_, &str>) {
+            if node.label.starts_with('$') {
+                node.text = values.next().map(|value| (*value).to_owned());
+            }
+            for child in &mut node.children {
+                fill(child, values);
+            }
+        }
+        let mut root = function(2);
+        fill(&mut root, &mut values.iter());
+        root
+    }
+
+    const TEXTS: [&str; 7] = ["items", "a", "a", "1", "b", "b", "2"];
+
+    #[test]
+    fn token_digests_agree_exactly_when_shapes_and_texts_agree() {
+        let digest = token_digest(&texted(&TEXTS));
+        assert!(digest.is_some());
+        assert_eq!(digest, token_digest(&texted(&TEXTS)));
+        let mut renamed = TEXTS;
+        renamed[1] = "c";
+        assert_ne!(digest, token_digest(&texted(&renamed)));
+        let mut relit = TEXTS;
+        relit[6] = "3";
+        assert_ne!(digest, token_digest(&texted(&relit)));
+        let mut reshaped = texted(&TEXTS);
+        reshaped.children[1].children[1].children[2].children[1] = NormNode::leaf("-");
+        assert_ne!(digest, token_digest(&reshaped));
+    }
+
+    #[test]
+    fn spans_do_not_change_a_token_digest() {
+        let span = crate::syntax::Span {
+            line: 3,
+            col: 1,
+            end_line: 9,
+            end_col: 2,
+        };
+        let placed = texted(&TEXTS).at(span);
+        assert_eq!(token_digest(&placed), token_digest(&texted(&TEXTS)));
+    }
+
+    #[test]
+    fn a_tree_with_a_marker_lacking_its_text_has_no_token_digest() {
+        assert_eq!(token_digest(&texted(&TEXTS[..6])), None);
+        assert_eq!(token_digest(&function(2)), None);
+        let operators = NormNode::new("binary", vec![NormNode::leaf("+")]);
+        assert!(token_digest(&operators).is_some());
+    }
+
+    #[test]
+    fn moving_a_text_to_another_marker_changes_the_token_digest() {
+        let mut swapped = TEXTS;
+        swapped.swap(3, 6);
+        assert_ne!(
+            token_digest(&texted(&TEXTS)),
+            token_digest(&texted(&swapped))
+        );
     }
 
     #[test]
