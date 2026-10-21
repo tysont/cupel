@@ -37,14 +37,15 @@ bench = "cargo bench --bench {name} -- --save-baseline {id}"
 "gen.property.falsified" = "== 0"
 "spec.contracts" = "none"
 
-# The tree still holds 86 clone groups (169 similar pairs), mostly per-language test scaffolding
-# and same-shape data variants; the tree gate holds them from growing while the changed gate
-# admits no new ones. Lower these as the groups are removed.
+# The clone ratchets compare with the committed baseline (`.cupel/baseline.json`, the last tree
+# run on `main` that `make baseline` exported; ADR-140): the tree gate holds the clone groups,
+# mostly per-language test scaffolding and same-shape data variants, from growing while the
+# changed gate admits no new ones, and a commit that removes some refreshes the baseline.
 [gate.tree]
 "static.complexity" = "none"
 "static.complexity.cyclomatic_max" = "<= 10"
-"static.clones.pairs" = "<= 169"
-"static.clones.clusters" = "<= 19"
+"static.clones.pairs" = "<= base"
+"static.clones.clusters" = "<= base"
 "static.deps" = "none"
 "static.deps.cycles" = "== 0"
 "static.dead-code" = "none"

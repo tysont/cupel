@@ -44,6 +44,63 @@
             "title": "ImportCycle",
             "type": "object"
           },
+          "hints": {
+            "cheapest_cut": {
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The import to remove to break an import cycle, on `dep.cycle`.",
+              "properties": {
+                "breaks_component": {
+                  "description": "Whether removing every import from `from` to `to` leaves the cycle's modules with no\ncycle at all.",
+                  "type": "boolean"
+                },
+                "from": {
+                  "description": "The importing module.",
+                  "type": "string"
+                },
+                "line": {
+                  "description": "The line of the first import statement.",
+                  "format": "uint32",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "names": {
+                  "description": "The names the statements import, sorted: what to move.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "specifiers": {
+                  "description": "The import statements' specifiers, as written.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "to": {
+                  "description": "The imported module.",
+                  "type": "string"
+                },
+                "unnamed": {
+                  "description": "Statements that import the module whole or name nothing.",
+                  "format": "uint32",
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "from",
+                "to",
+                "line",
+                "specifiers",
+                "names",
+                "unnamed",
+                "breaks_component"
+              ],
+              "title": "CheapestCut",
+              "type": "object"
+            }
+          },
           "kind": "dep.cycle",
           "summary": "Modules that import each other, directly or through others."
         },

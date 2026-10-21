@@ -32,7 +32,21 @@
   "findings": [
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "cheapest_cut": {
+            "breaks_component": true,
+            "from": "src/deps_cycle/alpha.rs",
+            "line": 1,
+            "names": [
+              "BETA"
+            ],
+            "specifiers": [
+              "super::beta::BETA"
+            ],
+            "to": "src/deps_cycle/beta.rs",
+            "unnamed": 0
+          }
+        },
         "kind": "break_cycle",
         "priority": 2,
         "summary": "Break the cycle src/deps_cycle/alpha.rs → src/deps_cycle/beta.rs → src/deps_cycle/alpha.rs: move what the modules share into a module that imports none of them, or invert one import through an interface."

@@ -93,6 +93,8 @@ fn labeled(map: Option<Vec<TestCoverage>>) -> (CheckResult, Vec<Finding>) {
                     symbol: symbol.key(),
                     hash: hash_of_line(symbol.span.line * 100 + symbol.span.end_line),
                     root: NormNode {
+                        span: None,
+                        text: None,
                         label: "fn".to_owned(),
                         children: Vec::new(),
                     },

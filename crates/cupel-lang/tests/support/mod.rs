@@ -202,6 +202,33 @@ pub fn edge_rows(graph: &ModuleGraph) -> Vec<EdgeRow> {
         .collect()
 }
 
+/// Asserts that `lang`'s module graph over `files` gives the edges from `from`, in edge order,
+/// exactly `expected`: each edge's specifier and the names it imports (ADR-133).
+pub fn assert_imported_names(
+    lang: &str,
+    files: &[(&str, &str)],
+    from: &str,
+    expected: &[(&str, &[&str])],
+) {
+    let dir = tree(files);
+    let graph: ModuleGraph = produce(lang, dir.path());
+    let found: Vec<(&str, Vec<&str>)> = graph
+        .roots
+        .iter()
+        .flat_map(|root| &root.edges)
+        .filter(|edge| edge.from == from)
+        .map(|edge| {
+            let names = edge.names.iter().map(String::as_str).collect();
+            (edge.specifier.as_str(), names)
+        })
+        .collect();
+    let expected: Vec<(&str, Vec<&str>)> = expected
+        .iter()
+        .map(|(specifier, names)| (*specifier, names.to_vec()))
+        .collect();
+    assert_eq!(found, expected, "{lang}");
+}
+
 /// The expected `edge` in the root `root`.
 pub fn row(root: &str, edge: Edge<'_>) -> EdgeRow {
     let (from, line, specifier, target, relative) = edge;

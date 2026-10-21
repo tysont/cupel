@@ -2,7 +2,7 @@
 // ABOUTME: do not nest), weights from the tables, early returns, and which symbol owns each decision.
 mod support;
 
-use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
+use cupel_core::syntax::{DecisionKind, Decisions, Span, Symbols};
 use support::{case_continuations, decisions_of, fixture, loop_tables, produce, tree};
 
 use DecisionKind::{BooleanOp, Branch, Case, EarlyReturn, Loop};
@@ -152,5 +152,35 @@ fn every_case_after_the_first_continues_its_multiway_decision() {
     assert_eq!(
         case_continuations("rust", &fixture("rust"), "complexity::month"),
         expected
+    );
+}
+
+#[test]
+fn each_decision_carries_the_span_of_its_construct() {
+    let dir = tree(&[(
+        "src/lib.rs",
+        "pub fn f(xs: &[i64]) -> i64 {\n    for x in xs {\n        if *x > 0 {\n            return *x;\n        }\n    }\n    0\n}\n",
+    )]);
+    let decisions: Decisions = produce("rust", dir.path());
+    let spans: Vec<(DecisionKind, Option<Span>)> = decisions.symbols[0]
+        .decisions
+        .iter()
+        .map(|decision| (decision.kind, decision.span))
+        .collect();
+    let at = |line, col, end_line, end_col| {
+        Some(Span {
+            line,
+            col,
+            end_line,
+            end_col,
+        })
+    };
+    assert_eq!(
+        spans,
+        [
+            (Loop, at(2, 5, 6, 6)),
+            (Branch, at(3, 9, 5, 10)),
+            (EarlyReturn, at(4, 13, 4, 22)),
+        ]
     );
 }

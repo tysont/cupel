@@ -280,6 +280,146 @@
             "title": "CloneCluster",
             "type": "object"
           },
+          "hints": {
+            "common_subtree": {
+              "$defs": {
+                "Location": {
+                  "description": "A span in a file. Paths are relative to the repository root; lines and columns are 1-based.",
+                  "properties": {
+                    "col": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "end_col": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "end_line": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "file": {
+                      "type": "string"
+                    },
+                    "line": {
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "file",
+                    "line",
+                    "end_line"
+                  ],
+                  "type": "object"
+                },
+                "Parameter": {
+                  "description": "One position of the shared subtree whose text differs between members.",
+                  "properties": {
+                    "kind": {
+                      "$ref": "#/$defs/ParameterKind"
+                    },
+                    "occurrences": {
+                      "description": "How many positions in the subtree have these values.",
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "values": {
+                      "description": "The text in each member, the first member's first.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "values",
+                    "occurrences"
+                  ],
+                  "type": "object"
+                },
+                "ParameterKind": {
+                  "description": "What a differing position is.",
+                  "enum": [
+                    "identifier",
+                    "literal"
+                  ],
+                  "type": "string"
+                },
+                "PlacedSubtree": {
+                  "description": "The shared subtree in one member of a clone cluster.",
+                  "properties": {
+                    "location": {
+                      "$ref": "#/$defs/Location"
+                    },
+                    "symbol": {
+                      "description": "The member's display name.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "symbol",
+                    "location"
+                  ],
+                  "type": "object"
+                }
+              },
+              "$schema": "https://json-schema.org/draft/2020-12/schema",
+              "description": "The largest normalized subtree every member of a clone cluster shares: the extraction\ncandidate, on `clone.cluster`.",
+              "properties": {
+                "location": {
+                  "$ref": "#/$defs/Location",
+                  "description": "Where it is in the finding's symbol, the cluster's first member."
+                },
+                "nodes": {
+                  "description": "Nodes of the shared normalized subtree.",
+                  "format": "uint32",
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "others": {
+                  "description": "Where it is in each other member, in the evidence's member order.",
+                  "items": {
+                    "$ref": "#/$defs/PlacedSubtree"
+                  },
+                  "type": "array"
+                },
+                "parameters": {
+                  "description": "The identifiers and literals whose text differs between members: what the extracted\nfunction takes as parameters.",
+                  "items": {
+                    "$ref": "#/$defs/Parameter"
+                  },
+                  "type": "array"
+                },
+                "share": {
+                  "description": "Its share of the first member's normalized nodes, to three decimals.",
+                  "format": "double",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "nodes",
+                "share",
+                "location",
+                "others",
+                "parameters"
+              ],
+              "title": "CommonSubtree",
+              "type": "object"
+            }
+          },
           "kind": "clone.cluster",
           "summary": "Three or more symbols connected by pairs at least `threshold` similar."
         }

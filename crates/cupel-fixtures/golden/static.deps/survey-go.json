@@ -25,7 +25,19 @@
   "findings": [
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "cheapest_cut": {
+            "breaks_component": true,
+            "from": "deps_cycle/alpha/alpha.go",
+            "line": 3,
+            "names": [],
+            "specifiers": [
+              "example.com/ledger/deps_cycle/beta"
+            ],
+            "to": "deps_cycle/beta/beta.go",
+            "unnamed": 1
+          }
+        },
         "kind": "break_cycle",
         "priority": 2,
         "summary": "Break the cycle deps_cycle/alpha/alpha.go → deps_cycle/beta/beta.go → deps_cycle/alpha/alpha.go: move what the modules share into a module that imports none of them, or invert one import through an interface."

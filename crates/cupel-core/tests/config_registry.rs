@@ -197,6 +197,7 @@ fn breaking_registry() -> CheckRegistry {
         action: cupel_core::ActionKind::Review,
         summary: String::new(),
         evidence: serde_json::Map::new(),
+        hints: serde_json::Map::new(),
     }];
     checks.register(Box::new(Declared(api))).unwrap();
     checks.register(declared("tests.weakening", &[])).unwrap();

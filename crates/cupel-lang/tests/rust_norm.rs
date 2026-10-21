@@ -2,7 +2,7 @@
 // ABOUTME: properties: invariant under renames, layout, literals, and moves; sensitive to structure.
 mod support;
 
-use cupel_core::syntax::{NormTree, Symbols};
+use cupel_core::syntax::{NormNode, NormTree, Span, Symbols};
 use proptest::prelude::*;
 use support::{assert_distinct, normalize_at, produce, sexp, tree};
 
@@ -183,4 +183,39 @@ proptest! {
         );
         prop_assert_eq!(hash(&template(&names, literal, space, newline)), hash(&base));
     }
+}
+
+/// Every node of the tree rooted at `node`, in pre-order.
+fn nodes(node: &NormNode) -> Vec<&NormNode> {
+    std::iter::once(node)
+        .chain(node.children.iter().flat_map(nodes))
+        .collect()
+}
+
+#[test]
+fn every_node_carries_its_span_and_a_marker_its_source_text() {
+    let source = "pub fn f(rate: i64) -> i64 {\n    rate.max(1) + 20\n}\n";
+    let dir = tree(&[("src/lib.rs", source)]);
+    let symbols: Symbols = produce("rust", dir.path());
+    let norm: NormTree = produce("rust", dir.path());
+    let root = &norm.symbols[0].root;
+    assert_eq!(root.span, Some(symbols.symbols[0].span));
+    let all = nodes(root);
+    assert!(all.iter().all(|node| node.span.is_some()), "{root:?}");
+    let texts: Vec<(&str, &str, u32)> = all
+        .iter()
+        .filter_map(|node| {
+            let span: Span = node.span?;
+            Some((node.label.as_str(), node.text.as_deref()?, span.line))
+        })
+        .collect();
+    assert_eq!(
+        texts,
+        [
+            ("$id", "rate", 1),
+            ("$id", "rate", 2),
+            ("$lit", "1", 2),
+            ("$lit", "20", 2)
+        ]
+    );
 }

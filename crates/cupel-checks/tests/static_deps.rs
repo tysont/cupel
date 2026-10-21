@@ -1,7 +1,8 @@
 // ABOUTME: static.deps over synthetic module graphs: cycles, Martin's coupling metrics, layering rules,
-// ABOUTME: settings validation, finding identity and shape, and the score (ADR-052, ADR-053).
+// ABOUTME: settings validation, finding identity and shape, the score (ADR-052, ADR-053), and the cheapest cut (ADR-133).
 mod support;
 
+use cupel_core::hint::{self, CheapestCut};
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, RootImports,
     Span,
@@ -36,12 +37,27 @@ impl World {
             ImportTarget::Unresolved => "missing".to_owned(),
         };
         self.edges.push(ImportEdge {
+            names: Vec::new(),
             from: from.to_owned(),
             specifier,
             target,
             relative: false,
             line,
             edge_kind: kind,
+        });
+        self
+    }
+
+    /// `from` imports `names` from the module `to` at `line`, written as `specifier`.
+    fn named(mut self, from: &str, to: &str, line: u32, specifier: &str, names: &[&str]) -> Self {
+        self.edges.push(ImportEdge {
+            names: names.iter().map(|name| (*name).to_owned()).collect(),
+            from: from.to_owned(),
+            specifier: specifier.to_owned(),
+            target: imported_file(to),
+            relative: true,
+            line,
+            edge_kind: EdgeKind::Import,
         });
         self
     }
@@ -601,4 +617,94 @@ fn counts_add_up_across_languages_and_distance_takes_the_largest() {
     assert_eq!(combined(check, "cycles", &results), Some(3.0));
     assert_eq!(combined(check, "violations", &results), Some(1.0));
     assert_eq!(combined(check, "max_distance", &results), Some(0.75));
+}
+
+fn cut(findings: &[Finding]) -> Option<CheapestCut> {
+    hint::read(&of_kind(findings, "dep.cycle")[0].action.hints)
+}
+
+fn names(names: &[&str]) -> Vec<String> {
+    names.iter().map(|name| (*name).to_owned()).collect()
+}
+
+#[test]
+fn the_cheapest_cut_is_the_cycle_edge_carrying_the_fewest_names() {
+    // a → b → c → a: a imports two names from b, b one from c, and c imports a whole.
+    let world = World::default()
+        .named("a", "b", 2, "./b", &["X", "Y"])
+        .named("b", "c", 3, "./c", &["Z"])
+        .named("c", "a", 4, "./a", &[]);
+    let (_, findings) = run(&world, json!({}));
+    assert_eq!(
+        cut(&findings),
+        Some(CheapestCut {
+            from: "b".to_owned(),
+            to: "c".to_owned(),
+            line: 3,
+            specifiers: names(&["./c"]),
+            names: names(&["Z"]),
+            unnamed: 0,
+            breaks_component: true,
+        })
+    );
+}
+
+#[test]
+fn a_cut_that_breaks_the_whole_component_comes_before_one_with_fewer_names() {
+    // a ↔ b is the reported cycle; b → c → a is a second cycle through a. Removing a → b breaks
+    // both; removing b → a leaves a → b → c → a.
+    let world = World::default()
+        .named("a", "b", 1, "./b", &["P", "Q", "R"])
+        .named("b", "a", 1, "./a", &["S"])
+        .named("b", "c", 2, "./c", &["T"])
+        .named("c", "a", 1, "./a", &["U"]);
+    let (_, findings) = run(&world, json!({}));
+    let found = cut(&findings).unwrap();
+    assert_eq!(
+        (
+            found.from.as_str(),
+            found.to.as_str(),
+            found.breaks_component
+        ),
+        ("a", "b", true)
+    );
+    assert_eq!(found.names, names(&["P", "Q", "R"]));
+}
+
+#[test]
+fn a_cut_lists_every_statement_between_the_modules_and_counts_those_naming_nothing() {
+    let world = World::default()
+        .named("a", "b", 5, "./b", &["Y"])
+        .named("a", "b", 2, "./b.js", &[])
+        .named("a", "b", 7, "./b", &["X", "Y"])
+        .named("b", "a", 1, "./a", &[])
+        .named("b", "a", 3, "./a", &[]);
+    let (_, findings) = run(&world, json!({}));
+    assert_eq!(
+        cut(&findings),
+        Some(CheapestCut {
+            from: "a".to_owned(),
+            to: "b".to_owned(),
+            line: 2,
+            specifiers: names(&["./b.js", "./b"]),
+            names: names(&["X", "Y"]),
+            unnamed: 1,
+            breaks_component: true,
+        })
+    );
+}
+
+#[test]
+fn only_dep_cycle_declares_the_cheapest_cut() {
+    let manifest = support::check(ID).manifest().clone();
+    let hinted: Vec<(String, Vec<String>)> = manifest
+        .findings
+        .iter()
+        .filter(|spec| !spec.hints.is_empty())
+        .map(|spec| (spec.kind.clone(), spec.hints.keys().cloned().collect()))
+        .collect();
+    assert_eq!(
+        hinted,
+        [("dep.cycle".to_owned(), vec!["cheapest_cut".to_owned()])]
+    );
 }

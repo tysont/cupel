@@ -229,6 +229,7 @@ mod tests {
                 action: ActionKind::FixBug,
                 summary: String::new(),
                 evidence: serde_json::Map::new(),
+                hints: serde_json::Map::new(),
             }],
             metrics: vec![],
             settings: Vec::new(),

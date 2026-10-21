@@ -22,7 +22,7 @@ expression: pretty(&schema)
   "x-cupel-fact-version": 1,
   "$defs": {
     "NormNode": {
-      "description": "A node of a normalized tree. Labels are language-independent so trees in one family compare.",
+      "description": "A node of a normalized tree. Labels are language-independent so trees in one family compare.\nIts shape is its label and its children's shapes; the span and text say where it came from\nand are not part of the shape (ADR-133).",
       "type": "object",
       "properties": {
         "children": {
@@ -33,6 +33,26 @@ expression: pretty(&schema)
         },
         "label": {
           "type": "string"
+        },
+        "span": {
+          "description": "Where the syntax node this node was normalized from is in the file; absent when the\nproducer does not say.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-cupel-optional": true
+        },
+        "text": {
+          "description": "The source text of an identifier or literal that normalized to a marker (`$id`, `$lit`);\nabsent for every other node.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-cupel-optional": true
         }
       },
       "required": [
@@ -57,6 +77,38 @@ expression: pretty(&schema)
         "hash",
         "root",
         "symbol"
+      ]
+    },
+    "Span": {
+      "description": "A 1-based range within one file.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "line"
       ]
     },
     "SymbolHash": {

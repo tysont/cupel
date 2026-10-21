@@ -208,7 +208,97 @@
     },
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "common_subtree": {
+            "location": {
+              "col": 14,
+              "end_col": 40,
+              "end_line": 5,
+              "file": "twins.go",
+              "line": 5
+            },
+            "nodes": 8,
+            "others": [
+              {
+                "location": {
+                  "col": 20,
+                  "end_col": 50,
+                  "end_line": 13,
+                  "file": "twins.go",
+                  "line": 13
+                },
+                "symbol": "ledger.sumAfterCharge"
+              },
+              {
+                "location": {
+                  "col": 19,
+                  "end_col": 45,
+                  "end_line": 21,
+                  "file": "twins.go",
+                  "line": 21
+                },
+                "symbol": "ledger.netTotalFloor"
+              },
+              {
+                "location": {
+                  "col": 21,
+                  "end_col": 47,
+                  "end_line": 29,
+                  "file": "twins.go",
+                  "line": 29
+                },
+                "symbol": "ledger.netTotalLaidOut"
+              },
+              {
+                "location": {
+                  "col": 18,
+                  "end_col": 44,
+                  "end_line": 41,
+                  "file": "twins.go",
+                  "line": 41
+                },
+                "symbol": "ledger.netTotalPlus"
+              },
+              {
+                "location": {
+                  "col": 21,
+                  "end_col": 47,
+                  "end_line": 59,
+                  "file": "twins.go",
+                  "line": 59
+                },
+                "symbol": "ledger.netTotalProduct"
+              }
+            ],
+            "parameters": [
+              {
+                "kind": "identifier",
+                "occurrences": 1,
+                "values": [
+                  "items",
+                  "values",
+                  "items",
+                  "items",
+                  "items",
+                  "items"
+                ]
+              },
+              {
+                "kind": "identifier",
+                "occurrences": 1,
+                "values": [
+                  "fee",
+                  "charge",
+                  "fee",
+                  "fee",
+                  "fee",
+                  "fee"
+                ]
+              }
+            ],
+            "share": 0.222
+          }
+        },
         "kind": "refactor_extract",
         "priority": 2,
         "summary": "Extract the structure `netTotal` shares with 5 other symbols into one function and call it from each."

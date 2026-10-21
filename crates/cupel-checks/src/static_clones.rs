@@ -1,8 +1,11 @@
 // ABOUTME: `static.clones`: near-duplicate functions within a language family, from NormTree subtree
 // ABOUTME: fingerprints through MinHash and LSH to exact Jaccard, reported as pairs and clusters (ADR-050).
-use std::collections::BTreeMap;
+use std::collections::hash_map::DefaultHasher;
+use std::collections::{BTreeMap, HashMap};
+use std::hash::{Hash, Hasher};
 
 use cupel_core::config::{ConfigError, Table};
+use cupel_core::hint::{self, CommonSubtree, Parameter, ParameterKind, PlacedSubtree};
 use cupel_core::similarity::{Fingerprints, Similar, combine, mix, search};
 use cupel_core::syntax::{NormNode, NormTree, SymbolDef, Symbols};
 use cupel_core::{
@@ -221,7 +224,8 @@ fn finding_kinds() -> Vec<FindingKindSpec> {
             CLUSTER,
             ActionKind::RefactorExtract,
             "Three or more symbols connected by pairs at least `threshold` similar.",
-        ),
+        )
+        .with_hint::<CommonSubtree>(),
     ]
 }
 
@@ -462,11 +466,28 @@ impl Report<'_> {
                 kind: ActionKind::RefactorExtract,
                 priority: 2,
                 summary,
-                hints: Map::new(),
+                hints: self.hints(kind, group),
             },
             new_since_baseline: false,
             suppressed: false,
         }
+    }
+
+    /// The remediation hints of a `kind` finding about `group`: a cluster's common subtree
+    /// (ADR-133).
+    fn hints(&self, kind: &str, group: &Group) -> Map<String, Value> {
+        let mut hints = Map::new();
+        if kind == CLUSTER {
+            let members: Vec<&Compared<'_>> = group
+                .members
+                .iter()
+                .map(|index| &self.compared[*index])
+                .collect();
+            if let Some(common) = common_subtree(&members) {
+                hint::insert(&mut hints, &common);
+            }
+        }
+        hints
     }
 
     /// How many symbols `group` holds, for `survey`'s largest clone clusters (ADR-062).
@@ -494,7 +515,11 @@ impl Report<'_> {
 
     fn pair(&self, pair: &Similar) -> (&'static str, String, String, Value) {
         let (left, right) = (&self.compared[pair.left], &self.compared[pair.right]);
-        let clone_type = if left.root == right.root { 2 } else { 3 };
+        let clone_type = if left.root.same_shape(right.root) {
+            2
+        } else {
+            3
+        };
         let jaccard = rounded(pair.jaccard);
         let title = format!(
             "`{}` and `{}` ({}:{}) are type-{clone_type} clones (jaccard {jaccard:.2})",
@@ -544,6 +569,125 @@ impl Report<'_> {
         });
         (CLUSTER, title, summary, evidence)
     }
+}
+
+/// The largest normalized subtree every member shares, as placed in each (ADR-133): among the
+/// first member's non-leaf nodes with a span, the one with the most nodes whose shape occurs,
+/// with a span, in every other member, the first in pre-order on a tie; in each other member,
+/// the first occurrence in pre-order. `None` when no such subtree exists.
+fn common_subtree(members: &[&Compared<'_>]) -> Option<CommonSubtree> {
+    let (first, others) = members.split_first()?;
+    let placed: Vec<HashMap<u64, &NormNode>> = others
+        .iter()
+        .map(|other| {
+            let mut first_of = HashMap::new();
+            for (node, shape, _) in shapes(other.root) {
+                first_of.entry(shape).or_insert(node);
+            }
+            first_of
+        })
+        .collect();
+    let mut best: Option<(&NormNode, u32, Vec<&NormNode>)> = None;
+    for (node, shape, size) in shapes(first.root) {
+        if best.as_ref().is_some_and(|(_, chosen, _)| *chosen >= size) {
+            continue;
+        }
+        let matches: Option<Vec<&NormNode>> = placed
+            .iter()
+            .map(|first_of| first_of.get(&shape).copied().filter(|m| m.same_shape(node)))
+            .collect();
+        if let Some(matches) = matches {
+            best = Some((node, size, matches));
+        }
+    }
+    let (node, nodes, matches) = best?;
+    Some(CommonSubtree {
+        nodes,
+        share: rounded(f64::from(nodes) / f64::from(first.prints.nodes.max(1))),
+        location: crate::finding::located(&first.symbol.file, &node.span?),
+        others: others
+            .iter()
+            .zip(&matches)
+            .map(|(other, matched)| {
+                Some(PlacedSubtree {
+                    symbol: other.symbol.display.clone(),
+                    location: crate::finding::located(&other.symbol.file, &matched.span?),
+                })
+            })
+            .collect::<Option<_>>()?,
+        parameters: parameters(node, &matches),
+    })
+}
+
+/// Every non-leaf node of `root` that has a span, in pre-order, with its shape's hash and its
+/// number of nodes.
+fn shapes(root: &NormNode) -> Vec<(&NormNode, u64, u32)> {
+    fn visit<'a>(node: &'a NormNode, out: &mut Vec<(&'a NormNode, u64, u32)>) -> (u64, u32) {
+        let at = out.len();
+        let placed = !node.children.is_empty() && node.span.is_some();
+        if placed {
+            out.push((node, 0, 0));
+        }
+        let mut hasher = DefaultHasher::new();
+        node.label.hash(&mut hasher);
+        let mut size = 1;
+        for child in &node.children {
+            let (shape, nodes) = visit(child, out);
+            shape.hash(&mut hasher);
+            size += nodes;
+        }
+        let shape = hasher.finish();
+        if placed {
+            out[at] = (node, shape, size);
+        }
+        (shape, size)
+    }
+    let mut out = Vec::new();
+    visit(root, &mut out);
+    out
+}
+
+/// The positions of `first`'s subtree whose marker text differs in `others`' matching subtrees,
+/// grouped by their values in order of first occurrence.
+fn parameters(first: &NormNode, others: &[&NormNode]) -> Vec<Parameter> {
+    fn walk<'a>(nodes: &[&'a NormNode], out: &mut Vec<(&'a str, Vec<String>)>) {
+        let texts: Option<Vec<String>> = nodes.iter().map(|node| node.text.clone()).collect();
+        if let Some(texts) = texts {
+            out.push((&nodes[0].label, texts));
+        }
+        for index in 0..nodes[0].children.len() {
+            let children: Vec<&NormNode> = nodes.iter().map(|node| &node.children[index]).collect();
+            walk(&children, out);
+        }
+    }
+    let nodes: Vec<&NormNode> = std::iter::once(first)
+        .chain(others.iter().copied())
+        .collect();
+    let mut positions = Vec::new();
+    walk(&nodes, &mut positions);
+    let mut found: Vec<Parameter> = Vec::new();
+    for (label, values) in positions {
+        if values.iter().all(|value| *value == values[0]) {
+            continue;
+        }
+        let kind = if label == "$lit" {
+            ParameterKind::Literal
+        } else {
+            ParameterKind::Identifier
+        };
+        match found
+            .iter_mut()
+            .find(|parameter| parameter.kind == kind && parameter.values == values)
+        {
+            Some(parameter) => parameter.occurrences += 1,
+            None => found.push(Parameter {
+                kind,
+                values,
+                occurrences: 1,
+            }),
+        }
+    }
+    found
 }
 
 fn member(compared: &Compared<'_>) -> Member {

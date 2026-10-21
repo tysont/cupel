@@ -69,6 +69,8 @@ impl World {
                         symbol: symbol.key(),
                         hash: support::hash_of_line(symbol.span.line),
                         root: NormNode {
+                            span: None,
+                            text: None,
                             label: "fn".to_owned(),
                             children: Vec::new(),
                         },

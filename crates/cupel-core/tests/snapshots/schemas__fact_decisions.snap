@@ -49,6 +49,18 @@ expression: pretty(&schema)
           "format": "uint32",
           "minimum": 0
         },
+        "span": {
+          "description": "Where the decision's construct is in the file; absent when the producer does not say\n(ADR-133).",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Span"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-cupel-optional": true
+        },
         "table": {
           "description": "A loop over a table of cases written in place: a literal array, vector, slice, list, or\ntuple, iterated directly or through a local bound to one in the same body (ADR-069).\nAlways false for other kinds.",
           "type": "boolean"
@@ -73,6 +85,38 @@ expression: pretty(&schema)
         "catch",
         "early-return",
         "ternary"
+      ]
+    },
+    "Span": {
+      "description": "A 1-based range within one file.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "line"
       ]
     },
     "SymbolDecisions": {

@@ -25,7 +25,19 @@
   "findings": [
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "cheapest_cut": {
+            "breaks_component": true,
+            "from": "src/ledger/deps_cycle/alpha.clj",
+            "line": 3,
+            "names": [],
+            "specifiers": [
+              "ledger.deps-cycle.beta"
+            ],
+            "to": "src/ledger/deps_cycle/beta.clj",
+            "unnamed": 1
+          }
+        },
         "kind": "break_cycle",
         "priority": 2,
         "summary": "Break the cycle src/ledger/deps_cycle/alpha.clj → src/ledger/deps_cycle/beta.clj → src/ledger/deps_cycle/alpha.clj: move what the modules share into a module that imports none of them, or invert one import through an interface."

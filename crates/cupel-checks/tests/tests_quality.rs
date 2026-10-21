@@ -233,6 +233,7 @@ impl World {
                                 .map(|kind| (*kind, false))
                                 .chain((0..case.tables).map(|_| (DecisionKind::Loop, true)))
                                 .map(|(kind, table)| Decision {
+                                    span: None,
                                     kind,
                                     nesting: 0,
                                     cyclomatic: 1,
