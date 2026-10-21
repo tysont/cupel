@@ -382,6 +382,12 @@
           }
         },
         {
+          "aliases": [
+            {
+              "local": "assert",
+              "name": "default"
+            }
+          ],
           "edge_kind": "import",
           "from": "test/decide.test.ts",
           "line": 1,
@@ -425,6 +431,12 @@
           }
         },
         {
+          "aliases": [
+            {
+              "local": "fc",
+              "name": "default"
+            }
+          ],
           "edge_kind": "import",
           "from": "test/properties.test.ts",
           "line": 1,

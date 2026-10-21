@@ -110,7 +110,15 @@
         "line": 2
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -201,7 +209,15 @@
         "line": 5
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -461,7 +477,15 @@
         "line": 2
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/pricing.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/pricing.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -476,7 +500,15 @@
         "line": 2
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/pricing.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/pricing.ts",
+            "line": 9
+          }
+        ]
       }
     },
     {
@@ -574,7 +606,15 @@
         "line": 6
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/pricing.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/pricing.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -741,7 +781,15 @@
         "line": 11
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/pricing.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/pricing.ts",
+            "line": 9
+          }
+        ]
       }
     },
     {
@@ -6616,7 +6664,15 @@
         "line": 14
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/rates.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/rates.ts",
+            "line": 3
+          }
+        ]
       }
     },
     {
@@ -6883,7 +6939,15 @@
         "line": 4
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -6988,7 +7052,15 @@
         "line": 8
       },
       "target": {
-        "kind": "unresolved"
+        "file": "packages/shapes/src/index.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "packages/shapes/src/index.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -7405,7 +7477,15 @@
         "line": 16
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -7500,7 +7580,15 @@
         "line": 17
       },
       "target": {
-        "kind": "unresolved"
+        "file": "packages/shapes/src/index.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "packages/shapes/src/index.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -7734,7 +7822,15 @@
         "line": 2
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -7749,7 +7845,15 @@
         "line": 2
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -7847,7 +7951,15 @@
         "line": 6
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -7919,7 +8031,15 @@
         "line": 10
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -8029,7 +8149,15 @@
         "line": 14
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -8082,7 +8210,15 @@
         "line": 18
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -8306,7 +8442,15 @@
         "line": 25
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -8378,7 +8522,15 @@
         "line": 29
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -8416,7 +8568,15 @@
         "line": 30
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -8583,7 +8743,15 @@
         "line": 36
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -8712,7 +8880,15 @@
         "line": 41
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -8769,7 +8945,15 @@
         "line": 42
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -8826,7 +9010,15 @@
         "line": 43
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -8936,7 +9128,15 @@
         "line": 48
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -8993,7 +9193,15 @@
         "line": 49
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -9050,7 +9258,15 @@
         "line": 50
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -9269,7 +9485,15 @@
         "line": 2
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -9284,7 +9508,15 @@
         "line": 2
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -9427,7 +9659,15 @@
         "line": 8
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -9544,7 +9784,15 @@
         "line": 18
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -9635,7 +9883,15 @@
         "line": 22
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -9745,7 +10001,15 @@
         "line": 26
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -9851,7 +10115,15 @@
         "line": 30
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -9961,7 +10233,15 @@
         "line": 34
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -10044,7 +10324,15 @@
         "line": 40
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -10192,7 +10480,15 @@
         "line": 46
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -11224,7 +11520,15 @@
         "line": 1
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/references.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/references.ts",
+            "line": 10
+          }
+        ]
       }
     },
     {
@@ -11277,7 +11581,15 @@
         "line": 4
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/references.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/references.ts",
+            "line": 10
+          }
+        ]
       }
     },
     {
@@ -13912,7 +14224,15 @@
         "line": 2
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/widget.tsx",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/widget.tsx",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -13980,7 +14300,15 @@
         "line": 5
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/widget.tsx",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/widget.tsx",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -14397,7 +14725,15 @@
         "line": 3
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/decide.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/decide.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -14412,7 +14748,15 @@
         "line": 3
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/decide.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/decide.ts",
+            "line": 34
+          }
+        ]
       }
     },
     {
@@ -14499,7 +14843,15 @@
         "line": 6
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/decide.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/decide.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -14590,7 +14942,15 @@
         "line": 10
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/decide.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/decide.ts",
+            "line": 34
+          }
+        ]
       }
     },
     {
@@ -14719,7 +15079,15 @@
         "line": 15
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/decide.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/decide.ts",
+            "line": 5
+          }
+        ]
       }
     },
     {
@@ -14809,7 +15177,15 @@
         "line": 3
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -15067,7 +15443,15 @@
         "line": 8
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -15143,7 +15527,15 @@
         "line": 8
       },
       "target": {
-        "kind": "unresolved"
+        "file": "src/math.ts",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "src/math.ts",
+            "line": 1
+          }
+        ]
       }
     },
     {

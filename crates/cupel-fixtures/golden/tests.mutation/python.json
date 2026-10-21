@@ -13,7 +13,7 @@
         "killed": 3.0,
         "reused": 0.0,
         "schemata": 0.0,
-        "score": 0.75,
+        "score": 0.6,
         "survived": 1.0,
         "timeout": 0.0,
         "uncovered": 1.0,
@@ -21,9 +21,9 @@
       },
       "oracle": null,
       "score": {
-        "n": 4,
+        "n": 5,
         "unit": "killed_ratio",
-        "value": 0.75
+        "value": 0.6
       },
       "skipped": null,
       "status": "fail",

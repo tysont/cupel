@@ -197,7 +197,7 @@
         {
           "name": "score",
           "per": "scope",
-          "summary": "Killed / (killed + survived), the score; 1 when nothing was scored."
+          "summary": "Killed / (killed + survived + uncovered), the score; 1 when nothing was scored."
         },
         {
           "name": "killed",
@@ -258,7 +258,7 @@
           "name": "mutation_score",
           "per": "symbol",
           "protection": "mutation-score",
-          "summary": "Killed / (killed + survived) over the function's mutants; absent when none was scored."
+          "summary": "Killed / (killed + survived + uncovered) over the function's mutants; absent when none was scored."
         },
         {
           "name": "tests",
@@ -272,7 +272,7 @@
         "mutation-outcomes"
       ],
       "stability": "experimental",
-      "summary": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived). Uncovered sites are not run; outcomes of unchanged code and tests are reused from earlier runs.",
+      "summary": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs.",
       "tier": 3,
       "version": 1,
       "wants": [
