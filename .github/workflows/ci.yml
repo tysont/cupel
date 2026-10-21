@@ -1,5 +1,5 @@
 # ABOUTME: Continuous integration: `make check` and `make parity` on Linux and macOS with every test runner, coverage tool, property framework, analyzer, race detector, fuzzer, bench tool, contract library, and JVM build tool
-# ABOUTME: installed, `make dogfood` (Cupel's own gate at `--depth deep`, ADR-129) for every push and pull request, and the installer tests (ADR-125). Rust comes from rust-toolchain.toml.
+# ABOUTME: installed, the Windows target compiled and its Unix-free tests run (ADR-137), `make dogfood` (Cupel's own gate at `--depth deep`, ADR-129) for every push and pull request, and the installer tests (ADR-125). Rust comes from rust-toolchain.toml.
 # The tools every job but installers needs come from .github/actions/tools (ADR-129, ADR-139).
 name: ci
 
@@ -25,6 +25,25 @@ jobs:
       # Every golden-harness run again through the daemon, compared with the cold run (ADR-085 §11).
       - name: make parity
         run: make parity
+
+  # The Windows target (ADR-137): the workspace compiles for x86_64-pc-windows-msvc, and the tests that
+  # need no Unix tools run, among them the daemon's server tests over real named pipes.
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned toolchain
+        run: rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+      - name: Install make 4.4.1
+        run: choco install make --version 4.4.1 --no-progress -y
+      - name: make windows-check
+        run: make windows-check
+      - name: make windows-test
+        run: make windows-test
 
   # Cupel's own gate at `--depth deep` (ADR-129): the suite runs once under instrumentation for
   # coverage and the per-test map, and the changed gate mutates every function of every changed

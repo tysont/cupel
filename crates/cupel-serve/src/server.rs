@@ -1,27 +1,25 @@
 // ABOUTME: The daemon's server loop (ADR-085): claim the socket, accept connections, answer each on its own
 // ABOUTME: thread, cancel a run whose client hangs up, and stop on request, on its token, or when the socket goes.
 use std::fmt;
-use std::io::{self, BufReader, Read, Write};
-use std::os::fd::AsFd;
-use std::os::unix::fs::{MetadataExt, PermissionsExt};
-use std::os::unix::net::{UnixListener, UnixStream};
-use std::path::{Path, PathBuf};
+use std::io::{self, BufReader, Write};
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::thread::{self, JoinHandle};
+use std::time::Duration;
 
 use cupel_core::Cancellation;
-use nix::poll::{PollFd, PollFlags, PollTimeout, poll};
 
 use crate::client::{self, ClientError};
 use crate::lines::Lines;
 use crate::protocol::{
     Body, Build, Done, Invocation, PROTOCOL, Reply, Request, Status, read_message, write_message,
 };
+use crate::transport::{Connection, Listener};
 use crate::watch::Watch;
 
-/// How often the accept loop looks at its stop token and its socket file, in milliseconds.
-const POLL_MS: u16 = 200;
+/// How often the accept loop looks at its stop token and its socket file.
+const POLL: Duration = Duration::from_millis(200);
 
 /// What the daemon serves and how.
 #[derive(Debug, Clone)]
@@ -104,8 +102,7 @@ pub fn serve(
     stop: &Cancellation,
     ready: &mut dyn FnMut(&Status),
 ) -> Result<Served, ServeError> {
-    let listener = claim(daemon)?;
-    let identity = inode(&daemon.socket);
+    let mut listener = claim(daemon)?;
     let shared = Arc::new(Shared {
         daemon: daemon.clone(),
         handler,
@@ -120,12 +117,8 @@ pub fn serve(
         .map_err(|error| failed(daemon, &error))?;
     ready(&shared.status());
     let mut workers: Vec<JoinHandle<()>> = Vec::new();
-    while !shared.stopping.is_cancelled() && identity.is_some() && inode(&daemon.socket) == identity
-    {
-        if !readable(&listener) {
-            continue;
-        }
-        if let Ok((stream, _)) = listener.accept() {
+    while !shared.stopping.is_cancelled() && listener.is_current() {
+        if let Some(stream) = listener.accept(POLL) {
             let shared = Arc::clone(&shared);
             workers.push(thread::spawn(move || shared.answer(&stream)));
         }
@@ -136,7 +129,7 @@ pub fn serve(
     for worker in workers {
         let _ = worker.join();
     }
-    if inode(&daemon.socket) == identity {
+    if listener.is_current() {
         let _ = std::fs::remove_file(&daemon.socket);
     }
     Ok(Served {
@@ -144,9 +137,8 @@ pub fn serve(
     })
 }
 
-/// Binds the socket, replacing a stale socket file nothing answers on, and lets only its owner
-/// connect.
-fn claim(daemon: &Daemon) -> Result<UnixListener, ServeError> {
+/// Listens at the daemon's endpoint, replacing a stale endpoint file nothing answers on.
+fn claim(daemon: &Daemon) -> Result<Listener, ServeError> {
     let status = Request::new(daemon.build.clone(), Body::Status);
     match client::request(&daemon.socket, &status, &mut |_| {}) {
         Ok(Reply::Status(running)) => return Err(ServeError::Running(Box::new(running))),
@@ -158,10 +150,7 @@ fn claim(daemon: &Daemon) -> Result<UnixListener, ServeError> {
     if let Some(parent) = daemon.socket.parent() {
         std::fs::create_dir_all(parent).map_err(|error| failed(daemon, &error))?;
     }
-    let listener = UnixListener::bind(&daemon.socket).map_err(|error| failed(daemon, &error))?;
-    std::fs::set_permissions(&daemon.socket, std::fs::Permissions::from_mode(0o600))
-        .map_err(|error| failed(daemon, &error))?;
-    Ok(listener)
+    Listener::bind(&daemon.socket).map_err(|error| failed(daemon, &error))
 }
 
 fn failed(daemon: &Daemon, error: &dyn fmt::Display) -> ServeError {
@@ -169,19 +158,6 @@ fn failed(daemon: &Daemon, error: &dyn fmt::Display) -> ServeError {
         socket: daemon.socket.clone(),
         message: error.to_string(),
     }
-}
-
-/// The socket file's inode, which tells this daemon's socket from a replacement.
-fn inode(socket: &Path) -> Option<u64> {
-    std::fs::metadata(socket)
-        .ok()
-        .map(|metadata| metadata.ino())
-}
-
-/// Whether a connection waits, after waiting up to `POLL_MS` for one.
-fn readable(listener: &UnixListener) -> bool {
-    let mut fds = [PollFd::new(listener.as_fd(), PollFlags::POLLIN)];
-    matches!(poll(&mut fds, PollTimeout::from(POLL_MS)), Ok(ready) if ready > 0)
 }
 
 /// The watcher, handing changed files to the handler and counting what it reparsed.
@@ -208,7 +184,7 @@ impl Shared {
     }
 
     /// Reads one request from `stream` and answers it.
-    fn answer(&self, stream: &UnixStream) {
+    fn answer(&self, stream: &Connection) {
         let Ok(input) = stream.try_clone() else {
             return;
         };
@@ -223,7 +199,7 @@ impl Shared {
         let _ = write_message(&mut &*stream, &reply);
     }
 
-    fn reply(&self, request: Request, stream: &UnixStream, input: BufReader<UnixStream>) -> Reply {
+    fn reply(&self, request: Request, stream: &Connection, input: BufReader<Connection>) -> Reply {
         match request.body {
             Body::Status => Reply::Status(self.status()),
             Body::Stop => {
@@ -268,15 +244,13 @@ impl Shared {
     fn run(
         &self,
         invocation: Invocation,
-        stream: &UnixStream,
-        input: BufReader<UnixStream>,
+        stream: &Connection,
+        input: BufReader<Connection>,
     ) -> Done {
         let cancel = self.stopping.under(None);
         let hang_up = cancel.clone();
         thread::spawn(move || {
-            let mut input = input;
-            let mut byte = [0_u8; 1];
-            while matches!(input.read(&mut byte), Ok(1)) {}
+            input.into_inner().wait_for_hang_up();
             hang_up.cancel();
         });
         // Each complete line goes to the client as a `stderr` reply when written.

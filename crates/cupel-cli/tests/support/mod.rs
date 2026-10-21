@@ -7,6 +7,7 @@
 
 use std::fs;
 use std::io::Write;
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
@@ -372,6 +373,7 @@ fn sample_finding() -> Value {
 
 /// Writes the plugin script `name` in `dir`: it describes `manifest`, plans 1 target in 25 ms,
 /// and runs by saving its request beside itself, then reporting one finding and a failing result.
+#[cfg(unix)]
 pub fn plugin(dir: &Path, name: &str, manifest: &Value) {
     let result = json!({
         "ev": "result", "status": "fail", "score": null, "metrics": {"files": 1}, "notes": []

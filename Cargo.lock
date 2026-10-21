@@ -460,12 +460,14 @@ dependencies = [
 name = "cupel-serve"
 version = "0.1.0"
 dependencies = [
+ "blake3",
  "cupel-core",
  "nix",
  "notify",
  "serde",
  "serde_json",
  "tempfile",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

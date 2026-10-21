@@ -1,5 +1,6 @@
 // ABOUTME: Integration tests for the installers under dist/ (ADR-125): cargo-binstall metadata, install.sh, the
 // ABOUTME: Homebrew formula, and the npm and pipx wrappers, each run against a fake release on a local HTTP server.
+#![cfg(unix)]
 mod support;
 
 use std::collections::BTreeMap;

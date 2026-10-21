@@ -1,5 +1,6 @@
 // ABOUTME: Tests for scripts/release.sh, which `make dist` and the release workflow use to package the binary:
 // ABOUTME: the tag-to-version check, archive names and layout, SHA256SUMS, the static check, and workflow action pins.
+#![cfg(unix)]
 mod support;
 
 use std::fs;
@@ -485,4 +486,39 @@ fn only_its_publish_job_and_the_probe_read_each_secret() {
         .map(|(job, _, secret)| ((*job).to_owned(), (*secret).to_owned()))
         .collect();
     assert_eq!(readers, expected);
+}
+
+/// The Windows build is a release target like the others (ADR-137): no build may fail without
+/// failing the release.
+#[test]
+fn every_release_build_holds_back_the_release_when_it_fails() {
+    let jobs = jobs(&release_workflow());
+    let (_, lines) = jobs
+        .iter()
+        .find(|(name, _)| name == "build")
+        .expect("a `build` job");
+    let lenient: Vec<&String> = lines
+        .iter()
+        .filter(|line| line.contains("continue-on-error") || line.contains("best-effort"))
+        .collect();
+    assert_eq!(lenient, Vec::<&String>::new());
+}
+
+/// CI's `windows` job (ADR-137) compiles the workspace for the Windows target and runs the tests
+/// that need no Unix tools, both through make.
+#[test]
+fn ci_compiles_and_tests_the_windows_target() {
+    let jobs = jobs(&workflow("ci.yml"));
+    let lines = jobs
+        .iter()
+        .find(|(name, _)| name == "windows")
+        .map(|(_, lines)| lines.clone())
+        .unwrap_or_default();
+    let expected = vec![
+        "runs-on: windows-latest".to_owned(),
+        "run: choco install make --version 4.4.1 --no-progress -y".to_owned(),
+        "run: make windows-check".to_owned(),
+        "run: make windows-test".to_owned(),
+    ];
+    assert_eq!(missing(&lines, expected), Vec::<String>::new());
 }
